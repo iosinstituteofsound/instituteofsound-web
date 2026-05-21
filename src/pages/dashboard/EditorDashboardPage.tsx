@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { roleLabel } from '@/lib/auth/roles'
+import { getSuperAdminAnalytics } from '@/lib/analytics/service'
+import type { SuperAdminAnalytics } from '@/lib/analytics/types'
+import { SuperAdminAnalyticsPanel } from '@/components/dashboard/SuperAdminAnalytics'
 import {
   createEditorialDraft,
   getDraftsForEditor,
@@ -10,6 +13,7 @@ import {
   reviewSubmission,
 } from '@/lib/submissions/service'
 import { StatusBadge } from '@/components/auth/StatusBadge'
+import { MetalBadge } from '@/components/ui/MetalBadge'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { IOSImage } from '@/components/ui/IOSImage'
@@ -20,12 +24,13 @@ import type {
 } from '@/lib/auth/types'
 import clsx from 'clsx'
 
-type EditorTab = 'queue' | 'write' | 'drafts'
+type EditorTab = 'analytics' | 'queue' | 'write' | 'drafts'
 type FilterStatus = 'all' | SubmissionStatus
 
 export default function EditorDashboardPage() {
   const { user, logout, mode, isSuperEditor } = useAuth()
-  const [tab, setTab] = useState<EditorTab>('queue')
+  const [tab, setTab] = useState<EditorTab>(isSuperEditor ? 'analytics' : 'queue')
+  const [analytics, setAnalytics] = useState<SuperAdminAnalytics | null>(null)
   const [filter, setFilter] = useState<FilterStatus>('pending')
   const [submissions, setSubmissions] = useState<TrackSubmission[]>([])
   const [drafts, setDrafts] = useState<EditorialDraft[]>([])
@@ -52,12 +57,15 @@ export default function EditorDashboardPage() {
       ])
       setSubmissions(subs)
       setDrafts(drs)
+      if (isSuperEditor) {
+        setAnalytics(await getSuperAdminAnalytics(user.id))
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
       setLoadingData(false)
     }
-  }, [user])
+  }, [user, isSuperEditor])
 
   useEffect(() => {
     refresh()
@@ -133,41 +141,53 @@ export default function EditorDashboardPage() {
     }
   }
 
+  const openQueueFromAnalytics = (filter?: FilterStatus) => {
+    if (filter) setFilter(filter)
+    else setFilter('all')
+    setTab('queue')
+  }
+
+  const tabs: { id: EditorTab; label: string }[] = isSuperEditor
+    ? [
+        { id: 'analytics', label: 'Analytics' },
+        { id: 'queue', label: 'Submission Queue' },
+        { id: 'write', label: 'Write Editorial' },
+        { id: 'drafts', label: `My Drafts (${drafts.length})` },
+      ]
+    : [
+        { id: 'queue', label: 'Submission Queue' },
+        { id: 'write', label: 'Write Editorial' },
+        { id: 'drafts', label: `My Drafts (${drafts.length})` },
+      ]
+
   return (
-    <div className="section-padding pt-28 min-h-screen">
+    <div className="section-padding pt-28 min-h-screen bg-void">
       <div className="max-w-6xl mx-auto">
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+        <div className="ios-panel ios-panel-accent flex flex-wrap items-start justify-between gap-4 mb-8">
           <div>
-            <p className="text-[11px] tracking-[0.25em] uppercase text-rs-red font-semibold">
-              {isSuperEditor ? 'Super Editor Command' : 'Editor Dashboard'}
+            <p className="ios-kicker">
+              Institute of Sound
               {mode === 'supabase' && (
-                <span className="ml-2 text-muted font-normal">· cloud</span>
+                <span className="text-muted font-normal tracking-[0.15em] ml-2">· live</span>
               )}
             </p>
-            <h1 className="font-serif text-3xl md:text-4xl font-bold mt-1">
-              {isSuperEditor ? 'Full Editorial Control' : 'Editorial Control'}
+            <h1 className="font-serif text-3xl md:text-4xl font-bold mt-2">
+              {isSuperEditor ? 'Editorial Command' : 'Editorial Control'}
             </h1>
             <p className="text-muted text-sm mt-2">
               {user.name} · {roleLabel(user.role)}
-              {isSuperEditor && (
-                <span className="text-rs-red"> — all submissions, all drafts, publish authority</span>
-              )}
             </p>
             {isSuperEditor && (
-              <span className="inline-block mt-3 text-[10px] tracking-[0.2em] uppercase border border-rs-red text-rs-red px-3 py-1 font-bold">
-                Super Editor
-              </span>
+              <MetalBadge variant="live" className="mt-4">
+                Super Admin
+              </MetalBadge>
             )}
           </div>
-          <div className="flex gap-3">
-            <Link to="/" className="text-xs tracking-widest uppercase text-muted hover:text-signal">
+          <div className="flex gap-3 items-center">
+            <Link to="/" className="ios-link text-xs tracking-widest uppercase">
               ← Site
             </Link>
-            <button
-              type="button"
-              onClick={() => logout()}
-              className="text-xs tracking-widest uppercase border border-border px-4 py-2 hover:border-rs-red"
-            >
+            <button type="button" onClick={() => logout()} className="ios-btn ios-btn-ghost !text-xs">
               Logout
             </button>
           </div>
@@ -182,36 +202,36 @@ export default function EditorDashboardPage() {
           </p>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-          {(
-            [
-              ['pending', counts.pending, 'Pending'],
-              ['in_review', counts.in_review, 'In Review'],
-              ['approved', counts.approved, 'Approved'],
-              ['rejected', counts.rejected, 'Rejected'],
-            ] as const
-          ).map(([key, count, label]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => {
-                setFilter(key)
-                setTab('queue')
-              }}
-              className={clsx(
-                'border p-4 text-left transition-colors',
-                filter === key && tab === 'queue'
-                  ? 'border-rs-red bg-rs-red/10'
-                  : 'border-border hover:border-rs-red/50'
-              )}
-            >
-              <span className="font-display text-2xl font-bold">{count}</span>
-              <span className="text-[10px] tracking-widest uppercase text-muted block mt-1">
-                {label}
-              </span>
-            </button>
-          ))}
-        </div>
+        {tab !== 'analytics' && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            {(
+              [
+                ['pending', counts.pending, 'Pending'],
+                ['in_review', counts.in_review, 'In Review'],
+                ['approved', counts.approved, 'Approved'],
+                ['rejected', counts.rejected, 'Rejected'],
+              ] as const
+            ).map(([key, count, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => {
+                  setFilter(key)
+                  setTab('queue')
+                }}
+                className={clsx(
+                  'ios-analytics-pipeline-tile',
+                  filter === key && tab === 'queue' && 'border-mh-red bg-mh-red/10'
+                )}
+              >
+                <span className="font-display text-2xl font-bold">{count}</span>
+                <span className="text-[10px] tracking-widest uppercase text-muted block mt-1">
+                  {label}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {message && (
           <p className="text-sm text-emerald-400 mb-6 border border-emerald-500/30 px-4 py-2">
@@ -226,23 +246,17 @@ export default function EditorDashboardPage() {
           </p>
         )}
 
-        <div className="flex gap-2 border-b border-border mb-8">
-          {(
-            [
-              ['queue', 'Submission Queue'],
-              ['write', 'Write Editorial'],
-              ['drafts', `My Drafts (${drafts.length})`],
-            ] as const
-          ).map(([t, label]) => (
+        <div className="flex flex-wrap gap-1 border-b border-border mb-8">
+          {tabs.map(({ id, label }) => (
             <button
-              key={t}
+              key={id}
               type="button"
-              onClick={() => setTab(t)}
+              onClick={() => setTab(id)}
               className={clsx(
-                'px-4 py-3 text-xs tracking-widest uppercase font-bold border-b-2 -mb-px',
-                tab === t
-                  ? 'border-rs-red text-rs-red'
-                  : 'border-transparent text-muted'
+                'px-4 py-3 text-xs tracking-widest uppercase font-bold border-b-2 -mb-px transition-colors',
+                tab === id
+                  ? 'border-mh-red text-mh-red'
+                  : 'border-transparent text-muted hover:text-signal'
               )}
             >
               {label}
@@ -250,8 +264,18 @@ export default function EditorDashboardPage() {
           ))}
         </div>
 
-        {loadingData && tab !== 'write' ? (
+        {loadingData && tab !== 'write' && tab !== 'analytics' ? (
           <LoadingTransmission variant="compact" />
+        ) : tab === 'analytics' && isSuperEditor ? (
+          analytics ? (
+            <SuperAdminAnalyticsPanel
+              data={analytics}
+              operatorName={user.name}
+              onOpenQueue={openQueueFromAnalytics}
+            />
+          ) : (
+            <LoadingTransmission variant="compact" />
+          )
         ) : (
           <>
             {tab === 'queue' && (

@@ -433,6 +433,98 @@ textarea.ios-input {
   transform: translateX(3px);
 }
 
+/* —— Super admin analytics (editorial desk) —— */
+.ios-analytics-hero {
+  overflow: hidden;
+}
+
+.ios-analytics-hero::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 45%;
+  height: 140%;
+  background: radial-gradient(ellipse at center, rgba(212, 0, 0, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.ios-analytics-meta .ios-label {
+  font-size: 0.625rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.ios-analytics-stat {
+  position: relative;
+  padding: 1.25rem 1rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--color-border);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+}
+
+.ios-analytics-stat-code {
+  display: block;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--color-muted);
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+
+.ios-analytics-stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-top: 0.35rem;
+  color: var(--color-signal);
+}
+
+.ios-analytics-stat-label {
+  display: block;
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-top: 0.35rem;
+}
+
+.ios-analytics-pipeline-tile {
+  text-align: left;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  background: rgba(0, 0, 0, 0.25);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.ios-analytics-pipeline-tile:hover {
+  border-color: rgba(212, 0, 0, 0.5);
+  background: rgba(212, 0, 0, 0.06);
+}
+
+.ios-analytics-bar-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-border);
+}
+
+.ios-analytics-bar-fill {
+  height: 100%;
+  min-width: 2px;
+  background: linear-gradient(90deg, var(--color-mh-red), var(--color-rs-red));
+  box-shadow: 0 0 12px rgba(212, 0, 0, 0.45);
+  transition: width 0.5s ease;
+}
+
+.ios-analytics-feed-row-new {
+  border-left: 2px solid var(--color-mh-red);
+  padding-left: 1rem;
+  margin-left: -1rem;
+}
+
 *,
 *::before,
 *::after {
