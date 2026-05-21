@@ -23,23 +23,38 @@ export default function SubmissionsPage() {
         <MagazineSectionHeading
           variant="metal-hammer"
           kicker="Artist Portal"
-          title="Submit Your Music"
-          subtitle="Create a free artist account and send tracks to the Institute. Our editorial team reviews every submission."
+          title="Register & Submit"
+          subtitle="Bands and solo artists — create your account, build your public profile, and send tracks for editorial review."
         />
 
-        <div className="ios-panel ios-panel-accent text-left p-8 mt-12">
-          <h3 className="font-display text-lg font-bold uppercase text-mh-red">For Artists</h3>
-          <p className="text-sm text-muted mt-3 leading-relaxed">
-            Login, upload artwork, add stream links, and track status: pending → in review →
-            approved or rejected with editor notes.
-          </p>
-          <div className="flex flex-wrap gap-3 mt-6">
-            <Button to="/register" variant="primary">
-              Register as Artist →
+        <div className="ios-panel ios-panel-accent text-left p-8 mt-12 space-y-8">
+          <div>
+            <h3 className="font-display text-lg font-bold uppercase text-mh-red">Step 1 — Register</h3>
+            <p className="text-sm text-muted mt-3 leading-relaxed">
+              Free artist account only. Choose your band name, email, and password. No credit card.
+            </p>
+            <Button to="/register" variant="primary" className="mt-4">
+              Create Artist Account →
             </Button>
-            <Button to="/login" variant="secondary">
-              Artist Login →
-            </Button>
+          </div>
+          <div className="border-t border-border pt-8">
+            <h3 className="font-display text-lg font-bold uppercase text-mh-red">Step 2 — Build profile</h3>
+            <p className="text-sm text-muted mt-3 leading-relaxed">
+              In <strong className="text-signal">My Studio</strong>: avatar, banner, genres, Spotify / YouTube /
+              Instagram links, tracks, albums, singles, and videos — your public page at{' '}
+              <span className="font-mono text-xs">/artist/your-band</span>.
+            </p>
+          </div>
+          <div className="border-t border-border pt-8">
+            <h3 className="font-display text-lg font-bold uppercase text-mh-red">Step 3 — Submit tracks</h3>
+            <p className="text-sm text-muted mt-3 leading-relaxed">
+              Send music to the desk: pending → in review → approved or rejected with editor notes.
+            </p>
+            <div className="flex flex-wrap gap-3 mt-4">
+              <Button to="/login" variant="secondary">
+                Artist Login →
+              </Button>
+            </div>
           </div>
         </div>
 

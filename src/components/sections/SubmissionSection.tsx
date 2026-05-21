@@ -11,14 +11,21 @@ export function SubmissionSection() {
             variant="metal-hammer"
             kicker="For Artists"
             title="Submit Your Music"
-            subtitle="Tracks, albums, visuals, and portfolios — pitch the editorial desk."
+            subtitle="Free artist account — build your band page, add tracks & socials, submit music for review."
           />
+          <p className="text-sm text-muted mt-6 max-w-lg mx-auto leading-relaxed">
+            Register in under a minute. No editor account — artists only. After signup, open{' '}
+            <strong className="text-signal">My Studio</strong> to publish your profile and submit tracks.
+          </p>
           <div className="flex flex-wrap justify-center gap-4 mt-8">
             <Button to="/register" variant="primary">
-              Artist Sign Up →
+              Create Free Artist Account →
             </Button>
             <Button to="/login" variant="secondary">
-              Artist Login →
+              Already registered? Sign in
+            </Button>
+            <Button to="/submissions" variant="ghost">
+              How it works
             </Button>
           </div>
         </Reveal>

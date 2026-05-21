@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ArtistNavActions } from '@/components/layout/ArtistNavActions'
 import type { NavLink } from '@/types'
 import clsx from 'clsx'
 
@@ -49,7 +50,14 @@ export function Navbar({ links }: NavbarProps) {
               </li>
             )
           })}
+          <li className="hidden lg:block">
+            <ArtistNavActions />
+          </li>
         </ul>
+
+        <div className="hidden md:flex lg:hidden items-center">
+          <ArtistNavActions />
+        </div>
 
         <button
           type="button"
@@ -81,6 +89,12 @@ export function Navbar({ links }: NavbarProps) {
                   </Link>
                 </li>
               ))}
+              <li className="pt-4 mt-2 border-t border-border">
+                <p className="text-[10px] tracking-[0.25em] uppercase text-mh-red font-bold mb-3">
+                  Artists
+                </p>
+                <ArtistNavActions layout="stack" onNavigate={() => setOpen(false)} />
+              </li>
             </ul>
           </motion.div>
         )}

@@ -1,4 +1,5 @@
 [
+  { "label": "For Artists", "href": "/submissions" },
   { "label": "Bands", "href": "/discover" },
   { "label": "Reviews", "href": "/#reviews" },
   { "label": "Features", "href": "/features" },
