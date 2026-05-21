@@ -11,13 +11,14 @@ import { ImageUpload } from '@/components/ui/ImageUpload'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { Button } from '@/components/ui/Button'
 import { Input, FieldLabel } from '@/components/ui/Input'
+import { ArtistProfileEditor } from '@/components/dashboard/ArtistProfileEditor'
 import type { TrackSubmission } from '@/lib/auth/types'
 
 export default function ArtistDashboardPage() {
   const { user, logout, mode } = useAuth()
   const [submissions, setSubmissions] = useState<TrackSubmission[]>([])
   const [loadingList, setLoadingList] = useState(true)
-  const [tab, setTab] = useState<'submit' | 'history'>('submit')
+  const [tab, setTab] = useState<'profile' | 'submit' | 'history'>('profile')
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -91,7 +92,7 @@ export default function ArtistDashboardPage() {
               )}
             </p>
             <h1 className="font-display text-3xl md:text-4xl font-extrabold uppercase mt-1">
-              Submit Tracks
+              Artist Portal
             </h1>
             <p className="text-muted text-sm mt-2">
               Logged in as <span className="text-signal">{user.name}</span> ·{' '}
@@ -116,7 +117,7 @@ export default function ArtistDashboardPage() {
         </div>
 
         <div className="flex gap-2 border-b border-border mb-8">
-          {(['submit', 'history'] as const).map((t) => (
+          {(['profile', 'submit', 'history'] as const).map((t) => (
             <button
               key={t}
               type="button"
@@ -127,10 +128,16 @@ export default function ArtistDashboardPage() {
                   : 'border-transparent text-muted hover:text-signal'
               }`}
             >
-              {t === 'submit' ? 'New Submission' : `My Submissions (${submissions.length})`}
+              {t === 'profile'
+                ? 'Band Profile'
+                : t === 'submit'
+                  ? 'Submit Track'
+                  : `Submissions (${submissions.length})`}
             </button>
           ))}
         </div>
+
+        {tab === 'profile' && <ArtistProfileEditor user={user} />}
 
         {tab === 'submit' && (
           <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">

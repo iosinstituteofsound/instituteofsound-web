@@ -4,6 +4,8 @@ export type CloudinaryFolder =
   | 'ios/submissions'
   | 'ios/editorial'
   | 'ios/artists'
+  | 'ios/tracks'
+  | 'ios/albums'
   | 'ios/playlists'
   | 'ios/features'
 

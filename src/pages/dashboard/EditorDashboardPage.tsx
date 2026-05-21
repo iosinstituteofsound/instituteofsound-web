@@ -5,11 +5,14 @@ import { roleLabel } from '@/lib/auth/roles'
 import { getSuperAdminAnalytics } from '@/lib/analytics/service'
 import type { SuperAdminAnalytics } from '@/lib/analytics/types'
 import { SuperAdminAnalyticsPanel } from '@/components/dashboard/SuperAdminAnalytics'
+import { listArtistProfilesForEditor } from '@/lib/artist-profile/service'
+import type { ArtistProfile } from '@/lib/artist-profile/types'
 import {
   createEditorialDraft,
   getDraftsForEditor,
   getSubmissionsForEditor,
   markInReview,
+  publishEditorialDraft,
   reviewSubmission,
 } from '@/lib/submissions/service'
 import { StatusBadge } from '@/components/auth/StatusBadge'
@@ -46,6 +49,8 @@ export default function EditorDashboardPage() {
   const [draftSubject, setDraftSubject] = useState('')
   const [draftBody, setDraftBody] = useState('')
   const [draftCoverUrl, setDraftCoverUrl] = useState('')
+  const [draftArtistProfileId, setDraftArtistProfileId] = useState('')
+  const [artistProfiles, setArtistProfiles] = useState<ArtistProfile[]>([])
 
   const refresh = useCallback(async () => {
     if (!user) return
@@ -59,6 +64,11 @@ export default function EditorDashboardPage() {
       setDrafts(drs)
       if (isSuperEditor) {
         setAnalytics(await getSuperAdminAnalytics(user.id))
+        try {
+          setArtistProfiles(await listArtistProfilesForEditor())
+        } catch {
+          setArtistProfiles([])
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data')
@@ -128,6 +138,7 @@ export default function EditorDashboardPage() {
         subject: draftSubject,
         body: draftBody,
         coverImageUrl: draftCoverUrl || undefined,
+        artistProfileId: draftArtistProfileId || undefined,
       })
       setDraftTitle('')
       setDraftCoverUrl('')
@@ -461,6 +472,25 @@ export default function EditorDashboardPage() {
                     className="w-full bg-surface border border-border px-4 py-3 text-sm focus:border-rs-red focus:outline-none"
                   />
                 </div>
+                {isSuperEditor && artistProfiles.length > 0 && (
+                  <div>
+                    <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
+                      Link to artist profile (Editorial Featured)
+                    </label>
+                    <select
+                      value={draftArtistProfileId}
+                      onChange={(e) => setDraftArtistProfileId(e.target.value)}
+                      className="w-full ios-input"
+                    >
+                      <option value="">— No linked profile —</option>
+                      {artistProfiles.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.displayName} ({p.slug}){p.published ? '' : ' · draft'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <ImageUpload
                   label="Cover Image"
                   folder="ios/editorial"
@@ -507,17 +537,53 @@ export default function EditorDashboardPage() {
                           className="w-full h-40 object-cover mb-4"
                         />
                       )}
-                      <span className="text-[10px] tracking-widest uppercase text-rs-red">
-                        {d.type.replace('_', ' ')} · draft
-                      </span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] tracking-widest uppercase text-rs-red">
+                          {d.type.replace('_', ' ')}
+                        </span>
+                        <span
+                          className={clsx(
+                            'text-[10px] tracking-widest uppercase px-2 py-0.5 border',
+                            d.status === 'published'
+                              ? 'border-emerald-500/50 text-emerald-400'
+                              : 'border-border text-muted'
+                          )}
+                        >
+                          {d.status}
+                        </span>
+                      </div>
                       <h3 className="font-serif text-2xl font-bold mt-2">{d.title}</h3>
                       <p className="text-sm text-mh-red mt-1">{d.subject}</p>
+                      {d.artistProfileId && (
+                        <p className="text-xs text-muted mt-2">
+                          Linked profile · shows in Editorial Featured when published
+                        </p>
+                      )}
                       <p className="text-muted text-sm mt-4 line-clamp-4 whitespace-pre-wrap">
                         {d.body}
                       </p>
                       <p className="text-xs text-muted mt-4">
                         {new Date(d.updatedAt).toLocaleString()}
                       </p>
+                      {isSuperEditor && d.status !== 'published' && (
+                        <button
+                          type="button"
+                          className="ios-btn ios-btn-primary mt-4 !text-xs"
+                          onClick={async () => {
+                            try {
+                              await publishEditorialDraft(d.id)
+                              setMessage(`Published "${d.title}" on artist profile`)
+                              await refresh()
+                            } catch (err) {
+                              setError(
+                                err instanceof Error ? err.message : 'Publish failed'
+                              )
+                            }
+                          }}
+                        >
+                          Publish to artist profile →
+                        </button>
+                      )}
                     </article>
                   ))
                 )}

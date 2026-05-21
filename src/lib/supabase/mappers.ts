@@ -37,6 +37,7 @@ export interface DraftRow {
   subject: string
   body: string
   cover_image_url: string | null
+  artist_profile_id: string | null
   status: EditorialDraft['status']
   created_at: string
   updated_at: string
@@ -84,6 +85,7 @@ export function mapDraft(row: DraftRow): EditorialDraft {
     subject: row.subject,
     body: row.body,
     coverImageUrl: row.cover_image_url ?? undefined,
+    artistProfileId: row.artist_profile_id ?? undefined,
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

@@ -104,6 +104,7 @@ export async function supabaseCreateDraft(
       subject: input.subject,
       body: input.body,
       cover_image_url: input.coverImageUrl?.trim() || null,
+      artist_profile_id: input.artistProfileId ?? null,
       status: 'draft',
     })
     .select()
@@ -125,6 +126,18 @@ export async function supabaseGetDraftsForEditor(
 
   if (error) throw new Error(error.message)
   return (data as DraftRow[]).map(mapDraft)
+}
+
+export async function supabasePublishDraft(draftId: string): Promise<EditorialDraft> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('editorial_drafts')
+    .update({ status: 'published', updated_at: new Date().toISOString() })
+    .eq('id', draftId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return mapDraft(data as DraftRow)
 }
 
 export async function supabaseGetSubmissionById(id: string) {

@@ -34,6 +34,7 @@ export interface CreateDraftInput {
   subject: string
   body: string
   coverImageUrl?: string
+  artistProfileId?: string
 }
 
 function now() {
@@ -136,6 +137,7 @@ export async function createEditorialDraft(
     subject: input.subject,
     body: input.body,
     coverImageUrl: input.coverImageUrl,
+    artistProfileId: input.artistProfileId,
     status: 'draft',
     createdAt: now(),
     updatedAt: now(),
@@ -159,6 +161,26 @@ export async function getSubmissionById(id: string) {
     return sb.supabaseGetSubmissionById(id)
   }
   return getSubmissions().find((s) => s.id === id) ?? null
+}
+
+export async function publishEditorialDraft(draftId: string): Promise<EditorialDraft> {
+  if (isSupabaseConfigured()) {
+    return sb.supabasePublishDraft(draftId)
+  }
+  const drafts = getDrafts()
+  const idx = drafts.findIndex((d) => d.id === draftId)
+  if (idx === -1) throw new Error('Draft not found')
+  drafts[idx] = {
+    ...drafts[idx],
+    status: 'published',
+    updatedAt: now(),
+  }
+  saveDrafts(drafts)
+  if (drafts[idx].artistProfileId) {
+    const { localLinkEditorial } = await import('@/lib/artist-profile/storage')
+    localLinkEditorial(drafts[idx].artistProfileId!, draftId)
+  }
+  return drafts[idx]
 }
 
 export function resolveSessionUser(userId: string) {
