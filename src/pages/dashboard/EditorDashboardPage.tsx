@@ -246,7 +246,7 @@ export default function EditorDashboardPage() {
         </div>
 
         {loadingData && tab !== 'write' ? (
-          <LoadingTransmission />
+          <LoadingTransmission variant="compact" />
         ) : (
           <>
             {tab === 'queue' && (

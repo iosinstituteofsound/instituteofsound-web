@@ -9,7 +9,7 @@ export default function ArtistDetailPage() {
   const fetcher = useCallback(() => getArtist(slug!), [slug])
   const { data: artist, loading, error } = useContent(fetcher)
 
-  if (loading) return <LoadingTransmission />
+  if (loading) return <LoadingTransmission variant="hell" />
   if (error || !artist) {
     return (
       <div className="section-padding pt-32 text-center">

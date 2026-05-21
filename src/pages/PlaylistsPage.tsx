@@ -17,7 +17,7 @@ export default function PlaylistsPage() {
           title="Playlists"
           subtitle="Midnight Frequencies. Noise Ritual. Underground Protocol. Collect them all."
         />
-        {loading && <LoadingTransmission />}
+        {loading && <LoadingTransmission variant="compact" />}
         {error && <p className="text-crimson">{error}</p>}
         {data && (
           <AnimatedGrid columns={3}>

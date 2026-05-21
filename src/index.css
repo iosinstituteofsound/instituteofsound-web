@@ -147,3 +147,114 @@ body {
     2px 0 var(--color-neon),
     -2px 0 var(--color-crimson);
 }
+
+/* Hell loader */
+.hell-loader-vortex {
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(212, 0, 0, 0.15) 0%, transparent 45%),
+    radial-gradient(ellipse at 30% 70%, rgba(61, 124, 255, 0.12) 0%, transparent 40%),
+    conic-gradient(from 0deg at 50% 50%, transparent, rgba(139, 21, 56, 0.08), transparent, rgba(61, 124, 255, 0.06), transparent);
+  animation: hell-vortex-spin 12s linear infinite;
+}
+
+@keyframes hell-vortex-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hell-loader-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.5) 2px,
+    rgba(0, 0, 0, 0.5) 4px
+  );
+  animation: hell-scan 0.1s steps(2) infinite;
+}
+
+@keyframes hell-scan {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(4px);
+  }
+}
+
+.hell-loader-grid {
+  background-image:
+    linear-gradient(rgba(212, 0, 0, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 124, 255, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.hell-loader-core {
+  background: conic-gradient(
+    from 0deg,
+    #050505,
+    #d40000,
+    #3d7cff,
+    #8b1538,
+    #050505
+  );
+  animation: hell-core-spin 2.5s linear infinite;
+}
+
+@keyframes hell-core-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hell-loader-glitch {
+  animation: hell-glitch 0.35s steps(2) infinite;
+}
+
+.hell-loader-glitch-slow {
+  animation: hell-glitch 1.2s steps(3) infinite;
+}
+
+@keyframes hell-glitch {
+  0% {
+    text-shadow: 2px 0 #3d7cff, -2px 0 #d40000;
+    transform: translate(0);
+  }
+  33% {
+    text-shadow: -3px 0 #d40000, 3px 0 #3d7cff;
+    transform: translate(1px, -1px);
+  }
+  66% {
+    text-shadow: 3px 2px #8b1538, -2px -1px #3d7cff;
+    transform: translate(-1px, 1px);
+  }
+  100% {
+    text-shadow: 2px 0 #3d7cff, -2px 0 #d40000;
+    transform: translate(0);
+  }
+}
+
+.hell-loader-rain {
+  animation: hell-rain 4s linear infinite;
+}
+
+@keyframes hell-rain {
+  0% {
+    transform: translateY(-20%);
+  }
+  100% {
+    transform: translateY(20%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hell-loader-vortex,
+  .hell-loader-core,
+  .hell-loader-scanlines,
+  .hell-loader-glitch,
+  .hell-loader-glitch-slow,
+  .hell-loader-rain {
+    animation: none;
+  }
+}

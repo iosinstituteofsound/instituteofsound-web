@@ -48,7 +48,7 @@ export default function HomePage() {
     community.loading ||
     ranks.loading
 
-  if (loading) return <LoadingTransmission />
+  if (loading) return <LoadingTransmission variant="hell" />
 
   if (
     !cover.data ||

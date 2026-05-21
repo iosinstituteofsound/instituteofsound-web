@@ -17,7 +17,7 @@ export default function SignalsPage() {
           title="Signals"
           subtitle="Underground discoveries. Releases. Culture drops. Not a news blog."
         />
-        {loading && <LoadingTransmission />}
+        {loading && <LoadingTransmission variant="compact" />}
         {error && <p className="text-crimson">{error}</p>}
         {data && (
           <AnimatedGrid columns={2}>

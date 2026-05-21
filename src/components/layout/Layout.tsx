@@ -34,7 +34,7 @@ export function Layout() {
       <main>
         <Outlet />
       </main>
-      {footerLoading ? <LoadingTransmission /> : footerData && <Footer data={footerData} />}
+      {footerLoading ? <LoadingTransmission variant="compact" /> : footerData && <Footer data={footerData} />}
     </>
   )
 }

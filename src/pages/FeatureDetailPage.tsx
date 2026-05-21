@@ -9,7 +9,7 @@ export default function FeatureDetailPage() {
   const fetcher = useCallback(() => getFeature(slug!), [slug])
   const { data: feature, loading, error } = useContent(fetcher)
 
-  if (loading) return <LoadingTransmission />
+  if (loading) return <LoadingTransmission variant="hell" />
   if (error || !feature) {
     return (
       <div className="section-padding pt-32 text-center">

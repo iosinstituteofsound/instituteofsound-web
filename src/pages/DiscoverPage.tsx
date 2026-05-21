@@ -22,7 +22,7 @@ export default function DiscoverPage() {
       </div>
       <div className="section-padding pt-12">
         <div className="max-w-7xl mx-auto">
-          {loading && <LoadingTransmission />}
+          {loading && <LoadingTransmission variant="compact" />}
           {error && <p className="text-crimson">{error}</p>}
           {data && (
             <AnimatedGrid columns={3}>

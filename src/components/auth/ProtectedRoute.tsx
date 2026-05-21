@@ -26,7 +26,7 @@ export function ProtectedRoute({ children, role }: ProtectedRouteProps) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-24">
-        <LoadingTransmission />
+        <LoadingTransmission variant="hell" />
       </div>
     )
   }

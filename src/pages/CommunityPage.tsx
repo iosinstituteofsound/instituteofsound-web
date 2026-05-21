@@ -11,7 +11,7 @@ export default function CommunityPage() {
   const members = useContent(useCallback(() => getCommunity(), []))
   const ranks = useContent(useCallback(() => getRanks(), []))
 
-  if (members.loading || ranks.loading) return <LoadingTransmission />
+  if (members.loading || ranks.loading) return <LoadingTransmission variant="hell" />
 
   return (
     <div className="section-padding pt-32">

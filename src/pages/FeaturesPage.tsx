@@ -16,7 +16,7 @@ export default function FeaturesPage() {
           title="Features"
           subtitle="Deep interviews. Music philosophy. Scene analysis. Alternative culture."
         />
-        {loading && <LoadingTransmission />}
+        {loading && <LoadingTransmission variant="compact" />}
         {error && <p className="text-crimson">{error}</p>}
         {data && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

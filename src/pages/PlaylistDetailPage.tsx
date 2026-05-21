@@ -9,7 +9,7 @@ export default function PlaylistDetailPage() {
   const fetcher = useCallback(() => getPlaylist(slug!), [slug])
   const { data: playlist, loading, error } = useContent(fetcher)
 
-  if (loading) return <LoadingTransmission />
+  if (loading) return <LoadingTransmission variant="hell" />
   if (error || !playlist) {
     return (
       <div className="section-padding pt-32 text-center">

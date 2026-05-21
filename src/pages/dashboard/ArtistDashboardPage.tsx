@@ -212,7 +212,7 @@ export default function ArtistDashboardPage() {
         {tab === 'history' && (
           <div className="space-y-4">
             {loadingList ? (
-              <LoadingTransmission />
+              <LoadingTransmission variant="compact" />
             ) : submissions.length === 0 ? (
               <p className="text-muted text-sm py-8 border border-dashed border-border text-center">
                 No submissions yet. Submit your first track.
