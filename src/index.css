@@ -464,6 +464,35 @@ textarea.ios-input {
   clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
 }
 
+.ios-analytics-stat-btn {
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.ios-analytics-stat-btn:hover {
+  border-color: rgba(212, 0, 0, 0.45);
+  background: rgba(212, 0, 0, 0.06);
+}
+
+.ios-analytics-stat-active {
+  border-color: var(--color-mh-red);
+  background: rgba(212, 0, 0, 0.1);
+}
+
+.ios-analytics-stat-hint {
+  display: block;
+  font-size: 0.5625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  margin-top: 0.5rem;
+  opacity: 0.85;
+}
+
+.ios-analytics-detail {
+  animation: ios-fade-in 0.25s ease;
+}
+
 .ios-analytics-stat-code {
   display: block;
   font-size: 0.5625rem;

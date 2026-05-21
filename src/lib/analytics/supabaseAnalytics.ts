@@ -12,6 +12,52 @@ export async function supabaseCountArtists(): Promise<number> {
   return count ?? 0
 }
 
+export async function supabaseListArtistAccounts(): Promise<
+  { id: string; email: string; name: string; createdAt: string }[]
+> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, email, name, created_at')
+    .eq('role', 'artist')
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    email: r.email,
+    name: r.name,
+    createdAt: r.created_at,
+  }))
+}
+
+export async function supabaseListArtistProfiles(): Promise<
+  {
+    id: string
+    userId: string
+    slug: string
+    displayName: string
+    published: boolean
+    createdAt: string
+  }[]
+> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_profiles')
+    .select('id, user_id, slug, display_name, published, created_at')
+    .order('display_name')
+
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    userId: r.user_id,
+    slug: r.slug,
+    displayName: r.display_name,
+    published: r.published,
+    createdAt: r.created_at,
+  }))
+}
+
 export async function supabaseGetAllDraftsForSuperEditor(): Promise<ReturnType<typeof mapDraft>[]> {
   const supabase = getSupabase()
   const { data, error } = await supabase

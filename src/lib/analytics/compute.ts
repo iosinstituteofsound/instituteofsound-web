@@ -1,5 +1,5 @@
 import type { EditorialDraft, SubmissionStatus } from '@/lib/auth/types'
-import type { AnalyticsSource, SuperAdminAnalytics } from './types'
+import type { AnalyticsSource, RecentActivityItem, SuperAdminAnalytics } from './types'
 
 const MS_DAY = 86_400_000
 
@@ -75,17 +75,20 @@ export function computeSuperAdminAnalytics(source: AnalyticsSource): SuperAdminA
     avgReviewHours = Math.round(totalH * 10) / 10
   }
 
-  const recentActivity = [...submissions]
+  const toActivity = (s: (typeof submissions)[0]): RecentActivityItem => ({
+    id: s.id,
+    trackTitle: s.trackTitle,
+    artistName: s.artistName,
+    genre: s.genre,
+    status: s.status,
+    createdAt: s.createdAt,
+  })
+
+  const submissionLog = [...submissions]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 6)
-    .map((s) => ({
-      id: s.id,
-      trackTitle: s.trackTitle,
-      artistName: s.artistName,
-      genre: s.genre,
-      status: s.status,
-      createdAt: s.createdAt,
-    }))
+    .map(toActivity)
+
+  const recentActivity = submissionLog.slice(0, 6)
 
   return {
     generatedAt: new Date().toISOString(),
@@ -101,6 +104,9 @@ export function computeSuperAdminAnalytics(source: AnalyticsSource): SuperAdminA
     draftsTotal: drafts.length,
     draftsByType,
     recentActivity,
+    submissionLog,
+    artistAccounts: source.artistAccounts,
+    artistProfiles: source.artistProfiles,
     pipeline: pipelineLabel(statusCounts.pending, statusCounts.in_review),
   }
 }

@@ -74,6 +74,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [albumType, setAlbumType] = useState<'album' | 'single' | 'ep'>('album')
   const [videoTitle, setVideoTitle] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [bulkTrackUrls, setBulkTrackUrls] = useState('')
+  const [bulkAdding, setBulkAdding] = useState(false)
 
   const loadChildData = useCallback(async (profileId: string) => {
     if (isSupabaseConfigured()) {
@@ -174,6 +176,56 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
     })
     setProfile(created)
     return created
+  }
+
+  const titleFromStreamUrl = async (url: string): Promise<string> => {
+    try {
+      const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`)
+      if (!res.ok) return 'Track'
+      const data = (await res.json()) as { title?: string }
+      return data.title?.split('·')[0]?.split(' - ')[0]?.trim() || 'Track'
+    } catch {
+      return 'Track'
+    }
+  }
+
+  const addBulkTracks = async () => {
+    const urls = bulkTrackUrls
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith('http'))
+    if (urls.length === 0) {
+      setError('Har line pe ek stream URL paste karo (https://...)')
+      return
+    }
+    setBulkAdding(true)
+    setError('')
+    try {
+      const p = await ensureProfile()
+      const existing = new Set(tracks.map((t) => t.streamUrl.trim().toLowerCase()))
+      let added = 0
+      let skipped = 0
+      for (const streamUrl of urls) {
+        if (existing.has(streamUrl.toLowerCase())) {
+          skipped++
+          continue
+        }
+        const title = await titleFromStreamUrl(streamUrl)
+        await addArtistTrack(p.id, { title, streamUrl })
+        existing.add(streamUrl.toLowerCase())
+        added++
+      }
+      setBulkTrackUrls('')
+      await loadChildData(p.id)
+      setMessage(
+        `${added} track${added === 1 ? '' : 's'} added` +
+          (skipped ? ` · ${skipped} duplicate skip` : '')
+      )
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bulk add failed')
+    } finally {
+      setBulkAdding(false)
+    }
   }
 
   if (loading) return <LoadingTransmission variant="compact" />
@@ -351,6 +403,25 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           value={trackCover}
           onChange={setTrackCover}
         />
+        <div className="border border-dashed border-mh-red/40 p-4 space-y-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-mh-red">
+            Quick add (Spotify API block ho to ye use karo)
+          </p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Spotify app se har track ka <strong className="text-foreground">Share → Copy link</strong> karo.
+            Neeche ek URL per line paste karo — title + cover auto aayega.
+          </p>
+          <textarea
+            rows={5}
+            value={bulkTrackUrls}
+            onChange={(e) => setBulkTrackUrls(e.target.value)}
+            placeholder={'https://open.spotify.com/track/...\nhttps://open.spotify.com/track/...'}
+            className="ios-input min-h-[100px] font-mono text-xs"
+          />
+          <Button type="button" variant="metal" disabled={bulkAdding} onClick={addBulkTracks}>
+            {bulkAdding ? 'Adding…' : 'Add all URLs'}
+          </Button>
+        </div>
         {tracks.length === 0 ? (
           <p className="text-xs text-muted-foreground">No tracks yet — add manually or import catalog.</p>
         ) : (

@@ -1,12 +1,18 @@
+import { useState } from 'react'
 import { StatusBadge } from '@/components/auth/StatusBadge'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import type { SuperAdminAnalytics } from '@/lib/analytics/types'
+import {
+  AnalyticsDetailPanel,
+  type AnalyticsDetailKey,
+} from '@/components/dashboard/AnalyticsDetailPanel'
 import clsx from 'clsx'
 
 interface SuperAdminAnalyticsProps {
   data: SuperAdminAnalytics
   operatorName: string
   onOpenQueue: (filter?: 'pending' | 'in_review' | 'approved' | 'rejected') => void
+  onSelectSubmission?: (submissionId: string) => void
 }
 
 function formatWhen(iso: string) {
@@ -34,18 +40,25 @@ export function SuperAdminAnalyticsPanel({
   data,
   operatorName,
   onOpenQueue,
+  onSelectSubmission,
 }: SuperAdminAnalyticsProps) {
+  const [detail, setDetail] = useState<AnalyticsDetailKey | null>(null)
   const pipe = pipelineCopy(data.pipeline)
   const updated = new Date(data.generatedAt).toLocaleString(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
   })
 
-  const heroStats = [
-    { label: 'Artists Registered', value: data.artistsRegistered, code: 'ART' },
-    { label: 'Track Submissions', value: data.totalSubmissions, code: 'SUB' },
-    { label: 'Last 7 Days', value: data.submissionsLast7Days, code: '7D' },
-    { label: 'Approval Rate', value: `${data.approvalRate}%`, code: 'APR' },
+  const heroStats: {
+    key: AnalyticsDetailKey
+    label: string
+    value: string | number
+    code: string
+  }[] = [
+    { key: 'artists', label: 'Artists Registered', value: data.artistsRegistered, code: 'ART' },
+    { key: 'submissions', label: 'Track Submissions', value: data.totalSubmissions, code: 'SUB' },
+    { key: 'week', label: 'Last 7 Days', value: data.submissionsLast7Days, code: '7D' },
+    { key: 'approval', label: 'Approval Rate', value: `${data.approvalRate}%`, code: 'APR' },
   ]
 
   const draftStats = [
@@ -53,6 +66,11 @@ export function SuperAdminAnalyticsPanel({
     { label: 'Features', value: data.draftsByType.feature },
     { label: 'Band Profiles', value: data.draftsByType.band_profile },
   ]
+
+  const openSubmissionFromDetail = (id: string) => {
+    setDetail(null)
+    onSelectSubmission?.(id)
+  }
 
   return (
     <div className="ios-analytics space-y-10">
@@ -82,16 +100,42 @@ export function SuperAdminAnalyticsPanel({
           </div>
         </div>
         <div className="transmission-line mt-8 mb-6" />
+        <p className="text-[10px] tracking-[0.2em] uppercase text-muted mb-3">
+          Click a metric for full detail
+        </p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {heroStats.map((s) => (
-            <div key={s.code} className="ios-analytics-stat">
+            <button
+              key={s.code}
+              type="button"
+              onClick={() => setDetail(detail === s.key ? null : s.key)}
+              className={clsx(
+                'ios-analytics-stat ios-analytics-stat-btn text-left',
+                detail === s.key && 'ios-analytics-stat-active'
+              )}
+            >
               <span className="ios-analytics-stat-code">{s.code}</span>
               <span className="ios-analytics-stat-value">{s.value}</span>
               <span className="ios-analytics-stat-label">{s.label}</span>
-            </div>
+              <span className="ios-analytics-stat-hint">View detail →</span>
+            </button>
           ))}
         </div>
       </section>
+
+      {detail && (
+        <AnalyticsDetailPanel
+          view={detail}
+          onClose={() => setDetail(null)}
+          artistAccounts={data.artistAccounts}
+          artistProfiles={data.artistProfiles}
+          submissions={data.submissionLog}
+          approvalRate={data.approvalRate}
+          statusApproved={data.statusCounts.approved}
+          statusRejected={data.statusCounts.rejected}
+          onOpenSubmission={onSelectSubmission ? openSubmissionFromDetail : undefined}
+        />
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6">
         <section className="ios-panel lg:col-span-2">

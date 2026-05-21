@@ -187,9 +187,9 @@ export function ArtistCatalogImport({
       <div>
         <p className="ios-kicker">Import / re-import catalog</p>
         <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-          Spotify / YouTube / SoundCloud profile URL se fetch karo. Dubara import karoge to sirf{' '}
-          <strong className="text-foreground">naye</strong> tracks/albums/videos add honge — jo pehle se
-          profile pe hai wo skip (grey / already added).
+          Spotify / YouTube / SoundCloud profile URL se fetch karo. Dubara import = sirf naye items.
+          Agar Spotify 403 aaye (Premium same email pe bhi): Spotify ko sync hone do (24h) ya neeche{' '}
+          <strong className="text-foreground">Tracks → Quick add</strong> se track links paste karo.
         </p>
       </div>
 

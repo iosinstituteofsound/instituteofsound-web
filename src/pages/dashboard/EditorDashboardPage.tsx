@@ -158,6 +158,14 @@ export default function EditorDashboardPage() {
     setTab('queue')
   }
 
+  const selectSubmissionFromAnalytics = (submissionId: string) => {
+    const sub = submissions.find((s) => s.id === submissionId)
+    if (!sub) return
+    setTab('queue')
+    setFilter('all')
+    void openReview(sub)
+  }
+
   const tabs: { id: EditorTab; label: string }[] = isSuperEditor
     ? [
         { id: 'analytics', label: 'Analytics' },
@@ -283,6 +291,7 @@ export default function EditorDashboardPage() {
               data={analytics}
               operatorName={user.name}
               onOpenQueue={openQueueFromAnalytics}
+              onSelectSubmission={selectSubmissionFromAnalytics}
             />
           ) : (
             <LoadingTransmission variant="compact" />
