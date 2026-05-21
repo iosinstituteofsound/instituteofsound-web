@@ -82,6 +82,18 @@ async function spotifyGet<T>(path: string, token: string): Promise<T> {
   return res.json() as Promise<T>
 }
 
+async function spotifyOembed(profileUrl: string) {
+  try {
+    const res = await fetch(
+      `https://open.spotify.com/oembed?url=${encodeURIComponent(profileUrl)}`
+    )
+    if (!res.ok) return null
+    return (await res.json()) as { title?: string; thumbnail_url?: string }
+  } catch {
+    return null
+  }
+}
+
 async function fetchSpotifyTracks(
   token: string,
   artist: { id: string; name: string },
@@ -176,86 +188,129 @@ async function importFromSpotify(profileUrl: string): Promise<CatalogResult> {
   }
 
   const market = process.env.SPOTIFY_MARKET?.trim() || 'IN'
-  let artist: { id: string; name: string; images?: { url: string; height: number }[]; genres?: string[] }
+  const oembed = await spotifyOembed(profileUrl)
+
+  type AlbumRow = {
+    id: string
+    name: string
+    album_type: string
+    external_urls: { spotify: string }
+    images?: { url: string }[]
+    release_date?: string
+  }
+
+  const items: CatalogItem[] = []
+  const seenUrls = new Set<string>()
+
+  const pushAlbums = (albumRows: AlbumRow[]) => {
+    const albumGroups = new Map<string, AlbumRow>()
+    for (const album of albumRows) {
+      const key = `${album.name}-${album.album_type}`
+      const existing = albumGroups.get(key)
+      if (!existing || (album.images?.[0]?.url && !existing.images?.[0]?.url)) {
+        albumGroups.set(key, album)
+      }
+    }
+    for (const album of albumGroups.values()) {
+      const streamUrl = album.external_urls.spotify
+      if (!streamUrl || seenUrls.has(streamUrl)) continue
+      seenUrls.add(streamUrl)
+      items.push({
+        id: `spotify-album-${album.id}`,
+        kind: albumKind(album.album_type),
+        title: album.name,
+        streamUrl,
+        coverUrl: album.images?.[0]?.url,
+        releaseYear: releaseYear(album.release_date),
+      })
+    }
+  }
+
+  const pushTracks = (
+    trackList: {
+      id: string
+      name: string
+      external_urls?: { spotify?: string }
+      album?: { images?: { url: string }[]; release_date?: string }
+    }[]
+  ) => {
+    for (const track of trackList) {
+      const streamUrl = track.external_urls?.spotify
+      if (!streamUrl || seenUrls.has(streamUrl)) continue
+      seenUrls.add(streamUrl)
+      items.push({
+        id: `spotify-track-${track.id}`,
+        kind: 'track',
+        title: track.name,
+        streamUrl,
+        coverUrl: track.album?.images?.[0]?.url,
+        releaseYear: releaseYear(track.album?.release_date),
+      })
+    }
+  }
+
+  let artist: { id: string; name: string; images?: { url: string; height: number }[]; genres?: string[] } | null =
+    null
+  let spotifyError = ''
+
   try {
     artist = await spotifyGet(`/artists/${artistId}`, token)
   } catch (err) {
-    const msg = err instanceof Error ? err.message : ''
-    if (msg.includes('403') || msg.toLowerCase().includes('premium')) {
+    spotifyError = err instanceof Error ? err.message : 'Spotify artist lookup failed'
+    if (spotifyError.includes('403') || spotifyError.toLowerCase().includes('premium')) {
       warnings.push(
-        'Spotify API blocked: app owner account pe active Spotify Premium chahiye (2026 dev rule).'
+        'Spotify abhi bhi API block kar raha hai. Premium usi email pe hona chahiye jo developer.spotify.com pe app banayi (The Lost Symbols wala account). Kabhi-kabhi 2–24 ghante lagte hain sync hone mein.'
       )
-      return { platform: 'spotify', profileUrl, suggestions: { spotifyUrl: profileUrl }, items: [], warnings }
+      warnings.push(`Technical: ${spotifyError}`)
+    } else {
+      warnings.push(spotifyError)
     }
-    throw err
   }
 
-  let albumsRes = { items: [] as { id: string; name: string; album_type: string; external_urls: { spotify: string }; images?: { url: string }[]; release_date?: string }[] }
+  const artistName = artist?.name ?? oembed?.title?.replace(/\s*·.*$/, '').trim() ?? 'Artist'
+  const artistRef = artist ?? { id: artistId, name: artistName }
+
+  let albumsRes = { items: [] as AlbumRow[] }
   try {
     albumsRes = await spotifyGet(
       `/artists/${artistId}/albums?include_groups=album,single,compilation&limit=10&market=${encodeURIComponent(market)}`,
       token
     )
-  } catch {
-    /* optional */
+    pushAlbums(albumsRes.items)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : ''
+    if (msg && !warnings.some((w) => w.includes(msg.slice(0, 40)))) warnings.push(msg)
   }
 
-  const trackList = await fetchSpotifyTracks(token, artist, market)
-  const items: CatalogItem[] = []
-  const seenUrls = new Set<string>()
-
-  for (const track of trackList) {
-    const streamUrl = track.external_urls?.spotify
-    if (!streamUrl || seenUrls.has(streamUrl)) continue
-    seenUrls.add(streamUrl)
-    items.push({
-      id: `spotify-track-${track.id}`,
-      kind: 'track',
-      title: track.name,
-      streamUrl,
-      coverUrl: track.album?.images?.[0]?.url,
-      releaseYear: releaseYear(track.album?.release_date),
-    })
+  try {
+    const trackList = await fetchSpotifyTracks(token, artistRef, market)
+    pushTracks(trackList)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : ''
+    if (msg && !warnings.some((w) => w.includes(msg.slice(0, 40)))) warnings.push(msg)
   }
 
-  const albumGroups = new Map<string, (typeof albumsRes.items)[0]>()
-  for (const album of albumsRes.items) {
-    const key = `${album.name}-${album.album_type}`
-    const existing = albumGroups.get(key)
-    if (!existing || (album.images?.[0]?.url && !existing.images?.[0]?.url)) {
-      albumGroups.set(key, album)
-    }
+  const images = artist?.images ? [...artist.images].sort((a, b) => b.height - a.height) : []
+
+  if (items.length === 0 && !warnings.length) {
+    warnings.push('Spotify se tracks nahi mile.')
   }
 
-  for (const album of albumGroups.values()) {
-    const streamUrl = album.external_urls.spotify
-    if (!streamUrl || seenUrls.has(streamUrl)) continue
-    seenUrls.add(streamUrl)
-    items.push({
-      id: `spotify-album-${album.id}`,
-      kind: albumKind(album.album_type),
-      title: album.name,
-      streamUrl,
-      coverUrl: album.images?.[0]?.url,
-      releaseYear: releaseYear(album.release_date),
-    })
-  }
-
-  const images = [...(artist.images ?? [])].sort((a, b) => b.height - a.height)
-
-  if (items.length === 0) {
-    warnings.push('Spotify se tracks nahi mile. App owner Premium + dev mode check karo.')
+  if (items.length === 0 && spotifyError.includes('403')) {
+    warnings.push(
+      'Dashboard → Spotify Developer → apni app → Settings check karo. Premium active ho to kal dubara try karo, ya tracks manually add karo.'
+    )
   }
 
   return {
     platform: 'spotify',
     profileUrl,
     suggestions: {
-      displayName: artist.name,
-      avatarUrl: images[0]?.url,
-      bannerUrl: images[1]?.url ?? images[0]?.url,
-      genres: (artist.genres ?? []).slice(0, 6),
-      tagline: artist.name ? `${artist.name} on Spotify` : undefined,
+      displayName: artistName,
+      avatarUrl: images[0]?.url ?? oembed?.thumbnail_url,
+      bannerUrl: images[1]?.url ?? images[0]?.url ?? oembed?.thumbnail_url,
+      genres: (artist?.genres ?? []).slice(0, 6),
+      tagline: artistName ? `${artistName} on Spotify` : undefined,
       spotifyUrl: profileUrl,
     },
     items,
