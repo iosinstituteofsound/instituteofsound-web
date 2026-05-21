@@ -641,6 +641,19 @@ html[data-perf='lite'] .hero-marquee {
     -2px 0 var(--color-crimson);
 }
 
+/* Hero headline readable when overlapping image */
+.hero-headline-over-image {
+  text-shadow:
+    0 0 40px rgba(5, 5, 5, 0.95),
+    0 2px 8px rgba(0, 0, 0, 0.9),
+    0 0 2px rgba(5, 5, 5, 1),
+    2px 0 var(--color-mh-red),
+    -1px 0 rgba(0, 0, 0, 0.8);
+  position: relative;
+  z-index: 1;
+}
+
+
 /* Metal loader — brutal, no neon pop */
 .metal-loader-smoke {
   background:
