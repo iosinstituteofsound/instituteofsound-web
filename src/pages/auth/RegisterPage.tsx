@@ -83,7 +83,20 @@ export default function RegisterPage() {
             />
           </div>
 
-          {error && <p className="text-mh-red text-sm">{error}</p>}
+          {error && (
+            <div className="text-mh-red text-sm space-y-2 border border-mh-red/30 px-3 py-3">
+              <p>{error}</p>
+              {(error.includes('Sign in') ||
+                error.includes('already') ||
+                error.includes('Confirm your email')) && (
+                <p>
+                  <Link to="/login" state={{ email }} className="ios-link font-semibold">
+                    Go to Sign in →
+                  </Link>
+                </p>
+              )}
+            </div>
+          )}
 
           <Button type="submit" variant="primary" disabled={submitting} className="w-full">
             {submitting ? 'Creating...' : 'Create Artist Account'}

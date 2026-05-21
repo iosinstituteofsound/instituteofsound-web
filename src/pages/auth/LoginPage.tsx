@@ -11,7 +11,8 @@ export default function LoginPage() {
   const location = useLocation()
   const from = (location.state as { from?: string })?.from
 
-  const [email, setEmail] = useState('')
+  const locationState = location.state as { email?: string } | null
+  const [email, setEmail] = useState(locationState?.email ?? '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
