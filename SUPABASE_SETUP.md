@@ -38,10 +38,14 @@ Email links go to `/auth/callback` on your live site.
 1. **Authentication** → **Providers** → **Google** → Enable
 2. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
    - OAuth client type: **Web application**
-   - **Authorized redirect URIs** — add:
-     - `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
-     (find exact callback in Supabase → Google provider settings)
-3. Paste **Client ID** and **Client Secret** into Supabase Google provider → Save
+   - **Authorized JavaScript origins** (add all):
+     - `https://instituteofsound.in`
+     - `https://www.instituteofsound.in`
+     - `http://localhost:5173`
+   - **Authorized redirect URIs** — copy **exactly** from Supabase → Authentication → Google → “Callback URL”, or use:
+     - `https://edddkvrwkbyjypyzjafy.supabase.co/auth/v1/callback`
+   - If you see **Error 400: redirect_uri_mismatch**, this URI is missing or typo’d in Google Cloud. Save, wait 1–2 min, retry.
+3. Paste the **same** Client ID and Client Secret into Supabase Google provider → Save
 4. Email/password signup is **disabled in the app** — artists and staff use Google only.
 5. Super admin: sign in at `/desk` with Google (`tlssymbols@gmail.com` must be `super_editor` in `profiles`).
 
