@@ -27,14 +27,14 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
         className="absolute top-0 right-0 w-1/2 h-full opacity-40 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse at 70% 40%, rgba(61,124,255,0.25), transparent 55%), radial-gradient(ellipse at 90% 80%, rgba(139,21,56,0.2), transparent 50%)',
+            'radial-gradient(ellipse at 70% 40%, rgba(212,0,0,0.22), transparent 55%), radial-gradient(ellipse at 90% 80%, rgba(139,21,56,0.25), transparent 50%)',
         }}
       />
 
       {/* Vertical transmission rail */}
       <div className="absolute left-4 md:left-8 top-28 bottom-8 hidden md:flex flex-col justify-between z-20 pointer-events-none">
         <span
-          className="text-[10px] tracking-[0.5em] text-neon/80 uppercase [writing-mode:vertical-rl] rotate-180"
+          className="text-[10px] tracking-[0.5em] text-mh-red/80 uppercase [writing-mode:vertical-rl] rotate-180"
           style={{ fontFamily: 'var(--font-display)' }}
         >
           Transmission 001
@@ -54,7 +54,7 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
                 className="text-[10px] md:text-xs tracking-[0.35em] text-muted uppercase font-medium"
               >
                 {item}
-                <span className="text-neon mx-6">◆</span>
+                <span className="text-mh-red mx-6">◆</span>
               </span>
             ))}
           </div>
@@ -69,9 +69,9 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
               transition={{ duration: 0.6 }}
               className="flex flex-wrap items-center gap-3 mb-6"
             >
-              <span className="inline-flex items-center gap-2 border border-neon/50 bg-neon/10 px-3 py-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-neon animate-pulse" />
-                <span className="text-[10px] tracking-[0.3em] text-neon uppercase font-bold">
+              <span className="inline-flex items-center gap-2 border border-mh-red/50 bg-mh-red/10 px-3 py-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-mh-red animate-pulse" />
+                <span className="text-[10px] tracking-[0.3em] text-mh-red uppercase font-bold">
                   Live Signal
                 </span>
               </span>
@@ -102,7 +102,7 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.35 }}
-              className="mt-8 border-l-2 border-neon pl-5 max-w-xl"
+              className="mt-8 border-l-2 border-mh-red pl-5 max-w-xl"
             >
               <p className="font-serif text-lg md:text-xl text-signal/90 leading-relaxed italic">
                 {story.dek}
@@ -121,7 +121,7 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
               <span className="hidden sm:inline text-border">|</span>
               <time>{story.date}</time>
               <span className="hidden sm:inline text-border">|</span>
-              <span className="text-neon/80">Encrypted Feature</span>
+              <span className="text-mh-red/80">Encrypted Feature</span>
             </motion.div>
 
             <motion.div
@@ -132,14 +132,14 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
             >
               <Link
                 to={`/feature/${story.slug}`}
-                className="group relative overflow-hidden bg-neon text-void px-8 py-3.5 text-[11px] tracking-[0.25em] uppercase font-bold"
+                className="group relative overflow-hidden bg-mh-red text-white px-8 py-3.5 text-[11px] tracking-[0.25em] uppercase font-bold hover:bg-rs-red transition-colors"
               >
                 <span className="relative z-10">{story.readLabel} →</span>
                 <span className="absolute inset-0 bg-signal translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               </Link>
               <Link
                 to="/discover"
-                className="border border-signal/25 px-8 py-3.5 text-[11px] tracking-[0.25em] uppercase text-signal/80 hover:border-neon hover:text-neon transition-colors"
+                className="border border-signal/25 px-8 py-3.5 text-[11px] tracking-[0.25em] uppercase text-signal/80 hover:border-mh-red hover:text-mh-red transition-colors"
               >
                 Enter Archive
               </Link>
@@ -154,7 +154,7 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
             className="lg:col-span-5 relative"
           >
             <div className="relative">
-              <div className="absolute -inset-3 border border-neon/20 pointer-events-none" />
+              <div className="absolute -inset-3 border border-mh-red/25 pointer-events-none" />
               <div className="absolute top-4 -left-3 w-full h-full border border-crimson/30 pointer-events-none hidden lg:block" />
 
               <div className="relative hero-image-frame overflow-hidden aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5]">
@@ -164,10 +164,10 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
                   className="w-full h-full object-cover scale-105 hover:scale-100 transition-transform duration-[1.2s]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-void via-void/20 to-transparent" />
-                <div className="absolute inset-0 mix-blend-overlay opacity-30 bg-neon/20" />
+                <div className="absolute inset-0 mix-blend-overlay opacity-30 bg-mh-red/15" />
 
                 {/* HUD corners */}
-                <span className="absolute top-3 left-3 text-[9px] tracking-widest text-neon uppercase font-bold">
+                <span className="absolute top-3 left-3 text-[9px] tracking-widest text-mh-red uppercase font-bold">
                   IOS // Visual
                 </span>
                 <span className="absolute bottom-3 right-3 text-[9px] tracking-widest text-signal/60 uppercase">
@@ -176,7 +176,7 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
               </div>
 
               {/* Floating stat card */}
-              <div className="absolute -bottom-4 -left-4 md:-left-8 bg-void border border-border p-4 min-w-[140px] shadow-[0_0_40px_-10px_rgba(61,124,255,0.4)]">
+              <div className="absolute -bottom-4 -left-4 md:-left-8 bg-void border border-border p-4 min-w-[140px] shadow-[0_0_40px_-10px_rgba(212,0,0,0.35)]">
                 <p className="text-[9px] tracking-[0.3em] text-mh-red uppercase font-bold">
                   Now Broadcasting
                 </p>
@@ -195,7 +195,7 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
           className="border-t border-border px-6 md:px-12 lg:px-16 py-4 flex flex-wrap justify-between gap-4 text-[10px] tracking-[0.2em] uppercase text-muted"
         >
           <span>Frequency locked</span>
-          <span className="text-neon">◉ Signal stable</span>
+          <span className="text-mh-red">◉ Signal stable</span>
           <span>Scroll to decode</span>
         </motion.div>
       </div>
@@ -209,7 +209,7 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
         <motion.div
           animate={{ height: [24, 48, 24] }}
           transition={{ duration: 2, repeat: Infinity }}
-          className="w-px bg-gradient-to-b from-transparent via-neon to-transparent"
+          className="w-px bg-gradient-to-b from-transparent via-mh-red to-transparent"
         />
       </motion.div>
     </section>

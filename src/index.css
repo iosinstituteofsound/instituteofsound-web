@@ -10,7 +10,8 @@
   --color-rs-red: #e31b23;
   --color-mh-red: #d40000;
   --color-mh-black: #0b0b0b;
-  --color-neon: #3d7cff;
+  /* Site accent — metal red (was blue; keep `neon` token for Tailwind compat) */
+  --color-neon: var(--color-mh-red);
   --color-crimson: #8b1538;
   --font-serif: 'Playfair Display', Georgia, serif;
   --font-sans: 'Space Grotesk', system-ui, sans-serif;
@@ -86,7 +87,7 @@ body {
 
 .magazine-card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 40px -12px rgba(61, 124, 255, 0.2);
+  box-shadow: 0 12px 40px -12px rgba(212, 0, 0, 0.25);
 }
 
 .mh-card-hover:hover {
@@ -120,8 +121,8 @@ body {
 
 .hero-grid {
   background-image:
-    linear-gradient(rgba(61, 124, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(61, 124, 255, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(212, 0, 0, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 0, 0, 0.06) 1px, transparent 1px);
   background-size: 48px 48px;
 }
 

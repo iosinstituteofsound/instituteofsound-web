@@ -15,7 +15,7 @@ export function HeroSection({ data }: HeroSectionProps) {
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage:
-              'radial-gradient(ellipse at 50% 0%, rgba(61,124,255,0.15) 0%, transparent 60%)',
+              'radial-gradient(ellipse at 50% 0%, rgba(212,0,0,0.18) 0%, transparent 60%)',
           }}
         />
         <WaveformBackground />

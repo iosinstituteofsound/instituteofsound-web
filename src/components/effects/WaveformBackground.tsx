@@ -40,8 +40,8 @@ export function WaveformBackground({
           (Math.sin(t * 0.01 + i * 0.1) * 0.3) * h * 0.15
         const x = i * barW
         const gradient = ctx.createLinearGradient(0, h, 0, h - height)
-        gradient.addColorStop(0, 'rgba(61, 124, 255, 0.05)')
-        gradient.addColorStop(1, 'rgba(61, 124, 255, 0.25)')
+        gradient.addColorStop(0, 'rgba(212, 0, 0, 0.06)')
+        gradient.addColorStop(1, 'rgba(212, 0, 0, 0.35)')
         ctx.fillStyle = gradient
         ctx.fillRect(x + 1, h - height, barW - 2, height)
       }
