@@ -36,34 +36,13 @@ export default function HomePage() {
   const community = useContent(useCallback(() => getCommunity(), []))
   const ranks = useContent(useCallback(() => getRanks(), []))
 
-  const loading =
-    cover.loading ||
-    trending.loading ||
-    artists.loading ||
-    reviews.loading ||
-    albums.loading ||
-    features.loading ||
-    playlists.loading ||
-    signals.loading ||
-    community.loading ||
-    ranks.loading
+  if (cover.loading && !cover.data) {
+    return <LoadingTransmission variant="hell" />
+  }
 
-  if (loading) return <LoadingTransmission variant="hell" />
-
-  if (
-    !cover.data ||
-    !trending.data ||
-    !artists.data ||
-    !reviews.data ||
-    !albums.data ||
-    !features.data ||
-    !playlists.data ||
-    !signals.data ||
-    !community.data ||
-    !ranks.data
-  ) {
+  if (cover.error && !cover.data) {
     return (
-      <div className="section-padding text-center text-rs-red">
+      <div className="section-padding text-center text-rs-red min-h-[50vh] flex items-center justify-center">
         Failed to load magazine feed.
       </div>
     )
@@ -71,22 +50,18 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Rolling Stone layer */}
-      <CoverHeroSection story={cover.data} />
-      <TrendingRail items={trending.data} />
+      {cover.data && <CoverHeroSection story={cover.data} />}
 
-      {/* Metal Hammer layer — band-first */}
-      <BandSpotlightSection artists={artists.data} />
-      <ReviewsBlock reviews={reviews.data} />
-      <AlbumArtRow albums={albums.data} />
-
-      {/* Rolling Stone editorial grid */}
-      <EditorialMagazineGrid features={features.data} />
-
-      {/* Supporting sections */}
-      <PlaylistSection playlists={playlists.data} />
-      <SignalsSection signals={signals.data} limit={4} />
-      <CommunitySection members={community.data} ranks={ranks.data} />
+      {trending.data && <TrendingRail items={trending.data} />}
+      {artists.data && <BandSpotlightSection artists={artists.data} />}
+      {reviews.data && <ReviewsBlock reviews={reviews.data} />}
+      {albums.data && <AlbumArtRow albums={albums.data} />}
+      {features.data && <EditorialMagazineGrid features={features.data} />}
+      {playlists.data && <PlaylistSection playlists={playlists.data} />}
+      {signals.data && <SignalsSection signals={signals.data} limit={4} />}
+      {community.data && ranks.data && (
+        <CommunitySection members={community.data} ranks={ranks.data} />
+      )}
       <SubmissionSection />
     </>
   )

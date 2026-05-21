@@ -11,7 +11,7 @@ export function EditorialMagazineGrid({ features }: EditorialMagazineGridProps) 
   const [lead, second, third, ...rest] = features
 
   return (
-    <section className="section-padding border-t border-border">
+    <section className="section-padding border-t border-border metal-section section-perf">
       <div className="max-w-7xl mx-auto">
         <MagazineSectionHeading
           variant="rolling-stone"

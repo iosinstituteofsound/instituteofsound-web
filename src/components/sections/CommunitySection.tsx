@@ -12,7 +12,7 @@ interface CommunitySectionProps {
 
 export function CommunitySection({ members, ranks }: CommunitySectionProps) {
   return (
-    <section className="section-padding border-t border-border bg-surface/30">
+    <section className="section-padding border-t border-border bg-surface/30 metal-section section-perf">
       <div className="max-w-7xl mx-auto">
         <MagazineSectionHeading
           kicker="Readers & Curators"

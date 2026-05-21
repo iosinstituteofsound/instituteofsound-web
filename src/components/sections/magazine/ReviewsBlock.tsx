@@ -8,7 +8,7 @@ interface ReviewsBlockProps {
 
 export function ReviewsBlock({ reviews }: ReviewsBlockProps) {
   return (
-    <section id="reviews" className="section-padding bg-paper scroll-mt-24">
+    <section id="reviews" className="section-padding bg-paper scroll-mt-24 metal-section section-perf">
       <div className="max-w-7xl mx-auto">
         <MagazineSectionHeading
           variant="metal-hammer"

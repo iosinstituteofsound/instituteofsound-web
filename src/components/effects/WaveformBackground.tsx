@@ -1,66 +1,28 @@
-import { useEffect, useRef } from 'react'
+import { getPerformanceProfile } from '@/lib/performance'
 
 interface WaveformBackgroundProps {
   className?: string
   bars?: number
 }
 
+/** Pure CSS equalizer — no canvas, no RAF */
 export function WaveformBackground({
   className = '',
-  bars = 64,
+  bars: barsProp,
 }: WaveformBackgroundProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    let frame: number
-    let t = 0
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
-    }
-    resize()
-    window.addEventListener('resize', resize)
-
-    const draw = () => {
-      const w = canvas.offsetWidth
-      const h = canvas.offsetHeight
-      ctx.clearRect(0, 0, w, h)
-
-      const barW = w / bars
-      for (let i = 0; i < bars; i++) {
-        const height =
-          (Math.sin(t * 0.02 + i * 0.3) * 0.5 + 0.5) * h * 0.35 +
-          (Math.sin(t * 0.01 + i * 0.1) * 0.3) * h * 0.15
-        const x = i * barW
-        const gradient = ctx.createLinearGradient(0, h, 0, h - height)
-        gradient.addColorStop(0, 'rgba(212, 0, 0, 0.06)')
-        gradient.addColorStop(1, 'rgba(212, 0, 0, 0.35)')
-        ctx.fillStyle = gradient
-        ctx.fillRect(x + 1, h - height, barW - 2, height)
-      }
-      t++
-      frame = requestAnimationFrame(draw)
-    }
-    draw()
-
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener('resize', resize)
-    }
-  }, [bars])
-
+  const bars = barsProp ?? (getPerformanceProfile() === 'lite' ? 24 : 36)
   return (
-    <canvas
-      ref={canvasRef}
-      className={`absolute inset-0 w-full h-full opacity-40 ${className}`}
+    <div
+      className={`absolute inset-0 flex items-end justify-center gap-px md:gap-0.5 px-1 pointer-events-none css-waveform ${className}`}
       aria-hidden
-    />
+    >
+      {Array.from({ length: bars }).map((_, i) => (
+        <div
+          key={i}
+          className="css-waveform-bar flex-1 max-w-[5px] min-w-[2px] rounded-t-sm bg-gradient-to-t from-transparent via-mh-red/25 to-mh-red/50"
+          style={{ animationDelay: `${(i % 16) * 0.07}s`, animationDuration: `${0.55 + (i % 5) * 0.12}s` }}
+        />
+      ))}
+    </div>
   )
 }

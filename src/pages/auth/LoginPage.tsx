@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { editorDashboardPath } from '@/lib/auth/roles'
+import { MetalButton } from '@/components/ui/MetalButton'
+import { MetalInput } from '@/components/ui/MetalInput'
 
 export default function LoginPage() {
   const { user, login, mode, configHint } = useAuth()
@@ -58,12 +60,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="section-padding pt-32 min-h-screen">
-      <div className="max-w-md mx-auto">
-        <p className="text-[11px] tracking-[0.25em] uppercase text-rs-red font-semibold">
-          Portal Access
-        </p>
-        <h1 className="font-serif text-4xl font-bold mt-2">Sign In</h1>
+    <div className="section-padding pt-32 min-h-screen metal-section">
+      <div className="max-w-md mx-auto metal-card p-8 md:p-10">
+        <div className="metal-rule-stack mb-4">
+          <span />
+          <span />
+          <span />
+        </div>
+        <p className="metal-kicker text-rs-red">Portal Access</p>
+        <h1 className="font-metal text-4xl text-signal mt-2">Sign In</h1>
         <p className="text-muted mt-2 text-sm">
           Editors review submissions. Artists submit tracks.
         </p>
@@ -91,12 +96,11 @@ export default function LoginPage() {
             <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
               Email
             </label>
-            <input
+            <MetalInput
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-surface border border-border px-4 py-3 text-sm focus:outline-none focus:border-rs-red"
               placeholder="you@band.com"
             />
           </div>
@@ -104,24 +108,21 @@ export default function LoginPage() {
             <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
               Password
             </label>
-            <input
+            <MetalInput
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-surface border border-border px-4 py-3 text-sm focus:outline-none focus:border-rs-red"
             />
           </div>
 
           {error && <p className="text-mh-red text-sm">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-rs-red text-white py-3 text-xs tracking-[0.2em] uppercase font-bold hover:bg-mh-red transition-colors disabled:opacity-50"
-          >
-            {submitting ? 'Signing in...' : 'Sign In'}
-          </button>
+          <MetalButton type="submit" variant="rs" disabled={submitting} className="w-full">
+            <span className="metal-btn-inner w-full justify-center">
+              {submitting ? 'Signing in...' : 'Sign In'}
+            </span>
+          </MetalButton>
         </form>
 
         {mode === 'local' && (

@@ -16,6 +16,9 @@
   --font-serif: 'Playfair Display', Georgia, serif;
   --font-sans: 'Space Grotesk', system-ui, sans-serif;
   --font-display: 'Syne', system-ui, sans-serif;
+  --font-metal: 'Bebas Neue', 'Syne', system-ui, sans-serif;
+  --metal-shadow: 0 4px 24px -6px rgba(212, 0, 0, 0.45);
+  --metal-shadow-soft: 0 8px 32px -12px rgba(0, 0, 0, 0.8);
 }
 
 *,
@@ -58,13 +61,443 @@ body {
   font-family: var(--font-display);
 }
 
+.font-metal {
+  font-family: var(--font-metal);
+  letter-spacing: 0.04em;
+}
+
+/* ─── Metal design system ─── */
+.metal-btn.w-full {
+  width: 100%;
+}
+
+.metal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.metal-btn-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.75rem;
+}
+
+.metal-btn-primary {
+  background: linear-gradient(180deg, #e80000 0%, var(--color-mh-red) 45%, #9a0000 100%);
+  color: #fff;
+  box-shadow: var(--metal-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.metal-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px -4px rgba(212, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: linear-gradient(180deg, #ff1a1a 0%, var(--color-rs-red) 50%, var(--color-mh-red) 100%);
+}
+
+.metal-btn-rs {
+  background: linear-gradient(180deg, #ff2230 0%, var(--color-rs-red) 100%);
+  color: #fff;
+  box-shadow: 0 4px 20px -6px rgba(227, 27, 35, 0.5);
+}
+
+.metal-btn-rs:hover {
+  transform: translateY(-2px);
+  background: var(--color-mh-red);
+}
+
+.metal-btn-outline {
+  background: transparent;
+  color: var(--color-signal);
+  box-shadow: inset 0 0 0 1px rgba(245, 245, 245, 0.2);
+}
+
+.metal-btn-outline:hover {
+  color: var(--color-mh-red);
+  box-shadow: inset 0 0 0 1px var(--color-mh-red);
+  background: rgba(212, 0, 0, 0.06);
+}
+
+.metal-btn-ghost {
+  background: rgba(212, 0, 0, 0.08);
+  color: var(--color-mh-red);
+  box-shadow: inset 0 0 0 1px rgba(212, 0, 0, 0.35);
+}
+
+.metal-btn-ghost:hover {
+  background: rgba(212, 0, 0, 0.18);
+  color: #fff;
+}
+
+.metal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid rgba(212, 0, 0, 0.45);
+  background: rgba(212, 0, 0, 0.1);
+  color: var(--color-mh-red);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+
+.metal-badge-crimson {
+  border-color: rgba(139, 21, 56, 0.5);
+  background: rgba(139, 21, 56, 0.15);
+  color: #c45a7a;
+}
+
+.metal-badge-dark {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+}
+
+.metal-badge-live {
+  border-color: rgba(212, 0, 0, 0.6);
+  background: rgba(212, 0, 0, 0.15);
+  color: #ff4444;
+}
+
+.metal-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: metal-pulse-dot 1.2s ease-in-out infinite;
+}
+
+@keyframes metal-pulse-dot {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+.metal-input {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-signal);
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.metal-input:focus {
+  outline: none;
+  border-color: var(--color-mh-red);
+  box-shadow: 0 0 0 1px rgba(212, 0, 0, 0.35), inset 0 0 20px rgba(212, 0, 0, 0.05);
+}
+
+.metal-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.metal-card {
+  position: relative;
+  background: linear-gradient(145deg, #0c0c0c 0%, var(--color-surface) 100%);
+  border: 1px solid var(--color-border);
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s,
+    box-shadow 0.35s;
+}
+
+.metal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 0;
+  background: linear-gradient(180deg, var(--color-rs-red), var(--color-mh-red));
+  transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+}
+
+.metal-card:hover {
+  border-color: rgba(212, 0, 0, 0.35);
+  transform: translateY(-4px);
+  box-shadow: var(--metal-shadow-soft), var(--metal-shadow);
+}
+
+.metal-card:hover::before {
+  height: 100%;
+}
+
+.metal-card-mh::before {
+  background: linear-gradient(180deg, var(--color-mh-red), var(--color-crimson));
+}
+
+.metal-card-frame {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+
+.metal-section {
+  position: relative;
+}
+
+.metal-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 0, 0, 0.5) 20%,
+    rgba(212, 0, 0, 0.5) 80%,
+    transparent
+  );
+}
+
+.metal-section-header .metal-rule-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 1rem;
+}
+
+.metal-section-header .metal-rule-stack span:nth-child(1) {
+  height: 4px;
+  width: 100%;
+  max-width: 120px;
+  background: var(--color-mh-red);
+}
+
+.metal-section-header .metal-rule-stack span:nth-child(2) {
+  height: 2px;
+  width: 100%;
+  max-width: 80px;
+  background: var(--color-crimson);
+}
+
+.metal-section-header .metal-rule-stack span:nth-child(3) {
+  height: 1px;
+  width: 100%;
+  max-width: 48px;
+  background: var(--color-border);
+}
+
+.metal-kicker {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-mh-red);
+}
+
+.metal-title-display {
+  font-family: var(--font-metal);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 0.92;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.transmission-line {
+  height: 2px;
+  max-width: 12rem;
+  background: linear-gradient(90deg, var(--color-mh-red), rgba(212, 0, 0, 0.2), transparent);
+  position: relative;
+}
+
+.transmission-line::after {
+  content: '†';
+  position: absolute;
+  right: -1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: var(--color-mh-red);
+  opacity: 0.7;
+}
+
+.metal-nav {
+  border-bottom: 1px solid rgba(212, 0, 0, 0.15);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.metal-nav-link {
+  position: relative;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgba(245, 245, 245, 0.72);
+  transition: color 0.2s;
+}
+
+.metal-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-mh-red);
+  transition: width 0.25s ease;
+}
+
+.metal-nav-link:hover,
+.metal-nav-link.is-active {
+  color: var(--color-signal);
+}
+
+.metal-nav-link:hover::after,
+.metal-nav-link.is-active::after {
+  width: 100%;
+}
+
+.metal-score {
+  font-family: var(--font-metal);
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  line-height: 1;
+  color: var(--color-mh-red);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.metal-footer {
+  background: linear-gradient(180deg, var(--color-void) 0%, #080808 100%);
+  border-top: 1px solid rgba(212, 0, 0, 0.2);
+}
+
+.metal-footer::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-mh-red), var(--color-crimson), transparent);
+  max-width: 40%;
+  margin-bottom: 0;
+}
+
+.metal-rank {
+  font-family: var(--font-metal);
+  font-size: 2.5rem;
+  line-height: 1;
+  color: var(--color-rs-red);
+  text-shadow: 1px 1px 0 #000;
+}
+
+.metal-trending-strip {
+  background: linear-gradient(90deg, #0a0a0a 0%, var(--color-paper) 8%, var(--color-paper) 100%);
+}
+
+.metal-trending-label {
+  background: linear-gradient(135deg, var(--color-rs-red) 0%, var(--color-mh-red) 100%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.metal-quote-border {
+  border-left: 3px solid var(--color-mh-red);
+  padding-left: 1.25rem;
+  background: linear-gradient(90deg, rgba(212, 0, 0, 0.08), transparent);
+}
+
+.magazine-card-hover,
+.mh-card-hover,
+.card-hover {
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s,
+    box-shadow 0.35s;
+}
+
+.magazine-card-hover:hover,
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(212, 0, 0, 0.35);
+  box-shadow: var(--metal-shadow-soft), var(--metal-shadow);
+}
+
+.mh-card-hover:hover {
+  border-color: rgba(212, 0, 0, 0.5);
+  box-shadow: 0 12px 40px -12px rgba(212, 0, 0, 0.4);
+}
+
+/* Lightweight grain — no SVG feTurbulence (GPU-heavy on weak devices) */
 .grain-overlay {
   pointer-events: none;
   position: fixed;
   inset: 0;
   z-index: 9998;
   opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.04) 0,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0,
+      transparent 1px,
+      transparent 4px
+    );
+  background-size: 3px 3px, 5px 5px;
+}
+
+html[data-perf='lite'] .grain-overlay {
+  display: none;
+}
+
+html[data-perf='lite'] .perf-lite-hide {
+  animation: none !important;
+}
+
+html[data-perf='lite'] .hero-scanlines {
+  display: none;
+}
+
+/* CSS-only waveform (hero background) */
+.css-waveform-bar {
+  height: 18%;
+  transform-origin: bottom;
+  animation: css-waveform-pulse ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes css-waveform-pulse {
+  0% {
+    transform: scaleY(0.12);
+    opacity: 0.25;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0.55;
+  }
+}
+
+html[data-perf='lite'] .css-waveform-bar {
+  animation: none;
+  transform: scaleY(0.35);
+  opacity: 0.35;
 }
 
 .section-padding {
@@ -132,6 +565,33 @@ body {
 
 .hero-marquee {
   animation: hero-marquee 28s linear infinite;
+}
+
+.hero-scroll-line {
+  height: 32px;
+  animation: hero-scroll-pulse 2s ease-in-out infinite;
+}
+
+@keyframes hero-scroll-pulse {
+  0%,
+  100% {
+    height: 24px;
+    opacity: 0.5;
+  }
+  50% {
+    height: 48px;
+    opacity: 1;
+  }
+}
+
+html[data-perf='lite'] .hero-marquee {
+  animation-duration: 40s;
+}
+
+/* Below-fold sections: browser can skip layout work until scroll */
+.section-perf {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
 }
 
 @keyframes hero-marquee {
@@ -203,6 +663,63 @@ body {
 
 .metal-loader-pentagram {
   filter: drop-shadow(0 0 24px rgba(212, 0, 0, 0.25));
+}
+
+.metal-loader-pentagram-spin {
+  animation: metal-pentagram-spin 24s linear infinite;
+}
+
+@keyframes metal-pentagram-spin {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.metal-loader-core-beat {
+  animation: metal-core-beat 0.24s steps(2) infinite;
+}
+
+@keyframes metal-core-beat {
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.metal-loader-eq-bar {
+  height: 12px;
+  animation: metal-eq-bar ease-in-out infinite alternate;
+  transform-origin: bottom;
+}
+
+@keyframes metal-eq-bar {
+  0% {
+    transform: scaleY(0.08);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+html[data-perf='lite'] .metal-loader-eq-bar {
+  animation-duration: 0.8s;
+}
+
+html[data-perf='lite'] .metal-loader-pentagram-spin,
+html[data-perf='lite'] .metal-loader-core-beat {
+  animation: none;
+}
+
+.metal-loader-line-fade {
+  animation: metal-line-fade 0.35s ease-out;
+}
+
+@keyframes metal-line-fade {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .metal-loader-core {

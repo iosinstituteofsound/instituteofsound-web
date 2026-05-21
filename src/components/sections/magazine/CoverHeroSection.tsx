@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import type { CoverStory } from '@/types'
 import { WaveformBackground } from '@/components/effects/WaveformBackground'
+import { Reveal } from '@/components/ui/Reveal'
+import { MetalButton } from '@/components/ui/MetalButton'
+import { MetalBadge } from '@/components/ui/MetalBadge'
+import { getPerformanceProfile } from '@/lib/performance'
 
 interface CoverHeroSectionProps {
   story: CoverStory
@@ -17,6 +19,8 @@ const marqueeItems = [
 ]
 
 export function CoverHeroSection({ story }: CoverHeroSectionProps) {
+  const lite = getPerformanceProfile() === 'lite'
+
   return (
     <section className="relative min-h-screen overflow-hidden bg-void pt-20 md:pt-24">
       <div className="absolute inset-0 hero-grid opacity-60" />
@@ -63,58 +67,28 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 section-padding pb-8 pt-10 md:pt-14 items-end">
           {/* Left — IOS identity + headline */}
           <div className="lg:col-span-7 flex flex-col justify-end">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="flex flex-wrap items-center gap-3 mb-6"
-            >
-              <span className="inline-flex items-center gap-2 border border-mh-red/50 bg-mh-red/10 px-3 py-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-mh-red animate-pulse" />
-                <span className="text-[10px] tracking-[0.3em] text-mh-red uppercase font-bold">
-                  Live Signal
-                </span>
-              </span>
-              <span className="text-[10px] tracking-[0.25em] text-crimson uppercase">
-                {story.category}
-              </span>
-            </motion.div>
+            <Reveal className="flex flex-wrap items-center gap-3 mb-6">
+              <MetalBadge variant="live">Live Signal</MetalBadge>
+              <MetalBadge variant="crimson">{story.category}</MetalBadge>
+            </Reveal>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="font-display text-xs md:text-sm tracking-[0.45em] text-muted uppercase mb-3"
-            >
+            <Reveal delay={0.1} className="font-display text-xs md:text-sm tracking-[0.45em] text-muted uppercase mb-3">
               Institute of Sound presents
-            </motion.p>
+            </Reveal>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="font-display text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold uppercase leading-[0.92] tracking-tight hero-glitch-shadow"
-            >
-              {story.headline}
-            </motion.h1>
+            <Reveal delay={0.15}>
+              <h1 className="font-metal text-4xl sm:text-5xl md:text-6xl xl:text-8xl text-signal hero-glitch-shadow">
+                {story.headline}
+              </h1>
+            </Reveal>
 
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.35 }}
-              className="mt-8 border-l-2 border-mh-red pl-5 max-w-xl"
-            >
+            <Reveal delay={0.2} className="mt-8 metal-quote-border max-w-xl">
               <p className="font-serif text-lg md:text-xl text-signal/90 leading-relaxed italic">
                 {story.dek}
               </p>
-            </motion.div>
+            </Reveal>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.45 }}
-              className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] tracking-[0.2em] uppercase text-muted"
-            >
+            <Reveal delay={0.25} className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] tracking-[0.2em] uppercase text-muted">
               <span>
                 Archivist <span className="text-signal">{story.author}</span>
               </span>
@@ -122,37 +96,20 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
               <time>{story.date}</time>
               <span className="hidden sm:inline text-border">|</span>
               <span className="text-mh-red/80">Encrypted Feature</span>
-            </motion.div>
+            </Reveal>
 
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55 }}
-              className="mt-10 flex flex-wrap gap-4"
-            >
-              <Link
-                to={`/feature/${story.slug}`}
-                className="group relative overflow-hidden bg-mh-red text-white px-8 py-3.5 text-[11px] tracking-[0.25em] uppercase font-bold hover:bg-rs-red transition-colors"
-              >
-                <span className="relative z-10">{story.readLabel} →</span>
-                <span className="absolute inset-0 bg-signal translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              </Link>
-              <Link
-                to="/discover"
-                className="border border-signal/25 px-8 py-3.5 text-[11px] tracking-[0.25em] uppercase text-signal/80 hover:border-mh-red hover:text-mh-red transition-colors"
-              >
+            <Reveal delay={0.3} className="mt-10 flex flex-wrap gap-4">
+              <MetalButton to={`/feature/${story.slug}`} variant="primary">
+                {story.readLabel} →
+              </MetalButton>
+              <MetalButton to="/discover" variant="outline">
                 Enter Archive
-              </Link>
-            </motion.div>
+              </MetalButton>
+            </Reveal>
           </div>
 
           {/* Right — brutalist image panel */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="lg:col-span-5 relative"
-          >
+          <Reveal delay={0.2} className="lg:col-span-5 relative">
             <div className="relative">
               <div className="absolute -inset-3 border border-mh-red/25 pointer-events-none" />
               <div className="absolute top-4 -left-3 w-full h-full border border-crimson/30 pointer-events-none hidden lg:block" />
@@ -184,34 +141,22 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
                 <p className="text-[10px] text-muted mt-1">Underground only</p>
               </div>
             </div>
-          </motion.div>
+          </Reveal>
         </div>
 
         {/* Bottom status bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="border-t border-border px-6 md:px-12 lg:px-16 py-4 flex flex-wrap justify-between gap-4 text-[10px] tracking-[0.2em] uppercase text-muted"
-        >
+        <Reveal delay={0.35} className="border-t border-border px-6 md:px-12 lg:px-16 py-4 flex flex-wrap justify-between gap-4 text-[10px] tracking-[0.2em] uppercase text-muted">
           <span>Frequency locked</span>
           <span className="text-mh-red">◉ Signal stable</span>
           <span>Scroll to decode</span>
-        </motion.div>
+        </Reveal>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        className="absolute bottom-24 right-8 hidden lg:flex flex-col items-center gap-2 z-20"
-      >
-        <motion.div
-          animate={{ height: [24, 48, 24] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="w-px bg-gradient-to-b from-transparent via-mh-red to-transparent"
-        />
-      </motion.div>
+      {!lite && (
+        <div className="absolute bottom-24 right-8 hidden lg:flex flex-col items-center gap-2 z-20">
+          <div className="hero-scroll-line w-px bg-gradient-to-b from-transparent via-mh-red to-transparent" />
+        </div>
+      )}
     </section>
   )
 }

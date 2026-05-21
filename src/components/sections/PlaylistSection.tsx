@@ -10,7 +10,7 @@ interface PlaylistSectionProps {
 
 export function PlaylistSection({ playlists }: PlaylistSectionProps) {
   return (
-    <section className="section-padding border-t border-border bg-surface/30">
+    <section className="section-padding border-t border-border bg-surface/30 metal-section section-perf">
       <div className="max-w-7xl mx-auto">
         <MagazineSectionHeading
           kicker="Listen"

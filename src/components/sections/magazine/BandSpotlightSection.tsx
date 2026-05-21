@@ -11,7 +11,7 @@ export function BandSpotlightSection({ artists }: BandSpotlightSectionProps) {
   const bands = artists.filter((a) => a.featured).slice(0, 4)
 
   return (
-    <section className="section-padding bg-mh-black border-t-4 border-mh-red">
+    <section className="section-padding bg-mh-black border-t-4 border-mh-red metal-section section-perf">
       <div className="max-w-7xl mx-auto">
         <MagazineSectionHeading
           variant="metal-hammer"

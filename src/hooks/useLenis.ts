@@ -1,30 +1,36 @@
 import { useEffect } from 'react'
-import Lenis from 'lenis'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useSmoothScroll } from '@/lib/performance'
 
-gsap.registerPlugin(ScrollTrigger)
-
+/**
+ * Smooth scroll only on capable desktops. Low-end devices use native scroll.
+ */
 export function useLenis() {
+  const enabled = useSmoothScroll()
+
   useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
+    if (!enabled) return
+
+    let frame = 0
+    let lenis: { destroy: () => void; raf: (time: number) => void } | null = null
+    let cancelled = false
+
+    void import('lenis').then(({ default: Lenis }) => {
+      if (cancelled) return
+      lenis = new Lenis({
+        duration: 1.1,
+        smoothWheel: true,
+      })
+      const raf = (time: number) => {
+        lenis!.raf(time)
+        frame = requestAnimationFrame(raf)
+      }
+      frame = requestAnimationFrame(raf)
     })
 
-    lenis.on('scroll', ScrollTrigger.update)
-
-    const tick = (time: number) => {
-      lenis.raf(time * 1000)
-    }
-    gsap.ticker.add(tick)
-    gsap.ticker.lagSmoothing(0)
-
     return () => {
-      gsap.ticker.remove(tick)
-      lenis.destroy()
-      ScrollTrigger.getAll().forEach((t) => t.kill())
+      cancelled = true
+      cancelAnimationFrame(frame)
+      lenis?.destroy()
     }
-  }, [])
+  }, [enabled])
 }

@@ -8,7 +8,7 @@ interface AlbumArtRowProps {
 
 export function AlbumArtRow({ albums }: AlbumArtRowProps) {
   return (
-    <section className="section-padding border-t border-border bg-mh-black">
+    <section className="section-padding border-t border-border bg-mh-black metal-section section-perf">
       <div className="max-w-7xl mx-auto">
         <MagazineSectionHeading
           variant="metal-hammer"
