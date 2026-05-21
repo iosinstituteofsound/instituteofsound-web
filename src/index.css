@@ -148,113 +148,139 @@ body {
     -2px 0 var(--color-crimson);
 }
 
-/* Hell loader */
-.hell-loader-vortex {
+/* Metal loader — brutal, no neon pop */
+.metal-loader-smoke {
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(212, 0, 0, 0.15) 0%, transparent 45%),
-    radial-gradient(ellipse at 30% 70%, rgba(61, 124, 255, 0.12) 0%, transparent 40%),
-    conic-gradient(from 0deg at 50% 50%, transparent, rgba(139, 21, 56, 0.08), transparent, rgba(61, 124, 255, 0.06), transparent);
-  animation: hell-vortex-spin 12s linear infinite;
+    radial-gradient(ellipse at 50% 45%, rgba(212, 0, 0, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(20, 20, 20, 0.9) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 20%, rgba(139, 21, 56, 0.12) 0%, transparent 40%);
 }
 
-@keyframes hell-vortex-spin {
-  to {
-    transform: rotate(360deg);
-  }
+.metal-loader-vignette {
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.85) 100%);
 }
 
-.hell-loader-scanlines {
+.metal-loader-scanlines {
   background: repeating-linear-gradient(
     0deg,
     transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.5) 2px,
-    rgba(0, 0, 0, 0.5) 4px
+    transparent 3px,
+    rgba(0, 0, 0, 0.65) 3px,
+    rgba(0, 0, 0, 0.65) 6px
   );
-  animation: hell-scan 0.1s steps(2) infinite;
+  animation: metal-scan 0.08s steps(2) infinite;
 }
 
-@keyframes hell-scan {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(4px);
-  }
-}
-
-.hell-loader-grid {
-  background-image:
-    linear-gradient(rgba(212, 0, 0, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(61, 124, 255, 0.08) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
-.hell-loader-core {
-  background: conic-gradient(
-    from 0deg,
-    #050505,
-    #d40000,
-    #3d7cff,
-    #8b1538,
-    #050505
-  );
-  animation: hell-core-spin 2.5s linear infinite;
-}
-
-@keyframes hell-core-spin {
+@keyframes metal-scan {
   to {
-    transform: rotate(360deg);
+    transform: translateY(6px);
   }
 }
 
-.hell-loader-glitch {
-  animation: hell-glitch 0.35s steps(2) infinite;
+.metal-loader-scratches {
+  background-image: repeating-linear-gradient(
+    105deg,
+    transparent,
+    transparent 48px,
+    rgba(212, 0, 0, 0.04) 48px,
+    rgba(212, 0, 0, 0.04) 49px
+  );
 }
 
-.hell-loader-glitch-slow {
-  animation: hell-glitch 1.2s steps(3) infinite;
+.metal-loader-slashes {
+  animation: metal-slashes 3.5s linear infinite;
 }
 
-@keyframes hell-glitch {
+@keyframes metal-slashes {
   0% {
-    text-shadow: 2px 0 #3d7cff, -2px 0 #d40000;
-    transform: translate(0);
-  }
-  33% {
-    text-shadow: -3px 0 #d40000, 3px 0 #3d7cff;
-    transform: translate(1px, -1px);
-  }
-  66% {
-    text-shadow: 3px 2px #8b1538, -2px -1px #3d7cff;
-    transform: translate(-1px, 1px);
+    transform: translateY(-15%);
   }
   100% {
-    text-shadow: 2px 0 #3d7cff, -2px 0 #d40000;
-    transform: translate(0);
+    transform: translateY(15%);
   }
 }
 
-.hell-loader-rain {
-  animation: hell-rain 4s linear infinite;
+.metal-loader-pentagram {
+  filter: drop-shadow(0 0 24px rgba(212, 0, 0, 0.25));
 }
 
-@keyframes hell-rain {
-  0% {
-    transform: translateY(-20%);
+.metal-loader-core {
+  clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+  background: radial-gradient(circle at 40% 35%, #2a2a2a 0%, #0a0a0a 55%, #000 100%);
+  box-shadow:
+    0 0 0 2px rgba(212, 0, 0, 0.5),
+    0 0 80px rgba(212, 0, 0, 0.35),
+    inset 0 0 50px rgba(0, 0, 0, 0.95);
+}
+
+.metal-loader-core-ring {
+  clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+  border: 1px solid rgba(212, 0, 0, 0.3);
+  animation: metal-core-pulse 0.2s steps(2) infinite;
+}
+
+.metal-loader-core-inner {
+  clip-path: polygon(50% 5%, 88% 28%, 88% 72%, 50% 95%, 12% 72%, 12% 28%);
+}
+
+@keyframes metal-core-pulse {
+  50% {
+    box-shadow: inset 0 0 30px rgba(212, 0, 0, 0.4);
   }
+}
+
+.metal-loader-logo {
+  text-shadow:
+    0 0 20px rgba(212, 0, 0, 0.8),
+    2px 2px 0 #000,
+    -1px -1px 0 #d40000;
+}
+
+.metal-loader-bar {
+  box-shadow: 0 0 6px rgba(212, 0, 0, 0.4);
+}
+
+.metal-loader-title {
+  letter-spacing: 0.12em;
+  text-shadow:
+    3px 0 #d40000,
+    -3px 0 #1a1a1a,
+    0 4px 0 #000;
+  animation: metal-title-flicker 0.2s steps(3) infinite;
+}
+
+@keyframes metal-title-flicker {
+  0%,
   100% {
-    transform: translateY(20%);
+    opacity: 1;
   }
+  50% {
+    opacity: 0.88;
+  }
+}
+
+.metal-loader-stutter {
+  animation: metal-stutter 0.1s steps(2) infinite;
+}
+
+@keyframes metal-stutter {
+  50% {
+    letter-spacing: 0.65em;
+    opacity: 0.7;
+  }
+}
+
+.metal-loader-progress {
+  background: linear-gradient(90deg, #1a1a1a, #d40000 40%, #8b1538 70%, #d40000);
+  box-shadow: 0 0 12px rgba(212, 0, 0, 0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hell-loader-vortex,
-  .hell-loader-core,
-  .hell-loader-scanlines,
-  .hell-loader-glitch,
-  .hell-loader-glitch-slow,
-  .hell-loader-rain {
+  .metal-loader-scanlines,
+  .metal-loader-slashes,
+  .metal-loader-core-ring,
+  .metal-loader-title,
+  .metal-loader-stutter {
     animation: none;
   }
 }
