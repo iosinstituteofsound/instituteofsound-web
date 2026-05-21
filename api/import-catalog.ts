@@ -1,4 +1,4 @@
-import { buildArtistCatalogFromUrl } from '../src/lib/media/catalog/buildCatalog'
+import { buildArtistCatalogFromUrl } from './catalog/buildCatalog'
 
 type VercelRequest = { query: { url?: string | string[] } }
 type VercelResponse = {
@@ -8,11 +8,28 @@ type VercelResponse = {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Content-Type', 'application/json')
+
   const raw = req.query.url
   const url = typeof raw === 'string' ? raw : Array.isArray(raw) ? raw[0] : undefined
 
   if (!url?.trim()) {
     return res.status(400).json({ error: 'Missing url query parameter' })
+  }
+
+  if (!process.env.SPOTIFY_CLIENT_ID?.trim() || !process.env.SPOTIFY_CLIENT_SECRET?.trim()) {
+    const isSpotify = url.includes('spotify.com')
+    if (isSpotify) {
+      return res.status(503).json({
+        error:
+          'Spotify keys server pe missing. Vercel → Settings → Environment Variables → SPOTIFY_CLIENT_ID + SPOTIFY_CLIENT_SECRET (Production), phir Redeploy.',
+        platform: 'spotify',
+        profileUrl: url,
+        suggestions: { spotifyUrl: url },
+        items: [],
+        warnings: [],
+      })
+    }
   }
 
   try {

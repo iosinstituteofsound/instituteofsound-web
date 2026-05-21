@@ -2,7 +2,7 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
-import { buildArtistCatalogFromUrl } from './src/lib/media/catalog/buildCatalog'
+import { buildArtistCatalogFromUrl } from './api/catalog/buildCatalog'
 import { resolveThumbnailFromUrl } from './src/lib/media/resolveThumbnail'
 
 function thumbnailApiPlugin(): Plugin {
