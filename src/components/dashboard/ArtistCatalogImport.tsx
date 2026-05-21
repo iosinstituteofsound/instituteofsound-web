@@ -98,6 +98,9 @@ export function ArtistCatalogImport({
     try {
       const result = await fetchArtistCatalogFromUrl(profileUrl)
       setCatalog(result)
+      if (result.warnings.length > 0 && result.items.length === 0) {
+        setError(result.warnings.join(' '))
+      }
       const dup = (item: CatalogImportItem) => {
         const url = item.streamUrl.trim().toLowerCase()
         if (item.kind === 'track') return tracks.some((t) => t.streamUrl.trim().toLowerCase() === url)

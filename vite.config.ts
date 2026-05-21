@@ -1,9 +1,12 @@
+import { createRequire } from 'node:module'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
-import { buildArtistCatalogFromUrl } from './api/catalog/buildCatalog'
 import { resolveThumbnailFromUrl } from './src/lib/media/resolveThumbnail'
+
+const require = createRequire(import.meta.url)
+const { buildArtistCatalogFromUrl } = require('./api/import-catalog.cjs')
 
 function thumbnailApiPlugin(): Plugin {
   return {

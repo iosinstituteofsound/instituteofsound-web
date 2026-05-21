@@ -2,6 +2,14 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "functions": {
+    "api/import-catalog.cjs": {
+      "maxDuration": 30
+    },
+    "api/thumbnail.ts": {
+      "maxDuration": 15
+    }
+  },
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
