@@ -65,14 +65,54 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
           </div>
         </div>
 
-        <div className="flex-1 relative section-padding pb-8 pt-10 md:pt-14 flex flex-col justify-end min-h-0">
-          {/* Image — back layer (desktop: right; mobile: top) */}
-          <Reveal
-            delay={0.2}
-            className="relative lg:absolute lg:right-6 xl:right-16 lg:top-10 lg:bottom-20 lg:w-[min(44%,520px)] lg:z-0 mb-10 lg:mb-0 mx-auto lg:mx-0 w-full max-w-md lg:max-w-none"
-          >
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 section-padding pb-8 pt-10 md:pt-14 items-end overflow-visible">
+          {/* Text — upar (z-20), headline image ke overlap pe */}
+          <div className="lg:col-span-7 flex flex-col justify-end relative z-20 overflow-visible">
+            <Reveal className="flex flex-wrap items-center gap-3 mb-6">
+              <MetalBadge variant="live">Live Signal</MetalBadge>
+              <MetalBadge variant="crimson">{story.category}</MetalBadge>
+            </Reveal>
+
+            <Reveal delay={0.1} className="font-display text-xs md:text-sm tracking-[0.45em] text-muted uppercase mb-3">
+              Institute of Sound presents
+            </Reveal>
+
+            <Reveal delay={0.15}>
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold uppercase leading-[0.92] tracking-tight hero-headline-over-image">
+                {story.headline}
+              </h1>
+            </Reveal>
+
+            <Reveal delay={0.2} className="mt-8 border-l-2 border-mh-red pl-5 max-w-xl">
+              <p className="font-serif text-lg md:text-xl text-signal/90 leading-relaxed italic">
+                {story.dek}
+              </p>
+            </Reveal>
+
+            <Reveal delay={0.25} className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] tracking-[0.2em] uppercase text-muted">
+              <span>
+                Archivist <span className="text-signal">{story.author}</span>
+              </span>
+              <span className="hidden sm:inline text-border">|</span>
+              <time>{story.date}</time>
+              <span className="hidden sm:inline text-border">|</span>
+              <span className="text-mh-red/80">Encrypted Feature</span>
+            </Reveal>
+
+            <Reveal delay={0.3} className="mt-10 flex flex-wrap gap-4">
+              <Button to={`/feature/${story.slug}`} variant="primary">
+                {story.readLabel} →
+              </Button>
+              <Button to="/discover" variant="secondary">
+                Enter Archive
+              </Button>
+            </Reveal>
+          </div>
+
+          {/* Image — peeche (z-0), pehli wali grid position right */}
+          <Reveal delay={0.2} className="lg:col-span-5 relative z-0">
             <div className="relative">
-              <div className="absolute -inset-3 border border-mh-red/25 pointer-events-none z-10" />
+              <div className="absolute -inset-3 border border-mh-red/25 pointer-events-none" />
               <div className="absolute top-4 -left-3 w-full h-full border border-crimson/30 pointer-events-none hidden lg:block" />
 
               <div className="relative hero-image-frame overflow-hidden aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5]">
@@ -83,18 +123,18 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
                   priority
                   className="w-full h-full object-cover scale-105 hover:scale-100 transition-transform duration-[1.2s]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-void via-void/30 to-transparent lg:bg-gradient-to-l lg:from-void/90 lg:via-void/25 lg:to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-void via-void/20 to-transparent" />
                 <div className="absolute inset-0 mix-blend-overlay opacity-30 bg-mh-red/15" />
 
-                <span className="absolute top-3 left-3 text-[9px] tracking-widest text-mh-red uppercase font-bold z-10">
+                <span className="absolute top-3 left-3 text-[9px] tracking-widest text-mh-red uppercase font-bold">
                   IOS // Visual
                 </span>
-                <span className="absolute bottom-3 right-3 text-[9px] tracking-widest text-signal/60 uppercase z-10">
+                <span className="absolute bottom-3 right-3 text-[9px] tracking-widest text-signal/60 uppercase">
                   Ref. {story.slug.slice(0, 12)}
                 </span>
               </div>
 
-              <div className="absolute -bottom-4 -left-4 md:-left-8 bg-void border border-border p-4 min-w-[140px] shadow-[0_0_40px_-10px_rgba(212,0,0,0.35)] z-20">
+              <div className="absolute -bottom-4 -left-4 md:-left-8 bg-void border border-border p-4 min-w-[140px] shadow-[0_0_40px_-10px_rgba(212,0,0,0.35)] z-10">
                 <p className="text-[9px] tracking-[0.3em] text-mh-red uppercase font-bold">
                   Now Broadcasting
                 </p>
@@ -103,57 +143,6 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
               </div>
             </div>
           </Reveal>
-
-          {/* Copy — front layer, headline overlaps image on desktop */}
-          <div className="relative z-20 flex flex-col justify-end pointer-events-none lg:pointer-events-auto">
-            <div className="pointer-events-auto">
-              <Reveal className="flex flex-wrap items-center gap-3 mb-6">
-                <MetalBadge variant="live">Live Signal</MetalBadge>
-                <MetalBadge variant="crimson">{story.category}</MetalBadge>
-              </Reveal>
-
-              <Reveal
-                delay={0.1}
-                className="font-display text-xs md:text-sm tracking-[0.45em] text-muted uppercase mb-3"
-              >
-                Institute of Sound presents
-              </Reveal>
-
-              <Reveal delay={0.15}>
-                <h1 className="font-display text-4xl sm:text-5xl md:text-6xl xl:text-[5.25rem] font-extrabold uppercase leading-[0.92] tracking-tight hero-headline-over-image w-full lg:max-w-[min(100%,58rem)]">
-                  {story.headline}
-                </h1>
-              </Reveal>
-
-              <Reveal delay={0.2} className="mt-8 border-l-2 border-mh-red pl-5 max-w-xl">
-                <p className="font-serif text-lg md:text-xl text-signal/90 leading-relaxed italic">
-                  {story.dek}
-                </p>
-              </Reveal>
-
-              <Reveal
-                delay={0.25}
-                className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] tracking-[0.2em] uppercase text-muted"
-              >
-                <span>
-                  Archivist <span className="text-signal">{story.author}</span>
-                </span>
-                <span className="hidden sm:inline text-border">|</span>
-                <time>{story.date}</time>
-                <span className="hidden sm:inline text-border">|</span>
-                <span className="text-mh-red/80">Encrypted Feature</span>
-              </Reveal>
-
-              <Reveal delay={0.3} className="mt-10 flex flex-wrap gap-4">
-                <Button to={`/feature/${story.slug}`} variant="primary">
-                  {story.readLabel} →
-                </Button>
-                <Button to="/discover" variant="secondary">
-                  Enter Archive
-                </Button>
-              </Reveal>
-            </div>
-          </div>
         </div>
 
         {/* Bottom status bar */}

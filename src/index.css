@@ -641,7 +641,7 @@ html[data-perf='lite'] .hero-marquee {
     -2px 0 var(--color-crimson);
 }
 
-/* Hero headline readable when overlapping image */
+/* Hero headline readable when overlapping image (grid position unchanged) */
 .hero-headline-over-image {
   text-shadow:
     0 0 40px rgba(5, 5, 5, 0.95),
@@ -651,6 +651,14 @@ html[data-perf='lite'] .hero-marquee {
     -1px 0 rgba(0, 0, 0, 0.8);
   position: relative;
   z-index: 1;
+}
+
+@media (min-width: 1024px) {
+  .hero-headline-over-image {
+    max-width: none;
+    width: calc(100% + 12rem);
+    padding-right: 2rem;
+  }
 }
 
 
