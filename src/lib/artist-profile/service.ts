@@ -10,6 +10,8 @@ import type {
   UpsertTrackInput,
   UpsertVideoInput,
 } from './types'
+import { fetchThumbnailFromUrl } from '@/lib/media/thumbnailFromUrl'
+import { enrichTracksWithThumbnails, enrichVideosWithThumbnails } from './enrichMedia'
 import * as local from './storage'
 import * as sb from './supabaseProfile'
 
@@ -80,17 +82,21 @@ export async function getArtistProfilePage(slug: string): Promise<ArtistProfileP
       sb.supabaseGetVideos(profile.id),
       sb.supabaseGetEditorialForProfile(profile.id),
     ])
+    const [enrichedTracks, enrichedVideos] = await Promise.all([
+      enrichTracksWithThumbnails(tracks, true),
+      enrichVideosWithThumbnails(videos, true),
+    ])
     const albumList = albums.filter((a) => a.releaseType === 'album')
     const singles = albums.filter((a) => a.releaseType === 'single' || a.releaseType === 'ep')
     const pickTrack = profile.artistPickTrackId
-      ? tracks.find((t) => t.id === profile.artistPickTrackId)
-      : tracks[0]
+      ? enrichedTracks.find((t) => t.id === profile.artistPickTrackId)
+      : enrichedTracks[0]
     return {
       profile,
-      tracks,
+      tracks: enrichedTracks,
       albums: albumList,
       singles,
-      videos,
+      videos: enrichedVideos,
       editorial: mapEditorial(editorialRows),
       pickTrack,
     }
@@ -98,7 +104,16 @@ export async function getArtistProfilePage(slug: string): Promise<ArtistProfileP
 
   const profile = local.localGetProfileBySlug(slug)
   if (!profile) return null
-  return local.localGetPageData(slug, localEditorialForProfile(profile.id))
+  const data = local.localGetPageData(slug, localEditorialForProfile(profile.id))
+  if (!data) return null
+  const [tracks, videos] = await Promise.all([
+    enrichTracksWithThumbnails(data.tracks),
+    enrichVideosWithThumbnails(data.videos),
+  ])
+  const pickTrack = data.profile.artistPickTrackId
+    ? tracks.find((t) => t.id === data.profile.artistPickTrackId)
+    : tracks[0]
+  return { ...data, tracks, videos, pickTrack }
 }
 
 export async function getArtistProfilePageForViewer(
@@ -117,14 +132,28 @@ export async function addArtistAlbum(profileId: string, input: UpsertAlbumInput)
   return local.localAddAlbum(profileId, input)
 }
 
+async function trackWithThumbnail(input: UpsertTrackInput): Promise<UpsertTrackInput> {
+  if (input.coverUrl?.trim() || !input.streamUrl?.trim()) return input
+  const coverUrl = await fetchThumbnailFromUrl(input.streamUrl)
+  return coverUrl ? { ...input, coverUrl } : input
+}
+
+async function videoWithThumbnail(input: UpsertVideoInput): Promise<UpsertVideoInput> {
+  if (input.thumbnailUrl?.trim() || !input.videoUrl?.trim()) return input
+  const thumbnailUrl = await fetchThumbnailFromUrl(input.videoUrl)
+  return thumbnailUrl ? { ...input, thumbnailUrl } : input
+}
+
 export async function addArtistTrack(profileId: string, input: UpsertTrackInput) {
-  if (isSupabaseConfigured()) return sb.supabaseAddTrack(profileId, input)
-  return local.localAddTrack(profileId, input)
+  const enriched = await trackWithThumbnail(input)
+  if (isSupabaseConfigured()) return sb.supabaseAddTrack(profileId, enriched)
+  return local.localAddTrack(profileId, enriched)
 }
 
 export async function addArtistVideo(profileId: string, input: UpsertVideoInput) {
-  if (isSupabaseConfigured()) return sb.supabaseAddVideo(profileId, input)
-  return local.localAddVideo(profileId, input)
+  const enriched = await videoWithThumbnail(input)
+  if (isSupabaseConfigured()) return sb.supabaseAddVideo(profileId, enriched)
+  return local.localAddVideo(profileId, enriched)
 }
 
 export async function deleteArtistAlbum(id: string) {

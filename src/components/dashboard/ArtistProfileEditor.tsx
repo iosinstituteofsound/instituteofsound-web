@@ -25,6 +25,10 @@ import { Button } from '@/components/ui/Button'
 import { Input, FieldLabel } from '@/components/ui/Input'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { MetalBadge } from '@/components/ui/MetalBadge'
+import {
+  ArtistCatalogImport,
+  type CatalogProfileSuggestions,
+} from '@/components/dashboard/ArtistCatalogImport'
 
 interface ArtistProfileEditorProps {
   user: User
@@ -281,8 +285,30 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         </div>
       </section>
 
+      <ArtistCatalogImport
+        initialUrl={spotify || youtube}
+        tracks={tracks}
+        albums={albums}
+        videos={videos}
+        ensureProfile={ensureProfile}
+        onReload={loadChildData}
+        onApplySuggestions={(s: CatalogProfileSuggestions) => {
+          if (s.displayName) setDisplayName(s.displayName)
+          if (s.tagline) setTagline(s.tagline)
+          if (s.avatarUrl) setAvatarUrl(s.avatarUrl)
+          if (s.bannerUrl) setBannerUrl(s.bannerUrl)
+          if (s.genresText) setGenresText(s.genresText)
+          if (s.spotify) setSpotify(s.spotify)
+          if (s.youtube) setYoutube(s.youtube)
+          setMessage('Catalog imported — review profile fields and Save profile.')
+        }}
+      />
+
       <section className="ios-panel space-y-4">
         <p className="ios-kicker">Tracks (Popular top 5)</p>
+        <p className="text-xs text-muted-foreground">
+          Stream URL se cover auto-fetch hota hai (Spotify, YouTube, SoundCloud, etc.). Manual upload optional.
+        </p>
         <div className="flex gap-2 flex-wrap">
           <Input
             placeholder="Track title"
@@ -431,6 +457,9 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
 
       <section className="ios-panel space-y-4">
         <p className="ios-kicker">Videos</p>
+        <p className="text-xs text-muted-foreground">
+          Video URL daalo — thumbnail automatically set hoga.
+        </p>
         <div className="flex flex-wrap gap-2">
           <Input
             placeholder="Video title"

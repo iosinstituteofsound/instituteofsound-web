@@ -318,6 +318,24 @@ export async function supabaseAddVideo(
   }
 }
 
+export async function supabasePatchTrackCover(trackId: string, coverUrl: string) {
+  const supabase = getSupabase()
+  const { error } = await supabase
+    .from('artist_tracks')
+    .update({ cover_url: coverUrl.trim() })
+    .eq('id', trackId)
+  if (error) throw new Error(error.message)
+}
+
+export async function supabasePatchVideoThumbnail(videoId: string, thumbnailUrl: string) {
+  const supabase = getSupabase()
+  const { error } = await supabase
+    .from('artist_videos')
+    .update({ thumbnail_url: thumbnailUrl.trim() })
+    .eq('id', videoId)
+  if (error) throw new Error(error.message)
+}
+
 export async function supabaseDeleteAlbum(id: string) {
   const supabase = getSupabase()
   const { error } = await supabase.from('artist_albums').delete().eq('id', id)
