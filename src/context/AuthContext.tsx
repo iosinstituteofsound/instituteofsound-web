@@ -71,7 +71,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (input.role === 'super_editor') {
       throw new Error('Super Editor accounts are assigned by admin only.')
     }
-    const created = await authRegister(input)
+    if (input.role === 'editor') {
+      throw new Error('Editor registration is not open yet. Create an artist account to submit music.')
+    }
+    const created = await authRegister({
+      ...input,
+      role: 'artist',
+    })
     setUser(created)
     return created
   }, [])

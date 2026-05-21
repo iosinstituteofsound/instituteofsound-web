@@ -2,10 +2,8 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { editorDashboardPath } from '@/lib/auth/roles'
-import type { UserRole } from '@/lib/auth/types'
 import { Button } from '@/components/ui/Button'
 import { Input, FieldLabel } from '@/components/ui/Input'
-import clsx from 'clsx'
 
 export default function RegisterPage() {
   const { user, register, mode, configHint } = useAuth()
@@ -14,7 +12,6 @@ export default function RegisterPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState<UserRole>('artist')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -27,7 +24,12 @@ export default function RegisterPage() {
     setError('')
     setSubmitting(true)
     try {
-      const created = await register({ name, email, password, role })
+      const created = await register({
+        name,
+        email,
+        password,
+        role: 'artist',
+      })
       navigate(editorDashboardPath(created.role))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')
@@ -39,8 +41,12 @@ export default function RegisterPage() {
   return (
     <div className="section-padding pt-32 min-h-screen">
       <div className="max-w-md mx-auto ios-panel ios-panel-accent">
-        <p className="ios-kicker">Join the Institute</p>
-        <h1 className="font-serif text-4xl font-bold mt-3">Create Account</h1>
+        <p className="ios-kicker">Artist Portal</p>
+        <h1 className="font-serif text-4xl font-bold mt-3">Create Artist Account</h1>
+        <p className="text-sm text-muted mt-3 leading-relaxed">
+          Register to submit your music for review. Editorial posting is managed by the
+          Institute team only.
+        </p>
 
         {configHint ? (
           <p className="mt-4 text-xs px-3 py-2 border border-amber-500/50 text-amber-400">
@@ -54,35 +60,7 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="mt-10 space-y-5">
           <div>
-            <FieldLabel>I am a...</FieldLabel>
-            <div className="grid grid-cols-2 gap-3">
-              {(['artist', 'editor'] as UserRole[]).map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => setRole(r)}
-                  className={clsx(
-                    'ios-btn !w-full',
-                    role === r
-                      ? r === 'editor'
-                        ? 'ios-btn-primary'
-                        : 'ios-btn-metal'
-                      : 'ios-btn-ghost'
-                  )}
-                >
-                  {r === 'editor' ? 'Editor' : 'Artist'}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-muted mt-2">
-              {role === 'artist'
-                ? 'Submit tracks for editorial review.'
-                : 'Review submissions and write for the magazine.'}
-            </p>
-          </div>
-
-          <div>
-            <FieldLabel>{role === 'artist' ? 'Artist / Project Name' : 'Full Name'}</FieldLabel>
+            <FieldLabel>Artist / Project Name</FieldLabel>
             <Input required value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
@@ -108,7 +86,7 @@ export default function RegisterPage() {
           {error && <p className="text-mh-red text-sm">{error}</p>}
 
           <Button type="submit" variant="primary" disabled={submitting} className="w-full">
-            {submitting ? 'Creating...' : 'Create Account'}
+            {submitting ? 'Creating...' : 'Create Artist Account'}
           </Button>
         </form>
 

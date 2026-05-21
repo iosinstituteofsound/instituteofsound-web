@@ -18,7 +18,7 @@ export function SubmissionSection() {
               Artist Sign Up →
             </Button>
             <Button to="/login" variant="secondary">
-              Editor Login →
+              Artist Login →
             </Button>
           </div>
         </Reveal>

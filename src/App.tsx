@@ -17,6 +17,7 @@ const PlaylistDetailPage = lazy(() => import('@/pages/PlaylistDetailPage'))
 const FeatureDetailPage = lazy(() => import('@/pages/FeatureDetailPage'))
 
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
+const DeskLoginPage = lazy(() => import('@/pages/auth/DeskLoginPage'))
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'))
 const DashboardRedirectPage = lazy(
   () => import('@/pages/dashboard/DashboardRedirectPage')
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="feature/:slug" element={<FeatureDetailPage />} />
 
             <Route path="login" element={<LoginPage />} />
+            <Route path="desk" element={<DeskLoginPage />} />
             <Route path="register" element={<RegisterPage />} />
             <Route path="dashboard" element={<DashboardRedirectPage />} />
             <Route
@@ -64,7 +66,7 @@ export default function App() {
             <Route
               path="editor/dashboard"
               element={
-                <ProtectedRoute role={['editor', 'super_editor']}>
+                <ProtectedRoute role="super_editor">
                   <EditorDashboardPage />
                 </ProtectedRoute>
               }

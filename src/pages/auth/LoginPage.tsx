@@ -49,14 +49,9 @@ export default function LoginPage() {
     }
   }
 
-  const fillDemo = (role: 'editor' | 'artist') => {
-    if (role === 'editor') {
-      setEmail('editor@ios.test')
-      setPassword('editor123')
-    } else {
-      setEmail('artist@ios.test')
-      setPassword('artist123')
-    }
+  const fillDemoArtist = () => {
+    setEmail('artist@ios.test')
+    setPassword('artist123')
   }
 
   return (
@@ -65,7 +60,7 @@ export default function LoginPage() {
         <p className="ios-kicker">Portal Access</p>
         <h1 className="font-serif text-4xl font-bold mt-3">Sign In</h1>
         <p className="text-muted mt-2 text-sm">
-          Editors review submissions. Artists submit tracks.
+          Sign in with your artist account to submit tracks for review.
         </p>
 
         {configHint ? (
@@ -117,17 +112,10 @@ export default function LoginPage() {
         {mode === 'local' && (
           <div className="mt-8 p-4 border border-border bg-void/80">
             <p className="ios-label mb-3">Demo accounts (local only)</p>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="secondary" onClick={() => fillDemo('editor')}>
-                Editor demo
-              </Button>
-              <Button type="button" variant="metal" onClick={() => fillDemo('artist')}>
-                Artist demo
-              </Button>
-            </div>
-            <p className="text-muted text-xs mt-3">
-              editor@ios.test / editor123 · artist@ios.test / artist123
-            </p>
+            <Button type="button" variant="metal" onClick={fillDemoArtist}>
+              Artist demo login
+            </Button>
+            <p className="text-muted text-xs mt-3">artist@ios.test / artist123</p>
           </div>
         )}
 

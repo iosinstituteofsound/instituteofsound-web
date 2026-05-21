@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useAuth } from '@/context/AuthContext'
-import { editorDashboardPath } from '@/lib/auth/roles'
-import { Button } from '@/components/ui/Button'
 import type { NavLink } from '@/types'
 import clsx from 'clsx'
 
@@ -14,10 +11,7 @@ interface NavbarProps {
 export function Navbar({ links }: NavbarProps) {
   const [open, setOpen] = useState(false)
   const location = useLocation()
-  const { user, logout, isSuperEditor } = useAuth()
   const isHome = location.pathname === '/'
-
-  const dashboardHref = user ? editorDashboardPath(user.role) : '/login'
 
   return (
     <header
@@ -55,46 +49,6 @@ export function Navbar({ links }: NavbarProps) {
               </li>
             )
           })}
-
-          {user ? (
-            <>
-              <li>
-                <Button
-                  to={dashboardHref}
-                  variant={isSuperEditor ? 'primary' : user.role === 'editor' ? 'primary' : 'metal'}
-                  className="!py-2 !px-4"
-                >
-                  {isSuperEditor
-                    ? 'Super Editor'
-                    : user.role === 'editor'
-                      ? 'Editor Desk'
-                      : 'My Tracks'}
-                </Button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="ios-nav-link !text-muted hover:!text-signal"
-                >
-                  Logout
-                </button>
-              </li>
-            </>
-          ) : (
-            <>
-              <li>
-                <Link to="/login" className="ios-nav-link">
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Button to="/register" variant="primary" className="!py-2 !px-5">
-                  Join
-                </Button>
-              </li>
-            </>
-          )}
         </ul>
 
         <button
@@ -127,48 +81,6 @@ export function Navbar({ links }: NavbarProps) {
                   </Link>
                 </li>
               ))}
-              {user ? (
-                <>
-                  <li>
-                    <Link
-                      to={dashboardHref}
-                      onClick={() => setOpen(false)}
-                      className="ios-btn ios-btn-primary w-full text-center"
-                    >
-                      Dashboard
-                    </Link>
-                  </li>
-                  <li>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        logout()
-                        setOpen(false)
-                      }}
-                      className="text-sm tracking-widest uppercase text-muted"
-                    >
-                      Logout
-                    </button>
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li>
-                    <Link to="/login" onClick={() => setOpen(false)} className="text-sm tracking-widest uppercase">
-                      Login
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/register"
-                      onClick={() => setOpen(false)}
-                      className="ios-btn ios-btn-primary w-full text-center"
-                    >
-                      Join
-                    </Link>
-                  </li>
-                </>
-              )}
             </ul>
           </motion.div>
         )}

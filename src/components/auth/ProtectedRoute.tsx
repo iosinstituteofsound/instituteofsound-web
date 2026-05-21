@@ -10,6 +10,12 @@ interface ProtectedRouteProps {
   role?: UserRole | UserRole[]
 }
 
+function signInPathFor(allowed?: UserRole | UserRole[]): string {
+  if (!allowed) return '/login'
+  const list = Array.isArray(allowed) ? allowed : [allowed]
+  return list.includes('super_editor') ? '/desk' : '/login'
+}
+
 function roleAllowed(userRole: UserRole, allowed?: UserRole | UserRole[]): boolean {
   if (!allowed) return true
   const list = Array.isArray(allowed) ? allowed : [allowed]
@@ -32,7 +38,9 @@ export function ProtectedRoute({ children, role }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />
+    return (
+      <Navigate to={signInPathFor(role)} state={{ from: location.pathname }} replace />
+    )
   }
 
   if (role && !roleAllowed(user.role, role)) {

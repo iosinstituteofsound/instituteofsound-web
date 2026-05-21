@@ -69,7 +69,7 @@ export async function supabaseRegister(input: RegisterInput): Promise<User> {
     options: {
       data: {
         name: input.name,
-        role: input.role,
+        role: 'artist',
       },
     },
   })

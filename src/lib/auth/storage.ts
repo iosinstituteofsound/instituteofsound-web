@@ -95,6 +95,9 @@ export function getUserById(id: string): User | null {
 }
 
 export function registerUser(input: RegisterInput): User {
+  if (input.role !== 'artist') {
+    throw new Error('Only artist registration is available.')
+  }
   seedDemoAccounts()
   const users = getUsers()
   const existing = users.find(
