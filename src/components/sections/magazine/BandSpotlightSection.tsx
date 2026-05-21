@@ -11,7 +11,7 @@ export function BandSpotlightSection({ artists }: BandSpotlightSectionProps) {
   const bands = artists.filter((a) => a.featured).slice(0, 4)
 
   return (
-    <section className="section-padding bg-mh-black border-t-4 border-mh-red metal-section section-perf">
+    <section className="section-padding bg-mh-black border-t-4 border-mh-red">
       <div className="max-w-7xl mx-auto">
         <MagazineSectionHeading
           variant="metal-hammer"
@@ -28,7 +28,7 @@ export function BandSpotlightSection({ artists }: BandSpotlightSectionProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08, duration: 0.5 }}
-              className="group relative overflow-hidden bg-void border border-border mh-card-hover magazine-card-hover"
+              className="group relative overflow-hidden ios-card mh-card-hover magazine-card-hover"
             >
               <Link to={`/artist/${band.slug}`} className="grid md:grid-cols-[1.1fr_1fr]">
                 <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[280px] overflow-hidden">

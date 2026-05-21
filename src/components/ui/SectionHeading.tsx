@@ -14,16 +14,15 @@ export function SectionHeading({
   align = 'left',
 }: SectionHeadingProps) {
   return (
-    <Reveal className={`mb-16 metal-section-header ${align === 'center' ? 'text-center' : ''}`}>
-      <div className={`metal-rule-stack ${align === 'center' ? 'mx-auto items-center' : ''}`}>
-        <span />
-        <span />
-        <span />
-      </div>
-      <span className="metal-kicker">{label}</span>
-      <h2 className="metal-title-display text-signal mt-3">{title}</h2>
+    <Reveal className={`mb-16 magazine-section-head ${align === 'center' ? 'text-center' : ''}`}>
+      <span className="ios-kicker">{label}</span>
+      <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-extrabold mt-4 tracking-tight uppercase">
+        {title}
+      </h2>
       {subtitle && (
-        <p className="text-muted mt-4 max-w-xl text-lg leading-relaxed">{subtitle}</p>
+        <p className={`text-muted mt-4 text-lg max-w-xl ${align === 'center' ? 'mx-auto' : ''}`}>
+          {subtitle}
+        </p>
       )}
       <div className={`transmission-line mt-8 ${align === 'center' ? 'mx-auto' : ''}`} />
     </Reveal>

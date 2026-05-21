@@ -31,7 +31,7 @@ export function Layout() {
     <>
       <GrainOverlay />
       {navLoading ? <div className="h-[72px]" /> : navLinks && <Navbar links={navLinks} />}
-      <main>
+      <main className="ios-page-bg">
         <Outlet />
       </main>
       {footerLoading ? <LoadingTransmission variant="compact" /> : footerData && <Footer data={footerData} />}

@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { editorDashboardPath } from '@/lib/auth/roles'
-import { MetalButton } from '@/components/ui/MetalButton'
-import { MetalInput } from '@/components/ui/MetalInput'
+import { Button } from '@/components/ui/Button'
+import { Input, FieldLabel } from '@/components/ui/Input'
 
 export default function LoginPage() {
   const { user, login, mode, configHint } = useAuth()
@@ -60,15 +60,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="section-padding pt-32 min-h-screen metal-section">
-      <div className="max-w-md mx-auto metal-card p-8 md:p-10">
-        <div className="metal-rule-stack mb-4">
-          <span />
-          <span />
-          <span />
-        </div>
-        <p className="metal-kicker text-rs-red">Portal Access</p>
-        <h1 className="font-metal text-4xl text-signal mt-2">Sign In</h1>
+    <div className="section-padding pt-32 min-h-screen">
+      <div className="max-w-md mx-auto ios-panel ios-panel-accent">
+        <p className="ios-kicker">Portal Access</p>
+        <h1 className="font-serif text-4xl font-bold mt-3">Sign In</h1>
         <p className="text-muted mt-2 text-sm">
           Editors review submissions. Artists submit tracks.
         </p>
@@ -93,10 +88,8 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="mt-10 space-y-5">
           <div>
-            <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
-              Email
-            </label>
-            <MetalInput
+            <FieldLabel>Email</FieldLabel>
+            <Input
               type="email"
               required
               value={email}
@@ -105,10 +98,8 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
-              Password
-            </label>
-            <MetalInput
+            <FieldLabel>Password</FieldLabel>
+            <Input
               type="password"
               required
               value={password}
@@ -118,43 +109,31 @@ export default function LoginPage() {
 
           {error && <p className="text-mh-red text-sm">{error}</p>}
 
-          <MetalButton type="submit" variant="rs" disabled={submitting} className="w-full">
-            <span className="metal-btn-inner w-full justify-center">
-              {submitting ? 'Signing in...' : 'Sign In'}
-            </span>
-          </MetalButton>
+          <Button type="submit" variant="primary" disabled={submitting} className="w-full">
+            {submitting ? 'Signing in...' : 'Sign In'}
+          </Button>
         </form>
 
         {mode === 'local' && (
-        <div className="mt-8 p-4 border border-border bg-paper text-sm">
-          <p className="text-muted text-[10px] tracking-widest uppercase mb-3">
-            Demo accounts (local only)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => fillDemo('editor')}
-              className="text-xs border border-rs-red text-rs-red px-3 py-1.5 hover:bg-rs-red hover:text-white transition-colors"
-            >
-              Editor demo
-            </button>
-            <button
-              type="button"
-              onClick={() => fillDemo('artist')}
-              className="text-xs border border-mh-red text-mh-red px-3 py-1.5 hover:bg-mh-red hover:text-white transition-colors"
-            >
-              Artist demo
-            </button>
+          <div className="mt-8 p-4 border border-border bg-void/80">
+            <p className="ios-label mb-3">Demo accounts (local only)</p>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="secondary" onClick={() => fillDemo('editor')}>
+                Editor demo
+              </Button>
+              <Button type="button" variant="metal" onClick={() => fillDemo('artist')}>
+                Artist demo
+              </Button>
+            </div>
+            <p className="text-muted text-xs mt-3">
+              editor@ios.test / editor123 · artist@ios.test / artist123
+            </p>
           </div>
-          <p className="text-muted text-xs mt-3">
-            editor@ios.test / editor123 · artist@ios.test / artist123
-          </p>
-        </div>
         )}
 
         <p className="text-center text-sm text-muted mt-8">
           No account?{' '}
-          <Link to="/register" className="text-rs-red hover:underline font-medium">
+          <Link to="/register" className="ios-link">
             Register
           </Link>
         </p>

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { MetalButton } from '@/components/ui/MetalButton'
-import { MetalInput } from '@/components/ui/MetalInput'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 import type { FooterData } from '@/types'
 
 interface FooterProps {
@@ -9,34 +9,24 @@ interface FooterProps {
 
 export function Footer({ data }: FooterProps) {
   return (
-    <footer className="metal-footer section-padding section-perf">
-      <div className="max-w-7xl mx-auto pt-1">
+    <footer className="ios-footer section-padding">
+      <div className="max-w-7xl mx-auto pt-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
           <div className="lg:col-span-2">
-            <Link to="/" className="inline-block group">
-              <span className="font-metal text-3xl md:text-4xl tracking-wide text-signal group-hover:text-mh-red transition-colors">
-                INSTITUTE OF SOUND
-              </span>
+            <Link to="/" className="ios-brand-lockup inline-flex flex-col pl-3">
+              <span className="font-display text-2xl font-extrabold tracking-tight">INSTITUTE</span>
+              <span className="text-[10px] tracking-[0.35em] text-muted uppercase">of Sound</span>
             </Link>
-            <p className="text-muted mt-4 max-w-md leading-relaxed text-sm md:text-base">
-              {data.manifesto}
-            </p>
-            <div className="flex gap-2 mt-6">
-              <span className="metal-badge metal-badge-dark">Underground</span>
-              <span className="metal-badge">No Pop</span>
-            </div>
+            <p className="text-muted mt-5 max-w-md leading-relaxed text-sm">{data.manifesto}</p>
           </div>
 
           <div>
-            <h4 className="metal-kicker text-rs-red mb-4">Socials</h4>
-            <ul className="space-y-3">
+            <h4 className="ios-footer-heading">Socials</h4>
+            <ul className="space-y-2.5">
               {data.socials.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-muted hover:text-mh-red transition-colors uppercase tracking-wider"
-                  >
-                    → {link.label}
+                  <a href={link.href} className="ios-footer-link">
+                    {link.label}
                   </a>
                 </li>
               ))}
@@ -44,15 +34,12 @@ export function Footer({ data }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="metal-kicker text-rs-red mb-4">Archive</h4>
-            <ul className="space-y-3">
+            <h4 className="ios-footer-heading">Archive</h4>
+            <ul className="space-y-2.5">
               {data.archive.map((link) => (
                 <li key={link.label}>
-                  <Link
-                    to={link.href}
-                    className="text-sm text-muted hover:text-mh-red transition-colors uppercase tracking-wider"
-                  >
-                    → {link.label}
+                  <Link to={link.href} className="ios-footer-link">
+                    {link.label}
                   </Link>
                 </li>
               ))}
@@ -60,22 +47,22 @@ export function Footer({ data }: FooterProps) {
           </div>
         </div>
 
-        <div className="mt-16 pt-10 border-t border-border/80">
-          <h4 className="metal-kicker mb-4">Newsletter</h4>
+        <div className="mt-16 pt-10 border-t border-border">
+          <h4 className="ios-footer-heading">Newsletter</h4>
           <form
             className="flex flex-col sm:flex-row gap-3 max-w-lg"
             onSubmit={(e) => e.preventDefault()}
           >
-            <MetalInput type="email" placeholder={data.newsletter.placeholder} className="flex-1" />
-            <MetalButton type="submit" variant="rs">
+            <Input type="email" placeholder={data.newsletter.placeholder} className="flex-1" />
+            <Button type="submit" variant="primary">
               {data.newsletter.cta}
-            </MetalButton>
+            </Button>
           </form>
         </div>
 
         <div className="mt-12 flex flex-col md:flex-row justify-between gap-4 text-[10px] tracking-[0.35em] text-muted uppercase">
           <span>© 2026 Institute of Sound</span>
-          <span className="text-mh-red/60">† Underground Archive // Global Transmission</span>
+          <span className="text-mh-red/70">Underground Archive // Global Transmission</span>
         </div>
       </div>
     </footer>

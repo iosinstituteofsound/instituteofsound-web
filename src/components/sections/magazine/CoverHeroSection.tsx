@@ -1,7 +1,7 @@
 import type { CoverStory } from '@/types'
 import { WaveformBackground } from '@/components/effects/WaveformBackground'
 import { Reveal } from '@/components/ui/Reveal'
-import { MetalButton } from '@/components/ui/MetalButton'
+import { Button } from '@/components/ui/Button'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import { getPerformanceProfile } from '@/lib/performance'
 
@@ -77,12 +77,12 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
             </Reveal>
 
             <Reveal delay={0.15}>
-              <h1 className="font-metal text-4xl sm:text-5xl md:text-6xl xl:text-8xl text-signal hero-glitch-shadow">
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold uppercase leading-[0.92] tracking-tight hero-glitch-shadow">
                 {story.headline}
               </h1>
             </Reveal>
 
-            <Reveal delay={0.2} className="mt-8 metal-quote-border max-w-xl">
+            <Reveal delay={0.2} className="mt-8 border-l-2 border-mh-red pl-5 max-w-xl">
               <p className="font-serif text-lg md:text-xl text-signal/90 leading-relaxed italic">
                 {story.dek}
               </p>
@@ -99,12 +99,12 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
             </Reveal>
 
             <Reveal delay={0.3} className="mt-10 flex flex-wrap gap-4">
-              <MetalButton to={`/feature/${story.slug}`} variant="primary">
+              <Button to={`/feature/${story.slug}`} variant="primary">
                 {story.readLabel} →
-              </MetalButton>
-              <MetalButton to="/discover" variant="outline">
+              </Button>
+              <Button to="/discover" variant="secondary">
                 Enter Archive
-              </MetalButton>
+              </Button>
             </Reveal>
           </div>
 

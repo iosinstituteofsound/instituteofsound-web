@@ -1,13 +1,13 @@
 import type { CommunityRank } from '@/types'
 import clsx from 'clsx'
 
-const rankVariant: Record<CommunityRank, string> = {
+const rankClass: Record<CommunityRank, string> = {
   Listener: 'metal-badge-dark',
-  Scout: 'metal-badge',
+  Scout: 'metal-badge-dark',
   Curator: 'metal-badge',
   Archivist: 'metal-badge',
   'Signal Host': 'metal-badge-crimson',
-  Operator: 'metal-badge-crimson',
+  Operator: 'metal-badge-live',
 }
 
 interface RankBadgeProps {
@@ -17,13 +17,7 @@ interface RankBadgeProps {
 
 export function RankBadge({ rank, size = 'sm' }: RankBadgeProps) {
   return (
-    <span
-      className={clsx(
-        'metal-badge',
-        rankVariant[rank],
-        size === 'md' && '!text-xs !px-3 !py-1'
-      )}
-    >
+    <span className={clsx('metal-badge', rankClass[rank], size === 'md' && '!text-xs !px-3 !py-1')}>
       {rank}
     </span>
   )

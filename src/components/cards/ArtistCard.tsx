@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { MetalBadge } from '@/components/ui/MetalBadge'
 import type { Artist } from '@/types'
 import { gridItemVariants } from '@/components/ui/AnimatedGrid'
 
@@ -12,28 +11,27 @@ export function ArtistCard({ artist }: ArtistCardProps) {
   return (
     <motion.article
       variants={gridItemVariants}
-      className="group metal-card metal-card-mh overflow-hidden"
+      className="group relative overflow-hidden ios-card"
     >
       <Link to={`/artist/${artist.slug}`} className="block">
-        <div className="relative aspect-[4/5] overflow-hidden metal-card-frame">
+        <div className="relative aspect-[4/5] overflow-hidden">
           <img
             src={artist.image}
             alt={artist.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-void via-void/50 to-transparent" />
-          <div className="absolute top-3 right-3">
-            <MetalBadge variant="dark">{artist.genre}</MetalBadge>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-void via-void/40 to-transparent" />
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-neon/5 mix-blend-overlay" />
         </div>
-        <div className="p-6 border-t border-border/80">
-          <h3 className="font-metal text-2xl md:text-3xl text-signal mt-1 group-hover:text-mh-red transition-colors">
+        <div className="p-6">
+          <span className="metal-badge metal-badge-dark">{artist.genre}</span>
+          <h3 className="font-display text-xl md:text-2xl font-extrabold mt-3 group-hover:text-mh-red transition-colors uppercase">
             {artist.name}
           </h3>
-          <p className="text-muted text-sm mt-2 line-clamp-2 leading-relaxed">{artist.description}</p>
-          <span className="inline-block mt-4 text-[10px] tracking-[0.3em] uppercase text-mh-red/70 group-hover:text-mh-red transition-colors font-bold">
-            † Enter Archive
+          <p className="text-muted text-sm mt-2 line-clamp-2">{artist.description}</p>
+          <span className="inline-block mt-4 text-xs tracking-widest uppercase text-muted ios-link-arrow group-hover:text-mh-red transition-colors">
+            Listen
           </span>
         </div>
       </Link>

@@ -46,9 +46,9 @@ export default function ArchivePage() {
             >
               <Link
                 to={link.href}
-                className="flex items-center justify-between border border-border px-6 py-5 hover:border-neon hover:bg-surface/50 transition-all group"
+                className="flex items-center justify-between ios-card px-6 py-5 transition-all group"
               >
-                <span className="font-display text-lg group-hover:text-neon transition-colors">
+                <span className="font-display text-lg font-extrabold uppercase group-hover:text-mh-red transition-colors">
                   {link.label}
                 </span>
                 <span className="text-[10px] tracking-widest text-muted">{link.code}</span>

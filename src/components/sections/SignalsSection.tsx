@@ -11,7 +11,7 @@ interface SignalsSectionProps {
 
 export function SignalsSection({ signals, limit = 6 }: SignalsSectionProps) {
   return (
-    <section className="section-padding border-t border-border metal-section section-perf">
+    <section className="section-padding border-t border-border">
       <div className="max-w-7xl mx-auto">
         <MagazineSectionHeading
           kicker="News Desk"

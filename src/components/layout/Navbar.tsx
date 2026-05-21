@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { editorDashboardPath } from '@/lib/auth/roles'
-import { MetalButton } from '@/components/ui/MetalButton'
+import { Button } from '@/components/ui/Button'
 import type { NavLink } from '@/types'
 import clsx from 'clsx'
 
@@ -21,26 +22,20 @@ export function Navbar({ links }: NavbarProps) {
   return (
     <header
       className={clsx(
-        'fixed top-0 left-0 right-0 z-50 metal-nav transition-colors',
-        isHome ? 'bg-void/50 backdrop-blur-md' : 'bg-void/95 backdrop-blur-sm'
+        'ios-nav fixed top-0 left-0 right-0 z-50 transition-colors',
+        isHome
+          ? 'bg-void/50 backdrop-blur-md'
+          : 'bg-void/95 backdrop-blur-sm'
       )}
     >
-      <nav className="flex items-center justify-between px-6 md:px-12 lg:px-16 py-4 md:py-5">
-        <Link to="/" className="flex items-center gap-3 group">
-          <span
-            className="hidden sm:flex w-9 h-9 items-center justify-center font-metal text-lg text-mh-red border border-mh-red/40 bg-mh-red/5 group-hover:bg-mh-red/15 transition-colors"
-            style={{ clipPath: 'polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px)' }}
-          >
-            †
+      <nav className="relative flex items-center justify-between px-6 md:px-12 lg:px-16 py-4 md:py-5">
+        <Link to="/" className="ios-brand-lockup flex flex-col leading-none group">
+          <span className="ios-brand-title font-display text-lg md:text-xl font-extrabold tracking-tight">
+            INSTITUTE
           </span>
-          <div className="flex flex-col leading-none">
-            <span className="font-metal text-xl md:text-2xl tracking-wide text-signal group-hover:text-mh-red transition-colors">
-              INSTITUTE
-            </span>
-            <span className="text-[9px] tracking-[0.4em] text-muted uppercase mt-0.5">
-              of Sound
-            </span>
-          </div>
+          <span className="text-[10px] tracking-[0.35em] text-muted uppercase mt-0.5">
+            of Sound
+          </span>
         </Link>
 
         <ul className="hidden lg:flex items-center gap-8">
@@ -53,7 +48,7 @@ export function Navbar({ links }: NavbarProps) {
               <li key={link.href}>
                 <Link
                   to={link.href}
-                  className={clsx('metal-nav-link', active && 'is-active')}
+                  className={clsx('ios-nav-link', active && 'ios-nav-link-active')}
                 >
                   {link.label}
                 </Link>
@@ -64,23 +59,23 @@ export function Navbar({ links }: NavbarProps) {
           {user ? (
             <>
               <li>
-                <MetalButton
+                <Button
                   to={dashboardHref}
-                  variant={isSuperEditor ? 'rs' : 'primary'}
-                  className="!text-[10px]"
+                  variant={isSuperEditor ? 'primary' : user.role === 'editor' ? 'primary' : 'metal'}
+                  className="!py-2 !px-4"
                 >
                   {isSuperEditor
                     ? 'Super Editor'
                     : user.role === 'editor'
                       ? 'Editor Desk'
                       : 'My Tracks'}
-                </MetalButton>
+                </Button>
               </li>
               <li>
                 <button
                   type="button"
                   onClick={logout}
-                  className="metal-nav-link !text-muted hover:!text-signal bg-transparent border-0 cursor-pointer p-0"
+                  className="ios-nav-link !text-muted hover:!text-signal"
                 >
                   Logout
                 </button>
@@ -89,14 +84,14 @@ export function Navbar({ links }: NavbarProps) {
           ) : (
             <>
               <li>
-                <Link to="/login" className="metal-nav-link">
+                <Link to="/login" className="ios-nav-link">
                   Login
                 </Link>
               </li>
               <li>
-                <MetalButton to="/register" variant="primary" className="!text-[10px]">
+                <Button to="/register" variant="primary" className="!py-2 !px-5">
                   Join
-                </MetalButton>
+                </Button>
               </li>
             </>
           )}
@@ -104,71 +99,80 @@ export function Navbar({ links }: NavbarProps) {
 
         <button
           type="button"
-          className="lg:hidden metal-btn metal-btn-ghost !p-0"
+          className="lg:hidden ios-btn ios-btn-ghost !py-2 !px-4"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
-          <span className="metal-btn-inner !py-2 !px-4 !text-[10px]">
-            {open ? 'Close' : 'Menu'}
-          </span>
+          {open ? 'Close' : 'Menu'}
         </button>
       </nav>
 
-      {open && (
-        <div className="lg:hidden border-t border-mh-red/20 bg-void/98 overflow-hidden">
-          <ul className="flex flex-col p-6 gap-4">
-            {links.map((link) => (
-              <li key={link.href}>
-                <Link
-                  to={link.href}
-                  onClick={() => setOpen(false)}
-                  className="font-display text-sm tracking-widest uppercase font-bold hover:text-mh-red transition-colors"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-            {user ? (
-              <>
-                <li>
-                  <MetalButton to={dashboardHref} variant="primary" onClick={() => setOpen(false)}>
-                    Dashboard
-                  </MetalButton>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      logout()
-                      setOpen(false)
-                    }}
-                    className="text-sm tracking-widest uppercase text-muted"
-                  >
-                    Logout
-                  </button>
-                </li>
-              </>
-            ) : (
-              <>
-                <li>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="lg:hidden border-t border-border bg-void/98 overflow-hidden"
+          >
+            <ul className="flex flex-col p-6 gap-4">
+              {links.map((link) => (
+                <li key={link.href}>
                   <Link
-                    to="/login"
+                    to={link.href}
                     onClick={() => setOpen(false)}
-                    className="text-sm tracking-widest uppercase"
+                    className="text-sm tracking-widest uppercase font-semibold hover:text-mh-red transition-colors"
                   >
-                    Login
+                    {link.label}
                   </Link>
                 </li>
-                <li>
-                  <MetalButton to="/register" variant="primary" onClick={() => setOpen(false)}>
-                    Join
-                  </MetalButton>
-                </li>
-              </>
-            )}
-          </ul>
-        </div>
-      )}
+              ))}
+              {user ? (
+                <>
+                  <li>
+                    <Link
+                      to={dashboardHref}
+                      onClick={() => setOpen(false)}
+                      className="ios-btn ios-btn-primary w-full text-center"
+                    >
+                      Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout()
+                        setOpen(false)
+                      }}
+                      className="text-sm tracking-widest uppercase text-muted"
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link to="/login" onClick={() => setOpen(false)} className="text-sm tracking-widest uppercase">
+                      Login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/register"
+                      onClick={() => setOpen(false)}
+                      className="ios-btn ios-btn-primary w-full text-center"
+                    >
+                      Join
+                    </Link>
+                  </li>
+                </>
+              )}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

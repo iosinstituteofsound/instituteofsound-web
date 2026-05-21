@@ -11,11 +11,11 @@ export function PlaylistCard({ playlist }: PlaylistCardProps) {
   return (
     <motion.article
       variants={gridItemVariants}
-      className="group metal-card overflow-hidden"
-      style={{ borderColor: `${playlist.accent}25` }}
+      className="group relative overflow-hidden ios-card"
+      style={{ borderColor: `${playlist.accent}20` }}
     >
       <Link to={`/playlist/${playlist.slug}`} className="block">
-        <div className="relative aspect-square overflow-hidden metal-card-frame">
+        <div className="relative aspect-square overflow-hidden">
           <img
             src={playlist.cover}
             alt={playlist.title}
@@ -25,26 +25,20 @@ export function PlaylistCard({ playlist }: PlaylistCardProps) {
           <div
             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
             style={{
-              background: `linear-gradient(135deg, ${playlist.accent}50, transparent)`,
+              background: `linear-gradient(135deg, ${playlist.accent}40, transparent)`,
             }}
           />
-          <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
-            <span
-              className="metal-badge text-[10px]"
-              style={{ borderColor: playlist.accent, color: playlist.accent }}
-            >
-              ▶ Play
-            </span>
+          <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
+            <span className="ios-btn ios-btn-metal !py-1.5 !px-3 !text-[0.6rem]">Play</span>
           </div>
         </div>
-        <div className="p-5 border-t border-border/60">
-          <h3 className="font-metal text-xl text-signal group-hover:text-mh-red transition-colors">
+        <div className="p-5 bg-surface">
+          <h3 className="font-display text-lg font-extrabold uppercase group-hover:text-mh-red transition-colors">
             {playlist.title}
           </h3>
           <p className="text-muted text-sm mt-1 line-clamp-2">{playlist.description}</p>
-          <div className="flex gap-4 mt-3 text-[10px] tracking-[0.2em] text-muted uppercase">
+          <div className="flex gap-4 mt-3 text-[10px] tracking-wider text-muted uppercase">
             <span>{playlist.trackCount} tracks</span>
-            <span className="text-mh-red">†</span>
             <span>{playlist.duration}</span>
           </div>
         </div>
