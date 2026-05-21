@@ -23,6 +23,7 @@ export async function supabaseCreateSubmission(
       track_title: input.trackTitle,
       description: input.description,
       stream_url: input.streamUrl,
+      cover_image_url: input.coverImageUrl?.trim() || null,
       status: 'pending',
     })
     .select()
@@ -102,6 +103,7 @@ export async function supabaseCreateDraft(
       title: input.title,
       subject: input.subject,
       body: input.body,
+      cover_image_url: input.coverImageUrl?.trim() || null,
       status: 'draft',
     })
     .select()

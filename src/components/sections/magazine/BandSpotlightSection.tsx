@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { Artist } from '@/types'
 import { MagazineSectionHeading } from '@/components/ui/MagazineSectionHeading'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 interface BandSpotlightSectionProps {
   artists: Artist[]
@@ -32,11 +33,11 @@ export function BandSpotlightSection({ artists }: BandSpotlightSectionProps) {
             >
               <Link to={`/artist/${band.slug}`} className="grid md:grid-cols-[1.1fr_1fr]">
                 <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[280px] overflow-hidden">
-                  <img
+                  <IOSImage
                     src={band.image}
                     alt={band.name}
+                    width={640}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-void via-transparent to-transparent md:bg-gradient-to-r" />
                   {band.onTour && (

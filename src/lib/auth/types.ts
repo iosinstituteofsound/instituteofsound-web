@@ -26,6 +26,7 @@ export interface TrackSubmission {
   trackTitle: string
   description: string
   streamUrl: string
+  coverImageUrl?: string
   status: SubmissionStatus
   editorNotes?: string
   reviewedById?: string
@@ -43,6 +44,7 @@ export interface EditorialDraft {
   title: string
   subject: string
   body: string
+  coverImageUrl?: string
   status: 'draft' | 'published'
   createdAt: string
   updatedAt: string

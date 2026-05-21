@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { Feature } from '@/types'
 import { MagazineSectionHeading } from '@/components/ui/MagazineSectionHeading'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 interface EditorialMagazineGridProps {
   features: Feature[]
@@ -30,11 +31,11 @@ export function EditorialMagazineGrid({ features }: EditorialMagazineGridProps) 
             >
               <Link to={`/feature/${lead.slug}`} className="block">
                 <div className="relative aspect-[16/10] overflow-hidden">
-                  <img
+                  <IOSImage
                     src={lead.image}
                     alt=""
+                    width={1200}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                    loading="lazy"
                   />
                 </div>
                 <div className="pt-6 border-b border-border pb-8">
@@ -69,11 +70,11 @@ export function EditorialMagazineGrid({ features }: EditorialMagazineGridProps) 
                   className="flex gap-4 md:gap-5 flex-1"
                 >
                   <div className="w-32 md:w-40 shrink-0 aspect-[4/5] overflow-hidden">
-                    <img
+                    <IOSImage
                       src={feature!.image}
                       alt=""
+                      width={320}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
                     />
                   </div>
                   <div className="flex-1 py-1 border-b border-border">
@@ -108,11 +109,11 @@ export function EditorialMagazineGrid({ features }: EditorialMagazineGridProps) 
               >
                 <Link to={`/feature/${feature.slug}`}>
                   <div className="aspect-[16/10] overflow-hidden">
-                    <img
+                    <IOSImage
                       src={feature.image}
                       alt=""
+                      width={640}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
                     />
                   </div>
                   <div className="pt-4">

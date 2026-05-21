@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { AlbumRelease } from '@/types'
 import { MagazineSectionHeading } from '@/components/ui/MagazineSectionHeading'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 interface AlbumArtRowProps {
   albums: AlbumRelease[]
@@ -26,11 +27,11 @@ export function AlbumArtRow({ albums }: AlbumArtRowProps) {
                   className="group block magazine-card-hover mh-card-hover"
                 >
                   <div className="aspect-square overflow-hidden border-2 border-border group-hover:border-mh-red transition-colors">
-                    <img
+                    <IOSImage
                       src={album.cover}
                       alt={`${album.artist} — ${album.title}`}
+                      width={352}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
                     />
                   </div>
                   <p className="font-display text-sm font-bold uppercase mt-3 group-hover:text-mh-red transition-colors line-clamp-1">

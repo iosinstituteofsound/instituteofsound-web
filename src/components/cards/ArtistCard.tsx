@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { Artist } from '@/types'
 import { gridItemVariants } from '@/components/ui/AnimatedGrid'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 interface ArtistCardProps {
   artist: Artist
@@ -15,11 +16,11 @@ export function ArtistCard({ artist }: ArtistCardProps) {
     >
       <Link to={`/artist/${artist.slug}`} className="block">
         <div className="relative aspect-[4/5] overflow-hidden">
-          <img
+          <IOSImage
             src={artist.image}
             alt={artist.name}
+            width={600}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-void via-void/40 to-transparent" />
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-neon/5 mix-blend-overlay" />

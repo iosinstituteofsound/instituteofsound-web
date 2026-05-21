@@ -3,6 +3,7 @@ import { WaveformBackground } from '@/components/effects/WaveformBackground'
 import { Reveal } from '@/components/ui/Reveal'
 import { Button } from '@/components/ui/Button'
 import { MetalBadge } from '@/components/ui/MetalBadge'
+import { IOSImage } from '@/components/ui/IOSImage'
 import { getPerformanceProfile } from '@/lib/performance'
 
 interface CoverHeroSectionProps {
@@ -115,9 +116,11 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
               <div className="absolute top-4 -left-3 w-full h-full border border-crimson/30 pointer-events-none hidden lg:block" />
 
               <div className="relative hero-image-frame overflow-hidden aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5]">
-                <img
+                <IOSImage
                   src={story.image}
                   alt=""
+                  width={900}
+                  priority
                   className="w-full h-full object-cover scale-105 hover:scale-100 transition-transform duration-[1.2s]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-void via-void/20 to-transparent" />

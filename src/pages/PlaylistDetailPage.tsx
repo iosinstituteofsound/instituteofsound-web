@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useContent } from '@/hooks/useContent'
 import { getPlaylist } from '@/api/endpoints'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 export default function PlaylistDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -29,9 +30,11 @@ export default function PlaylistDetailPage() {
             className="aspect-square overflow-hidden border"
             style={{ borderColor: `${playlist.accent}40` }}
           >
-            <img
+            <IOSImage
               src={playlist.cover}
               alt={playlist.title}
+              width={800}
+              priority
               className="w-full h-full object-cover"
             />
           </div>

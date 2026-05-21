@@ -20,6 +20,7 @@ export interface CreateSubmissionInput {
   trackTitle: string
   description: string
   streamUrl: string
+  coverImageUrl?: string
 }
 
 export interface ReviewSubmissionInput {
@@ -32,6 +33,7 @@ export interface CreateDraftInput {
   title: string
   subject: string
   body: string
+  coverImageUrl?: string
 }
 
 function now() {
@@ -57,6 +59,7 @@ export async function createSubmission(
     trackTitle: input.trackTitle,
     description: input.description,
     streamUrl: input.streamUrl,
+    coverImageUrl: input.coverImageUrl,
     status: 'pending',
     createdAt: now(),
     updatedAt: now(),
@@ -132,6 +135,7 @@ export async function createEditorialDraft(
     title: input.title,
     subject: input.subject,
     body: input.body,
+    coverImageUrl: input.coverImageUrl,
     status: 'draft',
     createdAt: now(),
     updatedAt: now(),

@@ -36,6 +36,12 @@ Ready to connect: Node/Express, Supabase, Firebase, Strapi, or any headless CMS.
 | **Artist** | Login, submit tracks (stream link + description) | `/artist/dashboard` |
 | **Editor** | Review submission queue, approve/reject, write reviews & features | `/editor/dashboard` |
 
+### Cloudinary (images)
+
+1. Follow **[CLOUDINARY_SETUP.md](./CLOUDINARY_SETUP.md)**
+2. Add `VITE_CLOUDINARY_CLOUD_NAME` + `VITE_CLOUDINARY_UPLOAD_PRESET` to `.env`
+3. Artist/editor uploads go to Cloudinary; site loads them via CDN (`f_auto`, `q_auto`, responsive widths)
+
 ### Supabase (production)
 
 1. Follow **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**

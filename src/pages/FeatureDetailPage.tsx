@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useContent } from '@/hooks/useContent'
 import { getFeature } from '@/api/endpoints'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 export default function FeatureDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -24,9 +25,11 @@ export default function FeatureDetailPage() {
   return (
     <article className="pt-20">
       <div className="relative h-[50vh] overflow-hidden">
-        <img
+        <IOSImage
           src={feature.image}
           alt={feature.title}
+          width={1400}
+          priority
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-void to-transparent" />

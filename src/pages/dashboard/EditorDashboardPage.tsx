@@ -11,6 +11,8 @@ import {
 } from '@/lib/submissions/service'
 import { StatusBadge } from '@/components/auth/StatusBadge'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { ImageUpload } from '@/components/ui/ImageUpload'
+import { IOSImage } from '@/components/ui/IOSImage'
 import type {
   EditorialDraft,
   SubmissionStatus,
@@ -38,6 +40,7 @@ export default function EditorDashboardPage() {
   const [draftTitle, setDraftTitle] = useState('')
   const [draftSubject, setDraftSubject] = useState('')
   const [draftBody, setDraftBody] = useState('')
+  const [draftCoverUrl, setDraftCoverUrl] = useState('')
 
   const refresh = useCallback(async () => {
     if (!user) return
@@ -116,8 +119,10 @@ export default function EditorDashboardPage() {
         title: draftTitle,
         subject: draftSubject,
         body: draftBody,
+        coverImageUrl: draftCoverUrl || undefined,
       })
       setDraftTitle('')
+      setDraftCoverUrl('')
       setDraftSubject('')
       setDraftBody('')
       setMessage('Draft saved.')
@@ -313,6 +318,14 @@ export default function EditorDashboardPage() {
                   ) : (
                     <>
                       <StatusBadge status={selected.status} />
+                      {selected.coverImageUrl && (
+                        <IOSImage
+                          src={selected.coverImageUrl}
+                          alt={selected.trackTitle}
+                          width={720}
+                          className="w-full max-h-64 object-cover mt-4 border border-border"
+                        />
+                      )}
                       <h2 className="font-display text-2xl font-bold uppercase mt-4">
                         {selected.trackTitle}
                       </h2>
@@ -424,6 +437,13 @@ export default function EditorDashboardPage() {
                     className="w-full bg-surface border border-border px-4 py-3 text-sm focus:border-rs-red focus:outline-none"
                   />
                 </div>
+                <ImageUpload
+                  label="Cover Image"
+                  folder="ios/editorial"
+                  value={draftCoverUrl}
+                  onChange={setDraftCoverUrl}
+                  hint="Hero image for review/feature — delivered via Cloudinary CDN."
+                />
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
                     Write-up
@@ -454,7 +474,15 @@ export default function EditorDashboardPage() {
                   </p>
                 ) : (
                   drafts.map((d) => (
-                    <article key={d.id} className="border border-border p-6">
+                    <article key={d.id} className="ios-card p-6">
+                      {d.coverImageUrl && (
+                        <IOSImage
+                          src={d.coverImageUrl}
+                          alt={d.title}
+                          width={640}
+                          className="w-full h-40 object-cover mb-4"
+                        />
+                      )}
                       <span className="text-[10px] tracking-widest uppercase text-rs-red">
                         {d.type.replace('_', ' ')} · draft
                       </span>

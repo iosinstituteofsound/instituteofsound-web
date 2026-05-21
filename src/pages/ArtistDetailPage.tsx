@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useContent } from '@/hooks/useContent'
 import { getArtist } from '@/api/endpoints'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 export default function ArtistDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -24,9 +25,11 @@ export default function ArtistDetailPage() {
   return (
     <div className="pt-20">
       <div className="relative h-[60vh] overflow-hidden">
-        <img
+        <IOSImage
           src={artist.image}
           alt={artist.name}
+          width={1600}
+          priority
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-void via-void/50 to-transparent" />

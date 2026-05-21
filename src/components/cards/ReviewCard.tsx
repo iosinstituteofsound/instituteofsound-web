@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { Review } from '@/types'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 interface ReviewCardProps {
   review: Review
@@ -18,11 +19,11 @@ export function ReviewCard({ review, index = 0 }: ReviewCardProps) {
     >
       <Link to={`/artist/${review.artistSlug}`} className="shrink-0">
         <div className="relative w-28 h-28 md:w-36 md:h-36 overflow-hidden border-2 border-border group-hover:border-mh-red transition-colors">
-          <img
+          <IOSImage
             src={review.cover}
             alt={review.album}
+            width={288}
             className="w-full h-full object-cover"
-            loading="lazy"
           />
         </div>
       </Link>

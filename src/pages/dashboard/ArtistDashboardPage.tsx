@@ -7,10 +7,11 @@ import {
 } from '@/lib/submissions/service'
 import { StatusBadge } from '@/components/auth/StatusBadge'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { ImageUpload } from '@/components/ui/ImageUpload'
+import { IOSImage } from '@/components/ui/IOSImage'
+import { Button } from '@/components/ui/Button'
+import { Input, FieldLabel } from '@/components/ui/Input'
 import type { TrackSubmission } from '@/lib/auth/types'
-
-const inputClass =
-  'w-full bg-surface border border-border px-4 py-3 text-sm focus:outline-none focus:border-mh-red'
 
 export default function ArtistDashboardPage() {
   const { user, logout, mode } = useAuth()
@@ -26,6 +27,7 @@ export default function ArtistDashboardPage() {
   const [trackTitle, setTrackTitle] = useState('')
   const [description, setDescription] = useState('')
   const [streamUrl, setStreamUrl] = useState('')
+  const [coverImageUrl, setCoverImageUrl] = useState('')
 
   const refresh = useCallback(async () => {
     if (!user) return
@@ -61,10 +63,12 @@ export default function ArtistDashboardPage() {
         trackTitle,
         description,
         streamUrl,
+        coverImageUrl: coverImageUrl || undefined,
       })
       setTrackTitle('')
       setDescription('')
       setStreamUrl('')
+      setCoverImageUrl('')
       setSuccess('Track submitted! Editors will review it in their dashboard.')
       await refresh()
       setTab('history')
@@ -136,62 +140,51 @@ export default function ArtistDashboardPage() {
             </p>
 
             <div>
-              <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
-                Project / Band Name
-              </label>
-              <input
+              <FieldLabel>Project / Band Name</FieldLabel>
+              <Input
                 required
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                className={inputClass}
               />
             </div>
             <div>
-              <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
-                Genre
-              </label>
-              <input
+              <FieldLabel>Genre</FieldLabel>
+              <Input
                 required
                 value={genre}
                 onChange={(e) => setGenre(e.target.value)}
-                className={inputClass}
                 placeholder="Dark Ambient, Industrial..."
               />
             </div>
             <div>
-              <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
-                Track Title
-              </label>
-              <input
-                required
-                value={trackTitle}
-                onChange={(e) => setTrackTitle(e.target.value)}
-                className={inputClass}
-              />
+              <FieldLabel>Track Title</FieldLabel>
+              <Input required value={trackTitle} onChange={(e) => setTrackTitle(e.target.value)} />
             </div>
+            <ImageUpload
+              label="Track Artwork"
+              folder="ios/submissions"
+              value={coverImageUrl}
+              onChange={setCoverImageUrl}
+              hint="Stored on Cloudinary — fast load for editors worldwide."
+            />
             <div>
-              <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
-                Stream Link (Spotify, SoundCloud, Drive...)
-              </label>
-              <input
+              <FieldLabel>Stream Link (Spotify, SoundCloud, Drive...)</FieldLabel>
+              <Input
                 required
                 type="url"
                 value={streamUrl}
                 onChange={(e) => setStreamUrl(e.target.value)}
-                className={inputClass}
                 placeholder="https://"
               />
             </div>
             <div>
-              <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
-                Description for Editors
-              </label>
+              <FieldLabel>Description for Editors</FieldLabel>
               <textarea
                 required
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className={inputClass}
+                className="ios-input min-h-[120px]"
                 placeholder="Tell editors about the track, influences, why it fits IOS..."
               />
             </div>
@@ -199,13 +192,9 @@ export default function ArtistDashboardPage() {
             {error && <p className="text-mh-red text-sm">{error}</p>}
             {success && <p className="text-emerald-400 text-sm">{success}</p>}
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="bg-mh-red text-white px-8 py-3 text-xs tracking-[0.2em] uppercase font-bold hover:bg-rs-red transition-colors disabled:opacity-50"
-            >
+            <Button type="submit" variant="primary" disabled={submitting}>
               {submitting ? 'Submitting...' : 'Submit to Editors →'}
-            </button>
+            </Button>
           </form>
         )}
 
@@ -219,10 +208,17 @@ export default function ArtistDashboardPage() {
               </p>
             ) : (
               submissions.map((s) => (
-                <article
-                  key={s.id}
-                  className="border border-border p-5 md:p-6 bg-paper"
-                >
+                <article key={s.id} className="ios-card p-5 md:p-6 flex flex-col sm:flex-row gap-5">
+                  {s.coverImageUrl && (
+                    <IOSImage
+                      src={s.coverImageUrl}
+                      alt={s.trackTitle}
+                      width={160}
+                      height={160}
+                      className="w-32 h-32 shrink-0 object-cover"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h3 className="font-display text-xl font-bold uppercase">
@@ -258,6 +254,7 @@ export default function ArtistDashboardPage() {
                       )}
                     </div>
                   )}
+                  </div>
                 </article>
               ))
             )}

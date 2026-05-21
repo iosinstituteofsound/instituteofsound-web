@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { Playlist } from '@/types'
 import { gridItemVariants } from '@/components/ui/AnimatedGrid'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 interface PlaylistCardProps {
   playlist: Playlist
@@ -16,11 +17,11 @@ export function PlaylistCard({ playlist }: PlaylistCardProps) {
     >
       <Link to={`/playlist/${playlist.slug}`} className="block">
         <div className="relative aspect-square overflow-hidden">
-          <img
+          <IOSImage
             src={playlist.cover}
             alt={playlist.title}
+            width={500}
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
-            loading="lazy"
           />
           <div
             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"

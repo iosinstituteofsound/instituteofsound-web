@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import type { CommunityMember } from '@/types'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { gridItemVariants } from '@/components/ui/AnimatedGrid'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 interface CommunityCardProps {
   member: CommunityMember
@@ -13,11 +14,13 @@ export function CommunityCard({ member }: CommunityCardProps) {
       variants={gridItemVariants}
       className="flex items-center gap-4 ios-card p-5"
     >
-      <img
+      <IOSImage
         src={member.avatar}
         alt={member.name}
+        width={112}
+        height={112}
+        crop="fill"
         className="w-14 h-14 rounded-full object-cover border border-border"
-        loading="lazy"
       />
       <div className="flex-1 min-w-0">
         <h3 className="font-display font-bold truncate">{member.name}</h3>

@@ -18,6 +18,7 @@ export interface SubmissionRow {
   track_title: string
   description: string
   stream_url: string
+  cover_image_url: string | null
   status: TrackSubmission['status']
   editor_notes: string | null
   reviewed_by_id: string | null
@@ -35,6 +36,7 @@ export interface DraftRow {
   title: string
   subject: string
   body: string
+  cover_image_url: string | null
   status: EditorialDraft['status']
   created_at: string
   updated_at: string
@@ -61,6 +63,7 @@ export function mapSubmission(row: SubmissionRow): TrackSubmission {
     trackTitle: row.track_title,
     description: row.description,
     streamUrl: row.stream_url,
+    coverImageUrl: row.cover_image_url ?? undefined,
     status: row.status,
     editorNotes: row.editor_notes ?? undefined,
     reviewedById: row.reviewed_by_id ?? undefined,
@@ -80,6 +83,7 @@ export function mapDraft(row: DraftRow): EditorialDraft {
     title: row.title,
     subject: row.subject,
     body: row.body,
+    coverImageUrl: row.cover_image_url ?? undefined,
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
