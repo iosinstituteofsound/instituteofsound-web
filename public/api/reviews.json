@@ -1,0 +1,58 @@
+[
+  {
+    "id": "1",
+    "slug": "void-echo-cathedral",
+    "artistSlug": "void-echo",
+    "album": "Cathedral of Static",
+    "artist": "VOID ECHO",
+    "score": 9,
+    "maxScore": 10,
+    "verdict": "Essential",
+    "excerpt": "Nine tracks of architectural decay. Every room in this album has its own weather system.",
+    "cover": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80",
+    "genre": "Dark Ambient",
+    "reviewer": "K. VANT"
+  },
+  {
+    "id": "2",
+    "slug": "neon-ritual-transmission",
+    "artistSlug": "neon-ritual",
+    "album": "Transmission Ritual",
+    "artist": "NEON RITUAL",
+    "score": 8,
+    "maxScore": 10,
+    "verdict": "Killer",
+    "excerpt": "Industrial hymns that feel like they were recorded inside a collapsing factory cathedral.",
+    "cover": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80",
+    "genre": "Industrial",
+    "reviewer": "M. RHEX"
+  },
+  {
+    "id": "3",
+    "slug": "static-prophet-code",
+    "artistSlug": "static-prophet",
+    "album": "Digital Prayer",
+    "artist": "STATIC PROPHET",
+    "score": 8,
+    "maxScore": 10,
+    "verdict": "Killer",
+    "excerpt": "Glitch prophecies with surgical precision. IDM for the end of the timeline.",
+    "cover": "https://images.unsplash.com/photo-1571330735066-0abcd4055f08?w=400&q=80",
+    "genre": "Glitch / IDM",
+    "reviewer": "S. ARCHIVE"
+  },
+  {
+    "id": "4",
+    "slug": "hollow-frequency-monolith",
+    "artistSlug": "hollow-frequency",
+    "album": "Monolith Drone",
+    "artist": "HOLLOW FREQUENCY",
+    "score": 7,
+    "maxScore": 10,
+    "verdict": "Heavy",
+    "excerpt": "Single vibrations that collapse hours into minutes. Not for casual listeners.",
+    "cover": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&q=80",
+    "genre": "Drone / Post-Metal",
+    "reviewer": "L. SIGNAL"
+  }
+]

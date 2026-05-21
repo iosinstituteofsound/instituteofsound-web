@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1",
+    "slug": "midnight-frequencies",
+    "title": "Midnight Frequencies",
+    "description": "Late-night transmissions for insomniacs and night operators.",
+    "trackCount": 42,
+    "duration": "3h 12m",
+    "cover": "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&q=80",
+    "accent": "#3d7cff"
+  },
+  {
+    "id": "2",
+    "slug": "noise-ritual",
+    "title": "Noise Ritual",
+    "description": "Sacred noise ceremonies. Industrial hymns for the converted.",
+    "trackCount": 28,
+    "duration": "2h 04m",
+    "cover": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&q=80",
+    "accent": "#8b1538"
+  },
+  {
+    "id": "3",
+    "slug": "underground-protocol",
+    "title": "Underground Protocol",
+    "description": "Classified tracks from scenes that don't exist on maps.",
+    "trackCount": 56,
+    "duration": "4h 28m",
+    "cover": "https://images.unsplash.com/photo-1459745451990-5cd2ddb0b98a?w=600&q=80",
+    "accent": "#3d7cff"
+  },
+  {
+    "id": "4",
+    "slug": "dark-signal",
+    "title": "Dark Signal",
+    "description": "Encrypted moods. Darkwave, coldwave, and post-punk archives.",
+    "trackCount": 35,
+    "duration": "2h 41m",
+    "cover": "https://images.unsplash.com/photo-1498038432885-c6d3f1e8e8f0?w=600&q=80",
+    "accent": "#8b1538"
+  },
+  {
+    "id": "5",
+    "slug": "neon-afterlife",
+    "title": "Neon Afterlife",
+    "description": "Cyberpunk soundtracks for cities that never sleep.",
+    "trackCount": 48,
+    "duration": "3h 55m",
+    "cover": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80",
+    "accent": "#3d7cff"
+  },
+  {
+    "id": "6",
+    "slug": "future-collapse",
+    "title": "Future Collapse",
+    "description": "When tomorrow breaks. Experimental collapse aesthetics.",
+    "trackCount": 31,
+    "duration": "2h 18m",
+    "cover": "https://images.unsplash.com/photo-1598387181032-a310d89d0a38?w=600&q=80",
+    "accent": "#8b1538"
+  }
+]

@@ -1,0 +1,8 @@
+[
+  { "rank": "Listener", "description": "Tuned in. Receiving transmissions.", "level": 1 },
+  { "rank": "Scout", "description": "Discovers hidden frequencies.", "level": 2 },
+  { "rank": "Curator", "description": "Shapes the archive's direction.", "level": 3 },
+  { "rank": "Archivist", "description": "Preserves underground history.", "level": 4 },
+  { "rank": "Signal Host", "description": "Broadcasts to the network.", "level": 5 },
+  { "rank": "Operator", "description": "Commands the entire system.", "level": 6 }
+]

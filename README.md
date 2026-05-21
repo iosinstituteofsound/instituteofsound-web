@@ -89,4 +89,3 @@ npm run preview
 3. Keep the same response shapes defined in `src/types/`
 
 Mock data lives in `public/api/*.json` for local development.
-# instituteofsound

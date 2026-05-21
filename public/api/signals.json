@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "slug": "tokyo-noise-cell",
+    "title": "Tokyo Noise Cell Discovered",
+    "excerpt": "A hidden warehouse collective broadcasting 140bpm rituals every full moon.",
+    "category": "DISCOVERY",
+    "timestamp": "2026-05-18",
+    "encrypted": true
+  },
+  {
+    "id": "2",
+    "slug": "void-echo-album",
+    "title": "VOID ECHO — Cathedral of Static",
+    "excerpt": "Debut full-length drops May 30. 9 tracks of architectural decay.",
+    "category": "RELEASE",
+    "timestamp": "2026-05-17",
+    "encrypted": false
+  },
+  {
+    "id": "3",
+    "slug": "dark-internet-aesthetics",
+    "title": "The Rise of Dark Internet Aesthetics",
+    "excerpt": "How liminal spaces and analog horror shaped underground music visuals.",
+    "category": "CULTURE",
+    "timestamp": "2026-05-15",
+    "encrypted": true
+  },
+  {
+    "id": "4",
+    "slug": "berlin-modular",
+    "title": "Berlin Modular Underground Resurfaces",
+    "excerpt": "Eurorack synagogues return after a decade of digital dominance.",
+    "category": "SCENE",
+    "timestamp": "2026-05-12",
+    "encrypted": false
+  },
+  {
+    "id": "5",
+    "slug": "signal-ghost-spotlight",
+    "title": "Artist Spotlight: SIGNAL GHOST",
+    "excerpt": "Pop deconstructed into pure frequency. An interview from the void.",
+    "category": "SPOTLIGHT",
+    "timestamp": "2026-05-10",
+    "encrypted": false
+  },
+  {
+    "id": "6",
+    "slug": "cassette-revival",
+    "title": "Cassette Revival in Post-Digital Scenes",
+    "excerpt": "Physical media as resistance. Why tapes are the new vinyl.",
+    "category": "MOVEMENT",
+    "timestamp": "2026-05-08",
+    "encrypted": true
+  }
+]

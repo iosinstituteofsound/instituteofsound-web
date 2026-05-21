@@ -1,0 +1,80 @@
+[
+  {
+    "id": "1",
+    "slug": "void-echo",
+    "name": "VOID ECHO",
+    "genre": "Dark Ambient / Cinematic",
+    "description": "Architect of decayed soundscapes. Frequencies from abandoned cities.",
+    "image": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
+    "featured": true,
+    "listenUrl": "#",
+    "onTour": true,
+    "newAlbum": "Cathedral of Static",
+    "label": "Archive Recordings"
+  },
+  {
+    "id": "2",
+    "slug": "neon-ritual",
+    "name": "NEON RITUAL",
+    "genre": "Industrial / Experimental",
+    "description": "Ritualistic noise ceremonies broadcast from the underground.",
+    "image": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
+    "featured": true,
+    "listenUrl": "#",
+    "onTour": true,
+    "newAlbum": "Transmission Ritual",
+    "label": "Noise Division"
+  },
+  {
+    "id": "3",
+    "slug": "static-prophet",
+    "name": "STATIC PROPHET",
+    "genre": "Glitch / IDM",
+    "description": "Prophecies encoded in broken waveforms and digital prayer.",
+    "image": "https://images.unsplash.com/photo-1571330735066-0abcd4055f08?w=800&q=80",
+    "featured": true,
+    "listenUrl": "#",
+    "onTour": false,
+    "newAlbum": "Digital Prayer",
+    "label": "Signal Works"
+  },
+  {
+    "id": "4",
+    "slug": "chrome-veil",
+    "name": "CHROME VEIL",
+    "genre": "Synthwave / Cyberpunk",
+    "description": "Chrome-drenched melodies for midnight drives through megacities.",
+    "image": "https://images.unsplash.com/photo-1598387181032-a310d89d0a38?w=800&q=80",
+    "featured": true,
+    "listenUrl": "#",
+    "onTour": false,
+    "newAlbum": "Chrome Highway",
+    "label": "Neon Afterlife"
+  },
+  {
+    "id": "5",
+    "slug": "hollow-frequency",
+    "name": "HOLLOW FREQUENCY",
+    "genre": "Drone / Post-Metal",
+    "description": "Monolithic drones that collapse time into single vibrations.",
+    "image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80",
+    "featured": true,
+    "listenUrl": "#",
+    "onTour": true,
+    "newAlbum": "Monolith Drone",
+    "label": "Heavy Archive"
+  },
+  {
+    "id": "6",
+    "slug": "signal-ghost",
+    "name": "SIGNAL GHOST",
+    "genre": "Hyperpop / Deconstructed",
+    "description": "Ghosts in the machine. Pop torn apart and rebuilt wrong.",
+    "image": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80",
+    "featured": true,
+    "listenUrl": "#",
+    "onTour": false,
+    "newAlbum": "Ghost Pop",
+    "label": "Decon Pop"
+  }
+]

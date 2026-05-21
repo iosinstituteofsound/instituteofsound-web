@@ -1,0 +1,16 @@
+[
+  { "name": "artistName", "label": "Artist / Project Name", "type": "text", "required": true },
+  { "name": "email", "label": "Contact Frequency", "type": "email", "required": true },
+  { "name": "genre", "label": "Genre / Scene", "type": "text", "required": true },
+  {
+    "name": "submissionType",
+    "label": "Transmission Type",
+    "type": "select",
+    "required": true,
+    "options": ["Track", "Album", "Visuals", "Full Portfolio"]
+  },
+  { "name": "links", "label": "Stream / Portfolio Links", "type": "textarea", "required": true },
+  { "name": "description", "label": "Signal Description", "type": "textarea", "required": true },
+  { "name": "audio", "label": "Audio File (optional)", "type": "file", "required": false },
+  { "name": "visuals", "label": "Visual Assets (optional)", "type": "file", "required": false }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "slug": "music-as-identity",
+    "title": "Music as Identity in the Post-Scene Era",
+    "excerpt": "When subcultures dissolve into algorithms, who are we listening as?",
+    "author": "K. VANT",
+    "readTime": "12 min",
+    "image": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=1200&q=80",
+    "category": "PHILOSOPHY"
+  },
+  {
+    "id": "2",
+    "slug": "cyberpunk-aesthetics",
+    "title": "Cyberpunk Aesthetics Beyond the Neon",
+    "excerpt": "The visual language of underground music in 2026 — grit, glitch, and grace.",
+    "author": "M. RHEX",
+    "readTime": "18 min",
+    "image": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&q=80",
+    "category": "AESTHETICS"
+  },
+  {
+    "id": "3",
+    "slug": "void-echo-interview",
+    "title": "VOID ECHO: Building Cathedrals from Silence",
+    "excerpt": "Deep interview with the architect of decayed cinematic soundscapes.",
+    "author": "S. ARCHIVE",
+    "readTime": "24 min",
+    "image": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80",
+    "category": "INTERVIEW"
+  },
+  {
+    "id": "4",
+    "slug": "underground-movements",
+    "title": "Mapping Underground Movements in Real Time",
+    "excerpt": "How global scenes connect without ever meeting — the network effect.",
+    "author": "L. SIGNAL",
+    "readTime": "15 min",
+    "image": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&q=80",
+    "category": "ANALYSIS"
+  }
+]

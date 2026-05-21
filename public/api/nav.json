@@ -1,0 +1,8 @@
+[
+  { "label": "Bands", "href": "/discover" },
+  { "label": "Reviews", "href": "/#reviews" },
+  { "label": "Features", "href": "/features" },
+  { "label": "Playlists", "href": "/playlists" },
+  { "label": "Signals", "href": "/signals" },
+  { "label": "Community", "href": "/community" }
+]

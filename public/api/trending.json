@@ -1,0 +1,44 @@
+[
+  {
+    "id": "1",
+    "rank": 1,
+    "title": "VOID ECHO Announces Cathedral of Static",
+    "category": "News",
+    "href": "/feature/void-echo-interview"
+  },
+  {
+    "id": "2",
+    "rank": 2,
+    "title": "Berlin Modular Underground Resurfaces",
+    "category": "Scene Report",
+    "href": "/signals"
+  },
+  {
+    "id": "3",
+    "rank": 3,
+    "title": "Cyberpunk Aesthetics Beyond the Neon",
+    "category": "Culture",
+    "href": "/feature/cyberpunk-aesthetics"
+  },
+  {
+    "id": "4",
+    "rank": 4,
+    "title": "Midnight Frequencies: The Playlist Defining 2026",
+    "category": "Playlists",
+    "href": "/playlist/midnight-frequencies"
+  },
+  {
+    "id": "5",
+    "rank": 5,
+    "title": "NEON RITUAL Live Ritual Broadcast",
+    "category": "Live",
+    "href": "/artist/neon-ritual"
+  },
+  {
+    "id": "6",
+    "rank": 6,
+    "title": "Cassette Revival in Post-Digital Scenes",
+    "category": "Movement",
+    "href": "/signals"
+  }
+]

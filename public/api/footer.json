@@ -1,0 +1,20 @@
+{
+  "manifesto": "We are not a blog. We are the future headquarters of underground music culture.",
+  "socials": [
+    { "label": "Instagram", "href": "#" },
+    { "label": "Twitter / X", "href": "#" },
+    { "label": "Discord", "href": "#" },
+    { "label": "Spotify", "href": "#" },
+    { "label": "YouTube", "href": "#" }
+  ],
+  "archive": [
+    { "label": "Manifesto", "href": "/archive" },
+    { "label": "All Playlists", "href": "/playlists" },
+    { "label": "Submit Work", "href": "/submissions" },
+    { "label": "Contact", "href": "#" }
+  ],
+  "newsletter": {
+    "placeholder": "Enter your frequency...",
+    "cta": "JOIN TRANSMISSION"
+  }
+}
