@@ -11,20 +11,17 @@ export function SubmissionSection() {
             variant="metal-hammer"
             kicker="For Artists"
             title="Submit Your Music"
-            subtitle="Free artist account — build your band page, add tracks & socials, submit music for review."
+            subtitle="Sign in with Google — build your band page, add tracks, submit for review."
           />
           <p className="text-sm text-muted mt-6 max-w-lg mx-auto leading-relaxed">
-            Register in under a minute. No editor account — artists only. After signup, open{' '}
-            <strong className="text-signal">My Studio</strong> to publish your profile and submit tracks.
+            No password or email confirmation. One Google account →{' '}
+            <strong className="text-signal">My Studio</strong> for your profile and submissions.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mt-8">
-            <Button to="/register" variant="primary">
-              Create Free Artist Account →
+            <Button to="/login" variant="primary">
+              Continue with Google →
             </Button>
-            <Button to="/login" variant="secondary">
-              Already registered? Sign in
-            </Button>
-            <Button to="/submissions" variant="ghost">
+            <Button to="/submissions" variant="secondary">
               How it works
             </Button>
           </div>

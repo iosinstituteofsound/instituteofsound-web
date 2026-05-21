@@ -11,21 +11,19 @@ import {
   authMode,
   getAuthConfigHint,
   getCurrentUser,
-  login as authLogin,
   logout as authLogout,
-  register as authRegister,
+  signInWithGoogle as authSignInWithGoogle,
   subscribeAuth,
 } from '@/lib/auth/provider'
 import { isEditorStaff, isSuperEditor } from '@/lib/auth/roles'
-import type { LoginInput, RegisterInput, User, UserRole } from '@/lib/auth/types'
+import type { User, UserRole } from '@/lib/auth/types'
 
 interface AuthContextValue {
   user: User | null
   loading: boolean
   mode: 'supabase' | 'local'
   configHint: string | null
-  login: (input: LoginInput) => Promise<User>
-  register: (input: RegisterInput) => Promise<User>
+  signInWithGoogle: (intent?: 'artist' | 'desk') => Promise<void>
   logout: () => Promise<void>
   isEditor: boolean
   isSuperEditor: boolean
@@ -61,25 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const login = useCallback(async (input: LoginInput) => {
-    const loggedIn = await authLogin(input)
-    setUser(loggedIn)
-    return loggedIn
-  }, [])
-
-  const register = useCallback(async (input: RegisterInput) => {
-    if (input.role === 'super_editor') {
-      throw new Error('Super Editor accounts are assigned by admin only.')
-    }
-    if (input.role === 'editor') {
-      throw new Error('Editor registration is not open yet. Create an artist account to submit music.')
-    }
-    const created = await authRegister({
-      ...input,
-      role: 'artist',
-    })
-    setUser(created)
-    return created
+  const signInWithGoogle = useCallback(async (intent: 'artist' | 'desk' = 'artist') => {
+    await authSignInWithGoogle(intent)
   }, [])
 
   const logout = useCallback(async () => {
@@ -93,14 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       mode,
       configHint,
-      login,
-      register,
+      signInWithGoogle,
       logout,
       isEditor: user ? isEditorStaff(user.role) : false,
       isSuperEditor: user ? isSuperEditor(user.role) : false,
       isArtist: user?.role === 'artist',
     }),
-    [user, loading, mode, configHint, login, register, logout]
+    [user, loading, mode, configHint, signInWithGoogle, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

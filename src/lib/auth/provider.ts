@@ -1,6 +1,5 @@
 import { getSupabaseConfigError, isSupabaseConfigured } from '@/lib/supabase/client'
-import type { LoginInput, RegisterInput, User } from './types'
-import * as local from './storage'
+import type { User } from './types'
 import * as supabase from './supabaseAuth'
 
 export { isSupabaseConfigured }
@@ -16,19 +15,19 @@ export function getAuthConfigHint(): string | null {
   return null
 }
 
-export async function login(input: LoginInput): Promise<User> {
-  if (isSupabaseConfigured()) {
-    return supabase.supabaseLogin(input)
+export async function signInWithGoogle(
+  intent: 'artist' | 'desk' = 'artist'
+): Promise<void> {
+  if (!isSupabaseConfigured()) {
+    throw new Error(
+      'Google sign-in needs Supabase in .env. See SUPABASE_SETUP.md — enable Google provider in dashboard.'
+    )
   }
-  return local.loginUser(input.email, input.password).user
+  return supabase.supabaseSignInWithGoogle(intent)
 }
 
-export async function register(input: RegisterInput): Promise<User> {
-  if (isSupabaseConfigured()) {
-    return supabase.supabaseRegister(input)
-  }
-  local.registerUser(input)
-  return local.loginUser(input.email, input.password).user
+export async function completeAuthCallback() {
+  return supabase.supabaseHandleAuthCallback()
 }
 
 export async function logout(): Promise<void> {
@@ -36,20 +35,13 @@ export async function logout(): Promise<void> {
     await supabase.supabaseLogout()
     return
   }
-  local.logoutUser()
 }
 
 export async function getCurrentUser(): Promise<User | null> {
   if (isSupabaseConfigured()) {
     return supabase.supabaseGetCurrentUser()
   }
-  local.seedDemoAccounts()
-  const session = local.getSession()
-  if (!session || new Date(session.expiresAt) < new Date()) {
-    local.logoutUser()
-    return null
-  }
-  return local.getUserById(session.userId)
+  return null
 }
 
 export function subscribeAuth(callback: (user: User | null) => void): () => void {

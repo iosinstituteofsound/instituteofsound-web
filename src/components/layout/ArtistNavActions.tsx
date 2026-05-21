@@ -84,30 +84,17 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
         </Link>
       )}
       {wrap(
-        <Link
-          to="/login"
-          onClick={onNavigate}
-          className={clsx(
-            layout === 'stack'
-              ? 'text-sm tracking-widest uppercase text-center text-muted hover:text-mh-red'
-              : 'ios-nav-link'
-          )}
-        >
-          Artist Login
-        </Link>
-      )}
-      {wrap(
         layout === 'stack' ? (
           <Link
-            to="/register"
+            to="/login"
             onClick={onNavigate}
             className="ios-btn ios-btn-primary w-full text-center"
           >
-            Join as Artist →
+            Sign in with Google →
           </Link>
         ) : (
-          <Button to="/register" variant="primary" className="!py-2 !px-4 !text-[10px]">
-            Join as Artist
+          <Button to="/login" variant="primary" className="!py-2 !px-4 !text-[10px]">
+            Google Sign In
           </Button>
         )
       )}

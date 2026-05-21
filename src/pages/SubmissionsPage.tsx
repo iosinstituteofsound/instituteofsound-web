@@ -23,18 +23,18 @@ export default function SubmissionsPage() {
         <MagazineSectionHeading
           variant="metal-hammer"
           kicker="Artist Portal"
-          title="Register & Submit"
-          subtitle="Bands and solo artists — create your account, build your public profile, and send tracks for editorial review."
+          title="Google Sign In & Submit"
+          subtitle="Bands and solo artists — one Google login, your public profile, tracks for editorial review."
         />
 
         <div className="ios-panel ios-panel-accent text-left p-8 mt-12 space-y-8">
           <div>
-            <h3 className="font-display text-lg font-bold uppercase text-mh-red">Step 1 — Register</h3>
+            <h3 className="font-display text-lg font-bold uppercase text-mh-red">Step 1 — Google</h3>
             <p className="text-sm text-muted mt-3 leading-relaxed">
-              Free artist account only. Choose your band name, email, and password. No credit card.
+              Tap Continue with Google. No password, no confirmation email.
             </p>
-            <Button to="/register" variant="primary" className="mt-4">
-              Create Artist Account →
+            <Button to="/login" variant="primary" className="mt-4">
+              Continue with Google →
             </Button>
           </div>
           <div className="border-t border-border pt-8">
@@ -50,11 +50,9 @@ export default function SubmissionsPage() {
             <p className="text-sm text-muted mt-3 leading-relaxed">
               Send music to the desk: pending → in review → approved or rejected with editor notes.
             </p>
-            <div className="flex flex-wrap gap-3 mt-4">
-              <Button to="/login" variant="secondary">
-                Artist Login →
-              </Button>
-            </div>
+            <Button to="/login" variant="secondary" className="mt-4">
+              Sign in with Google →
+            </Button>
           </div>
         </div>
 

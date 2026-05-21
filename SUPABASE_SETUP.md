@@ -19,14 +19,33 @@ This creates:
 - `editorial_drafts` (editor write-ups)
 - Row Level Security (RLS) policies
 
-## 3. Auth settings (important for dev)
+## 3. Auth URLs (fixes localhost in confirmation emails)
 
-1. **Authentication** → **Providers** → Email → enabled
-2. For quick local testing, disable email confirmation:
-   - **Authentication** → **Sign In / Providers** → Email
-   - Turn off **Confirm email** (or use the confirmation link from inbox)
+1. **Authentication** → **URL Configuration**
+2. Set **Site URL** to: `https://instituteofsound.in`
+3. **Redirect URLs** — add:
+   - `https://instituteofsound.in/**`
+   - `https://www.instituteofsound.in/**` (if you use www)
+   - `http://localhost:5173/**` (local dev only)
+4. **Vercel** → Environment Variables (Production) → **redeploy after save**:
+   - `VITE_SITE_URL` = `https://instituteofsound.in`
+5. Redeploy after changing env vars.
 
-## 4. Environment variables
+Email links go to `/auth/callback` on your live site.
+
+## 4. Google sign-in (required)
+
+1. **Authentication** → **Providers** → **Google** → Enable
+2. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
+   - OAuth client type: **Web application**
+   - **Authorized redirect URIs** — add:
+     - `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
+     (find exact callback in Supabase → Google provider settings)
+3. Paste **Client ID** and **Client Secret** into Supabase Google provider → Save
+4. Email/password signup is **disabled in the app** — artists and staff use Google only.
+5. Super admin: sign in at `/desk` with Google (`tlssymbols@gmail.com` must be `super_editor` in `profiles`).
+
+## 5. Environment variables
 
 1. **Project Settings** → **API**
 2. Copy **Project URL** and **anon public** key
@@ -41,6 +60,7 @@ Edit `.env`:
 ```env
 VITE_SUPABASE_URL=https://xxxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbG...
+VITE_SITE_URL=https://instituteofsound.in
 ```
 
 4. Restart dev server:
@@ -51,12 +71,12 @@ npm run dev
 
 Navbar / login will use **Supabase mode** (real accounts in the cloud).
 
-## 5. Create test users
+## 6. Create test users
 
-### Option A — Register in the app
+### Option A — Google in the app
 
-1. `/register` → choose **Editor** or **Artist**
-2. Sign up with your email
+1. `/login` → **Continue with Google** (artist)
+2. `/desk` → **Continue with Google** (super editor only)
 
 ### Option B — Supabase Dashboard
 
@@ -75,7 +95,7 @@ or
 
 The trigger creates the matching `profiles` row automatically.
 
-## 6. Verify
+## 7. Verify
 
 | Step | Action |
 |------|--------|
@@ -94,9 +114,4 @@ The trigger creates the matching `profiles` row automatically.
 
 ## Without Supabase
 
-If `.env` is missing, the app uses **localStorage demo mode**:
-
-- `editor@ios.test` / `editor123`
-- `artist@ios.test` / `artist123`
-
-Data stays in the browser only.
+If `.env` is missing, Google sign-in is unavailable until Supabase is configured.

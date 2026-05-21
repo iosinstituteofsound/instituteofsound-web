@@ -18,6 +18,7 @@ const FeatureDetailPage = lazy(() => import('@/pages/FeatureDetailPage'))
 
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
 const DeskLoginPage = lazy(() => import('@/pages/auth/DeskLoginPage'))
+const AuthCallbackPage = lazy(() => import('@/pages/auth/AuthCallbackPage'))
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'))
 const DashboardRedirectPage = lazy(
   () => import('@/pages/dashboard/DashboardRedirectPage')
@@ -52,6 +53,7 @@ export default function App() {
             <Route path="feature/:slug" element={<FeatureDetailPage />} />
 
             <Route path="login" element={<LoginPage />} />
+            <Route path="auth/callback" element={<AuthCallbackPage />} />
             <Route path="desk" element={<DeskLoginPage />} />
             <Route path="register" element={<RegisterPage />} />
             <Route path="dashboard" element={<DashboardRedirectPage />} />

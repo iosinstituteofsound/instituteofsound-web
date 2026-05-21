@@ -50,13 +50,8 @@ export function Footer({ data }: FooterProps) {
             <h4 className="ios-footer-heading">Artists</h4>
             <ul className="space-y-2.5">
               <li>
-                <Link to="/register" className="ios-footer-link text-mh-red font-semibold">
-                  Register free →
-                </Link>
-              </li>
-              <li>
-                <Link to="/login" className="ios-footer-link">
-                  Artist login
+                <Link to="/login" className="ios-footer-link text-mh-red font-semibold">
+                  Sign in with Google →
                 </Link>
               </li>
               <li>

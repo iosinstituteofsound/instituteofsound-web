@@ -1,13 +1,23 @@
 import { getSupabase } from '@/lib/supabase/client'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { getAuthEmailRedirectUrl } from '@/lib/auth/siteUrl'
 import { mapProfile, type ProfileRow } from '@/lib/supabase/mappers'
-import type { LoginInput, RegisterInput, User, UserRole } from './types'
+import type { User, UserRole } from './types'
 
 const PROFILE_RETRIES = 6
 const PROFILE_RETRY_MS = 500
+const OAUTH_INTENT_KEY = 'ios_oauth_intent'
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function displayNameFromMeta(
+  meta: Record<string, unknown> | undefined,
+  email: string
+): string {
+  const full = meta?.full_name ?? meta?.name
+  if (typeof full === 'string' && full.trim()) return full.trim()
+  return email.split('@')[0] || 'Artist'
 }
 
 async function fetchProfile(userId: string): Promise<User> {
@@ -34,7 +44,6 @@ async function fetchProfile(userId: string): Promise<User> {
   throw new Error(lastError ?? 'Profile not found')
 }
 
-/** Create profile row when trigger missed (user must be signed in) */
 async function ensureProfileRow(
   userId: string,
   email: string,
@@ -58,7 +67,7 @@ async function ensureProfileRow(
 
     if (insertError) {
       throw new Error(
-        `Account exists but profile could not be created: ${insertError.message}. Run supabase/migrations/007-profile-insert-fallback.sql in Supabase.`
+        `Profile setup failed: ${insertError.message}. Run supabase/migrations/007-profile-insert-fallback.sql`
       )
     }
 
@@ -66,113 +75,61 @@ async function ensureProfileRow(
   }
 }
 
-function isExistingEmailSignup(user: { identities?: { id: string }[] } | null): boolean {
-  return Boolean(user && Array.isArray(user.identities) && user.identities.length === 0)
-}
-
-function formatAuthError(message: string): string {
-  const lower = message.toLowerCase()
-  if (lower.includes('rate limit') || lower.includes('too many')) {
-    return 'Too many attempts. Wait a few minutes and try again.'
-  }
-  if (
-    lower.includes('already registered') ||
-    lower.includes('already exists') ||
-    lower.includes('user already registered')
-  ) {
-    return 'This email already has an account — use Sign in with the same password.'
-  }
-  if (lower.includes('invalid login credentials')) {
-    return 'Wrong email or password.'
-  }
-  if (lower.includes('email not confirmed')) {
-    return 'Confirm your email from the inbox link, then Sign in. (Or turn off “Confirm email” in Supabase → Authentication for testing.)'
-  }
-  if (lower.includes('password') && lower.includes('weak')) {
-    return 'Use a stronger password (at least 6 characters).'
-  }
-  return message
-}
-
-async function signInAfterSignup(
-  supabase: SupabaseClient,
-  email: string,
-  password: string,
-  name: string
-): Promise<User> {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (error) {
-    const msg = formatAuthError(error.message)
-    if (error.message.toLowerCase().includes('invalid login credentials')) {
-      throw new Error(
-        `${msg} If you never finished signup before, wait 2 minutes or use Sign in — the email may already be in the system from an earlier attempt.`
-      )
-    }
-    throw new Error(msg)
-  }
-
-  if (!data.user) {
-    throw new Error('Sign in failed. Try again in a moment.')
-  }
-
-  return ensureProfileRow(data.user.id, email, name, 'artist')
-}
-
-export async function supabaseLogin(input: LoginInput): Promise<User> {
+export async function supabaseSignInWithGoogle(
+  intent: 'artist' | 'desk' = 'artist'
+): Promise<void> {
   const supabase = getSupabase()
-  const email = input.email.trim().toLowerCase()
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password: input.password,
-  })
-  if (error) throw new Error(formatAuthError(error.message))
-  if (!data.user) throw new Error('Login failed')
-  return ensureProfileRow(
-    data.user.id,
-    email,
-    (data.user.user_metadata?.name as string) ?? email.split('@')[0]
-  )
-}
+  localStorage.setItem(OAUTH_INTENT_KEY, intent)
 
-export async function supabaseRegister(input: RegisterInput): Promise<User> {
-  const supabase = getSupabase()
-  const email = input.email.trim().toLowerCase()
-  const name = input.name.trim()
-
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password: input.password,
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
     options: {
-      data: {
-        name,
-        role: 'artist',
-      },
+      redirectTo: getAuthEmailRedirectUrl(),
     },
   })
 
   if (error) {
-    throw new Error(formatAuthError(error.message))
+    localStorage.removeItem(OAUTH_INTENT_KEY)
+    throw new Error(error.message)
+  }
+}
+
+export async function supabaseHandleAuthCallback(): Promise<{
+  user: User
+  intent: 'artist' | 'desk' | null
+}> {
+  const supabase = getSupabase()
+  const hash = window.location.hash
+
+  if (hash.includes('error=')) {
+    const desc = new URLSearchParams(hash.slice(1)).get('error_description')
+    throw new Error(desc?.replace(/\+/g, ' ') ?? 'Google sign-in was cancelled')
   }
 
-  // Supabase hides “email taken” — empty identities means account already exists
-  if (isExistingEmailSignup(data.user ?? null)) {
-    return signInAfterSignup(supabase, email, input.password, name)
+  const code = new URLSearchParams(window.location.search).get('code')
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) throw new Error(error.message)
   }
 
-  if (!data.user) {
-    return signInAfterSignup(supabase, email, input.password, name)
+  const { data, error: sessionError } = await supabase.auth.getSession()
+  if (sessionError) throw new Error(sessionError.message)
+  if (!data.session?.user) {
+    throw new Error('No session after Google sign-in. Try again.')
   }
 
-  if (data.session?.user) {
-    return ensureProfileRow(data.session.user.id, email, name, 'artist')
-  }
+  const authUser = data.session.user
+  const meta = authUser.user_metadata as Record<string, unknown> | undefined
+  const email = authUser.email ?? ''
+  const name = displayNameFromMeta(meta, email)
 
-  // No session: email confirmation on, or delay — try password sign-in
-  return signInAfterSignup(supabase, email, input.password, name)
+  const user = await ensureProfileRow(authUser.id, email, name, 'artist')
+
+  const rawIntent = localStorage.getItem(OAUTH_INTENT_KEY)
+  localStorage.removeItem(OAUTH_INTENT_KEY)
+  const intent = rawIntent === 'desk' ? 'desk' : rawIntent === 'artist' ? 'artist' : null
+
+  return { user, intent }
 }
 
 export async function supabaseLogout(): Promise<void> {
@@ -184,24 +141,25 @@ export async function supabaseGetCurrentUser(): Promise<User | null> {
   const supabase = getSupabase()
   const { data } = await supabase.auth.getSession()
   if (!data.session?.user) return null
+
+  const authUser = data.session.user
+  const email = authUser.email ?? ''
+  const name = displayNameFromMeta(
+    authUser.user_metadata as Record<string, unknown>,
+    email
+  )
+
   try {
-    return await fetchProfile(data.session.user.id)
+    return await fetchProfile(authUser.id)
   } catch {
     try {
-      return await ensureProfileRow(
-        data.session.user.id,
-        data.session.user.email ?? '',
-        (data.session.user.user_metadata?.name as string) ??
-          data.session.user.email?.split('@')[0] ??
-          'Artist'
-      )
+      return await ensureProfileRow(authUser.id, email, name, 'artist')
     } catch {
       return null
     }
   }
 }
 
-/** Must NOT await Supabase auth inside this callback — causes sign-in deadlock */
 export function supabaseOnAuthChange(callback: (user: User | null) => void) {
   const supabase = getSupabase()
   const {
@@ -212,31 +170,17 @@ export function supabaseOnAuthChange(callback: (user: User | null) => void) {
       return
     }
 
-    const userId = session.user.id
-    const meta = session.user.user_metadata as { name?: string; role?: UserRole }
-    const email = session.user.email ?? ''
+    const authUser = session.user
+    const email = authUser.email ?? ''
+    const name = displayNameFromMeta(
+      authUser.user_metadata as Record<string, unknown>,
+      email
+    )
 
     window.setTimeout(() => {
-      ensureProfileRow(
-        userId,
-        email,
-        meta?.name ?? email.split('@')[0],
-        meta?.role ?? 'artist'
-      )
+      ensureProfileRow(authUser.id, email, name, 'artist')
         .then(callback)
-        .catch(() => {
-          if (meta?.name && meta?.role) {
-            callback({
-              id: userId,
-              email,
-              name: meta.name,
-              role: meta.role,
-              createdAt: new Date().toISOString(),
-            })
-            return
-          }
-          callback(null)
-        })
+        .catch(() => callback(null))
     }, 0)
   })
   return () => subscription.unsubscribe()

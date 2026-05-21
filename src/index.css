@@ -680,6 +680,35 @@ textarea.ios-input {
   opacity: 1;
 }
 
+/* —— Google sign-in —— */
+.ios-google-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-signal);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.ios-google-btn:hover:not(:disabled) {
+  border-color: rgba(212, 0, 0, 0.5);
+  background: rgba(212, 0, 0, 0.06);
+  box-shadow: 0 0 24px -8px rgba(212, 0, 0, 0.35);
+}
+
+.ios-google-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 *,
 *::before,
 *::after {

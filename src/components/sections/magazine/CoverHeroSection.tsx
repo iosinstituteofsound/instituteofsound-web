@@ -103,8 +103,8 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
               <Button to={`/feature/${story.slug}`} variant="primary">
                 {story.readLabel} →
               </Button>
-              <Button to="/register" variant="metal">
-                Join as Artist →
+              <Button to="/login" variant="metal">
+                Artists — Google Sign In →
               </Button>
               <Button to="/discover" variant="secondary">
                 Enter Archive
