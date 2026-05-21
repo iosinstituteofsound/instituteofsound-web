@@ -29,6 +29,23 @@ function buildTransformString(options: CloudinaryTransformOptions): string {
   return parts.join(',')
 }
 
+/**
+ * Remove existing transform segment after /upload/ (e.g. f_auto,q_auto,w_800).
+ * Do NOT strip folder names like ios/artists/... — those have no commas.
+ */
+function cloudinaryAssetPathAfterUpload(rest: string): string {
+  let path = rest.replace(/^v\d+\//, '')
+  const slash = path.indexOf('/')
+  if (slash === -1) {
+    return path.includes(',') ? '' : path
+  }
+  const first = path.slice(0, slash)
+  if (first.includes(',')) {
+    return path.slice(slash + 1)
+  }
+  return path
+}
+
 /** Fast CDN URL — auto format/quality, responsive width */
 export function cloudinaryUrl(src: string, options: CloudinaryTransformOptions = {}): string {
   if (!src?.trim()) return ''
@@ -40,12 +57,10 @@ export function cloudinaryUrl(src: string, options: CloudinaryTransformOptions =
     const idx = src.indexOf(marker)
     if (idx === -1) return src
     const base = src.slice(0, idx + marker.length)
-    let rest = src.slice(idx + marker.length)
-    rest = rest.replace(/^v\d+\//, '')
-    if (/^[\w_,:-]+\//.test(rest)) {
-      rest = rest.replace(/^[\w_,:-]+\//, '')
-    }
-    return `${base}${transforms}/${rest}`
+    const rest = src.slice(idx + marker.length)
+    const assetPath = cloudinaryAssetPathAfterUpload(rest)
+    if (!assetPath) return src
+    return `${base}${transforms}/${assetPath}`
   }
 
   const cloudName = getCloudinaryCloudName()

@@ -1,4 +1,5 @@
-import { cloudinarySrcSet, cloudinaryUrl } from '@/lib/cloudinary/url'
+import { useState } from 'react'
+import { cloudinarySrcSet, cloudinaryUrl, isCloudinaryUrl } from '@/lib/cloudinary/url'
 
 interface IOSImageProps {
   src: string
@@ -24,19 +25,25 @@ export function IOSImage({
   priority = false,
   crop = 'fill',
 }: IOSImageProps) {
-  if (!src) return null
+  const [useOriginal, setUseOriginal] = useState(false)
 
-  const mainSrc = cloudinaryUrl(src, { width, height, crop })
-  const srcSet = cloudinarySrcSet(
-    src,
-    DEFAULT_WIDTHS.filter((w) => w <= Math.max(width * 2, 1600)),
-    { height, crop }
-  )
+  if (!src?.trim()) return null
+
+  const optimized = cloudinaryUrl(src, { width, height, crop })
+  const displaySrc = useOriginal && isCloudinaryUrl(src) ? src : optimized
+  const srcSet =
+    useOriginal || !isCloudinaryUrl(src)
+      ? undefined
+      : cloudinarySrcSet(
+          src,
+          DEFAULT_WIDTHS.filter((w) => w <= Math.max(width * 2, 1600)),
+          { height, crop }
+        ) || undefined
 
   return (
     <img
-      src={mainSrc}
-      srcSet={srcSet || undefined}
+      src={displaySrc}
+      srcSet={srcSet}
       sizes={sizes}
       alt={alt}
       width={width}
@@ -45,6 +52,11 @@ export function IOSImage({
       decoding={priority ? 'sync' : 'async'}
       fetchPriority={priority ? 'high' : 'auto'}
       className={className}
+      onError={() => {
+        if (!useOriginal && isCloudinaryUrl(src)) {
+          setUseOriginal(true)
+        }
+      }}
     />
   )
 }
