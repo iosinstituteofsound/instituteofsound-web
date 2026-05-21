@@ -6,9 +6,6 @@ import {
   addArtistAlbum,
   addArtistTrack,
   addArtistVideo,
-  deleteArtistAlbum,
-  deleteArtistTrack,
-  deleteArtistVideo,
   getProfileForUser,
   upsertArtistProfile,
 } from '@/lib/artist-profile/service'
@@ -29,6 +26,11 @@ import {
   ArtistCatalogImport,
   type CatalogProfileSuggestions,
 } from '@/components/dashboard/ArtistCatalogImport'
+import {
+  EditableAlbumRow,
+  EditableTrackRow,
+  EditableVideoRow,
+} from '@/components/dashboard/ArtistMediaEditors'
 
 interface ArtistProfileEditorProps {
   user: User
@@ -181,8 +183,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   return (
     <div className="space-y-10 max-w-3xl">
       <p className="text-sm text-muted border-l-2 border-mh-red pl-4 leading-relaxed">
-        Build your band page like a streaming profile — header, tags, socials, tracks, albums,
-        singles, and videos. When published, fans see it at{' '}
+        Apni artist page ki har cheez yahan edit karo — naam, images, tracks, albums, videos.
+        Catalog dubara import kar sakte ho; purani entries skip, sirf naya data add hoga. Published page:{' '}
         <Link to={`/artist/${profileSlug}`} className="ios-link">
           /artist/{profileSlug}
         </Link>
@@ -300,8 +302,9 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           if (s.genresText) setGenresText(s.genresText)
           if (s.spotify) setSpotify(s.spotify)
           if (s.youtube) setYoutube(s.youtube)
-          setMessage('Catalog imported — review profile fields and Save profile.')
+          setMessage('Catalog imported — review fields below, then Save profile.')
         }}
+        onImportMessage={(msg) => setMessage(msg)}
       />
 
       <section className="ios-panel space-y-4">
@@ -348,23 +351,26 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           value={trackCover}
           onChange={setTrackCover}
         />
-        <ul className="space-y-2">
-          {tracks.map((t) => (
-            <li key={t.id} className="flex justify-between items-center text-sm border border-border px-3 py-2">
-              <span>{t.title}</span>
-              <button
-                type="button"
-                className="text-mh-red text-xs uppercase"
-                onClick={async () => {
-                  await deleteArtistTrack(t.id)
+        {tracks.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No tracks yet — add manually or import catalog.</p>
+        ) : (
+          <ul className="space-y-2">
+            {tracks.map((t) => (
+              <EditableTrackRow
+                key={t.id}
+                track={t}
+                onSaved={async () => {
                   if (profile) await loadChildData(profile.id)
+                  setMessage('Track updated.')
                 }}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
+                onDeleted={async () => {
+                  if (profile) await loadChildData(profile.id)
+                  setMessage('Track removed.')
+                }}
+              />
+            ))}
+          </ul>
+        )}
         {tracks.length > 0 && (
           <div>
             <FieldLabel>Artist pick track</FieldLabel>
@@ -434,25 +440,26 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           value={albumCover}
           onChange={setAlbumCover}
         />
-        <ul className="space-y-2 text-sm">
-          {albums.map((a) => (
-            <li key={a.id} className="flex justify-between border border-border px-3 py-2">
-              <span>
-                {a.title} · {a.releaseType} {a.releaseYear ? `(${a.releaseYear})` : ''}
-              </span>
-              <button
-                type="button"
-                className="text-mh-red text-xs"
-                onClick={async () => {
-                  await deleteArtistAlbum(a.id)
+        {albums.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No albums/singles yet.</p>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {albums.map((a) => (
+              <EditableAlbumRow
+                key={a.id}
+                album={a}
+                onSaved={async () => {
                   if (profile) await loadChildData(profile.id)
+                  setMessage('Release updated.')
                 }}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
+                onDeleted={async () => {
+                  if (profile) await loadChildData(profile.id)
+                  setMessage('Release removed.')
+                }}
+              />
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="ios-panel space-y-4">
@@ -488,23 +495,26 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
             Add video
           </Button>
         </div>
-        <ul className="space-y-2 text-sm">
-          {videos.map((v) => (
-            <li key={v.id} className="flex justify-between border border-border px-3 py-2">
-              <span>{v.title}</span>
-              <button
-                type="button"
-                className="text-mh-red text-xs"
-                onClick={async () => {
-                  await deleteArtistVideo(v.id)
+        {videos.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No videos yet.</p>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {videos.map((v) => (
+              <EditableVideoRow
+                key={v.id}
+                video={v}
+                onSaved={async () => {
                   if (profile) await loadChildData(profile.id)
+                  setMessage('Video updated.')
                 }}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
+                onDeleted={async () => {
+                  if (profile) await loadChildData(profile.id)
+                  setMessage('Video removed.')
+                }}
+              />
+            ))}
+          </ul>
+        )}
       </section>
 
       {error && <p className="text-mh-red text-sm">{error}</p>}

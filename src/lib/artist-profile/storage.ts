@@ -169,6 +169,57 @@ export function localAddVideo(profileId: string, input: UpsertVideoInput): Artis
   return video
 }
 
+export function localUpdateTrack(trackId: string, input: UpsertTrackInput): ArtistTrack {
+  const tracks = localGetTracks()
+  const idx = tracks.findIndex((t) => t.id === trackId)
+  if (idx < 0) throw new Error('Track not found')
+  const existing = tracks[idx]
+  const updated: ArtistTrack = {
+    ...existing,
+    title: input.title.trim() || existing.title,
+    streamUrl: input.streamUrl.trim() || existing.streamUrl,
+    coverUrl: input.coverUrl,
+    playCount: input.playCount ?? existing.playCount,
+    albumId: input.albumId,
+  }
+  tracks[idx] = updated
+  write(TRACKS_KEY, tracks)
+  return updated
+}
+
+export function localUpdateAlbum(albumId: string, input: UpsertAlbumInput): ArtistAlbum {
+  const albums = localGetAlbums()
+  const idx = albums.findIndex((a) => a.id === albumId)
+  if (idx < 0) throw new Error('Album not found')
+  const existing = albums[idx]
+  const updated: ArtistAlbum = {
+    ...existing,
+    title: input.title.trim() || existing.title,
+    coverUrl: input.coverUrl,
+    releaseYear: input.releaseYear,
+    releaseType: input.releaseType,
+  }
+  albums[idx] = updated
+  write(ALBUMS_KEY, albums)
+  return updated
+}
+
+export function localUpdateVideo(videoId: string, input: UpsertVideoInput): ArtistVideo {
+  const videos = localGetVideos()
+  const idx = videos.findIndex((v) => v.id === videoId)
+  if (idx < 0) throw new Error('Video not found')
+  const existing = videos[idx]
+  const updated: ArtistVideo = {
+    ...existing,
+    title: input.title.trim() || existing.title,
+    videoUrl: input.videoUrl.trim() || existing.videoUrl,
+    thumbnailUrl: input.thumbnailUrl,
+  }
+  videos[idx] = updated
+  write(VIDEOS_KEY, videos)
+  return updated
+}
+
 export function localDeleteAlbum(id: string) {
   write(
     ALBUMS_KEY,

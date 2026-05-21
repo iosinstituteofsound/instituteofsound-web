@@ -156,6 +156,23 @@ export async function addArtistVideo(profileId: string, input: UpsertVideoInput)
   return local.localAddVideo(profileId, enriched)
 }
 
+export async function updateArtistTrack(trackId: string, input: UpsertTrackInput) {
+  const enriched = await trackWithThumbnail(input)
+  if (isSupabaseConfigured()) return sb.supabaseUpdateTrack(trackId, enriched)
+  return local.localUpdateTrack(trackId, enriched)
+}
+
+export async function updateArtistAlbum(albumId: string, input: UpsertAlbumInput) {
+  if (isSupabaseConfigured()) return sb.supabaseUpdateAlbum(albumId, input)
+  return local.localUpdateAlbum(albumId, input)
+}
+
+export async function updateArtistVideo(videoId: string, input: UpsertVideoInput) {
+  const enriched = await videoWithThumbnail(input)
+  if (isSupabaseConfigured()) return sb.supabaseUpdateVideo(videoId, enriched)
+  return local.localUpdateVideo(videoId, enriched)
+}
+
 export async function deleteArtistAlbum(id: string) {
   if (isSupabaseConfigured()) return sb.supabaseDeleteAlbum(id)
   local.localDeleteAlbum(id)

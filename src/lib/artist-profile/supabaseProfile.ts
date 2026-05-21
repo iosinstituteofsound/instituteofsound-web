@@ -318,6 +318,96 @@ export async function supabaseAddVideo(
   }
 }
 
+export async function supabaseUpdateTrack(
+  trackId: string,
+  input: UpsertTrackInput
+): Promise<ArtistTrack> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_tracks')
+    .update({
+      title: input.title.trim(),
+      stream_url: input.streamUrl.trim(),
+      cover_url: input.coverUrl?.trim() || null,
+      play_count: input.playCount ?? 0,
+      album_id: input.albumId ?? null,
+    })
+    .eq('id', trackId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  const r = data
+  return {
+    id: r.id,
+    profileId: r.profile_id,
+    albumId: r.album_id ?? undefined,
+    title: r.title,
+    streamUrl: r.stream_url,
+    coverUrl: r.cover_url ?? undefined,
+    playCount: r.play_count ?? 0,
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }
+}
+
+export async function supabaseUpdateAlbum(
+  albumId: string,
+  input: UpsertAlbumInput
+): Promise<ArtistAlbum> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_albums')
+    .update({
+      title: input.title.trim(),
+      cover_url: input.coverUrl?.trim() || null,
+      release_year: input.releaseYear ?? null,
+      release_type: input.releaseType,
+    })
+    .eq('id', albumId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  const r = data
+  return {
+    id: r.id,
+    profileId: r.profile_id,
+    title: r.title,
+    coverUrl: r.cover_url ?? undefined,
+    releaseYear: r.release_year ?? undefined,
+    releaseType: r.release_type,
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }
+}
+
+export async function supabaseUpdateVideo(
+  videoId: string,
+  input: UpsertVideoInput
+): Promise<ArtistVideo> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_videos')
+    .update({
+      title: input.title.trim(),
+      video_url: input.videoUrl.trim(),
+      thumbnail_url: input.thumbnailUrl?.trim() || null,
+    })
+    .eq('id', videoId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  const r = data
+  return {
+    id: r.id,
+    profileId: r.profile_id,
+    title: r.title,
+    videoUrl: r.video_url,
+    thumbnailUrl: r.thumbnail_url ?? undefined,
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }
+}
+
 export async function supabasePatchTrackCover(trackId: string, coverUrl: string) {
   const supabase = getSupabase()
   const { error } = await supabase

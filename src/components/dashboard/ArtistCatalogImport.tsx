@@ -33,6 +33,7 @@ interface ArtistCatalogImportProps {
   ensureProfile: () => Promise<{ id: string }>
   onReload: (profileId: string) => Promise<void>
   onApplySuggestions?: (suggestions: CatalogProfileSuggestions) => void
+  onImportMessage?: (message: string) => void
 }
 
 function kindLabel(kind: CatalogImportItem['kind']): string {
@@ -63,6 +64,7 @@ export function ArtistCatalogImport({
   ensureProfile,
   onReload,
   onApplySuggestions,
+  onImportMessage,
 }: ArtistCatalogImportProps) {
   const [profileUrl, setProfileUrl] = useState(initialUrl)
   const [fetching, setFetching] = useState(false)
@@ -161,6 +163,12 @@ export function ArtistCatalogImport({
         onApplySuggestions(suggestionsToPayload(catalog.suggestions))
       }
 
+      const alreadyOnProfile = catalog.items.filter((item) => isDuplicate(item)).length
+      onImportMessage?.(
+        `${chosen.length} new item${chosen.length === 1 ? '' : 's'} added` +
+          (alreadyOnProfile > 0 ? ` · ${alreadyOnProfile} already on profile (skipped)` : '')
+      )
+
       await onReload(profile.id)
       setCatalog(null)
       setSelected(new Set())
@@ -174,10 +182,11 @@ export function ArtistCatalogImport({
   return (
     <section className="ios-panel space-y-4 border border-mh-red/30">
       <div>
-        <p className="ios-kicker">Import catalog from profile URL</p>
+        <p className="ios-kicker">Import / re-import catalog</p>
         <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-          Spotify artist, YouTube channel, ya SoundCloud profile URL paste karo — system tracks,
-          albums, aur videos fetch karke arrange karega. Tum review karke select karke import karo.
+          Spotify / YouTube / SoundCloud profile URL se fetch karo. Dubara import karoge to sirf{' '}
+          <strong className="text-foreground">naye</strong> tracks/albums/videos add honge — jo pehle se
+          profile pe hai wo skip (grey / already added).
         </p>
       </div>
 
@@ -190,7 +199,7 @@ export function ArtistCatalogImport({
           className="flex-1 min-w-[220px]"
         />
         <Button type="button" variant="metal" disabled={fetching || !profileUrl.trim()} onClick={fetchCatalog}>
-          {fetching ? 'Fetching…' : 'Fetch catalog'}
+          {fetching ? 'Fetching…' : 'Fetch / re-fetch'}
         </Button>
       </div>
 
@@ -204,6 +213,9 @@ export function ArtistCatalogImport({
               {catalog.suggestions.displayName && (
                 <p className="text-xs text-muted-foreground">{catalog.suggestions.displayName}</p>
               )}
+              <p className="text-[10px] text-muted-foreground mt-1">
+                {selectableItems.length} new · {catalog.items.length - selectableItems.length} already on profile
+              </p>
             </div>
             {selectableItems.length > 0 && (
               <div className="flex gap-2 text-xs">
