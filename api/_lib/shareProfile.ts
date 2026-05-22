@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+/** Supabase REST fetch only — works on Node & Edge (no @supabase/supabase-js bundle). */
 
 export type ShareProfileRow = {
   display_name: string
@@ -28,30 +28,31 @@ export function siteOrigin(): string {
   return 'https://instituteofsound.in'
 }
 
-function supabase() {
-  const url = env('VITE_SUPABASE_URL', 'SUPABASE_URL')
-  const key = env('VITE_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY')
-  if (!url || !key) return null
-  return createClient(url, key)
-}
-
 export async function fetchPublishedProfileForShare(
   slug: string
 ): Promise<ShareProfileRow | null> {
-  const client = supabase()
-  if (!client) return null
+  const base = env('VITE_SUPABASE_URL', 'SUPABASE_URL')
+  const key = env('VITE_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY')
+  if (!base || !key) return null
 
-  const { data, error } = await client
-    .from('artist_profiles')
-    .select(
-      'display_name, tagline, bio, banner_url, avatar_url, genres, accent_color, published'
-    )
-    .eq('slug', slug)
-    .eq('published', true)
-    .maybeSingle()
+  const params = new URLSearchParams({
+    slug: `eq.${slug}`,
+    published: 'eq.true',
+    select:
+      'display_name,tagline,bio,banner_url,avatar_url,genres,accent_color,published',
+  })
 
-  if (error || !data) return null
-  return data as ShareProfileRow
+  const res = await fetch(`${base.replace(/\/$/, '')}/rest/v1/artist_profiles?${params}`, {
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      Accept: 'application/json',
+    },
+  })
+
+  if (!res.ok) return null
+  const rows = (await res.json()) as ShareProfileRow[]
+  return rows[0] ?? null
 }
 
 export function escapeHtml(s: string) {

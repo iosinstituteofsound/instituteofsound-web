@@ -1,8 +1,10 @@
 import { ImageResponse } from '@vercel/og'
-import { fetchPublishedProfileForShare } from '../_lib/shareProfile'
+import { fetchPublishedProfileForShare } from '../_lib/shareProfile.js'
 
+/** Node runtime — @vercel/og font/wasm assets fail on Edge for Vite projects. */
 export const config = {
-  runtime: 'edge',
+  runtime: 'nodejs',
+  maxDuration: 15,
 }
 
 type VercelRequest = { query?: { slug?: string | string[] } }

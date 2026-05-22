@@ -1,6 +1,7 @@
 const BOT_UA =
   /facebookexternalhit|whatsapp|twitterbot|telegrambot|linkedinbot|slackbot|discordbot|embedly|pinterest/i
 
+/** Edge-only: no imports from /api (keeps @vercel/og off the middleware bundle). */
 export const config = {
   matcher: '/artist/:slug',
 }

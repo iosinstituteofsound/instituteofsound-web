@@ -2,7 +2,12 @@ import {
   escapeHtml,
   fetchPublishedProfileForShare,
   siteOrigin,
-} from '../_lib/shareProfile'
+} from '../_lib/shareProfile.js'
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 10,
+}
 
 type VercelRequest = { query?: { slug?: string | string[] } }
 type VercelResponse = {
