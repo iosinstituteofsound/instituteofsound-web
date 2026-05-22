@@ -91,3 +91,28 @@ export function moveSocialLinkOrder(
   ;[next[idx], next[swap]] = [next[swap], next[idx]]
   return next
 }
+
+/** Apply drag reorder for links that are currently filled in */
+export function reorderActiveSocialLinks(
+  fullOrder: SocialLinkKey[],
+  activeKeysInNewOrder: SocialLinkKey[]
+): SocialLinkKey[] {
+  const activeSet = new Set(activeKeysInNewOrder)
+  const inactive = fullOrder.filter((k) => !activeSet.has(k))
+  return [...activeKeysInNewOrder, ...inactive]
+}
+
+export function reorderSocialLinkByDrag(
+  activeKeys: SocialLinkKey[],
+  draggedKey: SocialLinkKey,
+  targetKey: SocialLinkKey
+): SocialLinkKey[] {
+  if (draggedKey === targetKey) return activeKeys
+  const from = activeKeys.indexOf(draggedKey)
+  const to = activeKeys.indexOf(targetKey)
+  if (from < 0 || to < 0) return activeKeys
+  const next = [...activeKeys]
+  next.splice(from, 1)
+  next.splice(to, 0, draggedKey)
+  return next
+}

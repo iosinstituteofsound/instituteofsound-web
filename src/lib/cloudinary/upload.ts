@@ -8,9 +8,12 @@ export type CloudinaryFolder =
   | 'ios/albums'
   | 'ios/playlists'
   | 'ios/features'
+  | 'ios/press-kits'
 
 const MAX_BYTES = 10 * 1024 * 1024
+const MAX_PDF_BYTES = 15 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']
+const ALLOWED_PDF_TYPES = ['application/pdf']
 
 export interface CloudinaryUploadResult {
   url: string
@@ -28,6 +31,64 @@ export function validateImageFile(file: File): string | null {
     return 'Image must be under 10MB.'
   }
   return null
+}
+
+export function validatePdfFile(file: File): string | null {
+  if (!ALLOWED_PDF_TYPES.includes(file.type)) {
+    return 'Use a PDF file.'
+  }
+  if (file.size > MAX_PDF_BYTES) {
+    return 'PDF must be under 15MB.'
+  }
+  return null
+}
+
+export async function uploadPdfToCloudinary(
+  file: File,
+  folder: CloudinaryFolder
+): Promise<{ url: string; publicId: string; bytes: number }> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error(
+      'Cloudinary is not configured. Add VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to .env'
+    )
+  }
+
+  const validation = validatePdfFile(file)
+  if (validation) throw new Error(validation)
+
+  const cloudName = getCloudinaryCloudName()
+  const preset = getCloudinaryUploadPreset()
+
+  const body = new FormData()
+  body.append('file', file)
+  body.append('upload_preset', preset)
+  body.append('folder', folder)
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
+    method: 'POST',
+    body,
+  })
+
+  const data = (await res.json()) as {
+    error?: { message?: string }
+    secure_url?: string
+    public_id?: string
+    bytes?: number
+  }
+
+  if (!res.ok || data.error) {
+    throw new Error(data.error?.message ?? `Upload failed (${res.status})`)
+  }
+
+  if (!data.secure_url || !data.public_id) {
+    throw new Error('Invalid Cloudinary response')
+  }
+
+  return {
+    url: data.secure_url,
+    publicId: data.public_id,
+    bytes: data.bytes ?? file.size,
+  }
 }
 
 export async function uploadImageToCloudinary(

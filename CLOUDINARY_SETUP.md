@@ -14,6 +14,7 @@ All **uploaded** images (track artwork, editorial covers) go to **Cloudinary** a
 3. **Signing Mode**: **Unsigned**
 4. **Folder**: optional default `ios` (we also set folder per upload in code)
 5. Save
+6. For **EPK PDF uploads**: in the same preset, set **Upload preset type** to allow **Raw** (or create a second preset with **Resource type: Raw** and use it only for PDFs if you split presets later).
 
 ## 3. Add to `.env`
 
@@ -44,6 +45,7 @@ This adds `cover_image_url` on `track_submissions` and `editorial_drafts`.
 | `ios/editorial` | Editor draft / feature images |
 | `ios/artists` | Band profiles (future) |
 | `ios/features` | Magazine features (future) |
+| `ios/press-kits` | Artist EPK / press kit PDFs (raw upload) |
 
 ## Display
 

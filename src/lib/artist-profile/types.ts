@@ -1,4 +1,5 @@
 import type { ArtistThemePreset } from './branding'
+import type { HeroLayout } from './heroLayout'
 import type { SocialLinkKey } from './socialOrder'
 
 export interface ArtistSocialLinks {
@@ -21,6 +22,7 @@ export interface ArtistProfile {
   bannerUrl?: string
   logoUrl?: string
   genres: string[]
+  influenceTags: string[]
   country?: string
   social: ArtistSocialLinks
   monthlyListenersDisplay: string
@@ -28,11 +30,16 @@ export interface ArtistProfile {
   accentColor: string
   themePreset: ArtistThemePreset
   heroVideoUrl?: string
+  heroLayout: HeroLayout
   socialLinkOrder: SocialLinkKey[]
+  pressKitUrl?: string
+  pressKitLabel?: string
   published: boolean
   createdAt: string
   updatedAt: string
 }
+
+export const DEFAULT_PRESS_KIT_LABEL = 'Press kit (EPK)'
 
 export interface ArtistAlbum {
   id: string
@@ -67,6 +74,40 @@ export interface ArtistVideo {
   createdAt: string
 }
 
+export type LineupEntryType = 'member' | 'guest' | 'production'
+
+export interface ArtistBioTimelineEntry {
+  id: string
+  profileId: string
+  year: number
+  title: string
+  description?: string
+  sortOrder: number
+  createdAt: string
+}
+
+export interface ArtistLineupEntry {
+  id: string
+  profileId: string
+  name: string
+  role: string
+  entryType: LineupEntryType
+  sortOrder: number
+  createdAt: string
+}
+
+export interface ArtistMerchItem {
+  id: string
+  profileId: string
+  title: string
+  productUrl: string
+  imageUrl?: string
+  priceDisplay?: string
+  showPrice: boolean
+  sortOrder: number
+  createdAt: string
+}
+
 export interface ArtistEditorialFeature {
   id: string
   type: 'review' | 'feature' | 'band_profile'
@@ -84,6 +125,9 @@ export interface ArtistProfilePageData {
   albums: ArtistAlbum[]
   singles: ArtistAlbum[]
   videos: ArtistVideo[]
+  merch: ArtistMerchItem[]
+  lineup: ArtistLineupEntry[]
+  bioTimeline: ArtistBioTimelineEntry[]
   editorial: ArtistEditorialFeature[]
   pickTrack?: ArtistTrack
 }
@@ -97,6 +141,7 @@ export interface UpsertArtistProfileInput {
   bannerUrl?: string
   logoUrl?: string
   genres?: string[]
+  influenceTags?: string[]
   country?: string
   social?: ArtistSocialLinks
   monthlyListenersDisplay?: string
@@ -104,7 +149,10 @@ export interface UpsertArtistProfileInput {
   accentColor?: string
   themePreset?: ArtistThemePreset
   heroVideoUrl?: string
+  heroLayout?: HeroLayout
   socialLinkOrder?: SocialLinkKey[]
+  pressKitUrl?: string
+  pressKitLabel?: string
   published?: boolean
 }
 
@@ -127,4 +175,24 @@ export interface UpsertVideoInput {
   title: string
   videoUrl: string
   thumbnailUrl?: string
+}
+
+export interface UpsertBioTimelineInput {
+  year: number
+  title: string
+  description?: string
+}
+
+export interface UpsertLineupInput {
+  name: string
+  role: string
+  entryType?: LineupEntryType
+}
+
+export interface UpsertMerchInput {
+  title: string
+  productUrl: string
+  imageUrl?: string
+  priceDisplay?: string
+  showPrice?: boolean
 }

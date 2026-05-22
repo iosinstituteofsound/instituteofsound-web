@@ -2,11 +2,17 @@ import { getSupabase } from '@/lib/supabase/client'
 import type { User } from '@/lib/auth/types'
 import type {
   ArtistAlbum,
+  ArtistBioTimelineEntry,
+  ArtistLineupEntry,
+  ArtistMerchItem,
   ArtistProfile,
   ArtistTrack,
   ArtistVideo,
   UpsertAlbumInput,
   UpsertArtistProfileInput,
+  UpsertBioTimelineInput,
+  UpsertLineupInput,
+  UpsertMerchInput,
   UpsertTrackInput,
   UpsertVideoInput,
 } from './types'
@@ -16,6 +22,9 @@ import {
   normalizeAccentColor,
   resolveThemePreset,
 } from './branding'
+import { DEFAULT_HERO_LAYOUT, resolveHeroLayout } from './heroLayout'
+import { normalizeInfluenceTags } from './influences'
+import { resolveLineupEntryType } from './lineup'
 import { normalizeSocialLinkOrder } from './socialOrder'
 import { ensureUniqueSlug, slugifyArtistName } from './slug'
 
@@ -30,6 +39,7 @@ type ProfileRow = {
   banner_url: string | null
   logo_url: string | null
   genres: string[] | null
+  influence_tags: string[] | null
   country: string | null
   website_url: string | null
   spotify_url: string | null
@@ -42,7 +52,10 @@ type ProfileRow = {
   accent_color: string | null
   theme_preset: string | null
   hero_video_url: string | null
+  hero_layout: string | null
   social_link_order: string[] | null
+  press_kit_url: string | null
+  press_kit_label: string | null
   published: boolean
   created_at: string
   updated_at: string
@@ -60,6 +73,7 @@ function mapProfile(row: ProfileRow): ArtistProfile {
     bannerUrl: row.banner_url ?? undefined,
     logoUrl: row.logo_url ?? undefined,
     genres: row.genres ?? [],
+    influenceTags: normalizeInfluenceTags(row.influence_tags ?? []),
     country: row.country ?? undefined,
     social: {
       website: row.website_url ?? undefined,
@@ -74,7 +88,10 @@ function mapProfile(row: ProfileRow): ArtistProfile {
     accentColor: row.accent_color ?? DEFAULT_ACCENT_COLOR,
     themePreset: resolveThemePreset(row.theme_preset),
     heroVideoUrl: row.hero_video_url ?? undefined,
+    heroLayout: resolveHeroLayout(row.hero_layout),
     socialLinkOrder: normalizeSocialLinkOrder(row.social_link_order),
+    pressKitUrl: row.press_kit_url ?? undefined,
+    pressKitLabel: row.press_kit_label ?? undefined,
     published: row.published,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -91,6 +108,7 @@ function profilePayload(input: UpsertArtistProfileInput, user: User) {
     banner_url: input.bannerUrl?.trim() || null,
     logo_url: input.logoUrl?.trim() || null,
     genres: input.genres ?? [],
+    influence_tags: normalizeInfluenceTags(input.influenceTags ?? []),
     country: input.country?.trim() || null,
     website_url: social.website?.trim() || null,
     spotify_url: social.spotify?.trim() || null,
@@ -104,7 +122,10 @@ function profilePayload(input: UpsertArtistProfileInput, user: User) {
       normalizeAccentColor(input.accentColor ?? '') ?? DEFAULT_ACCENT_COLOR,
     theme_preset: input.themePreset ?? DEFAULT_THEME_PRESET,
     hero_video_url: input.heroVideoUrl?.trim() || null,
+    hero_layout: input.heroLayout ?? DEFAULT_HERO_LAYOUT,
     social_link_order: normalizeSocialLinkOrder(input.socialLinkOrder),
+    press_kit_url: input.pressKitUrl?.trim() || null,
+    press_kit_label: input.pressKitLabel?.trim() || null,
     published: input.published ?? false,
     updated_at: new Date().toISOString(),
   }
@@ -222,6 +243,71 @@ export async function supabaseGetTracks(profileId: string): Promise<ArtistTrack[
   }))
 }
 
+export async function supabaseGetBioTimeline(
+  profileId: string
+): Promise<ArtistBioTimelineEntry[]> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_bio_timeline_entries')
+    .select('*')
+    .eq('profile_id', profileId)
+    .order('year', { ascending: true })
+    .order('sort_order', { ascending: true })
+
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    profileId: r.profile_id,
+    year: r.year,
+    title: r.title,
+    description: r.description ?? undefined,
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }))
+}
+
+export async function supabaseGetLineup(profileId: string): Promise<ArtistLineupEntry[]> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_lineup_entries')
+    .select('*')
+    .eq('profile_id', profileId)
+    .order('sort_order')
+
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    profileId: r.profile_id,
+    name: r.name,
+    role: r.role,
+    entryType: resolveLineupEntryType(r.entry_type),
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }))
+}
+
+export async function supabaseGetMerch(profileId: string): Promise<ArtistMerchItem[]> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_merch_items')
+    .select('*')
+    .eq('profile_id', profileId)
+    .order('sort_order')
+
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    profileId: r.profile_id,
+    title: r.title,
+    productUrl: r.product_url,
+    imageUrl: r.image_url ?? undefined,
+    priceDisplay: r.price_display ?? undefined,
+    showPrice: r.show_price ?? true,
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }))
+}
+
 export async function supabaseGetVideos(profileId: string): Promise<ArtistVideo[]> {
   const supabase = getSupabase()
   const { data, error } = await supabase
@@ -306,6 +392,206 @@ export async function supabaseAddTrack(
     sortOrder: r.sort_order,
     createdAt: r.created_at,
   }
+}
+
+export async function supabaseAddMerch(
+  profileId: string,
+  input: UpsertMerchInput
+): Promise<ArtistMerchItem> {
+  const supabase = getSupabase()
+  const count = (await supabaseGetMerch(profileId)).length
+  const { data, error } = await supabase
+    .from('artist_merch_items')
+    .insert({
+      profile_id: profileId,
+      title: input.title.trim(),
+      product_url: input.productUrl.trim(),
+      image_url: input.imageUrl?.trim() || null,
+      price_display: input.priceDisplay?.trim() || null,
+      show_price: input.showPrice ?? true,
+      sort_order: count,
+    })
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  const r = data
+  return {
+    id: r.id,
+    profileId: r.profile_id,
+    title: r.title,
+    productUrl: r.product_url,
+    imageUrl: r.image_url ?? undefined,
+    priceDisplay: r.price_display ?? undefined,
+    showPrice: r.show_price ?? true,
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }
+}
+
+export async function supabaseUpdateMerch(
+  merchId: string,
+  input: UpsertMerchInput
+): Promise<ArtistMerchItem> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_merch_items')
+    .update({
+      title: input.title.trim(),
+      product_url: input.productUrl.trim(),
+      image_url: input.imageUrl?.trim() || null,
+      price_display: input.priceDisplay?.trim() || null,
+      show_price: input.showPrice ?? true,
+    })
+    .eq('id', merchId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  const r = data
+  return {
+    id: r.id,
+    profileId: r.profile_id,
+    title: r.title,
+    productUrl: r.product_url,
+    imageUrl: r.image_url ?? undefined,
+    priceDisplay: r.price_display ?? undefined,
+    showPrice: r.show_price ?? true,
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }
+}
+
+export async function supabaseDeleteMerch(id: string) {
+  const supabase = getSupabase()
+  const { error } = await supabase.from('artist_merch_items').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function supabaseAddLineup(
+  profileId: string,
+  input: UpsertLineupInput
+): Promise<ArtistLineupEntry> {
+  const supabase = getSupabase()
+  const count = (await supabaseGetLineup(profileId)).length
+  const { data, error } = await supabase
+    .from('artist_lineup_entries')
+    .insert({
+      profile_id: profileId,
+      name: input.name.trim(),
+      role: input.role.trim(),
+      entry_type: resolveLineupEntryType(input.entryType),
+      sort_order: count,
+    })
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  const r = data
+  return {
+    id: r.id,
+    profileId: r.profile_id,
+    name: r.name,
+    role: r.role,
+    entryType: resolveLineupEntryType(r.entry_type),
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }
+}
+
+export async function supabaseUpdateLineup(
+  entryId: string,
+  input: UpsertLineupInput
+): Promise<ArtistLineupEntry> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_lineup_entries')
+    .update({
+      name: input.name.trim(),
+      role: input.role.trim(),
+      entry_type: resolveLineupEntryType(input.entryType),
+    })
+    .eq('id', entryId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  const r = data
+  return {
+    id: r.id,
+    profileId: r.profile_id,
+    name: r.name,
+    role: r.role,
+    entryType: resolveLineupEntryType(r.entry_type),
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }
+}
+
+export async function supabaseDeleteLineup(id: string) {
+  const supabase = getSupabase()
+  const { error } = await supabase.from('artist_lineup_entries').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function supabaseAddBioTimeline(
+  profileId: string,
+  input: UpsertBioTimelineInput
+): Promise<ArtistBioTimelineEntry> {
+  const supabase = getSupabase()
+  const count = (await supabaseGetBioTimeline(profileId)).length
+  const { data, error } = await supabase
+    .from('artist_bio_timeline_entries')
+    .insert({
+      profile_id: profileId,
+      year: input.year,
+      title: input.title.trim(),
+      description: input.description?.trim() || null,
+      sort_order: count,
+    })
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  const r = data
+  return {
+    id: r.id,
+    profileId: r.profile_id,
+    year: r.year,
+    title: r.title,
+    description: r.description ?? undefined,
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }
+}
+
+export async function supabaseUpdateBioTimeline(
+  entryId: string,
+  input: UpsertBioTimelineInput
+): Promise<ArtistBioTimelineEntry> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_bio_timeline_entries')
+    .update({
+      year: input.year,
+      title: input.title.trim(),
+      description: input.description?.trim() || null,
+    })
+    .eq('id', entryId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  const r = data
+  return {
+    id: r.id,
+    profileId: r.profile_id,
+    year: r.year,
+    title: r.title,
+    description: r.description ?? undefined,
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }
+}
+
+export async function supabaseDeleteBioTimeline(id: string) {
+  const supabase = getSupabase()
+  const { error } = await supabase.from('artist_bio_timeline_entries').delete().eq('id', id)
+  if (error) throw new Error(error.message)
 }
 
 export async function supabaseAddVideo(

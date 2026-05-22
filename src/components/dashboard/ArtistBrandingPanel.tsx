@@ -2,6 +2,11 @@ import { useState } from 'react'
 import clsx from 'clsx'
 import type { ArtistThemePreset } from '@/lib/artist-profile/branding'
 import {
+  HERO_LAYOUT_PRESETS,
+  heroLayoutClass,
+  type HeroLayout,
+} from '@/lib/artist-profile/heroLayout'
+import {
   ACCENT_SWATCHES,
   ARTIST_THEME_PRESETS,
   artistBrandingStyle,
@@ -18,9 +23,11 @@ interface ArtistBrandingPanelProps {
   displayName: string
   bannerUrl?: string
   heroVideoUrl?: string
+  heroLayout: HeroLayout
   onAccentChange: (hex: string) => void
   onThemeChange: (preset: ArtistThemePreset) => void
   onHeroVideoChange: (url: string) => void
+  onHeroLayoutChange: (layout: HeroLayout) => void
 }
 
 export function ArtistBrandingPanel({
@@ -29,9 +36,11 @@ export function ArtistBrandingPanel({
   displayName,
   bannerUrl,
   heroVideoUrl = '',
+  heroLayout,
   onAccentChange,
   onThemeChange,
   onHeroVideoChange,
+  onHeroLayoutChange,
 }: ArtistBrandingPanelProps) {
   const [matching, setMatching] = useState(false)
   const [matchNote, setMatchNote] = useState('')
@@ -132,6 +141,26 @@ export function ArtistBrandingPanel({
       </div>
 
       <div>
+        <FieldLabel>Hero layout</FieldLabel>
+        <div className="grid sm:grid-cols-2 gap-3 mt-2">
+          {HERO_LAYOUT_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => onHeroLayoutChange(preset.id)}
+              className={clsx(
+                'artist-branding-theme-card text-left',
+                heroLayout === preset.id && 'artist-branding-theme-card-active'
+              )}
+            >
+              <span className="font-display font-bold text-sm uppercase">{preset.label}</span>
+              <span className="text-xs text-muted mt-1 block leading-snug">{preset.description}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
         <FieldLabel>Theme preset</FieldLabel>
         <div className="grid sm:grid-cols-2 gap-3 mt-2">
           {ARTIST_THEME_PRESETS.map((preset) => (
@@ -159,11 +188,11 @@ export function ArtistBrandingPanel({
       <div>
         <FieldLabel>Live preview</FieldLabel>
         <div
-          className={`artist-site ${artistSiteThemeClass(themePreset)}`}
+          className={`artist-site ${artistSiteThemeClass(themePreset)} ${heroLayoutClass(heroLayout)}`}
           style={previewStyle}
           aria-hidden
         >
-          <div className="artist-branding-preview">
+          <div className={clsx('artist-branding-preview', `artist-branding-preview-${heroLayout}`)}>
             <div className="artist-branding-preview-hero">
               <span className="artist-site-pill">Genre</span>
               <p className="artist-branding-preview-name">{displayName || 'Your band'}</p>

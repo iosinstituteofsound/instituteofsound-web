@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { ArtistAlbum, ArtistProfilePageData, ArtistTrack, ArtistVideo } from '@/lib/artist-profile/types'
-import {
-  STREAM_PLATFORM_LABEL,
-  streamPlatform,
-} from '@/lib/artist-profile/streamPlatform'
-import { CoverArt, formatPlayCount } from './CoverArt'
-import { ArtistStreamEmbed } from './ArtistStreamEmbed'
+import { CoverArt } from './CoverArt'
+import { ArtistPickPlayer } from './ArtistPickPlayer'
+import { TrackListWithPlayers } from './TrackListWithPlayers'
+import { ArtistLineupSection } from './ArtistLineupSection'
+import { ArtistStorySection, hasArtistStory } from './ArtistStorySection'
+import { ArtistMerchSection } from './ArtistMerchSection'
+import { ArtistPressKitSection } from './ArtistPressKitSection'
 import { ArtistSiteHero } from './ArtistSiteHero'
-import { getStreamEmbed } from '@/lib/artist-profile/embed'
 import { ArtistSiteStickyNav, type ArtistSiteNavItem } from './ArtistSiteStickyNav'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import { artistBrandingStyle, artistSiteThemeClass } from '@/lib/artist-profile/branding'
@@ -16,6 +16,7 @@ import { artistBrandingStyle, artistSiteThemeClass } from '@/lib/artist-profile/
 interface ArtistProfilePageViewProps {
   data: ArtistProfilePageData
   isOwner?: boolean
+  viewerUserId?: string
 }
 
 const sectionMotion = {
@@ -25,10 +26,16 @@ const sectionMotion = {
   transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const },
 }
 
-export function ArtistProfilePageView({ data, isOwner }: ArtistProfilePageViewProps) {
-  const { profile, tracks, albums, singles, videos, editorial, pickTrack } = data
+export function ArtistProfilePageView({ data, isOwner, viewerUserId }: ArtistProfilePageViewProps) {
+  const { profile, tracks, albums, singles, videos, merch, lineup, bioTimeline, editorial, pickTrack } =
+    data
+  const analyticsCtx = {
+    profileId: profile.id,
+    published: profile.published,
+    viewerUserId,
+    ownerUserId: profile.userId,
+  }
   const listenTrack = pickTrack ?? tracks[0]
-  const featuredEmbed = listenTrack ? getStreamEmbed(listenTrack.streamUrl, listenTrack.title) : null
   const latestAlbum = albums[0]
   const latestSingle = singles[0]
 
@@ -39,7 +46,10 @@ export function ArtistProfilePageView({ data, isOwner }: ArtistProfilePageViewPr
       ? [{ id: 'releases', label: 'Releases' }]
       : []),
     ...(videos.length > 0 ? [{ id: 'videos', label: 'Videos' }] : []),
-    ...(profile.bio ? [{ id: 'about', label: 'Story' }] : []),
+    ...(merch.length > 0 ? [{ id: 'merch', label: 'Merch' }] : []),
+    ...(profile.pressKitUrl ? [{ id: 'press-kit', label: 'Press kit' }] : []),
+    ...(lineup.length > 0 ? [{ id: 'lineup', label: 'Lineup' }] : []),
+    ...(hasArtistStory(profile, bioTimeline) ? [{ id: 'about', label: 'Story' }] : []),
     ...(editorial.length > 0 ? [{ id: 'press', label: 'Press' }] : []),
   ]
 
@@ -77,25 +87,18 @@ export function ArtistProfilePageView({ data, isOwner }: ArtistProfilePageViewPr
           <motion.section id="music" {...sectionMotion} className="artist-site-section">
             <SectionHeader
               title="Music"
-              subtitle={
-                featuredEmbed
-                  ? 'Play here — or open any track on your platform of choice.'
-                  : 'Stream the catalog — every link opens on the artist’s platform.'
-              }
+              subtitle="▶ dabao — player slide open hoga. Spotify, YouTube, SoundCloud."
             />
-            {listenTrack && featuredEmbed && (
-              <ArtistStreamEmbed
-                streamUrl={listenTrack.streamUrl}
-                title={listenTrack.title}
-                className="mb-8"
-              />
-            )}
             <div className="artist-site-music-grid">
               <div className="artist-site-track-panel">
-                <TrackList tracks={tracks} />
+                <TrackListWithPlayers tracks={tracks} {...analyticsCtx} />
               </div>
               <aside className="artist-site-pick-panel">
-                <ArtistPickCard profileName={profile.displayName} track={pickTrack ?? tracks[0]} />
+                <ArtistPickCard
+                  profileName={profile.displayName}
+                  track={pickTrack ?? tracks[0]}
+                  analytics={analyticsCtx}
+                />
               </aside>
             </div>
           </motion.section>
@@ -117,21 +120,13 @@ export function ArtistProfilePageView({ data, isOwner }: ArtistProfilePageViewPr
           </motion.section>
         )}
 
-        {profile.bio && (
-          <motion.section id="about" {...sectionMotion} className="artist-site-section">
-            <div className="artist-site-story">
-              <p className="artist-site-eyebrow">The story</p>
-              {profile.tagline && (
-                <blockquote className="artist-site-story-quote font-serif">
-                  {profile.tagline}
-                </blockquote>
-              )}
-              <div className="artist-site-story-body">
-                <p className="whitespace-pre-wrap">{profile.bio}</p>
-              </div>
-            </div>
-          </motion.section>
-        )}
+        <ArtistMerchSection items={merch} />
+
+        <ArtistPressKitSection profile={profile} />
+
+        <ArtistLineupSection entries={lineup} />
+
+        <ArtistStorySection profile={profile} bioTimeline={bioTimeline} />
 
         {editorial.length > 0 && (
           <motion.section id="press" {...sectionMotion} className="artist-site-section">
@@ -223,50 +218,19 @@ function FeaturedRelease({
   )
 }
 
-function TrackList({ tracks }: { tracks: ArtistTrack[] }) {
-  return (
-    <ol className="artist-site-track-list">
-      {tracks.map((track, i) => {
-        const platform = streamPlatform(track.streamUrl)
-        return (
-          <li key={track.id}>
-            <a
-              href={track.streamUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="artist-site-track"
-            >
-              <span className="artist-site-track-index">{String(i + 1).padStart(2, '0')}</span>
-              <CoverArt
-                src={track.coverUrl}
-                alt=""
-                size="sm"
-                className="artist-site-track-thumb"
-              />
-              <span className="artist-site-track-main">
-                <span className="artist-site-track-title">{track.title}</span>
-                <span className="artist-site-track-platform">
-                  {STREAM_PLATFORM_LABEL[platform]}
-                </span>
-              </span>
-              <span className="artist-site-track-plays">{formatPlayCount(track.playCount)}</span>
-              <span className="artist-site-track-play" aria-hidden>
-                ▶
-              </span>
-            </a>
-          </li>
-        )
-      })}
-    </ol>
-  )
-}
-
 function ArtistPickCard({
   profileName,
   track,
+  analytics,
 }: {
   profileName: string
   track?: ArtistTrack
+  analytics: {
+    profileId: string
+    published: boolean
+    viewerUserId?: string
+    ownerUserId: string
+  }
 }) {
   if (!track) {
     return (
@@ -278,27 +242,7 @@ function ArtistPickCard({
     )
   }
 
-  return (
-    <div className="artist-site-pick">
-      <p className="artist-site-eyebrow">Artist pick</p>
-      <p className="artist-site-pick-by">Curated by {profileName}</p>
-      <a
-        href={track.streamUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="artist-site-pick-link group"
-      >
-        <div className="artist-site-pick-visual">
-          <CoverArt src={track.coverUrl} alt={track.title} size="pick" />
-          <span className="artist-site-pick-play" aria-hidden>
-            ▶
-          </span>
-        </div>
-        <h3 className="artist-site-pick-title">{track.title}</h3>
-        <span className="artist-site-pick-cta">Play on {STREAM_PLATFORM_LABEL[streamPlatform(track.streamUrl)]} →</span>
-      </a>
-    </div>
-  )
+  return <ArtistPickPlayer profileName={profileName} track={track} {...analytics} />
 }
 
 function DiscographyCarousel({

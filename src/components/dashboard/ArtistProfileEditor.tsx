@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { User } from '@/lib/auth/types'
-import type { ArtistAlbum, ArtistProfile, ArtistTrack, ArtistVideo } from '@/lib/artist-profile/types'
+import type {
+  ArtistAlbum,
+  ArtistBioTimelineEntry,
+  ArtistLineupEntry,
+  ArtistMerchItem,
+  ArtistProfile,
+  ArtistTrack,
+  ArtistVideo,
+} from '@/lib/artist-profile/types'
 import {
   addArtistAlbum,
   addArtistTrack,
@@ -11,11 +19,15 @@ import {
 } from '@/lib/artist-profile/service'
 import {
   localGetAlbums,
+  localGetBioTimeline,
+  localGetLineup,
+  localGetMerch,
   localGetTracks,
   localGetVideos,
 } from '@/lib/artist-profile/storage'
 import { isSupabaseConfigured } from '@/lib/supabase/client'
 import * as sb from '@/lib/artist-profile/supabaseProfile'
+import { normalizeInfluenceTags } from '@/lib/artist-profile/influences'
 import { slugifyArtistName } from '@/lib/artist-profile/slug'
 import {
   evaluateProfileCompleteness,
@@ -38,11 +50,21 @@ import {
   EditableVideoRow,
 } from '@/components/dashboard/ArtistMediaEditors'
 import { ArtistBrandingPanel } from '@/components/dashboard/ArtistBrandingPanel'
+import { ArtistProfileAnalyticsPanel } from '@/components/dashboard/ArtistProfileAnalytics'
+import { ArtistBioTimelineEditor } from '@/components/dashboard/ArtistBioTimelineEditor'
+import { ArtistLineupEditor } from '@/components/dashboard/ArtistLineupEditor'
+import { ArtistMerchEditor } from '@/components/dashboard/ArtistMerchEditor'
+import { ArtistPressKitEditor } from '@/components/dashboard/ArtistPressKitEditor'
+import { ArtistProfileQrCard } from '@/components/dashboard/ArtistProfileQrCard'
 import {
   DEFAULT_ACCENT_COLOR,
   DEFAULT_THEME_PRESET,
   type ArtistThemePreset,
 } from '@/lib/artist-profile/branding'
+import {
+  DEFAULT_HERO_LAYOUT,
+  type HeroLayout,
+} from '@/lib/artist-profile/heroLayout'
 import {
   DEFAULT_SOCIAL_LINK_ORDER,
   type SocialLinkKey,
@@ -58,6 +80,9 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [tracks, setTracks] = useState<ArtistTrack[]>([])
   const [albums, setAlbums] = useState<ArtistAlbum[]>([])
   const [videos, setVideos] = useState<ArtistVideo[]>([])
+  const [merch, setMerch] = useState<ArtistMerchItem[]>([])
+  const [lineup, setLineup] = useState<ArtistLineupEntry[]>([])
+  const [bioTimeline, setBioTimeline] = useState<ArtistBioTimelineEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -68,6 +93,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [tagline, setTagline] = useState('')
   const [bio, setBio] = useState('')
   const [genresText, setGenresText] = useState('')
+  const [influencesText, setInfluencesText] = useState('')
   const [country, setCountry] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [bannerUrl, setBannerUrl] = useState('')
@@ -84,6 +110,9 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [accentColor, setAccentColor] = useState(DEFAULT_ACCENT_COLOR)
   const [themePreset, setThemePreset] = useState<ArtistThemePreset>(DEFAULT_THEME_PRESET)
   const [heroVideoUrl, setHeroVideoUrl] = useState('')
+  const [heroLayout, setHeroLayout] = useState<HeroLayout>(DEFAULT_HERO_LAYOUT)
+  const [pressKitUrl, setPressKitUrl] = useState('')
+  const [pressKitLabel, setPressKitLabel] = useState('')
   const [socialLinkOrder, setSocialLinkOrder] = useState<SocialLinkKey[]>(
     [...DEFAULT_SOCIAL_LINK_ORDER]
   )
@@ -102,18 +131,27 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
 
   const loadChildData = useCallback(async (profileId: string) => {
     if (isSupabaseConfigured()) {
-      const [t, a, v] = await Promise.all([
+      const [t, a, v, m, l, bt] = await Promise.all([
         sb.supabaseGetTracks(profileId),
         sb.supabaseGetAlbums(profileId),
         sb.supabaseGetVideos(profileId),
+        sb.supabaseGetMerch(profileId),
+        sb.supabaseGetLineup(profileId),
+        sb.supabaseGetBioTimeline(profileId),
       ])
       setTracks(t)
       setAlbums(a)
       setVideos(v)
+      setMerch(m)
+      setLineup(l)
+      setBioTimeline(bt)
     } else {
       setTracks(localGetTracks(profileId))
       setAlbums(localGetAlbums(profileId))
       setVideos(localGetVideos(profileId))
+      setMerch(localGetMerch(profileId))
+      setLineup(localGetLineup(profileId))
+      setBioTimeline(localGetBioTimeline(profileId))
     }
   }, [])
 
@@ -128,6 +166,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         setTagline(p.tagline ?? '')
         setBio(p.bio ?? '')
         setGenresText(p.genres.join(', '))
+        setInfluencesText(p.influenceTags.join(', '))
         setCountry(p.country ?? '')
         setAvatarUrl(p.avatarUrl ?? '')
         setBannerUrl(p.bannerUrl ?? '')
@@ -144,7 +183,10 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         setAccentColor(p.accentColor)
         setThemePreset(p.themePreset)
         setHeroVideoUrl(p.heroVideoUrl ?? '')
+        setHeroLayout(p.heroLayout)
         setSocialLinkOrder(p.socialLinkOrder)
+        setPressKitUrl(p.pressKitUrl ?? '')
+        setPressKitLabel(p.pressKitLabel ?? '')
         await loadChildData(p.id)
       } else {
         setSlug(slugifyArtistName(user.name))
@@ -186,6 +228,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       .split(',')
       .map((g) => g.trim())
       .filter(Boolean)
+    const influenceTags = normalizeInfluenceTags(influencesText)
     const completeness = evaluateProfileCompleteness(
       buildCompletenessInput(mediaCounts?.trackCount, mediaCounts?.videoCount)
     )
@@ -195,6 +238,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       tagline,
       bio,
       genres,
+      influenceTags,
       country,
       avatarUrl,
       bannerUrl,
@@ -205,7 +249,10 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       accentColor,
       themePreset,
       heroVideoUrl: heroVideoUrl || undefined,
+      heroLayout,
       socialLinkOrder,
+      pressKitUrl: pressKitUrl.trim() || undefined,
+      pressKitLabel: pressKitLabel.trim() || undefined,
       social: { spotify, youtube, instagram, facebook, bandcamp, website },
     })
     setProfile(updated)
@@ -355,6 +402,15 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       </p>
 
       {profile && (
+        <ArtistProfileAnalyticsPanel
+          profileId={profile.id}
+          profileSlug={profileSlug}
+          published={published}
+          tracks={tracks}
+        />
+      )}
+
+      {profile && (
         <div className="flex flex-wrap gap-3 items-center">
           <MetalBadge variant={published ? 'live' : 'crimson'}>
             {published ? 'Live' : 'Draft'}
@@ -401,6 +457,26 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           />
         </div>
         <div>
+          <FieldLabel>Influences (comma separated)</FieldLabel>
+          <Input
+            value={influencesText}
+            onChange={(e) => setInfluencesText(e.target.value)}
+            placeholder="Mayhem, Burzum, Swans, dark ambient…"
+          />
+          {normalizeInfluenceTags(influencesText).length > 0 && (
+            <ul className="flex flex-wrap gap-1.5 mt-2">
+              {normalizeInfluenceTags(influencesText).map((tag) => (
+                <li
+                  key={tag}
+                  className="text-[10px] uppercase tracking-wider px-2 py-0.5 border border-border text-muted-foreground"
+                >
+                  {tag}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div>
           <FieldLabel>Country</FieldLabel>
           <Input value={country} onChange={(e) => setCountry(e.target.value)} />
         </div>
@@ -440,15 +516,42 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         </div>
       </section>
 
+      {profile && (
+        <ArtistBioTimelineEditor
+          profileId={profile.id}
+          entries={bioTimeline}
+          onChanged={async () => {
+            if (profile) await loadChildData(profile.id)
+            setMessage('Timeline updated.')
+          }}
+        />
+      )}
+
       <ArtistBrandingPanel
         accentColor={accentColor}
         themePreset={themePreset}
         displayName={displayName}
         bannerUrl={bannerUrl}
         heroVideoUrl={heroVideoUrl}
+        heroLayout={heroLayout}
         onAccentChange={setAccentColor}
         onThemeChange={setThemePreset}
         onHeroVideoChange={setHeroVideoUrl}
+        onHeroLayoutChange={setHeroLayout}
+      />
+
+      <ArtistProfileQrCard
+        slug={profileSlug}
+        displayName={displayName}
+        accentColor={accentColor}
+        published={published}
+      />
+
+      <ArtistPressKitEditor
+        pressKitUrl={pressKitUrl}
+        pressKitLabel={pressKitLabel}
+        onUrlChange={setPressKitUrl}
+        onLabelChange={setPressKitLabel}
       />
 
       <section className="ios-panel space-y-4">
@@ -686,6 +789,28 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           </ul>
         )}
       </section>
+
+      {profile && (
+        <ArtistMerchEditor
+          profileId={profile.id}
+          items={merch}
+          onChanged={async () => {
+            if (profile) await loadChildData(profile.id)
+            setMessage('Merch updated.')
+          }}
+        />
+      )}
+
+      {profile && (
+        <ArtistLineupEditor
+          profileId={profile.id}
+          entries={lineup}
+          onChanged={async () => {
+            if (profile) await loadChildData(profile.id)
+            setMessage('Lineup updated.')
+          }}
+        />
+      )}
 
       <section className="ios-panel space-y-4">
         <p className="ios-kicker">Videos</p>

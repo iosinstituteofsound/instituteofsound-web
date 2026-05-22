@@ -4,10 +4,16 @@ import type {
   ArtistEditorialFeature,
   ArtistProfile,
   ArtistProfilePageData,
+  ArtistBioTimelineEntry,
+  ArtistLineupEntry,
+  ArtistMerchItem,
   ArtistTrack,
   ArtistVideo,
   UpsertAlbumInput,
   UpsertArtistProfileInput,
+  UpsertBioTimelineInput,
+  UpsertLineupInput,
+  UpsertMerchInput,
   UpsertTrackInput,
   UpsertVideoInput,
 } from './types'
@@ -17,6 +23,9 @@ import {
   resolveAccentColor,
   resolveThemePreset,
 } from './branding'
+import { resolveHeroLayout } from './heroLayout'
+import { normalizeInfluenceTags } from './influences'
+import { resolveLineupEntryType } from './lineup'
 import { normalizeSocialLinkOrder } from './socialOrder'
 import { ensureUniqueSlug, slugifyArtistName } from './slug'
 
@@ -24,6 +33,9 @@ const PROFILES_KEY = 'ios_artist_profiles'
 const ALBUMS_KEY = 'ios_artist_albums'
 const TRACKS_KEY = 'ios_artist_tracks'
 const VIDEOS_KEY = 'ios_artist_videos'
+const MERCH_KEY = 'ios_artist_merch'
+const LINEUP_KEY = 'ios_artist_lineup'
+const BIO_TIMELINE_KEY = 'ios_artist_bio_timeline'
 const EDITORIAL_LINK_KEY = 'ios_artist_editorial'
 
 function read<T>(key: string, fallback: T): T {
@@ -46,9 +58,11 @@ function now() {
 export function localGetProfiles(): ArtistProfile[] {
   return read<Partial<ArtistProfile>[]>(PROFILES_KEY, []).map((p) => ({
     ...(p as ArtistProfile),
+    influenceTags: normalizeInfluenceTags((p as ArtistProfile).influenceTags ?? []),
     accentColor: resolveAccentColor((p as ArtistProfile).accentColor),
     themePreset: resolveThemePreset((p as ArtistProfile).themePreset),
     socialLinkOrder: normalizeSocialLinkOrder((p as ArtistProfile).socialLinkOrder),
+    heroLayout: resolveHeroLayout((p as ArtistProfile).heroLayout),
   }))
 }
 
@@ -78,6 +92,25 @@ export function localGetTracks(profileId?: string): ArtistTrack[] {
 export function localGetVideos(profileId?: string): ArtistVideo[] {
   const all = read<ArtistVideo[]>(VIDEOS_KEY, [])
   return profileId ? all.filter((v) => v.profileId === profileId) : all
+}
+
+export function localGetMerch(profileId?: string): ArtistMerchItem[] {
+  const all = read<ArtistMerchItem[]>(MERCH_KEY, [])
+  return profileId ? all.filter((m) => m.profileId === profileId) : all
+}
+
+export function localGetBioTimeline(profileId?: string): ArtistBioTimelineEntry[] {
+  const all = read<ArtistBioTimelineEntry[]>(BIO_TIMELINE_KEY, [])
+  const list = profileId ? all.filter((e) => e.profileId === profileId) : all
+  return list.sort((a, b) => a.year - b.year || a.sortOrder - b.sortOrder)
+}
+
+export function localGetLineup(profileId?: string): ArtistLineupEntry[] {
+  const all = read<ArtistLineupEntry[]>(LINEUP_KEY, [])
+  const list = profileId ? all.filter((e) => e.profileId === profileId) : all
+  return list
+    .map((e) => ({ ...e, entryType: resolveLineupEntryType(e.entryType) }))
+    .sort((a, b) => a.sortOrder - b.sortOrder)
 }
 
 export function localGetEditorialLinks(): Record<string, string[]> {
@@ -116,6 +149,10 @@ export function localUpsertProfile(
     bannerUrl: input.bannerUrl,
     logoUrl: input.logoUrl,
     genres: input.genres ?? existing?.genres ?? [],
+    influenceTags:
+      input.influenceTags !== undefined
+        ? normalizeInfluenceTags(input.influenceTags)
+        : normalizeInfluenceTags(existing?.influenceTags ?? []),
     country: input.country,
     social: input.social ?? existing?.social ?? {},
     monthlyListenersDisplay:
@@ -136,10 +173,22 @@ export function localUpsertProfile(
       input.heroVideoUrl !== undefined
         ? input.heroVideoUrl?.trim() || undefined
         : existing?.heroVideoUrl,
+    heroLayout:
+      input.heroLayout !== undefined
+        ? resolveHeroLayout(input.heroLayout)
+        : resolveHeroLayout(existing?.heroLayout),
     socialLinkOrder:
       input.socialLinkOrder !== undefined
         ? normalizeSocialLinkOrder(input.socialLinkOrder)
         : normalizeSocialLinkOrder(existing?.socialLinkOrder),
+    pressKitUrl:
+      input.pressKitUrl !== undefined
+        ? input.pressKitUrl?.trim() || undefined
+        : existing?.pressKitUrl,
+    pressKitLabel:
+      input.pressKitLabel !== undefined
+        ? input.pressKitLabel?.trim() || undefined
+        : existing?.pressKitLabel,
     published: input.published ?? existing?.published ?? false,
     createdAt: existing?.createdAt ?? now(),
     updatedAt: now(),
@@ -188,6 +237,140 @@ export function localAddTrack(profileId: string, input: UpsertTrackInput): Artis
   tracks.push(track)
   write(TRACKS_KEY, tracks)
   return track
+}
+
+export function localAddMerch(profileId: string, input: UpsertMerchInput): ArtistMerchItem {
+  const items = localGetMerch()
+  const item: ArtistMerchItem = {
+    id: crypto.randomUUID(),
+    profileId,
+    title: input.title.trim(),
+    productUrl: input.productUrl.trim(),
+    imageUrl: input.imageUrl?.trim() || undefined,
+    priceDisplay: input.priceDisplay?.trim() || undefined,
+    showPrice: input.showPrice ?? true,
+    sortOrder: items.filter((m) => m.profileId === profileId).length,
+    createdAt: now(),
+  }
+  items.push(item)
+  write(MERCH_KEY, items)
+  return item
+}
+
+export function localUpdateMerch(merchId: string, input: UpsertMerchInput): ArtistMerchItem {
+  const items = localGetMerch()
+  const idx = items.findIndex((m) => m.id === merchId)
+  if (idx < 0) throw new Error('Merch item not found')
+  const existing = items[idx]
+  const updated: ArtistMerchItem = {
+    ...existing,
+    title: input.title.trim() || existing.title,
+    productUrl: input.productUrl.trim() || existing.productUrl,
+    imageUrl: input.imageUrl !== undefined ? input.imageUrl?.trim() || undefined : existing.imageUrl,
+    priceDisplay:
+      input.priceDisplay !== undefined
+        ? input.priceDisplay?.trim() || undefined
+        : existing.priceDisplay,
+    showPrice: input.showPrice ?? existing.showPrice,
+  }
+  items[idx] = updated
+  write(MERCH_KEY, items)
+  return updated
+}
+
+export function localDeleteMerch(id: string) {
+  write(
+    MERCH_KEY,
+    localGetMerch().filter((m) => m.id !== id)
+  )
+}
+
+export function localAddLineup(profileId: string, input: UpsertLineupInput): ArtistLineupEntry {
+  const entries = localGetLineup()
+  const entry: ArtistLineupEntry = {
+    id: crypto.randomUUID(),
+    profileId,
+    name: input.name.trim(),
+    role: input.role.trim(),
+    entryType: resolveLineupEntryType(input.entryType),
+    sortOrder: entries.filter((e) => e.profileId === profileId).length,
+    createdAt: now(),
+  }
+  const all = read<ArtistLineupEntry[]>(LINEUP_KEY, [])
+  all.push(entry)
+  write(LINEUP_KEY, all)
+  return entry
+}
+
+export function localUpdateLineup(entryId: string, input: UpsertLineupInput): ArtistLineupEntry {
+  const all = read<ArtistLineupEntry[]>(LINEUP_KEY, [])
+  const idx = all.findIndex((e) => e.id === entryId)
+  if (idx < 0) throw new Error('Lineup entry not found')
+  const existing = all[idx]
+  const updated: ArtistLineupEntry = {
+    ...existing,
+    name: input.name.trim() || existing.name,
+    role: input.role.trim() || existing.role,
+    entryType: input.entryType !== undefined ? resolveLineupEntryType(input.entryType) : existing.entryType,
+  }
+  all[idx] = updated
+  write(LINEUP_KEY, all)
+  return updated
+}
+
+export function localDeleteLineup(id: string) {
+  write(
+    LINEUP_KEY,
+    read<ArtistLineupEntry[]>(LINEUP_KEY, []).filter((e) => e.id !== id)
+  )
+}
+
+export function localAddBioTimeline(
+  profileId: string,
+  input: UpsertBioTimelineInput
+): ArtistBioTimelineEntry {
+  const all = read<ArtistBioTimelineEntry[]>(BIO_TIMELINE_KEY, [])
+  const entry: ArtistBioTimelineEntry = {
+    id: crypto.randomUUID(),
+    profileId,
+    year: input.year,
+    title: input.title.trim(),
+    description: input.description?.trim() || undefined,
+    sortOrder: all.filter((e) => e.profileId === profileId).length,
+    createdAt: now(),
+  }
+  all.push(entry)
+  write(BIO_TIMELINE_KEY, all)
+  return entry
+}
+
+export function localUpdateBioTimeline(
+  entryId: string,
+  input: UpsertBioTimelineInput
+): ArtistBioTimelineEntry {
+  const all = read<ArtistBioTimelineEntry[]>(BIO_TIMELINE_KEY, [])
+  const idx = all.findIndex((e) => e.id === entryId)
+  if (idx < 0) throw new Error('Timeline entry not found')
+  const existing = all[idx]
+  const updated: ArtistBioTimelineEntry = {
+    ...existing,
+    year: input.year,
+    title: input.title.trim() || existing.title,
+    description:
+      input.description !== undefined
+        ? input.description?.trim() || undefined
+        : existing.description,
+  }
+  all[idx] = updated
+  write(BIO_TIMELINE_KEY, all)
+  return updated
+}
+
+export function localDeleteBioTimeline(id: string) {
+  write(
+    BIO_TIMELINE_KEY,
+    read<ArtistBioTimelineEntry[]>(BIO_TIMELINE_KEY, []).filter((e) => e.id !== id)
+  )
 }
 
 export function localAddVideo(profileId: string, input: UpsertVideoInput): ArtistVideo {
@@ -299,6 +482,9 @@ export function localGetPageData(
     (a) => a.releaseType === 'single' || a.releaseType === 'ep'
   )
   const videos = localGetVideos(profile.id)
+  const merch = localGetMerch(profile.id)
+  const lineup = localGetLineup(profile.id)
+  const bioTimeline = localGetBioTimeline(profile.id)
   const pickTrack = profile.artistPickTrackId
     ? tracks.find((t) => t.id === profile.artistPickTrackId)
     : tracks[0]
@@ -309,6 +495,9 @@ export function localGetPageData(
     albums,
     singles,
     videos,
+    merch,
+    lineup,
+    bioTimeline,
     editorial,
     pickTrack,
   }

@@ -10,6 +10,9 @@ import type {
   ArtistProfilePageData,
   UpsertAlbumInput,
   UpsertArtistProfileInput,
+  UpsertBioTimelineInput,
+  UpsertLineupInput,
+  UpsertMerchInput,
   UpsertTrackInput,
   UpsertVideoInput,
 } from './types'
@@ -79,12 +82,16 @@ export async function getArtistProfilePage(slug: string): Promise<ArtistProfileP
   if (isSupabaseConfigured()) {
     const profile = await sb.supabaseGetProfileBySlug(slug)
     if (!profile) return null
-    const [tracks, albums, videos, editorialRows] = await Promise.all([
-      sb.supabaseGetTracks(profile.id),
-      sb.supabaseGetAlbums(profile.id),
-      sb.supabaseGetVideos(profile.id),
-      sb.supabaseGetEditorialForProfile(profile.id),
-    ])
+    const [tracks, albums, videos, merch, lineup, bioTimeline, editorialRows] =
+      await Promise.all([
+        sb.supabaseGetTracks(profile.id),
+        sb.supabaseGetAlbums(profile.id),
+        sb.supabaseGetVideos(profile.id),
+        sb.supabaseGetMerch(profile.id),
+        sb.supabaseGetLineup(profile.id),
+        sb.supabaseGetBioTimeline(profile.id),
+        sb.supabaseGetEditorialForProfile(profile.id),
+      ])
     const [enrichedTracks, enrichedVideos] = await Promise.all([
       enrichTracksWithThumbnails(tracks, true),
       enrichVideosWithThumbnails(videos, true),
@@ -100,6 +107,9 @@ export async function getArtistProfilePage(slug: string): Promise<ArtistProfileP
       albums: albumList,
       singles,
       videos: enrichedVideos,
+      merch,
+      lineup,
+      bioTimeline,
       editorial: mapEditorial(editorialRows),
       pickTrack,
     }
@@ -147,6 +157,12 @@ async function videoWithThumbnail(input: UpsertVideoInput): Promise<UpsertVideoI
   return thumbnailUrl ? { ...input, thumbnailUrl } : input
 }
 
+async function merchWithThumbnail(input: UpsertMerchInput): Promise<UpsertMerchInput> {
+  if (input.imageUrl?.trim() || !input.productUrl?.trim()) return input
+  const imageUrl = await fetchThumbnailFromUrl(input.productUrl)
+  return imageUrl ? { ...input, imageUrl } : input
+}
+
 export async function addArtistTrack(profileId: string, input: UpsertTrackInput) {
   const enriched = await trackWithThumbnail(input)
   if (isSupabaseConfigured()) return sb.supabaseAddTrack(profileId, enriched)
@@ -189,6 +205,53 @@ export async function deleteArtistTrack(id: string) {
 export async function deleteArtistVideo(id: string) {
   if (isSupabaseConfigured()) return sb.supabaseDeleteVideo(id)
   local.localDeleteVideo(id)
+}
+
+export async function addArtistMerch(profileId: string, input: UpsertMerchInput) {
+  const enriched = await merchWithThumbnail(input)
+  if (isSupabaseConfigured()) return sb.supabaseAddMerch(profileId, enriched)
+  return local.localAddMerch(profileId, enriched)
+}
+
+export async function updateArtistMerch(merchId: string, input: UpsertMerchInput) {
+  const enriched = await merchWithThumbnail(input)
+  if (isSupabaseConfigured()) return sb.supabaseUpdateMerch(merchId, enriched)
+  return local.localUpdateMerch(merchId, enriched)
+}
+
+export async function deleteArtistMerch(id: string) {
+  if (isSupabaseConfigured()) return sb.supabaseDeleteMerch(id)
+  local.localDeleteMerch(id)
+}
+
+export async function addArtistLineup(profileId: string, input: UpsertLineupInput) {
+  if (isSupabaseConfigured()) return sb.supabaseAddLineup(profileId, input)
+  return local.localAddLineup(profileId, input)
+}
+
+export async function updateArtistLineup(entryId: string, input: UpsertLineupInput) {
+  if (isSupabaseConfigured()) return sb.supabaseUpdateLineup(entryId, input)
+  return local.localUpdateLineup(entryId, input)
+}
+
+export async function deleteArtistLineup(id: string) {
+  if (isSupabaseConfigured()) return sb.supabaseDeleteLineup(id)
+  local.localDeleteLineup(id)
+}
+
+export async function addArtistBioTimeline(profileId: string, input: UpsertBioTimelineInput) {
+  if (isSupabaseConfigured()) return sb.supabaseAddBioTimeline(profileId, input)
+  return local.localAddBioTimeline(profileId, input)
+}
+
+export async function updateArtistBioTimeline(entryId: string, input: UpsertBioTimelineInput) {
+  if (isSupabaseConfigured()) return sb.supabaseUpdateBioTimeline(entryId, input)
+  return local.localUpdateBioTimeline(entryId, input)
+}
+
+export async function deleteArtistBioTimeline(id: string) {
+  if (isSupabaseConfigured()) return sb.supabaseDeleteBioTimeline(id)
+  local.localDeleteBioTimeline(id)
 }
 
 export async function listArtistProfilesForEditor(): Promise<ArtistProfile[]> {
