@@ -4,6 +4,7 @@ import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { GrainOverlay } from '@/components/effects/GrainOverlay'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { ManifestoGateModal } from '@/components/ui/ManifestoGateModal'
 import { useLenis } from '@/hooks/useLenis'
 import { useContent } from '@/hooks/useContent'
 import { getNav, getFooter } from '@/api/endpoints'
@@ -29,6 +30,7 @@ export function Layout() {
 
   return (
     <>
+      <ManifestoGateModal />
       <GrainOverlay />
       {navLoading ? <div className="h-[72px]" /> : navLinks && <Navbar links={navLinks} />}
       <main className="ios-page-bg">
