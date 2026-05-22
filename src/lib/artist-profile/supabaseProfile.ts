@@ -10,6 +10,13 @@ import type {
   UpsertTrackInput,
   UpsertVideoInput,
 } from './types'
+import {
+  DEFAULT_ACCENT_COLOR,
+  DEFAULT_THEME_PRESET,
+  normalizeAccentColor,
+  resolveThemePreset,
+} from './branding'
+import { normalizeSocialLinkOrder } from './socialOrder'
 import { ensureUniqueSlug, slugifyArtistName } from './slug'
 
 type ProfileRow = {
@@ -32,6 +39,10 @@ type ProfileRow = {
   bandcamp_url: string | null
   monthly_listeners_display: string | null
   artist_pick_track_id: string | null
+  accent_color: string | null
+  theme_preset: string | null
+  hero_video_url: string | null
+  social_link_order: string[] | null
   published: boolean
   created_at: string
   updated_at: string
@@ -60,6 +71,10 @@ function mapProfile(row: ProfileRow): ArtistProfile {
     },
     monthlyListenersDisplay: row.monthly_listeners_display ?? '—',
     artistPickTrackId: row.artist_pick_track_id ?? undefined,
+    accentColor: row.accent_color ?? DEFAULT_ACCENT_COLOR,
+    themePreset: resolveThemePreset(row.theme_preset),
+    heroVideoUrl: row.hero_video_url ?? undefined,
+    socialLinkOrder: normalizeSocialLinkOrder(row.social_link_order),
     published: row.published,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -85,6 +100,11 @@ function profilePayload(input: UpsertArtistProfileInput, user: User) {
     bandcamp_url: social.bandcamp?.trim() || null,
     monthly_listeners_display: input.monthlyListenersDisplay?.trim() || '—',
     artist_pick_track_id: input.artistPickTrackId ?? null,
+    accent_color:
+      normalizeAccentColor(input.accentColor ?? '') ?? DEFAULT_ACCENT_COLOR,
+    theme_preset: input.themePreset ?? DEFAULT_THEME_PRESET,
+    hero_video_url: input.heroVideoUrl?.trim() || null,
+    social_link_order: normalizeSocialLinkOrder(input.socialLinkOrder),
     published: input.published ?? false,
     updated_at: new Date().toISOString(),
   }

@@ -1,3 +1,6 @@
+import type { ArtistThemePreset } from './branding'
+import type { SocialLinkKey } from './socialOrder'
+
 export interface ArtistSocialLinks {
   spotify?: string
   youtube?: string
@@ -22,6 +25,10 @@ export interface ArtistProfile {
   social: ArtistSocialLinks
   monthlyListenersDisplay: string
   artistPickTrackId?: string
+  accentColor: string
+  themePreset: ArtistThemePreset
+  heroVideoUrl?: string
+  socialLinkOrder: SocialLinkKey[]
   published: boolean
   createdAt: string
   updatedAt: string
@@ -94,6 +101,10 @@ export interface UpsertArtistProfileInput {
   social?: ArtistSocialLinks
   monthlyListenersDisplay?: string
   artistPickTrackId?: string | null
+  accentColor?: string
+  themePreset?: ArtistThemePreset
+  heroVideoUrl?: string
+  socialLinkOrder?: SocialLinkKey[]
   published?: boolean
 }
 

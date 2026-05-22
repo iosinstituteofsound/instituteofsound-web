@@ -1,46 +1,50 @@
 import type { ArtistSocialLinks } from '@/lib/artist-profile/types'
+import {
+  getOrderedSocialLinks,
+  type SocialLinkKey,
+} from '@/lib/artist-profile/socialOrder'
 import clsx from 'clsx'
-
-const networks = [
-  { key: 'spotify' as const, label: 'Spotify' },
-  { key: 'youtube' as const, label: 'YouTube' },
-  { key: 'instagram' as const, label: 'Instagram' },
-  { key: 'facebook' as const, label: 'Facebook' },
-  { key: 'bandcamp' as const, label: 'Bandcamp' },
-]
 
 interface SocialIconsProps {
   social: ArtistSocialLinks
+  socialLinkOrder?: SocialLinkKey[]
   className?: string
+  variant?: 'default' | 'hero'
 }
 
-export function SocialIcons({ social, className }: SocialIconsProps) {
-  const links = networks.filter((n) => social[n.key])
-  if (!links.length && !social.website) return null
+export function SocialIcons({
+  social,
+  socialLinkOrder,
+  className,
+  variant = 'default',
+}: SocialIconsProps) {
+  const links = getOrderedSocialLinks(social, socialLinkOrder)
+  if (links.length === 0) return null
+
+  const linkClass =
+    variant === 'hero' ? 'artist-site-social artist-site-social-hero' : 'artist-site-social'
 
   return (
     <div className={clsx('flex flex-wrap items-center gap-2', className)}>
-      {social.website && (
-        <a
-          href={social.website}
-          target="_blank"
-          rel="noreferrer"
-          className="ios-artist-social"
-          aria-label="Website"
-        >
-          WEB
-        </a>
-      )}
-      {links.map(({ key, label }) => (
+      {links.map(({ key, href, label, short }) => (
         <a
           key={key}
-          href={social[key]!}
+          href={href}
           target="_blank"
           rel="noreferrer"
-          className="ios-artist-social"
+          className={linkClass}
           aria-label={label}
         >
-          {label.slice(0, 2).toUpperCase()}
+          {key === 'website' ? (
+            <span className="artist-site-social-icon" aria-hidden>
+              ↗
+            </span>
+          ) : (
+            <span className="artist-site-social-badge" aria-hidden>
+              {short}
+            </span>
+          )}
+          {variant === 'hero' ? label : key === 'website' ? 'WEB' : short}
         </a>
       ))}
     </div>

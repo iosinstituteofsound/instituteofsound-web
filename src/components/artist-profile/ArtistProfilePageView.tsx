@@ -1,297 +1,373 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import type { ArtistProfilePageData } from '@/lib/artist-profile/types'
+import type { ArtistAlbum, ArtistProfilePageData, ArtistTrack, ArtistVideo } from '@/lib/artist-profile/types'
+import {
+  STREAM_PLATFORM_LABEL,
+  streamPlatform,
+} from '@/lib/artist-profile/streamPlatform'
 import { CoverArt, formatPlayCount } from './CoverArt'
-import { SocialIcons } from './SocialIcons'
+import { ArtistStreamEmbed } from './ArtistStreamEmbed'
+import { ArtistSiteHero } from './ArtistSiteHero'
+import { getStreamEmbed } from '@/lib/artist-profile/embed'
+import { ArtistSiteStickyNav, type ArtistSiteNavItem } from './ArtistSiteStickyNav'
 import { MetalBadge } from '@/components/ui/MetalBadge'
+import { artistBrandingStyle, artistSiteThemeClass } from '@/lib/artist-profile/branding'
+
 interface ArtistProfilePageViewProps {
   data: ArtistProfilePageData
   isOwner?: boolean
 }
 
+const sectionMotion = {
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: '-80px' },
+  transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const },
+}
+
 export function ArtistProfilePageView({ data, isOwner }: ArtistProfilePageViewProps) {
   const { profile, tracks, albums, singles, videos, editorial, pickTrack } = data
-  const popular = tracks.slice(0, 5)
+  const listenTrack = pickTrack ?? tracks[0]
+  const featuredEmbed = listenTrack ? getStreamEmbed(listenTrack.streamUrl, listenTrack.title) : null
   const latestAlbum = albums[0]
+  const latestSingle = singles[0]
+
+  const navItems: ArtistSiteNavItem[] = [
+    { id: 'overview', label: 'Overview' },
+    ...(tracks.length > 0 ? [{ id: 'music', label: 'Music' }] : []),
+    ...(albums.length > 0 || singles.length > 0
+      ? [{ id: 'releases', label: 'Releases' }]
+      : []),
+    ...(videos.length > 0 ? [{ id: 'videos', label: 'Videos' }] : []),
+    ...(profile.bio ? [{ id: 'about', label: 'Story' }] : []),
+    ...(editorial.length > 0 ? [{ id: 'press', label: 'Press' }] : []),
+  ]
+
+  const siteStyle = artistBrandingStyle(profile.accentColor, profile.themePreset)
 
   return (
-    <div className="ios-artist-profile bg-void min-h-screen">
-      <header className="ios-artist-hero relative">
-        <div className="absolute inset-0">
-          <CoverArt src={profile.bannerUrl} alt="" size="banner" className="opacity-40" />
-          <div className="absolute inset-0 bg-gradient-to-b from-void/30 via-void/80 to-void" />
-        </div>
+    <div
+      className={`artist-site ${artistSiteThemeClass(profile.themePreset)}`}
+      style={siteStyle}
+    >
+      <ArtistSiteHero
+        profile={profile}
+        listenTrack={listenTrack}
+        trackCount={tracks.length}
+        isOwner={isOwner}
+      />
 
-        <div className="relative z-10 section-padding pt-28 pb-10 max-w-6xl mx-auto">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="flex flex-wrap items-end gap-6">
-              <div className="ios-artist-avatar-ring shrink-0">
-                <CoverArt src={profile.avatarUrl} alt={profile.displayName} size="md" />
-              </div>
-              <div>
-                <p className="ios-kicker">Artist</p>
-                <h1 className="font-display text-4xl md:text-6xl font-extrabold uppercase tracking-tight mt-1">
-                  {profile.displayName}
-                </h1>
-                {profile.tagline && (
-                  <p className="text-muted text-sm mt-2 max-w-lg">{profile.tagline}</p>
-                )}
-              </div>
-            </div>
-            {profile.logoUrl ? (
-              <CoverArt
-                src={profile.logoUrl}
-                alt={`${profile.displayName} logo`}
-                size="sm"
-                className="!w-20 !h-20 rounded-none hidden md:block"
+      <ArtistSiteStickyNav items={navItems} artistName={profile.displayName} />
+
+      <div className="artist-site-body">
+        {(latestAlbum || latestSingle) && (
+          <motion.section
+            {...sectionMotion}
+            className="artist-site-featured-release"
+            aria-labelledby="featured-release"
+          >
+            <p id="featured-release" className="artist-site-eyebrow">
+              Latest release
+            </p>
+            <FeaturedRelease item={latestAlbum ?? latestSingle!} />
+          </motion.section>
+        )}
+
+        {tracks.length > 0 && (
+          <motion.section id="music" {...sectionMotion} className="artist-site-section">
+            <SectionHeader
+              title="Music"
+              subtitle={
+                featuredEmbed
+                  ? 'Play here — or open any track on your platform of choice.'
+                  : 'Stream the catalog — every link opens on the artist’s platform.'
+              }
+            />
+            {listenTrack && featuredEmbed && (
+              <ArtistStreamEmbed
+                streamUrl={listenTrack.streamUrl}
+                title={listenTrack.title}
+                className="mb-8"
               />
-            ) : (
-              <div className="ios-artist-logo-placeholder hidden md:flex">◆</div>
             )}
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center gap-6">
-            <div className="text-right">
-              <p className="text-[10px] tracking-[0.25em] uppercase text-muted">Monthly Listeners</p>
-              <p className="font-display text-2xl font-bold text-signal mt-1">
-                {profile.monthlyListenersDisplay}
-              </p>
+            <div className="artist-site-music-grid">
+              <div className="artist-site-track-panel">
+                <TrackList tracks={tracks} />
+              </div>
+              <aside className="artist-site-pick-panel">
+                <ArtistPickCard profileName={profile.displayName} track={pickTrack ?? tracks[0]} />
+              </aside>
             </div>
-            {isOwner && !profile.published && (
-              <MetalBadge variant="crimson">Draft — not public</MetalBadge>
+          </motion.section>
+        )}
+
+        {(albums.length > 0 || singles.length > 0) && (
+          <motion.section id="releases" {...sectionMotion} className="artist-site-section">
+            <DiscographyCarousel title="Albums" items={albums} />
+            {singles.length > 0 && (
+              <DiscographyCarousel title="Singles & EPs" items={singles} className="mt-14" />
             )}
-          </div>
+          </motion.section>
+        )}
 
-          <nav className="flex gap-8 mt-10 border-b border-border/80">
-            <span className="ios-artist-tab ios-artist-tab-active">Overview</span>
-            <span className="ios-artist-tab text-muted">About</span>
-          </nav>
-        </div>
-      </header>
+        {videos.length > 0 && (
+          <motion.section id="videos" {...sectionMotion} className="artist-site-section">
+            <SectionHeader title="Videos" subtitle="Visual transmissions." />
+            <VideoGallery videos={videos} />
+          </motion.section>
+        )}
 
-      <div className="section-padding pb-20 max-w-6xl mx-auto">
-        <section className="mb-10">
-          <div className="flex flex-wrap gap-2 mb-4">
-            {profile.genres.map((g) => (
-              <span key={g} className="ios-artist-tag">
-                {g}
-              </span>
-            ))}
-            {profile.country && (
-              <span className="ios-artist-tag ios-artist-tag-muted">{profile.country}</span>
-            )}
-          </div>
-          <SocialIcons social={profile.social} />
-        </section>
-
-        {latestAlbum && (
-          <section className="mb-12 flex flex-wrap items-center gap-4">
-            <CoverArt src={latestAlbum.coverUrl} alt={latestAlbum.title} size="sm" className="!w-16 !h-16" />
-            <div>
-              <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">Latest release</p>
-              <p className="font-semibold mt-1">{latestAlbum.title}</p>
-              {latestAlbum.releaseYear && (
-                <p className="text-xs text-muted mt-0.5">
-                  {new Date(latestAlbum.releaseYear, 0, 1).toLocaleString('en', {
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </p>
+        {profile.bio && (
+          <motion.section id="about" {...sectionMotion} className="artist-site-section">
+            <div className="artist-site-story">
+              <p className="artist-site-eyebrow">The story</p>
+              {profile.tagline && (
+                <blockquote className="artist-site-story-quote font-serif">
+                  {profile.tagline}
+                </blockquote>
               )}
+              <div className="artist-site-story-body">
+                <p className="whitespace-pre-wrap">{profile.bio}</p>
+              </div>
             </div>
-          </section>
+          </motion.section>
         )}
 
         {editorial.length > 0 && (
-          <section className="mb-14">
-            <h2 className="font-display text-2xl font-bold uppercase mb-6">Editorial Featured</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <motion.section id="press" {...sectionMotion} className="artist-site-section">
+            <SectionHeader title="Press & editorial" subtitle="Institute of Sound features." />
+            <div className="artist-site-press-grid">
               {editorial.map((item, i) => (
                 <motion.article
                   key={item.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="ios-artist-editorial-card group"
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.06, duration: 0.5 }}
+                  className="artist-site-press-card"
                 >
-                  <div className="aspect-[16/10] overflow-hidden">
+                  <div className="artist-site-press-media">
                     <CoverArt src={item.coverImageUrl} alt={item.title} size="lg" />
                   </div>
-                  <div className="p-4">
-                    <MetalBadge variant="crimson" className="mb-2">
-                      {item.type.replace('_', ' ')}
-                    </MetalBadge>
-                    <h3 className="font-display font-bold uppercase leading-tight group-hover:text-mh-red transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs text-muted mt-2 line-clamp-2">{item.excerpt}</p>
-                    <p className="text-[10px] tracking-widest uppercase text-muted mt-3">
+                  <div className="artist-site-press-copy">
+                    <MetalBadge variant="crimson">{item.type.replace('_', ' ')}</MetalBadge>
+                    <h3>{item.title}</h3>
+                    <p>{item.excerpt}</p>
+                    <p className="artist-site-press-byline">
                       {item.editorName} · Institute of Sound
                     </p>
                   </div>
                 </motion.article>
               ))}
             </div>
-          </section>
+          </motion.section>
         )}
-
-        <section className="grid lg:grid-cols-[1.2fr_1fr] gap-8 mb-14">
-          <div>
-            <h2 className="font-display text-2xl font-bold uppercase mb-4">Popular</h2>
-            <ol className="space-y-1">
-              {popular.length === 0 ? (
-                <li className="text-sm text-muted py-8 border border-dashed border-border text-center">
-                  Tracks coming soon
-                </li>
-              ) : (
-                popular.map((track, i) => (
-                  <li key={track.id}>
-                    <a
-                      href={track.streamUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="ios-artist-track-row group"
-                    >
-                      <span className="ios-artist-track-rank">{i + 1}</span>
-                      <CoverArt
-                        src={track.coverUrl}
-                        alt={track.title}
-                        size="sm"
-                        className="!w-12 !h-12 shrink-0"
-                      />
-                      <span className="flex-1 min-w-0 font-medium truncate group-hover:text-mh-red transition-colors">
-                        {track.title}
-                      </span>
-                      <span className="text-sm text-muted font-mono">
-                        {formatPlayCount(track.playCount)}
-                      </span>
-                    </a>
-                  </li>
-                ))
-              )}
-            </ol>
-          </div>
-
-          <div>
-            <h2 className="font-display text-2xl font-bold uppercase mb-4">Artist Pick</h2>
-            <div className="ios-artist-pick-card">
-              <p className="text-[10px] tracking-[0.2em] uppercase text-muted mb-3">
-                Posted by {profile.displayName}
-              </p>
-              {pickTrack ? (
-                <>
-                  <div className="rounded overflow-hidden mb-4">
-                    <CoverArt src={pickTrack.coverUrl} alt={pickTrack.title} size="pick" />
-                  </div>
-                  <a
-                    href={pickTrack.streamUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-3 group"
-                  >
-                    <CoverArt
-                      src={pickTrack.coverUrl}
-                      alt=""
-                      size="sm"
-                      className="!w-14 !h-14"
-                    />
-                    <span className="font-bold uppercase group-hover:text-mh-red transition-colors">
-                      {pickTrack.title}
-                    </span>
-                  </a>
-                </>
-              ) : (
-                <div className="ios-artist-pick-empty">
-                  <CoverArt alt="Pick" size="pick" />
-                  <p className="text-sm text-muted mt-4 text-center">Artist pick not set</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <DiscographySection title="Albums" items={albums} />
-        <DiscographySection title="Singles and EPs" items={singles} className="mt-12" />
-        <VideosSection videos={videos} className="mt-12" />
-
-        {profile.bio && (
-          <section className="mt-14 ios-panel max-w-3xl">
-            <p className="ios-kicker">About</p>
-            <p className="text-signal/90 leading-relaxed mt-4 whitespace-pre-wrap">{profile.bio}</p>
-          </section>
-        )}
-
-        <Link
-          to="/discover"
-          className="inline-block mt-12 text-xs tracking-widest uppercase text-muted hover:text-mh-red"
-        >
-          ← Discover artists
-        </Link>
       </div>
+
+      <footer className="artist-site-footer">
+        <div className="artist-site-footer-inner">
+          <div>
+            <p className="artist-site-footer-name">{profile.displayName}</p>
+            <p className="artist-site-footer-meta">
+              Official artist archive on{' '}
+              <Link to="/" className="artist-site-footer-link">
+                Institute of Sound
+              </Link>
+            </p>
+          </div>
+          <Link to="/discover" className="artist-site-footer-discover">
+            Explore more artists →
+          </Link>
+        </div>
+      </footer>
     </div>
   )
 }
 
-function DiscographySection({
+function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <header className="artist-site-section-head">
+      <h2 className="artist-site-section-title">{title}</h2>
+      {subtitle && <p className="artist-site-section-sub">{subtitle}</p>}
+    </header>
+  )
+}
+
+function FeaturedRelease({
+  item,
+}: {
+  item: { title: string; coverUrl?: string; releaseYear?: number; releaseType?: string }
+}) {
+  return (
+    <article className="artist-site-release-hero">
+      <div className="artist-site-release-art">
+        <CoverArt src={item.coverUrl} alt={item.title} size="lg" />
+      </div>
+      <div className="artist-site-release-info">
+        <h3>{item.title}</h3>
+        {item.releaseYear && (
+          <p className="artist-site-release-year">
+            {new Date(item.releaseYear, 0, 1).toLocaleString('en', {
+              month: 'long',
+              year: 'numeric',
+            })}
+          </p>
+        )}
+        {item.releaseType && (
+          <span className="artist-site-pill artist-site-pill-muted mt-4 inline-flex">
+            {item.releaseType}
+          </span>
+        )}
+      </div>
+    </article>
+  )
+}
+
+function TrackList({ tracks }: { tracks: ArtistTrack[] }) {
+  return (
+    <ol className="artist-site-track-list">
+      {tracks.map((track, i) => {
+        const platform = streamPlatform(track.streamUrl)
+        return (
+          <li key={track.id}>
+            <a
+              href={track.streamUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="artist-site-track"
+            >
+              <span className="artist-site-track-index">{String(i + 1).padStart(2, '0')}</span>
+              <CoverArt
+                src={track.coverUrl}
+                alt=""
+                size="sm"
+                className="artist-site-track-thumb"
+              />
+              <span className="artist-site-track-main">
+                <span className="artist-site-track-title">{track.title}</span>
+                <span className="artist-site-track-platform">
+                  {STREAM_PLATFORM_LABEL[platform]}
+                </span>
+              </span>
+              <span className="artist-site-track-plays">{formatPlayCount(track.playCount)}</span>
+              <span className="artist-site-track-play" aria-hidden>
+                ▶
+              </span>
+            </a>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
+function ArtistPickCard({
+  profileName,
+  track,
+}: {
+  profileName: string
+  track?: ArtistTrack
+}) {
+  if (!track) {
+    return (
+      <div className="artist-site-pick">
+        <p className="artist-site-eyebrow">Artist pick</p>
+        <CoverArt alt="Pick" size="pick" className="artist-site-pick-art" />
+        <p className="text-sm text-muted mt-4">No pick set yet.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="artist-site-pick">
+      <p className="artist-site-eyebrow">Artist pick</p>
+      <p className="artist-site-pick-by">Curated by {profileName}</p>
+      <a
+        href={track.streamUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="artist-site-pick-link group"
+      >
+        <div className="artist-site-pick-visual">
+          <CoverArt src={track.coverUrl} alt={track.title} size="pick" />
+          <span className="artist-site-pick-play" aria-hidden>
+            ▶
+          </span>
+        </div>
+        <h3 className="artist-site-pick-title">{track.title}</h3>
+        <span className="artist-site-pick-cta">Play on {STREAM_PLATFORM_LABEL[streamPlatform(track.streamUrl)]} →</span>
+      </a>
+    </div>
+  )
+}
+
+function DiscographyCarousel({
   title,
   items,
   className,
 }: {
   title: string
-  items: { id: string; title: string; coverUrl?: string; releaseYear?: number }[]
+  items: ArtistAlbum[]
   className?: string
 }) {
   if (items.length === 0) return null
   return (
-    <section className={className}>
-      <h2 className="font-display text-2xl font-bold uppercase mb-6">{title}</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className={className}>
+      <SectionHeader title={title} />
+      <div className="artist-site-carousel" role="list">
         {items.map((item) => (
-          <article key={item.id} className="ios-artist-disc-card group">
-            <CoverArt src={item.coverUrl} alt={item.title} size="lg" className="mb-3" />
-            <h3 className="font-semibold text-sm truncate group-hover:text-mh-red transition-colors">
-              {item.title}
-            </h3>
-            {item.releaseYear && <p className="text-xs text-muted mt-0.5">{item.releaseYear}</p>}
+          <article key={item.id} role="listitem" className="artist-site-disc">
+            <div className="artist-site-disc-art">
+              <CoverArt src={item.coverUrl} alt={item.title} size="lg" />
+            </div>
+            <h3>{item.title}</h3>
+            {item.releaseYear && <p>{item.releaseYear}</p>}
           </article>
         ))}
       </div>
-    </section>
+    </div>
   )
 }
 
-function VideosSection({
-  videos,
-  className,
-}: {
-  videos: { id: string; title: string; videoUrl: string; thumbnailUrl?: string }[]
-  className?: string
-}) {
-  if (videos.length === 0) return null
+function VideoGallery({ videos }: { videos: ArtistVideo[] }) {
+  const [lead, ...rest] = videos
   return (
-    <section className={className}>
-      <h2 className="font-display text-2xl font-bold uppercase mb-6">Videos</h2>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {videos.map((v) => (
-          <a
-            key={v.id}
-            href={v.videoUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="ios-artist-video-card group"
-          >
-            <div className="aspect-video overflow-hidden relative">
-              <CoverArt src={v.thumbnailUrl} alt={v.title} size="lg" />
-              <span className="ios-artist-play-fab" aria-hidden>
-                ▶
-              </span>
-            </div>
-            <p className="font-semibold text-sm mt-3 group-hover:text-mh-red transition-colors">
-              {v.title}
-            </p>
-          </a>
-        ))}
-      </div>
-    </section>
+    <div className="artist-site-video-grid">
+      <a
+        href={lead.videoUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="artist-site-video artist-site-video-lead group"
+      >
+        <div className="artist-site-video-media">
+          <CoverArt src={lead.thumbnailUrl} alt={lead.title} size="lg" />
+          <span className="artist-site-video-play" aria-hidden>
+            ▶
+          </span>
+        </div>
+        <h3>{lead.title}</h3>
+      </a>
+      {rest.length > 0 && (
+        <div className="artist-site-video-stack">
+          {rest.map((v) => (
+            <a
+              key={v.id}
+              href={v.videoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="artist-site-video group"
+            >
+              <div className="artist-site-video-media">
+                <CoverArt src={v.thumbnailUrl} alt={v.title} size="lg" />
+                <span className="artist-site-video-play" aria-hidden>
+                  ▶
+                </span>
+              </div>
+              <h3>{v.title}</h3>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

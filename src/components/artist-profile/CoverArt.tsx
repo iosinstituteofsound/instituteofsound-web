@@ -4,7 +4,7 @@ import clsx from 'clsx'
 interface CoverArtProps {
   src?: string
   alt: string
-  size?: 'sm' | 'md' | 'lg' | 'banner' | 'pick'
+  size?: 'sm' | 'md' | 'lg' | 'hero' | 'banner' | 'pick'
   className?: string
 }
 
@@ -12,6 +12,7 @@ const sizeClass = {
   sm: 'w-12 h-12',
   md: 'w-32 h-32',
   lg: 'w-full aspect-square',
+  hero: 'w-full h-full aspect-square',
   banner: 'w-full h-full',
   pick: 'w-full h-full min-h-[280px]',
 }

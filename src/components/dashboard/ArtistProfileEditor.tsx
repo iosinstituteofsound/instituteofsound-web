@@ -37,6 +37,17 @@ import {
   EditableTrackRow,
   EditableVideoRow,
 } from '@/components/dashboard/ArtistMediaEditors'
+import { ArtistBrandingPanel } from '@/components/dashboard/ArtistBrandingPanel'
+import {
+  DEFAULT_ACCENT_COLOR,
+  DEFAULT_THEME_PRESET,
+  type ArtistThemePreset,
+} from '@/lib/artist-profile/branding'
+import {
+  DEFAULT_SOCIAL_LINK_ORDER,
+  type SocialLinkKey,
+} from '@/lib/artist-profile/socialOrder'
+import { ArtistSocialOrderEditor } from '@/components/dashboard/ArtistSocialOrderEditor'
 
 interface ArtistProfileEditorProps {
   user: User
@@ -70,6 +81,12 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [facebook, setFacebook] = useState('')
   const [bandcamp, setBandcamp] = useState('')
   const [website, setWebsite] = useState('')
+  const [accentColor, setAccentColor] = useState(DEFAULT_ACCENT_COLOR)
+  const [themePreset, setThemePreset] = useState<ArtistThemePreset>(DEFAULT_THEME_PRESET)
+  const [heroVideoUrl, setHeroVideoUrl] = useState('')
+  const [socialLinkOrder, setSocialLinkOrder] = useState<SocialLinkKey[]>(
+    [...DEFAULT_SOCIAL_LINK_ORDER]
+  )
 
   const [trackTitle, setTrackTitle] = useState('')
   const [trackUrl, setTrackUrl] = useState('')
@@ -124,6 +141,10 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         setFacebook(p.social.facebook ?? '')
         setBandcamp(p.social.bandcamp ?? '')
         setWebsite(p.social.website ?? '')
+        setAccentColor(p.accentColor)
+        setThemePreset(p.themePreset)
+        setHeroVideoUrl(p.heroVideoUrl ?? '')
+        setSocialLinkOrder(p.socialLinkOrder)
         await loadChildData(p.id)
       } else {
         setSlug(slugifyArtistName(user.name))
@@ -181,6 +202,10 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       monthlyListenersDisplay: monthlyListeners,
       artistPickTrackId: pickTrackId || null,
       published: completeness.complete,
+      accentColor,
+      themePreset,
+      heroVideoUrl: heroVideoUrl || undefined,
+      socialLinkOrder,
       social: { spotify, youtube, instagram, facebook, bandcamp, website },
     })
     setProfile(updated)
@@ -415,6 +440,17 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         </div>
       </section>
 
+      <ArtistBrandingPanel
+        accentColor={accentColor}
+        themePreset={themePreset}
+        displayName={displayName}
+        bannerUrl={bannerUrl}
+        heroVideoUrl={heroVideoUrl}
+        onAccentChange={setAccentColor}
+        onThemeChange={setThemePreset}
+        onHeroVideoChange={setHeroVideoUrl}
+      />
+
       <section className="ios-panel space-y-4">
         <p className="ios-kicker">Social & Links</p>
         <div>
@@ -441,6 +477,18 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           <FieldLabel>Bandcamp</FieldLabel>
           <Input type="url" value={bandcamp} onChange={(e) => setBandcamp(e.target.value)} />
         </div>
+        <ArtistSocialOrderEditor
+          social={{
+            website,
+            spotify,
+            youtube,
+            instagram,
+            facebook,
+            bandcamp,
+          }}
+          order={socialLinkOrder}
+          onOrderChange={setSocialLinkOrder}
+        />
       </section>
 
       <ArtistCatalogImport

@@ -11,6 +11,13 @@ import type {
   UpsertTrackInput,
   UpsertVideoInput,
 } from './types'
+import {
+  DEFAULT_ACCENT_COLOR,
+  DEFAULT_THEME_PRESET,
+  resolveAccentColor,
+  resolveThemePreset,
+} from './branding'
+import { normalizeSocialLinkOrder } from './socialOrder'
 import { ensureUniqueSlug, slugifyArtistName } from './slug'
 
 const PROFILES_KEY = 'ios_artist_profiles'
@@ -37,7 +44,12 @@ function now() {
 }
 
 export function localGetProfiles(): ArtistProfile[] {
-  return read<ArtistProfile[]>(PROFILES_KEY, [])
+  return read<Partial<ArtistProfile>[]>(PROFILES_KEY, []).map((p) => ({
+    ...(p as ArtistProfile),
+    accentColor: resolveAccentColor((p as ArtistProfile).accentColor),
+    themePreset: resolveThemePreset((p as ArtistProfile).themePreset),
+    socialLinkOrder: normalizeSocialLinkOrder((p as ArtistProfile).socialLinkOrder),
+  }))
 }
 
 export function localListPublishedProfiles(): ArtistProfile[] {
@@ -112,6 +124,22 @@ export function localUpsertProfile(
       input.artistPickTrackId !== undefined
         ? input.artistPickTrackId ?? undefined
         : existing?.artistPickTrackId,
+    accentColor:
+      input.accentColor !== undefined
+        ? resolveAccentColor(input.accentColor)
+        : resolveAccentColor(existing?.accentColor ?? DEFAULT_ACCENT_COLOR),
+    themePreset:
+      input.themePreset !== undefined
+        ? resolveThemePreset(input.themePreset)
+        : resolveThemePreset(existing?.themePreset ?? DEFAULT_THEME_PRESET),
+    heroVideoUrl:
+      input.heroVideoUrl !== undefined
+        ? input.heroVideoUrl?.trim() || undefined
+        : existing?.heroVideoUrl,
+    socialLinkOrder:
+      input.socialLinkOrder !== undefined
+        ? normalizeSocialLinkOrder(input.socialLinkOrder)
+        : normalizeSocialLinkOrder(existing?.socialLinkOrder),
     published: input.published ?? existing?.published ?? false,
     createdAt: existing?.createdAt ?? now(),
     updatedAt: now(),

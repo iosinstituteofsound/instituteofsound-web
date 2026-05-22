@@ -13,14 +13,17 @@ export function Navbar({ links }: NavbarProps) {
   const [open, setOpen] = useState(false)
   const location = useLocation()
   const isHome = location.pathname === '/'
+  const isArtistSite = /^\/artist\/[^/]+$/.test(location.pathname)
 
   return (
     <header
       className={clsx(
         'ios-nav fixed top-0 left-0 right-0 z-50 transition-colors',
-        isHome
-          ? 'bg-void/50 backdrop-blur-md'
-          : 'bg-void/95 backdrop-blur-sm'
+        isArtistSite
+          ? 'ios-nav-artist-site bg-transparent backdrop-blur-none border-b border-transparent'
+          : isHome
+            ? 'bg-void/50 backdrop-blur-md'
+            : 'bg-void/95 backdrop-blur-sm'
       )}
     >
       <nav className="relative flex items-center justify-between px-6 md:px-12 lg:px-16 py-4 md:py-5">

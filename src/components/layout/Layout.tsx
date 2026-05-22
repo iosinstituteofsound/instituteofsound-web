@@ -28,6 +28,8 @@ export function Layout() {
     }
   }, [location.hash, location.pathname])
 
+  const isArtistSite = /^\/artist\/[^/]+$/.test(location.pathname)
+
   return (
     <>
       <ManifestoGateModal />
@@ -36,7 +38,12 @@ export function Layout() {
       <main className="ios-page-bg">
         <Outlet />
       </main>
-      {footerLoading ? <LoadingTransmission variant="compact" /> : footerData && <Footer data={footerData} />}
+      {!isArtistSite &&
+        (footerLoading ? (
+          <LoadingTransmission variant="compact" />
+        ) : (
+          footerData && <Footer data={footerData} />
+        ))}
     </>
   )
 }
