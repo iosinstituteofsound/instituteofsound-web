@@ -812,22 +812,25 @@ html[data-perf='lite'] .hero-scanlines {
   display: none;
 }
 
-/* CSS-only waveform (hero background) */
+/* CSS-only waveform (hero background) — height set per bar in JS */
+.css-waveform {
+  width: 100%;
+}
+
 .css-waveform-bar {
-  height: 18%;
-  transform-origin: bottom;
+  transform-origin: bottom center;
   animation: css-waveform-pulse ease-in-out infinite alternate;
   will-change: transform;
 }
 
 @keyframes css-waveform-pulse {
   0% {
-    transform: scaleY(0.12);
-    opacity: 0.25;
+    transform: scaleY(0.35);
+    opacity: 0.2;
   }
   100% {
     transform: scaleY(1);
-    opacity: 0.55;
+    opacity: 0.65;
   }
 }
 
