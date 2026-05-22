@@ -57,6 +57,7 @@ import { ArtistMerchEditor } from '@/components/dashboard/ArtistMerchEditor'
 import { ArtistPressKitEditor } from '@/components/dashboard/ArtistPressKitEditor'
 import { ArtistProfileQrCard } from '@/components/dashboard/ArtistProfileQrCard'
 import {
+  ARTIST_THEME_PRESETS,
   DEFAULT_ACCENT_COLOR,
   DEFAULT_THEME_PRESET,
   type ArtistThemePreset,
@@ -149,6 +150,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [bulkTrackUrls, setBulkTrackUrls] = useState('')
   const [bulkAdding, setBulkAdding] = useState(false)
   const [activeSection, setActiveSection] = useState('overview')
+  const [brandingSaving, setBrandingSaving] = useState(false)
 
   const loadChildData = useCallback(async (profileId: string) => {
     if (isSupabaseConfigured()) {
@@ -241,10 +243,17 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
 
   const completionStatus = getProfileCompletionStatus(buildCompletenessInput())
 
-  const persistProfile = async (mediaCounts?: {
-    trackCount?: number
-    videoCount?: number
-  }) => {
+  type BrandingPatch = {
+    accentColor?: string
+    themePreset?: ArtistThemePreset
+    heroVideoUrl?: string
+    heroLayout?: HeroLayout
+  }
+
+  const persistProfile = async (
+    mediaCounts?: { trackCount?: number; videoCount?: number },
+    brandingPatch?: BrandingPatch
+  ) => {
     const genres = genresText
       .split(',')
       .map((g) => g.trim())
@@ -253,6 +262,14 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
     const completeness = evaluateProfileCompleteness(
       buildCompletenessInput(mediaCounts?.trackCount, mediaCounts?.videoCount)
     )
+    const nextAccent = brandingPatch?.accentColor ?? accentColor
+    const nextTheme = brandingPatch?.themePreset ?? themePreset
+    const nextHeroVideo =
+      brandingPatch?.heroVideoUrl !== undefined
+        ? brandingPatch.heroVideoUrl
+        : heroVideoUrl
+    const nextHeroLayout = brandingPatch?.heroLayout ?? heroLayout
+
     const updated = await upsertArtistProfile(user, {
       displayName,
       slug: slug || slugifyArtistName(displayName),
@@ -267,10 +284,10 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       monthlyListenersDisplay: monthlyListeners,
       artistPickTrackId: pickTrackId || null,
       published: completeness.complete,
-      accentColor,
-      themePreset,
-      heroVideoUrl: heroVideoUrl || undefined,
-      heroLayout,
+      accentColor: nextAccent,
+      themePreset: nextTheme,
+      heroVideoUrl: nextHeroVideo || undefined,
+      heroLayout: nextHeroLayout,
       socialLinkOrder,
       pressKitUrl: pressKitUrl.trim() || undefined,
       pressKitLabel: pressKitLabel.trim() || undefined,
@@ -279,6 +296,42 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
     setProfile(updated)
     setPublished(completeness.complete)
     return { updated, completeness }
+  }
+
+  const brandingMigrationHint = (err: unknown) => {
+    const msg = err instanceof Error ? err.message : String(err)
+    if (/hero_layout|theme_preset|schema cache/i.test(msg)) {
+      return `${msg} — Run Supabase migrations 010-artist-branding.sql and 012-artist-hero-layout.sql in the SQL Editor, then try again.`
+    }
+    return msg
+  }
+
+  const saveBranding = async (patch: BrandingPatch) => {
+    if (patch.themePreset !== undefined) setThemePreset(patch.themePreset)
+    if (patch.heroLayout !== undefined) setHeroLayout(patch.heroLayout)
+    if (patch.accentColor !== undefined) setAccentColor(patch.accentColor)
+    if (patch.heroVideoUrl !== undefined) setHeroVideoUrl(patch.heroVideoUrl)
+
+    setBrandingSaving(true)
+    setError('')
+    try {
+      await persistProfile(undefined, patch)
+      setMessage('Look & hero saved — open Preview to see it on your page.')
+    } catch (err) {
+      setError(brandingMigrationHint(err))
+    } finally {
+      setBrandingSaving(false)
+    }
+  }
+
+  const handleThemeChange = (preset: ArtistThemePreset) => {
+    const suggested =
+      ARTIST_THEME_PRESETS.find((p) => p.id === preset)?.suggestedAccent ?? accentColor
+    void saveBranding({ themePreset: preset, accentColor: suggested })
+  }
+
+  const handleHeroLayoutChange = (layout: HeroLayout) => {
+    void saveBranding({ heroLayout: layout })
   }
 
   const saveProfile = async () => {
@@ -296,7 +349,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       }
       await loadChildData(updated.id)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed')
+      setError(brandingMigrationHint(err))
     } finally {
       setSaving(false)
     }
@@ -619,12 +672,16 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         themePreset={themePreset}
         displayName={displayName}
         bannerUrl={bannerUrl}
+        avatarUrl={avatarUrl}
+        logoUrl={logoUrl}
         heroVideoUrl={heroVideoUrl}
         heroLayout={heroLayout}
-        onAccentChange={setAccentColor}
-        onThemeChange={setThemePreset}
+        saving={brandingSaving}
+        onAccentChange={(hex) => void saveBranding({ accentColor: hex })}
+        onThemeChange={handleThemeChange}
         onHeroVideoChange={setHeroVideoUrl}
-        onHeroLayoutChange={setHeroLayout}
+        onHeroVideoCommit={() => void saveBranding({ heroVideoUrl })}
+        onHeroLayoutChange={handleHeroLayoutChange}
       />
         </DashboardSection>
 

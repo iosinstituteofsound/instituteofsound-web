@@ -22,11 +22,15 @@ interface ArtistBrandingPanelProps {
   themePreset: ArtistThemePreset
   displayName: string
   bannerUrl?: string
+  avatarUrl?: string
+  logoUrl?: string
   heroVideoUrl?: string
   heroLayout: HeroLayout
+  saving?: boolean
   onAccentChange: (hex: string) => void
   onThemeChange: (preset: ArtistThemePreset) => void
   onHeroVideoChange: (url: string) => void
+  onHeroVideoCommit?: () => void
   onHeroLayoutChange: (layout: HeroLayout) => void
 }
 
@@ -35,17 +39,23 @@ export function ArtistBrandingPanel({
   themePreset,
   displayName,
   bannerUrl,
+  avatarUrl,
+  logoUrl,
   heroVideoUrl = '',
   heroLayout,
+  saving = false,
   onAccentChange,
   onThemeChange,
   onHeroVideoChange,
+  onHeroVideoCommit,
   onHeroLayoutChange,
 }: ArtistBrandingPanelProps) {
   const [matching, setMatching] = useState(false)
   const [matchNote, setMatchNote] = useState('')
   const safeAccent = normalizeAccentColor(accentColor) ?? accentColor
   const previewStyle = artistBrandingStyle(safeAccent, themePreset)
+  const previewPortrait = avatarUrl || bannerUrl
+  const previewLogo = logoUrl || avatarUrl
 
   const matchBannerColor = async () => {
     if (!bannerUrl?.trim()) {
@@ -58,7 +68,7 @@ export function ArtistBrandingPanel({
     setMatching(false)
     if (hex) {
       onAccentChange(hex)
-      setMatchNote('Accent color matched from banner — click Save profile.')
+      setMatchNote('Accent matched from banner — saved to your profile.')
     } else {
       setMatchNote('Could not read color from banner — pick one manually.')
     }
@@ -69,8 +79,14 @@ export function ArtistBrandingPanel({
       <div>
         <p className="ios-kicker">Your look</p>
         <p className="text-sm text-muted mt-2 leading-relaxed">
-          Accent color and theme preset — applied on your public page. Click Save profile to publish changes.
+          Layout and theme save automatically when you pick an option. Accent color and hero video
+          save when you pick a swatch or leave the video field. Open <strong className="text-foreground">Preview page</strong> to see the full hero.
         </p>
+        {saving && (
+          <p className="text-xs text-muted mt-2" role="status">
+            Saving look…
+          </p>
+        )}
       </div>
 
       <div>
@@ -134,6 +150,7 @@ export function ArtistBrandingPanel({
           type="url"
           value={heroVideoUrl}
           onChange={(e) => onHeroVideoChange(e.target.value)}
+          onBlur={() => onHeroVideoCommit?.()}
           placeholder="https://www.youtube.com/watch?v=..."
           className="ios-input w-full"
         />
@@ -146,6 +163,7 @@ export function ArtistBrandingPanel({
             <button
               key={preset.id}
               type="button"
+              disabled={saving}
               onClick={() => onHeroLayoutChange(preset.id)}
               className={clsx(
                 'artist-branding-theme-card text-left',
@@ -166,6 +184,7 @@ export function ArtistBrandingPanel({
             <button
               key={preset.id}
               type="button"
+              disabled={saving}
               onClick={() => onThemeChange(preset.id)}
               className={clsx(
                 'artist-branding-theme-card text-left',
@@ -186,24 +205,68 @@ export function ArtistBrandingPanel({
 
       <div>
         <FieldLabel>Live preview</FieldLabel>
+        <p className="text-xs text-muted mt-1 mb-2">
+          Miniature of your public hero — layout and theme match what fans see after save.
+        </p>
         <div
-          className={`artist-site ${artistSiteThemeClass(themePreset)} ${heroLayoutClass(heroLayout)}`}
+          className={clsx('artist-site artist-branding-preview-root', artistSiteThemeClass(themePreset))}
           style={previewStyle}
-          aria-hidden
         >
-          <div className={clsx('artist-branding-preview', `artist-branding-preview-${heroLayout}`)}>
-            <div className="artist-branding-preview-hero">
-              <span className="artist-site-pill">Genre</span>
-              <p className="artist-branding-preview-name">{displayName || 'Your band'}</p>
-              <span className="artist-site-btn artist-site-btn-primary text-[9px] py-2 px-3">
-                Listen now
-              </span>
+          <header
+            className={clsx('artist-site-hero artist-branding-preview-stage', heroLayoutClass(heroLayout))}
+            aria-hidden
+          >
+            <div
+              className={clsx(
+                'artist-site-hero-media',
+                (heroLayout === 'logo' || heroLayout === 'compact') && 'artist-site-hero-media-dim'
+              )}
+            >
+              {bannerUrl ? (
+                <img src={bannerUrl} alt="" className="artist-site-hero-img" />
+              ) : (
+                <div className="artist-branding-preview-fallback-bg" />
+              )}
+              <div className="artist-site-hero-vignette" />
+              <div className="artist-site-hero-grain" />
             </div>
-            <div className="artist-branding-preview-nav">
-              <span className="artist-site-nav-link artist-site-nav-link-active">Music</span>
-              <span className="artist-site-nav-link">Story</span>
+
+            <div className="artist-site-hero-inner">
+              {heroLayout === 'logo' && previewLogo && (
+                <div className="artist-site-hero-logo-mark">
+                  <div className="artist-site-hero-logo-ring">
+                    <img src={previewLogo} alt="" className="artist-site-hero-logo-img" />
+                  </div>
+                </div>
+              )}
+
+              <div className="artist-site-hero-meta">
+                <span className="artist-site-pill">Genre</span>
+                <h2
+                  className={clsx(
+                    'artist-site-hero-title',
+                    (heroLayout === 'logo' || heroLayout === 'compact') &&
+                      'artist-site-hero-title-compact'
+                  )}
+                >
+                  {displayName || 'Your band'}
+                </h2>
+                <div className="artist-site-hero-actions">
+                  <span className="artist-site-btn artist-site-btn-primary text-[9px] py-1.5 px-2.5">
+                    Listen
+                  </span>
+                </div>
+              </div>
+
+              {heroLayout !== 'logo' && previewPortrait && (
+                <div className="artist-site-hero-portrait-wrap">
+                  <div className="artist-site-hero-portrait-ring">
+                    <img src={previewPortrait} alt="" className="artist-site-hero-portrait" />
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          </header>
         </div>
       </div>
     </section>
