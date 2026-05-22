@@ -78,7 +78,7 @@ export function ArtistProfileAnalyticsPanel({
           <p className="text-xs text-muted-foreground mt-1">
             Live stats for{' '}
             <span className="text-signal">/artist/{profileSlug}</span>
-            {!published && ' · counts start when profile is on Discover'}
+            {!published && ' · counts begin once your profile is live on Discover'}
           </p>
         </div>
         <button type="button" className="text-xs uppercase ios-link" onClick={() => void load()}>
@@ -112,7 +112,7 @@ export function ArtistProfileAnalyticsPanel({
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            No track plays yet — fans ▶ dabayenge tab count hoga.
+            No track plays yet — counts update when fans press ▶ on your page.
           </p>
         )}
 

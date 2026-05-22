@@ -103,7 +103,7 @@ export function ArtistProfileQrCard({
         if (!cancelled) setReady(true)
       } catch {
         if (!cancelled) {
-          setError('QR generate nahi ho paya')
+          setError('Could not generate QR code')
           setReady(false)
         }
       }
@@ -129,7 +129,7 @@ export function ArtistProfileQrCard({
       a.click()
       URL.revokeObjectURL(a.href)
     } catch {
-      setError('Download fail — dubara try karo')
+      setError('Download failed — please try again')
     }
   }
 
@@ -138,11 +138,11 @@ export function ArtistProfileQrCard({
       <div>
         <p className="ios-kicker">QR for posters & merch</p>
         <p className="text-sm text-muted mt-2 leading-relaxed">
-          Scan → tumhari public page khulegi. Print karo stickers, posters, tees, show flyers.
+          Scan opens your public profile. Print on stickers, posters, merch, and show flyers.
         </p>
         {!published && (
           <p className="text-xs text-mh-red mt-2">
-            Profile abhi draft — QR tab kaam karega jab Discover par live ho.
+            Profile is still a draft — the QR works once you are live on Discover.
           </p>
         )}
       </div>
@@ -177,7 +177,7 @@ export function ArtistProfileQrCard({
           <p className="text-xs text-muted leading-relaxed">
             <strong className="text-foreground">QR PNG</strong> — square, social / small print.{' '}
             <strong className="text-foreground">Poster pack</strong> — naam + branding + scan line,
-            A4 print ke liye.
+            Optimized for A4 print.
           </p>
           {error && <p className="text-xs text-mh-red">{error}</p>}
         </div>

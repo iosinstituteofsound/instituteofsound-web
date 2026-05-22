@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import clsx from 'clsx'
 import { useAuth } from '@/context/AuthContext'
 import {
   createSubmission,
@@ -12,7 +13,14 @@ import { IOSImage } from '@/components/ui/IOSImage'
 import { Button } from '@/components/ui/Button'
 import { Input, FieldLabel } from '@/components/ui/Input'
 import { ArtistProfileEditor } from '@/components/dashboard/ArtistProfileEditor'
+import { DashboardSection } from '@/components/dashboard/DashboardSection'
 import type { TrackSubmission } from '@/lib/auth/types'
+
+const TABS = [
+  { id: 'profile' as const, label: 'Your page', hint: 'Profile, music, merch' },
+  { id: 'submit' as const, label: 'Submit to editors', hint: 'New track review' },
+  { id: 'history' as const, label: 'Submissions', hint: 'Editor feedback' },
+]
 
 export default function ArtistDashboardPage() {
   const { user, logout, mode } = useAuth()
@@ -81,58 +89,69 @@ export default function ArtistDashboardPage() {
   }
 
   return (
-    <div className="section-padding pt-28 min-h-screen">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-10">
+    <div className="artist-dashboard">
+      <div className="artist-dashboard-inner">
+        <header className="artist-dashboard-header">
           <div>
             <p className="text-[11px] tracking-[0.25em] uppercase text-mh-red font-bold">
-              Artist Portal
+              Artist portal
               {mode === 'supabase' && (
-                <span className="ml-2 text-muted font-normal">· cloud</span>
+                <span className="ml-2 text-muted font-normal">· live cloud</span>
               )}
             </p>
-            <h1 className="font-display text-3xl md:text-4xl font-extrabold uppercase mt-1">
-              Artist Portal
+            <h1 className="font-display text-3xl md:text-5xl font-extrabold uppercase mt-1">
+              Dashboard
             </h1>
-            <p className="text-muted text-sm mt-2">
-              Logged in as <span className="text-signal">{user.name}</span> ·{' '}
-              {user.email}
+            <p className="text-muted text-sm mt-2 max-w-xl">
+              Build your <strong className="text-signal">public artist page</strong>, add music,
+              and submit tracks to Institute of Sound editors.
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {user.name} · {user.email}
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 shrink-0">
             <Link
-              to="/"
-              className="text-xs tracking-widest uppercase text-muted hover:text-signal"
+              to="/discover"
+              className="ios-btn ios-btn-ghost !text-xs !py-2"
             >
-              ← Site
+              Discover
+            </Link>
+            <Link to="/" className="ios-btn ios-btn-ghost !text-xs !py-2">
+              Site
             </Link>
             <button
               type="button"
               onClick={() => logout()}
-              className="text-xs tracking-widest uppercase border border-border px-4 py-2 hover:border-mh-red hover:text-mh-red"
+              className="ios-btn ios-btn-secondary !text-xs !py-2"
             >
               Logout
             </button>
           </div>
-        </div>
+        </header>
 
-        <div className="flex gap-2 border-b border-border mb-8">
-          {(['profile', 'submit', 'history'] as const).map((t) => (
+        <div className="artist-dashboard-tabs" role="tablist">
+          {TABS.map((t) => (
             <button
-              key={t}
+              key={t.id}
               type="button"
-              onClick={() => setTab(t)}
-              className={`px-4 py-3 text-xs tracking-widest uppercase font-bold border-b-2 -mb-px transition-colors ${
-                tab === t
-                  ? 'border-mh-red text-mh-red'
-                  : 'border-transparent text-muted hover:text-signal'
-              }`}
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => setTab(t.id)}
+              className={clsx(
+                'artist-dashboard-tab',
+                tab === t.id && 'artist-dashboard-tab-active'
+              )}
             >
-              {t === 'profile'
-                ? 'Band Profile'
-                : t === 'submit'
-                  ? 'Submit Track'
-                  : `Submissions (${submissions.length})`}
+              <span className="block">{t.label}</span>
+              {tab === t.id && (
+                <span className="block text-[9px] font-normal tracking-wide text-muted-foreground mt-0.5 normal-case">
+                  {t.hint}
+                </span>
+              )}
+              {t.id === 'history' && submissions.length > 0 && (
+                <span className="ml-1 text-mh-red">({submissions.length})</span>
+              )}
             </button>
           ))}
         </div>
@@ -140,132 +159,144 @@ export default function ArtistDashboardPage() {
         {tab === 'profile' && <ArtistProfileEditor user={user} />}
 
         {tab === 'submit' && (
-          <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
-            <p className="text-sm text-muted border-l-2 border-mh-red pl-4">
-              Your track goes to the <strong className="text-signal">Editor Dashboard</strong>{' '}
-              as a pending request. Editors listen, review, and approve or reject.
-            </p>
+          <DashboardSection
+            id="submit-track"
+            step="Editors"
+            title="Submit a track for review"
+            hint="Separate from your public page — submissions go to the editorial team for review and approval."
+          >
+            <form onSubmit={handleSubmit} className="artist-dash-submit-card space-y-5">
+              <div className="artist-dash-grid-2">
+                <div>
+                  <FieldLabel>Project / band name</FieldLabel>
+                  <Input
+                    required
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Genre</FieldLabel>
+                  <Input
+                    required
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                    placeholder="Black Metal, Industrial…"
+                  />
+                </div>
+              </div>
+              <div>
+                <FieldLabel>Track title</FieldLabel>
+                <Input
+                  required
+                  value={trackTitle}
+                  onChange={(e) => setTrackTitle(e.target.value)}
+                />
+              </div>
+              <ImageUpload
+                label="Track artwork"
+                folder="ios/submissions"
+                value={coverImageUrl}
+                onChange={setCoverImageUrl}
+                hint="Cloudinary — editors ko fast load."
+              />
+              <div>
+                <FieldLabel>Stream link</FieldLabel>
+                <Input
+                  required
+                  type="url"
+                  value={streamUrl}
+                  onChange={(e) => setStreamUrl(e.target.value)}
+                  placeholder="Spotify, SoundCloud, Drive…"
+                />
+              </div>
+              <div>
+                <FieldLabel>Note for editors</FieldLabel>
+                <textarea
+                  required
+                  rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="ios-input min-h-[120px]"
+                  placeholder="Tell editors about the track — vibe, influences, why it fits Institute of Sound…"
+                />
+              </div>
 
-            <div>
-              <FieldLabel>Project / Band Name</FieldLabel>
-              <Input
-                required
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-              />
-            </div>
-            <div>
-              <FieldLabel>Genre</FieldLabel>
-              <Input
-                required
-                value={genre}
-                onChange={(e) => setGenre(e.target.value)}
-                placeholder="Dark Ambient, Industrial..."
-              />
-            </div>
-            <div>
-              <FieldLabel>Track Title</FieldLabel>
-              <Input required value={trackTitle} onChange={(e) => setTrackTitle(e.target.value)} />
-            </div>
-            <ImageUpload
-              label="Track Artwork"
-              folder="ios/submissions"
-              value={coverImageUrl}
-              onChange={setCoverImageUrl}
-              hint="Stored on Cloudinary — fast load for editors worldwide."
-            />
-            <div>
-              <FieldLabel>Stream Link (Spotify, SoundCloud, Drive...)</FieldLabel>
-              <Input
-                required
-                type="url"
-                value={streamUrl}
-                onChange={(e) => setStreamUrl(e.target.value)}
-                placeholder="https://"
-              />
-            </div>
-            <div>
-              <FieldLabel>Description for Editors</FieldLabel>
-              <textarea
-                required
-                rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="ios-input min-h-[120px]"
-                placeholder="Tell editors about the track, influences, why it fits IOS..."
-              />
-            </div>
+              {error && <p className="text-mh-red text-sm">{error}</p>}
+              {success && <p className="text-emerald-400 text-sm">{success}</p>}
 
-            {error && <p className="text-mh-red text-sm">{error}</p>}
-            {success && <p className="text-emerald-400 text-sm">{success}</p>}
-
-            <Button type="submit" variant="primary" disabled={submitting}>
-              {submitting ? 'Submitting...' : 'Submit to Editors →'}
-            </Button>
-          </form>
+              <Button type="submit" variant="primary" disabled={submitting}>
+                {submitting ? 'Submitting…' : 'Send to editors →'}
+              </Button>
+            </form>
+          </DashboardSection>
         )}
 
         {tab === 'history' && (
-          <div className="space-y-4">
+          <DashboardSection
+            id="submission-history"
+            step="Status"
+            title="Your submissions"
+            hint="Status for each track — pending, approved, or rejected. Editor notes appear below when provided."
+          >
             {loadingList ? (
               <LoadingTransmission variant="compact" />
             ) : submissions.length === 0 ? (
-              <p className="text-muted text-sm py-8 border border-dashed border-border text-center">
-                No submissions yet. Submit your first track.
+              <p className="text-muted text-sm py-12 border border-dashed border-border text-center">
+                No submissions yet. Use the Submit to editors tab to send your first track.
               </p>
             ) : (
-              submissions.map((s) => (
-                <article key={s.id} className="ios-card p-5 md:p-6 flex flex-col sm:flex-row gap-5">
-                  {s.coverImageUrl && (
-                    <IOSImage
-                      src={s.coverImageUrl}
-                      alt={s.trackTitle}
-                      width={160}
-                      height={160}
-                      className="w-32 h-32 shrink-0 object-cover"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-display text-xl font-bold uppercase">
-                        {s.trackTitle}
-                      </h3>
-                      <p className="text-sm text-muted mt-1">
-                        {s.projectName} · {s.genre}
-                      </p>
-                    </div>
-                    <StatusBadge status={s.status} />
-                  </div>
-                  <p className="text-sm text-muted mt-3 line-clamp-2">{s.description}</p>
-                  <a
-                    href={s.streamUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-mh-red mt-2 inline-block hover:underline"
-                  >
-                    Listen link →
-                  </a>
-                  {s.editorNotes && (
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <p className="text-[10px] tracking-widest uppercase text-rs-red mb-1">
-                        Editor feedback
-                      </p>
-                      <p className="text-sm text-signal/90">{s.editorNotes}</p>
-                      {s.reviewedByName && (
-                        <p className="text-xs text-muted mt-2">
-                          — {s.reviewedByName},{' '}
-                          {s.reviewedAt &&
-                            new Date(s.reviewedAt).toLocaleDateString()}
+              <div className="artist-dash-history-grid">
+                {submissions.map((s) => (
+                  <article key={s.id} className="ios-card p-5 flex flex-col gap-4 h-full">
+                    {s.coverImageUrl && (
+                      <IOSImage
+                        src={s.coverImageUrl}
+                        alt={s.trackTitle}
+                        width={320}
+                        className="w-full aspect-square object-cover"
+                      />
+                    )}
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-display text-lg font-bold uppercase truncate">
+                          {s.trackTitle}
+                        </h3>
+                        <p className="text-xs text-muted mt-1">
+                          {s.projectName} · {s.genre}
                         </p>
-                      )}
+                      </div>
+                      <StatusBadge status={s.status} />
                     </div>
-                  )}
-                  </div>
-                </article>
-              ))
+                    <p className="text-sm text-muted line-clamp-3 flex-1">{s.description}</p>
+                    <a
+                      href={s.streamUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-mh-red hover:underline"
+                    >
+                      Listen link →
+                    </a>
+                    {s.editorNotes && (
+                      <div className="pt-3 border-t border-border mt-auto">
+                        <p className="text-[10px] tracking-widest uppercase text-rs-red mb-1">
+                          Editor feedback
+                        </p>
+                        <p className="text-sm text-signal/90">{s.editorNotes}</p>
+                        {s.reviewedByName && (
+                          <p className="text-xs text-muted mt-2">
+                            — {s.reviewedByName}
+                            {s.reviewedAt &&
+                              ` · ${new Date(s.reviewedAt).toLocaleDateString()}`}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
             )}
-          </div>
+          </DashboardSection>
         )}
       </div>
     </div>

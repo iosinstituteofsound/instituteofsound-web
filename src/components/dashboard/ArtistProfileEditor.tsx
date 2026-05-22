@@ -70,6 +70,26 @@ import {
   type SocialLinkKey,
 } from '@/lib/artist-profile/socialOrder'
 import { ArtistSocialOrderEditor } from '@/components/dashboard/ArtistSocialOrderEditor'
+import { DashboardSection } from '@/components/dashboard/DashboardSection'
+import {
+  ArtistProfileSectionNav,
+  type ProfileSectionLink,
+} from '@/components/dashboard/ArtistProfileSectionNav'
+
+const PROFILE_SECTIONS: ProfileSectionLink[] = [
+  { id: 'overview', label: 'Overview', hint: 'Stats & checklist' },
+  { id: 'identity', label: 'Identity', hint: 'Name & bio' },
+  { id: 'photos', label: 'Photos', hint: 'Avatar & banner' },
+  { id: 'story', label: 'Story', hint: 'Timeline' },
+  { id: 'branding', label: 'Look', hint: 'Colors & hero' },
+  { id: 'share', label: 'Share', hint: 'QR & press' },
+  { id: 'links', label: 'Social', hint: 'Spotify, IG…' },
+  { id: 'music', label: 'Music', hint: 'Tracks & import' },
+  { id: 'releases', label: 'Releases', hint: 'Albums & EPs' },
+  { id: 'videos', label: 'Videos', hint: 'YouTube' },
+  { id: 'merch', label: 'Merch', hint: 'Store links' },
+  { id: 'lineup', label: 'Lineup', hint: 'Credits' },
+]
 
 interface ArtistProfileEditorProps {
   user: User
@@ -128,6 +148,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [videoUrl, setVideoUrl] = useState('')
   const [bulkTrackUrls, setBulkTrackUrls] = useState('')
   const [bulkAdding, setBulkAdding] = useState(false)
+  const [activeSection, setActiveSection] = useState('overview')
 
   const loadChildData = useCallback(async (profileId: string) => {
     if (isSupabaseConfigured()) {
@@ -267,10 +288,10 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
     try {
       const { updated, completeness } = await persistProfile()
       if (completeness.complete) {
-        setMessage('Profile complete — ab Discover section mein live ho!')
+        setMessage('Profile complete — you are now live on Discover.')
       } else {
         setMessage(
-          `Saved as draft. Discover ke liye baaki: ${completeness.missing.join(', ')}`
+          `Saved as draft. To go live on Discover, still needed: ${completeness.missing.join(', ')}`
         )
       }
       await loadChildData(updated.id)
@@ -307,7 +328,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
     try {
       const { completeness } = await persistProfile({ trackCount, videoCount })
       if (completeness.complete) {
-        setMessage('Profile complete — ab Discover section mein live ho!')
+        setMessage('Profile complete — you are now live on Discover.')
       }
       return completeness
     } catch (err) {
@@ -346,7 +367,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       .map((line) => line.trim())
       .filter((line) => line.startsWith('http'))
     if (urls.length === 0) {
-      setError('Har line pe ek stream URL paste karo (https://...)')
+      setError('Add one stream URL per line (https://…)')
       return
     }
     setBulkAdding(true)
@@ -390,50 +411,120 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const profileSlug = profile?.slug ?? slugifyArtistName(displayName)
 
   return (
-    <div className="space-y-10 max-w-3xl">
-      <p className="text-sm text-muted border-l-2 border-mh-red pl-4 leading-relaxed">
-        Apni artist page ki har cheez yahan edit karo — naam, images, tracks, albums, videos.
-        Jab checklist complete ho jayegi, profile <strong className="text-foreground">Discover</strong> par
-        automatically live ho jayegi. Page:{' '}
-        <Link to={`/artist/${profileSlug}`} className="ios-link">
-          /artist/{profileSlug}
-        </Link>
-        . Super admin reviews appear in Editorial Featured.
-      </p>
+    <div className="artist-dash-layout">
+      <ArtistProfileSectionNav
+        sections={PROFILE_SECTIONS}
+        activeId={activeSection}
+        onSelect={setActiveSection}
+      />
 
-      {profile && (
-        <ArtistProfileAnalyticsPanel
-          profileId={profile.id}
-          profileSlug={profileSlug}
-          published={published}
-          tracks={tracks}
-        />
-      )}
-
-      {profile && (
-        <div className="flex flex-wrap gap-3 items-center">
-          <MetalBadge variant={published ? 'live' : 'crimson'}>
-            {published ? 'Live' : 'Draft'}
-          </MetalBadge>
-          <Link to={`/artist/${profile.slug}`} className="ios-btn ios-btn-ghost !text-xs">
-            Preview page →
-          </Link>
+      <div className="artist-dash-main">
+        <div className="artist-dash-toolbar">
+          <div className="artist-dash-toolbar-meta">
+            <MetalBadge variant={published ? 'live' : 'crimson'}>
+              {published ? 'Live on Discover' : 'Draft'}
+            </MetalBadge>
+            <span className="artist-dash-toolbar-url">/artist/{profileSlug}</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {profile && (
+              <Link
+                to={`/artist/${profile.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="ios-btn ios-btn-ghost !text-xs !py-2"
+              >
+                Preview page ↗
+              </Link>
+            )}
+            <Button
+              type="button"
+              variant="primary"
+              disabled={saving}
+              onClick={saveProfile}
+              className="!text-xs !py-2"
+            >
+              {saving ? 'Saving…' : 'Save profile'}
+            </Button>
+          </div>
         </div>
-      )}
 
-      <section className="ios-panel space-y-5">
-        <p className="ios-kicker">Identity</p>
-        <div>
-          <FieldLabel>Band / Artist Name</FieldLabel>
-          <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-        </div>
-        <div>
-          <FieldLabel>URL Slug</FieldLabel>
-          <Input
-            value={slug}
-            onChange={(e) => setSlug(slugifyArtistName(e.target.value))}
-            placeholder="the-lost-symbols"
-          />
+        <p className="artist-dash-intro">
+          Use the section list to jump between areas. Click <strong className="text-foreground">Save profile</strong>{' '}
+          after edits. When the checklist is complete, your profile goes live on{' '}
+          <strong className="text-foreground">Discover</strong> automatically.
+        </p>
+
+        {(error || message) && (
+          <div
+            className={
+              error
+                ? 'text-mh-red text-sm border border-mh-red/40 px-4 py-3'
+                : 'text-emerald-400 text-sm border border-emerald-500/30 px-4 py-3'
+            }
+          >
+            {error || message}
+          </div>
+        )}
+
+        <DashboardSection
+          id="overview"
+          step="01"
+          title="Overview"
+          hint="Profile views, top track clicks, and your Discover checklist — start here to see what is missing."
+        >
+          {profile && (
+            <ArtistProfileAnalyticsPanel
+              profileId={profile.id}
+              profileSlug={profileSlug}
+              published={published}
+              tracks={tracks}
+            />
+          )}
+          <div className="artist-dash-checklist">
+            <p className="text-xs uppercase tracking-widest text-muted mb-3">
+              Discover checklist
+            </p>
+            <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+              {PROFILE_COMPLETION_ITEMS.map((item) => {
+                const done = completionStatus[item.key]
+                return (
+                  <li
+                    key={item.key}
+                    className={done ? 'text-emerald-400' : 'text-muted-foreground'}
+                  >
+                    {done ? '✓' : '○'} {item.label}
+                  </li>
+                )
+              })}
+            </ul>
+            <p className="text-xs mt-4 text-muted-foreground">
+              {published
+                ? `Your profile is public at /artist/${profileSlug}.`
+                : 'Still a draft — add music and bio to complete your profile.'}
+            </p>
+          </div>
+        </DashboardSection>
+
+        <DashboardSection
+          id="identity"
+          step="02"
+          title="Identity & story text"
+          hint="Name, tagline, bio, genres, and influences shown on your public page."
+        >
+        <div className="artist-dash-grid-2">
+          <div>
+            <FieldLabel>Band / Artist Name</FieldLabel>
+            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+          </div>
+          <div>
+            <FieldLabel>URL Slug</FieldLabel>
+            <Input
+              value={slug}
+              onChange={(e) => setSlug(slugifyArtistName(e.target.value))}
+              placeholder="the-lost-symbols"
+            />
+          </div>
         </div>
         <div>
           <FieldLabel>Tagline</FieldLabel>
@@ -484,49 +575,45 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           <FieldLabel>Monthly listeners (display)</FieldLabel>
           <Input value={monthlyListeners} onChange={(e) => setMonthlyListeners(e.target.value)} />
         </div>
-        <ImageUpload label="Avatar" folder="ios/artists" value={avatarUrl} onChange={setAvatarUrl} />
-        <ImageUpload label="Banner" folder="ios/artists" value={bannerUrl} onChange={setBannerUrl} />
-        <ImageUpload label="Logo" folder="ios/artists" value={logoUrl} onChange={setLogoUrl} />
-        <div className="border border-border/60 p-4 space-y-3">
-          <p className="text-xs uppercase tracking-widest text-muted">
-            Discover listing checklist
-          </p>
-          <ul className="space-y-1.5 text-sm">
-            {PROFILE_COMPLETION_ITEMS.map((item) => {
-              const done = completionStatus[item.key]
-              return (
-                <li
-                  key={item.key}
-                  className={done ? 'text-emerald-400' : 'text-muted-foreground'}
-                >
-                  {done ? '✓' : '○'} {item.label}
-                </li>
-              )
-            })}
-          </ul>
-          {published ? (
-            <p className="text-xs text-emerald-400">
-              Live on Discover — profile public hai.
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              Incomplete profile draft rehti hai; complete karte hi Discover par dikhegi.
-            </p>
-          )}
-        </div>
-      </section>
+        </DashboardSection>
 
-      {profile && (
-        <ArtistBioTimelineEditor
-          profileId={profile.id}
-          entries={bioTimeline}
-          onChanged={async () => {
-            if (profile) await loadChildData(profile.id)
-            setMessage('Timeline updated.')
-          }}
-        />
-      )}
+        <DashboardSection
+          id="photos"
+          step="03"
+          title="Photos"
+          hint="Avatar, banner, and logo — shown on your public page hero."
+        >
+          <div className="artist-dash-grid-3">
+            <ImageUpload label="Avatar" folder="ios/artists" value={avatarUrl} onChange={setAvatarUrl} />
+            <ImageUpload label="Banner" folder="ios/artists" value={bannerUrl} onChange={setBannerUrl} />
+            <ImageUpload label="Logo" folder="ios/artists" value={logoUrl} onChange={setLogoUrl} />
+          </div>
+        </DashboardSection>
 
+        {profile && (
+          <DashboardSection
+            id="story"
+            step="04"
+            title="Bio timeline"
+            hint="Year-by-year milestones — formed, releases, tours."
+          >
+            <ArtistBioTimelineEditor
+              profileId={profile.id}
+              entries={bioTimeline}
+              onChanged={async () => {
+                if (profile) await loadChildData(profile.id)
+                setMessage('Timeline updated.')
+              }}
+            />
+          </DashboardSection>
+        )}
+
+        <DashboardSection
+          id="branding"
+          step="05"
+          title="Look & hero"
+          hint="Accent color, theme, hero video, layout style."
+        >
       <ArtistBrandingPanel
         accentColor={accentColor}
         themePreset={themePreset}
@@ -539,23 +626,36 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         onHeroVideoChange={setHeroVideoUrl}
         onHeroLayoutChange={setHeroLayout}
       />
+        </DashboardSection>
 
-      <ArtistProfileQrCard
-        slug={profileSlug}
-        displayName={displayName}
-        accentColor={accentColor}
-        published={published}
-      />
+        <DashboardSection
+          id="share"
+          step="06"
+          title="Share & press"
+          hint="QR codes for print and your EPK PDF for press and promoters."
+        >
+          <div className="artist-dash-grid-2">
+            <ArtistProfileQrCard
+              slug={profileSlug}
+              displayName={displayName}
+              accentColor={accentColor}
+              published={published}
+            />
+            <ArtistPressKitEditor
+              pressKitUrl={pressKitUrl}
+              pressKitLabel={pressKitLabel}
+              onUrlChange={setPressKitUrl}
+              onLabelChange={setPressKitLabel}
+            />
+          </div>
+        </DashboardSection>
 
-      <ArtistPressKitEditor
-        pressKitUrl={pressKitUrl}
-        pressKitLabel={pressKitLabel}
-        onUrlChange={setPressKitUrl}
-        onLabelChange={setPressKitLabel}
-      />
-
-      <section className="ios-panel space-y-4">
-        <p className="ios-kicker">Social & Links</p>
+        <DashboardSection
+          id="links"
+          step="07"
+          title="Social links"
+          hint="Spotify, YouTube, Instagram — drag to set the order they appear on your page."
+        >
         <div>
           <FieldLabel>Website</FieldLabel>
           <Input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} />
@@ -592,8 +692,14 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           order={socialLinkOrder}
           onOrderChange={setSocialLinkOrder}
         />
-      </section>
+        </DashboardSection>
 
+        <DashboardSection
+          id="music"
+          step="08"
+          title="Music"
+          hint="Import from Spotify or add tracks manually — plays are counted when fans hit ▶ on your page."
+        >
       <ArtistCatalogImport
         initialUrl={spotify || youtube}
         tracks={tracks}
@@ -616,10 +722,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         onImportMessage={(msg) => setMessage(msg)}
       />
 
-      <section className="ios-panel space-y-4">
-        <p className="ios-kicker">Tracks (Popular top 5)</p>
-        <p className="text-xs text-muted-foreground">
-          Stream URL se cover auto-fetch hota hai (Spotify, YouTube, SoundCloud, etc.). Manual upload optional.
+        <p className="text-xs text-muted-foreground -mt-2">
+          Stream URL se cover auto-fetch (Spotify, YouTube, SoundCloud).
         </p>
         <div className="flex gap-2 flex-wrap">
           <Input
@@ -662,11 +766,11 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         />
         <div className="border border-dashed border-mh-red/40 p-4 space-y-3">
           <p className="text-xs font-medium uppercase tracking-wide text-mh-red">
-            Quick add (Spotify API block ho to ye use karo)
+            Quick add (use if Spotify API is blocked)
           </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Spotify app se har track ka <strong className="text-foreground">Share → Copy link</strong> karo.
-            Neeche ek URL per line paste karo — title + cover auto aayega.
+            In the Spotify app, use <strong className="text-foreground">Share → Copy link</strong> for each track.
+            Paste one URL per line below — title and cover art are fetched automatically.
           </p>
           <textarea
             rows={5}
@@ -716,10 +820,14 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
             </select>
           </div>
         )}
-      </section>
+        </DashboardSection>
 
-      <section className="ios-panel space-y-4">
-        <p className="ios-kicker">Albums & Singles</p>
+        <DashboardSection
+          id="releases"
+          step="09"
+          title="Albums & singles"
+          hint="Discography carousel on your public page."
+        >
         <div className="flex flex-wrap gap-2">
           <Input
             placeholder="Release title"
@@ -788,35 +896,14 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
             ))}
           </ul>
         )}
-      </section>
+        </DashboardSection>
 
-      {profile && (
-        <ArtistMerchEditor
-          profileId={profile.id}
-          items={merch}
-          onChanged={async () => {
-            if (profile) await loadChildData(profile.id)
-            setMessage('Merch updated.')
-          }}
-        />
-      )}
-
-      {profile && (
-        <ArtistLineupEditor
-          profileId={profile.id}
-          entries={lineup}
-          onChanged={async () => {
-            if (profile) await loadChildData(profile.id)
-            setMessage('Lineup updated.')
-          }}
-        />
-      )}
-
-      <section className="ios-panel space-y-4">
-        <p className="ios-kicker">Videos</p>
-        <p className="text-xs text-muted-foreground">
-          Video URL daalo — thumbnail automatically set hoga.
-        </p>
+        <DashboardSection
+          id="videos"
+          step="10"
+          title="Videos"
+          hint="YouTube links — thumbnail auto."
+        >
         <div className="flex flex-wrap gap-2">
           <Input
             placeholder="Video title"
@@ -865,14 +952,60 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
             ))}
           </ul>
         )}
-      </section>
+        </DashboardSection>
 
-      {error && <p className="text-mh-red text-sm">{error}</p>}
-      {message && <p className="text-emerald-400 text-sm">{message}</p>}
+        {profile && (
+          <DashboardSection
+            id="merch"
+            step="11"
+            title="Merch & store"
+            hint="External shop links — Shopify, Bandcamp, etc."
+          >
+            <ArtistMerchEditor
+              profileId={profile.id}
+              items={merch}
+              onChanged={async () => {
+                if (profile) await loadChildData(profile.id)
+                setMessage('Merch updated.')
+              }}
+            />
+          </DashboardSection>
+        )}
 
-      <Button type="button" variant="primary" disabled={saving} onClick={saveProfile}>
-        {saving ? 'Saving...' : 'Save profile'}
-      </Button>
+        {profile && (
+          <DashboardSection
+            id="lineup"
+            step="12"
+            title="Lineup & credits"
+            hint="Band members, guests, production."
+          >
+            <ArtistLineupEditor
+              profileId={profile.id}
+              entries={lineup}
+              onChanged={async () => {
+                if (profile) await loadChildData(profile.id)
+                setMessage('Lineup updated.')
+              }}
+            />
+          </DashboardSection>
+        )}
+
+        <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
+          <Button type="button" variant="primary" disabled={saving} onClick={saveProfile}>
+            {saving ? 'Saving…' : 'Save profile'}
+          </Button>
+          {profile && (
+            <Link
+              to={`/artist/${profile.slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="ios-btn ios-btn-ghost !text-xs"
+            >
+              Preview public page ↗
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

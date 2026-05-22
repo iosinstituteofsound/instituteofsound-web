@@ -174,7 +174,7 @@ async function importFromSpotify(profileUrl: string): Promise<CatalogResult> {
       suggestions: { spotifyUrl: profileUrl },
       items: [],
       warnings: [
-        'Spotify keys server pe missing. Vercel env mein SPOTIFY_CLIENT_ID + SPOTIFY_CLIENT_SECRET add karo.',
+        'Spotify credentials missing. Add SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET to your Vercel environment variables.',
       ],
     }
   }
@@ -259,7 +259,7 @@ async function importFromSpotify(profileUrl: string): Promise<CatalogResult> {
     spotifyError = err instanceof Error ? err.message : 'Spotify artist lookup failed'
     if (spotifyError.includes('403') || spotifyError.toLowerCase().includes('premium')) {
       warnings.push(
-        'Spotify abhi bhi API block kar raha hai. Premium usi email pe hona chahiye jo developer.spotify.com pe app banayi (The Lost Symbols wala account). Kabhi-kabhi 2–24 ghante lagte hain sync hone mein.'
+        'Spotify is still blocking API access. Premium must be on the same email used to create the app at developer.spotify.com. Sync can take 2–24 hours.'
       )
       warnings.push(`Technical: ${spotifyError}`)
     } else {
@@ -293,12 +293,12 @@ async function importFromSpotify(profileUrl: string): Promise<CatalogResult> {
   const images = artist?.images ? [...artist.images].sort((a, b) => b.height - a.height) : []
 
   if (items.length === 0 && !warnings.length) {
-    warnings.push('Spotify se tracks nahi mile.')
+    warnings.push('No tracks returned from Spotify.')
   }
 
   if (items.length === 0 && spotifyError.includes('403')) {
     warnings.push(
-      'Dashboard → Spotify Developer → apni app → Settings check karo. Premium active ho to kal dubara try karo, ya tracks manually add karo.'
+      'Check your app in the Spotify Developer Dashboard → Settings. If Premium is active, try again later or add tracks manually.'
     )
   }
 
@@ -330,8 +330,8 @@ export async function buildArtistCatalogFromUrl(profileUrl: string): Promise<Cat
     items: [],
     warnings: [
       platform === 'youtube'
-        ? 'YouTube import ke liye YOUTUBE_API_KEY Vercel env mein add karo.'
-        : 'Unsupported URL. Spotify artist link use karo.',
+        ? 'Add YOUTUBE_API_KEY to your Vercel environment for YouTube import.'
+        : 'Unsupported URL. Use a Spotify artist profile link.',
     ],
   }
 }

@@ -176,8 +176,8 @@ export function ArtistMerchEditor({ profileId, items, onChanged }: ArtistMerchEd
     <section className="ios-panel space-y-4">
       <p className="ios-kicker">Merch & store</p>
       <p className="text-xs text-muted-foreground">
-        Kisi bhi store ka product link daalo (Shopify, Bandcamp, Printful, etc.). Add
-        dabate hi product image fetch hogi. Click profile pe → unki website khulegi.
+        Add a product link from any store (Shopify, Bandcamp, Printful, etc.). The product image
+        is fetched when you add the item. Visitors open your store in a new tab when they click.
       </p>
       <div className="space-y-2">
         <Input

@@ -137,7 +137,7 @@ export function ArtistLineupEditor({ profileId, entries, onChanged }: ArtistLine
     <section className="ios-panel space-y-4">
       <p className="ios-kicker">Band lineup & credits</p>
       <p className="text-xs text-muted-foreground">
-        Members, guest musicians, aur production credits — press kit & profile par dikhenge.
+        Band members, guest musicians, and production credits — shown on your profile and press kit.
       </p>
       <div className="space-y-2">
         <Input

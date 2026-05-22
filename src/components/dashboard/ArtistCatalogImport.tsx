@@ -187,9 +187,9 @@ export function ArtistCatalogImport({
       <div>
         <p className="ios-kicker">Import / re-import catalog</p>
         <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-          Spotify / YouTube / SoundCloud profile URL se fetch karo. Dubara import = sirf naye items.
-          Agar Spotify 403 aaye (Premium same email pe bhi): Spotify ko sync hone do (24h) ya neeche{' '}
-          <strong className="text-foreground">Tracks → Quick add</strong> se track links paste karo.
+          Fetch from a Spotify, YouTube, or SoundCloud profile URL. Re-import only adds new items.
+          If Spotify returns 403 (even with Premium on the same email): wait for Spotify to sync (up to 24h) or use{' '}
+          <strong className="text-foreground">Tracks → Quick add</strong> to paste track links.
         </p>
       </div>
 
@@ -247,7 +247,7 @@ export function ArtistCatalogImport({
                 onChange={(e) => setApplyProfile(e.target.checked)}
                 className="accent-mh-red"
               />
-              Profile name, image, genres & social link bhi update karo
+              Also update profile name, images, genres, and social links
             </label>
           )}
 
@@ -305,9 +305,9 @@ export function ArtistCatalogImport({
       {error && <p className="text-mh-red text-sm">{error}</p>}
 
       <p className="text-[10px] text-muted-foreground leading-relaxed">
-        Spotify: dashboard pe app banao (Web API tick ab form mein nahi hota — normal hai), phir Client ID/Secret →{' '}
+        Spotify: create an app in the dashboard (the Web API checkbox may be gone from the form — that is normal), then Client ID/Secret →{' '}
         <code className="text-foreground">SPOTIFY_CLIENT_ID</code>, <code className="text-foreground">SPOTIFY_CLIENT_SECRET</code>{' '}
-        on Vercel. App owner ko Spotify Premium chahiye (2026 dev mode). Optional: <code className="text-foreground">YOUTUBE_API_KEY</code>.
+        on Vercel. The Spotify app owner needs a Premium account (2026 dev mode). Optional: <code className="text-foreground">YOUTUBE_API_KEY</code>.
       </p>
     </section>
   )

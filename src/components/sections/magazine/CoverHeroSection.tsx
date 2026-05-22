@@ -112,7 +112,7 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
             </Reveal>
           </div>
 
-          {/* Image — peeche (z-0), pehli wali grid position right */}
+          {/* Image — behind (z-0), first grid column on the right */}
           <Reveal delay={0.2} className="lg:col-span-5 relative z-0">
             <div className="relative">
               <div className="absolute -inset-3 border border-mh-red/25 pointer-events-none" />

@@ -28,8 +28,8 @@ export default function DiscoverPage() {
           {error && <p className="text-crimson">{error}</p>}
           {data && data.length === 0 && (
             <p className="text-muted text-sm max-w-lg">
-              Abhi koi live artist profile nahi. Dashboard se profile complete karo — naam, bio,
-              avatar, aur kam se kam ek track ya video — phir yahan automatically dikhega.
+              No live artist profiles yet. Complete your profile in the dashboard — name, bio,
+              avatar, and at least one track or video — then you will appear here automatically.
             </p>
           )}
           {data && data.length > 0 && (

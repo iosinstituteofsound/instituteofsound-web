@@ -87,7 +87,7 @@ export function ArtistProfilePageView({ data, isOwner, viewerUserId }: ArtistPro
           <motion.section id="music" {...sectionMotion} className="artist-site-section">
             <SectionHeader
               title="Music"
-              subtitle="▶ dabao — player slide open hoga. Spotify, YouTube, SoundCloud."
+              subtitle="Press ▶ to open the player. Spotify, YouTube, and SoundCloud supported."
             />
             <div className="artist-site-music-grid">
               <div className="artist-site-track-panel">

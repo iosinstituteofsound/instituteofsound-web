@@ -19,15 +19,15 @@ export function ArtistPressKitEditor({
     <section className="ios-panel space-y-4">
       <p className="ios-kicker">Press kit / EPK</p>
       <p className="text-xs text-muted-foreground">
-        Media & promoters ke liye PDF — bio, photos, tech rider, credits. Cloudinary par upload
-        karo ya direct PDF link paste karo. Profile par download button dikhega.
+        PDF for media and promoters — bio, photos, tech rider, credits. Upload via Cloudinary or
+        paste a direct PDF URL. A download button appears on your public profile.
       </p>
       <PdfUpload
         label="Upload EPK (PDF)"
         folder="ios/press-kits"
         value={pressKitUrl || undefined}
         onChange={onUrlChange}
-        hint="Cloudinary preset ko raw/PDF allow karna hoga (unsigned upload)."
+        hint="Your Cloudinary unsigned upload preset must allow raw/PDF files."
       />
       <div>
         <FieldLabel>Or paste PDF URL</FieldLabel>

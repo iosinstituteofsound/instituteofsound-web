@@ -51,7 +51,7 @@ export function ArtistSocialOrderEditor({
     <div className="space-y-2">
       <FieldLabel>Link order (public page)</FieldLabel>
       <p className="text-xs text-muted mb-3">
-        Drag karke order set karo — ya ↑ ↓ buttons. Jo link upar, woh pehle dikhega.
+        Drag to set order — or use ↑ ↓. Links at the top appear first on your profile.
       </p>
       <ul className="space-y-2" role="list">
         {active.map((item, index) => {

@@ -8,7 +8,7 @@ async function readApiJson<T>(res: Response): Promise<T & { error?: string }> {
     const snippet = text.replace(/\s+/g, ' ').trim().slice(0, 160)
     if (snippet.toLowerCase().includes('<!doctype') || snippet.startsWith('<')) {
       throw new Error(
-        'Catalog API reachable nahi (HTML mila). Vercel pe deploy + SPOTIFY_CLIENT_ID/SECRET Production env mein daalo, phir redeploy.'
+        'Catalog API unreachable (received HTML). Deploy to Vercel with SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in production env, then redeploy.'
       )
     }
     throw new Error(snippet || `Server error (${res.status})`)

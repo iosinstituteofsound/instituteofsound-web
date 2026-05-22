@@ -49,7 +49,7 @@ export function ArtistBrandingPanel({
 
   const matchBannerColor = async () => {
     if (!bannerUrl?.trim()) {
-      setMatchNote('Pehle banner image upload karo.')
+      setMatchNote('Upload a banner image first.')
       return
     }
     setMatching(true)
@@ -58,9 +58,9 @@ export function ArtistBrandingPanel({
     setMatching(false)
     if (hex) {
       onAccentChange(hex)
-      setMatchNote('Banner se accent set ho gaya — Save profile dabao.')
+      setMatchNote('Accent color matched from banner — click Save profile.')
     } else {
-      setMatchNote('Banner se color nahi nikla — picker se choose karo.')
+      setMatchNote('Could not read color from banner — pick one manually.')
     }
   }
 
@@ -69,8 +69,7 @@ export function ArtistBrandingPanel({
       <div>
         <p className="ios-kicker">Your look</p>
         <p className="text-sm text-muted mt-2 leading-relaxed">
-          Accent color aur theme preset — public page par tumhari branding dikhegi. Save profile
-          dabao changes live hone ke liye.
+          Accent color and theme preset — applied on your public page. Click Save profile to publish changes.
         </p>
       </div>
 
@@ -129,7 +128,7 @@ export function ArtistBrandingPanel({
       <div>
         <FieldLabel>Hero background video (YouTube)</FieldLabel>
         <p className="text-xs text-muted mt-1 mb-2 leading-relaxed">
-          Optional — muted loop behind your name. Banner image tab tak dikhegi jab video na ho.
+          Optional muted loop behind your name. The banner image shows when no video is set.
         </p>
         <input
           type="url"

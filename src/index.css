@@ -441,6 +441,322 @@ textarea.ios-input {
   transform: translateX(3px);
 }
 
+/* —— Artist dashboard (full width) —— */
+.artist-dashboard {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--color-void);
+}
+
+.artist-dashboard-inner {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 6.5rem clamp(1.25rem, 4vw, 3rem) 4rem;
+}
+
+.artist-dashboard-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.artist-dashboard-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.artist-dashboard-tab {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted-foreground);
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.artist-dashboard-tab:hover {
+  border-color: rgba(212, 0, 0, 0.4);
+  color: var(--color-signal);
+}
+
+.artist-dashboard-tab-active {
+  border-color: var(--color-mh-red);
+  background: rgba(212, 0, 0, 0.08);
+  color: var(--color-mh-red);
+}
+
+.artist-dash-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  background: linear-gradient(165deg, var(--color-elevated) 0%, var(--color-surface) 100%);
+  border: 1px solid var(--color-border);
+  position: sticky;
+  top: 4.5rem;
+  z-index: 30;
+}
+
+.artist-dash-toolbar-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.artist-dash-toolbar-url {
+  font-size: 0.75rem;
+  color: var(--color-muted-foreground);
+  font-family: ui-monospace, monospace;
+}
+
+.artist-dash-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .artist-dash-layout {
+    grid-template-columns: minmax(200px, 220px) minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+.artist-dash-nav {
+  position: sticky;
+  top: 8.5rem;
+  padding: 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.artist-dash-nav-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  margin: 0 0 1rem;
+}
+
+.artist-dash-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+@media (max-width: 1023px) {
+  .artist-dash-nav {
+    position: static;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .artist-dash-nav-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .artist-dash-nav-item {
+    flex: 1 1 auto;
+    min-width: 8rem;
+  }
+}
+
+.artist-dash-nav-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.artist-dash-nav-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--color-border);
+}
+
+.artist-dash-nav-item-active {
+  background: rgba(212, 0, 0, 0.1);
+  border-color: rgba(212, 0, 0, 0.35);
+}
+
+.artist-dash-nav-item-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-foreground);
+}
+
+.artist-dash-nav-item-hint {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--color-muted-foreground);
+  margin-top: 0.15rem;
+}
+
+.artist-dash-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  min-width: 0;
+}
+
+.artist-dash-section {
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  background: linear-gradient(165deg, var(--color-elevated) 0%, var(--color-surface) 100%);
+  border: 1px solid var(--color-border);
+  position: relative;
+}
+
+.artist-dash-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--color-mh-red), var(--color-crimson));
+}
+
+.artist-dash-section-head {
+  margin-bottom: 1.5rem;
+  padding-left: 0.25rem;
+}
+
+.artist-dash-section-step {
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  margin-bottom: 0.5rem;
+  font-family: ui-monospace, monospace;
+}
+
+.artist-dash-section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.artist-dash-section-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--color-muted-foreground);
+  max-width: 52rem;
+}
+
+.artist-dash-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.artist-dash-section-body .ios-panel {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--color-border);
+  padding: 1.25rem;
+}
+
+.artist-dash-section-body .ios-panel::before {
+  display: none;
+}
+
+.artist-dash-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .artist-dash-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.artist-dash-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .artist-dash-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.artist-dash-intro {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(212, 0, 0, 0.25);
+  background: rgba(212, 0, 0, 0.05);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-muted-foreground);
+}
+
+.artist-dash-checklist {
+  padding: 1.25rem;
+  border: 1px dashed var(--color-border);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.artist-dash-submit-card {
+  max-width: 40rem;
+  padding: 2rem;
+  background: linear-gradient(165deg, var(--color-elevated) 0%, var(--color-surface) 100%);
+  border: 1px solid var(--color-border);
+}
+
+.artist-dash-history-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .artist-dash-history-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .artist-dash-history-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* —— Super admin analytics (editorial desk) —— */
 .ios-analytics-hero {
   overflow: hidden;
