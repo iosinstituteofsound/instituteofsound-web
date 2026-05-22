@@ -17,6 +17,12 @@ import {
 import { isSupabaseConfigured } from '@/lib/supabase/client'
 import * as sb from '@/lib/artist-profile/supabaseProfile'
 import { slugifyArtistName } from '@/lib/artist-profile/slug'
+import {
+  evaluateProfileCompleteness,
+  getProfileCompletionStatus,
+  PROFILE_COMPLETION_ITEMS,
+  type ProfileCompletenessInput,
+} from '@/lib/artist-profile/completeness'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { Button } from '@/components/ui/Button'
 import { Input, FieldLabel } from '@/components/ui/Input'
@@ -133,35 +139,108 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
     refresh()
   }, [refresh])
 
+  const buildCompletenessInput = (
+    trackCount = tracks.length,
+    videoCount = videos.length
+  ): ProfileCompletenessInput => ({
+    displayName,
+    slug: slug || slugifyArtistName(displayName),
+    bio,
+    genres: genresText
+      .split(',')
+      .map((g) => g.trim())
+      .filter(Boolean),
+    avatarUrl,
+    trackCount,
+    videoCount,
+  })
+
+  const completionStatus = getProfileCompletionStatus(buildCompletenessInput())
+
+  const persistProfile = async (mediaCounts?: {
+    trackCount?: number
+    videoCount?: number
+  }) => {
+    const genres = genresText
+      .split(',')
+      .map((g) => g.trim())
+      .filter(Boolean)
+    const completeness = evaluateProfileCompleteness(
+      buildCompletenessInput(mediaCounts?.trackCount, mediaCounts?.videoCount)
+    )
+    const updated = await upsertArtistProfile(user, {
+      displayName,
+      slug: slug || slugifyArtistName(displayName),
+      tagline,
+      bio,
+      genres,
+      country,
+      avatarUrl,
+      bannerUrl,
+      logoUrl,
+      monthlyListenersDisplay: monthlyListeners,
+      artistPickTrackId: pickTrackId || null,
+      published: completeness.complete,
+      social: { spotify, youtube, instagram, facebook, bandcamp, website },
+    })
+    setProfile(updated)
+    setPublished(completeness.complete)
+    return { updated, completeness }
+  }
+
   const saveProfile = async () => {
     setSaving(true)
     setError('')
     setMessage('')
     try {
-      const genres = genresText
-        .split(',')
-        .map((g) => g.trim())
-        .filter(Boolean)
-      const updated = await upsertArtistProfile(user, {
-        displayName,
-        slug: slug || slugifyArtistName(displayName),
-        tagline,
-        bio,
-        genres,
-        country,
-        avatarUrl,
-        bannerUrl,
-        logoUrl,
-        monthlyListenersDisplay: monthlyListeners,
-        artistPickTrackId: pickTrackId || null,
-        published,
-        social: { spotify, youtube, instagram, facebook, bandcamp, website },
-      })
-      setProfile(updated)
-      setMessage(published ? 'Profile published!' : 'Profile saved as draft.')
+      const { updated, completeness } = await persistProfile()
+      if (completeness.complete) {
+        setMessage('Profile complete — ab Discover section mein live ho!')
+      } else {
+        setMessage(
+          `Saved as draft. Discover ke liye baaki: ${completeness.missing.join(', ')}`
+        )
+      }
       await loadChildData(updated.id)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const reloadMediaAndTryDiscover = async (profileId: string) => {
+    let trackCount = tracks.length
+    let videoCount = videos.length
+    if (isSupabaseConfigured()) {
+      const [t, a, v] = await Promise.all([
+        sb.supabaseGetTracks(profileId),
+        sb.supabaseGetAlbums(profileId),
+        sb.supabaseGetVideos(profileId),
+      ])
+      setTracks(t)
+      setAlbums(a)
+      setVideos(v)
+      trackCount = t.length
+      videoCount = v.length
+    } else {
+      setTracks(localGetTracks(profileId))
+      setAlbums(localGetAlbums(profileId))
+      setVideos(localGetVideos(profileId))
+      trackCount = localGetTracks(profileId).length
+      videoCount = localGetVideos(profileId).length
+    }
+    setSaving(true)
+    setError('')
+    try {
+      const { completeness } = await persistProfile({ trackCount, videoCount })
+      if (completeness.complete) {
+        setMessage('Profile complete — ab Discover section mein live ho!')
+      }
+      return completeness
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Auto-publish failed')
+      return evaluateProfileCompleteness(buildCompletenessInput(trackCount, videoCount))
     } finally {
       setSaving(false)
     }
@@ -216,11 +295,17 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         added++
       }
       setBulkTrackUrls('')
-      await loadChildData(p.id)
-      setMessage(
-        `${added} track${added === 1 ? '' : 's'} added` +
-          (skipped ? ` · ${skipped} duplicate skip` : '')
-      )
+      const completeness = await reloadMediaAndTryDiscover(p.id)
+      if (!completeness?.complete) {
+        const extra =
+          added > 0
+            ? `${added} track${added === 1 ? '' : 's'} added` +
+              (skipped ? ` · ${skipped} duplicate skip` : '')
+            : skipped
+              ? `${skipped} duplicate skip`
+              : ''
+        if (extra) setMessage(extra)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Bulk add failed')
     } finally {
@@ -236,7 +321,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
     <div className="space-y-10 max-w-3xl">
       <p className="text-sm text-muted border-l-2 border-mh-red pl-4 leading-relaxed">
         Apni artist page ki har cheez yahan edit karo — naam, images, tracks, albums, videos.
-        Catalog dubara import kar sakte ho; purani entries skip, sirf naya data add hoga. Published page:{' '}
+        Jab checklist complete ho jayegi, profile <strong className="text-foreground">Discover</strong> par
+        automatically live ho jayegi. Page:{' '}
         <Link to={`/artist/${profileSlug}`} className="ios-link">
           /artist/{profileSlug}
         </Link>
@@ -300,15 +386,33 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         <ImageUpload label="Avatar" folder="ios/artists" value={avatarUrl} onChange={setAvatarUrl} />
         <ImageUpload label="Banner" folder="ios/artists" value={bannerUrl} onChange={setBannerUrl} />
         <ImageUpload label="Logo" folder="ios/artists" value={logoUrl} onChange={setLogoUrl} />
-        <label className="flex items-center gap-3 text-sm">
-          <input
-            type="checkbox"
-            checked={published}
-            onChange={(e) => setPublished(e.target.checked)}
-            className="accent-mh-red"
-          />
-          Publish profile publicly
-        </label>
+        <div className="border border-border/60 p-4 space-y-3">
+          <p className="text-xs uppercase tracking-widest text-muted">
+            Discover listing checklist
+          </p>
+          <ul className="space-y-1.5 text-sm">
+            {PROFILE_COMPLETION_ITEMS.map((item) => {
+              const done = completionStatus[item.key]
+              return (
+                <li
+                  key={item.key}
+                  className={done ? 'text-emerald-400' : 'text-muted-foreground'}
+                >
+                  {done ? '✓' : '○'} {item.label}
+                </li>
+              )
+            })}
+          </ul>
+          {published ? (
+            <p className="text-xs text-emerald-400">
+              Live on Discover — profile public hai.
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Incomplete profile draft rehti hai; complete karte hi Discover par dikhegi.
+            </p>
+          )}
+        </div>
       </section>
 
       <section className="ios-panel space-y-4">
@@ -345,7 +449,9 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         albums={albums}
         videos={videos}
         ensureProfile={ensureProfile}
-        onReload={loadChildData}
+        onReload={async (profileId) => {
+          await reloadMediaAndTryDiscover(profileId)
+        }}
         onApplySuggestions={(s: CatalogProfileSuggestions) => {
           if (s.displayName) setDisplayName(s.displayName)
           if (s.tagline) setTagline(s.tagline)
@@ -391,7 +497,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
               setTrackTitle('')
               setTrackUrl('')
               setTrackCover('')
-              await loadChildData(p.id)
+              await reloadMediaAndTryDiscover(p.id)
             }}
           >
             Add track
@@ -560,7 +666,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
               await addArtistVideo(p.id, { title: videoTitle, videoUrl })
               setVideoTitle('')
               setVideoUrl('')
-              await loadChildData(p.id)
+              await reloadMediaAndTryDiscover(p.id)
             }}
           >
             Add video

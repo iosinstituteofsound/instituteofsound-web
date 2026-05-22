@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useContent } from '@/hooks/useContent'
-import { getArtists } from '@/api/endpoints'
+import { listDiscoverArtists } from '@/lib/artist-profile/service'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { AnimatedGrid } from '@/components/ui/AnimatedGrid'
 import { ArtistCard } from '@/components/cards/ArtistCard'
@@ -8,7 +8,9 @@ import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { WaveformBackground } from '@/components/effects/WaveformBackground'
 
 export default function DiscoverPage() {
-  const { data, loading, error } = useContent(useCallback(() => getArtists(), []))
+  const { data, loading, error } = useContent(
+    useCallback(() => listDiscoverArtists(), [])
+  )
 
   return (
     <div className="relative">
@@ -24,7 +26,13 @@ export default function DiscoverPage() {
         <div className="max-w-7xl mx-auto">
           {loading && <LoadingTransmission variant="compact" />}
           {error && <p className="text-crimson">{error}</p>}
-          {data && (
+          {data && data.length === 0 && (
+            <p className="text-muted text-sm max-w-lg">
+              Abhi koi live artist profile nahi. Dashboard se profile complete karo — naam, bio,
+              avatar, aur kam se kam ek track ya video — phir yahan automatically dikhega.
+            </p>
+          )}
+          {data && data.length > 0 && (
             <AnimatedGrid columns={3}>
               {data.map((artist) => (
                 <ArtistCard key={artist.id} artist={artist} />

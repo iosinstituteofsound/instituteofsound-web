@@ -1,6 +1,9 @@
+import { getArtists } from '@/api/endpoints'
 import { isSupabaseConfigured } from '@/lib/supabase/client'
 import { getDrafts } from '@/lib/auth/storage'
+import type { Artist } from '@/types'
 import type { User } from '@/lib/auth/types'
+import { mergeDiscoverArtists } from './discover'
 import type {
   ArtistEditorialFeature,
   ArtistProfile,
@@ -191,4 +194,13 @@ export async function deleteArtistVideo(id: string) {
 export async function listArtistProfilesForEditor(): Promise<ArtistProfile[]> {
   if (isSupabaseConfigured()) return sb.supabaseListProfilesForEditor()
   return local.localGetProfiles()
+}
+
+/** Published artist profiles + legacy demo artists (deduped by slug) */
+export async function listDiscoverArtists(): Promise<Artist[]> {
+  const legacy = await getArtists().catch(() => [] as Artist[])
+  const published = isSupabaseConfigured()
+    ? await sb.supabaseListPublishedProfiles()
+    : local.localListPublishedProfiles()
+  return mergeDiscoverArtists(published, legacy)
 }

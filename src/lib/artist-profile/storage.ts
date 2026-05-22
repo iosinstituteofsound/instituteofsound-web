@@ -40,6 +40,15 @@ export function localGetProfiles(): ArtistProfile[] {
   return read<ArtistProfile[]>(PROFILES_KEY, [])
 }
 
+export function localListPublishedProfiles(): ArtistProfile[] {
+  return localGetProfiles()
+    .filter((p) => p.published)
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    )
+}
+
 function saveProfiles(profiles: ArtistProfile[]) {
   write(PROFILES_KEY, profiles)
 }

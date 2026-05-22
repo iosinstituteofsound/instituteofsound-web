@@ -454,6 +454,17 @@ export async function supabaseListProfilesForEditor(): Promise<ArtistProfile[]> 
   return (data as ProfileRow[]).map(mapProfile)
 }
 
+export async function supabaseListPublishedProfiles(): Promise<ArtistProfile[]> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_profiles')
+    .select('*')
+    .eq('published', true)
+    .order('updated_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as ProfileRow[]).map(mapProfile)
+}
+
 export async function supabaseGetEditorialForProfile(
   profileId: string
 ): Promise<
