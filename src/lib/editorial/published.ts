@@ -1,8 +1,9 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { mapDraft, type DraftRow } from '@/lib/supabase/mappers'
-import { getDrafts } from '@/lib/auth/storage'
+import { getDrafts, getUsers } from '@/lib/auth/storage'
 import type { EditorialDraft } from '@/lib/auth/types'
 import { editorialExcerpt } from '@/lib/editorial/richText'
+import { formatEditorByline, type EditorBylineSource } from '@/lib/editorial/editorByline'
 import { ensureUniqueSlug, slugifyArtistName } from '@/lib/artist-profile/slug'
 import type { CoverStory, Feature } from '@/types'
 
@@ -38,20 +39,80 @@ function estimateReadTime(htmlOrText: string): string {
   return `${mins} min`
 }
 
-export function draftToFeature(d: PublishedEditorial): Feature {
+export async function fetchEditorProfilesForDrafts(
+  editorIds: string[]
+): Promise<Map<string, EditorBylineSource>> {
+  const unique = [...new Set(editorIds.filter(Boolean))]
+  const map = new Map<string, EditorBylineSource>()
+  if (unique.length === 0) return map
+
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabase()
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, name, username')
+      .in('id', unique)
+
+    if (error) throw new Error(error.message)
+    for (const row of data ?? []) {
+      map.set(row.id, {
+        name: row.name,
+        username: row.username ?? undefined,
+      })
+    }
+    return map
+  }
+
+  for (const u of getUsers()) {
+    if (unique.includes(u.id)) {
+      map.set(u.id, {
+        name: u.name,
+        username: u.username,
+      })
+    }
+  }
+  return map
+}
+
+function enrichWithLiveEditor(
+  draft: PublishedEditorial,
+  editors: Map<string, EditorBylineSource>
+): PublishedEditorial & { authorName: string; authorUsername?: string } {
+  const live = editors.get(draft.editorId)
+  const authorName = live?.name?.trim() || draft.editorName
+  const authorUsername = live?.username?.trim() || undefined
+  const editorName = live
+    ? formatEditorByline(live, draft.editorName)
+    : draft.editorName
+
+  return {
+    ...draft,
+    editorName,
+    authorName,
+    authorUsername,
+  }
+}
+
+export function draftToFeature(
+  d: PublishedEditorial & { authorName?: string; authorUsername?: string }
+): Feature {
   return {
     id: d.id,
     slug: d.slug,
     title: d.title,
     excerpt: editorialExcerpt(d.body),
     author: d.editorName,
+    authorName: d.authorName ?? d.editorName,
+    authorUsername: d.authorUsername,
     readTime: estimateReadTime(d.body),
     image: d.coverImageUrl?.trim() || FALLBACK_IMAGE,
     category: TYPE_CATEGORY[d.type],
   }
 }
 
-export function draftToCoverStory(d: PublishedEditorial): CoverStory {
+export function draftToCoverStory(
+  d: PublishedEditorial & { authorName?: string; authorUsername?: string }
+): CoverStory {
   return {
     category: d.featuredOnHomepage ? 'Featured' : 'Editorial',
     headline: d.title,
@@ -73,12 +134,21 @@ export type FeatureArticle = Feature & {
   subject: string
 }
 
-export function draftToFeatureArticle(d: PublishedEditorial): FeatureArticle {
+export function draftToFeatureArticle(
+  d: PublishedEditorial & { authorName?: string; authorUsername?: string }
+): FeatureArticle {
   return {
     ...draftToFeature(d),
     body: d.body,
     subject: d.subject,
   }
+}
+
+async function enrichPublishedList(
+  rows: PublishedEditorial[]
+): Promise<(PublishedEditorial & { authorName: string; authorUsername?: string })[]> {
+  const editors = await fetchEditorProfilesForDrafts(rows.map((r) => r.editorId))
+  return rows.map((r) => enrichWithLiveEditor(r, editors))
 }
 
 async function supabaseListPublished(): Promise<PublishedEditorial[]> {
@@ -105,8 +175,10 @@ function localListPublished(): PublishedEditorial[] {
 }
 
 export async function listPublishedEditorials(): Promise<PublishedEditorial[]> {
-  if (isSupabaseConfigured()) return supabaseListPublished()
-  return localListPublished()
+  const rows = isSupabaseConfigured()
+    ? await supabaseListPublished()
+    : localListPublished()
+  return enrichPublishedList(rows)
 }
 
 export async function listHomepageFeatures(): Promise<Feature[]> {

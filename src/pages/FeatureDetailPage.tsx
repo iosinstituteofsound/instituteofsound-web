@@ -5,6 +5,7 @@ import { getFeature } from '@/api/endpoints'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { RichTextContent } from '@/components/editor/RichTextContent'
+import { EditorByline } from '@/components/editor/EditorByline'
 
 export default function FeatureDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -47,9 +48,13 @@ export default function FeatureDetailPage() {
         {feature.subject && (
           <p className="text-lg text-rs-red font-serif italic mt-3">{feature.subject}</p>
         )}
-        <div className="flex gap-4 mt-4 text-sm text-muted">
-          <span>{feature.author}</span>
-          <span>·</span>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-4 text-sm text-muted">
+          <EditorByline
+            name={feature.authorName}
+            username={feature.authorUsername}
+            fallback={feature.author}
+          />
+          <span aria-hidden>·</span>
           <span>{feature.readTime}</span>
         </div>
         <p className="text-lg text-muted mt-8 leading-relaxed">{feature.excerpt}</p>

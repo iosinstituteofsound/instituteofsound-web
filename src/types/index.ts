@@ -97,6 +97,9 @@ export interface Feature {
   /** Full HTML write-up when loaded from editorial desk */
   body?: string
   subject?: string
+  /** Live from editor profile (when loaded from Supabase) */
+  authorName?: string
+  authorUsername?: string
 }
 
 export interface CommunityMember {

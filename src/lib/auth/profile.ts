@@ -69,7 +69,16 @@ export async function updateUserProfile(
     .single()
 
   if (error) throw new Error(error.message)
-  return mapProfile(data as ProfileRow)
+  const updated = mapProfile(data as ProfileRow)
+
+  if (patch.name) {
+    await supabase
+      .from('editorial_drafts')
+      .update({ editor_name: patch.name })
+      .eq('editor_id', userId)
+  }
+
+  return updated
 }
 
 export async function fetchUserProfile(userId: string): Promise<User> {

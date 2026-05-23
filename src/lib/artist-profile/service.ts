@@ -16,13 +16,14 @@ import type {
   UpsertTrackInput,
   UpsertVideoInput,
 } from './types'
+import { fetchEditorProfilesForDrafts } from '@/lib/editorial/published'
 import { editorialExcerpt } from '@/lib/editorial/richText'
 import { fetchThumbnailFromUrl } from '@/lib/media/thumbnailFromUrl'
 import { enrichTracksWithThumbnails, enrichVideosWithThumbnails } from './enrichMedia'
 import * as local from './storage'
 import * as sb from './supabaseProfile'
 
-function mapEditorial(
+async function mapEditorial(
   rows: {
     id: string
     type: string
@@ -30,20 +31,28 @@ function mapEditorial(
     subject: string
     body: string
     cover_image_url?: string | null
+    editor_id: string
     editor_name: string
     updated_at: string
   }[]
-): ArtistEditorialFeature[] {
-  return rows.map((r) => ({
-    id: r.id,
-    type: r.type as ArtistEditorialFeature['type'],
-    title: r.title,
-    subject: r.subject,
-    excerpt: editorialExcerpt(r.body),
-    coverImageUrl: r.cover_image_url ?? undefined,
-    editorName: r.editor_name,
-    publishedAt: r.updated_at,
-  }))
+): Promise<ArtistEditorialFeature[]> {
+  const editors = await fetchEditorProfilesForDrafts(rows.map((r) => r.editor_id))
+  return rows.map((r) => {
+    const live = editors.get(r.editor_id)
+    const authorName = live?.name?.trim() || r.editor_name
+    const authorUsername = live?.username?.trim() || undefined
+    return {
+      id: r.id,
+      type: r.type as ArtistEditorialFeature['type'],
+      title: r.title,
+      subject: r.subject,
+      excerpt: editorialExcerpt(r.body),
+      coverImageUrl: r.cover_image_url ?? undefined,
+      editorName: authorName,
+      editorUsername: authorUsername,
+      publishedAt: r.updated_at,
+    }
+  })
 }
 
 function localEditorialForProfile(profileId: string): ArtistEditorialFeature[] {
@@ -111,7 +120,7 @@ export async function getArtistProfilePage(slug: string): Promise<ArtistProfileP
       merch,
       lineup,
       bioTimeline,
-      editorial: mapEditorial(editorialRows),
+      editorial: await mapEditorial(editorialRows),
       pickTrack,
     }
   }

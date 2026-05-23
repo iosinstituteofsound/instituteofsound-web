@@ -116,6 +116,7 @@ export interface ArtistEditorialFeature {
   excerpt: string
   coverImageUrl?: string
   editorName: string
+  editorUsername?: string
   publishedAt: string
 }
 

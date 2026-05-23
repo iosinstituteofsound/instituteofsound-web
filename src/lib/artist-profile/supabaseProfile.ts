@@ -781,6 +781,7 @@ export async function supabaseGetEditorialForProfile(
     subject: string
     body: string
     cover_image_url: string | null
+    editor_id: string
     editor_name: string
     updated_at: string
   }[]
@@ -788,7 +789,9 @@ export async function supabaseGetEditorialForProfile(
   const supabase = getSupabase()
   const { data, error } = await supabase
     .from('editorial_drafts')
-    .select('id, type, title, subject, body, cover_image_url, editor_name, updated_at')
+    .select(
+      'id, type, title, subject, body, cover_image_url, editor_id, editor_name, updated_at'
+    )
     .eq('artist_profile_id', profileId)
     .eq('status', 'published')
     .order('updated_at', { ascending: false })

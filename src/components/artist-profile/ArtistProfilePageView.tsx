@@ -11,6 +11,7 @@ import { ArtistPressKitSection } from './ArtistPressKitSection'
 import { ArtistSiteHero } from './ArtistSiteHero'
 import { ArtistSiteStickyNav, type ArtistSiteNavItem } from './ArtistSiteStickyNav'
 import { MetalBadge } from '@/components/ui/MetalBadge'
+import { EditorByline } from '@/components/editor/EditorByline'
 import { artistBrandingStyle, artistSiteThemeClass } from '@/lib/artist-profile/branding'
 
 interface ArtistProfilePageViewProps {
@@ -149,7 +150,11 @@ export function ArtistProfilePageView({ data, isOwner, viewerUserId }: ArtistPro
                     <h3>{item.title}</h3>
                     <p>{item.excerpt}</p>
                     <p className="artist-site-press-byline">
-                      {item.editorName} · Institute of Sound
+                      <EditorByline
+                        name={item.editorName}
+                        username={item.editorUsername}
+                      />
+                      <span className="text-muted"> · Institute of Sound</span>
                     </p>
                   </div>
                 </motion.article>
