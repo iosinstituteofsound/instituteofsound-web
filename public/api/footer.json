@@ -11,6 +11,7 @@
     { "label": "Manifesto", "href": "/archive" },
     { "label": "All Playlists", "href": "/playlists" },
     { "label": "Submit Work", "href": "/submissions" },
+    { "label": "Join as Editor", "href": "/editor/join" },
     { "label": "Contact", "href": "#" }
   ],
   "newsletter": {

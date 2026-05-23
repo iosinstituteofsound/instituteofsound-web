@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { editorDashboardPath } from '@/lib/auth/roles'
+import { editorDashboardPath, isEditorStaff } from '@/lib/auth/roles'
 import { Button } from '@/components/ui/Button'
 import clsx from 'clsx'
 
@@ -23,6 +23,7 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
   if (user) {
     const dashboardTo = editorDashboardPath(user.role)
     const label = isSuperEditor ? 'Editorial Desk' : user.role === 'artist' ? 'My Studio' : 'Dashboard'
+    const showEditorApply = user.role === 'artist' && !isEditorStaff(user.role)
     return (
       <div
         className={clsx(
@@ -30,6 +31,19 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
           layout === 'stack' && 'flex-col w-full items-stretch gap-3'
         )}
       >
+        {showEditorApply &&
+          wrap(
+            <Link
+              to="/editor/apply"
+              onClick={onNavigate}
+              className={clsx(
+                'ios-nav-link !text-mh-red',
+                layout === 'stack' && 'text-sm tracking-widest uppercase font-semibold text-center'
+              )}
+            >
+              Join as Editor
+            </Link>
+          )}
         {wrap(
           <Link
             to={dashboardTo}
@@ -81,6 +95,18 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
           )}
         >
           For Artists
+        </Link>
+      )}
+      {wrap(
+        <Link
+          to="/editor/join"
+          onClick={onNavigate}
+          className={clsx(
+            'ios-nav-link hidden xl:inline !text-mh-red',
+            layout === 'stack' && '!inline text-sm tracking-widest uppercase font-semibold'
+          )}
+        >
+          Join as Editor
         </Link>
       )}
       {wrap(
