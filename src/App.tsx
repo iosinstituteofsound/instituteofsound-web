@@ -18,6 +18,9 @@ const FeatureDetailPage = lazy(() => import('@/pages/FeatureDetailPage'))
 
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
 const DeskLoginPage = lazy(() => import('@/pages/auth/DeskLoginPage'))
+const EditorJoinPage = lazy(() => import('@/pages/auth/EditorJoinPage'))
+const EditorLoginPage = lazy(() => import('@/pages/auth/EditorLoginPage'))
+const EditorApplyPage = lazy(() => import('@/pages/editor/EditorApplyPage'))
 const AuthCallbackPage = lazy(() => import('@/pages/auth/AuthCallbackPage'))
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'))
 const DashboardRedirectPage = lazy(
@@ -55,6 +58,16 @@ export default function App() {
             <Route path="login" element={<LoginPage />} />
             <Route path="auth/callback" element={<AuthCallbackPage />} />
             <Route path="desk" element={<DeskLoginPage />} />
+            <Route path="editor/join" element={<EditorJoinPage />} />
+            <Route path="editor/login" element={<EditorLoginPage />} />
+            <Route
+              path="editor/apply"
+              element={
+                <ProtectedRoute role="artist">
+                  <EditorApplyPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="register" element={<RegisterPage />} />
             <Route path="dashboard" element={<DashboardRedirectPage />} />
             <Route
@@ -68,7 +81,7 @@ export default function App() {
             <Route
               path="editor/dashboard"
               element={
-                <ProtectedRoute role="super_editor">
+                <ProtectedRoute role={['editor', 'super_editor']}>
                   <EditorDashboardPage />
                 </ProtectedRoute>
               }

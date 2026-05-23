@@ -7,6 +7,7 @@ import { getSuperAdminAnalytics } from '@/lib/analytics/service'
 import type { SuperAdminAnalytics } from '@/lib/analytics/types'
 import { SuperAdminAnalyticsPanel } from '@/components/dashboard/SuperAdminAnalytics'
 import { EditorProfilePanel } from '@/components/dashboard/EditorProfilePanel'
+import { EditorApplicationsPanel } from '@/components/editor-applications/EditorApplicationsPanel'
 import { listArtistProfilesForEditor } from '@/lib/artist-profile/service'
 import type { ArtistProfile } from '@/lib/artist-profile/types'
 import {
@@ -33,7 +34,7 @@ import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import { RichTextContent } from '@/components/editor/RichTextContent'
 import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richText'
 
-type EditorTab = 'analytics' | 'queue' | 'write' | 'drafts' | 'profile'
+type EditorTab = 'analytics' | 'applications' | 'queue' | 'write' | 'drafts' | 'profile'
 type FilterStatus = 'all' | SubmissionStatus
 
 export default function EditorDashboardPage() {
@@ -183,6 +184,7 @@ export default function EditorDashboardPage() {
   const tabs: { id: EditorTab; label: string }[] = isSuperEditor
     ? [
         { id: 'analytics', label: 'Analytics' },
+        { id: 'applications', label: 'Editor Applications' },
         { id: 'queue', label: 'Submission Queue' },
         { id: 'write', label: 'Write Editorial' },
         { id: 'drafts', label: `My Drafts (${drafts.length})` },
@@ -321,7 +323,13 @@ export default function EditorDashboardPage() {
           <EditorProfilePanel user={user} onSaved={refreshUser} />
         )}
 
-        {loadingData && tab !== 'write' && tab !== 'analytics' && tab !== 'profile' ? (
+        {tab === 'applications' && isSuperEditor && user ? (
+          <EditorApplicationsPanel reviewerId={user.id} />
+        ) : loadingData &&
+          tab !== 'write' &&
+          tab !== 'analytics' &&
+          tab !== 'profile' &&
+          tab !== 'applications' ? (
           <LoadingTransmission variant="compact" />
         ) : tab === 'profile' ? null : tab === 'analytics' && isSuperEditor ? (
           analytics ? (

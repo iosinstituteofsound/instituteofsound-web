@@ -4,8 +4,8 @@ import clsx from 'clsx'
 
 interface GoogleSignInButtonProps {
   className?: string
-  /** Staff bookmark /desk — must be super_editor after Google */
-  intent?: 'artist' | 'desk'
+  /** artist = default signup; desk = super editor; editor_apply = join / apply flow */
+  intent?: 'artist' | 'desk' | 'editor_apply'
   label?: string
 }
 

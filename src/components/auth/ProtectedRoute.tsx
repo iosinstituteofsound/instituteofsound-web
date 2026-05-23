@@ -13,7 +13,9 @@ interface ProtectedRouteProps {
 function signInPathFor(allowed?: UserRole | UserRole[]): string {
   if (!allowed) return '/login'
   const list = Array.isArray(allowed) ? allowed : [allowed]
-  return list.includes('super_editor') ? '/desk' : '/login'
+  if (list.includes('super_editor') && list.length === 1) return '/desk'
+  if (list.includes('editor') || list.includes('super_editor')) return '/editor/login'
+  return '/login'
 }
 
 function roleAllowed(userRole: UserRole, allowed?: UserRole | UserRole[]): boolean {

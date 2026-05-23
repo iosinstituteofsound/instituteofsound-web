@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { completeAuthCallback } from '@/lib/auth/provider'
-import { editorDashboardPath, isSuperEditor } from '@/lib/auth/roles'
+import { isSuperEditor } from '@/lib/auth/roles'
+import { resolvePostLoginPath } from '@/lib/auth/postLogin'
+import { getMyEditorApplication } from '@/lib/editor-applications/service'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 
 export default function AuthCallbackPage() {
@@ -14,7 +16,7 @@ export default function AuthCallbackPage() {
     let cancelled = false
 
     completeAuthCallback()
-      .then(({ user, intent }) => {
+      .then(async ({ user, intent }) => {
         if (cancelled) return
 
         if (intent === 'desk' && !isSuperEditor(user.role)) {
@@ -23,7 +25,14 @@ export default function AuthCallbackPage() {
           return
         }
 
-        navigate(editorDashboardPath(user.role), { replace: true })
+        let application = null
+        try {
+          application = await getMyEditorApplication(user.id)
+        } catch {
+          /* optional */
+        }
+
+        navigate(resolvePostLoginPath(user, intent, application), { replace: true })
       })
       .catch((err: Error) => {
         if (!cancelled) setError(err.message)

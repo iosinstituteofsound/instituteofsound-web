@@ -25,7 +25,7 @@ interface AuthContextValue {
   loading: boolean
   mode: 'supabase' | 'local'
   configHint: string | null
-  signInWithGoogle: (intent?: 'artist' | 'desk') => Promise<void>
+  signInWithGoogle: (intent?: 'artist' | 'desk' | 'editor_apply') => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
   isEditor: boolean
@@ -62,9 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const signInWithGoogle = useCallback(async (intent: 'artist' | 'desk' = 'artist') => {
-    await authSignInWithGoogle(intent)
-  }, [])
+  const signInWithGoogle = useCallback(
+    async (intent: 'artist' | 'desk' | 'editor_apply' = 'artist') => {
+      await authSignInWithGoogle(intent)
+    },
+    []
+  )
 
   const logout = useCallback(async () => {
     await authLogout()

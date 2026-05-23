@@ -76,8 +76,10 @@ async function ensureProfileRow(
   }
 }
 
+export type GoogleOAuthIntent = 'artist' | 'desk' | 'editor_apply'
+
 export async function supabaseSignInWithGoogle(
-  intent: 'artist' | 'desk' = 'artist'
+  intent: GoogleOAuthIntent = 'artist'
 ): Promise<void> {
   const supabase = getSupabase()
   localStorage.setItem(OAUTH_INTENT_KEY, intent)
@@ -97,7 +99,7 @@ export async function supabaseSignInWithGoogle(
 
 export async function supabaseHandleAuthCallback(): Promise<{
   user: User
-  intent: 'artist' | 'desk' | null
+  intent: GoogleOAuthIntent | null
 }> {
   const supabase = getSupabase()
   const hash = window.location.hash
@@ -128,7 +130,10 @@ export async function supabaseHandleAuthCallback(): Promise<{
 
   const rawIntent = localStorage.getItem(OAUTH_INTENT_KEY)
   localStorage.removeItem(OAUTH_INTENT_KEY)
-  const intent = rawIntent === 'desk' ? 'desk' : rawIntent === 'artist' ? 'artist' : null
+  const intent: GoogleOAuthIntent | null =
+    rawIntent === 'desk' || rawIntent === 'artist' || rawIntent === 'editor_apply'
+      ? rawIntent
+      : null
 
   return { user, intent }
 }

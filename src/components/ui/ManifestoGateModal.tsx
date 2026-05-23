@@ -32,6 +32,9 @@ const MANIFESTO = {
 
 function shouldShowOnPath(pathname: string) {
   if (pathname.startsWith('/desk')) return false
+  if (pathname.startsWith('/editor/join')) return false
+  if (pathname.startsWith('/editor/login')) return false
+  if (pathname.startsWith('/editor/apply')) return false
   if (pathname.startsWith('/auth')) return false
   if (pathname.startsWith('/dashboard')) return false
   return true
