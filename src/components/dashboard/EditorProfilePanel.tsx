@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { User } from '@/lib/auth/types'
+import { isSuperEditor } from '@/lib/auth/roles'
 import { updateUserProfile } from '@/lib/auth/profile'
 import { suggestUsernameFromEmail, normalizeUsername, validateUsername } from '@/lib/auth/username'
 import { ImageUpload } from '@/components/ui/ImageUpload'
@@ -30,7 +31,7 @@ export function EditorProfilePanel({ user, onSaved }: EditorProfilePanelProps) {
   }, [user])
 
   const usernamePreview = normalizeUsername(username) || 'username'
-  const usernameError = username ? validateUsername(username) : null
+  const usernameError = username ? validateUsername(username, { role: user.role }) : null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -144,6 +145,11 @@ export function EditorProfilePanel({ user, onSaved }: EditorProfilePanelProps) {
         ) : (
           <p className="text-xs text-muted mt-1">
             Letters, numbers, underscore only. Minimum 3 characters.
+            {isSuperEditor(user.role) && (
+              <span className="block mt-1 text-foreground/80">
+                Super editor: you can claim brand handles such as <strong>@ios</strong>.
+              </span>
+            )}
           </p>
         )}
       </div>

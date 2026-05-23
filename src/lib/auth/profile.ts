@@ -21,6 +21,7 @@ export async function updateUserProfile(
     throw new Error('Profile updates require Supabase. Configure .env and sign in with Google.')
   }
 
+  const current = await fetchUserProfile(userId)
   const patch: Record<string, string | null> = {}
 
   if (input.name !== undefined) {
@@ -31,7 +32,7 @@ export async function updateUserProfile(
 
   if (input.username !== undefined) {
     const username = normalizeUsername(input.username)
-    const err = validateUsername(username)
+    const err = validateUsername(username, { role: current.role })
     if (err) throw new Error(err)
     patch.username = username
   }
@@ -45,7 +46,7 @@ export async function updateUserProfile(
   }
 
   if (Object.keys(patch).length === 0) {
-    return fetchUserProfile(userId)
+    return current
   }
 
   if (patch.username) {

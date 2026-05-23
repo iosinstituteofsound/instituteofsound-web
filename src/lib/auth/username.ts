@@ -1,3 +1,6 @@
+import type { UserRole } from './types'
+
+/** Blocked for regular editors; super editors can claim (e.g. @ios for the desk) */
 const RESERVED = new Set([
   'admin',
   'editor',
@@ -22,10 +25,15 @@ export function normalizeUsername(input: string): string {
     .slice(0, 32)
 }
 
-export function validateUsername(username: string): string | null {
+export function validateUsername(
+  username: string,
+  options?: { role?: UserRole }
+): string | null {
   const u = normalizeUsername(username)
   if (u.length < 3) return 'Username must be at least 3 characters (letters, numbers, underscore).'
-  if (RESERVED.has(u)) return 'This username is reserved.'
+  if (RESERVED.has(u) && options?.role !== 'super_editor') {
+    return 'This username is reserved. Super editors can claim brand handles like @ios.'
+  }
   return null
 }
 
