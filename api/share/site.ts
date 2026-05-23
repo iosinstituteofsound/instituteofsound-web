@@ -18,7 +18,7 @@ const DESCRIPTION =
 export default function handler(_req: unknown, res: VercelResponse) {
   const origin = siteOrigin()
   const url = `${origin}/`
-  const image = `${origin}/api/og/site`
+  const image = `${origin}/og/site-og.jpg`
   const t = escapeHtml(TITLE)
   const d = escapeHtml(DESCRIPTION)
   const u = escapeHtml(url)
