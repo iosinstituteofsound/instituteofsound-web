@@ -94,6 +94,9 @@ export interface Feature {
   readTime: string
   image: string
   category: string
+  /** Full HTML write-up when loaded from editorial desk */
+  body?: string
+  subject?: string
 }
 
 export interface CommunityMember {

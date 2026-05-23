@@ -38,6 +38,9 @@ export interface DraftRow {
   body: string
   cover_image_url: string | null
   artist_profile_id: string | null
+  slug: string | null
+  featured_on_homepage: boolean | null
+  published_at: string | null
   status: EditorialDraft['status']
   created_at: string
   updated_at: string
@@ -86,6 +89,9 @@ export function mapDraft(row: DraftRow): EditorialDraft {
     body: row.body,
     coverImageUrl: row.cover_image_url ?? undefined,
     artistProfileId: row.artist_profile_id ?? undefined,
+    slug: row.slug ?? undefined,
+    featuredOnHomepage: row.featured_on_homepage ?? undefined,
+    publishedAt: row.published_at ?? undefined,
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

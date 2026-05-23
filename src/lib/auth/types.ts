@@ -46,6 +46,9 @@ export interface EditorialDraft {
   body: string
   coverImageUrl?: string
   artistProfileId?: string
+  slug?: string
+  featuredOnHomepage?: boolean
+  publishedAt?: string
   status: 'draft' | 'published'
   createdAt: string
   updatedAt: string

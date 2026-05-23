@@ -1,4 +1,9 @@
 import { fetchApi } from './client'
+import {
+  getHomepageCoverStory,
+  getPublishedFeatureBySlug,
+  mergeFeaturesWithPublished,
+} from '@/lib/editorial/published'
 import type {
   AlbumRelease,
   Artist,
@@ -17,7 +22,11 @@ import type {
 } from '@/types'
 
 export const getHero = () => fetchApi<HeroData>('/hero.json')
-export const getCoverStory = () => fetchApi<CoverStory>('/cover-story.json')
+export const getCoverStory = async (): Promise<CoverStory> => {
+  const live = await getHomepageCoverStory()
+  if (live) return live
+  return fetchApi<CoverStory>('/cover-story.json')
+}
 export const getTrending = () => fetchApi<TrendingItem[]>('/trending.json')
 export const getReviews = () => fetchApi<Review[]>('/reviews.json')
 export const getAlbumReleases = () => fetchApi<AlbumRelease[]>('/album-releases.json')
@@ -37,13 +46,19 @@ export const getPlaylist = (slug: string) =>
     return playlist
   })
 export const getSignals = () => fetchApi<Signal[]>('/signals.json')
-export const getFeatures = () => fetchApi<Feature[]>('/features.json')
-export const getFeature = (slug: string) =>
-  getFeatures().then((features) => {
-    const feature = features.find((f) => f.slug === slug)
-    if (!feature) throw new Error('Feature not found')
-    return feature
-  })
+export const getFeatures = async (): Promise<Feature[]> => {
+  const staticFeatures = await fetchApi<Feature[]>('/features.json')
+  return mergeFeaturesWithPublished(staticFeatures)
+}
+
+export const getFeature = async (slug: string) => {
+  const live = await getPublishedFeatureBySlug(slug)
+  if (live) return live
+  const features = await fetchApi<Feature[]>('/features.json')
+  const feature = features.find((f) => f.slug === slug)
+  if (!feature) throw new Error('Feature not found')
+  return { ...feature, body: '', subject: '' }
+}
 export const getCommunity = () => fetchApi<CommunityMember[]>('/community.json')
 export const getRanks = () => fetchApi<RankInfo[]>('/ranks.json')
 export const getFooter = () => fetchApi<FooterData>('/footer.json')

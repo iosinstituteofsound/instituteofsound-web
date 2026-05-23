@@ -12,6 +12,8 @@ import type {
   TrackSubmission,
   User,
 } from '@/lib/auth/types'
+import { ensureEditorialSlug } from '@/lib/editorial/published'
+import { slugifyArtistName } from '@/lib/artist-profile/slug'
 import * as sb from './supabaseSubmissions'
 
 export interface CreateSubmissionInput {
@@ -35,6 +37,8 @@ export interface CreateDraftInput {
   body: string
   coverImageUrl?: string
   artistProfileId?: string
+  /** When true, article appears on homepage after publish (default: true for features) */
+  featuredOnHomepage?: boolean
 }
 
 function now() {
@@ -128,6 +132,8 @@ export async function createEditorialDraft(
   }
 
   const drafts = getDrafts()
+  const featuredOnHomepage =
+    input.featuredOnHomepage ?? input.type === 'feature'
   const draft: EditorialDraft = {
     id: crypto.randomUUID(),
     editorId: editor.id,
@@ -138,6 +144,8 @@ export async function createEditorialDraft(
     body: input.body,
     coverImageUrl: input.coverImageUrl,
     artistProfileId: input.artistProfileId,
+    slug: slugifyArtistName(input.title),
+    featuredOnHomepage,
     status: 'draft',
     createdAt: now(),
     updatedAt: now(),
@@ -170,9 +178,16 @@ export async function publishEditorialDraft(draftId: string): Promise<EditorialD
   const drafts = getDrafts()
   const idx = drafts.findIndex((d) => d.id === draftId)
   if (idx === -1) throw new Error('Draft not found')
+  const slug =
+    drafts[idx].slug ??
+    (await ensureEditorialSlug(drafts[idx].title, drafts[idx].id))
   drafts[idx] = {
     ...drafts[idx],
+    slug,
+    featuredOnHomepage:
+      drafts[idx].featuredOnHomepage ?? drafts[idx].type === 'feature',
     status: 'published',
+    publishedAt: now(),
     updatedAt: now(),
   }
   saveDrafts(drafts)

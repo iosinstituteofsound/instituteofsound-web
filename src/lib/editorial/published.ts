@@ -1,0 +1,154 @@
+import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { mapDraft, type DraftRow } from '@/lib/supabase/mappers'
+import { getDrafts } from '@/lib/auth/storage'
+import type { EditorialDraft } from '@/lib/auth/types'
+import { editorialExcerpt } from '@/lib/editorial/richText'
+import { ensureUniqueSlug, slugifyArtistName } from '@/lib/artist-profile/slug'
+import type { CoverStory, Feature } from '@/types'
+
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80'
+
+const TYPE_CATEGORY: Record<EditorialDraft['type'], string> = {
+  feature: 'FEATURE',
+  review: 'REVIEW',
+  band_profile: 'PROFILE',
+}
+
+export type PublishedEditorial = EditorialDraft & {
+  slug: string
+  featuredOnHomepage: boolean
+  publishedAt?: string
+}
+
+function rowToPublished(row: DraftRow): PublishedEditorial {
+  const draft = mapDraft(row)
+  const slug = row.slug?.trim() || slugifyArtistName(row.title)
+  return {
+    ...draft,
+    slug,
+    featuredOnHomepage: row.featured_on_homepage ?? row.type === 'feature',
+    publishedAt: row.published_at ?? row.updated_at,
+  }
+}
+
+function estimateReadTime(htmlOrText: string): string {
+  const words = editorialExcerpt(htmlOrText, 50_000).split(/\s+/).filter(Boolean).length
+  const mins = Math.max(1, Math.round(words / 220))
+  return `${mins} min`
+}
+
+export function draftToFeature(d: PublishedEditorial): Feature {
+  return {
+    id: d.id,
+    slug: d.slug,
+    title: d.title,
+    excerpt: editorialExcerpt(d.body),
+    author: d.editorName,
+    readTime: estimateReadTime(d.body),
+    image: d.coverImageUrl?.trim() || FALLBACK_IMAGE,
+    category: TYPE_CATEGORY[d.type],
+  }
+}
+
+export function draftToCoverStory(d: PublishedEditorial): CoverStory {
+  return {
+    category: d.featuredOnHomepage ? 'Featured' : 'Editorial',
+    headline: d.title,
+    dek: d.subject || editorialExcerpt(d.body, 160),
+    author: d.editorName,
+    date: new Date(d.publishedAt ?? d.updatedAt).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }),
+    image: d.coverImageUrl?.trim() || FALLBACK_IMAGE,
+    slug: d.slug,
+    readLabel: 'Read Feature',
+  }
+}
+
+export type FeatureArticle = Feature & {
+  body: string
+  subject: string
+}
+
+export function draftToFeatureArticle(d: PublishedEditorial): FeatureArticle {
+  return {
+    ...draftToFeature(d),
+    body: d.body,
+    subject: d.subject,
+  }
+}
+
+async function supabaseListPublished(): Promise<PublishedEditorial[]> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('editorial_drafts')
+    .select('*')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false, nullsFirst: false })
+
+  if (error) throw new Error(error.message)
+  return (data as DraftRow[]).map(rowToPublished)
+}
+
+function localListPublished(): PublishedEditorial[] {
+  return getDrafts()
+    .filter((d) => d.status === 'published')
+    .map((d) => ({
+      ...d,
+      slug: d.slug ?? slugifyArtistName(d.title),
+      featuredOnHomepage: d.featuredOnHomepage ?? d.type === 'feature',
+      publishedAt: d.publishedAt ?? d.updatedAt,
+    }))
+}
+
+export async function listPublishedEditorials(): Promise<PublishedEditorial[]> {
+  if (isSupabaseConfigured()) return supabaseListPublished()
+  return localListPublished()
+}
+
+export async function listHomepageFeatures(): Promise<Feature[]> {
+  const published = await listPublishedEditorials()
+  const homepage = published.filter((d) => d.featuredOnHomepage)
+  return homepage.map(draftToFeature)
+}
+
+export async function getHomepageCoverStory(): Promise<CoverStory | null> {
+  const published = await listPublishedEditorials()
+  const lead =
+    published.find((d) => d.featuredOnHomepage && d.type === 'feature') ??
+    published.find((d) => d.featuredOnHomepage) ??
+    published.find((d) => d.type === 'feature') ??
+    published[0]
+  return lead ? draftToCoverStory(lead) : null
+}
+
+export async function getPublishedFeatureBySlug(
+  slug: string
+): Promise<FeatureArticle | null> {
+  const published = await listPublishedEditorials()
+  const match = published.find((d) => d.slug === slug)
+  return match ? draftToFeatureArticle(match) : null
+}
+
+export async function mergeFeaturesWithPublished(staticFeatures: Feature[]): Promise<Feature[]> {
+  const live = await listHomepageFeatures()
+  if (live.length === 0) return staticFeatures
+  const liveSlugs = new Set(live.map((f) => f.slug))
+  const rest = staticFeatures.filter((f) => !liveSlugs.has(f.slug))
+  return [...live, ...rest]
+}
+
+export async function ensureEditorialSlug(
+  title: string,
+  excludeId?: string
+): Promise<string> {
+  const base = slugifyArtistName(title)
+  const published = await listPublishedEditorials()
+  const taken = published
+    .filter((d) => d.id !== excludeId)
+    .map((d) => d.slug)
+  return ensureUniqueSlug(base, taken)
+}

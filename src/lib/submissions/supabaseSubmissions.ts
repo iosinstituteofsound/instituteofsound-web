@@ -1,3 +1,4 @@
+import { ensureEditorialSlug } from '@/lib/editorial/published'
 import { getSupabase } from '@/lib/supabase/client'
 import { mapDraft, mapSubmission, type DraftRow, type SubmissionRow } from '@/lib/supabase/mappers'
 import type { EditorialDraft, TrackSubmission, User } from '@/lib/auth/types'
@@ -94,6 +95,9 @@ export async function supabaseCreateDraft(
   input: CreateDraftInput
 ): Promise<EditorialDraft> {
   const supabase = getSupabase()
+  const slug = await ensureEditorialSlug(input.title)
+  const featuredOnHomepage =
+    input.featuredOnHomepage ?? input.type === 'feature'
   const { data, error } = await supabase
     .from('editorial_drafts')
     .insert({
@@ -105,6 +109,8 @@ export async function supabaseCreateDraft(
       body: input.body,
       cover_image_url: input.coverImageUrl?.trim() || null,
       artist_profile_id: input.artistProfileId ?? null,
+      slug,
+      featured_on_homepage: featuredOnHomepage,
       status: 'draft',
     })
     .select()
@@ -130,9 +136,28 @@ export async function supabaseGetDraftsForEditor(
 
 export async function supabasePublishDraft(draftId: string): Promise<EditorialDraft> {
   const supabase = getSupabase()
+  const { data: existing, error: fetchErr } = await supabase
+    .from('editorial_drafts')
+    .select('*')
+    .eq('id', draftId)
+    .single()
+  if (fetchErr) throw new Error(fetchErr.message)
+
+  const row = existing as DraftRow
+  const slug = row.slug?.trim() || (await ensureEditorialSlug(row.title, draftId))
+  const featuredOnHomepage =
+    row.featured_on_homepage ?? row.type === 'feature'
+  const publishedAt = new Date().toISOString()
+
   const { data, error } = await supabase
     .from('editorial_drafts')
-    .update({ status: 'published', updated_at: new Date().toISOString() })
+    .update({
+      status: 'published',
+      slug,
+      featured_on_homepage: featuredOnHomepage,
+      published_at: publishedAt,
+      updated_at: publishedAt,
+    })
     .eq('id', draftId)
     .select()
     .single()

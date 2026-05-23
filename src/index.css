@@ -3634,6 +3634,15 @@ html[data-perf='lite'] .metal-loader-core-beat {
   overflow: hidden;
 }
 
+.ios-prose-feature {
+  font-size: 1.0625rem;
+}
+
+.ios-prose-feature h2:first-child,
+.ios-prose-feature p:first-child {
+  margin-top: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .metal-loader-scanlines,
   .metal-loader-slashes,

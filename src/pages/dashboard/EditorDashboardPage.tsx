@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { slugifyArtistName } from '@/lib/artist-profile/slug'
 import { useAuth } from '@/context/AuthContext'
 import { roleLabel } from '@/lib/auth/roles'
 import { getSuperAdminAnalytics } from '@/lib/analytics/service'
@@ -54,6 +55,7 @@ export default function EditorDashboardPage() {
   const [draftBody, setDraftBody] = useState('')
   const [draftCoverUrl, setDraftCoverUrl] = useState('')
   const [draftArtistProfileId, setDraftArtistProfileId] = useState('')
+  const [draftFeaturedOnHomepage, setDraftFeaturedOnHomepage] = useState(true)
   const [artistProfiles, setArtistProfiles] = useState<ArtistProfile[]>([])
 
   const refresh = useCallback(async () => {
@@ -148,11 +150,13 @@ export default function EditorDashboardPage() {
         body,
         coverImageUrl: draftCoverUrl || undefined,
         artistProfileId: draftArtistProfileId || undefined,
+        featuredOnHomepage: draftFeaturedOnHomepage,
       })
       setDraftTitle('')
       setDraftCoverUrl('')
       setDraftSubject('')
       setDraftBody('')
+      setDraftFeaturedOnHomepage(draftType === 'feature')
       setMessage('Draft saved.')
       await refresh()
       setTab('drafts')
@@ -457,9 +461,11 @@ export default function EditorDashboardPage() {
                   </label>
                   <select
                     value={draftType}
-                    onChange={(e) =>
-                      setDraftType(e.target.value as EditorialDraft['type'])
-                    }
+                    onChange={(e) => {
+                      const next = e.target.value as EditorialDraft['type']
+                      setDraftType(next)
+                      if (next === 'feature') setDraftFeaturedOnHomepage(true)
+                    }}
                     className="w-full bg-surface border border-border px-4 py-3 text-sm"
                   >
                     <option value="review">Album Review</option>
@@ -467,6 +473,21 @@ export default function EditorDashboardPage() {
                     <option value="feature">Feature Article</option>
                   </select>
                 </div>
+                <label className="flex items-start gap-3 cursor-pointer border border-border px-4 py-3 bg-surface/50">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={draftFeaturedOnHomepage}
+                    onChange={(e) => setDraftFeaturedOnHomepage(e.target.checked)}
+                  />
+                  <span className="text-sm leading-relaxed">
+                    <strong className="text-foreground block text-xs tracking-widest uppercase mb-1">
+                      Feature on homepage
+                    </strong>
+                    When published, appears in the homepage cover / Features grid and at{' '}
+                    <code className="text-foreground">/feature/your-slug</code>
+                  </span>
+                </label>
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
                     Headline
@@ -579,8 +600,16 @@ export default function EditorDashboardPage() {
                       <p className="text-sm text-mh-red mt-1">{d.subject}</p>
                       {d.artistProfileId && (
                         <p className="text-xs text-muted mt-2">
-                          Linked profile · shows in Editorial Featured when published
+                          Linked artist profile · Press & editorial section when published
                         </p>
+                      )}
+                      {(d.featuredOnHomepage ?? d.type === 'feature') && d.status === 'published' && (
+                        <p className="text-xs text-emerald-400/90 mt-2">
+                          Homepage featured
+                        </p>
+                      )}
+                      {d.slug && (
+                        <p className="text-xs text-muted mt-1 font-mono">/feature/{d.slug}</p>
                       )}
                       <RichTextContent
                         html={d.body}
@@ -589,18 +618,44 @@ export default function EditorDashboardPage() {
                       <p className="text-xs text-muted mt-4">
                         {new Date(d.updatedAt).toLocaleString()}
                       </p>
+                      {d.status === 'published' && d.slug && (
+                        <div className="flex flex-wrap gap-3 mt-4">
+                          <Link
+                            to={`/feature/${d.slug}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="ios-link text-xs uppercase"
+                          >
+                            View on homepage ↗
+                          </Link>
+                          <Link to="/" target="_blank" rel="noreferrer" className="ios-link text-xs uppercase">
+                            Open home ↗
+                          </Link>
+                        </div>
+                      )}
                       {isSuperEditor && d.status !== 'published' && (
                         <button
                           type="button"
                           className="ios-btn ios-btn-primary mt-4 !text-xs"
                           onClick={async () => {
                             try {
-                              await publishEditorialDraft(d.id)
-                              setMessage(`Published "${d.title}" on artist profile`)
+                              const published = await publishEditorialDraft(d.id)
+                              const slug =
+                                published.slug ?? slugifyArtistName(published.title)
+                              const onHome =
+                                published.featuredOnHomepage ?? published.type === 'feature'
+                              setMessage(
+                                onHome
+                                  ? `Published "${d.title}" — live on homepage (/feature/${slug})${published.artistProfileId ? ' and linked artist profile' : ''}.`
+                                  : `Published "${d.title}"${published.artistProfileId ? ' on artist profile' : ''}. Enable "Feature on homepage" before publish to show on the home page.`
+                              )
                               await refresh()
                             } catch (err) {
+                              const msg = err instanceof Error ? err.message : 'Publish failed'
                               setError(
-                                err instanceof Error ? err.message : 'Publish failed'
+                                /slug|featured_on_homepage|published_at|schema cache/i.test(msg)
+                                  ? `${msg} — Run Supabase migration 018-editorial-homepage.sql in the SQL Editor.`
+                                  : msg
                               )
                             }
                           }}
