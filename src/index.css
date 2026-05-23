@@ -3417,6 +3417,223 @@ html[data-perf='lite'] .metal-loader-core-beat {
   box-shadow: 0 0 12px rgba(212, 0, 0, 0.6);
 }
 
+/* —— Rich text editor (editorial desk) —— */
+.ios-rte-shell {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.ios-rte-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.ios-rte-btn {
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  border: 1px solid transparent;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ios-rte-btn:hover:not(:disabled) {
+  color: var(--color-signal);
+  border-color: var(--color-border);
+  background: rgb(255 255 255 / 0.04);
+}
+
+.ios-rte-btn-active {
+  color: var(--color-mh-red);
+  border-color: rgba(212, 0, 0, 0.45);
+  background: rgba(212, 0, 0, 0.1);
+}
+
+.ios-rte-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.ios-rte-sep {
+  width: 1px;
+  height: 1.25rem;
+  margin: 0 0.15rem;
+  background: var(--color-border);
+}
+
+.ios-rte-colors {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ios-rte-color-swatch {
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+}
+
+.ios-rte-color-swatch:hover {
+  outline: 1px solid var(--color-signal);
+}
+
+.ios-rte-color-clear {
+  width: 1.125rem;
+  height: 1.125rem;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  border: 1px dashed var(--color-border);
+}
+
+.ios-rte-content {
+  min-height: var(--ios-rte-min-h, 320px);
+}
+
+.ios-rte-content .tiptap {
+  min-height: var(--ios-rte-min-h, 320px);
+  padding: 1rem 1.15rem 1.25rem;
+  outline: none;
+}
+
+.ios-rte-editor-inner {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--color-signal);
+}
+
+.ios-rte-editor-inner p.is-editor-empty:first-child::before {
+  color: var(--color-muted);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ios-rte-editor-inner h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.ios-rte-editor-inner h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 1rem 0 0.35rem;
+}
+
+.ios-rte-editor-inner blockquote {
+  border-left: 3px solid var(--color-mh-red);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: rgba(245, 245, 245, 0.88);
+  font-style: italic;
+}
+
+.ios-rte-editor-inner a {
+  color: var(--color-mh-red);
+  text-decoration: underline;
+}
+
+.ios-rte-editor-inner mark {
+  background: rgba(212, 0, 0, 0.35);
+  color: inherit;
+  padding: 0 0.15em;
+}
+
+.ios-rte-editor-inner ul,
+.ios-rte-editor-inner ol {
+  padding-left: 1.35rem;
+  margin: 0.75rem 0;
+}
+
+/* Published / preview prose */
+.ios-prose {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  line-height: 1.75;
+  color: rgba(245, 245, 245, 0.9);
+}
+
+.ios-prose h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 1.25rem 0 0.5rem;
+  color: var(--color-signal);
+}
+
+.ios-prose h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 1rem 0 0.35rem;
+  color: var(--color-signal);
+}
+
+.ios-prose p {
+  margin: 0.65rem 0;
+}
+
+.ios-prose blockquote {
+  border-left: 3px solid var(--color-mh-red);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: rgba(245, 245, 245, 0.85);
+}
+
+.ios-prose a,
+.ios-prose-link {
+  color: var(--color-mh-red);
+  text-decoration: underline;
+}
+
+.ios-prose ul,
+.ios-prose ol {
+  padding-left: 1.35rem;
+  margin: 0.75rem 0;
+}
+
+.ios-prose mark {
+  background: rgba(212, 0, 0, 0.35);
+  padding: 0 0.1em;
+}
+
+.ios-prose-plain {
+  white-space: pre-wrap;
+  font-family: var(--font-serif);
+  line-height: 1.75;
+}
+
+.ios-prose-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .metal-loader-scanlines,
   .metal-loader-slashes,

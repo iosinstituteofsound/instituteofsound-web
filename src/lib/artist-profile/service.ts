@@ -16,6 +16,7 @@ import type {
   UpsertTrackInput,
   UpsertVideoInput,
 } from './types'
+import { editorialExcerpt } from '@/lib/editorial/richText'
 import { fetchThumbnailFromUrl } from '@/lib/media/thumbnailFromUrl'
 import { enrichTracksWithThumbnails, enrichVideosWithThumbnails } from './enrichMedia'
 import * as local from './storage'
@@ -38,7 +39,7 @@ function mapEditorial(
     type: r.type as ArtistEditorialFeature['type'],
     title: r.title,
     subject: r.subject,
-    excerpt: r.body.slice(0, 180) + (r.body.length > 180 ? '…' : ''),
+    excerpt: editorialExcerpt(r.body),
     coverImageUrl: r.cover_image_url ?? undefined,
     editorName: r.editor_name,
     publishedAt: r.updated_at,
@@ -58,7 +59,7 @@ function localEditorialForProfile(profileId: string): ArtistEditorialFeature[] {
       type: d.type,
       title: d.title,
       subject: d.subject,
-      excerpt: d.body.slice(0, 180) + (d.body.length > 180 ? '…' : ''),
+      excerpt: editorialExcerpt(d.body),
       coverImageUrl: d.coverImageUrl,
       editorName: d.editorName,
       publishedAt: d.updatedAt,

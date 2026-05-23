@@ -27,6 +27,9 @@ import type {
   TrackSubmission,
 } from '@/lib/auth/types'
 import clsx from 'clsx'
+import { RichTextEditor } from '@/components/editor/RichTextEditor'
+import { RichTextContent } from '@/components/editor/RichTextContent'
+import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richText'
 
 type EditorTab = 'analytics' | 'queue' | 'write' | 'drafts'
 type FilterStatus = 'all' | SubmissionStatus
@@ -132,12 +135,17 @@ export default function EditorDashboardPage() {
 
   const handleDraft = async (e: React.FormEvent) => {
     e.preventDefault()
+    const body = normalizeEditorHtml(draftBody)
+    if (isEditorContentEmpty(body)) {
+      setError('Write-up cannot be empty — add your editorial text.')
+      return
+    }
     try {
       await createEditorialDraft(user, {
         type: draftType,
         title: draftTitle,
         subject: draftSubject,
-        body: draftBody,
+        body,
         coverImageUrl: draftCoverUrl || undefined,
         artistProfileId: draftArtistProfileId || undefined,
       })
@@ -437,9 +445,10 @@ export default function EditorDashboardPage() {
             )}
 
             {tab === 'write' && (
-              <form onSubmit={handleDraft} className="max-w-2xl space-y-5">
+              <form onSubmit={handleDraft} className="max-w-4xl space-y-5">
                 <p className="text-sm text-muted border-l-2 border-rs-red pl-4">
-                  Write band profiles, album reviews, or long-form features. Saved to{' '}
+                  Write band profiles, album reviews, or long-form features. Use the toolbar for
+                  headings, emphasis, links, alignment, and color. Saved to{' '}
                   {mode === 'supabase' ? 'Supabase' : 'local storage'}.
                 </p>
                 <div>
@@ -507,16 +516,22 @@ export default function EditorDashboardPage() {
                   hint="Hero image for review/feature — delivered via Cloudinary CDN."
                 />
                 <div>
-                  <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
+                  <label
+                    htmlFor="editorial-write-up"
+                    className="text-[10px] tracking-widest uppercase text-muted block mb-2"
+                  >
                     Write-up
                   </label>
-                  <textarea
-                    required
-                    rows={12}
+                  <p className="text-xs text-muted-foreground mb-2 leading-relaxed">
+                    Bold, italic, headings, lists, quotes, links, highlight, and text color — same
+                    styling appears when published on artist profiles.
+                  </p>
+                  <RichTextEditor
+                    id="editorial-write-up"
                     value={draftBody}
-                    onChange={(e) => setDraftBody(e.target.value)}
-                    className="w-full bg-surface border border-border px-4 py-3 text-sm focus:border-rs-red focus:outline-none font-serif leading-relaxed"
-                    placeholder="Your review, interview notes, scene analysis..."
+                    onChange={setDraftBody}
+                    placeholder="Your review, interview notes, scene analysis…"
+                    minHeight="360px"
                   />
                 </div>
                 <button
@@ -567,9 +582,10 @@ export default function EditorDashboardPage() {
                           Linked profile · shows in Editorial Featured when published
                         </p>
                       )}
-                      <p className="text-muted text-sm mt-4 line-clamp-4 whitespace-pre-wrap">
-                        {d.body}
-                      </p>
+                      <RichTextContent
+                        html={d.body}
+                        className="text-muted text-sm mt-4 ios-prose-clamp"
+                      />
                       <p className="text-xs text-muted mt-4">
                         {new Date(d.updatedAt).toLocaleString()}
                       </p>
