@@ -3,6 +3,9 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "functions": {
+    "api/og/site.tsx": {
+      "maxDuration": 15
+    },
     "api/og/artist.tsx": {
       "maxDuration": 15
     },
