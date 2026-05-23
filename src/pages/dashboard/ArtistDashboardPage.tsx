@@ -11,6 +11,7 @@ import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { Button } from '@/components/ui/Button'
+import { DismissibleBanner } from '@/components/ui/DismissibleBanner'
 import { Input, FieldLabel } from '@/components/ui/Input'
 import { ArtistProfileEditor } from '@/components/dashboard/ArtistProfileEditor'
 import { DashboardSection } from '@/components/dashboard/DashboardSection'
@@ -222,8 +223,16 @@ export default function ArtistDashboardPage() {
                 />
               </div>
 
-              {error && <p className="text-mh-red text-sm">{error}</p>}
-              {success && <p className="text-emerald-400 text-sm">{success}</p>}
+              {error && (
+                <DismissibleBanner variant="error" onDismiss={() => setError('')}>
+                  {error}
+                </DismissibleBanner>
+              )}
+              {success && (
+                <DismissibleBanner variant="success" onDismiss={() => setSuccess('')}>
+                  {success}
+                </DismissibleBanner>
+              )}
 
               <Button type="submit" variant="primary" disabled={submitting}>
                 {submitting ? 'Submitting…' : 'Send to editors →'}

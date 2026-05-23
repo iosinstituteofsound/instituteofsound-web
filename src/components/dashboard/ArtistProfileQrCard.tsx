@@ -3,6 +3,7 @@ import { getSiteUrl } from '@/lib/auth/siteUrl'
 import { resolveAccentColor } from '@/lib/artist-profile/branding'
 import { FieldLabel } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { DismissibleBanner } from '@/components/ui/DismissibleBanner'
 
 interface ArtistProfileQrCardProps {
   slug: string
@@ -179,7 +180,11 @@ export function ArtistProfileQrCard({
             <strong className="text-foreground">Poster pack</strong> — naam + branding + scan line,
             Optimized for A4 print.
           </p>
-          {error && <p className="text-xs text-mh-red">{error}</p>}
+          {error && (
+            <DismissibleBanner variant="error" onDismiss={() => setError('')}>
+              {error}
+            </DismissibleBanner>
+          )}
         </div>
       </div>
     </section>

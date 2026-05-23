@@ -12,6 +12,7 @@ import type {
   CatalogImportSuggestions,
 } from '@/lib/media/catalog/types'
 import { Button } from '@/components/ui/Button'
+import { DismissibleBanner } from '@/components/ui/DismissibleBanner'
 import { Input } from '@/components/ui/Input'
 import { IOSImage } from '@/components/ui/IOSImage'
 
@@ -302,7 +303,11 @@ export function ArtistCatalogImport({
         </div>
       )}
 
-      {error && <p className="text-mh-red text-sm">{error}</p>}
+      {error && (
+        <DismissibleBanner variant="error" onDismiss={() => setError('')}>
+          {error}
+        </DismissibleBanner>
+      )}
 
       <p className="text-[10px] text-muted-foreground leading-relaxed">
         Spotify: create an app in the dashboard (the Web API checkbox may be gone from the form — that is normal), then Client ID/Secret →{' '}

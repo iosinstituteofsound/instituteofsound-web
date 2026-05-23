@@ -18,6 +18,7 @@ import {
 import { StatusBadge } from '@/components/auth/StatusBadge'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { DismissibleBanner } from '@/components/ui/DismissibleBanner'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { IOSImage } from '@/components/ui/IOSImage'
 import type {
@@ -213,12 +214,13 @@ export default function EditorDashboardPage() {
         </div>
 
         {error && (
-          <p className="text-mh-red text-sm mb-4 border border-mh-red/40 px-4 py-2">
+          <DismissibleBanner
+            variant="error"
+            className="mb-4"
+            onDismiss={() => setError('')}
+          >
             {error}
-            <button type="button" className="ml-3" onClick={() => setError('')}>
-              ×
-            </button>
-          </p>
+          </DismissibleBanner>
         )}
 
         {tab !== 'analytics' && (
@@ -253,16 +255,13 @@ export default function EditorDashboardPage() {
         )}
 
         {message && (
-          <p className="text-sm text-emerald-400 mb-6 border border-emerald-500/30 px-4 py-2">
+          <DismissibleBanner
+            variant="success"
+            className="mb-6"
+            onDismiss={() => setMessage('')}
+          >
             {message}
-            <button
-              type="button"
-              className="ml-4 text-muted hover:text-signal"
-              onClick={() => setMessage('')}
-            >
-              ×
-            </button>
-          </p>
+          </DismissibleBanner>
         )}
 
         <div className="flex flex-wrap gap-1 border-b border-border mb-8">

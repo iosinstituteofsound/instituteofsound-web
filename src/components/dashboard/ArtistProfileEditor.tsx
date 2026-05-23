@@ -40,6 +40,7 @@ import { Button } from '@/components/ui/Button'
 import { Input, FieldLabel } from '@/components/ui/Input'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { MetalBadge } from '@/components/ui/MetalBadge'
+import { DismissibleBanner } from '@/components/ui/DismissibleBanner'
 import {
   ArtistCatalogImport,
   type CatalogProfileSuggestions,
@@ -508,16 +509,15 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           <strong className="text-foreground">Discover</strong> automatically.
         </p>
 
-        {(error || message) && (
-          <div
-            className={
-              error
-                ? 'text-mh-red text-sm border border-mh-red/40 px-4 py-3'
-                : 'text-emerald-400 text-sm border border-emerald-500/30 px-4 py-3'
-            }
-          >
-            {error || message}
-          </div>
+        {error && (
+          <DismissibleBanner variant="error" onDismiss={() => setError('')}>
+            {error}
+          </DismissibleBanner>
+        )}
+        {message && !error && (
+          <DismissibleBanner variant="success" onDismiss={() => setMessage('')}>
+            {message}
+          </DismissibleBanner>
         )}
 
         <DashboardSection
