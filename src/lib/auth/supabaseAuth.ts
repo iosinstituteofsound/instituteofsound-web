@@ -1,5 +1,6 @@
 import { getSupabase } from '@/lib/supabase/client'
 import { getAuthEmailRedirectUrl } from '@/lib/auth/siteUrl'
+import { PROFILE_COLUMNS } from '@/lib/auth/profile'
 import { mapProfile, type ProfileRow } from '@/lib/supabase/mappers'
 import type { User, UserRole } from './types'
 
@@ -27,7 +28,7 @@ async function fetchProfile(userId: string): Promise<User> {
   for (let i = 0; i < PROFILE_RETRIES; i++) {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, name, role, created_at')
+      .select(PROFILE_COLUMNS)
       .eq('id', userId)
       .maybeSingle()
 

@@ -44,6 +44,9 @@ export async function getCurrentUser(): Promise<User | null> {
   return null
 }
 
+export { updateUserProfile, fetchUserProfile } from './profile'
+export type { UpdateProfileInput } from './profile'
+
 export function subscribeAuth(callback: (user: User | null) => void): () => void {
   if (isSupabaseConfigured()) {
     return supabase.supabaseOnAuthChange(callback)

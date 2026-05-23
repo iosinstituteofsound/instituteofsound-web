@@ -5,6 +5,9 @@ export interface ProfileRow {
   email: string
   name: string
   role: UserRole
+  avatar_url?: string | null
+  username?: string | null
+  bio?: string | null
   created_at: string
 }
 
@@ -52,6 +55,9 @@ export function mapProfile(row: ProfileRow): User {
     email: row.email,
     name: row.name,
     role: row.role,
+    avatarUrl: row.avatar_url?.trim() || undefined,
+    username: row.username?.trim() || undefined,
+    bio: row.bio?.trim() || undefined,
     createdAt: row.created_at,
   }
 }

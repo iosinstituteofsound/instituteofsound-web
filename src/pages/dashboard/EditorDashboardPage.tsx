@@ -6,6 +6,7 @@ import { roleLabel } from '@/lib/auth/roles'
 import { getSuperAdminAnalytics } from '@/lib/analytics/service'
 import type { SuperAdminAnalytics } from '@/lib/analytics/types'
 import { SuperAdminAnalyticsPanel } from '@/components/dashboard/SuperAdminAnalytics'
+import { EditorProfilePanel } from '@/components/dashboard/EditorProfilePanel'
 import { listArtistProfilesForEditor } from '@/lib/artist-profile/service'
 import type { ArtistProfile } from '@/lib/artist-profile/types'
 import {
@@ -32,11 +33,11 @@ import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import { RichTextContent } from '@/components/editor/RichTextContent'
 import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richText'
 
-type EditorTab = 'analytics' | 'queue' | 'write' | 'drafts'
+type EditorTab = 'analytics' | 'queue' | 'write' | 'drafts' | 'profile'
 type FilterStatus = 'all' | SubmissionStatus
 
 export default function EditorDashboardPage() {
-  const { user, logout, mode, isSuperEditor } = useAuth()
+  const { user, logout, mode, isSuperEditor, refreshUser } = useAuth()
   const [tab, setTab] = useState<EditorTab>(isSuperEditor ? 'analytics' : 'queue')
   const [analytics, setAnalytics] = useState<SuperAdminAnalytics | null>(null)
   const [filter, setFilter] = useState<FilterStatus>('pending')
@@ -185,11 +186,13 @@ export default function EditorDashboardPage() {
         { id: 'queue', label: 'Submission Queue' },
         { id: 'write', label: 'Write Editorial' },
         { id: 'drafts', label: `My Drafts (${drafts.length})` },
+        { id: 'profile', label: 'My Profile' },
       ]
     : [
         { id: 'queue', label: 'Submission Queue' },
         { id: 'write', label: 'Write Editorial' },
         { id: 'drafts', label: `My Drafts (${drafts.length})` },
+        { id: 'profile', label: 'My Profile' },
       ]
 
   return (
@@ -206,9 +209,29 @@ export default function EditorDashboardPage() {
             <h1 className="font-serif text-3xl md:text-4xl font-bold mt-2">
               {isSuperEditor ? 'Editorial Command' : 'Editorial Control'}
             </h1>
-            <p className="text-muted text-sm mt-2">
-              {user.name} · {roleLabel(user.role)}
-            </p>
+            <div className="flex items-center gap-3 mt-2">
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt=""
+                  className="w-10 h-10 object-cover border border-border"
+                />
+              ) : (
+                <div
+                  className="w-10 h-10 border border-border bg-surface flex items-center justify-center text-xs font-bold text-mh-red"
+                  aria-hidden
+                >
+                  {user.name.slice(0, 1).toUpperCase()}
+                </div>
+              )}
+              <p className="text-muted text-sm">
+                {user.name}
+                {user.username && (
+                  <span className="text-mh-red"> @{user.username}</span>
+                )}{' '}
+                · {roleLabel(user.role)}
+              </p>
+            </div>
             {isSuperEditor && (
               <MetalBadge variant="live" className="mt-4">
                 Super Admin
@@ -294,9 +317,13 @@ export default function EditorDashboardPage() {
           ))}
         </div>
 
-        {loadingData && tab !== 'write' && tab !== 'analytics' ? (
+        {tab === 'profile' && (
+          <EditorProfilePanel user={user} onSaved={refreshUser} />
+        )}
+
+        {loadingData && tab !== 'write' && tab !== 'analytics' && tab !== 'profile' ? (
           <LoadingTransmission variant="compact" />
-        ) : tab === 'analytics' && isSuperEditor ? (
+        ) : tab === 'profile' ? null : tab === 'analytics' && isSuperEditor ? (
           analytics ? (
             <SuperAdminAnalyticsPanel
               data={analytics}

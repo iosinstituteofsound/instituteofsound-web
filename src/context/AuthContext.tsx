@@ -14,8 +14,10 @@ import {
   logout as authLogout,
   signInWithGoogle as authSignInWithGoogle,
   subscribeAuth,
+  fetchUserProfile,
 } from '@/lib/auth/provider'
 import { isEditorStaff, isSuperEditor } from '@/lib/auth/roles'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
 import type { User, UserRole } from '@/lib/auth/types'
 
 interface AuthContextValue {
@@ -25,6 +27,7 @@ interface AuthContextValue {
   configHint: string | null
   signInWithGoogle: (intent?: 'artist' | 'desk') => Promise<void>
   logout: () => Promise<void>
+  refreshUser: () => Promise<void>
   isEditor: boolean
   isSuperEditor: boolean
   isArtist: boolean
@@ -68,6 +71,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
+  const refreshUser = useCallback(async () => {
+    if (!user?.id || !isSupabaseConfigured()) {
+      const u = await getCurrentUser()
+      setUser(u)
+      return
+    }
+    try {
+      const u = await fetchUserProfile(user.id)
+      setUser(u)
+    } catch {
+      const u = await getCurrentUser()
+      setUser(u)
+    }
+  }, [user?.id])
+
   const value = useMemo(
     () => ({
       user,
@@ -76,11 +94,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       configHint,
       signInWithGoogle,
       logout,
+      refreshUser,
       isEditor: user ? isEditorStaff(user.role) : false,
       isSuperEditor: user ? isSuperEditor(user.role) : false,
       isArtist: user?.role === 'artist',
     }),
-    [user, loading, mode, configHint, signInWithGoogle, logout]
+    [user, loading, mode, configHint, signInWithGoogle, logout, refreshUser]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

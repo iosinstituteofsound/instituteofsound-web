@@ -3,6 +3,7 @@ import { getCloudinaryCloudName, getCloudinaryUploadPreset, isCloudinaryConfigur
 export type CloudinaryFolder =
   | 'ios/submissions'
   | 'ios/editorial'
+  | 'ios/editors'
   | 'ios/artists'
   | 'ios/tracks'
   | 'ios/albums'

@@ -1,0 +1,84 @@
+import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { mapProfile, type ProfileRow } from '@/lib/supabase/mappers'
+import type { User } from './types'
+import { normalizeUsername, validateUsername } from './username'
+
+export const PROFILE_COLUMNS =
+  'id, email, name, role, avatar_url, username, bio, created_at'
+
+export interface UpdateProfileInput {
+  name?: string
+  username?: string
+  avatarUrl?: string
+  bio?: string
+}
+
+export async function updateUserProfile(
+  userId: string,
+  input: UpdateProfileInput
+): Promise<User> {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Profile updates require Supabase. Configure .env and sign in with Google.')
+  }
+
+  const patch: Record<string, string | null> = {}
+
+  if (input.name !== undefined) {
+    const name = input.name.trim()
+    if (name.length < 2) throw new Error('Display name must be at least 2 characters.')
+    patch.name = name
+  }
+
+  if (input.username !== undefined) {
+    const username = normalizeUsername(input.username)
+    const err = validateUsername(username)
+    if (err) throw new Error(err)
+    patch.username = username
+  }
+
+  if (input.avatarUrl !== undefined) {
+    patch.avatar_url = input.avatarUrl.trim() || null
+  }
+
+  if (input.bio !== undefined) {
+    patch.bio = input.bio.trim().slice(0, 280) || null
+  }
+
+  if (Object.keys(patch).length === 0) {
+    return fetchUserProfile(userId)
+  }
+
+  if (patch.username) {
+    const supabase = getSupabase()
+    const { data: conflict } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', patch.username)
+      .neq('id', userId)
+      .maybeSingle()
+    if (conflict) throw new Error('This username is already taken. Try another.')
+  }
+
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(patch)
+    .eq('id', userId)
+    .select(PROFILE_COLUMNS)
+    .single()
+
+  if (error) throw new Error(error.message)
+  return mapProfile(data as ProfileRow)
+}
+
+export async function fetchUserProfile(userId: string): Promise<User> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('profiles')
+    .select(PROFILE_COLUMNS)
+    .eq('id', userId)
+    .single()
+
+  if (error) throw new Error(error.message)
+  return mapProfile(data as ProfileRow)
+}

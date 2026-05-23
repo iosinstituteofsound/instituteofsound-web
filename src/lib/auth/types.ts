@@ -7,6 +7,9 @@ export interface User {
   email: string
   name: string
   role: UserRole
+  avatarUrl?: string
+  username?: string
+  bio?: string
   createdAt: string
 }
 
