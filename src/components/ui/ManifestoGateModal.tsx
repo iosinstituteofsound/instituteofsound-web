@@ -56,8 +56,13 @@ export function ManifestoGateModal() {
     if (!open) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') dismiss()
+    }
+    window.addEventListener('keydown', onKeyDown)
     return () => {
       document.body.style.overflow = prev
+      window.removeEventListener('keydown', onKeyDown)
     }
   }, [open])
 
@@ -99,6 +104,18 @@ export function ManifestoGateModal() {
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           >
+            <button
+              type="button"
+              className="ios-manifesto-close"
+              onClick={dismiss}
+              aria-label="Close message"
+            >
+              <span className="ios-manifesto-close-icon" aria-hidden>
+                ×
+              </span>
+              Close
+            </button>
+
             <div className="ios-manifesto-accent-bar" aria-hidden />
 
             <header className="ios-manifesto-header">
