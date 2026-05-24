@@ -20,6 +20,7 @@ export default function DiscoverPage() {
           label="Archive Access"
           title="Discover"
           subtitle="Emerging artists, underground bands, experimental creators."
+          titleAs="h1"
         />
       </div>
       <div className="section-padding pt-12">

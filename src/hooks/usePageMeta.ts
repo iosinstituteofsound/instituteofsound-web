@@ -1,38 +1,41 @@
-import { useEffect } from 'react'
 import type { ArtistShareMeta } from '@/lib/share/artistShareMeta'
+import { breadcrumbJsonLd, musicGroupJsonLd } from '@/lib/seo/jsonLd'
+import type { SeoConfig } from '@/lib/seo/types'
+import { useSeo } from '@/hooks/useSeo'
 
-function setMeta(attr: 'name' | 'property', key: string, content: string) {
-  const selector = `meta[${attr}="${key}"]`
-  let el = document.querySelector(selector) as HTMLMetaElement | null
-  if (!el) {
-    el = document.createElement('meta')
-    el.setAttribute(attr, key)
-    document.head.appendChild(el)
+export function artistShareToSeo(
+  slug: string,
+  meta: ArtistShareMeta,
+  profile?: { genres?: string[] }
+): SeoConfig {
+  const path = `/artist/${slug}`
+  const displayName = meta.title.replace(/ \| Institute of Sound$/, '')
+  return {
+    title: meta.title,
+    description: meta.description,
+    canonicalPath: path,
+    ogImage: meta.ogImageUrl,
+    jsonLd: [
+      breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Discover', path: '/discover' },
+        { name: displayName, path },
+      ]),
+      musicGroupJsonLd({
+        name: displayName,
+        description: meta.description,
+        path,
+        image: meta.ogImageUrl,
+        genre: profile?.genres?.[0],
+      }),
+    ],
   }
-  el.setAttribute('content', content)
 }
 
-export function usePageMeta(meta: ArtistShareMeta | null) {
-  useEffect(() => {
-    if (!meta) return
-
-    const prevTitle = document.title
-    document.title = meta.title
-
-    setMeta('name', 'description', meta.description)
-    setMeta('property', 'og:type', 'website')
-    setMeta('property', 'og:site_name', 'Institute of Sound')
-    setMeta('property', 'og:title', meta.title)
-    setMeta('property', 'og:description', meta.description)
-    setMeta('property', 'og:url', meta.canonicalUrl)
-    setMeta('property', 'og:image', meta.ogImageUrl)
-    setMeta('name', 'twitter:card', meta.twitterCard)
-    setMeta('name', 'twitter:title', meta.title)
-    setMeta('name', 'twitter:description', meta.description)
-    setMeta('name', 'twitter:image', meta.ogImageUrl)
-
-    return () => {
-      document.title = prevTitle
-    }
-  }, [meta])
+export function usePageMeta(
+  slug: string | undefined,
+  meta: ArtistShareMeta | null,
+  profile?: { genres?: string[] }
+) {
+  useSeo(slug && meta ? artistShareToSeo(slug, meta, profile) : null)
 }

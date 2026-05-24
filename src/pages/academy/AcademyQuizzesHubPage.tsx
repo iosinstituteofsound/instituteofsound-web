@@ -25,6 +25,7 @@ export default function AcademyQuizzesHubPage() {
           title="Track quizzes"
           subtitle="Five-question reviews with instant explanations. Pass at 70% — scores save in your browser."
           align="center"
+          titleAs="h1"
         />
 
         {passedCount > 0 && (

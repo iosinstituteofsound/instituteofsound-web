@@ -16,6 +16,7 @@ export default function SignalsPage() {
           label="Encrypted Feed"
           title="Signals"
           subtitle="Underground discoveries. Releases. Culture drops. Not a news blog."
+          titleAs="h1"
         />
         {loading && <LoadingTransmission variant="compact" />}
         {error && <p className="text-crimson">{error}</p>}

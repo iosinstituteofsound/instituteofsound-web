@@ -523,6 +523,43 @@ textarea.ios-input {
   color: var(--color-mh-red);
 }
 
+.ios-nav-dropdown-panel-toolkit {
+  min-width: 18.5rem;
+  max-height: min(70vh, 28rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ios-nav-dropdown-section {
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  padding: 0.5rem 1rem 0.25rem;
+  margin: 0;
+}
+
+.ios-nav-dropdown-section:first-child {
+  padding-top: 0.15rem;
+}
+
+.ios-nav-drawer-section {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  padding: 0.65rem 0.75rem 0.25rem;
+  margin: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.ios-nav-drawer-section:first-child {
+  border-top: none;
+  padding-top: 0.35rem;
+}
+
 .ios-nav-dropdown-panel {
   position: absolute;
   top: calc(100% + 0.35rem);

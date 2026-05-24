@@ -15,6 +15,7 @@ export default function FeaturesPage() {
           label="Long Form Editorial"
           title="Features"
           subtitle="Deep interviews. Music philosophy. Scene analysis. Alternative culture."
+          titleAs="h1"
         />
         {loading && <LoadingTransmission variant="compact" />}
         {error && <p className="text-crimson">{error}</p>}

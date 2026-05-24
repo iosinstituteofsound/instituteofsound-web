@@ -20,6 +20,7 @@ export default function CommunityPage() {
           label="The Network"
           title="Community"
           subtitle="Member ranks. Curators. Top contributors. A global cultural movement."
+          titleAs="h1"
         />
 
         {ranks.data && (

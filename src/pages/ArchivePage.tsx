@@ -19,6 +19,7 @@ export default function ArchivePage() {
           label="Classified Access"
           title="The Archive"
           subtitle="We are not a blog. We are the future headquarters of underground music culture."
+          titleAs="h1"
         />
 
         <motion.div

@@ -7,18 +7,51 @@ interface FooterProps {
   data: FooterData
 }
 
+function FooterLinkList({ heading, links }: { heading: string; links: { label: string; href: string }[] }) {
+  return (
+    <div>
+      <h4 className="ios-footer-heading">{heading}</h4>
+      <ul className="space-y-2.5">
+        {links.map((link) => (
+          <li key={link.label}>
+            {link.href.startsWith('/') ? (
+              <Link to={link.href} className="ios-footer-link">
+                {link.label}
+              </Link>
+            ) : (
+              <a href={link.href} className="ios-footer-link">
+                {link.label}
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 export function Footer({ data }: FooterProps) {
   return (
     <footer className="ios-footer section-padding">
       <div className="max-w-7xl mx-auto pt-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-12 lg:gap-8">
+          <div className="sm:col-span-2 xl:col-span-2">
             <Link to="/" className="ios-brand-lockup inline-flex flex-col pl-3">
               <span className="font-display text-2xl font-extrabold tracking-tight">INSTITUTE</span>
               <span className="text-[10px] tracking-[0.35em] text-muted uppercase">of Sound</span>
             </Link>
             <p className="text-muted mt-5 max-w-md leading-relaxed text-sm">{data.manifesto}</p>
           </div>
+
+          {data.explore && data.explore.length > 0 && (
+            <FooterLinkList heading="Explore" links={data.explore} />
+          )}
+
+          {data.learn && data.learn.length > 0 && (
+            <FooterLinkList heading="Learn" links={data.learn} />
+          )}
+
+          <FooterLinkList heading="Archive" links={data.archive} />
 
           <div>
             <h4 className="ios-footer-heading">Socials</h4>
@@ -28,19 +61,6 @@ export function Footer({ data }: FooterProps) {
                   <a href={link.href} className="ios-footer-link">
                     {link.label}
                   </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="ios-footer-heading">Archive</h4>
-            <ul className="space-y-2.5">
-              {data.archive.map((link) => (
-                <li key={link.label}>
-                  <Link to={link.href} className="ios-footer-link">
-                    {link.label}
-                  </Link>
                 </li>
               ))}
             </ul>

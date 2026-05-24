@@ -16,6 +16,7 @@ export default function PlaylistsPage() {
           label="Sonic Archives"
           title="Playlists"
           subtitle="Midnight Frequencies. Noise Ritual. Underground Protocol. Collect them all."
+          titleAs="h1"
         />
         {loading && <LoadingTransmission variant="compact" />}
         {error && <p className="text-crimson">{error}</p>}

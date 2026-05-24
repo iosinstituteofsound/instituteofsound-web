@@ -32,6 +32,7 @@ export default function AcademyTrackPage() {
           label={`Academy · ${track.phase}`}
           title={track.title}
           subtitle={track.description}
+          titleAs="h1"
         />
 
         <div className="academy-track-progress">

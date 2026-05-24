@@ -7,6 +7,9 @@ const LEGACY_LESSONS = 'ios-academy-progress'
 const LEGACY_QUIZ = 'ios-academy-quiz-scores'
 const LEGACY_EAR = 'ios-academy-ear-lab-best'
 
+/** Stable reference for useSyncExternalStore — must not change identity unless data changes. */
+let cachedSnapshot: AcademyProgressSnapshot | null = null
+
 function migrateLegacy(): AcademyProgressSnapshot {
   const base: AcademyProgressSnapshot = {
     completedLessons: [],
@@ -48,7 +51,7 @@ function migrateLegacy(): AcademyProgressSnapshot {
   return base
 }
 
-export function readLocalSnapshot(): AcademyProgressSnapshot {
+function loadSnapshotFromStorage(): AcademyProgressSnapshot {
   try {
     const raw = localStorage.getItem(SNAPSHOT_KEY)
     if (!raw) return migrateLegacy()
@@ -65,14 +68,28 @@ export function readLocalSnapshot(): AcademyProgressSnapshot {
   }
 }
 
+/** Fresh read from localStorage (e.g. cloud merge). */
+export function readLocalSnapshot(): AcademyProgressSnapshot {
+  return loadSnapshotFromStorage()
+}
+
+/** Cached snapshot for React external store — same reference until write/patch. */
+export function getStableSnapshot(): AcademyProgressSnapshot {
+  if (!cachedSnapshot) {
+    cachedSnapshot = loadSnapshotFromStorage()
+  }
+  return cachedSnapshot
+}
+
 export function writeLocalSnapshot(snapshot: AcademyProgressSnapshot): void {
   localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot))
+  cachedSnapshot = snapshot
 }
 
 export function patchLocalSnapshot(
   patch: (prev: AcademyProgressSnapshot) => AcademyProgressSnapshot
 ): AcademyProgressSnapshot {
-  const next = patch(readLocalSnapshot())
+  const next = patch(getStableSnapshot())
   writeLocalSnapshot(next)
   return next
 }

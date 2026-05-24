@@ -22,6 +22,7 @@ export default function AcademyCertificatesPage() {
           title="Certificates"
           subtitle="Earn track certificates by finishing lessons and passing quizzes. Graduate when the full academy is complete."
           align="center"
+          titleAs="h1"
         />
 
         <AcademyCertificateNameField />

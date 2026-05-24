@@ -41,7 +41,11 @@ export default function ArtistDetailPage() {
     return buildArtistShareMeta(getSiteUrl(), slug, data.data.profile)
   }, [slug, data])
 
-  usePageMeta(shareMeta)
+  usePageMeta(
+    slug,
+    shareMeta,
+    data?.kind === 'profile' ? data.data.profile : undefined
+  )
 
   useEffect(() => {
     if (data?.kind !== 'profile') return

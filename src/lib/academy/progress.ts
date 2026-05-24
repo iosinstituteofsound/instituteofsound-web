@@ -2,8 +2,8 @@ import { scheduleCloudSync } from '@/lib/academy/cloudProgress'
 import type { EarLabMode } from '@/lib/academy/earLab'
 import {
   clampEarScore,
+  getStableSnapshot,
   patchLocalSnapshot,
-  readLocalSnapshot,
   writeLocalSnapshot,
 } from '@/lib/academy/progressStore'
 import type { AcademyProgressSnapshot } from '@/lib/academy/typesProgress'
@@ -31,11 +31,11 @@ function afterMutation(snapshot: AcademyProgressSnapshot): void {
 }
 
 export function getProgressSnapshot(): AcademyProgressSnapshot {
-  return readLocalSnapshot()
+  return getStableSnapshot()
 }
 
 export function getCompletedLessons(): string[] {
-  return readLocalSnapshot().completedLessons
+  return getStableSnapshot().completedLessons
 }
 
 export function isLessonComplete(lessonId: string): boolean {
@@ -60,7 +60,7 @@ export function trackProgressPercent(trackLessonIds: string[]): number {
 }
 
 export function getQuizScores(): Record<string, number> {
-  return readLocalSnapshot().quizScores
+  return getStableSnapshot().quizScores
 }
 
 export function getQuizBestScore(quizId: string): number | null {
@@ -79,11 +79,11 @@ export function saveQuizScore(quizId: string, percent: number): void {
 }
 
 export function getEarLabScores(): Partial<Record<EarLabMode, number>> {
-  return readLocalSnapshot().earLab
+  return getStableSnapshot().earLab
 }
 
 export function getEarLabScore(mode: EarLabMode): number {
-  return readLocalSnapshot().earLab[mode] ?? 0
+  return getStableSnapshot().earLab[mode] ?? 0
 }
 
 /** @deprecated use getEarLabScore('frequency') */
@@ -108,7 +108,7 @@ export function saveEarLabBest(correct: number): void {
 }
 
 export function getCertificateName(): string {
-  return readLocalSnapshot().certificateName.trim()
+  return getStableSnapshot().certificateName.trim()
 }
 
 export function setCertificateName(name: string): void {

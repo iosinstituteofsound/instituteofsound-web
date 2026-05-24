@@ -3,6 +3,7 @@ interface MagazineSectionHeadingProps {
   title: string
   subtitle?: string
   variant?: 'rolling-stone' | 'metal-hammer'
+  titleAs?: 'h1' | 'h2'
 }
 
 export function MagazineSectionHeading({
@@ -10,14 +11,16 @@ export function MagazineSectionHeading({
   title,
   subtitle,
   variant = 'rolling-stone',
+  titleAs = 'h2',
 }: MagazineSectionHeadingProps) {
   const isMH = variant === 'metal-hammer'
+  const TitleTag = titleAs
 
   return (
     <header className="mb-10 md:mb-12 magazine-section-head">
       <div className={isMH ? 'mh-rule' : 'magazine-rule'} />
       <p className={`ios-kicker mt-4 ${isMH ? '' : 'ios-kicker-rs'}`}>{kicker}</p>
-      <h2
+      <TitleTag
         className={`mt-3 leading-[0.92] tracking-tight ${
           isMH
             ? 'font-display text-4xl md:text-6xl font-extrabold uppercase'
@@ -25,7 +28,7 @@ export function MagazineSectionHeading({
         }`}
       >
         {title}
-      </h2>
+      </TitleTag>
       {subtitle && (
         <p className="text-muted mt-4 max-w-2xl text-base md:text-lg leading-relaxed">{subtitle}</p>
       )}

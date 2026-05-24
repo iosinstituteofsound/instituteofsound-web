@@ -25,6 +25,7 @@ export default function SubmissionsPage() {
           kicker="Artist Portal"
           title="Google Sign In & Submit"
           subtitle="Bands and solo artists — one Google login, your public profile, tracks for editorial review."
+          titleAs="h1"
         />
 
         <div className="ios-panel ios-panel-accent text-left p-8 mt-12 space-y-8">

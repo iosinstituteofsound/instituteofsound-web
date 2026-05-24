@@ -1,14 +1,35 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useContent } from '@/hooks/useContent'
 import { getPlaylist } from '@/api/endpoints'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
+import { useSeo } from '@/hooks/useSeo'
+import { breadcrumbJsonLd } from '@/lib/seo/jsonLd'
+import { SITE_NAME } from '@/lib/seo/urls'
 
 export default function PlaylistDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const fetcher = useCallback(() => getPlaylist(slug!), [slug])
   const { data: playlist, loading, error } = useContent(fetcher)
+
+  const seo = useMemo(() => {
+    if (!slug || !playlist) return null
+    const path = `/playlist/${slug}`
+    return {
+      title: `${playlist.title} | ${SITE_NAME}`,
+      description: playlist.description,
+      canonicalPath: path,
+      ogImage: playlist.cover,
+      jsonLd: breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Playlists', path: '/playlists' },
+        { name: playlist.title, path },
+      ]),
+    }
+  }, [slug, playlist])
+
+  useSeo(seo)
 
   if (loading) return <LoadingTransmission variant="hell" />
   if (error || !playlist) {
@@ -34,6 +55,7 @@ export default function PlaylistDetailPage() {
               src={playlist.cover}
               alt={playlist.title}
               width={800}
+              height={800}
               priority
               className="w-full h-full object-cover"
             />
@@ -57,12 +79,17 @@ export default function PlaylistDetailPage() {
             >
               Play Collection →
             </button>
-            <Link
-              to="/playlists"
-              className="block mt-6 text-xs tracking-widest text-muted hover:text-neon"
-            >
-              ← All Playlists
-            </Link>
+            <div className="mt-10 flex flex-wrap gap-4 text-xs tracking-widest">
+              <Link to="/playlists" className="text-muted hover:text-neon">
+                ← All playlists
+              </Link>
+              <Link to="/discover" className="text-muted hover:text-neon">
+                Discover artists →
+              </Link>
+              <Link to="/signals" className="text-muted hover:text-neon">
+                Signals →
+              </Link>
+            </div>
           </div>
         </div>
       </div>

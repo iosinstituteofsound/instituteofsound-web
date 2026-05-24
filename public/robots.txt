@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+Disallow: /login
+Disallow: /register
+Disallow: /auth/
+Disallow: /dashboard
+Disallow: /artist/dashboard
+Disallow: /editor/dashboard
+Disallow: /desk
+Disallow: /editor/login
+Disallow: /editor/apply
+Disallow: /academy/certificate/
+
+Sitemap: https://instituteofsound.in/sitemap.xml

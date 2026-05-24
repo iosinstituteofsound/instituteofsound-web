@@ -7,6 +7,8 @@ import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { ManifestoGateModal } from '@/components/ui/ManifestoGateModal'
 import { EditorCongratsGate } from '@/components/editor-applications/EditorCongratsGate'
 import { AcademyProgressSync } from '@/components/academy/AcademyProgressSync'
+import { GlobalJsonLd } from '@/components/seo/GlobalJsonLd'
+import { RouteSeo } from '@/components/seo/RouteSeo'
 import { useLenis } from '@/hooks/useLenis'
 import { useContent } from '@/hooks/useContent'
 import { getNav, getFooter } from '@/api/endpoints'
@@ -34,6 +36,8 @@ export function Layout() {
 
   return (
     <>
+      <GlobalJsonLd />
+      <RouteSeo />
       <ManifestoGateModal />
       <EditorCongratsGate />
       <AcademyProgressSync />

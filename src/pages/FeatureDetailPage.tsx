@@ -1,16 +1,50 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useContent } from '@/hooks/useContent'
-import { getFeature } from '@/api/endpoints'
+import { getFeature, getFeatures } from '@/api/endpoints'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { RichTextContent } from '@/components/editor/RichTextContent'
 import { EditorByline } from '@/components/editor/EditorByline'
+import { EditorialRelatedLinks } from '@/components/seo/EditorialRelatedLinks'
+import { useSeo } from '@/hooks/useSeo'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonLd'
+import { SITE_NAME } from '@/lib/seo/urls'
 
 export default function FeatureDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const fetcher = useCallback(() => getFeature(slug!), [slug])
   const { data: feature, loading, error } = useContent(fetcher)
+  const { data: allFeatures } = useContent(useCallback(() => getFeatures(), []))
+
+  const seo = useMemo(() => {
+    if (!slug || !feature) return null
+    const path = `/feature/${slug}`
+    return {
+      title: `${feature.title} | ${SITE_NAME}`,
+      description: feature.excerpt,
+      canonicalPath: path,
+      ogImage: feature.image,
+      ogType: 'article' as const,
+      jsonLd: [
+        breadcrumbJsonLd([
+          { name: 'Home', path: '/' },
+          { name: 'Features', path: '/features' },
+          { name: feature.title, path },
+        ]),
+        articleJsonLd({
+          headline: feature.title,
+          description: feature.excerpt,
+          path,
+          image: feature.image,
+          author: feature.authorName ?? feature.author,
+          section: feature.category,
+        }),
+      ],
+    }
+  }, [slug, feature])
+
+  useSeo(seo)
 
   if (loading) return <LoadingTransmission variant="hell" />
   if (error || !feature) {
@@ -33,6 +67,7 @@ export default function FeatureDetailPage() {
           src={feature.image}
           alt={feature.title}
           width={1400}
+          height={788}
           priority
           className="w-full h-full object-cover"
         />
@@ -67,12 +102,12 @@ export default function FeatureDetailPage() {
             </p>
           )}
         </div>
-        <Link
-          to="/features"
-          className="inline-block mt-8 text-xs tracking-widest text-muted hover:text-neon"
-        >
-          ← All Features
-        </Link>
+        {allFeatures && slug && (
+          <EditorialRelatedLinks
+            currentSlug={slug}
+            items={allFeatures.map((f) => ({ slug: f.slug, title: f.title }))}
+          />
+        )}
       </div>
     </article>
   )

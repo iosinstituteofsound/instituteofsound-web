@@ -80,6 +80,7 @@ export default function AcademyHubPage() {
           title="Music Production Academy"
           subtitle="Infographic lessons, track quizzes, interactive Ear Lab, and printable certificates — built for students, zero login."
           align="center"
+          titleAs="h1"
         />
 
         <AcademySyncBanner />

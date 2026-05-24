@@ -134,6 +134,10 @@ export interface FooterData {
   manifesto: string
   socials: FooterLink[]
   archive: FooterLink[]
+  /** Editorial & discovery — internal SEO links */
+  explore?: FooterLink[]
+  /** Academy & toolkit */
+  learn?: FooterLink[]
   newsletter: { placeholder: string; cta: string }
 }
 
@@ -144,6 +148,8 @@ export interface NavLink {
   href: string
   group?: NavGroupId
   highlight?: boolean
+  /** Section label in dropdowns (e.g. toolkit phases). */
+  section?: string
 }
 
 export interface SubmissionField {

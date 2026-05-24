@@ -1,3 +1,4 @@
+import { mergeNavWithToolkit } from '@/lib/nav/toolkitNav'
 import type { NavGroupId, NavLink } from '@/types'
 
 export const NAV_GROUP_ORDER: NavGroupId[] = ['discover', 'desk', 'toolkit', 'academy', 'access']
@@ -17,8 +18,9 @@ export interface NavLinkGroup {
 }
 
 export function groupNavLinks(links: NavLink[]): NavLinkGroup[] {
+  const merged = mergeNavWithToolkit(links)
   const buckets = new Map<NavGroupId, NavLink[]>()
-  for (const link of links) {
+  for (const link of merged) {
     const id = link.group ?? 'desk'
     const arr = buckets.get(id) ?? []
     arr.push(link)

@@ -1,5 +1,4 @@
 [
-  { "label": "Tools", "href": "/tools", "group": "toolkit", "highlight": true },
   { "label": "Academy Home", "href": "/academy", "group": "academy", "highlight": true },
   { "label": "Production Fundamentals", "href": "/academy/production", "group": "academy" },
   { "label": "Mixing Essentials", "href": "/academy/mixing", "group": "academy" },

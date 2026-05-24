@@ -130,7 +130,10 @@ export function NavDropdown({
           <motion.div
             id={panelId}
             role="menu"
-            className="ios-nav-dropdown-panel"
+            className={clsx(
+              'ios-nav-dropdown-panel',
+              group.id === 'toolkit' && 'ios-nav-dropdown-panel-toolkit'
+            )}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
@@ -140,11 +143,18 @@ export function NavDropdown({
           >
             <p className="ios-nav-dropdown-panel-kicker">{group.label}</p>
             <ul className="ios-nav-dropdown-list">
-              {group.links.map((link) => (
-                <li key={link.href} role="none">
-                  <DropdownLink link={link} active={isLinkActive(link.href)} />
-                </li>
-              ))}
+              {group.links.map((link, index) => {
+                const prev = index > 0 ? group.links[index - 1] : undefined
+                const showSection = link.section && link.section !== prev?.section
+                return (
+                  <li key={`${link.href}-${link.section ?? ''}`} role="none">
+                    {showSection && (
+                      <p className="ios-nav-dropdown-section">{link.section}</p>
+                    )}
+                    <DropdownLink link={link} active={isLinkActive(link.href)} />
+                  </li>
+                )
+              })}
             </ul>
           </motion.div>
         )}
@@ -199,22 +209,29 @@ export function NavDrawerAccordion({
             className="ios-nav-accordion-panel"
           >
             <ul className="ios-nav-drawer-list">
-              {group.links.map((link, i) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    onClick={onNavigate}
-                    className={clsx(
-                      'ios-nav-drawer-link ios-nav-link',
-                      isLinkActive(link.href) && 'ios-nav-link-active',
-                      link.highlight && 'ios-nav-link-highlight'
+              {group.links.map((link, i) => {
+                const prev = i > 0 ? group.links[i - 1] : undefined
+                const showSection = link.section && link.section !== prev?.section
+                return (
+                  <li key={`${link.href}-${link.section ?? ''}`}>
+                    {showSection && (
+                      <p className="ios-nav-drawer-section">{link.section}</p>
                     )}
-                  >
-                    <span className="ios-nav-drawer-index">{String(i + 1).padStart(2, '0')}</span>
-                    <span>{link.label}</span>
-                  </Link>
-                </li>
-              ))}
+                    <Link
+                      to={link.href}
+                      onClick={onNavigate}
+                      className={clsx(
+                        'ios-nav-drawer-link ios-nav-link',
+                        isLinkActive(link.href) && 'ios-nav-link-active',
+                        link.highlight && 'ios-nav-link-highlight'
+                      )}
+                    >
+                      <span className="ios-nav-drawer-index">{String(i + 1).padStart(2, '0')}</span>
+                      <span>{link.label}</span>
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           </motion.div>
         )}

@@ -7,10 +7,24 @@
     { "label": "Spotify", "href": "#" },
     { "label": "YouTube", "href": "#" }
   ],
+  "explore": [
+    { "label": "Discover Artists", "href": "/discover" },
+    { "label": "Editorial Features", "href": "/features" },
+    { "label": "Signals", "href": "/signals" },
+    { "label": "Playlists", "href": "/playlists" },
+    { "label": "Community", "href": "/community" }
+  ],
+  "learn": [
+    { "label": "Production Academy", "href": "/academy" },
+    { "label": "Ear Lab", "href": "/academy/ear-lab" },
+    { "label": "Track Quizzes", "href": "/academy/quizzes" },
+    { "label": "Studio Toolkit", "href": "/tools" },
+    { "label": "BPM Calculator", "href": "/tools/bpm" },
+    { "label": "Loudness Meter", "href": "/tools/loudness" }
+  ],
   "archive": [
     { "label": "Manifesto", "href": "/archive" },
     { "label": "All Playlists", "href": "/playlists" },
-    { "label": "Creator Tools", "href": "/tools" },
     { "label": "Submit Work", "href": "/submissions" },
     { "label": "Join as Editor", "href": "/editor/join" },
     { "label": "Contact", "href": "#" }
