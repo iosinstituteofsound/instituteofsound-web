@@ -137,9 +137,13 @@ export interface FooterData {
   newsletter: { placeholder: string; cta: string }
 }
 
+export type NavGroupId = 'discover' | 'desk' | 'toolkit' | 'academy' | 'access'
+
 export interface NavLink {
   label: string
   href: string
+  group?: NavGroupId
+  highlight?: boolean
 }
 
 export interface SubmissionField {

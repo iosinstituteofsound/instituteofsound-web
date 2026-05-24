@@ -15,6 +15,31 @@ const ArchivePage = lazy(() => import('@/pages/ArchivePage'))
 const ArtistDetailPage = lazy(() => import('@/pages/ArtistDetailPage'))
 const PlaylistDetailPage = lazy(() => import('@/pages/PlaylistDetailPage'))
 const FeatureDetailPage = lazy(() => import('@/pages/FeatureDetailPage'))
+const ToolsHubPage = lazy(() => import('@/pages/tools/ToolsHubPage'))
+const MusicPromptToolPage = lazy(() => import('@/pages/tools/MusicPromptToolPage'))
+const ChordToolPage = lazy(() => import('@/pages/tools/ChordToolPage'))
+const ArtistNameToolPage = lazy(() => import('@/pages/tools/ArtistNameToolPage'))
+const VocalChainToolPage = lazy(() => import('@/pages/tools/VocalChainToolPage'))
+const TuningToolPage = lazy(() => import('@/pages/tools/TuningToolPage'))
+const BpmToolPage = lazy(() => import('@/pages/tools/BpmToolPage'))
+const TapTempoToolPage = lazy(() => import('@/pages/tools/TapTempoToolPage'))
+const SpectrumToolPage = lazy(() => import('@/pages/tools/SpectrumToolPage'))
+const ClippingToolPage = lazy(() => import('@/pages/tools/ClippingToolPage'))
+const LoudnessToolPage = lazy(() => import('@/pages/tools/LoudnessToolPage'))
+const KeyScaleToolPage = lazy(() => import('@/pages/tools/KeyScaleToolPage'))
+const LyricsToolPage = lazy(() => import('@/pages/tools/LyricsToolPage'))
+const SetlistToolPage = lazy(() => import('@/pages/tools/SetlistToolPage'))
+const AudioFormatToolPage = lazy(() => import('@/pages/tools/AudioFormatToolPage'))
+const SubgenreTagsToolPage = lazy(() => import('@/pages/tools/SubgenreTagsToolPage'))
+const ExportChecklistToolPage = lazy(() => import('@/pages/tools/ExportChecklistToolPage'))
+const AcademyHubPage = lazy(() => import('@/pages/academy/AcademyHubPage'))
+const AcademyTrackPage = lazy(() => import('@/pages/academy/AcademyTrackPage'))
+const AcademyLessonPage = lazy(() => import('@/pages/academy/AcademyLessonPage'))
+const AcademyQuizzesHubPage = lazy(() => import('@/pages/academy/AcademyQuizzesHubPage'))
+const AcademyQuizPage = lazy(() => import('@/pages/academy/AcademyQuizPage'))
+const AcademyEarLabPage = lazy(() => import('@/pages/academy/AcademyEarLabPage'))
+const AcademyCertificatesPage = lazy(() => import('@/pages/academy/AcademyCertificatesPage'))
+const AcademyCertificatePage = lazy(() => import('@/pages/academy/AcademyCertificatePage'))
 
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
 const DeskLoginPage = lazy(() => import('@/pages/auth/DeskLoginPage'))
@@ -50,6 +75,31 @@ export default function App() {
             <Route path="features" element={<FeaturesPage />} />
             <Route path="community" element={<CommunityPage />} />
             <Route path="submissions" element={<SubmissionsPage />} />
+            <Route path="academy" element={<AcademyHubPage />} />
+            <Route path="academy/quizzes" element={<AcademyQuizzesHubPage />} />
+            <Route path="academy/quiz/:quiz" element={<AcademyQuizPage />} />
+            <Route path="academy/ear-lab" element={<AcademyEarLabPage />} />
+            <Route path="academy/certificates" element={<AcademyCertificatesPage />} />
+            <Route path="academy/certificate/:cert" element={<AcademyCertificatePage />} />
+            <Route path="academy/:track" element={<AcademyTrackPage />} />
+            <Route path="academy/:track/:lesson" element={<AcademyLessonPage />} />
+            <Route path="tools" element={<ToolsHubPage />} />
+            <Route path="tools/music-prompt" element={<MusicPromptToolPage />} />
+            <Route path="tools/chords" element={<ChordToolPage />} />
+            <Route path="tools/artist-name" element={<ArtistNameToolPage />} />
+            <Route path="tools/vocal-chain" element={<VocalChainToolPage />} />
+            <Route path="tools/tuning" element={<TuningToolPage />} />
+            <Route path="tools/bpm" element={<BpmToolPage />} />
+            <Route path="tools/tap-tempo" element={<TapTempoToolPage />} />
+            <Route path="tools/spectrum" element={<SpectrumToolPage />} />
+            <Route path="tools/clipping" element={<ClippingToolPage />} />
+            <Route path="tools/loudness" element={<LoudnessToolPage />} />
+            <Route path="tools/key-scale" element={<KeyScaleToolPage />} />
+            <Route path="tools/lyrics" element={<LyricsToolPage />} />
+            <Route path="tools/setlist" element={<SetlistToolPage />} />
+            <Route path="tools/audio-format" element={<AudioFormatToolPage />} />
+            <Route path="tools/subgenre-tags" element={<SubgenreTagsToolPage />} />
+            <Route path="tools/export-checklist" element={<ExportChecklistToolPage />} />
             <Route path="archive" element={<ArchivePage />} />
             <Route path="artist/:slug" element={<ArtistDetailPage />} />
             <Route path="playlist/:slug" element={<PlaylistDetailPage />} />

@@ -37,8 +37,8 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
               to="/editor/apply"
               onClick={onNavigate}
               className={clsx(
-                'ios-nav-link !text-mh-red',
-                layout === 'stack' && 'text-sm tracking-widest uppercase font-semibold text-center'
+                'ios-nav-cta-link ios-nav-cta-link-editor',
+                layout === 'stack' && 'text-sm tracking-widest uppercase font-semibold text-center py-2'
               )}
             >
               Join as Editor
@@ -55,7 +55,7 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
             {layout === 'stack' ? (
               label
             ) : (
-              <span className="ios-nav-link !text-signal font-bold">{label}</span>
+              <span className="ios-nav-cta-link ios-nav-cta-dashboard">{label}</span>
             )}
           </Link>
         )}
@@ -90,8 +90,8 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
           to="/submissions"
           onClick={onNavigate}
           className={clsx(
-            'ios-nav-link hidden xl:inline',
-            layout === 'stack' && '!inline text-sm tracking-widest uppercase font-semibold'
+            'ios-nav-cta-link hidden xl:inline',
+            layout === 'stack' && '!inline text-sm tracking-widest uppercase font-semibold py-2'
           )}
         >
           For Artists
@@ -102,8 +102,8 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
           to="/editor/join"
           onClick={onNavigate}
           className={clsx(
-            'ios-nav-link hidden xl:inline !text-mh-red',
-            layout === 'stack' && '!inline text-sm tracking-widest uppercase font-semibold'
+            'ios-nav-cta-link ios-nav-cta-link-editor hidden xl:inline',
+            layout === 'stack' && '!inline text-sm tracking-widest uppercase font-semibold py-2'
           )}
         >
           Join as Editor

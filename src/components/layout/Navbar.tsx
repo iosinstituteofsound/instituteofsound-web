@@ -1,105 +1,158 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArtistNavActions } from '@/components/layout/ArtistNavActions'
-import type { NavLink } from '@/types'
+import { NavDrawerAccordion, NavDropdown } from '@/components/layout/NavDropdown'
+import { NavMenuToggle } from '@/components/layout/NavMenuToggle'
+import { groupNavLinks } from '@/lib/nav/groupLinks'
+import type { NavGroupId, NavLink } from '@/types'
 import clsx from 'clsx'
 
 interface NavbarProps {
   links: NavLink[]
 }
 
+function isLinkActive(href: string, pathname: string, hash: string): boolean {
+  if (href === '/#reviews') return hash === '#reviews'
+  if (href.startsWith('/#')) return false
+  return pathname === href || (href !== '/' && pathname.startsWith(href + '/'))
+}
+
 export function Navbar({ links }: NavbarProps) {
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [openMenu, setOpenMenu] = useState<NavGroupId | null>(null)
+  const [drawerSection, setDrawerSection] = useState<NavGroupId | null>('discover')
   const location = useLocation()
   const isHome = location.pathname === '/'
   const isArtistSite = /^\/artist\/[^/]+$/.test(location.pathname)
+  const groups = groupNavLinks(links)
+
+  const linkActive = (href: string) =>
+    isLinkActive(href, location.pathname, location.hash)
+
+  const groupActive = (groupId: NavGroupId) => {
+    const g = groups.find((x) => x.id === groupId)
+    return g?.links.some((l) => linkActive(l.href)) ?? false
+  }
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    setOpen(false)
+    setOpenMenu(null)
+  }, [location.pathname, location.hash])
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [open])
 
   return (
     <header
       className={clsx(
-        'ios-nav fixed top-0 left-0 right-0 z-50 transition-colors',
-        isArtistSite
-          ? 'ios-nav-artist-site bg-transparent backdrop-blur-none border-b border-transparent'
-          : isHome
-            ? 'bg-void/50 backdrop-blur-md'
-            : 'bg-void/95 backdrop-blur-sm'
+        'ios-nav fixed top-0 left-0 right-0 z-50',
+        isArtistSite && 'ios-nav-artist-site',
+        scrolled && !isArtistSite && 'ios-nav-scrolled',
+        !isArtistSite && !scrolled && isHome && 'ios-nav-home',
+        !isArtistSite && !isHome && 'ios-nav-solid'
       )}
     >
-      <nav className="relative flex items-center justify-between px-6 md:px-12 lg:px-16 py-4 md:py-5">
-        <Link to="/" className="ios-brand-lockup flex flex-col leading-none group">
+      <div className="ios-nav-rail" aria-hidden />
+      <nav className="ios-nav-inner" aria-label="Main">
+        <Link to="/" className="ios-brand-lockup group flex flex-col leading-none">
           <span className="ios-brand-title font-display text-lg md:text-xl font-extrabold tracking-tight">
             INSTITUTE
           </span>
-          <span className="text-[10px] tracking-[0.35em] text-muted uppercase mt-0.5">
+          <span className="ios-brand-sub text-[10px] tracking-[0.35em] text-muted uppercase mt-0.5">
             of Sound
           </span>
         </Link>
 
-        <ul className="hidden lg:flex items-center gap-8">
-          {links.map((link) => {
-            const active =
-              link.href === '/#reviews'
-                ? location.hash === '#reviews'
-                : location.pathname === link.href
-            return (
-              <li key={link.href}>
-                <Link
-                  to={link.href}
-                  className={clsx('ios-nav-link', active && 'ios-nav-link-active')}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            )
-          })}
-          <li className="hidden lg:block">
-            <ArtistNavActions />
-          </li>
+        <ul
+          className="ios-nav-mega hidden lg:flex"
+          onMouseLeave={() => setOpenMenu(null)}
+        >
+          {groups.map((group) => (
+            <NavDropdown
+              key={group.id}
+              group={group}
+              open={openMenu === group.id}
+              onOpen={() => setOpenMenu(group.id)}
+              onClose={() => setOpenMenu(null)}
+              isLinkActive={linkActive}
+              groupActive={groupActive(group.id)}
+            />
+          ))}
         </ul>
 
-        <div className="hidden md:flex lg:hidden items-center">
+        <div className="ios-nav-actions hidden lg:flex">
           <ArtistNavActions />
         </div>
 
-        <button
-          type="button"
-          className="lg:hidden ios-btn ios-btn-ghost !py-2 !px-4"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-        >
-          {open ? 'Close' : 'Menu'}
-        </button>
+        <div className="ios-nav-mobile-cta hidden md:flex lg:hidden">
+          <ArtistNavActions />
+        </div>
+
+        <NavMenuToggle open={open} onClick={() => setOpen((v) => !v)} />
       </nav>
 
       <AnimatePresence>
         {open && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden border-t border-border bg-void/98 overflow-hidden"
-          >
-            <ul className="flex flex-col p-6 gap-4">
-              {links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    onClick={() => setOpen(false)}
-                    className="text-sm tracking-widest uppercase font-semibold hover:text-mh-red transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-              <li className="pt-4 mt-2 border-t border-border">
-                <p className="text-[10px] tracking-[0.25em] uppercase text-mh-red font-bold mb-3">
-                  Artists
-                </p>
+          <>
+            <motion.button
+              type="button"
+              className="ios-nav-backdrop lg:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              aria-label="Close menu"
+              onClick={() => setOpen(false)}
+            />
+            <motion.div
+              id="ios-nav-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site menu"
+              initial={{ opacity: 0, x: '100%' }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              className="ios-nav-drawer lg:hidden"
+            >
+              <div className="ios-nav-drawer-head">
+                <p className="ios-nav-drawer-kicker">Navigation</p>
+                <p className="ios-nav-drawer-title font-display">Enter the archive</p>
+              </div>
+
+              <div className="ios-nav-drawer-body">
+                {groups.map((group) => (
+                  <NavDrawerAccordion
+                    key={group.id}
+                    group={group}
+                    expanded={drawerSection === group.id}
+                    onToggle={() =>
+                      setDrawerSection((cur) => (cur === group.id ? null : group.id))
+                    }
+                    isLinkActive={linkActive}
+                    onNavigate={() => setOpen(false)}
+                  />
+                ))}
+              </div>
+
+              <div className="ios-nav-drawer-foot">
+                <p className="ios-nav-drawer-foot-label">Account</p>
                 <ArtistNavActions layout="stack" onNavigate={() => setOpen(false)} />
-              </li>
-            </ul>
-          </motion.div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>

@@ -6,6 +6,7 @@ import { GrainOverlay } from '@/components/effects/GrainOverlay'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { ManifestoGateModal } from '@/components/ui/ManifestoGateModal'
 import { EditorCongratsGate } from '@/components/editor-applications/EditorCongratsGate'
+import { AcademyProgressSync } from '@/components/academy/AcademyProgressSync'
 import { useLenis } from '@/hooks/useLenis'
 import { useContent } from '@/hooks/useContent'
 import { getNav, getFooter } from '@/api/endpoints'
@@ -35,8 +36,9 @@ export function Layout() {
     <>
       <ManifestoGateModal />
       <EditorCongratsGate />
+      <AcademyProgressSync />
       <GrainOverlay />
-      {navLoading ? <div className="h-[72px]" /> : navLinks && <Navbar links={navLinks} />}
+      {navLoading ? <div className="h-[4.25rem] md:h-[4.5rem]" /> : navLinks && <Navbar links={navLinks} />}
       <main className="ios-page-bg">
         <Outlet />
       </main>
