@@ -58,8 +58,10 @@ export interface AcademyLesson {
   level: 'Beginner' | 'Intermediate'
   summary: string
   outcome: string
-  /** Optional curated study video (YouTube embed). */
+  /** Optional single study video (legacy — prefer `videos`). */
   video?: AcademyLessonVideo
+  /** Optional video playlist for the lesson (shown above the infographic). */
+  videos?: AcademyLessonVideo[]
   infographic: AcademyInfographicType
   infographicTitle: string
   sections: AcademyLessonSection[]

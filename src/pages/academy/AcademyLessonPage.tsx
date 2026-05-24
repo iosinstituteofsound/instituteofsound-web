@@ -1,6 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { AcademyInfographic } from '@/components/academy/AcademyInfographic'
-import { AcademyLessonVideo } from '@/components/academy/AcademyLessonVideo'
+import { AcademyLessonVideos } from '@/components/academy/AcademyLessonVideos'
 import { AcademyLessonComplete } from '@/components/academy/AcademyLessonComplete'
 import { AcademyLessonShell } from '@/components/academy/AcademyLessonShell'
 import { getAdjacentLessons, getLesson } from '@/lib/academy/registry'
@@ -21,7 +21,7 @@ export default function AcademyLessonPage() {
           <Link to="/academy/ear-lab">Open Ear Lab →</Link>
         </div>
       )}
-      {data.video && <AcademyLessonVideo video={data.video} />}
+      <AcademyLessonVideos lesson={data} />
       <AcademyInfographic type={data.infographic} title={data.infographicTitle} />
 
       <div className="academy-lesson-body">

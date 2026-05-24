@@ -6812,8 +6812,24 @@ html[data-perf='lite'] .metal-loader-core-beat {
   text-decoration: none;
 }
 
-.academy-lesson-video {
+.academy-lesson-videos {
   margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.academy-lesson-videos-heading {
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.academy-lesson-video {
+  margin-bottom: 0;
 }
 
 .academy-lesson-video-title {

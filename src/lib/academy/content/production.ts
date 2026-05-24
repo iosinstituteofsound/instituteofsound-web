@@ -10,6 +10,11 @@ export const PRODUCTION_LESSONS: AcademyLesson[] = [
     level: 'Beginner',
     summary: 'Understand how sound becomes data — frequency, amplitude, sample rate, and bit depth.',
     outcome: 'You will read meters confidently and choose correct export settings before mixing.',
+    videos: [
+      { title: 'Video 1 · Sound & digital audio basics', youtubeId: 'bWEOkmJnTmE' },
+      { title: 'Video 2 · Levels, meters & headroom', youtubeId: '-10h7Mu5VP8' },
+      { title: 'Video 3 · Sample rate & bit depth', youtubeId: 'mDy3bt0vty0' },
+    ],
     infographic: 'waveform-db',
     infographicTitle: 'Waveform → numbers engineers use',
     sections: [
@@ -80,6 +85,12 @@ export const PRODUCTION_LESSONS: AcademyLesson[] = [
     level: 'Beginner',
     summary: 'Tracks, buses, sends, returns, and the master — how audio actually moves in your session.',
     outcome: 'You will route drums, vocals, and FX without creating feedback loops or muddy summing.',
+    videos: [
+      { title: 'Video 1 · DAW signal flow overview', youtubeId: 'yY6-iSavai0' },
+      { title: 'Video 2 · Buses & routing', youtubeId: 'oPNBjg04xXQ' },
+      { title: 'Video 3 · Sends & returns', youtubeId: 'Fu3bQhithbI' },
+      { title: 'Video 4 · Inserts vs sends in practice', youtubeId: 'BVYtAkLXRzQ' },
+    ],
     infographic: 'signal-flow',
     infographicTitle: 'Session signal flow (top → bottom)',
     sections: [
@@ -150,6 +161,12 @@ export const PRODUCTION_LESSONS: AcademyLesson[] = [
     level: 'Beginner',
     summary: 'Structure songs with tension, release, and energy — before you chase mix tricks.',
     outcome: 'You will plan intros, verses, choruses, and bridges so mixes have natural dynamics.',
+    videos: [
+      { title: 'Video 1 · Arrangement foundations', youtubeId: 'vz770_GNpts' },
+      { title: 'Video 2 · Section planning and flow', youtubeId: 'gIVUpqVRf-w' },
+      { title: 'Video 3 · Energy and transitions', youtubeId: '9Ec2wZ-3TRs' },
+      { title: 'Video 4 · Practical arrangement walkthrough', youtubeId: 'CWVwsrRmwfY' },
+    ],
     infographic: 'arrangement',
     infographicTitle: 'Section energy map',
     sections: [
