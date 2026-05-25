@@ -5,15 +5,17 @@ import { getTrackBySlug } from '@/lib/academy/registry'
 
 interface AcademyLessonShellProps {
   lesson: AcademyLesson
+  /** Wider layout for lesson pages with a media sidebar */
+  wide?: boolean
   children: ReactNode
 }
 
-export function AcademyLessonShell({ lesson, children }: AcademyLessonShellProps) {
+export function AcademyLessonShell({ lesson, wide = false, children }: AcademyLessonShellProps) {
   const track = getTrackBySlug(lesson.trackSlug)
 
   return (
     <div className="academy-page">
-      <div className="academy-page-inner">
+      <div className={`academy-page-inner${wide ? ' academy-page-inner-wide' : ''}`}>
         <nav className="academy-breadcrumb" aria-label="Breadcrumb">
           <Link to="/academy">Academy</Link>
           <span aria-hidden>/</span>

@@ -11,6 +11,13 @@ export const EAR_TRAINING_LESSONS: AcademyLesson[] = [
     summary: 'Train your ears to separate low, mid, and high energy — the foundation of mixing decisions.',
     outcome:
       'You will identify muddy lows, harsh mids, and brittle highs without opening an analyzer first.',
+    videos: [
+      { title: 'Video 1 · Frequency bands overview', youtubeId: 'xF2iKVS88kU' },
+      { title: 'Video 2 · EQ hearing fundamentals', youtubeId: 'SAWp7LXrbZ8' },
+      { title: 'Video 3 · Low-mid & mud', youtubeId: 'lrx7w93hH6U' },
+      { title: 'Video 4 · Midrange & presence', youtubeId: '0fckQLQWhe0' },
+      { title: 'Video 5 · Highs & air', youtubeId: 'NUQUpiEF8j0' },
+    ],
     infographic: 'frequency-bands',
     infographicTitle: 'Three zones every mix engineer uses',
     sections: [
@@ -86,6 +93,13 @@ export const EAR_TRAINING_LESSONS: AcademyLesson[] = [
     summary: 'Hear punch, squash, and release — know when compression helps or kills transients.',
     outcome:
       'You will recognize over-compression and set attack/release with your ears guiding the meters.',
+    videos: [
+      { title: 'Video 1 · Dynamics & compression by ear', youtubeId: 'ksJRgK3viMc' },
+      { title: 'Video 2 · Compression basics', youtubeId: 'K0XGXz6SHco' },
+      { title: 'Video 3 · Attack, release & punch', youtubeId: 'yi0J9JsRdI4' },
+      { title: 'Video 4 · Hearing squash vs control', youtubeId: '7oOmX3JHwtE' },
+      { title: 'Video 5 · Crest factor in practice', youtubeId: 'yURGJ8ifchQ' },
+    ],
     infographic: 'dynamics-crest',
     infographicTitle: 'Punch vs squash (crest factor)',
     sections: [
@@ -163,6 +177,11 @@ export const EAR_TRAINING_LESSONS: AcademyLesson[] = [
     summary: 'Use references without copying — level-matched A/B that improves translation.',
     outcome:
       'You will run a repeatable reference session that tells you what to fix next in your mix.',
+    videos: [
+      { title: 'Video 1 · Reference listening workflow', youtubeId: 'lEWr5UJMqUA' },
+      { title: 'Video 2 · Level-matched A/B', youtubeId: 'EuWwq8Vidbk' },
+      { title: 'Video 3 · Translation & mix decisions', youtubeId: 'lIMVB75WafY' },
+    ],
     infographic: 'reference-ab',
     infographicTitle: 'A/B workflow (your mix ↔ reference)',
     sections: [

@@ -10,6 +10,10 @@ export const MASTERING_LESSONS: AcademyLesson[] = [
     level: 'Beginner',
     summary: 'Order of operations: corrective EQ, gentle compression, limiting last.',
     outcome: 'You will assemble a simple mastering chain that polishes without destroying the mix.',
+    videos: [
+      { title: 'Video 1 · Mastering chain order', youtubeId: 'OIOIi9G1ClI' },
+      { title: 'Video 2 · EQ, compression & limiting in sequence', youtubeId: '7zP255CNSvM' },
+    ],
     infographic: 'master-chain',
     infographicTitle: 'Mastering chain order',
     sections: [
@@ -66,6 +70,13 @@ export const MASTERING_LESSONS: AcademyLesson[] = [
     level: 'Intermediate',
     summary: 'RMS, perceived loudness, and why squashed masters fatigue listeners.',
     outcome: 'You will set loudness targets with meters and understand streaming normalization.',
+    videos: [
+      { title: 'Video 1 · Loudness, LUFS & perceived level', youtubeId: 'EiRMYoqU3ys' },
+      {
+        title: 'Video 2 · Playlist · 2-minute mastering tips (Ian Shepherd)',
+        playlistId: 'PLimWHcn2lzqJeYh1y1XDAGnzfz5X3zy49',
+      },
+    ],
     infographic: 'loudness',
     infographicTitle: 'Loudness vs dynamics',
     sections: [
@@ -121,6 +132,13 @@ export const MASTERING_LESSONS: AcademyLesson[] = [
     level: 'Beginner',
     summary: 'File formats, true peak, metadata, and pre-release checklist.',
     outcome: 'You will deliver masters that distributors and editors accept without technical rejection.',
+    videos: [
+      {
+        title: 'Video 1 · Playlist · Mastering essentials (Ian Shepherd / Sound On Sound)',
+        playlistId: 'PLimWHcn2lzqKy13Mj2lpqInvSVOlrql1Z',
+      },
+      { title: 'Video 2 · Loudness & delivery targets', youtubeId: 'EiRMYoqU3ys' },
+    ],
     infographic: 'export-qc',
     infographicTitle: 'Delivery checklist flow',
     sections: [

@@ -11,6 +11,11 @@ export const GENRE_LESSONS: AcademyLesson[] = [
     summary: 'Kick–bass marriage, guitar density, vocal cut, and drum punch for modern heavy mixes.',
     outcome:
       'You will balance a metal session with a repeatable template and know which fights to solve first.',
+    videos: [
+      { title: 'Video 1 · Heavy metal mix overview', youtubeId: '-iFE8M0W_So' },
+      { title: 'Video 2 · Kick, bass & guitar density', youtubeId: '4B8VFalcim4' },
+      { title: 'Video 3 · Vocal cut & drum punch', youtubeId: 'a98bnsXmFRk' },
+    ],
     infographic: 'metal-template',
     infographicTitle: 'Metal balance priorities (bottom → top)',
     sections: [
@@ -91,6 +96,11 @@ export const GENRE_LESSONS: AcademyLesson[] = [
     summary: 'Layer noise, synthesis, and drums for harsh, cinematic underground electronic hybrids.',
     outcome:
       'You will design industrial textures that support a song without turning the mix into noise soup.',
+    videos: [
+      { title: 'Video 1 · Industrial & dark electronic texture', youtubeId: '6S8kZG46qt8' },
+      { title: 'Video 2 · Layering noise and synthesis', youtubeId: 'lOhkJw1jlwg' },
+      { title: 'Video 3 · Harsh drums & mix balance', youtubeId: '848fp-O3QkM' },
+    ],
     infographic: 'genre-spectrum',
     infographicTitle: 'Frequency roles in dark electronic',
     sections: [
@@ -170,6 +180,16 @@ export const GENRE_LESSONS: AcademyLesson[] = [
     summary: 'Depth, reverb tails, and slow movement for atmospheric and cinematic beds.',
     outcome:
       'You will place elements in front-to-back space and build ambient worlds that support vocals or post-rock peaks.',
+    videos: [
+      { title: 'Video 1 · Cinematic & ambient space design', youtubeId: 'mx40aXhaxt8' },
+      { title: 'Video 2 · Depth and reverb placement', youtubeId: 'KVNb19dHA9Q' },
+      { title: 'Video 3 · Slow movement & atmosphere', youtubeId: 'YAn1eUBkWHI' },
+      { title: 'Video 4 · Front-to-back mixing', youtubeId: 'CASDW1Y915M' },
+      { title: 'Video 5 · Ambient beds & pads', youtubeId: 'M6GUNTwCJaA' },
+      { title: 'Video 6 · Reverb tails & space', youtubeId: '7L0m76ePozg' },
+      { title: 'Video 7 · Cinematic layering', youtubeId: 'xtk1C9K2P2s' },
+      { title: 'Video 8 · Post-rock peaks & release', youtubeId: 'elJiUz7Gfr0' },
+    ],
     infographic: 'cinematic-depth',
     infographicTitle: 'Depth map (dry → far)',
     sections: [

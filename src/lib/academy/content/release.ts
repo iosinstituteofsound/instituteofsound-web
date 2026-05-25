@@ -11,6 +11,10 @@ export const RELEASE_LESSONS: AcademyLesson[] = [
     summary: 'From mix approval to upload — what files, dates, and checks a student release needs.',
     outcome:
       'You will plan a realistic release calendar and know every deliverable before distribution day.',
+    videos: [
+      { title: 'Video 1 · Release timeline overview', youtubeId: 'B9BsicY-WvE' },
+      { title: 'Video 2 · Deliverables & milestones', youtubeId: 'qvYdSvRHVZ8' },
+    ],
     infographic: 'release-timeline',
     infographicTitle: 'Student release timeline (weeks → day)',
     sections: [
@@ -88,6 +92,12 @@ export const RELEASE_LESSONS: AcademyLesson[] = [
     summary: 'Titles, artists, ISRC, splits, and credits — get metadata right before you upload.',
     outcome:
       'You will fill distributor forms confidently and avoid takedowns from metadata conflicts.',
+    videos: [
+      { title: 'Video 1 · Metadata basics', youtubeId: 'lZOqx1qnAyI' },
+      { title: 'Video 2 · ISRC & identifiers', youtubeId: 'VstUOVGMBpg' },
+      { title: 'Video 3 · Credits & splits', youtubeId: 'tbgCJSU5pJw' },
+      { title: 'Video 4 · Distributor metadata QC', youtubeId: 'sXLJBFBg3Sg' },
+    ],
     infographic: 'metadata-map',
     infographicTitle: 'Metadata fields map',
     sections: [
@@ -168,6 +178,18 @@ export const RELEASE_LESSONS: AcademyLesson[] = [
     summary: 'Upload, verify stores, pitch playlists, and archive the project for your portfolio.',
     outcome:
       'You will complete distribution QC and run a minimal promo loop after release day.',
+    videos: [
+      { title: 'Video 1 · Distribution prep & upload', youtubeId: 'RhUknxgtqgM' },
+      { title: 'Video 2 · Post-release promo basics', youtubeId: 'P-aYtFm8K44' },
+      {
+        title: 'Guide · Post-release strategy (YouTube for Artists)',
+        href: 'https://artists.youtube/resources/post-release-strategy/',
+      },
+      {
+        title: 'Guide · Multi-format release strategy (YouTube for Artists)',
+        href: 'https://artists.youtube/resources/multi-format-release-strategy/',
+      },
+    ],
     infographic: 'distributor-checklist',
     infographicTitle: 'Post-upload verification',
     sections: [

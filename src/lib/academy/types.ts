@@ -46,7 +46,12 @@ export interface AcademyPracticeStep {
 
 export interface AcademyLessonVideo {
   title: string
-  youtubeId: string
+  /** Single YouTube video ID (watch?v=…) */
+  youtubeId?: string
+  /** YouTube playlist ID for playlist embed */
+  playlistId?: string
+  /** External article or guide (opens in new tab) */
+  href?: string
 }
 
 export interface AcademyLesson {

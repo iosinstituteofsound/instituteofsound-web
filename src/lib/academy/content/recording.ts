@@ -12,6 +12,11 @@ export const RECORDING_LESSONS: AcademyLesson[] = [
       'Choose the right mic, set safe gain, and place sources so you capture tone — not just volume.',
     outcome:
       'You will record vocals, amps, and drums with intentional mic choice and placement before you open EQ.',
+    videos: [
+      { title: 'Video 1 · Microphones & gain staging', youtubeId: 'TEjOdqZFvhY' },
+      { title: 'Video 2 · Mic placement fundamentals', youtubeId: 'Tc-_hoG4nec' },
+      { title: 'Video 3 · Placement & tone at the source', youtubeId: 'Fc-c66PjC0M' },
+    ],
     infographic: 'mic-placement',
     infographicTitle: 'Placement map (distance changes tone)',
     sections: [
@@ -91,6 +96,11 @@ export const RECORDING_LESSONS: AcademyLesson[] = [
     summary: 'Treat reflections, set listening position, and hear truthfully while tracking and editing.',
     outcome:
       'You will set up a student-friendly listening zone and reduce room problems that confuse EQ decisions.',
+    videos: [
+      { title: 'Video 1 · Room acoustics basics', youtubeId: 'lrNBrl9qMLw' },
+      { title: 'Video 2 · Reflections & treatment', youtubeId: 'WO-Puu2w2ks' },
+      { title: 'Video 3 · Monitoring & listening position', youtubeId: 'DaHXJzl9Yak' },
+    ],
     infographic: 'room-treatment',
     infographicTitle: 'Room zones (where problems hide)',
     sections: [
@@ -170,6 +180,11 @@ export const RECORDING_LESSONS: AcademyLesson[] = [
     summary: 'Build width and weight with intentional doubles, layers, and reamp workflows.',
     outcome:
       'You will stack guitars and vocals without phase mush and use reamping to reshape tone after the fact.',
+    videos: [
+      { title: 'Video 1 · Doubles & layering', youtubeId: 'IomooOHKZMs' },
+      { title: 'Video 2 · Wide guitars & vocal stacks', youtubeId: 'g959-jgfi4M' },
+      { title: 'Video 3 · Reamping workflow', youtubeId: 'Rz7roXkJRW4' },
+    ],
     infographic: 'double-tracking',
     infographicTitle: 'Double-track width (L / R / center)',
     sections: [

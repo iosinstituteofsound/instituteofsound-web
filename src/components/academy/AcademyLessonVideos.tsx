@@ -15,8 +15,11 @@ export function AcademyLessonVideos({ lesson }: AcademyLessonVideosProps) {
       {videos.length > 1 && (
         <h2 className="academy-lesson-videos-heading">Video lessons ({videos.length})</h2>
       )}
-      {videos.map((video) => (
-        <AcademyLessonVideo key={video.youtubeId} video={video} />
+      {videos.map((video, index) => (
+        <AcademyLessonVideo
+          key={video.youtubeId ?? video.playlistId ?? video.href ?? index}
+          video={video}
+        />
       ))}
     </section>
   )

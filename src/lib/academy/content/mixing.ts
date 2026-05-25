@@ -10,6 +10,12 @@ export const MIXING_LESSONS: AcademyLesson[] = [
     level: 'Beginner',
     summary: 'Balance faders, pan, and mute before opening an EQ or compressor.',
     outcome: 'You will build a musical balance that needs less corrective processing later.',
+    videos: [
+      { title: 'Video 1 · Static mix & fader balance', youtubeId: 'TEjOdqZFvhY' },
+      { title: 'Video 2 · Panning for width and separation', youtubeId: 'QSvdhuu2orQ' },
+      { title: 'Video 3 · Level hierarchy in the mix', youtubeId: 'pqZHOrj1VjQ' },
+      { title: 'Video 4 · Static mix walkthrough', youtubeId: 'JRPyiQEexSM' },
+    ],
     infographic: 'static-mix',
     infographicTitle: 'Static mix balance map',
     sections: [
@@ -70,6 +76,13 @@ export const MIXING_LESSONS: AcademyLesson[] = [
     level: 'Beginner',
     summary: 'Subtractive EQ, frequency zones, and fixing masking between instruments.',
     outcome: 'You will cut problem frequencies before boosting and know where to listen.',
+    videos: [
+      { title: 'Video 1 · EQ zones & frequency ranges', youtubeId: '_fDg_pgit5c' },
+      { title: 'Video 2 · Subtractive cuts & mud', youtubeId: 'qQPYMfcPzY0' },
+      { title: 'Video 3 · Harshness & high-mid control', youtubeId: 'tMzQVOfNVbo' },
+      { title: 'Video 4 · EQ masking between instruments', youtubeId: 'kSNYBbPAvKE' },
+      { title: 'Video 5 · Practical EQ decision tree', youtubeId: '3OoVnTO3AB4' },
+    ],
     infographic: 'eq-zones',
     infographicTitle: 'Mix frequency zones',
     sections: [
@@ -127,6 +140,13 @@ export const MIXING_LESSONS: AcademyLesson[] = [
     level: 'Intermediate',
     summary: 'Threshold, ratio, attack, release — controlling dynamics without killing punch.',
     outcome: 'You will use compression for control and tone, not just to make things louder.',
+    videos: [
+      { title: 'Video 1 · Compression basics', youtubeId: 'K0XGXz6SHco' },
+      { title: 'Video 2 · Attack & release', youtubeId: 'BIVfpsoPnOo' },
+      { title: 'Video 3 · Punch and transient control', youtubeId: 'YqQx75OPRa0' },
+      { title: 'Video 4 · Ratio & threshold in practice', youtubeId: 'ksJRgK3viMc' },
+      { title: 'Video 5 · Parallel compression & mix bus', youtubeId: 'EuWwq8Vidbk' },
+    ],
     infographic: 'compressor',
     infographicTitle: 'Compressor parameters',
     sections: [
