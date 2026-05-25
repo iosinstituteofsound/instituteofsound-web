@@ -1,20 +1,16 @@
 import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  EAR_LAB_BANDS,
   EAR_LAB_MODES,
   EAR_LAB_PASS_SCORE,
   EAR_LAB_TOTAL_ROUNDS,
-  getBandHz,
   pickCompressionRound,
   pickLevelRound,
-  pickRandomBand,
   playCompressionPair,
   playLevelPair,
-  playTone,
-  type EarLabBand,
   type EarLabMode,
 } from '@/lib/academy/earLab'
+import { EarFrequencyGame } from '@/components/academy/EarFrequencyGame'
 import { getEarLabScore, saveEarLabScore } from '@/lib/academy/progress'
 import { useAcademyProgress } from '@/hooks/useAcademyProgress'
 import clsx from 'clsx'
@@ -47,95 +43,6 @@ function DrillResult({
         <Link to="/academy/certificates" className="ios-btn ios-btn-ghost">
           Certificates
         </Link>
-      </div>
-    </div>
-  )
-}
-
-function FrequencyDrill({ onBack }: { onBack: () => void }) {
-  const [round, setRound] = useState(0)
-  const [correct, setCorrect] = useState(0)
-  const [target, setTarget] = useState<EarLabBand | null>(null)
-  const [feedback, setFeedback] = useState<'idle' | 'correct' | 'wrong'>('idle')
-  const [picked, setPicked] = useState<EarLabBand | null>(null)
-  const [finished, setFinished] = useState(false)
-
-  const startRound = useCallback(() => {
-    setTarget(pickRandomBand())
-    setFeedback('idle')
-    setPicked(null)
-  }, [])
-
-  const startSession = useCallback(() => {
-    setRound(1)
-    setCorrect(0)
-    setFinished(false)
-    startRound()
-  }, [startRound])
-
-  if (round === 0) {
-    return (
-      <div className="academy-ear-drill">
-        <button type="button" className="academy-ear-back" onClick={onBack}>
-          ← All drills
-        </button>
-        <p className="academy-ear-lab-intro">Guess Low / Mid / High after each tone.</p>
-        <button type="button" className="ios-btn ios-btn-metal" onClick={startSession}>
-          Start frequency drill
-        </button>
-      </div>
-    )
-  }
-
-  if (finished) {
-    return <DrillResult mode="frequency" correct={correct} onRetry={startSession} />
-  }
-
-  return (
-    <div className="academy-ear-drill">
-      <div className="academy-ear-lab-head">
-        <span>
-          Round {round}/{EAR_LAB_TOTAL_ROUNDS}
-        </span>
-        <span>Score {correct}</span>
-      </div>
-      <button type="button" className="ios-btn ios-btn-metal academy-ear-play" onClick={() => target && playTone(getBandHz(target))}>
-        Play tone
-      </button>
-      <p className="academy-ear-prompt">Which band?</p>
-      <div className="academy-ear-guess-grid">
-        {EAR_LAB_BANDS.map((b) => (
-          <button
-            key={b.id}
-            type="button"
-            className={clsx(
-              'academy-ear-guess',
-              picked === b.id && feedback === 'correct' && 'academy-ear-guess-correct',
-              picked === b.id && feedback === 'wrong' && 'academy-ear-guess-wrong'
-            )}
-            disabled={feedback !== 'idle'}
-            onClick={() => {
-              if (!target || feedback !== 'idle') return
-              setPicked(b.id)
-              const ok = b.id === target
-              setFeedback(ok ? 'correct' : 'wrong')
-              const next = ok ? correct + 1 : correct
-              if (ok) setCorrect(next)
-              window.setTimeout(() => {
-                if (round >= EAR_LAB_TOTAL_ROUNDS) {
-                  saveEarLabScore('frequency', next)
-                  setFinished(true)
-                  return
-                }
-                setRound((r) => r + 1)
-                startRound()
-              }, 1200)
-            }}
-          >
-            {b.label}
-            <span>{b.hz} Hz</span>
-          </button>
-        ))}
       </div>
     </div>
   )
@@ -340,7 +247,7 @@ export function EarTrainingLab() {
   const [activeMode, setActiveMode] = useState<EarLabMode | null>(null)
 
   if (activeMode === 'frequency') {
-    return <FrequencyDrill onBack={() => setActiveMode(null)} />
+    return <EarFrequencyGame onBack={() => setActiveMode(null)} />
   }
   if (activeMode === 'level') {
     return <LevelDrill onBack={() => setActiveMode(null)} />

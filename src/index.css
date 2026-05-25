@@ -8183,6 +8183,379 @@ html[data-perf='lite'] .metal-loader-core-beat {
   color: var(--color-muted);
 }
 
+/* EQ frequency spectrum game (Ear Lab) */
+.ear-freq-game {
+  --ear-freq-bg: #0a0a0a;
+  --ear-freq-band: #1a1a1a;
+  --ear-freq-band-alt: #141414;
+  --ear-freq-line: rgba(255, 255, 255, 0.35);
+  --ear-freq-accent: #3ecf6e;
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--ear-freq-bg);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ear-freq-game-idle,
+.ear-freq-game-end {
+  padding: 1.25rem 1rem 1.5rem;
+}
+
+.ear-freq-game-tagline {
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+}
+
+.ear-freq-game-start {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem;
+  background: #fff;
+  color: #0a0a0a;
+  border: none;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ear-freq-game-start:hover {
+  background: #e8e8e8;
+}
+
+.ear-freq-game-hud {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: end;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #111;
+}
+
+.ear-freq-game-hud-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ear-freq-game-hud-center {
+  align-items: center;
+  text-align: center;
+}
+
+.ear-freq-game-hud-right {
+  align-items: flex-end;
+}
+
+.ear-freq-game-hud-label {
+  font-size: 0.5625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.ear-freq-game-hud-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.ear-freq-game-lives {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.ear-freq-game-life {
+  width: 14px;
+  height: 14px;
+  border-radius: 50% 50% 40% 40%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ear-freq-game-life-on {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: #fff;
+}
+
+.ear-freq-game-stage {
+  position: relative;
+  min-height: 220px;
+  padding: 0.5rem 0 0;
+}
+
+.ear-freq-game-spectrum-wrap {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ear-freq-game-spectrum {
+  display: flex;
+  min-width: min(100%, 720px);
+  width: 100%;
+  height: 140px;
+  margin: 0 auto;
+}
+
+.ear-freq-game-band {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  background: var(--ear-freq-band);
+  transition: background 0.15s ease;
+}
+
+.ear-freq-game-band-alt {
+  background: var(--ear-freq-band-alt);
+}
+
+.ear-freq-game-band:hover:not(:disabled) {
+  background: #252525;
+}
+
+.ear-freq-game-band-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+  background: var(--ear-freq-line);
+  transform: translateX(-50%);
+}
+
+.ear-freq-game-band-tick {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  transform: translateX(-50%);
+}
+
+.ear-freq-game-band-target {
+  background: rgba(62, 207, 110, 0.2) !important;
+}
+
+.ear-freq-game-band-correct {
+  box-shadow: inset 0 0 0 2px var(--ear-freq-accent);
+}
+
+.ear-freq-game-band-wrong {
+  box-shadow: inset 0 0 0 2px var(--color-mh-red);
+}
+
+.ear-freq-game-band-locked {
+  cursor: default;
+}
+
+.ear-freq-game-labels {
+  display: flex;
+  min-width: min(100%, 720px);
+  width: 100%;
+  padding: 0.25rem 0 0.5rem;
+  pointer-events: none;
+}
+
+.ear-freq-game-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.5rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ear-freq-game-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.ear-freq-game-target-hz {
+  margin: 0;
+  font-size: clamp(2rem, 8vw, 3.25rem);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.8);
+}
+
+.ear-freq-game-target-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ear-freq-game-flash {
+  margin: 0.5rem 0 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ear-freq-game-flash-ok {
+  color: var(--ear-freq-accent);
+}
+
+.ear-freq-game-flash-bad {
+  color: var(--color-mh-red);
+}
+
+.ear-freq-game-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0d0d0d;
+}
+
+.ear-freq-game-eq-toggle {
+  display: flex;
+  flex: 1;
+  max-width: 280px;
+  margin: 0 auto;
+  gap: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ear-freq-game-eq-btn {
+  flex: 1;
+  position: relative;
+  padding: 0.65rem 0.5rem;
+  border: none;
+  background: #1c1c1c;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ear-freq-game-eq-active {
+  background: #2a2a2a;
+  color: #fff;
+  box-shadow: inset 0 -2px 0 #fff;
+}
+
+.ear-freq-game-eq-dot {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ear-freq-accent);
+}
+
+.ear-freq-game-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.ear-freq-game-icon-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.ear-freq-game-icon-muted {
+  opacity: 0.4;
+}
+
+.ear-freq-game-icon-group {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.ear-freq-game-exit {
+  margin: 0 1rem 1rem;
+}
+
+.ear-freq-game-end-kicker {
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0 0 0.5rem;
+}
+
+.ear-freq-game-end-score {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: #fff;
+}
+
+.ear-freq-game-end-msg {
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+  margin: 0 0 1.25rem;
+}
+
+.ear-freq-game-end-pass {
+  color: var(--ear-freq-accent);
+}
+
+.ear-freq-game-end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .ear-freq-game-label {
+    font-size: 0.5625rem;
+  }
+
+  .ear-freq-game-stage {
+    min-height: 260px;
+  }
+
+  .ear-freq-game-spectrum {
+    height: 160px;
+  }
+}
+
 @media print {
   .no-print {
     display: none !important;

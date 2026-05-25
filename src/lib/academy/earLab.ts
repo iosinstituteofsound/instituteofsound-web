@@ -7,8 +7,8 @@ export const EAR_LAB_PASS_SCORE = 7
 export const EAR_LAB_MODES: { id: EarLabMode; label: string; description: string }[] = [
   {
     id: 'frequency',
-    label: 'Frequency bands',
-    description: 'Hear a tone — guess Low, Mid, or High.',
+    label: 'EQ frequency game',
+    description: 'EQ on/off · pick the boosted band on the spectrum · 5 stages, 3 lives.',
   },
   {
     id: 'level',
