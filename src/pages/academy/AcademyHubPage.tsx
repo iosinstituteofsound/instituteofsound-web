@@ -9,6 +9,7 @@ import {
   getLessonsForTrack,
 } from '@/lib/academy/registry'
 import { getEarnedCertificateCount } from '@/lib/academy/certificates'
+import { AcademyHubContinue, AcademyHubSearch } from '@/components/academy/AcademyHubControls'
 import { AcademySyncBanner } from '@/components/academy/AcademySyncBanner'
 import { useAcademyProgress } from '@/hooks/useAcademyProgress'
 
@@ -84,6 +85,11 @@ export default function AcademyHubPage() {
         />
 
         <AcademySyncBanner />
+
+        <div className="academy-hub-controls">
+          <AcademyHubContinue />
+          <AcademyHubSearch />
+        </div>
 
         <div className="academy-stats-row">
           {ACADEMY_HUB_STATS.map((s) => (

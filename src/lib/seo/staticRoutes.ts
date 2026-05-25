@@ -117,6 +117,39 @@ const PUBLIC_PAGES: Record<string, SeoConfig> = {
       ]),
     }
   ),
+  '/about': page(
+    '/about',
+    'About',
+    'Institute of Sound — underground music magazine, artist archive, free production academy, and studio toolkit.',
+    {
+      jsonLd: breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'About', path: '/about' },
+      ]),
+    }
+  ),
+  '/contact': page(
+    '/contact',
+    'Contact',
+    'Contact Institute of Sound — artists, editors, students, and partners.',
+    {
+      jsonLd: breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Contact', path: '/contact' },
+      ]),
+    }
+  ),
+  '/privacy': page(
+    '/privacy',
+    'Privacy Policy',
+    'How Institute of Sound collects and uses data for accounts, academy progress, and editorial workflows.',
+    {
+      jsonLd: breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Privacy', path: '/privacy' },
+      ]),
+    }
+  ),
   '/tools': page(
     '/tools',
     'Studio Toolkit',

@@ -12,6 +12,9 @@ const FeaturesPage = lazy(() => import('@/pages/FeaturesPage'))
 const CommunityPage = lazy(() => import('@/pages/CommunityPage'))
 const SubmissionsPage = lazy(() => import('@/pages/SubmissionsPage'))
 const ArchivePage = lazy(() => import('@/pages/ArchivePage'))
+const AboutPage = lazy(() => import('@/pages/AboutPage'))
+const ContactPage = lazy(() => import('@/pages/ContactPage'))
+const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'))
 const ArtistDetailPage = lazy(() => import('@/pages/ArtistDetailPage'))
 const PlaylistDetailPage = lazy(() => import('@/pages/PlaylistDetailPage'))
 const FeatureDetailPage = lazy(() => import('@/pages/FeatureDetailPage'))
@@ -101,6 +104,9 @@ export default function App() {
             <Route path="tools/subgenre-tags" element={<SubgenreTagsToolPage />} />
             <Route path="tools/export-checklist" element={<ExportChecklistToolPage />} />
             <Route path="archive" element={<ArchivePage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="privacy" element={<PrivacyPage />} />
             <Route path="artist/:slug" element={<ArtistDetailPage />} />
             <Route path="playlist/:slug" element={<PlaylistDetailPage />} />
             <Route path="feature/:slug" element={<FeatureDetailPage />} />

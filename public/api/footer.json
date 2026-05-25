@@ -1,11 +1,11 @@
 {
   "manifesto": "We are not a blog. We are the future headquarters of underground music culture.",
   "socials": [
-    { "label": "Instagram", "href": "#" },
-    { "label": "Twitter / X", "href": "#" },
+    { "label": "Instagram", "href": "https://www.instagram.com/instituteofsound_/" },
+    { "label": "Email", "href": "mailto:iosinstituteofsound@gmail.com" },
+    { "label": "YouTube", "href": "#" },
     { "label": "Discord", "href": "#" },
-    { "label": "Spotify", "href": "#" },
-    { "label": "YouTube", "href": "#" }
+    { "label": "Spotify", "href": "#" }
   ],
   "explore": [
     { "label": "Discover Artists", "href": "/discover" },
@@ -23,11 +23,13 @@
     { "label": "Loudness Meter", "href": "/tools/loudness" }
   ],
   "archive": [
+    { "label": "About", "href": "/about" },
+    { "label": "Contact", "href": "/contact" },
+    { "label": "Privacy", "href": "/privacy" },
     { "label": "Manifesto", "href": "/archive" },
     { "label": "All Playlists", "href": "/playlists" },
     { "label": "Submit Work", "href": "/submissions" },
-    { "label": "Join as Editor", "href": "/editor/join" },
-    { "label": "Contact", "href": "#" }
+    { "label": "Join as Editor", "href": "/editor/join" }
   ],
   "newsletter": {
     "placeholder": "Enter your frequency...",
