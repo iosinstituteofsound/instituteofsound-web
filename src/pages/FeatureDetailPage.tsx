@@ -6,7 +6,10 @@ import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { RichTextContent } from '@/components/editor/RichTextContent'
 import { EditorByline } from '@/components/editor/EditorByline'
-import { EditorialMediaBlock } from '@/components/editorial/EditorialMediaBlock'
+import {
+  EditorialMediaBlock,
+  hasEditorialMedia,
+} from '@/components/editorial/EditorialMediaBlock'
 import { EditorialRelatedLinks } from '@/components/seo/EditorialRelatedLinks'
 import { useSeo } from '@/hooks/useSeo'
 import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonLd'
@@ -60,60 +63,100 @@ export default function FeatureDetailPage() {
   }
 
   const hasBody = feature.body?.trim().length > 0
+  const showSidebar = hasEditorialMedia(
+    feature.spotifyUrl,
+    feature.youtubeUrl,
+    feature.galleryImageUrls
+  )
 
   return (
-    <article className="pt-20">
-      <div className="relative h-[50vh] overflow-hidden">
+    <article className="editorial-article">
+      <header className="editorial-article-hero">
         <IOSImage
           src={feature.image}
-          alt={feature.title}
-          width={1400}
-          height={788}
+          alt=""
+          width={1600}
+          height={900}
           priority
-          className="w-full h-full object-cover"
+          className="editorial-article-hero-img"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-void to-transparent" />
-      </div>
-      <div className="section-padding max-w-3xl mx-auto">
-        <span className="text-[10px] tracking-[0.3em] text-neon uppercase">
-          {feature.category}
-        </span>
-        <h1 className="font-display text-4xl md:text-6xl font-bold mt-4">
-          {feature.title}
-        </h1>
-        {feature.subject && (
-          <p className="text-lg text-rs-red font-serif italic mt-3">{feature.subject}</p>
-        )}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-4 text-sm text-muted">
-          <EditorByline
-            name={feature.authorName}
-            username={feature.authorUsername}
-            fallback={feature.author}
-          />
-          <span aria-hidden>·</span>
-          <span>{feature.readTime}</span>
-        </div>
-        <p className="text-lg text-muted mt-8 leading-relaxed">{feature.excerpt}</p>
-        <div className="mt-12 border-t border-border pt-10">
-          {hasBody ? (
-            <RichTextContent html={feature.body} className="ios-prose-feature" />
-          ) : (
-            <p className="text-muted text-sm leading-relaxed">
-              Full article text is not available for this entry yet.
-            </p>
+        <div className="editorial-article-hero-scrim" aria-hidden />
+        <div className="editorial-article-hero-inner section-padding">
+          <Link to="/features" className="editorial-article-back">
+            ← Editorial
+          </Link>
+          <span className="editorial-article-category">{feature.category}</span>
+          <h1 className="editorial-article-title">{feature.title}</h1>
+          {feature.subject && (
+            <p className="editorial-article-dek">{feature.subject}</p>
           )}
-          <EditorialMediaBlock
-            spotifyUrl={feature.spotifyUrl}
-            youtubeUrl={feature.youtubeUrl}
-            galleryImageUrls={feature.galleryImageUrls}
-          />
+          <div className="editorial-article-meta">
+            <EditorByline
+              name={feature.authorName}
+              username={feature.authorUsername}
+              fallback={feature.author}
+            />
+            <span aria-hidden>·</span>
+            <span>{feature.readTime}</span>
+          </div>
         </div>
-        {allFeatures && slug && (
-          <EditorialRelatedLinks
-            currentSlug={slug}
-            items={allFeatures.map((f) => ({ slug: f.slug, title: f.title }))}
-          />
-        )}
+      </header>
+
+      <div className="editorial-article-body section-padding">
+        <div className="editorial-article-container">
+          <p className="editorial-article-lead">{feature.excerpt}</p>
+
+          <div
+            className={
+              showSidebar
+                ? 'editorial-article-columns'
+                : 'editorial-article-columns editorial-article-columns--solo'
+            }
+          >
+            <div className="editorial-article-main">
+              {showSidebar && (
+                <div className="editorial-article-aside-mobile">
+                  <EditorialMediaBlock
+                    layout="sidebar"
+                    spotifyUrl={feature.spotifyUrl}
+                    youtubeUrl={feature.youtubeUrl}
+                    galleryImageUrls={feature.galleryImageUrls}
+                  />
+                </div>
+              )}
+
+              <div className="editorial-article-prose-wrap">
+                {hasBody ? (
+                  <RichTextContent html={feature.body} className="ios-prose-feature" />
+                ) : (
+                  <p className="text-muted text-sm leading-relaxed">
+                    Full article text is not available for this entry yet.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {showSidebar && (
+              <div className="editorial-article-aside">
+                <div className="editorial-article-aside-sticky">
+                  <EditorialMediaBlock
+                    layout="sidebar"
+                    spotifyUrl={feature.spotifyUrl}
+                    youtubeUrl={feature.youtubeUrl}
+                    galleryImageUrls={feature.galleryImageUrls}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {allFeatures && slug && (
+            <EditorialRelatedLinks
+              currentSlug={slug}
+              items={allFeatures.map((f) => ({ slug: f.slug, title: f.title }))}
+            />
+          )}
+        </div>
       </div>
     </article>
   )
