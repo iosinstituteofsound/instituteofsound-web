@@ -3,6 +3,7 @@ import {
   getHomepageCoverStory,
   getPublishedFeatureBySlug,
   mergeFeaturesWithPublished,
+  mergeReviewsWithPublished,
 } from '@/lib/editorial/published'
 import type {
   AlbumRelease,
@@ -28,7 +29,10 @@ export const getCoverStory = async (): Promise<CoverStory> => {
   return fetchApi<CoverStory>('/cover-story.json')
 }
 export const getTrending = () => fetchApi<TrendingItem[]>('/trending.json')
-export const getReviews = () => fetchApi<Review[]>('/reviews.json')
+export const getReviews = async (): Promise<Review[]> => {
+  const staticReviews = await fetchApi<Review[]>('/reviews.json')
+  return mergeReviewsWithPublished(staticReviews)
+}
 export const getAlbumReleases = () => fetchApi<AlbumRelease[]>('/album-releases.json')
 export const getNav = () => fetchApi<NavLink[]>('/nav.json')
 export const getArtists = () => fetchApi<Artist[]>('/artists.json')

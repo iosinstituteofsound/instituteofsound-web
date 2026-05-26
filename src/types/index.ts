@@ -45,13 +45,16 @@ export interface Review {
   artistSlug: string
   album: string
   artist: string
-  score: number
-  maxScore: number
+  /** Omitted for desk-published reviews until scores are stored on editorials */
+  score?: number
+  maxScore?: number
   verdict: string
   excerpt: string
   cover: string
   genre: string
   reviewer: string
+  /** Full write-up at /feature/:featureSlug when published from the editorial desk */
+  featureSlug?: string
 }
 
 export interface AlbumRelease {

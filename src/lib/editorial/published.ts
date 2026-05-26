@@ -6,7 +6,8 @@ import { EDITORIAL_TYPE_CATEGORY } from '@/lib/editorial/labels'
 import { editorialExcerpt } from '@/lib/editorial/richText'
 import { formatEditorByline, type EditorBylineSource } from '@/lib/editorial/editorByline'
 import { ensureUniqueSlug, slugifyArtistName } from '@/lib/artist-profile/slug'
-import type { CoverStory, Feature } from '@/types'
+import { editorialTypeLabel, isEditorialReviewType } from '@/lib/editorial/labels'
+import type { CoverStory, Feature, Review } from '@/types'
 
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80'
@@ -85,6 +86,24 @@ function enrichWithLiveEditor(
     editorName,
     authorName,
     authorUsername,
+  }
+}
+
+export function draftToReview(
+  d: PublishedEditorial & { authorName?: string; authorUsername?: string }
+): Review {
+  return {
+    id: d.id,
+    slug: d.slug,
+    featureSlug: d.slug,
+    artistSlug: slugifyArtistName(d.subject || d.title),
+    album: d.title,
+    artist: d.subject || d.title,
+    verdict: editorialTypeLabel(d.type).replace(' Review', ''),
+    excerpt: editorialExcerpt(d.body, 220),
+    cover: d.coverImageUrl?.trim() || FALLBACK_IMAGE,
+    genre: EDITORIAL_TYPE_CATEGORY[d.type],
+    reviewer: d.authorName ?? d.editorName,
   }
 }
 
@@ -184,16 +203,34 @@ export async function listPublishedEditorials(): Promise<PublishedEditorial[]> {
 
 export async function listHomepageFeatures(): Promise<Feature[]> {
   const published = await listPublishedEditorials()
-  const homepage = published.filter((d) => d.featuredOnHomepage)
+  const homepage = published.filter(
+    (d) => d.featuredOnHomepage && !isEditorialReviewType(d.type)
+  )
   return homepage.map(draftToFeature)
+}
+
+export async function listPublishedReviews(): Promise<Review[]> {
+  const published = await listPublishedEditorials()
+  return published.filter((d) => isEditorialReviewType(d.type)).map(draftToReview)
+}
+
+export async function mergeReviewsWithPublished(staticReviews: Review[]): Promise<Review[]> {
+  const live = await listPublishedReviews()
+  if (live.length === 0) return staticReviews
+  const liveSlugs = new Set(live.map((r) => r.slug))
+  const rest = staticReviews.filter((r) => !liveSlugs.has(r.slug))
+  return [...live, ...rest]
 }
 
 export async function getHomepageCoverStory(): Promise<CoverStory | null> {
   const published = await listPublishedEditorials()
+  const editorialLead = (d: PublishedEditorial) =>
+    d.featuredOnHomepage && !isEditorialReviewType(d.type)
   const lead =
     published.find((d) => d.featuredOnHomepage && d.type === 'feature') ??
-    published.find((d) => d.featuredOnHomepage) ??
+    published.find(editorialLead) ??
     published.find((d) => d.type === 'feature') ??
+    published.find((d) => !isEditorialReviewType(d.type)) ??
     published[0]
   return lead ? draftToCoverStory(lead) : null
 }

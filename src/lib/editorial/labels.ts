@@ -19,3 +19,7 @@ export const EDITORIAL_TYPE_CATEGORY: Record<EditorialDraft['type'], string> = {
 export function editorialTypeLabel(type: EditorialDraft['type']): string {
   return EDITORIAL_TYPE_OPTIONS.find((o) => o.value === type)?.label ?? type.replace('_', ' ')
 }
+
+export function isEditorialReviewType(type: EditorialDraft['type']): boolean {
+  return type === 'review' || type === 'single' || type === 'ep'
+}

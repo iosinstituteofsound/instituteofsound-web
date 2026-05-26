@@ -12,9 +12,9 @@ export function ReviewsBlock({ reviews }: ReviewsBlockProps) {
       <div className="max-w-7xl mx-auto">
         <MagazineSectionHeading
           variant="metal-hammer"
-          kicker="Album Reviews"
+          kicker="Reviews"
           title="The Hammer Verdict"
-          subtitle="Scores, verdicts, and honest takes on the records shaping the underground."
+          subtitle="Albums, singles, and EPs — scores and honest takes from the editorial desk."
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
