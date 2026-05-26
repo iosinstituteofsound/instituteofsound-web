@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { pullAndMergeAcademyProgress } from '@/lib/academy/cloudProgress'
 import { notifyProgressChange, setAcademySyncUserId } from '@/lib/academy/progress'
+import { setCommunityUserId } from '@/lib/community/academyHooks'
 import { isSupabaseConfigured } from '@/lib/supabase/client'
 
 export function AcademyProgressSync() {
@@ -12,10 +13,12 @@ export function AcademyProgressSync() {
 
     if (!user?.id || !isSupabaseConfigured()) {
       setAcademySyncUserId(null)
+      setCommunityUserId(null)
       return
     }
 
     setAcademySyncUserId(user.id)
+    setCommunityUserId(user.id)
     let cancelled = false
 
     pullAndMergeAcademyProgress(user.id, user.name)
@@ -27,6 +30,7 @@ export function AcademyProgressSync() {
     return () => {
       cancelled = true
       setAcademySyncUserId(null)
+      setCommunityUserId(null)
     }
   }, [user?.id, user?.name, loading])
 

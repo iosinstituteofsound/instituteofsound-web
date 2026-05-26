@@ -43,6 +43,7 @@ export function isLessonComplete(lessonId: string): boolean {
 }
 
 export function toggleLessonComplete(lessonId: string): boolean {
+  const wasComplete = isLessonComplete(lessonId)
   const snapshot = patchLocalSnapshot((prev) => {
     const set = new Set(prev.completedLessons)
     if (set.has(lessonId)) set.delete(lessonId)
@@ -50,7 +51,11 @@ export function toggleLessonComplete(lessonId: string): boolean {
     return { ...prev, completedLessons: [...set] }
   })
   afterMutation(snapshot)
-  return snapshot.completedLessons.includes(lessonId)
+  const nowComplete = snapshot.completedLessons.includes(lessonId)
+  if (nowComplete && !wasComplete) {
+    void import('@/lib/community/academyHooks').then((m) => m.awardLessonCompleteDb(lessonId))
+  }
+  return nowComplete
 }
 
 export function trackProgressPercent(trackLessonIds: string[]): number {
@@ -69,13 +74,19 @@ export function getQuizBestScore(quizId: string): number | null {
 }
 
 export function saveQuizScore(quizId: string, percent: number): void {
+  const prevScore = getQuizScores()[quizId]
   const snapshot = patchLocalSnapshot((prev) => {
     const quizScores = { ...prev.quizScores }
-    const prevScore = quizScores[quizId]
-    if (prevScore === undefined || percent > prevScore) quizScores[quizId] = percent
+    const prevBest = quizScores[quizId]
+    if (prevBest === undefined || percent > prevBest) quizScores[quizId] = percent
     return { ...prev, quizScores }
   })
   afterMutation(snapshot)
+  const passedNow = percent >= 70
+  const passedBefore = (prevScore ?? 0) >= 70
+  if (passedNow && !passedBefore) {
+    void import('@/lib/community/academyHooks').then((m) => m.awardQuizPassDb(quizId))
+  }
 }
 
 export function getEarLabScores(): Partial<Record<EarLabMode, number>> {
@@ -93,13 +104,17 @@ export function getEarLabBest(): number {
 
 export function saveEarLabScore(mode: EarLabMode, correct: number): void {
   const score = clampEarScore(correct)
+  const prevBest = getEarLabScore(mode)
   const snapshot = patchLocalSnapshot((prev) => {
     const earLab = { ...prev.earLab }
-    const prevBest = earLab[mode] ?? 0
-    if (score > prevBest) earLab[mode] = score
+    const prevStored = earLab[mode] ?? 0
+    if (score > prevStored) earLab[mode] = score
     return { ...prev, earLab }
   })
   afterMutation(snapshot)
+  if (score >= 7 && prevBest < 7) {
+    void import('@/lib/community/academyHooks').then((m) => m.awardEarLabPassDb(mode, score))
+  }
 }
 
 /** @deprecated use saveEarLabScore('frequency', correct) */

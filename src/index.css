@@ -4759,6 +4759,188 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   COMMUNITY — dB progress + weekly leaderboard
+   ═══════════════════════════════════════════════════════════ */
+
+.community-progress-card {
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1.25rem 1.35rem;
+  background: var(--color-surface);
+}
+
+.community-progress-card--guest {
+  text-align: center;
+}
+
+.community-progress-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.community-progress-card-rank {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0.25rem 0 0;
+}
+
+.community-progress-card-db {
+  text-align: right;
+}
+
+.community-progress-card-db-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.community-progress-card-db-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.community-progress-card-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-border);
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.community-progress-card-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+  transition: width 0.4s ease;
+}
+
+.community-progress-card-meta {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.community-progress-card-week {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.community-progress-card-week strong {
+  color: var(--color-text);
+}
+
+.community-leaderboard {
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.community-leaderboard-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.community-leaderboard-head h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.community-leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.community-leaderboard-row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+
+.community-leaderboard-row:last-child {
+  border-bottom: none;
+}
+
+.community-leaderboard-row--you {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.community-leaderboard-rank {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.community-leaderboard-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.community-leaderboard-db {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-accent);
+}
+
+.community-leaderboard-empty,
+.community-leaderboard-loading {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.community-rank-ladder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.community-rank-chip {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.community-rank-chip--active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ═══════════════════════════════════════════════════════════
    IOS CREATOR TOOLKIT — infographic / workstation UI
    ═══════════════════════════════════════════════════════════ */
 

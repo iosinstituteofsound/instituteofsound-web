@@ -5,6 +5,8 @@ import {
   mergeFeaturesWithPublished,
   mergeReviewsWithPublished,
 } from '@/lib/editorial/published'
+import { rankInfoList } from '@/lib/community/ranks'
+import { fetchWeeklyLeaderboard } from '@/lib/community/service'
 import type {
   AlbumRelease,
   Artist,
@@ -15,7 +17,6 @@ import type {
   HeroData,
   NavLink,
   Playlist,
-  RankInfo,
   Review,
   Signal,
   SubmissionField,
@@ -63,8 +64,10 @@ export const getFeature = async (slug: string) => {
   if (!feature) throw new Error('Feature not found')
   return { ...feature, body: '', subject: '' }
 }
+export const getRanks = async () => rankInfoList()
+export const getCommunityLeaderboard = (limit = 6) => fetchWeeklyLeaderboard(limit)
+/** @deprecated static demo — use getCommunityLeaderboard */
 export const getCommunity = () => fetchApi<CommunityMember[]>('/community.json')
-export const getRanks = () => fetchApi<RankInfo[]>('/ranks.json')
 export const getFooter = () => fetchApi<FooterData>('/footer.json')
 export const getSubmissionFields = () =>
   fetchApi<SubmissionField[]>('/submission-fields.json')

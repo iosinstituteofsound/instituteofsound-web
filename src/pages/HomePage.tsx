@@ -9,8 +9,6 @@ import {
   getFeatures,
   getPlaylists,
   getSignals,
-  getCommunity,
-  getRanks,
 } from '@/api/endpoints'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { CoverHeroSection } from '@/components/sections/magazine/CoverHeroSection'
@@ -33,8 +31,6 @@ export default function HomePage() {
   const features = useContent(useCallback(() => getFeatures(), []))
   const playlists = useContent(useCallback(() => getPlaylists(), []))
   const signals = useContent(useCallback(() => getSignals(), []))
-  const community = useContent(useCallback(() => getCommunity(), []))
-  const ranks = useContent(useCallback(() => getRanks(), []))
 
   if (cover.loading && !cover.data) {
     return <LoadingTransmission variant="hell" />
@@ -59,9 +55,7 @@ export default function HomePage() {
       {features.data && <EditorialMagazineGrid features={features.data} />}
       {playlists.data && <PlaylistSection playlists={playlists.data} />}
       {signals.data && <SignalsSection signals={signals.data} limit={4} />}
-      {community.data && ranks.data && (
-        <CommunitySection members={community.data} ranks={ranks.data} />
-      )}
+      <CommunitySection />
       <SubmissionSection />
     </>
   )
