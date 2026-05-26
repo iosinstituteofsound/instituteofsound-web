@@ -33,8 +33,9 @@ export function EditorialPhotoSlider({ images, className }: EditorialPhotoSlider
           <IOSImage
             src={images[0]!}
             alt="Artist photo"
-            width={640}
-            height={640}
+            width={800}
+            height={1000}
+            crop="fit"
             className="editorial-photo-slider-img"
           />
         </figure>
@@ -65,8 +66,9 @@ export function EditorialPhotoSlider({ images, className }: EditorialPhotoSlider
               <IOSImage
                 src={src}
                 alt={`Artist photo ${i + 1} of ${count}`}
-                width={640}
-                height={640}
+                width={800}
+                height={1000}
+                crop="fit"
                 className="editorial-photo-slider-img"
               />
             </figure>
