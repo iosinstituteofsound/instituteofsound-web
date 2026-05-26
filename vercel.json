@@ -11,6 +11,9 @@
     },
     "api/share/artist.ts": {
       "maxDuration": 10
+    },
+    "api/share/feature.ts": {
+      "maxDuration": 10
     }
   },
   "rewrites": [

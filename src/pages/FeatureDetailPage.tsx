@@ -10,10 +10,12 @@ import {
   EditorialMediaBlock,
   hasEditorialMedia,
 } from '@/components/editorial/EditorialMediaBlock'
+import { EditorialShareBar } from '@/components/editorial/EditorialShareBar'
 import { EditorialRelatedLinks } from '@/components/seo/EditorialRelatedLinks'
 import { useSeo } from '@/hooks/useSeo'
+import { getSiteUrl } from '@/lib/auth/siteUrl'
 import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonLd'
-import { SITE_NAME } from '@/lib/seo/urls'
+import { buildEditorialShareMeta } from '@/lib/share/editorialShareMeta'
 
 export default function FeatureDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -21,32 +23,44 @@ export default function FeatureDetailPage() {
   const { data: feature, loading, error } = useContent(fetcher)
   const { data: allFeatures } = useContent(useCallback(() => getFeatures(), []))
 
-  const seo = useMemo(() => {
+  const shareMeta = useMemo(() => {
     if (!slug || !feature) return null
+    return buildEditorialShareMeta(getSiteUrl(), {
+      slug,
+      title: feature.title,
+      excerpt: feature.excerpt,
+      image: feature.image,
+      subject: feature.subject,
+    })
+  }, [slug, feature])
+
+  const seo = useMemo(() => {
+    if (!shareMeta || !slug) return null
     const path = `/feature/${slug}`
     return {
-      title: `${feature.title} | ${SITE_NAME}`,
-      description: feature.excerpt,
+      title: shareMeta.title,
+      description: shareMeta.description,
       canonicalPath: path,
-      ogImage: feature.image,
+      ogImage: shareMeta.ogImageUrl,
+      ogImageAlt: feature?.title,
       ogType: 'article' as const,
       jsonLd: [
         breadcrumbJsonLd([
           { name: 'Home', path: '/' },
           { name: 'Features', path: '/features' },
-          { name: feature.title, path },
+          { name: feature!.title, path },
         ]),
         articleJsonLd({
-          headline: feature.title,
-          description: feature.excerpt,
+          headline: feature!.title,
+          description: shareMeta.description,
           path,
-          image: feature.image,
-          author: feature.authorName ?? feature.author,
-          section: feature.category,
+          image: shareMeta.ogImageUrl,
+          author: feature!.authorName ?? feature!.author,
+          section: feature!.category,
         }),
       ],
     }
-  }, [slug, feature])
+  }, [shareMeta, slug, feature])
 
   useSeo(seo)
 
@@ -105,6 +119,14 @@ export default function FeatureDetailPage() {
       <div className="editorial-article-body section-padding">
         <div className="editorial-article-container">
           <p className="editorial-article-lead">{feature.excerpt}</p>
+
+          {shareMeta && (
+            <EditorialShareBar
+              url={shareMeta.canonicalUrl}
+              title={shareMeta.shareTitle}
+              description={shareMeta.description}
+            />
+          )}
 
           <div
             className={

@@ -7,6 +7,7 @@ export interface SeoConfig {
   /** Site path, e.g. /discover */
   canonicalPath: string
   ogImage?: string
+  ogImageAlt?: string
   ogType?: 'website' | 'article'
   robots?: 'index, follow' | 'noindex, nofollow'
   jsonLd?: JsonLd | JsonLd[]

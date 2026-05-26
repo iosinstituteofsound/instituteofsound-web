@@ -4335,9 +4335,110 @@ html[data-perf='lite'] .metal-loader-core-beat {
   line-height: 1.75;
   color: var(--color-muted);
   max-width: 42rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.editorial-share-bar {
+  max-width: 42rem;
+  margin-bottom: 2rem;
   padding-bottom: 2rem;
   border-bottom: 1px solid var(--color-border);
+}
+
+.editorial-share-bar-label {
+  margin: 0 0 0.75rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.editorial-share-bar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.editorial-share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.editorial-share-btn:hover {
+  border-color: var(--color-rs-red);
+  color: #fff;
+  background: rgba(212, 0, 0, 0.12);
+}
+
+.editorial-share-btn--copy {
+  padding-right: 0.9rem;
+}
+
+.editorial-share-btn--copy.is-copied {
+  border-color: #1db954;
+  color: #1db954;
+}
+
+.editorial-share-btn--whatsapp:hover {
+  border-color: #25d366;
+  color: #25d366;
+  background: rgba(37, 211, 102, 0.1);
+}
+
+.editorial-share-btn--twitter:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+.editorial-share-btn--facebook:hover {
+  border-color: #1877f2;
+  color: #1877f2;
+  background: rgba(24, 119, 242, 0.1);
+}
+
+.editorial-share-btn--linkedin:hover {
+  border-color: #0a66c2;
+  color: #0a66c2;
+  background: rgba(10, 102, 194, 0.1);
+}
+
+.editorial-share-btn--telegram:hover {
+  border-color: #26a5e4;
+  color: #26a5e4;
+}
+
+.editorial-share-btn-text {
+  font-size: 0.5625rem;
+}
+
+@media (min-width: 640px) {
+  .editorial-share-btn:not(.editorial-share-btn--copy) {
+    width: 2.25rem;
+    padding: 0;
+  }
+
+  .editorial-share-btn:not(.editorial-share-btn--copy) .editorial-share-btn-text {
+    display: none;
+  }
 }
 
 .editorial-article-columns {

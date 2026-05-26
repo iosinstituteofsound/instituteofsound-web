@@ -76,6 +76,11 @@ export function useSeo(config: SeoConfig | null) {
     setMeta('property', 'og:description', description)
     setMeta('property', 'og:url', canonical)
     setMeta('property', 'og:image', ogImage)
+    setMeta('property', 'og:image:secure_url', ogImage)
+    if (config.ogImageAlt) {
+      setMeta('property', 'og:image:alt', config.ogImageAlt)
+      setMeta('name', 'twitter:image:alt', config.ogImageAlt)
+    }
     setMeta('name', 'twitter:card', 'summary_large_image')
     setMeta('name', 'twitter:title', config.title)
     setMeta('name', 'twitter:description', description)

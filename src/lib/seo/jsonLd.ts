@@ -55,7 +55,9 @@ export function articleJsonLd(input: {
     headline: input.headline,
     description: input.description,
     url: pathUrl(input.path),
-    image: input.image ? [input.image] : [defaultOgImage()],
+    image: input.image
+      ? [input.image.startsWith('http') ? input.image : absoluteUrl(input.image)]
+      : [defaultOgImage()],
     author: input.author
       ? { '@type': 'Person', name: input.author }
       : { '@type': 'Organization', name: SITE_NAME },
