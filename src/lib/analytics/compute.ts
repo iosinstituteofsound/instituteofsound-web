@@ -56,11 +56,13 @@ export function computeSuperAdminAnalytics(source: AnalyticsSource): SuperAdminA
 
   const draftsByType: Record<EditorialDraft['type'], number> = {
     review: 0,
+    single: 0,
+    ep: 0,
     feature: 0,
     band_profile: 0,
   }
   for (const d of drafts) {
-    draftsByType[d.type] += 1
+    if (d.type in draftsByType) draftsByType[d.type] += 1
   }
 
   const reviewed = submissions.filter((s) => s.reviewedAt)

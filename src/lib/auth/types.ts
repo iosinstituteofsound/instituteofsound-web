@@ -39,15 +39,25 @@ export interface TrackSubmission {
   updatedAt: string
 }
 
+export type EditorialType =
+  | 'review'
+  | 'single'
+  | 'ep'
+  | 'feature'
+  | 'band_profile'
+
 export interface EditorialDraft {
   id: string
   editorId: string
   editorName: string
-  type: 'review' | 'feature' | 'band_profile'
+  type: EditorialType
   title: string
   subject: string
   body: string
   coverImageUrl?: string
+  spotifyUrl?: string
+  youtubeUrl?: string
+  galleryImageUrls?: string[]
   artistProfileId?: string
   slug?: string
   featuredOnHomepage?: boolean

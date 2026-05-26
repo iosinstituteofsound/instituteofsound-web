@@ -62,7 +62,9 @@ export function SuperAdminAnalyticsPanel({
   ]
 
   const draftStats = [
-    { label: 'Reviews', value: data.draftsByType.review },
+    { label: 'Album Reviews', value: data.draftsByType.review },
+    { label: 'Singles', value: data.draftsByType.single },
+    { label: 'EPs', value: data.draftsByType.ep },
     { label: 'Features', value: data.draftsByType.feature },
     { label: 'Band Profiles', value: data.draftsByType.band_profile },
   ]

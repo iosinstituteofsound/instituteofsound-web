@@ -4223,6 +4223,54 @@ html[data-perf='lite'] .metal-loader-core-beat {
   margin-top: 0;
 }
 
+.editorial-media-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-border);
+  color: var(--color-foreground);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.editorial-media-link:hover {
+  border-color: var(--color-rs-red);
+  color: var(--color-rs-red);
+}
+
+.editorial-media-link-spotify:hover {
+  border-color: #1db954;
+  color: #1db954;
+}
+
+.editorial-media-link-youtube:hover {
+  border-color: #ff0000;
+  color: #ff4444;
+}
+
+.editorial-media-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .editorial-media-gallery {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.editorial-media-gallery-item {
+  margin: 0;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
 /* ═══════════════════════════════════════════════════════════
    IOS CREATOR TOOLKIT — infographic / workstation UI
    ═══════════════════════════════════════════════════════════ */

@@ -100,6 +100,9 @@ export interface Feature {
   /** Live from editor profile (when loaded from Supabase) */
   authorName?: string
   authorUsername?: string
+  spotifyUrl?: string
+  youtubeUrl?: string
+  galleryImageUrls?: string[]
 }
 
 export interface CommunityMember {

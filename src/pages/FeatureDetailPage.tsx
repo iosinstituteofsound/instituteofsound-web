@@ -6,6 +6,7 @@ import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { RichTextContent } from '@/components/editor/RichTextContent'
 import { EditorByline } from '@/components/editor/EditorByline'
+import { EditorialMediaBlock } from '@/components/editorial/EditorialMediaBlock'
 import { EditorialRelatedLinks } from '@/components/seo/EditorialRelatedLinks'
 import { useSeo } from '@/hooks/useSeo'
 import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonLd'
@@ -101,6 +102,11 @@ export default function FeatureDetailPage() {
               Full article text is not available for this entry yet.
             </p>
           )}
+          <EditorialMediaBlock
+            spotifyUrl={feature.spotifyUrl}
+            youtubeUrl={feature.youtubeUrl}
+            galleryImageUrls={feature.galleryImageUrls}
+          />
         </div>
         {allFeatures && slug && (
           <EditorialRelatedLinks

@@ -144,7 +144,7 @@ create table if not exists public.editorial_drafts (
   id uuid primary key default gen_random_uuid(),
   editor_id uuid not null references public.profiles (id) on delete cascade,
   editor_name text not null,
-  type text not null check (type in ('review', 'feature', 'band_profile')),
+  type text not null check (type in ('review', 'single', 'ep', 'feature', 'band_profile')),
   title text not null,
   subject text not null,
   body text not null,

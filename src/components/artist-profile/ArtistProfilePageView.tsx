@@ -12,6 +12,7 @@ import { ArtistSiteHero } from './ArtistSiteHero'
 import { ArtistSiteStickyNav, type ArtistSiteNavItem } from './ArtistSiteStickyNav'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import { EditorByline } from '@/components/editor/EditorByline'
+import { editorialTypeLabel } from '@/lib/editorial/labels'
 import { artistBrandingStyle, artistSiteThemeClass } from '@/lib/artist-profile/branding'
 
 interface ArtistProfilePageViewProps {
@@ -146,7 +147,7 @@ export function ArtistProfilePageView({ data, isOwner, viewerUserId }: ArtistPro
                     <CoverArt src={item.coverImageUrl} alt={item.title} size="lg" />
                   </div>
                   <div className="artist-site-press-copy">
-                    <MetalBadge variant="crimson">{item.type.replace('_', ' ')}</MetalBadge>
+                    <MetalBadge variant="crimson">{editorialTypeLabel(item.type)}</MetalBadge>
                     <h3>{item.title}</h3>
                     <p>{item.excerpt}</p>
                     <p className="artist-site-press-byline">

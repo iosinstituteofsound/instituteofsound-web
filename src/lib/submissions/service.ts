@@ -36,6 +36,9 @@ export interface CreateDraftInput {
   subject: string
   body: string
   coverImageUrl?: string
+  spotifyUrl?: string
+  youtubeUrl?: string
+  galleryImageUrls?: string[]
   artistProfileId?: string
   /** When true, article appears on homepage after publish (default: true for features) */
   featuredOnHomepage?: boolean
@@ -143,6 +146,9 @@ export async function createEditorialDraft(
     subject: input.subject,
     body: input.body,
     coverImageUrl: input.coverImageUrl,
+    spotifyUrl: input.spotifyUrl?.trim() || undefined,
+    youtubeUrl: input.youtubeUrl?.trim() || undefined,
+    galleryImageUrls: input.galleryImageUrls?.filter(Boolean),
     artistProfileId: input.artistProfileId,
     slug: slugifyArtistName(input.title),
     featuredOnHomepage,

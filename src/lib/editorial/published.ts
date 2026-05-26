@@ -2,6 +2,7 @@ import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { mapDraft, type DraftRow } from '@/lib/supabase/mappers'
 import { getDrafts, getUsers } from '@/lib/auth/storage'
 import type { EditorialDraft } from '@/lib/auth/types'
+import { EDITORIAL_TYPE_CATEGORY } from '@/lib/editorial/labels'
 import { editorialExcerpt } from '@/lib/editorial/richText'
 import { formatEditorByline, type EditorBylineSource } from '@/lib/editorial/editorByline'
 import { ensureUniqueSlug, slugifyArtistName } from '@/lib/artist-profile/slug'
@@ -9,12 +10,6 @@ import type { CoverStory, Feature } from '@/types'
 
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80'
-
-const TYPE_CATEGORY: Record<EditorialDraft['type'], string> = {
-  feature: 'FEATURE',
-  review: 'REVIEW',
-  band_profile: 'PROFILE',
-}
 
 export type PublishedEditorial = EditorialDraft & {
   slug: string
@@ -106,7 +101,7 @@ export function draftToFeature(
     authorUsername: d.authorUsername,
     readTime: estimateReadTime(d.body),
     image: d.coverImageUrl?.trim() || FALLBACK_IMAGE,
-    category: TYPE_CATEGORY[d.type],
+    category: EDITORIAL_TYPE_CATEGORY[d.type],
   }
 }
 
@@ -132,6 +127,9 @@ export function draftToCoverStory(
 export type FeatureArticle = Feature & {
   body: string
   subject: string
+  spotifyUrl?: string
+  youtubeUrl?: string
+  galleryImageUrls?: string[]
 }
 
 export function draftToFeatureArticle(
@@ -141,6 +139,9 @@ export function draftToFeatureArticle(
     ...draftToFeature(d),
     body: d.body,
     subject: d.subject,
+    spotifyUrl: d.spotifyUrl,
+    youtubeUrl: d.youtubeUrl,
+    galleryImageUrls: d.galleryImageUrls,
   }
 }
 

@@ -40,6 +40,9 @@ export interface DraftRow {
   subject: string
   body: string
   cover_image_url: string | null
+  spotify_url: string | null
+  youtube_url: string | null
+  gallery_image_urls: string[] | null
   artist_profile_id: string | null
   slug: string | null
   featured_on_homepage: boolean | null
@@ -94,6 +97,10 @@ export function mapDraft(row: DraftRow): EditorialDraft {
     subject: row.subject,
     body: row.body,
     coverImageUrl: row.cover_image_url ?? undefined,
+    spotifyUrl: row.spotify_url?.trim() || undefined,
+    youtubeUrl: row.youtube_url?.trim() || undefined,
+    galleryImageUrls:
+      row.gallery_image_urls?.filter((u) => u?.trim()).map((u) => u.trim()) ?? undefined,
     artistProfileId: row.artist_profile_id ?? undefined,
     slug: row.slug ?? undefined,
     featuredOnHomepage: row.featured_on_homepage ?? undefined,

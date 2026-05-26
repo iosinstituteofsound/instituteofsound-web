@@ -1,3 +1,4 @@
+import type { EditorialType } from '@/lib/auth/types'
 import type { ArtistThemePreset } from './branding'
 import type { HeroLayout } from './heroLayout'
 import type { SocialLinkKey } from './socialOrder'
@@ -110,7 +111,7 @@ export interface ArtistMerchItem {
 
 export interface ArtistEditorialFeature {
   id: string
-  type: 'review' | 'feature' | 'band_profile'
+  type: EditorialType
   title: string
   subject: string
   excerpt: string

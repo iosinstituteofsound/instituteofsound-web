@@ -32,6 +32,8 @@ import type {
 import clsx from 'clsx'
 import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import { RichTextContent } from '@/components/editor/RichTextContent'
+import { EditorialGalleryUpload } from '@/components/editor/EditorialGalleryUpload'
+import { EDITORIAL_TYPE_OPTIONS, editorialTypeLabel } from '@/lib/editorial/labels'
 import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richText'
 
 type EditorTab = 'analytics' | 'applications' | 'queue' | 'write' | 'drafts' | 'profile'
@@ -56,6 +58,9 @@ export default function EditorDashboardPage() {
   const [draftSubject, setDraftSubject] = useState('')
   const [draftBody, setDraftBody] = useState('')
   const [draftCoverUrl, setDraftCoverUrl] = useState('')
+  const [draftSpotifyUrl, setDraftSpotifyUrl] = useState('')
+  const [draftYoutubeUrl, setDraftYoutubeUrl] = useState('')
+  const [draftGalleryUrls, setDraftGalleryUrls] = useState<string[]>([])
   const [draftArtistProfileId, setDraftArtistProfileId] = useState('')
   const [draftFeaturedOnHomepage, setDraftFeaturedOnHomepage] = useState(true)
   const [artistProfiles, setArtistProfiles] = useState<ArtistProfile[]>([])
@@ -151,11 +156,17 @@ export default function EditorDashboardPage() {
         subject: draftSubject,
         body,
         coverImageUrl: draftCoverUrl || undefined,
+        spotifyUrl: draftSpotifyUrl || undefined,
+        youtubeUrl: draftYoutubeUrl || undefined,
+        galleryImageUrls: draftGalleryUrls.length > 0 ? draftGalleryUrls : undefined,
         artistProfileId: draftArtistProfileId || undefined,
         featuredOnHomepage: draftFeaturedOnHomepage,
       })
       setDraftTitle('')
       setDraftCoverUrl('')
+      setDraftSpotifyUrl('')
+      setDraftYoutubeUrl('')
+      setDraftGalleryUrls([])
       setDraftSubject('')
       setDraftBody('')
       setDraftFeaturedOnHomepage(draftType === 'feature')
@@ -503,9 +514,11 @@ export default function EditorDashboardPage() {
                     }}
                     className="w-full bg-surface border border-border px-4 py-3 text-sm"
                   >
-                    <option value="review">Album Review</option>
-                    <option value="band_profile">Band Profile</option>
-                    <option value="feature">Feature Article</option>
+                    {EDITORIAL_TYPE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <label className="flex items-start gap-3 cursor-pointer border border-border px-4 py-3 bg-surface/50">
@@ -571,6 +584,37 @@ export default function EditorDashboardPage() {
                   onChange={setDraftCoverUrl}
                   hint="Hero image for review/feature — delivered via Cloudinary CDN."
                 />
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
+                      Spotify link
+                    </label>
+                    <input
+                      type="url"
+                      value={draftSpotifyUrl}
+                      onChange={(e) => setDraftSpotifyUrl(e.target.value)}
+                      placeholder="https://open.spotify.com/album/…"
+                      className="w-full bg-surface border border-border px-4 py-3 text-sm focus:border-rs-red focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
+                      YouTube link
+                    </label>
+                    <input
+                      type="url"
+                      value={draftYoutubeUrl}
+                      onChange={(e) => setDraftYoutubeUrl(e.target.value)}
+                      placeholder="https://youtube.com/watch?v=…"
+                      className="w-full bg-surface border border-border px-4 py-3 text-sm focus:border-rs-red focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <EditorialGalleryUpload
+                  folder="ios/editorial"
+                  urls={draftGalleryUrls}
+                  onChange={setDraftGalleryUrls}
+                />
                 <div>
                   <label
                     htmlFor="editorial-write-up"
@@ -616,9 +660,22 @@ export default function EditorDashboardPage() {
                           className="w-full h-40 object-cover mb-4"
                         />
                       )}
+                      {(d.spotifyUrl || d.youtubeUrl || (d.galleryImageUrls?.length ?? 0) > 0) && (
+                        <p className="text-xs text-muted mb-3">
+                          {[
+                            d.spotifyUrl && 'Spotify',
+                            d.youtubeUrl && 'YouTube',
+                            d.galleryImageUrls?.length
+                              ? `${d.galleryImageUrls.length} photo(s)`
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                      )}
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-[10px] tracking-widest uppercase text-rs-red">
-                          {d.type.replace('_', ' ')}
+                          {editorialTypeLabel(d.type)}
                         </span>
                         <span
                           className={clsx(
