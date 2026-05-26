@@ -101,7 +101,9 @@ export function Navbar({ links }: NavbarProps) {
           <ArtistNavActions />
         </div>
 
-        <NavMenuToggle open={open} onClick={() => setOpen((v) => !v)} />
+        <div className="ios-nav-toggle-wrap">
+          <NavMenuToggle open={open} onClick={() => setOpen((v) => !v)} />
+        </div>
       </nav>
 
       <AnimatePresence>
