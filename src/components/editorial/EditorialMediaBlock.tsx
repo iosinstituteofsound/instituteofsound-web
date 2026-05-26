@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { IOSImage } from '@/components/ui/IOSImage'
+import { EditorialPhotoSlider } from '@/components/editorial/EditorialPhotoSlider'
 
 interface EditorialMediaBlockProps {
   spotifyUrl?: string
@@ -84,26 +85,25 @@ export function EditorialMediaBlock({
       )}
 
       {gallery.length > 0 && (
-        <div className="editorial-media-panel">
+        <div className="editorial-media-panel editorial-media-panel--gallery">
           <p className="editorial-media-panel-kicker">Artist photos</p>
-          <div
-            className={clsx(
-              'editorial-media-gallery',
-              isSidebar && 'editorial-media-gallery--sidebar'
-            )}
-          >
-            {gallery.map((src, i) => (
-              <figure key={`${src}-${i}`} className="editorial-media-gallery-item">
-                <IOSImage
-                  src={src}
-                  alt={`Artist photo ${i + 1}`}
-                  width={640}
-                  height={480}
-                  className="w-full h-full object-cover"
-                />
-              </figure>
-            ))}
-          </div>
+          {isSidebar ? (
+            <EditorialPhotoSlider images={gallery} />
+          ) : (
+            <div className="editorial-media-gallery">
+              {gallery.map((src, i) => (
+                <figure key={`${src}-${i}`} className="editorial-media-gallery-item">
+                  <IOSImage
+                    src={src}
+                    alt={`Artist photo ${i + 1}`}
+                    width={640}
+                    height={480}
+                    className="w-full h-full object-cover"
+                  />
+                </figure>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </aside>
