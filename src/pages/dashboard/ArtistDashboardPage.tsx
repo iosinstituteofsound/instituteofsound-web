@@ -14,10 +14,12 @@ import { Button } from '@/components/ui/Button'
 import { DismissibleBanner } from '@/components/ui/DismissibleBanner'
 import { Input, FieldLabel } from '@/components/ui/Input'
 import { ArtistProfileEditor } from '@/components/dashboard/ArtistProfileEditor'
+import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
 import { DashboardSection } from '@/components/dashboard/DashboardSection'
 import type { TrackSubmission } from '@/lib/auth/types'
 
 const TABS = [
+  { id: 'network' as const, label: 'Network', hint: 'Feed, profile, dB' },
   { id: 'profile' as const, label: 'Your page', hint: 'Profile, music, merch' },
   { id: 'submit' as const, label: 'Submit to editors', hint: 'New track review' },
   { id: 'history' as const, label: 'Submissions', hint: 'Editor feedback' },
@@ -27,7 +29,7 @@ export default function ArtistDashboardPage() {
   const { user, logout, mode } = useAuth()
   const [submissions, setSubmissions] = useState<TrackSubmission[]>([])
   const [loadingList, setLoadingList] = useState(true)
-  const [tab, setTab] = useState<'profile' | 'submit' | 'history'>('profile')
+  const [tab, setTab] = useState<'network' | 'profile' | 'submit' | 'history'>('profile')
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -112,6 +114,9 @@ export default function ArtistDashboardPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2 shrink-0">
+            <Link to="/community#feed" className="ios-btn ios-btn-ghost !text-xs !py-2">
+              Network feed
+            </Link>
             <Link
               to="/discover"
               className="ios-btn ios-btn-ghost !text-xs !py-2"
@@ -156,6 +161,8 @@ export default function ArtistDashboardPage() {
             </button>
           ))}
         </div>
+
+        {tab === 'network' && <DashboardCommunityHub />}
 
         {tab === 'profile' && <ArtistProfileEditor user={user} />}
 

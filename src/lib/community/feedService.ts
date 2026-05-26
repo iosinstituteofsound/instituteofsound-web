@@ -22,7 +22,7 @@ const DROP_DB = 5
 
 const emptyReactions = () => ({ fire: 0, headphones: 0, bolt: 0 })
 
-function mapRow(row: {
+export type FeedRow = {
   id: string
   kind: string
   body: string | null
@@ -40,7 +40,13 @@ function mapRow(row: {
   reactions_headphones?: number | string
   reactions_bolt?: number | string
   my_reaction?: string | null
-}): CommunityFeedPost {
+}
+
+export function mapFeedRow(row: FeedRow): CommunityFeedPost {
+  return mapRow(row)
+}
+
+function mapRow(row: FeedRow): CommunityFeedPost {
   return {
     id: row.id,
     kind: row.kind as CommunityPostKind,

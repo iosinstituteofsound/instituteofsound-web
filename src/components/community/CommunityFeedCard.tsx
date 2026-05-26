@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import clsx from 'clsx'
+import { normalizeHandle } from '@/lib/community/memberProfileService'
 import { formatRelativeTime } from '@/lib/community/relativeTime'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import { getEmbedForPost, hideCommunityPost } from '@/lib/community/feedService'
@@ -11,6 +13,7 @@ import { CommunityFeedReactions } from '@/components/community/CommunityFeedReac
 interface CommunityFeedCardProps {
   post: CommunityFeedPost
   isYou?: boolean
+  linkProfile?: boolean
   onHidden?: () => void
   onReactionChange?: () => void
 }
@@ -22,7 +25,13 @@ function formatGenre(slug: string) {
     .join(' ')
 }
 
-export function CommunityFeedCard({ post, isYou, onHidden, onReactionChange }: CommunityFeedCardProps) {
+export function CommunityFeedCard({
+  post,
+  isYou,
+  linkProfile = true,
+  onHidden,
+  onReactionChange,
+}: CommunityFeedCardProps) {
   const [hiding, setHiding] = useState(false)
   const spotify = post.spotifyUrl ? parseSpotifyUrl(post.spotifyUrl) : null
   const youtube = post.youtubeUrl ? parseYouTubeUrl(post.youtubeUrl) : null
@@ -42,30 +51,53 @@ export function CommunityFeedCard({ post, isYou, onHidden, onReactionChange }: C
   }
 
   const when = formatRelativeTime(post.createdAt)
+  const profilePath = `/network/${normalizeHandle(post.handle)}`
+
+  const avatar = (
+    <div className="community-feed-card-avatar">
+      {post.avatarUrl ? (
+        <IOSImage src={post.avatarUrl} alt="" width={48} className="w-full h-full object-cover" />
+      ) : (
+        <span aria-hidden>{post.displayName.charAt(0).toUpperCase()}</span>
+      )}
+    </div>
+  )
+
+  const nameBlock = (
+    <>
+      <p className="community-feed-card-name">
+        {post.displayName}
+        {isYou && <span className="community-feed-card-you-pill">You</span>}
+      </p>
+      <p className="community-feed-card-handle">
+        {post.handle}
+        {post.primaryGenreSlug && (
+          <span className="community-feed-card-tribe"> · {formatGenre(post.primaryGenreSlug)}</span>
+        )}
+      </p>
+    </>
+  )
 
   return (
     <article
       className={clsx('community-feed-card ios-card', isYou && 'community-feed-card-you')}
     >
       <header className="community-feed-card-head">
-        <div className="community-feed-card-avatar">
-          {post.avatarUrl ? (
-            <IOSImage src={post.avatarUrl} alt="" width={48} className="w-full h-full object-cover" />
-          ) : (
-            <span aria-hidden>{post.displayName.charAt(0).toUpperCase()}</span>
-          )}
-        </div>
+        {linkProfile ? (
+          <Link to={profilePath} className="community-feed-card-profile-link" aria-label={`${post.displayName} profile`}>
+            {avatar}
+          </Link>
+        ) : (
+          avatar
+        )}
         <div className="community-feed-card-meta">
-          <p className="community-feed-card-name">
-            {post.displayName}
-            {isYou && <span className="community-feed-card-you-pill">You</span>}
-          </p>
-          <p className="community-feed-card-handle">
-            {post.handle}
-            {post.primaryGenreSlug && (
-              <span className="community-feed-card-tribe"> · {formatGenre(post.primaryGenreSlug)}</span>
-            )}
-          </p>
+          {linkProfile ? (
+            <Link to={profilePath} className="community-feed-card-profile-link block">
+              {nameBlock}
+            </Link>
+          ) : (
+            nameBlock
+          )}
         </div>
         <div className="community-feed-card-badges">
           <RankBadge rank={post.rank} />

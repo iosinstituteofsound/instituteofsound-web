@@ -6,6 +6,7 @@ import { roleLabel } from '@/lib/auth/roles'
 import { getSuperAdminAnalytics } from '@/lib/analytics/service'
 import type { SuperAdminAnalytics } from '@/lib/analytics/types'
 import { SuperAdminAnalyticsPanel } from '@/components/dashboard/SuperAdminAnalytics'
+import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
 import { EditorProfilePanel } from '@/components/dashboard/EditorProfilePanel'
 import { EditorApplicationsPanel } from '@/components/editor-applications/EditorApplicationsPanel'
 import { listArtistProfilesForEditor } from '@/lib/artist-profile/service'
@@ -36,7 +37,7 @@ import { EditorialGalleryUpload } from '@/components/editor/EditorialGalleryUplo
 import { EDITORIAL_TYPE_OPTIONS, editorialTypeLabel } from '@/lib/editorial/labels'
 import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richText'
 
-type EditorTab = 'analytics' | 'applications' | 'queue' | 'write' | 'drafts' | 'profile'
+type EditorTab = 'analytics' | 'applications' | 'queue' | 'write' | 'drafts' | 'network' | 'profile'
 type FilterStatus = 'all' | SubmissionStatus
 
 export default function EditorDashboardPage() {
@@ -199,12 +200,14 @@ export default function EditorDashboardPage() {
         { id: 'queue', label: 'Submission Queue' },
         { id: 'write', label: 'Write Editorial' },
         { id: 'drafts', label: `My Drafts (${drafts.length})` },
+        { id: 'network', label: 'Network' },
         { id: 'profile', label: 'My Profile' },
       ]
     : [
         { id: 'queue', label: 'Submission Queue' },
         { id: 'write', label: 'Write Editorial' },
         { id: 'drafts', label: `My Drafts (${drafts.length})` },
+        { id: 'network', label: 'Network' },
         { id: 'profile', label: 'My Profile' },
       ]
 
@@ -251,7 +254,10 @@ export default function EditorDashboardPage() {
               </MetalBadge>
             )}
           </div>
-          <div className="flex gap-3 items-center">
+          <div className="flex gap-3 items-center flex-wrap justify-end">
+            <Link to="/community#feed" className="ios-link text-xs tracking-widest uppercase">
+              Network feed
+            </Link>
             <Link to="/" className="ios-link text-xs tracking-widest uppercase">
               ← Site
             </Link>
@@ -271,7 +277,7 @@ export default function EditorDashboardPage() {
           </DismissibleBanner>
         )}
 
-        {tab !== 'analytics' && (
+        {tab === 'queue' && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
             {(
               [
@@ -330,6 +336,8 @@ export default function EditorDashboardPage() {
           ))}
         </div>
 
+        {tab === 'network' && <DashboardCommunityHub />}
+
         {tab === 'profile' && (
           <EditorProfilePanel user={user} onSaved={refreshUser} />
         )}
@@ -340,6 +348,7 @@ export default function EditorDashboardPage() {
           tab !== 'write' &&
           tab !== 'analytics' &&
           tab !== 'profile' &&
+          tab !== 'network' &&
           tab !== 'applications' ? (
           <LoadingTransmission variant="compact" />
         ) : tab === 'profile' ? null : tab === 'analytics' && isSuperEditor ? (

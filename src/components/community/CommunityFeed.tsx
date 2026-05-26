@@ -10,7 +10,7 @@ export function CommunityFeed({ highlightUserId }: CommunityFeedProps) {
   const { posts, loading, refresh } = useCommunityFeed(30)
 
   return (
-    <section className="community-feed-section" aria-labelledby="network-feed-heading">
+    <section id="feed" className="community-feed-section" aria-labelledby="network-feed-heading">
       <div className="mb-6">
         <h2 id="network-feed-heading" className="font-display text-2xl font-bold">
           Network feed
