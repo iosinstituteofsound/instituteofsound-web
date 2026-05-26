@@ -1,3 +1,5 @@
+import { localGrantBadge } from '@/lib/community/localCommunity'
+
 const KEY = 'ios_community_db'
 
 interface LocalDbState {
@@ -34,6 +36,7 @@ export function localAwardDb(
   state.sources[key] = amount
   state.totalDb += amount
   write(state)
+  if (state.totalDb >= 500) localGrantBadge('scout_promoted')
   return { awarded: true, totalDb: state.totalDb }
 }
 

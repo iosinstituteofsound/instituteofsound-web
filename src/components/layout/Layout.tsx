@@ -7,6 +7,7 @@ import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { ManifestoGateModal } from '@/components/ui/ManifestoGateModal'
 import { EditorCongratsGate } from '@/components/editor-applications/EditorCongratsGate'
 import { AcademyProgressSync } from '@/components/academy/AcademyProgressSync'
+import { CommunityOnboardingGate } from '@/components/community/CommunityOnboardingGate'
 import { GlobalJsonLd } from '@/components/seo/GlobalJsonLd'
 import { RouteSeo } from '@/components/seo/RouteSeo'
 import { useLenis } from '@/hooks/useLenis'
@@ -41,6 +42,7 @@ export function Layout() {
       <ManifestoGateModal />
       <EditorCongratsGate />
       <AcademyProgressSync />
+      <CommunityOnboardingGate />
       <GrainOverlay />
       {navLoading ? <div className="h-[4.25rem] md:h-[4.5rem]" /> : navLinks && <Navbar links={navLinks} />}
       <main className="ios-page-bg">

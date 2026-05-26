@@ -1,22 +1,24 @@
-import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { rankInfoList } from '@/lib/community/ranks'
 import { useCommunityLeaderboard, useCommunityMemberStats } from '@/hooks/useCommunity'
+import { useCommunityBadges } from '@/hooks/useCommunityBadges'
+import { CommunityTribePanel } from '@/components/community/CommunityTribePanel'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { RankBadge } from '@/components/ui/RankBadge'
-import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { CommunityProgressCard } from '@/components/community/CommunityProgressCard'
 import { CommunityLeaderboard } from '@/components/community/CommunityLeaderboard'
+import { CommunityGenreLeaderboard } from '@/components/community/CommunityGenreLeaderboard'
+import { CommunityFeed } from '@/components/community/CommunityFeed'
+import { CommunityCrewPanel } from '@/components/community/CommunityCrewPanel'
+import { CommunityCrewLeaderboard } from '@/components/community/CommunityCrewLeaderboard'
+import { CommunityWeeklyChallenges } from '@/components/community/CommunityWeeklyChallenges'
 
 export default function CommunityPage() {
   const { user } = useAuth()
   const ranks = rankInfoList()
   const { entries, loading: boardLoading } = useCommunityLeaderboard(20)
   const { stats, loading: statsLoading, isLoggedIn } = useCommunityMemberStats()
-
-  if (boardLoading && entries.length === 0) {
-    return <LoadingTransmission variant="hell" />
-  }
+  const { badges, loading: badgesLoading } = useCommunityBadges(user?.id)
 
   return (
     <div className="section-padding pt-32">
@@ -24,7 +26,7 @@ export default function CommunityPage() {
         <SectionHeading
           label="The Network"
           title="Community"
-          subtitle="Earn dB from learning and ear training. Rank up from Listener to Operator."
+          subtitle="Crews, spins, drops, tribe boards — earn dB and rank up from Listener to Operator."
           titleAs="h1"
         />
 
@@ -42,33 +44,42 @@ export default function CommunityPage() {
           ))}
         </div>
 
+        {isLoggedIn && <CommunityWeeklyChallenges />}
+
         {isLoggedIn && !statsLoading && stats && (
-          <CommunityProgressCard stats={stats} className="mb-12" />
+          <CommunityProgressCard
+            stats={stats}
+            badges={badges}
+            badgesLoading={badgesLoading}
+            className="mb-8"
+          />
         )}
 
-        {!isLoggedIn && (
-          <div className="community-guest-cta ios-card mb-12 p-6 md:p-8">
-            <p className="font-display text-xl font-bold">Join the network</p>
-            <p className="text-muted text-sm mt-2 max-w-xl leading-relaxed">
-              Sign in to earn dB, track your rank, and compete on the weekly leaderboard. Academy
-              progress counts toward your score.
-            </p>
-            <Link to="/login" className="ios-btn ios-btn-metal inline-block mt-5">
-              Sign in →
-            </Link>
-          </div>
-        )}
+        {isLoggedIn && <CommunityTribePanel />}
 
-        <section aria-labelledby="weekly-leaderboard-heading">
+        <div className="mb-12 space-y-12">
+          <CommunityCrewPanel />
+          <CommunityCrewLeaderboard />
+        </div>
+
+        <CommunityFeed highlightUserId={user?.id} />
+
+        <CommunityGenreLeaderboard highlightUserId={user?.id} />
+
+        <section className="mt-16" aria-labelledby="weekly-leaderboard-heading">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
             <div>
               <h2 id="weekly-leaderboard-heading" className="font-display text-2xl font-bold">
-                Weekly leaderboard
+                Global weekly leaderboard
               </h2>
-              <p className="text-sm text-muted mt-1">Top dB earners · resets every 7 days</p>
+              <p className="text-sm text-muted mt-1">All tribes combined · resets every 7 days</p>
             </div>
           </div>
-          <CommunityLeaderboard entries={entries} highlightUserId={user?.id} />
+          {boardLoading && entries.length === 0 ? (
+            <p className="text-sm text-muted text-center py-8">Loading leaderboard…</p>
+          ) : (
+            <CommunityLeaderboard entries={entries} highlightUserId={user?.id} />
+          )}
         </section>
       </div>
     </div>

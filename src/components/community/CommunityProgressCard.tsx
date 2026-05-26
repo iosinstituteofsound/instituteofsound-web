@@ -1,15 +1,30 @@
 import { Link } from 'react-router-dom'
-import type { CommunityMemberStats } from '@/lib/community/service'
+import type { CommunityMemberStats, EarnedBadge } from '@/lib/community/service'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
+import { CommunityBadgeStrip } from '@/components/community/CommunityBadgeStrip'
 import clsx from 'clsx'
 
 interface CommunityProgressCardProps {
   stats: CommunityMemberStats
+  badges?: EarnedBadge[]
+  badgesLoading?: boolean
   className?: string
 }
 
-export function CommunityProgressCard({ stats, className }: CommunityProgressCardProps) {
+function formatGenre(slug: string) {
+  return slug
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
+export function CommunityProgressCard({
+  stats,
+  badges = [],
+  badgesLoading,
+  className,
+}: CommunityProgressCardProps) {
   const atMax = !stats.nextRank
 
   return (
@@ -30,6 +45,11 @@ export function CommunityProgressCard({ stats, className }: CommunityProgressCar
           <p className="community-progress-handle">{stats.handle}</p>
           <div className="community-progress-badges">
             <RankBadge rank={stats.rank} size="md" />
+            {stats.primaryGenreSlug && (
+              <span className="community-progress-tribe">
+                {formatGenre(stats.primaryGenreSlug)}
+              </span>
+            )}
             <span className="community-progress-db">{stats.totalDb.toLocaleString()} dB total</span>
           </div>
         </div>
@@ -60,6 +80,11 @@ export function CommunityProgressCard({ stats, className }: CommunityProgressCar
       {atMax && (
         <p className="community-progress-max">Maximum rank — Operator status unlocked.</p>
       )}
+
+      <div className="community-progress-achievements">
+        <p className="community-progress-achievements-label">Achievements</p>
+        <CommunityBadgeStrip earned={badges} loading={badgesLoading} />
+      </div>
 
       <p className="community-progress-hint">
         Earn dB from Academy lessons, quizzes, and Ear Lab.{' '}

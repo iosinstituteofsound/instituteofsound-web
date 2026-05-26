@@ -1,5 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { localAwardDb } from '@/lib/community/localDb'
+import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
 
 export interface AwardDbInput {
@@ -35,5 +36,6 @@ export async function awardDb(input: AwardDbInput): Promise<boolean> {
   }
 
   window.dispatchEvent(new Event(COMMUNITY_DB_EVENT))
+  void evaluateWeeklyChallenges()
   return true
 }
