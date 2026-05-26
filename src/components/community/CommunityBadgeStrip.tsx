@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { COMMUNITY_BADGE_DEFS } from '@/lib/community/badges'
 import type { EarnedBadge } from '@/lib/community/service'
+import { MedalIllustration } from '@/components/community/medals/MedalIllustration'
 
 interface CommunityBadgeStripProps {
   earned: EarnedBadge[]
@@ -39,8 +40,8 @@ export function CommunityBadgeStrip({
             className={clsx('community-badge-item', unlocked && 'community-badge-item-unlocked')}
             title={def.description}
           >
-            <span className="community-badge-icon" aria-hidden>
-              {unlocked ? '◆' : '◇'}
+            <span className={clsx('community-badge-icon', !unlocked && 'community-badge-icon-locked')}>
+              <MedalIllustration slug={def.slug} size={40} />
             </span>
             <div className="community-badge-copy">
               <span className="community-badge-name">{def.name}</span>

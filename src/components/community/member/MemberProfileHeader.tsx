@@ -3,6 +3,8 @@ import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { EarnedBadge } from '@/lib/community/service'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
+import { MedalIllustration } from '@/components/community/medals/MedalIllustration'
+import { badgeDefBySlug } from '@/lib/community/badges'
 
 function formatGenre(slug: string) {
   return slug
@@ -90,8 +92,9 @@ export function MemberProfileHeader({
       {badges.length > 0 && (
         <ul className="member-profile-badge-strip" aria-label="Badges">
           {badges.slice(0, 6).map((b) => (
-            <li key={b.slug} title={b.description}>
-              {b.name}
+            <li key={b.slug} title={b.description} className="member-profile-badge-chip">
+              <MedalIllustration slug={b.slug} size={28} />
+              <span>{badgeDefBySlug(b.slug)?.name ?? b.name}</span>
             </li>
           ))}
           {badges.length > 6 && (
