@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { editorDashboardPath, isEditorStaff } from '@/lib/auth/roles'
+import { isEditorStaff } from '@/lib/auth/roles'
+import { NavUserIdentity } from '@/components/layout/NavUserIdentity'
 import { Button } from '@/components/ui/Button'
 import clsx from 'clsx'
 
@@ -11,7 +12,7 @@ interface ArtistNavActionsProps {
 
 /** Public artist sign-up / login — never links to staff /desk */
 export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavActionsProps) {
-  const { user, logout, isSuperEditor } = useAuth()
+  const { user, logout } = useAuth()
 
   const wrap = (node: React.ReactNode) =>
     layout === 'stack' ? (
@@ -21,14 +22,17 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
     )
 
   if (user) {
-    const dashboardTo = editorDashboardPath(user.role)
-    const label = isSuperEditor ? 'Editorial Desk' : user.role === 'artist' ? 'My Studio' : 'Dashboard'
     const showEditorApply = user.role === 'artist' && !isEditorStaff(user.role)
+    const handleLogout = () => {
+      void logout()
+      onNavigate?.()
+    }
+
     return (
       <div
         className={clsx(
           'flex items-center gap-3',
-          layout === 'stack' && 'flex-col w-full items-stretch gap-3'
+          layout === 'stack' && 'flex-col w-full items-stretch gap-4'
         )}
       >
         {showEditorApply &&
@@ -45,34 +49,7 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
             </Link>
           )}
         {wrap(
-          <Link
-            to={dashboardTo}
-            onClick={onNavigate}
-            className={clsx(
-              layout === 'stack' && 'ios-btn ios-btn-primary w-full text-center !text-xs'
-            )}
-          >
-            {layout === 'stack' ? (
-              label
-            ) : (
-              <span className="ios-nav-cta-link ios-nav-cta-dashboard">{label}</span>
-            )}
-          </Link>
-        )}
-        {wrap(
-          <button
-            type="button"
-            onClick={() => {
-              logout()
-              onNavigate?.()
-            }}
-            className={clsx(
-              'text-xs tracking-widest uppercase text-muted hover:text-mh-red transition-colors',
-              layout === 'stack' && 'text-center py-2'
-            )}
-          >
-            Logout
-          </button>
+          <NavUserIdentity layout={layout} onNavigate={onNavigate} onLogout={handleLogout} />
         )}
       </div>
     )

@@ -14,6 +14,7 @@ interface CommunityFeedCardProps {
   post: CommunityFeedPost
   isYou?: boolean
   linkProfile?: boolean
+  variant?: 'default' | 'profile'
   onHidden?: () => void
   onReactionChange?: () => void
 }
@@ -29,9 +30,11 @@ export function CommunityFeedCard({
   post,
   isYou,
   linkProfile = true,
+  variant = 'default',
   onHidden,
   onReactionChange,
 }: CommunityFeedCardProps) {
+  const isProfileFeed = variant === 'profile'
   const [hiding, setHiding] = useState(false)
   const spotify = post.spotifyUrl ? parseSpotifyUrl(post.spotifyUrl) : null
   const youtube = post.youtubeUrl ? parseYouTubeUrl(post.youtubeUrl) : null
@@ -80,27 +83,48 @@ export function CommunityFeedCard({
 
   return (
     <article
-      className={clsx('community-feed-card ios-card', isYou && 'community-feed-card-you')}
+      className={clsx(
+        'community-feed-card ios-card',
+        isYou && 'community-feed-card-you',
+        isProfileFeed && 'community-feed-card-profile'
+      )}
     >
-      <header className="community-feed-card-head">
-        {linkProfile ? (
-          <Link to={profilePath} className="community-feed-card-profile-link" aria-label={`${post.displayName} profile`}>
-            {avatar}
-          </Link>
-        ) : (
-          avatar
+      <header
+        className={clsx(
+          'community-feed-card-head',
+          isProfileFeed && 'community-feed-card-head-profile'
         )}
-        <div className="community-feed-card-meta">
-          {linkProfile ? (
-            <Link to={profilePath} className="community-feed-card-profile-link block">
-              {nameBlock}
-            </Link>
-          ) : (
-            nameBlock
+      >
+        {!isProfileFeed && (
+          <>
+            {linkProfile ? (
+              <Link
+                to={profilePath}
+                className="community-feed-card-profile-link"
+                aria-label={`${post.displayName} profile`}
+              >
+                {avatar}
+              </Link>
+            ) : (
+              avatar
+            )}
+            <div className="community-feed-card-meta">
+              {linkProfile ? (
+                <Link to={profilePath} className="community-feed-card-profile-link block">
+                  {nameBlock}
+                </Link>
+              ) : (
+                nameBlock
+              )}
+            </div>
+          </>
+        )}
+        <div
+          className={clsx(
+            'community-feed-card-badges',
+            isProfileFeed && 'community-feed-card-badges-profile'
           )}
-        </div>
-        <div className="community-feed-card-badges">
-          <RankBadge rank={post.rank} />
+        >
           <span
             className={clsx(
               'community-feed-kind',
@@ -109,6 +133,12 @@ export function CommunityFeedCard({
           >
             {post.kind === 'spin' ? 'Spin' : 'Drop'}
           </span>
+          {!isProfileFeed && <RankBadge rank={post.rank} />}
+          {isProfileFeed && (
+            <time className="community-feed-time-profile" dateTime={post.createdAt}>
+              {when}
+            </time>
+          )}
         </div>
       </header>
 
@@ -159,9 +189,11 @@ export function CommunityFeedCard({
       <CommunityFeedReactions post={post} onChange={onReactionChange} />
 
       <footer className="community-feed-card-foot">
-        <time className="community-feed-time" dateTime={post.createdAt}>
-          {when}
-        </time>
+        {!isProfileFeed && (
+          <time className="community-feed-time" dateTime={post.createdAt}>
+            {when}
+          </time>
+        )}
         {isYou && (
           <button
             type="button"
