@@ -86,8 +86,8 @@ const PUBLIC_PAGES: Record<string, SeoConfig> = {
   ),
   '/community': page(
     '/community',
-    'Community',
-    'Underground music community — scenes, creators, and collective transmission.',
+    'The Network',
+    'Underground music network — spins, drops, tribes, crews, and weekly dB leaderboards.',
     {
       jsonLd: breadcrumbJsonLd([
         { name: 'Home', path: '/' },
@@ -301,6 +301,7 @@ const DYNAMIC_PREFIXES = [
   /^\/artist\/[^/]+$/,
   /^\/feature\/[^/]+$/,
   /^\/playlist\/[^/]+$/,
+  /^\/network\/[^/]+$/,
 ]
 
 /** Static + generated route SEO (exact pathname match). */

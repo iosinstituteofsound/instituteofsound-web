@@ -106,6 +106,9 @@ export interface Feature {
   spotifyUrl?: string
   youtubeUrl?: string
   galleryImageUrls?: string[]
+  /** Linked artist catalog page (published editorials) */
+  artistProfileSlug?: string
+  artistProfileName?: string
 }
 
 export interface CommunityMember {

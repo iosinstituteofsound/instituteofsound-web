@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
-import { normalizeHandle } from '@/lib/community/memberProfileService'
+import { networkProfilePath } from '@/lib/community/networkPaths'
 import { formatRelativeTime } from '@/lib/community/relativeTime'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import { getEmbedForPost, hideCommunityPost } from '@/lib/community/feedService'
@@ -54,7 +54,7 @@ export function CommunityFeedCard({
   }
 
   const when = formatRelativeTime(post.createdAt)
-  const profilePath = `/network/${normalizeHandle(post.handle)}`
+  const profilePath = networkProfilePath(post.handle)
 
   const avatar = (
     <div className="community-feed-card-avatar">

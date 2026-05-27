@@ -6,12 +6,14 @@ import { heroLayoutClass } from '@/lib/artist-profile/heroLayout'
 import { CoverArt } from './CoverArt'
 import { SocialIcons } from './SocialIcons'
 import { MetalBadge } from '@/components/ui/MetalBadge'
+import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
 
 interface ArtistSiteHeroProps {
   profile: ArtistProfile
   listenTrack?: ArtistTrack
   trackCount: number
   isOwner?: boolean
+  networkHandle?: string | null
 }
 
 export function ArtistSiteHero({
@@ -19,6 +21,7 @@ export function ArtistSiteHero({
   listenTrack,
   trackCount,
   isOwner,
+  networkHandle,
 }: ArtistSiteHeroProps) {
   const layout = profile.heroLayout
   const primaryHref = listenTrack?.streamUrl || profile.social.spotify || profile.social.youtube
@@ -73,6 +76,7 @@ export function ArtistSiteHero({
             listenTrack={listenTrack}
             primaryHref={primaryHref}
             compactTitle={layout === 'logo' || layout === 'compact'}
+            networkHandle={networkHandle}
           />
         </motion.div>
 
@@ -142,6 +146,7 @@ function HeroMetaContent({
   listenTrack,
   primaryHref,
   compactTitle,
+  networkHandle,
 }: {
   profile: ArtistProfile
   trackCount: number
@@ -149,6 +154,7 @@ function HeroMetaContent({
   listenTrack?: ArtistTrack
   primaryHref?: string
   compactTitle?: boolean
+  networkHandle?: string | null
 }) {
   return (
     <>
@@ -222,6 +228,13 @@ function HeroMetaContent({
           </a>
         )}
       </div>
+
+      <IdentityCrossLinks
+        artistSlug={profile.slug}
+        networkHandle={networkHandle}
+        className="mt-5"
+        compact
+      />
 
       <SocialIcons
         social={profile.social}

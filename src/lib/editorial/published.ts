@@ -149,6 +149,8 @@ export type FeatureArticle = Feature & {
   spotifyUrl?: string
   youtubeUrl?: string
   galleryImageUrls?: string[]
+  artistProfileSlug?: string
+  artistProfileName?: string
 }
 
 export function draftToFeatureArticle(
@@ -235,12 +237,33 @@ export async function getHomepageCoverStory(): Promise<CoverStory | null> {
   return lead ? draftToCoverStory(lead) : null
 }
 
+async function resolveArtistProfileLink(
+  draft: PublishedEditorial
+): Promise<{ slug?: string; name?: string }> {
+  if (!draft.artistProfileId?.trim() || !isSupabaseConfigured()) return {}
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_profiles')
+    .select('slug, display_name')
+    .eq('id', draft.artistProfileId)
+    .maybeSingle()
+  if (error || !data) return {}
+  return { slug: data.slug, name: data.display_name }
+}
+
 export async function getPublishedFeatureBySlug(
   slug: string
 ): Promise<FeatureArticle | null> {
   const published = await listPublishedEditorials()
   const match = published.find((d) => d.slug === slug)
-  return match ? draftToFeatureArticle(match) : null
+  if (!match) return null
+  const article = draftToFeatureArticle(match)
+  const artist = await resolveArtistProfileLink(match)
+  return {
+    ...article,
+    artistProfileSlug: artist.slug,
+    artistProfileName: artist.name ?? (match.subject?.trim() || undefined),
+  }
 }
 
 export async function mergeFeaturesWithPublished(staticFeatures: Feature[]): Promise<Feature[]> {

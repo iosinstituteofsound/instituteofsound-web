@@ -15,7 +15,7 @@ export function CommunitySection() {
         <MagazineSectionHeading
           kicker="Readers & Curators"
           title="The Movement"
-          subtitle="Earn dB · rank up from Listener to Operator · weekly leaderboard."
+          subtitle="Spin tracks on the wire · earn dB in Academy · rank up from Listener to Operator."
         />
 
         <div className="flex flex-wrap gap-3 mb-10">
@@ -33,12 +33,21 @@ export function CommunitySection() {
 
         <CommunityLeaderboard entries={entries} compact />
 
-        <div className="mt-12 text-center">
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
           <Link
             to="/community"
             className="text-xs tracking-[0.2em] uppercase text-muted hover:text-rs-red transition-colors"
           >
-            Full leaderboard & your rank →
+            Network feed & tribes →
+          </Link>
+          <span className="text-muted text-xs" aria-hidden>
+            ·
+          </span>
+          <Link
+            to="/community#feed"
+            className="text-xs tracking-[0.2em] uppercase text-muted hover:text-rs-red transition-colors"
+          >
+            Post a spin →
           </Link>
         </div>
       </div>

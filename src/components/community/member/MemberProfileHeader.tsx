@@ -5,6 +5,7 @@ import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { MedalIllustration } from '@/components/community/medals/MedalIllustration'
 import { badgeDefBySlug } from '@/lib/community/badges'
+import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
 
 function formatGenre(slug: string) {
   return slug
@@ -19,6 +20,7 @@ interface MemberProfileHeaderProps {
   isYou: boolean
   dashboardHref?: string
   badges: EarnedBadge[]
+  artistSlug?: string | null
 }
 
 export function MemberProfileHeader({
@@ -27,6 +29,7 @@ export function MemberProfileHeader({
   isYou,
   dashboardHref,
   badges,
+  artistSlug,
 }: MemberProfileHeaderProps) {
   return (
     <header className="member-profile-hero">
@@ -88,6 +91,13 @@ export function MemberProfileHeader({
       </div>
 
       {profile.bio && <p className="member-profile-bio">{profile.bio}</p>}
+
+      <IdentityCrossLinks
+        artistSlug={artistSlug}
+        networkHandle={profile.handle}
+        className="mt-3"
+        compact
+      />
 
       {badges.length > 0 && (
         <ul className="member-profile-badge-strip" aria-label="Badges">

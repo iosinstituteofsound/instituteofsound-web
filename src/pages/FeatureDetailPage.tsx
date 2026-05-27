@@ -16,6 +16,7 @@ import { useSeo } from '@/hooks/useSeo'
 import { getSiteUrl } from '@/lib/auth/siteUrl'
 import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonLd'
 import { buildEditorialShareMeta } from '@/lib/share/editorialShareMeta'
+import { EditorialSubjectLinks } from '@/components/editorial/EditorialSubjectLinks'
 
 export default function FeatureDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -119,6 +120,13 @@ export default function FeatureDetailPage() {
       <div className="editorial-article-body section-padding">
         <div className="editorial-article-container">
           <p className="editorial-article-lead">{feature.excerpt}</p>
+
+          <EditorialSubjectLinks
+            subject={feature.subject}
+            artistProfileSlug={feature.artistProfileSlug}
+            artistProfileName={feature.artistProfileName}
+            authorUsername={feature.authorUsername}
+          />
 
           {shareMeta && (
             <EditorialShareBar

@@ -1,12 +1,52 @@
 /**
  * Generates public/sitemap.xml from static routes + public/api JSON catalogs.
+ * When Supabase env is set, includes /network/:handle from community_sitemap_handles().
  * Run: npm run sitemap (also runs before build).
  */
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createClient } from '@supabase/supabase-js'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+
+function loadDotEnv() {
+  const envPath = join(root, '.env')
+  if (!existsSync(envPath)) return
+  for (const line of readFileSync(envPath, 'utf8').split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const eq = trimmed.indexOf('=')
+    if (eq === -1) continue
+    const key = trimmed.slice(0, eq).trim()
+    let value = trimmed.slice(eq + 1).trim()
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1)
+    }
+    if (process.env[key] === undefined) process.env[key] = value
+  }
+}
+
+loadDotEnv()
+
+async function fetchNetworkHandles() {
+  const url = process.env.VITE_SUPABASE_URL
+  const key = process.env.VITE_SUPABASE_ANON_KEY
+  if (!url || !key) return []
+
+  const supabase = createClient(url, key)
+  const { data, error } = await supabase.rpc('community_sitemap_handles')
+  if (error) {
+    console.warn('[sitemap] community_sitemap_handles:', error.message)
+    return []
+  }
+  return (data ?? [])
+    .map((row) => row?.handle?.trim())
+    .filter(Boolean)
+}
 const siteUrl = (process.env.VITE_SITE_URL || 'https://instituteofsound.in').replace(/\/$/, '')
 const today = new Date().toISOString().slice(0, 10)
 
@@ -83,6 +123,10 @@ const paths = new Set(staticPaths)
 for (const f of features) paths.add(`/feature/${f.slug}`)
 for (const a of artists) paths.add(`/artist/${a.slug}`)
 for (const p of playlists) paths.add(`/playlist/${p.slug}`)
+
+for (const handle of await fetchNetworkHandles()) {
+  paths.add(`/network/${encodeURIComponent(handle)}`)
+}
 
 for (const [track, lessons] of Object.entries(lessonSlugs)) {
   for (const lesson of lessons) {

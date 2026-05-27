@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { recordProfileView } from '@/lib/analytics/artistAnalytics'
 import { Link, useParams } from 'react-router-dom'
 import { useContent } from '@/hooks/useContent'
@@ -11,6 +11,7 @@ import type { ArtistProfilePageData } from '@/lib/artist-profile/types'
 import { buildArtistShareMeta } from '@/lib/share/artistShareMeta'
 import type { Artist } from '@/types'
 import { ArtistProfilePageView } from '@/components/artist-profile/ArtistProfilePageView'
+import { fetchNetworkHandleForUserId } from '@/lib/artist-profile/networkLink'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
 
@@ -35,6 +36,21 @@ export default function ArtistDetailPage() {
   }, [slug, user?.id])
 
   const { data, loading, error } = useContent(fetcher)
+  const [networkHandle, setNetworkHandle] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (data?.kind !== 'profile') {
+      setNetworkHandle(null)
+      return
+    }
+    let cancelled = false
+    void fetchNetworkHandleForUserId(data.data.profile.userId).then((h) => {
+      if (!cancelled) setNetworkHandle(h)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [data])
 
   const shareMeta = useMemo(() => {
     if (!slug || !data || data.kind !== 'profile') return null
@@ -76,6 +92,7 @@ export default function ArtistDetailPage() {
         data={data.data}
         isOwner={user?.id === data.data.profile.userId}
         viewerUserId={user?.id}
+        networkHandle={networkHandle}
       />
     )
   }

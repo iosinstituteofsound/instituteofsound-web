@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { formatAccountNumericId } from '@/lib/auth/accountId'
@@ -23,6 +23,10 @@ import { MemberProfileFeed } from '@/components/community/member/MemberProfileFe
 import { MemberProfileSignalLog } from '@/components/community/member/MemberProfileSignalLog'
 import { MemberProfileMedals } from '@/components/community/member/MemberProfileMedals'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { useSeo } from '@/hooks/useSeo'
+import { fetchArtistSlugForUserId } from '@/lib/artist-profile/networkLink'
+import { breadcrumbJsonLd } from '@/lib/seo/jsonLd'
+import { networkProfilePath } from '@/lib/community/networkPaths'
 
 function tabFromSearch(params: URLSearchParams): MemberProfileTab {
   const t = params.get('tab')
@@ -42,8 +46,29 @@ export default function CommunityMemberPage() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [tab, setTab] = useState<MemberProfileTab>(() => tabFromSearch(searchParams))
+  const [artistSlug, setArtistSlug] = useState<string | null>(null)
 
   const { badges, loading: badgesLoading } = useCommunityBadges(profile?.userId)
+
+  const profilePath = profile ? networkProfilePath(profile.handle) : `/network/${handle}`
+
+  const seo = useMemo(() => {
+    if (!profile) return null
+    const displayHandle = profile.handle.replace(/^@/, '')
+    return {
+      title: `${profile.displayName} (@${displayHandle})`,
+      description: `${profile.displayName} on the Institute of Sound network — spins, drops, dB rank ${profile.rank}, ${profile.postCount} transmissions.`,
+      canonicalPath: profilePath,
+      ogType: 'profile' as const,
+      jsonLd: breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Community', path: '/community' },
+        { name: profile.displayName, path: profilePath },
+      ]),
+    }
+  }, [profile, profilePath])
+
+  useSeo(seo)
 
   const isYou = Boolean(
     user &&
@@ -73,10 +98,13 @@ export default function CommunityMemberPage() {
       setProfile(null)
       setPosts([])
       setActivity([])
+      setArtistSlug(null)
     } else {
       setProfile(p)
       setPosts(postList)
       setActivity(act)
+      const slug = await fetchArtistSlugForUserId(p.userId)
+      setArtistSlug(slug)
     }
     setLoading(false)
   }, [handle])
@@ -153,6 +181,7 @@ export default function CommunityMemberPage() {
           isYou={isYou}
           dashboardHref={isYou ? dashboardHref : undefined}
           badges={badges}
+          artistSlug={artistSlug}
         />
 
         <MemberProfileTabs

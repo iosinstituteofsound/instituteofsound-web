@@ -8,7 +8,7 @@ export interface SeoConfig {
   canonicalPath: string
   ogImage?: string
   ogImageAlt?: string
-  ogType?: 'website' | 'article'
+  ogType?: 'website' | 'article' | 'profile'
   robots?: 'index, follow' | 'noindex, nofollow'
   jsonLd?: JsonLd | JsonLd[]
 }

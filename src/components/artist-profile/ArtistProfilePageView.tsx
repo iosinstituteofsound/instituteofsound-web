@@ -19,6 +19,7 @@ interface ArtistProfilePageViewProps {
   data: ArtistProfilePageData
   isOwner?: boolean
   viewerUserId?: string
+  networkHandle?: string | null
 }
 
 const sectionMotion = {
@@ -28,7 +29,12 @@ const sectionMotion = {
   transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const },
 }
 
-export function ArtistProfilePageView({ data, isOwner, viewerUserId }: ArtistProfilePageViewProps) {
+export function ArtistProfilePageView({
+  data,
+  isOwner,
+  viewerUserId,
+  networkHandle,
+}: ArtistProfilePageViewProps) {
   const { profile, tracks, albums, singles, videos, merch, lineup, bioTimeline, editorial, pickTrack } =
     data
   const analyticsCtx = {
@@ -67,6 +73,7 @@ export function ArtistProfilePageView({ data, isOwner, viewerUserId }: ArtistPro
         listenTrack={listenTrack}
         trackCount={tracks.length}
         isOwner={isOwner}
+        networkHandle={networkHandle}
       />
 
       <ArtistSiteStickyNav items={navItems} artistName={profile.displayName} />
