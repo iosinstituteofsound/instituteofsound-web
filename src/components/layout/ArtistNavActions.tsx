@@ -11,7 +11,7 @@ interface ArtistNavActionsProps {
   layout?: 'row' | 'stack'
 }
 
-/** Public artist sign-up / login — never links to staff /desk */
+/** Public join / sign-in — never links to staff /desk */
 export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavActionsProps) {
   const { user, logout } = useAuth()
 
@@ -67,14 +67,14 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
     >
       {wrap(
         <Link
-          to="/submissions"
+          to="/register"
           onClick={onNavigate}
           className={clsx(
             'ios-nav-cta-link hidden xl:inline',
             layout === 'stack' && '!inline text-sm tracking-widest uppercase font-semibold py-2'
           )}
         >
-          For Artists
+          Join Network
         </Link>
       )}
       {wrap(
@@ -92,15 +92,15 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
       {wrap(
         layout === 'stack' ? (
           <Link
-            to="/login"
+            to="/register"
             onClick={onNavigate}
             className="ios-btn ios-btn-primary w-full text-center"
           >
-            Sign in with Google →
+            Join with Google →
           </Link>
         ) : (
-          <Button to="/login" variant="primary" className="!py-2 !px-4 !text-[10px]">
-            Google Sign In
+          <Button to="/register" variant="primary" className="!py-2 !px-4 !text-[10px]">
+            Join with Google
           </Button>
         )
       )}

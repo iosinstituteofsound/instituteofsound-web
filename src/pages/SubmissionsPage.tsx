@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { isSuperEditor } from '@/lib/auth/roles'
 import { MagazineSectionHeading } from '@/components/ui/MagazineSectionHeading'
@@ -13,6 +13,10 @@ export default function SubmissionsPage() {
     return <Navigate to="/artist/dashboard" replace />
   }
 
+  if (user?.role === 'member') {
+    return <Navigate to="/member/upgrade" replace />
+  }
+
   if (user && isSuperEditor(user.role)) {
     return <Navigate to="/editor/dashboard" replace />
   }
@@ -22,44 +26,49 @@ export default function SubmissionsPage() {
       <div className="max-w-xl mx-auto text-center">
         <MagazineSectionHeading
           variant="metal-hammer"
-          kicker="Artist Portal"
-          title="Google Sign In & Submit"
-          subtitle="Bands and solo artists — one Google login, your public profile, tracks for editorial review."
+          kicker="Artist studio"
+          title="My Studio & editorial submit"
+          subtitle="Join the network first, then upgrade to a public artist page and send tracks to the desk."
           titleAs="h1"
         />
 
         <div className="ios-panel ios-panel-accent text-left p-8 mt-12 space-y-8">
           <div>
-            <h3 className="font-display text-lg font-bold uppercase text-mh-red">Step 1 — Google</h3>
+            <h3 className="font-display text-lg font-bold uppercase text-mh-red">Step 1 — Join network</h3>
             <p className="text-sm text-muted mt-3 leading-relaxed">
-              Tap Continue with Google. No password, no confirmation email.
+              Free member account with Google — feed, dB, scenes, collab, and events. No password.
             </p>
-            <Button to="/login" variant="primary" className="mt-4">
-              Continue with Google →
+            <Button to="/register" variant="primary" className="mt-4">
+              Join with Google →
             </Button>
           </div>
           <div className="border-t border-border pt-8">
-            <h3 className="font-display text-lg font-bold uppercase text-mh-red">Step 2 — Build profile</h3>
+            <h3 className="font-display text-lg font-bold uppercase text-mh-red">
+              Step 2 — Upgrade to artist page
+            </h3>
             <p className="text-sm text-muted mt-3 leading-relaxed">
-              In <strong className="text-signal">My Studio</strong>: avatar, banner, genres, Spotify / YouTube /
-              Instagram links, tracks, albums, singles, and videos — your public page at{' '}
+              From your dashboard, launch <strong className="text-signal">My Studio</strong>: avatar,
+              banner, genres, links, tracks, albums, videos — public at{' '}
               <span className="font-mono text-xs">/artist/your-band</span>.
             </p>
           </div>
           <div className="border-t border-border pt-8">
             <h3 className="font-display text-lg font-bold uppercase text-mh-red">Step 3 — Submit tracks</h3>
             <p className="text-sm text-muted mt-3 leading-relaxed">
-              Send music to the desk: pending → in review → approved or rejected with editor notes.
+              Send music to editors: pending → in review → approved or rejected with notes.
             </p>
-            <Button to="/login" variant="secondary" className="mt-4">
-              Sign in with Google →
+            <Button to="/register" variant="secondary" className="mt-4">
+              Get started →
             </Button>
           </div>
         </div>
 
         <p className="text-xs text-muted mt-8 max-w-md mx-auto">
-          Magazine posts and reviews are published by Institute editorial staff only. Editor
-          accounts are not open for public registration.
+          Want to write for the magazine?{' '}
+          <Link to="/editor/join" className="ios-link">
+            Apply as an editor
+          </Link>
+          . Desk access is approved by super editors only.
         </p>
       </div>
     </div>

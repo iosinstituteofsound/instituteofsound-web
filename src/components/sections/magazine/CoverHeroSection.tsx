@@ -104,8 +104,8 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
               <Button to={`/feature/${story.slug}`} variant="primary">
                 {story.readLabel} →
               </Button>
-              <Button to="/login" variant="metal">
-                Artists — Google Sign In →
+              <Button to="/register" variant="metal">
+                Join with Google →
               </Button>
               <Button to="/discover" variant="secondary">
                 Enter Archive
@@ -124,13 +124,13 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
                 </p>
 
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <Link to="/community" className="ios-role-card">
+                  <Link to="/register" className="ios-role-card">
                     <p className="font-display font-bold uppercase tracking-wide text-sm">I’m a Listener</p>
-                    <p className="text-xs text-muted mt-1">Spin tracks · crews · India scenes</p>
+                    <p className="text-xs text-muted mt-1">Join free · spins · scenes · collab</p>
                   </Link>
                   <Link to="/submissions" className="ios-role-card">
                     <p className="font-display font-bold uppercase tracking-wide text-sm">I’m an Artist</p>
-                    <p className="text-xs text-muted mt-1">Premieres · EPK · collab board</p>
+                    <p className="text-xs text-muted mt-1">My Studio · premieres · EPK</p>
                   </Link>
                   <Link to="/editor/join" className="ios-role-card">
                     <p className="font-display font-bold uppercase tracking-wide text-sm">I’m an Editor</p>

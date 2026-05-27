@@ -65,11 +65,20 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-  plugins: [react(), tailwindcss(), thumbnailApiPlugin()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+    plugins: [react(), tailwindcss(), thumbnailApiPlugin()],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      },
     },
-  },
+    server: {
+      host: true,
+      port: 5173,
+      strictPort: false,
+    },
+    preview: {
+      host: true,
+      port: 4173,
+    },
   }
 })

@@ -7,10 +7,7 @@ const PLACEHOLDER_URL = 'YOUR_PROJECT_REF'
 const PLACEHOLDER_KEY = 'your_supabase_anon_public_key_here'
 
 export function isSupabaseConfigured(): boolean {
-  if (!url || !anonKey) return false
-  if (url.includes(PLACEHOLDER_URL)) return false
-  if (anonKey === PLACEHOLDER_KEY || anonKey.length < 100) return false
-  return true
+  return getSupabaseConfigError() === null
 }
 
 export function getSupabaseConfigError(): string | null {

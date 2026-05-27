@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AuthProvider } from '@/context/AuthContext'
+import { AppErrorBoundary } from '@/components/ui/AppErrorBoundary'
 import { applyPerformanceProfile } from '@/lib/performance'
 import './index.css'
 import App from './App.tsx'
@@ -9,8 +10,10 @@ applyPerformanceProfile()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <AppErrorBoundary>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </AppErrorBoundary>
   </StrictMode>
 )
