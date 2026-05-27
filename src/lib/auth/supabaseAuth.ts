@@ -17,7 +17,14 @@ function readOAuthIntent(): GoogleOAuthIntent | null {
     sessionStorage.getItem(OAUTH_INTENT_KEY) ?? localStorage.getItem(OAUTH_INTENT_KEY)
   localStorage.removeItem(OAUTH_INTENT_KEY)
   sessionStorage.removeItem(OAUTH_INTENT_KEY)
-  if (raw === 'desk' || raw === 'artist' || raw === 'editor_apply') return raw
+  if (
+    raw === 'desk' ||
+    raw === 'member' ||
+    raw === 'artist' ||
+    raw === 'editor_apply'
+  ) {
+    return raw
+  }
   return null
 }
 
@@ -55,7 +62,7 @@ function displayNameFromMeta(
 ): string {
   const full = meta?.full_name ?? meta?.name
   if (typeof full === 'string' && full.trim()) return full.trim()
-  return email.split('@')[0] || 'Artist'
+  return email.split('@')[0] || 'Member'
 }
 
 async function fetchProfile(userId: string): Promise<User> {
@@ -86,7 +93,7 @@ async function ensureProfileRow(
   userId: string,
   email: string,
   name: string,
-  role: UserRole = 'artist'
+  role: UserRole = 'member'
 ): Promise<User> {
   const supabase = getSupabase()
 
@@ -113,10 +120,10 @@ async function ensureProfileRow(
   }
 }
 
-export type GoogleOAuthIntent = 'artist' | 'desk' | 'editor_apply'
+export type GoogleOAuthIntent = 'member' | 'artist' | 'desk' | 'editor_apply'
 
 export async function supabaseSignInWithGoogle(
-  intent: GoogleOAuthIntent = 'artist'
+  intent: GoogleOAuthIntent = 'member'
 ): Promise<void> {
   const supabase = getSupabase()
   localStorage.setItem(OAUTH_INTENT_KEY, intent)
@@ -177,7 +184,7 @@ export async function supabaseHandleAuthCallback(): Promise<{
   const email = authUser.email ?? ''
   const name = displayNameFromMeta(meta, email)
 
-  const user = await ensureProfileRow(authUser.id, email, name, 'artist')
+  const user = await ensureProfileRow(authUser.id, email, name, 'member')
 
   const intent = readOAuthIntent()
 
@@ -205,7 +212,7 @@ export async function supabaseGetCurrentUser(): Promise<User | null> {
     return await fetchProfile(authUser.id)
   } catch {
     try {
-      return await ensureProfileRow(authUser.id, email, name, 'artist')
+      return await ensureProfileRow(authUser.id, email, name, 'member')
     } catch {
       return null
     }
@@ -230,7 +237,7 @@ export function supabaseOnAuthChange(callback: (user: User | null) => void) {
     )
 
     window.setTimeout(() => {
-      ensureProfileRow(authUser.id, email, name, 'artist')
+      ensureProfileRow(authUser.id, email, name, 'member')
         .then(callback)
         .catch(() => callback(null))
     }, 0)

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { formatAccountNumericId } from '@/lib/auth/accountId'
-import { editorDashboardPath } from '@/lib/auth/roles'
+import { homeDashboardPath } from '@/lib/auth/roles'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { IOSImage } from '@/components/ui/IOSImage'
 
@@ -23,12 +23,14 @@ export function NavUserIdentity({ onNavigate, layout = 'row', onLogout }: NavUse
 
   const handle = memberHandleFromUser(user)
   const profilePath = `/network/${handle}`
-  const dashboardTo = editorDashboardPath(user.role)
+  const dashboardTo = homeDashboardPath(user.role)
   const dashboardLabel = isSuperEditor
     ? 'Editorial Desk'
     : user.role === 'artist'
       ? 'My Studio'
-      : 'Dashboard'
+      : user.role === 'member'
+        ? 'My Network'
+        : 'Dashboard'
   const accountId = formatAccountNumericId(user.id)
   const username = user.username?.trim() ? `@${user.username.replace(/^@/, '')}` : `@${handle}`
 

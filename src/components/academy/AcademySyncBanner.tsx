@@ -26,7 +26,7 @@ export function AcademySyncBanner() {
         </p>
       </div>
       <div className="academy-sync-banner-actions">
-        <GoogleSignInButton intent="artist" label="Sign in with Google" />
+        <GoogleSignInButton intent="member" label="Sign in with Google" />
         <Link to="/login" className="ios-btn ios-btn-ghost">
           Login
         </Link>

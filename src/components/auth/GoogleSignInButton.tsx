@@ -4,14 +4,14 @@ import clsx from 'clsx'
 
 interface GoogleSignInButtonProps {
   className?: string
-  /** artist = default signup; desk = super editor; editor_apply = join / apply flow */
-  intent?: 'artist' | 'desk' | 'editor_apply'
+  /** member = default signup; artist = upgrade intent; desk = super editor; editor_apply = apply flow */
+  intent?: 'member' | 'artist' | 'desk' | 'editor_apply'
   label?: string
 }
 
 export function GoogleSignInButton({
   className,
-  intent = 'artist',
+  intent = 'member',
   label = 'Continue with Google',
 }: GoogleSignInButtonProps) {
   const { signInWithGoogle, mode, configHint } = useAuth()

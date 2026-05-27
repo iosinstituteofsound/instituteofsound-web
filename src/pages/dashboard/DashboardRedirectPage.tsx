@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { editorDashboardPath } from '@/lib/auth/roles'
+import { homeDashboardPath } from '@/lib/auth/roles'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 
 export default function DashboardRedirectPage() {
@@ -12,7 +12,7 @@ export default function DashboardRedirectPage() {
 
   return (
     <Navigate
-      to={editorDashboardPath(user.role)}
+      to={homeDashboardPath(user.role)}
       replace
     />
   )

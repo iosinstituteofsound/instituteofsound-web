@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { editorDashboardPath } from '@/lib/auth/roles'
-import { ArtistAuthPanel } from '@/components/auth/ArtistAuthPanel'
+import { homeDashboardPath } from '@/lib/auth/roles'
+import { NetworkAuthPanel } from '@/components/auth/NetworkAuthPanel'
 
 export default function LoginPage() {
   const { user } = useAuth()
@@ -9,8 +9,8 @@ export default function LoginPage() {
   const from = (location.state as { from?: string })?.from
 
   if (user) {
-    return <Navigate to={from ?? editorDashboardPath(user.role)} replace />
+    return <Navigate to={from ?? homeDashboardPath(user.role)} replace />
   }
 
-  return <ArtistAuthPanel />
+  return <NetworkAuthPanel title="Sign in" />
 }

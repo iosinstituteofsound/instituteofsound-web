@@ -15,9 +15,9 @@ export function getAuthConfigHint(): string | null {
   return null
 }
 
-export type SignInIntent = 'artist' | 'desk' | 'editor_apply'
+export type SignInIntent = 'member' | 'artist' | 'desk' | 'editor_apply'
 
-export async function signInWithGoogle(intent: SignInIntent = 'artist'): Promise<void> {
+export async function signInWithGoogle(intent: SignInIntent = 'member'): Promise<void> {
   if (!isSupabaseConfigured()) {
     throw new Error(
       'Google sign-in needs Supabase in .env. See SUPABASE_SETUP.md — enable Google provider in dashboard.'

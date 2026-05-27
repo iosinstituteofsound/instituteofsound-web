@@ -35,7 +35,7 @@ export function DiscoveryPathsPanel({ className }: DiscoveryPathsPanelProps) {
         </li>
         {tribeSlug && (
           <li>
-            <Link to="/community#feed" className="discovery-path-row">
+            <Link to="/community#genre-board" className="discovery-path-row">
               <span className="discovery-path-label">Your tribe</span>
               <span className="discovery-path-desc">
                 Weekly board for {SCENE_GENRES.find((g) => g.slug === tribeSlug)?.label ?? tribeSlug}

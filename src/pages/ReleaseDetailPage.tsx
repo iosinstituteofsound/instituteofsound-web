@@ -98,6 +98,18 @@ export default function ReleaseDetailPage() {
   return (
     <div className="release-page section-padding pt-28 pb-20">
       <div className="max-w-4xl mx-auto">
+        <nav className="text-xs text-muted uppercase tracking-widest mb-6">
+          <Link to="/" className="hover:text-mh-red">
+            Home
+          </Link>
+          <span className="mx-2">/</span>
+          <Link to={`/artist/${release.artistSlug}`} className="hover:text-mh-red">
+            {release.artistName}
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-signal">Premiere</span>
+        </nav>
+
         <p className="ios-kicker">Premiere</p>
         <p className="text-xs text-muted uppercase tracking-widest mt-2">
           {release.releaseType}

@@ -10,6 +10,8 @@ import { isValidSceneHub } from '@/lib/discovery/sceneRegistry'
 import { useSeo } from '@/hooks/useSeo'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonLd'
 import { IOSImage } from '@/components/ui/IOSImage'
+import { HubQuickLinks } from '@/components/ui/HubQuickLinks'
+import { HubPageFooter } from '@/components/ui/HubPageFooter'
 
 export default function SceneHubPage() {
   const { city: citySlug = '', genre: genreSlug = '' } = useParams<{
@@ -88,7 +90,15 @@ export default function SceneHubPage() {
             <Link to="/community#genre-board" className="ios-btn ios-btn-ghost !text-xs">
               Tribe board →
             </Link>
+            <Link
+              to={`/events?city=${citySlug}&genre=${genreSlug}`}
+              className="ios-btn ios-btn-ghost !text-xs"
+            >
+              Gigs this city →
+            </Link>
           </div>
+
+          <HubQuickLinks className="mt-6" activePath="/scenes" />
         </header>
 
         {data.editorialPick && (
@@ -179,6 +189,8 @@ export default function SceneHubPage() {
             </ol>
           </section>
         )}
+
+        <HubPageFooter backTo={{ label: 'All scenes', href: '/scenes' }} />
       </div>
     </div>
   )

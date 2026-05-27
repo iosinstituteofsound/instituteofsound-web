@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { editorDashboardPath, isEditorStaff } from '@/lib/auth/roles'
+import { homeDashboardPath, isEditorStaff } from '@/lib/auth/roles'
 import type { UserRole } from '@/lib/auth/types'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 
@@ -46,7 +46,7 @@ export function ProtectedRoute({ children, role }: ProtectedRouteProps) {
   }
 
   if (role && !roleAllowed(user.role, role)) {
-    return <Navigate to={editorDashboardPath(user.role)} replace />
+    return <Navigate to={homeDashboardPath(user.role)} replace />
   }
 
   return <>{children}</>

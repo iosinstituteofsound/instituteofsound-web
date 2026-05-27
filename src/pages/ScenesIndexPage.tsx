@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom'
 import { SectionHeading } from '@/components/ui/SectionHeading'
+import { PageManifestoLine } from '@/components/ui/PageManifestoLine'
+import { HubQuickLinks } from '@/components/ui/HubQuickLinks'
+import { HubPageFooter } from '@/components/ui/HubPageFooter'
 import { SCENE_CITIES, SCENE_GENRES } from '@/lib/discovery/sceneRegistry'
 import { useSeo } from '@/hooks/useSeo'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonLd'
@@ -28,9 +31,11 @@ export default function ScenesIndexPage() {
           titleAs="h1"
         />
 
-        <p className="discovery-anti-algo text-sm text-muted max-w-2xl mb-12 border-l-2 border-mh-red pl-4">
+        <HubQuickLinks className="mb-8" activePath="/scenes" />
+
+        <PageManifestoLine className="mb-12">
           Discovered by people. Not machines.
-        </p>
+        </PageManifestoLine>
 
         <div className="scenes-index-grid">
           {SCENE_CITIES.map((city) => (
@@ -52,11 +57,7 @@ export default function ScenesIndexPage() {
           ))}
         </div>
 
-        <p className="text-sm text-muted mt-12 text-center">
-          <Link to="/community" className="text-mh-red">
-            ← Back to the network
-          </Link>
-        </p>
+        <HubPageFooter />
       </div>
     </div>
   )

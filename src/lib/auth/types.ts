@@ -1,4 +1,4 @@
-export type UserRole = 'artist' | 'editor' | 'super_editor'
+export type UserRole = 'member' | 'artist' | 'editor' | 'super_editor'
 
 export type SubmissionStatus = 'pending' | 'in_review' | 'approved' | 'rejected'
 

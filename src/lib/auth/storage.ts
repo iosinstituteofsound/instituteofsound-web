@@ -55,6 +55,14 @@ export function seedDemoAccounts() {
     },
     {
       id: uid(),
+      email: 'member@ios.test',
+      name: 'Riya K.',
+      role: 'member',
+      createdAt: new Date().toISOString(),
+      passwordHash: hashPassword('member123'),
+    },
+    {
+      id: uid(),
       email: 'artist@ios.test',
       name: 'VOID ECHO',
       role: 'artist',
@@ -95,8 +103,8 @@ export function getUserById(id: string): User | null {
 }
 
 export function registerUser(input: RegisterInput): User {
-  if (input.role !== 'artist') {
-    throw new Error('Only artist registration is available.')
+  if (input.role !== 'member') {
+    throw new Error('Sign up creates a network member account. Upgrade to artist from your dashboard.')
   }
   seedDemoAccounts()
   const users = getUsers()

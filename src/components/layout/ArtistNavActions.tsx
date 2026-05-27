@@ -23,7 +23,8 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
     )
 
   if (user) {
-    const showEditorApply = user.role === 'artist' && !isEditorStaff(user.role)
+    const showEditorApply =
+      (user.role === 'member' || user.role === 'artist') && !isEditorStaff(user.role)
     const handleLogout = () => {
       void logout()
       onNavigate?.()

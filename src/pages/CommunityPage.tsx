@@ -21,6 +21,7 @@ import { CommunityCrewLeaderboard } from '@/components/community/CommunityCrewLe
 import { CommunityWeeklyChallenges } from '@/components/community/CommunityWeeklyChallenges'
 import { AcademyLoopMissions } from '@/components/academy/AcademyLoopMissions'
 import { DiscoveryPathsPanel } from '@/components/discovery/DiscoveryPathsPanel'
+import { HubQuickLinks } from '@/components/ui/HubQuickLinks'
 
 export default function CommunityPage() {
   const { user } = useAuth()
@@ -62,13 +63,15 @@ export default function CommunityPage() {
           <WireDigestPanel />
         </div>
 
+        <HubQuickLinks className="mb-8" activePath="/community" />
+
         <DiscoveryPathsPanel className="mb-12" />
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
           {ranks.map((r) => (
             <div
               key={r.rank}
-              className="border border-border p-4 text-center hover:border-neon/40 transition-colors"
+              className="ios-card p-4 text-center hover:border-mh-red/40 transition-colors"
               title={`${r.thresholdDb.toLocaleString()}+ dB`}
             >
               <RankBadge rank={r.rank} size="md" />

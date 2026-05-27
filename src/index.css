@@ -1364,6 +1364,71 @@ textarea.ios-input {
   color: var(--color-mh-red);
 }
 
+/* —— Member network dashboard —— */
+.member-dashboard {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--color-void);
+}
+
+.member-dashboard-inner {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 6.5rem clamp(1.25rem, 4vw, 3rem) 4rem;
+}
+
+.member-dashboard-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: 1.75rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.member-dashboard-paths {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .member-dashboard-paths {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.member-dashboard-path-card {
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.member-dashboard-path-card--artist {
+  border-color: rgba(212, 0, 0, 0.35);
+  background: linear-gradient(145deg, rgba(212, 0, 0, 0.06), transparent);
+}
+
+.member-dashboard-explore {
+  margin-bottom: 2.5rem;
+}
+
+.member-dashboard-explore-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .member-dashboard-explore-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 .artist-dash-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -6592,8 +6657,104 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 /* ── Discovery / scene hubs (Phase 14) ───────────────────────────── */
-.discovery-anti-algo {
+.discovery-anti-algo,
+.ios-manifesto-line {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  max-width: 42rem;
   font-style: italic;
+  border-left: 2px solid var(--color-rs-red);
+  padding-left: 1rem;
+  line-height: 1.55;
+}
+
+/* Home hero role picker */
+.ios-role-card {
+  display: block;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-border);
+  background: rgba(0, 0, 0, 0.25);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+}
+
+.ios-role-card:hover {
+  border-color: rgba(212, 0, 0, 0.55);
+  background: rgba(212, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+/* Hub pages — quick nav pills */
+.hub-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hub-quick-link {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-border);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-muted);
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.hub-quick-link:hover {
+  border-color: var(--color-rs-red);
+  color: var(--color-rs-red);
+}
+
+.hub-quick-link-active {
+  border-color: var(--color-rs-red);
+  color: var(--color-rs-red);
+  background: rgba(212, 0, 0, 0.08);
+}
+
+.hub-page-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.8rem;
+}
+
+.hub-page-footer-back,
+.hub-page-footer-link {
+  color: var(--color-muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+}
+
+.hub-page-footer-back:hover,
+.hub-page-footer-link:hover {
+  color: var(--color-rs-red);
+}
+
+.hub-page-footer-dot {
+  color: var(--color-border);
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .hub-page-footer-dot {
+    display: inline;
+  }
 }
 
 .discovery-paths {
@@ -6607,6 +6768,14 @@ html[data-perf='lite'] .metal-loader-core-beat {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .discovery-paths-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
 }
 
 .discovery-path-row {

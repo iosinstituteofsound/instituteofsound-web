@@ -1,8 +1,8 @@
 import type { User } from './types'
-import { isEditorStaff, isSuperEditor } from './roles'
+import { homeDashboardPath, isEditorStaff, isSuperEditor } from './roles'
 import type { EditorApplication } from '@/lib/editor-applications/types'
 
-export type OAuthIntent = 'artist' | 'desk' | 'editor_apply' | null
+export type OAuthIntent = 'member' | 'artist' | 'desk' | 'editor_apply' | null
 
 export function resolvePostLoginPath(
   user: User,
@@ -20,5 +20,9 @@ export function resolvePostLoginPath(
 
   if (application?.status === 'rejected') return '/editor/apply'
 
-  return '/artist/dashboard'
+  if (intent === 'artist' && user.role === 'member') {
+    return '/member/upgrade'
+  }
+
+  return homeDashboardPath(user.role)
 }

@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchCollabPost } from '@/lib/collab/service'
 import type { CollabBoardPost } from '@/lib/collab/types'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { SectionHeading } from '@/components/ui/SectionHeading'
+import { PageManifestoLine } from '@/components/ui/PageManifestoLine'
+import { HubQuickLinks } from '@/components/ui/HubQuickLinks'
+import { HubPageFooter } from '@/components/ui/HubPageFooter'
 import { CollabBoardFilters } from '@/components/collab/CollabBoardFilters'
 import { CollabPostComposer } from '@/components/collab/CollabPostComposer'
 import { CollabPostCard } from '@/components/collab/CollabPostCard'
@@ -55,15 +58,17 @@ export default function CollabBoardPage() {
     <div className="section-padding pt-32 pb-20">
       <div className="max-w-3xl mx-auto">
         <SectionHeading
-          label="Phase 15 · Network"
+          label="The Network"
           title="Collab board"
           subtitle="Post what you need. Find who is building. Replies stay on the board — no public DMs in v1."
           titleAs="h1"
         />
 
-        <p className="discovery-anti-algo text-sm text-muted max-w-2xl mb-8 border-l-2 border-mh-red pl-4">
-          Trust = completed collabs both sides confirm — not dB alone.
-        </p>
+        <HubQuickLinks className="mb-8" activePath="/collab" />
+
+        <PageManifestoLine className="mb-8">
+          Trust comes from completed collabs both sides confirm — not dB alone.
+        </PageManifestoLine>
 
         <CollabPostComposer onPosted={() => void refresh()} />
 
@@ -91,15 +96,7 @@ export default function CollabBoardPage() {
           ))}
         </div>
 
-        <p className="text-sm text-muted mt-12 text-center">
-          <Link to="/community" className="text-mh-red">
-            ← Back to the network
-          </Link>
-          {' · '}
-          <Link to="/scenes" className="text-mh-red">
-            India scenes
-          </Link>
-        </p>
+        <HubPageFooter />
       </div>
     </div>
   )

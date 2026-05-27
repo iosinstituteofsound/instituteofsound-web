@@ -1,20 +1,20 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { editorDashboardPath } from '@/lib/auth/roles'
-import { ArtistAuthPanel } from '@/components/auth/ArtistAuthPanel'
+import { homeDashboardPath } from '@/lib/auth/roles'
+import { NetworkAuthPanel } from '@/components/auth/NetworkAuthPanel'
 
 /** Same as login — Google only (no email/password form) */
 export default function RegisterPage() {
   const { user } = useAuth()
 
   if (user) {
-    return <Navigate to={editorDashboardPath(user.role)} replace />
+    return <Navigate to={homeDashboardPath(user.role)} replace />
   }
 
   return (
-    <ArtistAuthPanel
+    <NetworkAuthPanel
       title="Join with Google"
-      subtitle="Create your free artist account in one tap. Build your band profile and submit tracks — no password or email confirmation."
+      subtitle="Free network account in one tap — feed, dB, scenes, collab, and events. Upgrade to an artist page when you're ready."
     />
   )
 }

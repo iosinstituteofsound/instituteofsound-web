@@ -124,26 +124,17 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
                 </p>
 
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <Link
-                    to="/community"
-                    className="border border-border p-4 hover:border-mh-red/60 transition-colors"
-                  >
-                    <p className="font-display font-bold uppercase tracking-wide">I’m a Listener</p>
-                    <p className="text-xs text-muted mt-1">Spin tracks · join crews · rank up</p>
+                  <Link to="/community" className="ios-role-card">
+                    <p className="font-display font-bold uppercase tracking-wide text-sm">I’m a Listener</p>
+                    <p className="text-xs text-muted mt-1">Spin tracks · crews · India scenes</p>
                   </Link>
-                  <Link
-                    to="/submissions"
-                    className="border border-border p-4 hover:border-mh-red/60 transition-colors"
-                  >
-                    <p className="font-display font-bold uppercase tracking-wide">I’m an Artist</p>
-                    <p className="text-xs text-muted mt-1">Build your page · EPK · get discovered</p>
+                  <Link to="/submissions" className="ios-role-card">
+                    <p className="font-display font-bold uppercase tracking-wide text-sm">I’m an Artist</p>
+                    <p className="text-xs text-muted mt-1">Premieres · EPK · collab board</p>
                   </Link>
-                  <Link
-                    to="/editor/join"
-                    className="border border-border p-4 hover:border-mh-red/60 transition-colors"
-                  >
-                    <p className="font-display font-bold uppercase tracking-wide">I’m an Editor</p>
-                    <p className="text-xs text-muted mt-1">Publish features · curate the wire</p>
+                  <Link to="/editor/join" className="ios-role-card">
+                    <p className="font-display font-bold uppercase tracking-wide text-sm">I’m an Editor</p>
+                    <p className="text-xs text-muted mt-1">Features · wire · verify gigs</p>
                   </Link>
                 </div>
               </div>
@@ -177,10 +168,10 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
 
               <div className="absolute -bottom-4 -left-4 md:-left-8 bg-void border border-border p-4 min-w-[140px] shadow-[0_0_40px_-10px_rgba(212,0,0,0.35)] z-10">
                 <p className="text-[9px] tracking-[0.3em] text-mh-red uppercase font-bold">
-                  Now Broadcasting
+                  On the wire
                 </p>
-                <p className="font-display text-2xl font-bold mt-1 tabular-nums">24/7</p>
-                <p className="text-[10px] text-muted mt-1">Underground only</p>
+                <p className="font-display text-2xl font-bold mt-1">Weekly</p>
+                <p className="text-[10px] text-muted mt-1">Spins · tribes · scenes</p>
               </div>
             </div>
           </Reveal>

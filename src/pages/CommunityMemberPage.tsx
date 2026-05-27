@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { formatAccountNumericId } from '@/lib/auth/accountId'
-import { editorDashboardPath } from '@/lib/auth/roles'
+import { homeDashboardPath } from '@/lib/auth/roles'
 import {
   fetchMemberActivity,
   fetchMemberPosts,
@@ -171,7 +171,7 @@ export default function CommunityMemberPage() {
   }
 
   const accountId = formatAccountNumericId(profile.userId)
-  const dashboardHref = user ? editorDashboardPath(user.role) : undefined
+  const dashboardHref = user ? homeDashboardPath(user.role) : undefined
 
   return (
     <div className="member-profile-page">

@@ -36,22 +36,29 @@ export function CommunitySection() {
 
         <CommunityLeaderboard entries={entries} compact />
 
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-          <Link
-            to="/community"
-            className="text-xs tracking-[0.2em] uppercase text-muted hover:text-rs-red transition-colors"
-          >
-            Network feed & tribes →
-          </Link>
-          <span className="text-muted text-xs" aria-hidden>
-            ·
-          </span>
-          <Link
-            to="/community#feed"
-            className="text-xs tracking-[0.2em] uppercase text-muted hover:text-rs-red transition-colors"
-          >
-            Post a spin →
-          </Link>
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+          {(
+            [
+              ['Network', '/community'],
+              ['Scenes', '/scenes'],
+              ['Events', '/events'],
+              ['Collab', '/collab'],
+            ] as const
+          ).map(([label, href], i) => (
+            <span key={href} className="flex items-center gap-4">
+              {i > 0 && (
+                <span className="text-muted text-xs hidden sm:inline" aria-hidden>
+                  ·
+                </span>
+              )}
+              <Link
+                to={href}
+                className="text-xs tracking-[0.2em] uppercase text-muted hover:text-rs-red transition-colors"
+              >
+                {label} →
+              </Link>
+            </span>
+          ))}
         </div>
       </div>
     </section>

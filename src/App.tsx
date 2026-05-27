@@ -64,6 +64,12 @@ const DashboardRedirectPage = lazy(
 const ArtistDashboardPage = lazy(
   () => import('@/pages/dashboard/ArtistDashboardPage')
 )
+const MemberDashboardPage = lazy(
+  () => import('@/pages/dashboard/MemberDashboardPage')
+)
+const MemberUpgradeArtistPage = lazy(
+  () => import('@/pages/dashboard/MemberUpgradeArtistPage')
+)
 const EditorDashboardPage = lazy(
   () => import('@/pages/dashboard/EditorDashboardPage')
 )
@@ -133,13 +139,29 @@ export default function App() {
             <Route
               path="editor/apply"
               element={
-                <ProtectedRoute role="artist">
+                <ProtectedRoute role={['member', 'artist']}>
                   <EditorApplyPage />
                 </ProtectedRoute>
               }
             />
             <Route path="register" element={<RegisterPage />} />
             <Route path="dashboard" element={<DashboardRedirectPage />} />
+            <Route
+              path="member/dashboard"
+              element={
+                <ProtectedRoute role="member">
+                  <MemberDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="member/upgrade"
+              element={
+                <ProtectedRoute role="member">
+                  <MemberUpgradeArtistPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="artist/dashboard"
               element={

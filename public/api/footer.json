@@ -10,9 +10,12 @@
   "explore": [
     { "label": "Discover Artists", "href": "/discover" },
     { "label": "Editorial Features", "href": "/features" },
+    { "label": "Community", "href": "/community" },
+    { "label": "India Scenes", "href": "/scenes" },
+    { "label": "Underground Events", "href": "/events" },
+    { "label": "Collab Board", "href": "/collab" },
     { "label": "Signals", "href": "/signals" },
-    { "label": "Playlists", "href": "/playlists" },
-    { "label": "Community", "href": "/community" }
+    { "label": "Playlists", "href": "/playlists" }
   ],
   "learn": [
     { "label": "Production Academy", "href": "/academy" },

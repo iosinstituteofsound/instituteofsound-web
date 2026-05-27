@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { SectionHeading } from '@/components/ui/SectionHeading'
+import { PageManifestoLine } from '@/components/ui/PageManifestoLine'
+import { HubQuickLinks } from '@/components/ui/HubQuickLinks'
+import { HubPageFooter } from '@/components/ui/HubPageFooter'
 import { EventCard } from '@/components/events/EventCard'
 import { EventSubmitForm } from '@/components/events/EventSubmitForm'
 import { EventBoardFilters } from '@/components/events/EventBoardFilters'
@@ -72,9 +75,11 @@ export default function EventsIndexPage() {
           titleAs="h1"
         />
 
-        <p className="discovery-anti-algo text-sm text-muted max-w-2xl mb-8 border-l-2 border-mh-red pl-4">
+        <HubQuickLinks className="mb-8" activePath="/events" />
+
+        <PageManifestoLine className="mb-8">
           Real shows in your city — not a dead Ticketmaster clone.
-        </p>
+        </PageManifestoLine>
 
         <EventSubmitForm onSubmitted={() => void refresh()} />
 
@@ -100,19 +105,7 @@ export default function EventsIndexPage() {
           ))}
         </div>
 
-        <p className="text-sm text-muted mt-12 text-center">
-          <Link to="/scenes" className="text-mh-red">
-            Scene hubs
-          </Link>
-          {' · '}
-          <Link to="/collab" className="text-mh-red">
-            Collab board
-          </Link>
-          {' · '}
-          <Link to="/community" className="text-mh-red">
-            Network
-          </Link>
-        </p>
+        <HubPageFooter backTo={{ label: 'Network', href: '/community' }} />
       </div>
     </div>
   )
