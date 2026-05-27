@@ -66,6 +66,9 @@ export function DashboardCommunityHub() {
           <Link to="/collab" className="ios-btn ios-btn-ghost !text-xs">
             Collab board →
           </Link>
+          <Link to="/events" className="ios-btn ios-btn-ghost !text-xs">
+            Events →
+          </Link>
         </div>
       </div>
 

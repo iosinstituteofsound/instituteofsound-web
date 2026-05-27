@@ -3,6 +3,8 @@ import { fetchGenreWeeklyLeaderboard } from '@/lib/community/service'
 import { fetchCrewWarsV2 } from '@/lib/community/wireEvents'
 import { fetchTribeRecentSpins } from '@/lib/community/wireHighlights'
 import { localListReleasesForScene } from '@/lib/releases/localReleases'
+import { fetchEventsByScene } from '@/lib/events/service'
+import type { SceneEvent } from '@/lib/events/types'
 import type { LeaderboardEntry } from '@/lib/community/service'
 import type { CrewWarsEntry } from '@/lib/community/wireEvents'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
@@ -38,6 +40,7 @@ export interface SceneHubData {
   tribeLeaderboard: LeaderboardEntry[]
   recentSpins: CommunityFeedPost[]
   crews: CrewWarsEntry[]
+  events: SceneEvent[]
   rankingNote: string
 }
 
@@ -127,13 +130,15 @@ export async function fetchSceneHub(
   const genre = findGenreBySlug(genreSlug)
   if (!city || !genre) return null
 
-  const [releases, editorialPick, tribeLeaderboard, recentSpins, crews] = await Promise.all([
-    fetchSceneReleases(citySlug, genreSlug, city.label),
-    fetchSceneEditorialPick(citySlug, genreSlug),
-    fetchGenreWeeklyLeaderboard(genreSlug, 10),
-    fetchTribeRecentSpins(genreSlug, 4),
-    fetchCrewWarsV2(8),
-  ])
+  const [releases, editorialPick, tribeLeaderboard, recentSpins, crews, events] =
+    await Promise.all([
+      fetchSceneReleases(citySlug, genreSlug, city.label),
+      fetchSceneEditorialPick(citySlug, genreSlug),
+      fetchGenreWeeklyLeaderboard(genreSlug, 10),
+      fetchTribeRecentSpins(genreSlug, 4),
+      fetchCrewWarsV2(8),
+      fetchEventsByScene(citySlug, genreSlug, 8),
+    ])
 
   const crewsInScene = crews.filter(
     (c) => !c.genreSlug || c.genreSlug === genreSlug
@@ -149,6 +154,7 @@ export async function fetchSceneHub(
     tribeLeaderboard,
     recentSpins,
     crews: crewsInScene,
+    events,
     rankingNote:
       'Ranked by weekly dB in this taste tribe — not a black-box algorithm. Spins and premieres from people in the scene.',
   }

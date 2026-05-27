@@ -6945,6 +6945,47 @@ html[data-perf='lite'] .metal-loader-core-beat {
   padding: 0.2rem 0.5rem;
 }
 
+/* ── Events lite (Phase 16) ────────────────────────────────────────── */
+.scene-event-card,
+.event-submit {
+  padding: 1.35rem 1.5rem;
+}
+
+.scene-event-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.scene-event-kind {
+  color: var(--color-rs-red);
+  font-weight: 700;
+}
+
+.scene-event-date {
+  color: var(--color-muted);
+}
+
+.scene-event-venue {
+  font-size: 0.9rem;
+}
+
+.scene-event-actions {
+  align-items: center;
+}
+
+.scene-events-empty {
+  padding: 1.5rem;
+}
+
+.editor-event-row {
+  padding: 1.25rem 1.5rem;
+}
+
 .spin-of-week {
   padding: 1.35rem 1.5rem;
 }

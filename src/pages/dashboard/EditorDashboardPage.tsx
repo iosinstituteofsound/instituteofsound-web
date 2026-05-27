@@ -12,6 +12,7 @@ import { appendWireSuggestionToNotes } from '@/lib/editorial/editorialBridge'
 import { EditorialTribeBridge } from '@/components/editorial/EditorialTribeBridge'
 import { EditorProfilePanel } from '@/components/dashboard/EditorProfilePanel'
 import { EditorApplicationsPanel } from '@/components/editor-applications/EditorApplicationsPanel'
+import { EditorEventsPanel } from '@/components/dashboard/EditorEventsPanel'
 import { listArtistProfilesForEditor } from '@/lib/artist-profile/service'
 import type { ArtistProfile } from '@/lib/artist-profile/types'
 import {
@@ -45,6 +46,7 @@ type EditorTab =
   | 'applications'
   | 'queue'
   | 'wire'
+  | 'events'
   | 'write'
   | 'drafts'
   | 'network'
@@ -218,6 +220,7 @@ export default function EditorDashboardPage() {
         { id: 'applications', label: 'Editor Applications' },
         { id: 'queue', label: 'Submission Queue' },
         { id: 'wire', label: 'Wire Picks' },
+        { id: 'events', label: 'Events' },
         { id: 'write', label: 'Write Editorial' },
         { id: 'drafts', label: `My Drafts (${drafts.length})` },
         { id: 'network', label: 'Network' },
@@ -226,6 +229,7 @@ export default function EditorDashboardPage() {
     : [
         { id: 'queue', label: 'Submission Queue' },
         { id: 'wire', label: 'Wire Picks' },
+        { id: 'events', label: 'Events' },
         { id: 'write', label: 'Write Editorial' },
         { id: 'drafts', label: `My Drafts (${drafts.length})` },
         { id: 'network', label: 'Network' },
@@ -370,6 +374,8 @@ export default function EditorDashboardPage() {
           />
         )}
 
+        {tab === 'events' && <EditorEventsPanel />}
+
         {tab === 'profile' && (
           <EditorProfilePanel user={user} onSaved={refreshUser} />
         )}
@@ -382,6 +388,7 @@ export default function EditorDashboardPage() {
           tab !== 'profile' &&
           tab !== 'network' &&
           tab !== 'wire' &&
+          tab !== 'events' &&
           tab !== 'applications' ? (
           <LoadingTransmission variant="compact" />
         ) : tab === 'profile' ? null : tab === 'analytics' && isSuperEditor ? (

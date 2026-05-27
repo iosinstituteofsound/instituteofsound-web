@@ -4,6 +4,7 @@ import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { CommunityLeaderboard } from '@/components/community/CommunityLeaderboard'
 import { CommunityFeedCard } from '@/components/community/CommunityFeedCard'
 import { SceneReleaseRail } from '@/components/discovery/SceneReleaseRail'
+import { SceneEventsRail } from '@/components/events/SceneEventsRail'
 import { useSceneHub } from '@/hooks/useSceneHub'
 import { isValidSceneHub } from '@/lib/discovery/sceneRegistry'
 import { useSeo } from '@/hooks/useSeo'
@@ -117,6 +118,20 @@ export default function SceneHubPage() {
             Premieres in this scene
           </h2>
           <SceneReleaseRail releases={data.releases} />
+        </section>
+
+        <section className="mb-12" aria-labelledby="scene-gigs">
+          <h2 id="scene-gigs" className="font-display text-2xl font-bold mb-2">
+            Gigs this month
+          </h2>
+          <p className="text-sm text-muted mb-4">
+            Editor-verified listings in {data.cityLabel} · {data.genreLabel}
+          </p>
+          <SceneEventsRail
+            events={data.events}
+            citySlug={data.citySlug}
+            genreSlug={data.genreSlug}
+          />
         </section>
 
         <div className="scene-hub-grid">

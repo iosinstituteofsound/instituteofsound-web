@@ -63,6 +63,12 @@ export function DiscoveryPathsPanel({ className }: DiscoveryPathsPanelProps) {
           </li>
         )}
         <li>
+          <Link to="/events" className="discovery-path-row">
+            <span className="discovery-path-label">Underground events</span>
+            <span className="discovery-path-desc">Editor-verified gigs in your city — RSVP on the wire</span>
+          </Link>
+        </li>
+        <li>
           <Link to="/collab" className="discovery-path-row">
             <span className="discovery-path-label">Collab board</span>
             <span className="discovery-path-desc">Need / offer calls — city, genre, skill filters</span>

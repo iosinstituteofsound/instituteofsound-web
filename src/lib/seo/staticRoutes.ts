@@ -118,6 +118,17 @@ const PUBLIC_PAGES: Record<string, SeoConfig> = {
       ]),
     }
   ),
+  '/events': page(
+    '/events',
+    'Underground Events',
+    'India-first gig listings — editor-verified shows with RSVP on the network.',
+    {
+      jsonLd: breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Events', path: '/events' },
+      ]),
+    }
+  ),
   '/submissions': page(
     '/submissions',
     'Submit Your Work',
