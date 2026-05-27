@@ -112,6 +112,7 @@ export async function supabaseCreateDraft(
       youtube_url: input.youtubeUrl?.trim() || null,
       gallery_image_urls: input.galleryImageUrls?.filter(Boolean) ?? [],
       artist_profile_id: input.artistProfileId ?? null,
+      linked_community_post_id: input.linkedCommunityPostId ?? null,
       slug,
       featured_on_homepage: featuredOnHomepage,
       status: 'draft',

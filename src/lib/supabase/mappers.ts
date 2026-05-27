@@ -44,6 +44,7 @@ export interface DraftRow {
   youtube_url: string | null
   gallery_image_urls: string[] | null
   artist_profile_id: string | null
+  linked_community_post_id: string | null
   slug: string | null
   featured_on_homepage: boolean | null
   published_at: string | null
@@ -102,6 +103,7 @@ export function mapDraft(row: DraftRow): EditorialDraft {
     galleryImageUrls:
       row.gallery_image_urls?.filter((u) => u?.trim()).map((u) => u.trim()) ?? undefined,
     artistProfileId: row.artist_profile_id ?? undefined,
+    linkedCommunityPostId: row.linked_community_post_id ?? undefined,
     slug: row.slug ?? undefined,
     featuredOnHomepage: row.featured_on_homepage ?? undefined,
     publishedAt: row.published_at ?? undefined,

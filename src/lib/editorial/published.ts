@@ -7,6 +7,8 @@ import { editorialExcerpt } from '@/lib/editorial/richText'
 import { formatEditorByline, type EditorBylineSource } from '@/lib/editorial/editorByline'
 import { ensureUniqueSlug, slugifyArtistName } from '@/lib/artist-profile/slug'
 import { editorialTypeLabel, isEditorialReviewType } from '@/lib/editorial/labels'
+import type { CommunityFeedPost } from '@/lib/community/feedTypes'
+import { fetchCommunityPostById } from '@/lib/editorial/editorialBridge'
 import type { CoverStory, Feature, Review } from '@/types'
 
 const FALLBACK_IMAGE =
@@ -151,6 +153,7 @@ export type FeatureArticle = Feature & {
   galleryImageUrls?: string[]
   artistProfileSlug?: string
   artistProfileName?: string
+  linkedTransmission?: CommunityFeedPost
 }
 
 export function draftToFeatureArticle(
@@ -258,11 +261,17 @@ export async function getPublishedFeatureBySlug(
   const match = published.find((d) => d.slug === slug)
   if (!match) return null
   const article = draftToFeatureArticle(match)
-  const artist = await resolveArtistProfileLink(match)
+  const [artist, linkedTransmission] = await Promise.all([
+    resolveArtistProfileLink(match),
+    match.linkedCommunityPostId
+      ? fetchCommunityPostById(match.linkedCommunityPostId)
+      : Promise.resolve(null),
+  ])
   return {
     ...article,
     artistProfileSlug: artist.slug,
     artistProfileName: artist.name ?? (match.subject?.trim() || undefined),
+    linkedTransmission: linkedTransmission ?? undefined,
   }
 }
 

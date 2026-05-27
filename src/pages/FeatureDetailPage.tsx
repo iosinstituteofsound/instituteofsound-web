@@ -17,6 +17,9 @@ import { getSiteUrl } from '@/lib/auth/siteUrl'
 import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonLd'
 import { buildEditorialShareMeta } from '@/lib/share/editorialShareMeta'
 import { EditorialSubjectLinks } from '@/components/editorial/EditorialSubjectLinks'
+import { FeaturedTransmissionBlock } from '@/components/editorial/FeaturedTransmissionBlock'
+import { EditorialTribeBridge } from '@/components/editorial/EditorialTribeBridge'
+import { tribeSlugFromGenreLabel } from '@/lib/editorial/tagBridge'
 
 export default function FeatureDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -126,7 +129,14 @@ export default function FeatureDetailPage() {
             artistProfileSlug={feature.artistProfileSlug}
             artistProfileName={feature.artistProfileName}
             authorUsername={feature.authorUsername}
+            tribeSlug={tribeSlugFromGenreLabel(feature.subject) ?? undefined}
           />
+
+          <EditorialTribeBridge genreLabel={feature.subject} />
+
+          {feature.linkedTransmission && (
+            <FeaturedTransmissionBlock post={feature.linkedTransmission} />
+          )}
 
           {shareMeta && (
             <EditorialShareBar

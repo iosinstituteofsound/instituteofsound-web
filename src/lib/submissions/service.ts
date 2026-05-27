@@ -40,6 +40,7 @@ export interface CreateDraftInput {
   youtubeUrl?: string
   galleryImageUrls?: string[]
   artistProfileId?: string
+  linkedCommunityPostId?: string
   /** When true, article appears on homepage after publish (default: true for features) */
   featuredOnHomepage?: boolean
 }
@@ -150,6 +151,7 @@ export async function createEditorialDraft(
     youtubeUrl: input.youtubeUrl?.trim() || undefined,
     galleryImageUrls: input.galleryImageUrls?.filter(Boolean),
     artistProfileId: input.artistProfileId,
+    linkedCommunityPostId: input.linkedCommunityPostId,
     slug: slugifyArtistName(input.title),
     featuredOnHomepage,
     status: 'draft',

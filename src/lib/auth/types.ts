@@ -59,6 +59,7 @@ export interface EditorialDraft {
   youtubeUrl?: string
   galleryImageUrls?: string[]
   artistProfileId?: string
+  linkedCommunityPostId?: string
   slug?: string
   featuredOnHomepage?: boolean
   publishedAt?: string

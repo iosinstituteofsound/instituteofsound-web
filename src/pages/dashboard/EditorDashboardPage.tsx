@@ -7,6 +7,9 @@ import { getSuperAdminAnalytics } from '@/lib/analytics/service'
 import type { SuperAdminAnalytics } from '@/lib/analytics/types'
 import { SuperAdminAnalyticsPanel } from '@/components/dashboard/SuperAdminAnalytics'
 import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
+import { EditorWirePicksPanel } from '@/components/dashboard/EditorWirePicksPanel'
+import { appendWireSuggestionToNotes } from '@/lib/editorial/editorialBridge'
+import { EditorialTribeBridge } from '@/components/editorial/EditorialTribeBridge'
 import { EditorProfilePanel } from '@/components/dashboard/EditorProfilePanel'
 import { EditorApplicationsPanel } from '@/components/editor-applications/EditorApplicationsPanel'
 import { listArtistProfilesForEditor } from '@/lib/artist-profile/service'
@@ -37,7 +40,15 @@ import { EditorialGalleryUpload } from '@/components/editor/EditorialGalleryUplo
 import { EDITORIAL_TYPE_OPTIONS, editorialTypeLabel } from '@/lib/editorial/labels'
 import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richText'
 
-type EditorTab = 'analytics' | 'applications' | 'queue' | 'write' | 'drafts' | 'network' | 'profile'
+type EditorTab =
+  | 'analytics'
+  | 'applications'
+  | 'queue'
+  | 'wire'
+  | 'write'
+  | 'drafts'
+  | 'network'
+  | 'profile'
 type FilterStatus = 'all' | SubmissionStatus
 
 export default function EditorDashboardPage() {
@@ -64,6 +75,8 @@ export default function EditorDashboardPage() {
   const [draftGalleryUrls, setDraftGalleryUrls] = useState<string[]>([])
   const [draftArtistProfileId, setDraftArtistProfileId] = useState('')
   const [draftFeaturedOnHomepage, setDraftFeaturedOnHomepage] = useState(true)
+  const [draftLinkedPostId, setDraftLinkedPostId] = useState<string | null>(null)
+  const [suggestWireOnApprove, setSuggestWireOnApprove] = useState(true)
   const [artistProfiles, setArtistProfiles] = useState<ArtistProfile[]>([])
 
   const refresh = useCallback(async () => {
@@ -127,7 +140,11 @@ export default function EditorDashboardPage() {
     if (!selected) return
     setReviewing(true)
     try {
-      await reviewSubmission(selected.id, user, { status, editorNotes })
+      const notes =
+        status === 'approved' && suggestWireOnApprove
+          ? appendWireSuggestionToNotes(editorNotes)
+          : editorNotes
+      await reviewSubmission(selected.id, user, { status, editorNotes: notes })
       setMessage(
         status === 'approved'
           ? `Approved "${selected.trackTitle}"`
@@ -161,8 +178,10 @@ export default function EditorDashboardPage() {
         youtubeUrl: draftYoutubeUrl || undefined,
         galleryImageUrls: draftGalleryUrls.length > 0 ? draftGalleryUrls : undefined,
         artistProfileId: draftArtistProfileId || undefined,
+        linkedCommunityPostId: draftLinkedPostId || undefined,
         featuredOnHomepage: draftFeaturedOnHomepage,
       })
+      setDraftLinkedPostId(null)
       setDraftTitle('')
       setDraftCoverUrl('')
       setDraftSpotifyUrl('')
@@ -198,6 +217,7 @@ export default function EditorDashboardPage() {
         { id: 'analytics', label: 'Analytics' },
         { id: 'applications', label: 'Editor Applications' },
         { id: 'queue', label: 'Submission Queue' },
+        { id: 'wire', label: 'Wire Picks' },
         { id: 'write', label: 'Write Editorial' },
         { id: 'drafts', label: `My Drafts (${drafts.length})` },
         { id: 'network', label: 'Network' },
@@ -205,6 +225,7 @@ export default function EditorDashboardPage() {
       ]
     : [
         { id: 'queue', label: 'Submission Queue' },
+        { id: 'wire', label: 'Wire Picks' },
         { id: 'write', label: 'Write Editorial' },
         { id: 'drafts', label: `My Drafts (${drafts.length})` },
         { id: 'network', label: 'Network' },
@@ -338,6 +359,17 @@ export default function EditorDashboardPage() {
 
         {tab === 'network' && <DashboardCommunityHub />}
 
+        {tab === 'wire' && (
+          <EditorWirePicksPanel
+            selectedPostId={draftLinkedPostId}
+            onLinkToDraft={(postId) => {
+              setDraftLinkedPostId(postId)
+              setMessage('Spin linked — open Write Editorial and save draft to embed on publish.')
+              setTab('write')
+            }}
+          />
+        )}
+
         {tab === 'profile' && (
           <EditorProfilePanel user={user} onSaved={refreshUser} />
         )}
@@ -349,6 +381,7 @@ export default function EditorDashboardPage() {
           tab !== 'analytics' &&
           tab !== 'profile' &&
           tab !== 'network' &&
+          tab !== 'wire' &&
           tab !== 'applications' ? (
           <LoadingTransmission variant="compact" />
         ) : tab === 'profile' ? null : tab === 'analytics' && isSuperEditor ? (
@@ -450,7 +483,13 @@ export default function EditorDashboardPage() {
                         </div>
                         <div>
                           <dt className="text-[10px] tracking-widest uppercase text-muted">Genre</dt>
-                          <dd>{selected.genre}</dd>
+                          <dd>
+                            {selected.genre}
+                            <EditorialTribeBridge
+                              genreLabel={selected.genre}
+                              className="editorial-tribe-bridge mt-2"
+                            />
+                          </dd>
                         </div>
                         <div>
                           <dt className="text-[10px] tracking-widest uppercase text-muted">Description</dt>
@@ -465,6 +504,22 @@ export default function EditorDashboardPage() {
                       >
                         Open Track →
                       </a>
+
+                      <label className="flex items-start gap-3 cursor-pointer border border-border px-4 py-3 bg-surface/50 mt-6">
+                        <input
+                          type="checkbox"
+                          className="mt-1"
+                          checked={suggestWireOnApprove}
+                          onChange={(e) => setSuggestWireOnApprove(e.target.checked)}
+                        />
+                        <span className="text-sm leading-relaxed">
+                          <strong className="text-foreground block text-xs tracking-widest uppercase mb-1">
+                            Suggest network spin on approve
+                          </strong>
+                          Appends a note inviting the artist to post on{' '}
+                          <code className="text-foreground">/community</code> for dB and tribe boards.
+                        </span>
+                      </label>
 
                       <div className="mt-6">
                         <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
@@ -566,6 +621,35 @@ export default function EditorDashboardPage() {
                     onChange={(e) => setDraftSubject(e.target.value)}
                     className="w-full bg-surface border border-border px-4 py-3 text-sm focus:border-rs-red focus:outline-none"
                   />
+                </div>
+                <div className="border border-border px-4 py-3 bg-surface/50">
+                  <p className="text-xs tracking-widest uppercase text-muted mb-2">
+                    Linked network spin
+                  </p>
+                  {draftLinkedPostId ? (
+                    <p className="text-sm">
+                      Spin attached ·{' '}
+                      <button
+                        type="button"
+                        className="text-rs-red underline"
+                        onClick={() => setDraftLinkedPostId(null)}
+                      >
+                        Remove
+                      </button>
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted">
+                      Pick a spin from{' '}
+                      <button
+                        type="button"
+                        className="text-rs-red underline"
+                        onClick={() => setTab('wire')}
+                      >
+                        Wire Picks
+                      </button>{' '}
+                      to embed on the published article.
+                    </p>
+                  )}
                 </div>
                 {isSuperEditor && artistProfiles.length > 0 && (
                   <div>
@@ -702,6 +786,11 @@ export default function EditorDashboardPage() {
                       {d.artistProfileId && (
                         <p className="text-xs text-muted mt-2">
                           Linked artist profile · Press & editorial section when published
+                        </p>
+                      )}
+                      {d.linkedCommunityPostId && (
+                        <p className="text-xs text-muted mt-2">
+                          Linked network spin · Featured transmission on article
                         </p>
                       )}
                       {(d.featuredOnHomepage ?? d.type === 'feature') && d.status === 'published' && (
