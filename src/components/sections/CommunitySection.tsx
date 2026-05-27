@@ -4,6 +4,7 @@ import { useCommunityLeaderboard } from '@/hooks/useCommunity'
 import { MagazineSectionHeading } from '@/components/ui/MagazineSectionHeading'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { CommunityLeaderboard } from '@/components/community/CommunityLeaderboard'
+import { SpinOfTheWeekHero } from '@/components/community/SpinOfTheWeekHero'
 
 export function CommunitySection() {
   const ranks = rankInfoList()
@@ -17,6 +18,8 @@ export function CommunitySection() {
           title="The Movement"
           subtitle="Spin tracks on the wire · earn dB in Academy · rank up from Listener to Operator."
         />
+
+        <SpinOfTheWeekHero variant="rail" className="mb-10" />
 
         <div className="flex flex-wrap gap-3 mb-10">
           {ranks.map((r) => (

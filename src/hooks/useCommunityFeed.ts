@@ -5,19 +5,34 @@ import {
   type CommunityFeedPost,
 } from '@/lib/community/feedService'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
+import {
+  feedGenreParam,
+  feedKindParam,
+  type CommunityFeedFilter,
+} from '@/lib/community/feedFilters'
 
-export function useCommunityFeed(limit = 30) {
+export function useCommunityFeed(
+  limit = 30,
+  filter: CommunityFeedFilter = 'all',
+  tribeSlug?: string | null
+) {
   const [posts, setPosts] = useState<CommunityFeedPost[]>([])
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(async () => {
     setLoading(true)
     try {
-      setPosts(await fetchCommunityFeed(limit))
+      setPosts(
+        await fetchCommunityFeed({
+          limit,
+          kind: feedKindParam(filter),
+          genreSlug: feedGenreParam(filter, tribeSlug),
+        })
+      )
     } finally {
       setLoading(false)
     }
-  }, [limit])
+  }, [limit, filter, tribeSlug])
 
   useEffect(() => {
     void refresh()

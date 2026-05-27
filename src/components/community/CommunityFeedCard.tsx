@@ -15,6 +15,7 @@ interface CommunityFeedCardProps {
   isYou?: boolean
   linkProfile?: boolean
   variant?: 'default' | 'profile'
+  className?: string
   onHidden?: () => void
   onReactionChange?: () => void
 }
@@ -31,6 +32,7 @@ export function CommunityFeedCard({
   isYou,
   linkProfile = true,
   variant = 'default',
+  className,
   onHidden,
   onReactionChange,
 }: CommunityFeedCardProps) {
@@ -86,7 +88,8 @@ export function CommunityFeedCard({
       className={clsx(
         'community-feed-card ios-card',
         isYou && 'community-feed-card-you',
-        isProfileFeed && 'community-feed-card-profile'
+        isProfileFeed && 'community-feed-card-profile',
+        className
       )}
     >
       <header

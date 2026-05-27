@@ -75,18 +75,39 @@ function notifyFeed() {
   window.dispatchEvent(new Event(COMMUNITY_FEED_EVENT))
 }
 
-export async function fetchCommunityFeed(limit = 30): Promise<CommunityFeedPost[]> {
+export interface CommunityFeedQuery {
+  limit?: number
+  kind?: 'spin' | 'drop' | null
+  genreSlug?: string | null
+}
+
+export async function fetchCommunityFeed(
+  limitOrQuery: number | CommunityFeedQuery = 30
+): Promise<CommunityFeedPost[]> {
+  const query: CommunityFeedQuery =
+    typeof limitOrQuery === 'number' ? { limit: limitOrQuery } : limitOrQuery
+  const limit = query.limit ?? 30
+  const kind = query.kind ?? null
+  const genreSlug = query.genreSlug ?? null
+
   if (!isSupabaseConfigured()) {
-    return localApplyReactions(
-      localListFeed(limit).map((p) => ({
+    let posts = localApplyReactions(
+      localListFeed(limit * 2).map((p) => ({
         ...p,
         reactions: p.reactions ?? emptyReactions(),
       }))
     )
+    if (kind) posts = posts.filter((p) => p.kind === kind)
+    if (genreSlug) posts = posts.filter((p) => p.primaryGenreSlug === genreSlug)
+    return posts.slice(0, limit)
   }
 
   const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_feed', { lim: limit })
+  const { data, error } = await supabase.rpc('community_feed', {
+    lim: limit,
+    p_kind: kind,
+    p_genre_slug: genreSlug,
+  })
 
   if (error) {
     console.warn('[community] feed', error.message)

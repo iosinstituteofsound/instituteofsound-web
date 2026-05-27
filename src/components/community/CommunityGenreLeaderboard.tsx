@@ -26,7 +26,11 @@ export function CommunityGenreLeaderboard({ highlightUserId }: CommunityGenreLea
   const isYourTribe = stats?.primaryGenreSlug && stats.primaryGenreSlug === selectedSlug
 
   return (
-    <section className="community-genre-board mt-16" aria-labelledby="genre-leaderboard-heading">
+    <section
+      id="genre-board"
+      className="community-genre-board mt-16"
+      aria-labelledby="genre-leaderboard-heading"
+    >
       <div className="mb-6">
         <h2 id="genre-leaderboard-heading" className="font-display text-2xl font-bold">
           Tribe leaderboards

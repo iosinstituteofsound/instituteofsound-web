@@ -1,13 +1,18 @@
+import { useState } from 'react'
 import { useCommunityFeed } from '@/hooks/useCommunityFeed'
 import { CommunityFeedComposer } from '@/components/community/CommunityFeedComposer'
 import { CommunityFeedCard } from '@/components/community/CommunityFeedCard'
+import { CommunityFeedFilters } from '@/components/community/CommunityFeedFilters'
+import type { CommunityFeedFilter } from '@/lib/community/feedFilters'
 
 interface CommunityFeedProps {
   highlightUserId?: string
+  tribeSlug?: string | null
 }
 
-export function CommunityFeed({ highlightUserId }: CommunityFeedProps) {
-  const { posts, loading, refresh } = useCommunityFeed(30)
+export function CommunityFeed({ highlightUserId, tribeSlug }: CommunityFeedProps) {
+  const [filter, setFilter] = useState<CommunityFeedFilter>('all')
+  const { posts, loading, refresh } = useCommunityFeed(30, filter, tribeSlug)
 
   return (
     <section id="feed" className="community-feed-section" aria-labelledby="network-feed-heading">
@@ -20,6 +25,12 @@ export function CommunityFeed({ highlightUserId }: CommunityFeedProps) {
         </p>
       </div>
 
+      <CommunityFeedFilters
+        value={filter}
+        onChange={setFilter}
+        tribeSlug={tribeSlug}
+      />
+
       <CommunityFeedComposer onPosted={() => void refresh()} />
 
       <div className="community-feed-list mt-8">
@@ -30,7 +41,13 @@ export function CommunityFeed({ highlightUserId }: CommunityFeedProps) {
           <div className="community-feed-empty ios-card">
             <p className="font-display font-bold">Silence on the wire</p>
             <p className="text-sm text-muted mt-2">
-              Be the first to spin a track or drop a transmission this week.
+              {filter === 'tribe'
+                ? 'No spins or drops from your tribe yet — be the first on the wire.'
+                : filter === 'spin'
+                  ? 'No spins in this view yet. Share a track from the composer above.'
+                  : filter === 'drop'
+                    ? 'No drops yet. Post a short underground transmission.'
+                    : 'Be the first to spin a track or drop a transmission this week.'}
             </p>
           </div>
         )}

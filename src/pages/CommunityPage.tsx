@@ -1,7 +1,11 @@
+import { useMemo } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { rankInfoList } from '@/lib/community/ranks'
 import { useCommunityLeaderboard, useCommunityMemberStats } from '@/hooks/useCommunity'
+import { useCommunityGenres } from '@/hooks/useCommunityGenres'
 import { useCommunityBadges } from '@/hooks/useCommunityBadges'
+import { SpinOfTheWeekHero } from '@/components/community/SpinOfTheWeekHero'
+import { TribeSpotlight } from '@/components/community/TribeSpotlight'
 import { CommunityTribePanel } from '@/components/community/CommunityTribePanel'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { RankBadge } from '@/components/ui/RankBadge'
@@ -19,6 +23,14 @@ export default function CommunityPage() {
   const { entries, loading: boardLoading } = useCommunityLeaderboard(20)
   const { stats, loading: statsLoading, isLoggedIn } = useCommunityMemberStats()
   const { badges, loading: badgesLoading } = useCommunityBadges(user?.id)
+  const { genres } = useCommunityGenres()
+
+  const spotlightGenreSlug = useMemo(() => {
+    if (stats?.primaryGenreSlug) return stats.primaryGenreSlug
+    return genres[0]?.slug ?? null
+  }, [stats?.primaryGenreSlug, genres])
+
+  const spotlightGenreName = genres.find((g) => g.slug === spotlightGenreSlug)?.name
 
   return (
     <div className="section-padding pt-32">
@@ -29,6 +41,15 @@ export default function CommunityPage() {
           subtitle="Crews, spins, drops, tribe boards — earn dB and rank up from Listener to Operator."
           titleAs="h1"
         />
+
+        <div className="community-wire-highlights mb-12">
+          <SpinOfTheWeekHero className="community-wire-highlights-spin" />
+          <TribeSpotlight
+            genreSlug={spotlightGenreSlug}
+            genreName={spotlightGenreName}
+            className="community-wire-highlights-tribe"
+          />
+        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
           {ranks.map((r) => (
@@ -62,7 +83,7 @@ export default function CommunityPage() {
           <CommunityCrewLeaderboard />
         </div>
 
-        <CommunityFeed highlightUserId={user?.id} />
+        <CommunityFeed highlightUserId={user?.id} tribeSlug={stats?.primaryGenreSlug} />
 
         <CommunityGenreLeaderboard highlightUserId={user?.id} />
 

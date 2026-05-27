@@ -5638,6 +5638,253 @@ html[data-perf='lite'] .metal-loader-core-beat {
   padding: 1.5rem;
 }
 
+.community-wire-highlights {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .community-wire-highlights {
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: start;
+  }
+}
+
+.spin-of-week {
+  padding: 1.35rem 1.5rem;
+}
+
+.spin-of-week-rail {
+  padding: 1.15rem 1.25rem;
+}
+
+.spin-of-week-loading {
+  min-height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spin-of-week-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.spin-of-week-score {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-rs-red);
+}
+
+.spin-of-week-body-rail .spin-of-week-embeds {
+  margin-top: 0.75rem;
+}
+
+.spin-of-week-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+  margin-bottom: 0.75rem;
+}
+
+.spin-of-week-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-paper);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.spin-of-week-name {
+  font-weight: 600;
+  margin: 0;
+}
+
+.spin-of-week-handle {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.spin-of-week-caption {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+
+.spin-of-week-more,
+.spin-of-week-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.spin-of-week-more:hover,
+.spin-of-week-cta:hover {
+  color: var(--color-rs-red);
+}
+
+.tribe-spotlight-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.tribe-spotlight-board-link {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.tribe-spotlight-board-link:hover {
+  color: var(--color-rs-red);
+}
+
+.tribe-spotlight-winner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+
+.tribe-spotlight-winner:hover {
+  border-color: rgba(227, 27, 35, 0.35);
+}
+
+.tribe-spotlight-winner-empty {
+  display: block;
+}
+
+.tribe-spotlight-winner-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.35rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-paper);
+  font-weight: 700;
+}
+
+.tribe-spotlight-winner-kicker {
+  margin: 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-rs-red);
+}
+
+.tribe-spotlight-winner-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.tribe-spotlight-winner-db {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.tribe-spotlight-spins {
+  margin-top: 1.25rem;
+}
+
+.tribe-spotlight-spins-label {
+  margin: 0 0 0.75rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.tribe-spotlight-spins-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tribe-spotlight-spin-card {
+  padding: 1rem 1.1rem;
+}
+
+.community-feed-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.community-feed-filter {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.community-feed-filter-active {
+  color: var(--color-text);
+  border-color: var(--color-rs-red);
+  background: rgba(227, 27, 35, 0.08);
+}
+
+.community-feed-filter-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.community-feed-card-profile .community-feed-embeds {
+  margin-top: 0.75rem;
+}
+
+.community-feed-card-profile .community-feed-embed-spotify {
+  min-height: 152px;
+}
+
+.community-feed-card-profile .community-feed-embed-youtube {
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  width: 100%;
+}
+
 .community-feed-section {
   margin-bottom: 3rem;
 }

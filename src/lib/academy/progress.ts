@@ -1,6 +1,11 @@
 import { scheduleCloudSync } from '@/lib/academy/cloudProgress'
 import type { EarLabMode } from '@/lib/academy/earLab'
 import {
+  awardEarLabPassDb,
+  awardLessonCompleteDb,
+  awardQuizPassDb,
+} from '@/lib/community/academyHooks'
+import {
   clampEarScore,
   getStableSnapshot,
   patchLocalSnapshot,
@@ -53,7 +58,7 @@ export function toggleLessonComplete(lessonId: string): boolean {
   afterMutation(snapshot)
   const nowComplete = snapshot.completedLessons.includes(lessonId)
   if (nowComplete && !wasComplete) {
-    void import('@/lib/community/academyHooks').then((m) => m.awardLessonCompleteDb(lessonId))
+    void awardLessonCompleteDb(lessonId)
   }
   return nowComplete
 }
@@ -85,7 +90,7 @@ export function saveQuizScore(quizId: string, percent: number): void {
   const passedNow = percent >= 70
   const passedBefore = (prevScore ?? 0) >= 70
   if (passedNow && !passedBefore) {
-    void import('@/lib/community/academyHooks').then((m) => m.awardQuizPassDb(quizId))
+    void awardQuizPassDb(quizId)
   }
 }
 
@@ -113,7 +118,7 @@ export function saveEarLabScore(mode: EarLabMode, correct: number): void {
   })
   afterMutation(snapshot)
   if (score >= 7 && prevBest < 7) {
-    void import('@/lib/community/academyHooks').then((m) => m.awardEarLabPassDb(mode, score))
+    void awardEarLabPassDb(mode, score)
   }
 }
 
