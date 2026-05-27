@@ -8,6 +8,43 @@ const PROFILE_RETRIES = 6
 const PROFILE_RETRY_MS = 500
 const OAUTH_INTENT_KEY = 'ios_oauth_intent'
 
+/** Prevent duplicate exchangeCodeForSession (PKCE verifier is single-use). */
+let oauthCodeExchange: Promise<void> | null = null
+let oauthExchangeDone = false
+
+function readOAuthIntent(): GoogleOAuthIntent | null {
+  const raw =
+    sessionStorage.getItem(OAUTH_INTENT_KEY) ?? localStorage.getItem(OAUTH_INTENT_KEY)
+  localStorage.removeItem(OAUTH_INTENT_KEY)
+  sessionStorage.removeItem(OAUTH_INTENT_KEY)
+  if (raw === 'desk' || raw === 'artist' || raw === 'editor_apply') return raw
+  return null
+}
+
+function clearOAuthCallbackUrl() {
+  const path = window.location.pathname || '/auth/callback'
+  window.history.replaceState({}, document.title, path)
+}
+
+async function exchangeOAuthCode(code: string): Promise<void> {
+  if (oauthExchangeDone) return
+
+  if (!oauthCodeExchange) {
+    const supabase = getSupabase()
+    oauthCodeExchange = supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+      if (error) throw error
+      oauthExchangeDone = true
+    })
+  }
+
+  try {
+    await oauthCodeExchange
+  } catch (err) {
+    oauthCodeExchange = null
+    throw err
+  }
+}
+
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -83,6 +120,7 @@ export async function supabaseSignInWithGoogle(
 ): Promise<void> {
   const supabase = getSupabase()
   localStorage.setItem(OAUTH_INTENT_KEY, intent)
+  sessionStorage.setItem(OAUTH_INTENT_KEY, intent)
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -93,6 +131,7 @@ export async function supabaseSignInWithGoogle(
 
   if (error) {
     localStorage.removeItem(OAUTH_INTENT_KEY)
+    sessionStorage.removeItem(OAUTH_INTENT_KEY)
     throw new Error(error.message)
   }
 }
@@ -111,14 +150,26 @@ export async function supabaseHandleAuthCallback(): Promise<{
 
   const code = new URLSearchParams(window.location.search).get('code')
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (error) throw new Error(error.message)
+    try {
+      await exchangeOAuthCode(code)
+      clearOAuthCallbackUrl()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Google sign-in failed'
+      if (/code verifier|pkce/i.test(message)) {
+        throw new Error(
+          'Sign-in session expired or opened in a different tab. Close this tab, go back to the site, and sign in with Google again from the same browser window.'
+        )
+      }
+      throw new Error(message)
+    }
   }
 
   const { data, error: sessionError } = await supabase.auth.getSession()
   if (sessionError) throw new Error(sessionError.message)
   if (!data.session?.user) {
-    throw new Error('No session after Google sign-in. Try again.')
+    throw new Error(
+      'No session after Google sign-in. Use the same browser window (not a private preview tab) and try again.'
+    )
   }
 
   const authUser = data.session.user
@@ -128,12 +179,7 @@ export async function supabaseHandleAuthCallback(): Promise<{
 
   const user = await ensureProfileRow(authUser.id, email, name, 'artist')
 
-  const rawIntent = localStorage.getItem(OAUTH_INTENT_KEY)
-  localStorage.removeItem(OAUTH_INTENT_KEY)
-  const intent: GoogleOAuthIntent | null =
-    rawIntent === 'desk' || rawIntent === 'artist' || rawIntent === 'editor_apply'
-      ? rawIntent
-      : null
+  const intent = readOAuthIntent()
 
   return { user, intent }
 }

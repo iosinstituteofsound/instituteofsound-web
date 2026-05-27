@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { completeAuthCallback } from '@/lib/auth/provider'
@@ -11,8 +11,12 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate()
   const { logout } = useAuth()
   const [error, setError] = useState('')
+  const handledRef = useRef(false)
 
   useEffect(() => {
+    if (handledRef.current) return
+    handledRef.current = true
+
     let cancelled = false
 
     completeAuthCallback()

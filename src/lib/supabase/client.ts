@@ -36,8 +36,11 @@ export function getSupabase(): SupabaseClient {
   if (!client) {
     client = createClient(url!, anonKey!, {
       auth: {
-        detectSessionInUrl: true,
+        // Callback page calls exchangeCodeForSession once — auto-detect causes double exchange + PKCE errors
+        detectSessionInUrl: false,
         flowType: 'pkce',
+        persistSession: true,
+        autoRefreshToken: true,
       },
     })
   }
