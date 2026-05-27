@@ -4,6 +4,7 @@ import { BpmGauge } from '@/components/tools/BpmGauge'
 import { ToolCallout, ToolShell, ToolWorkspace } from '@/components/tools/ToolShell'
 import { detectBpmFromBuffer } from '@/lib/tools/audio/bpm'
 import { decodeAudioFile } from '@/lib/tools/audio/decode'
+import { ToolDropCta } from '@/components/tools/ToolDropCta'
 
 export default function BpmToolPage() {
   const [busy, setBusy] = useState(false)
@@ -52,6 +53,10 @@ export default function BpmToolPage() {
             <>
               <BpmGauge bpm={result.bpm} confidence={result.confidence} />
               <ToolCallout>{result.message}</ToolCallout>
+              <ToolDropCta
+                toolName="BPM Finder"
+                detail={`Detected ~${result.bpm} BPM (${result.confidence} confidence)`}
+              />
             </>
           ) : (
             <div className="ios-tools-empty">

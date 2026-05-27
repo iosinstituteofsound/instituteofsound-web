@@ -5,7 +5,10 @@ import {
   type CommunityFeedPost,
 } from '@/lib/community/feedService'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
+import { COMMUNITY_FOLLOW_EVENT } from '@/lib/community/followService'
+import { useAuth } from '@/context/AuthContext'
 import {
+  feedFollowingOnly,
   feedGenreParam,
   feedKindParam,
   type CommunityFeedFilter,
@@ -16,6 +19,7 @@ export function useCommunityFeed(
   filter: CommunityFeedFilter = 'all',
   tribeSlug?: string | null
 ) {
+  const { user } = useAuth()
   const [posts, setPosts] = useState<CommunityFeedPost[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -27,21 +31,25 @@ export function useCommunityFeed(
           limit,
           kind: feedKindParam(filter),
           genreSlug: feedGenreParam(filter, tribeSlug),
+          followingOnly: feedFollowingOnly(filter),
+          viewerUserId: user?.id ?? null,
         })
       )
     } finally {
       setLoading(false)
     }
-  }, [limit, filter, tribeSlug])
+  }, [limit, filter, tribeSlug, user?.id])
 
   useEffect(() => {
     void refresh()
     const onFeed = () => void refresh()
     window.addEventListener(COMMUNITY_FEED_EVENT, onFeed)
     window.addEventListener(COMMUNITY_DB_EVENT, onFeed)
+    window.addEventListener(COMMUNITY_FOLLOW_EVENT, onFeed)
     return () => {
       window.removeEventListener(COMMUNITY_FEED_EVENT, onFeed)
       window.removeEventListener(COMMUNITY_DB_EVENT, onFeed)
+      window.removeEventListener(COMMUNITY_FOLLOW_EVENT, onFeed)
     }
   }, [refresh])
 

@@ -7,6 +7,7 @@ import {
 import type { AcademyTrackSlug } from '@/lib/academy/types'
 import { EAR_LAB_MODES, EAR_LAB_PASS_SCORE } from '@/lib/academy/earLab'
 import { getCompletedLessons, getEarLabScores, getQuizBestScore } from '@/lib/academy/progress'
+import type { AcademyProgressSnapshot } from '@/lib/academy/typesProgress'
 
 export interface AcademyCertificateDef {
   id: string
@@ -144,4 +145,73 @@ export function getAllCertificateStatuses(): CertificateStatus[] {
 
 export function getEarnedCertificateCount(): number {
   return getAllCertificateStatuses().filter((s) => s.earned).length
+}
+
+function lessonSetFromSnapshot(snapshot: AcademyProgressSnapshot): Set<string> {
+  return new Set(snapshot.completedLessons)
+}
+
+function quizBestFromSnapshot(snapshot: AcademyProgressSnapshot, quizId: string): number | null {
+  const score = snapshot.quizScores[quizId]
+  return typeof score === 'number' ? score : null
+}
+
+function earLabFromSnapshot(snapshot: AcademyProgressSnapshot) {
+  return snapshot.earLab
+}
+
+export function getCertificateStatusesFromSnapshot(
+  snapshot: AcademyProgressSnapshot
+): CertificateStatus[] {
+  const done = lessonSetFromSnapshot(snapshot)
+  const earScores = earLabFromSnapshot(snapshot)
+
+  return ACADEMY_CERTIFICATES.map((cert) => {
+    if (cert.type === 'ear-lab') {
+      const parts = EAR_LAB_MODES.map((m) => ({
+        label: m.label,
+        score: earScores[m.id] ?? 0,
+        pass: (earScores[m.id] ?? 0) >= EAR_LAB_PASS_SCORE,
+      }))
+      const earned = parts.every((p) => p.pass)
+      return {
+        cert,
+        earned,
+        detail: earned
+          ? 'Frequency, level, and compression drills passed'
+          : parts.map((p) => `${p.label}: ${p.score}/10`).join(' · '),
+      }
+    }
+
+    if (cert.type === 'graduate') {
+      const lessonsDone = ALL_ACADEMY_LESSONS.every((l) => done.has(l.id))
+      const quizzesDone = ACADEMY_QUIZZES.every((q) => {
+        const best = quizBestFromSnapshot(snapshot, q.id)
+        return typeof best === 'number' && best >= q.passPercent
+      })
+      const earned = lessonsDone && quizzesDone
+      return {
+        cert,
+        earned,
+        detail: earned ? 'Full curriculum complete' : 'Complete all lessons and quizzes',
+      }
+    }
+
+    if (cert.type === 'track' && cert.trackSlug) {
+      const lessons = getLessonsForTrack(cert.trackSlug)
+      const lessonsOk =
+        lessons.length > 0 && lessons.every((l) => done.has(l.id))
+      const quiz = ACADEMY_QUIZZES.find((q) => q.trackSlug === cert.trackSlug)
+      const best = quiz ? quizBestFromSnapshot(snapshot, quiz.id) : null
+      const quizOk = !quiz || (typeof best === 'number' && best >= quiz.passPercent)
+      const earned = lessonsOk && quizOk
+      return {
+        cert,
+        earned,
+        detail: earned ? 'Track requirements met' : `${lessons.filter((l) => done.has(l.id)).length}/${lessons.length} lessons`,
+      }
+    }
+
+    return { cert, earned: false, detail: 'Requirements not met' }
+  })
 }

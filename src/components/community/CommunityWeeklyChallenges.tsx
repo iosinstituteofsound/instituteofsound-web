@@ -28,7 +28,9 @@ export function CommunityWeeklyChallenges() {
           <h2 id="weekly-challenges-heading" className="font-display text-xl font-bold">
             Weekly challenges
           </h2>
-          <p className="text-sm text-muted mt-1">Bonus dB when you complete all three.</p>
+          <p className="text-sm text-muted mt-1">
+            Includes Academy missions · bonus when you complete 3+ this week.
+          </p>
         </div>
         <button
           type="button"

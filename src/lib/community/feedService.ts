@@ -10,6 +10,7 @@ import {
 } from '@/lib/community/localFeed'
 import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
 import { getCommunityGenreId } from '@/lib/community/genreContext'
+import { getLocalFollowingIds } from '@/lib/community/followService'
 import { tryGrantBadge } from '@/lib/community/grantBadge'
 import type { CommunityFeedPost, CommunityPostKind, FeedReactionKind } from '@/lib/community/feedTypes'
 import type { CommunityRank } from '@/types'
@@ -79,6 +80,8 @@ export interface CommunityFeedQuery {
   limit?: number
   kind?: 'spin' | 'drop' | null
   genreSlug?: string | null
+  followingOnly?: boolean
+  viewerUserId?: string | null
 }
 
 export async function fetchCommunityFeed(
@@ -89,6 +92,8 @@ export async function fetchCommunityFeed(
   const limit = query.limit ?? 30
   const kind = query.kind ?? null
   const genreSlug = query.genreSlug ?? null
+  const followingOnly = query.followingOnly ?? false
+  const viewerUserId = query.viewerUserId ?? null
 
   if (!isSupabaseConfigured()) {
     let posts = localApplyReactions(
@@ -97,6 +102,14 @@ export async function fetchCommunityFeed(
         reactions: p.reactions ?? emptyReactions(),
       }))
     )
+    if (followingOnly) {
+      const following = new Set(getLocalFollowingIds())
+      posts = posts.filter(
+        (p) =>
+          p.userId === viewerUserId ||
+          following.has(p.userId)
+      )
+    }
     if (kind) posts = posts.filter((p) => p.kind === kind)
     if (genreSlug) posts = posts.filter((p) => p.primaryGenreSlug === genreSlug)
     return posts.slice(0, limit)
@@ -107,6 +120,7 @@ export async function fetchCommunityFeed(
     lim: limit,
     p_kind: kind,
     p_genre_slug: genreSlug,
+    p_following_only: followingOnly,
   })
 
   if (error) {

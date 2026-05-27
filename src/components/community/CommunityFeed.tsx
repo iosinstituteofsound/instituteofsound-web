@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
 import { useCommunityFeed } from '@/hooks/useCommunityFeed'
 import { CommunityFeedComposer } from '@/components/community/CommunityFeedComposer'
 import { CommunityFeedCard } from '@/components/community/CommunityFeedCard'
@@ -11,6 +12,7 @@ interface CommunityFeedProps {
 }
 
 export function CommunityFeed({ highlightUserId, tribeSlug }: CommunityFeedProps) {
+  const { user } = useAuth()
   const [filter, setFilter] = useState<CommunityFeedFilter>('all')
   const { posts, loading, refresh } = useCommunityFeed(30, filter, tribeSlug)
 
@@ -29,6 +31,7 @@ export function CommunityFeed({ highlightUserId, tribeSlug }: CommunityFeedProps
         value={filter}
         onChange={setFilter}
         tribeSlug={tribeSlug}
+        isLoggedIn={Boolean(user)}
       />
 
       <CommunityFeedComposer onPosted={() => void refresh()} />
@@ -41,7 +44,9 @@ export function CommunityFeed({ highlightUserId, tribeSlug }: CommunityFeedProps
           <div className="community-feed-empty ios-card">
             <p className="font-display font-bold">Silence on the wire</p>
             <p className="text-sm text-muted mt-2">
-              {filter === 'tribe'
+              {filter === 'following'
+                ? 'Your wire is quiet — follow operators on their profiles or join a crew to see more spins and drops.'
+                : filter === 'tribe'
                 ? 'No spins or drops from your tribe yet — be the first on the wire.'
                 : filter === 'spin'
                   ? 'No spins in this view yet. Share a track from the composer above.'

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { CopyOutput } from '@/components/tools/CopyOutput'
+import { ToolDropCta } from '@/components/tools/ToolDropCta'
 import { ToolTextAreaField } from '@/components/tools/ToolSelectField'
 import { ToolCallout, ToolShell, ToolWorkspace } from '@/components/tools/ToolShell'
 import { analyzeLyrics, formatLyricsExport } from '@/lib/tools/lyrics'
@@ -68,6 +69,10 @@ export default function LyricsToolPage() {
                 ))}
               </ul>
               <CopyOutput value={exportText} label="Copy analysis" className="mt-4" />
+              <ToolDropCta
+                toolName="Lyrics Lab"
+                detail={`${analysis.lines.length} lines · ${analysis.structureHint}`}
+              />
             </>
           ) : (
             <div className="ios-tools-empty">

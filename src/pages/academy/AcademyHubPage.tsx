@@ -11,6 +11,7 @@ import {
 import { getEarnedCertificateCount } from '@/lib/academy/certificates'
 import { AcademyHubContinue, AcademyHubSearch } from '@/components/academy/AcademyHubControls'
 import { AcademySyncBanner } from '@/components/academy/AcademySyncBanner'
+import { AcademyDbMilestones } from '@/components/academy/AcademyDbMilestones'
 import { useAcademyProgress } from '@/hooks/useAcademyProgress'
 
 function TrackGrid({
@@ -85,6 +86,8 @@ export default function AcademyHubPage() {
         />
 
         <AcademySyncBanner />
+
+        <AcademyDbMilestones />
 
         <div className="academy-hub-controls">
           <AcademyHubContinue />

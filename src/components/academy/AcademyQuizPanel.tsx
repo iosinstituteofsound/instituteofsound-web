@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import type { AcademyQuiz } from '@/lib/academy/types'
 import { getQuizBestScore, saveQuizScore } from '@/lib/academy/progress'
 import clsx from 'clsx'
+import { AcademyTribeHint } from '@/components/academy/AcademyTribeHint'
 
 interface AcademyQuizPanelProps {
   quiz: AcademyQuiz
@@ -58,6 +59,7 @@ export function AcademyQuizPanel({ quiz }: AcademyQuizPanelProps) {
             Previous best: {previousBest}% · New best saved: {Math.max(previousBest, finalPercent)}%
           </p>
         )}
+        <AcademyTribeHint trackSlug={quiz.trackSlug} passed={passed} />
         <div className="academy-quiz-result-actions">
           <button
             type="button"

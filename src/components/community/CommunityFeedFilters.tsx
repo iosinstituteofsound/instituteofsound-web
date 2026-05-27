@@ -5,13 +5,20 @@ interface CommunityFeedFiltersProps {
   value: CommunityFeedFilter
   onChange: (filter: CommunityFeedFilter) => void
   tribeSlug?: string | null
+  isLoggedIn?: boolean
 }
 
-export function CommunityFeedFilters({ value, onChange, tribeSlug }: CommunityFeedFiltersProps) {
+export function CommunityFeedFilters({
+  value,
+  onChange,
+  tribeSlug,
+  isLoggedIn = false,
+}: CommunityFeedFiltersProps) {
   return (
     <div className="community-feed-filters" role="tablist" aria-label="Feed filters">
       {FEED_FILTER_OPTIONS.map((opt) => {
-        const disabled = opt.id === 'tribe' && !tribeSlug
+        const disabled =
+          (opt.id === 'tribe' && !tribeSlug) || (opt.id === 'following' && !isLoggedIn)
         const active = value === opt.id
         return (
           <button
@@ -20,7 +27,13 @@ export function CommunityFeedFilters({ value, onChange, tribeSlug }: CommunityFe
             role="tab"
             aria-selected={active}
             disabled={disabled}
-            title={disabled ? 'Pick a tribe to filter by your genre' : undefined}
+            title={
+              disabled
+                ? opt.id === 'following'
+                  ? 'Sign in to see people and crew you follow'
+                  : 'Pick a tribe to filter by your genre'
+                : undefined
+            }
             className={clsx(
               'community-feed-filter',
               active && 'community-feed-filter-active',

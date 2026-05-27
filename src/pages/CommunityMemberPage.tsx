@@ -22,15 +22,17 @@ import {
 import { MemberProfileFeed } from '@/components/community/member/MemberProfileFeed'
 import { MemberProfileSignalLog } from '@/components/community/member/MemberProfileSignalLog'
 import { MemberProfileMedals } from '@/components/community/member/MemberProfileMedals'
+import { MemberProfileAcademy } from '@/components/community/member/MemberProfileAcademy'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { useSeo } from '@/hooks/useSeo'
 import { fetchArtistSlugForUserId } from '@/lib/artist-profile/networkLink'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonLd'
 import { networkProfilePath } from '@/lib/community/networkPaths'
+import { COMMUNITY_FOLLOW_EVENT } from '@/lib/community/followService'
 
 function tabFromSearch(params: URLSearchParams): MemberProfileTab {
   const t = params.get('tab')
-  if (t === 'signal' || t === 'medals') return t
+  if (t === 'signal' || t === 'medals' || t === 'academy') return t
   return 'feed'
 }
 
@@ -111,6 +113,12 @@ export default function CommunityMemberPage() {
 
   useEffect(() => {
     void loadProfile()
+  }, [loadProfile])
+
+  useEffect(() => {
+    const onFollow = () => void loadProfile()
+    window.addEventListener(COMMUNITY_FOLLOW_EVENT, onFollow)
+    return () => window.removeEventListener(COMMUNITY_FOLLOW_EVENT, onFollow)
   }, [loadProfile])
 
   useEffect(() => {
@@ -225,6 +233,16 @@ export default function CommunityMemberPage() {
             className="member-profile-panel"
           >
             <MemberProfileMedals badges={badges} loading={badgesLoading} />
+          </section>
+
+          <section
+            id="member-panel-academy"
+            role="tabpanel"
+            aria-labelledby="member-tab-academy"
+            hidden={tab !== 'academy'}
+            className="member-profile-panel"
+          >
+            <MemberProfileAcademy userId={profile.userId} isYou={isYou} />
           </section>
         </div>
       </div>

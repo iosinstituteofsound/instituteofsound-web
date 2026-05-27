@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { isEditorStaff } from '@/lib/auth/roles'
 import { NavUserIdentity } from '@/components/layout/NavUserIdentity'
+import { NetworkNotificationsPanel } from '@/components/community/NetworkNotificationsPanel'
 import { Button } from '@/components/ui/Button'
 import clsx from 'clsx'
 
@@ -48,6 +49,7 @@ export function ArtistNavActions({ onNavigate, layout = 'row' }: ArtistNavAction
               Join as Editor
             </Link>
           )}
+        {wrap(<NetworkNotificationsPanel />)}
         {wrap(
           <NavUserIdentity layout={layout} onNavigate={onNavigate} onLogout={handleLogout} />
         )}

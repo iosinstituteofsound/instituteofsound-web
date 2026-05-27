@@ -6,6 +6,7 @@ import { IOSImage } from '@/components/ui/IOSImage'
 import { MedalIllustration } from '@/components/community/medals/MedalIllustration'
 import { badgeDefBySlug } from '@/lib/community/badges'
 import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
+import { FollowButton } from '@/components/community/FollowButton'
 
 function formatGenre(slug: string) {
   return slug
@@ -60,12 +61,16 @@ export function MemberProfileHeader({
             <span>Posts</span>
           </li>
           <li>
-            <strong>{profile.totalDb.toLocaleString()}</strong>
-            <span>dB</span>
+            <strong>{profile.followerCount.toLocaleString()}</strong>
+            <span>Followers</span>
           </li>
           <li>
-            <strong>{profile.weeklyDb.toLocaleString()}</strong>
-            <span>Week</span>
+            <strong>{profile.followingCount.toLocaleString()}</strong>
+            <span>Following</span>
+          </li>
+          <li>
+            <strong>{profile.totalDb.toLocaleString()}</strong>
+            <span>dB</span>
           </li>
         </ul>
       </div>
@@ -119,9 +124,15 @@ export function MemberProfileHeader({
             New transmission
           </Link>
         ) : (
-          <Link to="/community#feed" className="member-profile-btn member-profile-btn-ghost">
-            Explore network
-          </Link>
+          <>
+            <FollowButton
+              targetUserId={profile.userId}
+              initialFollowing={profile.viewerIsFollowing}
+            />
+            <Link to="/community#feed" className="member-profile-btn member-profile-btn-ghost">
+              Explore network
+            </Link>
+          </>
         )}
         <button
           type="button"

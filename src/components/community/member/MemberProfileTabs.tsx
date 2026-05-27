@@ -1,11 +1,12 @@
 import clsx from 'clsx'
 
-export type MemberProfileTab = 'feed' | 'signal' | 'medals'
+export type MemberProfileTab = 'feed' | 'signal' | 'medals' | 'academy'
 
 const TABS: { id: MemberProfileTab; label: string; hint: string }[] = [
   { id: 'feed', label: 'Transmissions', hint: 'Spins & drops' },
   { id: 'signal', label: 'Signal log', hint: 'Activity' },
   { id: 'medals', label: 'Medals', hint: 'Badges' },
+  { id: 'academy', label: 'Academy', hint: 'Certs & tracks' },
 ]
 
 interface MemberProfileTabsProps {

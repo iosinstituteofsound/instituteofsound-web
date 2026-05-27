@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
 import { useAuth } from '@/context/AuthContext'
@@ -6,6 +6,7 @@ import { useCommunityMemberStats } from '@/hooks/useCommunity'
 import { useCommunityGenres } from '@/hooks/useCommunityGenres'
 import { createDropPost, createSpinPost } from '@/lib/community/feedService'
 import { DB_REWARDS } from '@/lib/community/dbRewards'
+import { consumePendingToolDrop } from '@/lib/academy/academyLoop'
 import { Button } from '@/components/ui/Button'
 
 type ComposeTab = 'spin' | 'drop'
@@ -27,6 +28,14 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+
+  useEffect(() => {
+    const pending = consumePendingToolDrop()
+    if (pending) {
+      setTab('drop')
+      setDropText(pending.body)
+    }
+  }, [])
 
   if (!user || !stats) {
     return (

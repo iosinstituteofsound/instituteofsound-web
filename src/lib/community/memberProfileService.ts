@@ -22,6 +22,9 @@ export interface PublicMemberProfile {
   primaryGenreSlug?: string
   memberSince: string
   postCount: number
+  followerCount: number
+  followingCount: number
+  viewerIsFollowing: boolean
 }
 
 export interface MemberActivityItem {
@@ -67,6 +70,9 @@ export async function fetchPublicMemberProfile(
     primaryGenreSlug: row.primary_genre_slug ?? undefined,
     memberSince: row.member_since,
     postCount: Number(row.post_count),
+    followerCount: Number(row.follower_count ?? 0),
+    followingCount: Number(row.following_count ?? 0),
+    viewerIsFollowing: Boolean(row.viewer_is_following),
   }
 }
 

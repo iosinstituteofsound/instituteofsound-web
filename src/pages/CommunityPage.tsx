@@ -16,6 +16,7 @@ import { CommunityFeed } from '@/components/community/CommunityFeed'
 import { CommunityCrewPanel } from '@/components/community/CommunityCrewPanel'
 import { CommunityCrewLeaderboard } from '@/components/community/CommunityCrewLeaderboard'
 import { CommunityWeeklyChallenges } from '@/components/community/CommunityWeeklyChallenges'
+import { AcademyLoopMissions } from '@/components/academy/AcademyLoopMissions'
 
 export default function CommunityPage() {
   const { user } = useAuth()
@@ -65,7 +66,12 @@ export default function CommunityPage() {
           ))}
         </div>
 
-        {isLoggedIn && <CommunityWeeklyChallenges />}
+        {isLoggedIn && (
+          <div className="community-academy-loop mb-8 grid gap-6 lg:grid-cols-2">
+            <AcademyLoopMissions />
+            <CommunityWeeklyChallenges />
+          </div>
+        )}
 
         {isLoggedIn && !statsLoading && stats && (
           <CommunityProgressCard

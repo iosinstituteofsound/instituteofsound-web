@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ToolActionButton, ToolShell, ToolWorkspace } from '@/components/tools/ToolShell'
 import { CopyOutput } from '@/components/tools/CopyOutput'
+import { ToolDropCta } from '@/components/tools/ToolDropCta'
 import { ToolSelectField } from '@/components/tools/ToolSelectField'
 import {
   CHORD_VIBES,
@@ -92,6 +93,10 @@ export default function ChordToolPage() {
                 ))}
               </div>
               <CopyOutput value={output} label="Copy progression" />
+              <ToolDropCta
+                toolName="Chord Progression"
+                detail={`${result.scaleLabel} · ${result.chords.join(' → ')}`}
+              />
             </>
           ) : (
             <CopyOutput
