@@ -1,9 +1,9 @@
 import clsx from 'clsx'
-import { useCrewLeaderboard } from '@/hooks/useCrewLeaderboard'
+import { useCrewWarsBoard } from '@/hooks/useCrewWarsBoard'
 import { useMyCrew } from '@/hooks/useCommunityCrew'
 
 export function CommunityCrewLeaderboard() {
-  const { entries, loading } = useCrewLeaderboard(15)
+  const { entries, loading, seasonLabel } = useCrewWarsBoard(15)
   const { crew } = useMyCrew()
 
   return (
@@ -13,7 +13,8 @@ export function CommunityCrewLeaderboard() {
           Crew wars
         </h2>
         <p className="text-sm text-muted mt-1">
-          Combined weekly dB from all members · top squads this week
+          Combined weekly dB · week-over-week delta
+          {seasonLabel ? ` · ${seasonLabel}` : ''}
         </p>
       </div>
 
@@ -54,6 +55,18 @@ export function CommunityCrewLeaderboard() {
                     {entry.weeklyDb.toLocaleString()}
                   </span>
                   <span className="community-crew-board-db-label">dB</span>
+                  {entry.dbDelta !== 0 && (
+                    <span
+                      className={clsx(
+                        'community-crew-board-delta',
+                        entry.dbDelta > 0 && 'community-crew-board-delta-up',
+                        entry.dbDelta < 0 && 'community-crew-board-delta-down'
+                      )}
+                    >
+                      {entry.dbDelta > 0 ? '+' : ''}
+                      {entry.dbDelta.toLocaleString()} vs last week
+                    </span>
+                  )}
                 </div>
               </li>
             )

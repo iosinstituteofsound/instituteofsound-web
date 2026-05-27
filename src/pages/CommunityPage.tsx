@@ -5,6 +5,9 @@ import { useCommunityLeaderboard, useCommunityMemberStats } from '@/hooks/useCom
 import { useCommunityGenres } from '@/hooks/useCommunityGenres'
 import { useCommunityBadges } from '@/hooks/useCommunityBadges'
 import { SpinOfTheWeekHero } from '@/components/community/SpinOfTheWeekHero'
+import { FridayWireBanner } from '@/components/community/FridayWireBanner'
+import { TribeWarSeason } from '@/components/community/TribeWarSeason'
+import { WireDigestPanel } from '@/components/community/WireDigestPanel'
 import { TribeSpotlight } from '@/components/community/TribeSpotlight'
 import { CommunityTribePanel } from '@/components/community/CommunityTribePanel'
 import { SectionHeading } from '@/components/ui/SectionHeading'
@@ -45,11 +48,17 @@ export default function CommunityPage() {
 
         <div className="community-wire-highlights mb-12">
           <SpinOfTheWeekHero className="community-wire-highlights-spin" />
+          <FridayWireBanner className="community-wire-highlights-friday" />
           <TribeSpotlight
             genreSlug={spotlightGenreSlug}
             genreName={spotlightGenreName}
             className="community-wire-highlights-tribe"
           />
+        </div>
+
+        <div className="community-events-grid mb-12">
+          <TribeWarSeason />
+          <WireDigestPanel />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">

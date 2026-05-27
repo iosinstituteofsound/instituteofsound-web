@@ -6220,9 +6220,263 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 @media (min-width: 1024px) {
   .community-wire-highlights {
-    grid-template-columns: 1.1fr 0.9fr;
+    grid-template-columns: 1fr 1fr;
     align-items: start;
   }
+
+  .community-wire-highlights-tribe {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1280px) {
+  .community-wire-highlights {
+    grid-template-columns: 1.05fr 0.95fr 1fr;
+  }
+
+  .community-wire-highlights-tribe {
+    grid-column: auto;
+  }
+}
+
+.community-events-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .community-events-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.friday-wire {
+  padding: 1.25rem 1.35rem;
+}
+
+.friday-wire-live {
+  color: var(--color-rs-red);
+}
+
+.friday-wire-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.friday-wire-countdown {
+  text-align: right;
+}
+
+.friday-wire-countdown-label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.friday-wire-body {
+  margin-top: 1rem;
+}
+
+.friday-wire-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.friday-wire-avatar,
+.friday-wire-avatar-fallback {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.friday-wire-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.friday-wire-handle {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.friday-wire-embed {
+  margin-top: 0.75rem;
+}
+
+.friday-wire-embed iframe {
+  width: 100%;
+  height: 80px;
+  border: 0;
+}
+
+.friday-wire-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-rs-red);
+  text-decoration: none;
+}
+
+.tribe-war-season {
+  padding: 1.25rem 1.35rem;
+}
+
+.tribe-war-season-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tribe-war-leader-pill {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--color-rs-red);
+  text-align: right;
+}
+
+.tribe-war-leader-label {
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.tribe-war-leader-db {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-rs-red);
+}
+
+.tribe-war-standings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tribe-war-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tribe-war-row-lead {
+  background: rgba(212, 0, 0, 0.05);
+}
+
+.tribe-war-rank {
+  font-weight: 700;
+  min-width: 1.5rem;
+  color: var(--color-rs-red);
+}
+
+.tribe-war-genre {
+  font-weight: 600;
+}
+
+.tribe-war-sub,
+.tribe-war-champion {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.tribe-war-champion {
+  display: inline-block;
+  margin-top: 0.2rem;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.tribe-war-board-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-rs-red);
+  text-decoration: none;
+}
+
+.wire-digest {
+  padding: 1.25rem 1.35rem;
+}
+
+.wire-digest-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.wire-digest-copy {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-border);
+  padding: 0.45rem 0.75rem;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.wire-digest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.wire-digest-list li {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.wire-digest-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.wire-digest-link {
+  color: var(--color-rs-red);
+  text-decoration: none;
+}
+
+.community-crew-board-delta {
+  display: block;
+  font-size: 0.65rem;
+  margin-top: 0.2rem;
+  color: var(--color-muted);
+}
+
+.community-crew-board-delta-up {
+  color: #3dffa8;
+}
+
+.community-crew-board-delta-down {
+  color: var(--color-muted);
 }
 
 .spin-of-week {
