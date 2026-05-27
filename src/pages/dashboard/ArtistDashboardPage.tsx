@@ -16,6 +16,8 @@ import { Input, FieldLabel } from '@/components/ui/Input'
 import { ArtistProfileEditor } from '@/components/dashboard/ArtistProfileEditor'
 import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
 import { DashboardSection } from '@/components/dashboard/DashboardSection'
+import { SubmissionLifecycleTimeline } from '@/components/dashboard/SubmissionLifecycleTimeline'
+import { getProfileForUser } from '@/lib/artist-profile/service'
 import type { TrackSubmission } from '@/lib/auth/types'
 
 const TABS = [
@@ -40,13 +42,18 @@ export default function ArtistDashboardPage() {
   const [description, setDescription] = useState('')
   const [streamUrl, setStreamUrl] = useState('')
   const [coverImageUrl, setCoverImageUrl] = useState('')
+  const [profileSlug, setProfileSlug] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
     if (!user) return
     setLoadingList(true)
     try {
-      const list = await getSubmissionsForArtist(user.id)
+      const [list, profile] = await Promise.all([
+        getSubmissionsForArtist(user.id),
+        getProfileForUser(user.id),
+      ])
       setSubmissions(list)
+      setProfileSlug(profile?.slug ?? null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load submissions')
     } finally {
@@ -262,9 +269,22 @@ export default function ArtistDashboardPage() {
                 No submissions yet. Use the Submit to editors tab to send your first track.
               </p>
             ) : (
+              <>
+                {profileSlug && (
+                  <p className="text-sm text-muted mb-6">
+                    <Link to={`/artist/${profileSlug}/epk`} className="text-rs-red hover:underline">
+                      Open your printable EPK →
+                    </Link>
+                    {' · '}
+                    <Link to={`/artist/${profileSlug}`} className="text-rs-red hover:underline">
+                      Public artist page
+                    </Link>
+                  </p>
+                )}
               <div className="artist-dash-history-grid">
                 {submissions.map((s) => (
                   <article key={s.id} className="ios-card p-5 flex flex-col gap-4 h-full">
+                    <SubmissionLifecycleTimeline submission={s} />
                     {s.coverImageUrl && (
                       <IOSImage
                         src={s.coverImageUrl}
@@ -311,6 +331,7 @@ export default function ArtistDashboardPage() {
                   </article>
                 ))}
               </div>
+              </>
             )}
           </DashboardSection>
         )}

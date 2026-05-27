@@ -111,6 +111,7 @@ export interface ArtistMerchItem {
 
 export interface ArtistEditorialFeature {
   id: string
+  slug: string
   type: EditorialType
   title: string
   subject: string

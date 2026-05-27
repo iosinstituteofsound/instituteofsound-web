@@ -17,6 +17,7 @@ const AboutPage = lazy(() => import('@/pages/AboutPage'))
 const ContactPage = lazy(() => import('@/pages/ContactPage'))
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'))
 const ArtistDetailPage = lazy(() => import('@/pages/ArtistDetailPage'))
+const ArtistEpkPage = lazy(() => import('@/pages/ArtistEpkPage'))
 const PlaylistDetailPage = lazy(() => import('@/pages/PlaylistDetailPage'))
 const FeatureDetailPage = lazy(() => import('@/pages/FeatureDetailPage'))
 const ToolsHubPage = lazy(() => import('@/pages/tools/ToolsHubPage'))
@@ -109,6 +110,7 @@ export default function App() {
             <Route path="about" element={<AboutPage />} />
             <Route path="contact" element={<ContactPage />} />
             <Route path="privacy" element={<PrivacyPage />} />
+            <Route path="artist/:slug/epk" element={<ArtistEpkPage />} />
             <Route path="artist/:slug" element={<ArtistDetailPage />} />
             <Route path="playlist/:slug" element={<PlaylistDetailPage />} />
             <Route path="feature/:slug" element={<FeatureDetailPage />} />

@@ -14,12 +14,15 @@ import { MetalBadge } from '@/components/ui/MetalBadge'
 import { EditorByline } from '@/components/editor/EditorByline'
 import { editorialTypeLabel } from '@/lib/editorial/labels'
 import { artistBrandingStyle, artistSiteThemeClass } from '@/lib/artist-profile/branding'
+import { pickListenUrl, type ArtistLaunchpadSnapshot } from '@/lib/artist-profile/launchpad'
+import { ArtistNetworkWire } from '@/components/artist-profile/ArtistNetworkWire'
 
 interface ArtistProfilePageViewProps {
   data: ArtistProfilePageData
   isOwner?: boolean
   viewerUserId?: string
   networkHandle?: string | null
+  launchpad?: ArtistLaunchpadSnapshot | null
 }
 
 const sectionMotion = {
@@ -34,6 +37,7 @@ export function ArtistProfilePageView({
   isOwner,
   viewerUserId,
   networkHandle,
+  launchpad,
 }: ArtistProfilePageViewProps) {
   const { profile, tracks, albums, singles, videos, merch, lineup, bioTimeline, editorial, pickTrack } =
     data
@@ -44,6 +48,7 @@ export function ArtistProfilePageView({
     ownerUserId: profile.userId,
   }
   const listenTrack = pickTrack ?? tracks[0]
+  const primaryListen = pickListenUrl(data)
   const latestAlbum = albums[0]
   const latestSingle = singles[0]
 
@@ -55,10 +60,11 @@ export function ArtistProfilePageView({
       : []),
     ...(videos.length > 0 ? [{ id: 'videos', label: 'Videos' }] : []),
     ...(merch.length > 0 ? [{ id: 'merch', label: 'Merch' }] : []),
-    ...(profile.pressKitUrl ? [{ id: 'press-kit', label: 'Press kit' }] : []),
+    { id: 'press-kit', label: 'Press kit' },
     ...(lineup.length > 0 ? [{ id: 'lineup', label: 'Lineup' }] : []),
     ...(hasArtistStory(profile, bioTimeline) ? [{ id: 'about', label: 'Story' }] : []),
     ...(editorial.length > 0 ? [{ id: 'press', label: 'Press' }] : []),
+    ...(networkHandle ? [{ id: 'network-wire', label: 'Network' }] : []),
   ]
 
   const siteStyle = artistBrandingStyle(profile.accentColor, profile.themePreset)
@@ -71,6 +77,7 @@ export function ArtistProfilePageView({
       <ArtistSiteHero
         profile={profile}
         listenTrack={listenTrack}
+        primaryListen={primaryListen}
         trackCount={tracks.length}
         isOwner={isOwner}
         networkHandle={networkHandle}
@@ -79,6 +86,12 @@ export function ArtistProfilePageView({
       <ArtistSiteStickyNav items={navItems} artistName={profile.displayName} />
 
       <div className="artist-site-body">
+        {networkHandle && (
+          <ArtistNetworkWire
+            networkHandle={networkHandle}
+            latestSpin={launchpad?.latestSpin ?? null}
+          />
+        )}
         {(latestAlbum || latestSingle) && (
           <motion.section
             {...sectionMotion}
@@ -155,7 +168,11 @@ export function ArtistProfilePageView({
                   </div>
                   <div className="artist-site-press-copy">
                     <MetalBadge variant="crimson">{editorialTypeLabel(item.type)}</MetalBadge>
-                    <h3>{item.title}</h3>
+                    <h3>
+                      <Link to={`/feature/${item.slug}`} className="hover:text-rs-red transition-colors">
+                        {item.title}
+                      </Link>
+                    </h3>
                     <p>{item.excerpt}</p>
                     <p className="artist-site-press-byline">
                       <EditorByline

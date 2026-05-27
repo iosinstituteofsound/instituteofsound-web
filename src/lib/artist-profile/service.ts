@@ -30,6 +30,7 @@ async function mapEditorial(
     title: string
     subject: string
     body: string
+    slug?: string | null
     cover_image_url?: string | null
     editor_id: string
     editor_name: string
@@ -43,6 +44,7 @@ async function mapEditorial(
     const authorUsername = live?.username?.trim() || undefined
     return {
       id: r.id,
+      slug: r.slug?.trim() || r.id,
       type: r.type as ArtistEditorialFeature['type'],
       title: r.title,
       subject: r.subject,
@@ -65,6 +67,7 @@ function localEditorialForProfile(profileId: string): ArtistEditorialFeature[] {
     )
     .map((d) => ({
       id: d.id,
+      slug: d.slug ?? d.id,
       type: d.type,
       title: d.title,
       subject: d.subject,

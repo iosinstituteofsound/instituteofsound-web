@@ -776,6 +776,7 @@ export async function supabaseGetEditorialForProfile(
 ): Promise<
   {
     id: string
+    slug: string | null
     type: string
     title: string
     subject: string
@@ -790,7 +791,7 @@ export async function supabaseGetEditorialForProfile(
   const { data, error } = await supabase
     .from('editorial_drafts')
     .select(
-      'id, type, title, subject, body, cover_image_url, editor_id, editor_name, updated_at'
+      'id, slug, type, title, subject, body, cover_image_url, editor_id, editor_name, updated_at'
     )
     .eq('artist_profile_id', profileId)
     .eq('status', 'published')

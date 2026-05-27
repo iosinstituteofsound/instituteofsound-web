@@ -482,14 +482,24 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           </div>
           <div className="flex flex-wrap gap-2">
             {profile && (
-              <Link
-                to={`/artist/${profile.slug}`}
-                target="_blank"
-                rel="noreferrer"
-                className="ios-btn ios-btn-ghost !text-xs !py-2"
-              >
-                Preview page ↗
-              </Link>
+              <>
+                <Link
+                  to={`/artist/${profile.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ios-btn ios-btn-ghost !text-xs !py-2"
+                >
+                  Preview page ↗
+                </Link>
+                <Link
+                  to={`/artist/${profile.slug}/epk`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ios-btn ios-btn-ghost !text-xs !py-2"
+                >
+                  EPK ↗
+                </Link>
+              </>
             )}
             <Button
               type="button"

@@ -12,6 +12,10 @@ import { buildArtistShareMeta } from '@/lib/share/artistShareMeta'
 import type { Artist } from '@/types'
 import { ArtistProfilePageView } from '@/components/artist-profile/ArtistProfilePageView'
 import { fetchNetworkHandleForUserId } from '@/lib/artist-profile/networkLink'
+import {
+  fetchArtistLaunchpadSnapshot,
+  type ArtistLaunchpadSnapshot,
+} from '@/lib/artist-profile/launchpad'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
 
@@ -37,16 +41,23 @@ export default function ArtistDetailPage() {
 
   const { data, loading, error } = useContent(fetcher)
   const [networkHandle, setNetworkHandle] = useState<string | null>(null)
+  const [launchpad, setLaunchpad] = useState<ArtistLaunchpadSnapshot | null>(null)
 
   useEffect(() => {
     if (data?.kind !== 'profile') {
       setNetworkHandle(null)
+      setLaunchpad(null)
       return
     }
     let cancelled = false
-    void fetchNetworkHandleForUserId(data.data.profile.userId).then((h) => {
-      if (!cancelled) setNetworkHandle(h)
-    })
+    void (async () => {
+      const h = await fetchNetworkHandleForUserId(data.data.profile.userId)
+      if (cancelled) return
+      setNetworkHandle(h)
+      setLaunchpad(
+        await fetchArtistLaunchpadSnapshot(data.data.profile, h, data.data.editorial)
+      )
+    })()
     return () => {
       cancelled = true
     }
@@ -93,6 +104,7 @@ export default function ArtistDetailPage() {
         isOwner={user?.id === data.data.profile.userId}
         viewerUserId={user?.id}
         networkHandle={networkHandle}
+        launchpad={launchpad}
       />
     )
   }

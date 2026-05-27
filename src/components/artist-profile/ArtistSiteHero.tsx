@@ -7,10 +7,17 @@ import { CoverArt } from './CoverArt'
 import { SocialIcons } from './SocialIcons'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
+import { networkProfilePath } from '@/lib/community/networkPaths'
+
+interface ArtistListenCta {
+  label: string
+  href: string
+}
 
 interface ArtistSiteHeroProps {
   profile: ArtistProfile
   listenTrack?: ArtistTrack
+  primaryListen?: ArtistListenCta | null
   trackCount: number
   isOwner?: boolean
   networkHandle?: string | null
@@ -19,12 +26,20 @@ interface ArtistSiteHeroProps {
 export function ArtistSiteHero({
   profile,
   listenTrack,
+  primaryListen,
   trackCount,
   isOwner,
   networkHandle,
 }: ArtistSiteHeroProps) {
   const layout = profile.heroLayout
-  const primaryHref = listenTrack?.streamUrl || profile.social.spotify || profile.social.youtube
+  const primaryHref =
+    primaryListen?.href ||
+    listenTrack?.streamUrl ||
+    profile.social.spotify ||
+    profile.social.youtube
+  const primaryLabel =
+    primaryListen?.label ||
+    (listenTrack ? `Play ${listenTrack.title}` : 'Listen now')
   const heroVideoEmbed = profile.heroVideoUrl
     ? getYoutubeHeroEmbedUrl(profile.heroVideoUrl)
     : null
@@ -73,8 +88,8 @@ export function ArtistSiteHero({
             profile={profile}
             trackCount={trackCount}
             isOwner={isOwner}
-            listenTrack={listenTrack}
             primaryHref={primaryHref}
+            primaryLabel={primaryLabel}
             compactTitle={layout === 'logo' || layout === 'compact'}
             networkHandle={networkHandle}
           />
@@ -143,16 +158,16 @@ function HeroMetaContent({
   profile,
   trackCount,
   isOwner,
-  listenTrack,
   primaryHref,
+  primaryLabel = 'Listen now',
   compactTitle,
   networkHandle,
 }: {
   profile: ArtistProfile
   trackCount: number
   isOwner?: boolean
-  listenTrack?: ArtistTrack
   primaryHref?: string
+  primaryLabel?: string
   compactTitle?: boolean
   networkHandle?: string | null
 }) {
@@ -203,7 +218,15 @@ function HeroMetaContent({
             rel="noreferrer"
             className="artist-site-btn artist-site-btn-primary"
           >
-            {listenTrack ? `Play ${listenTrack.title}` : 'Listen now'}
+            {primaryLabel}
+          </a>
+        )}
+        {networkHandle && (
+          <a
+            href={networkProfilePath(networkHandle)}
+            className="artist-site-btn artist-site-btn-ghost"
+          >
+            Network profile →
           </a>
         )}
         {profile.social.website && (

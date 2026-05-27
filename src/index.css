@@ -2845,6 +2845,238 @@ textarea.ios-input {
   }
 }
 
+.artist-site-press-kit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.artist-network-wire {
+  padding: 1.5rem 1.35rem;
+}
+
+.artist-network-wire-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.artist-network-wire-spin {
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.submission-lifecycle {
+  margin-bottom: 0.5rem;
+}
+
+.submission-lifecycle-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.submission-lifecycle-step {
+  text-align: center;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.submission-lifecycle-dot {
+  display: block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  margin: 0 auto 0.35rem;
+  background: var(--color-border);
+}
+
+.submission-lifecycle-step-done .submission-lifecycle-dot,
+.submission-lifecycle-step-current .submission-lifecycle-dot {
+  background: var(--color-rs-red);
+}
+
+.submission-lifecycle-step-rejected .submission-lifecycle-dot {
+  background: var(--color-muted);
+}
+
+.submission-lifecycle-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+}
+
+.submission-lifecycle-note-approved {
+  color: var(--color-muted);
+}
+
+.submission-lifecycle-note-rejected {
+  color: var(--color-rs-red);
+}
+
+.artist-epk-page {
+  min-height: 100vh;
+  background: #fff;
+  color: #111;
+  padding: 1.5rem;
+}
+
+.artist-epk-toolbar {
+  max-width: 48rem;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.artist-epk-sheet {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 2rem;
+  border: 1px solid #ddd;
+}
+
+.artist-epk-header {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+  .artist-epk-header {
+    grid-template-columns: 140px 1fr;
+  }
+}
+
+.artist-epk-photo {
+  width: 140px;
+  height: 140px;
+  overflow: hidden;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.artist-epk-kicker {
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.artist-epk-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0.25rem 0 0;
+}
+
+.artist-epk-tagline {
+  font-style: italic;
+  margin: 0.5rem 0 0;
+}
+
+.artist-epk-genres {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.artist-epk-block {
+  margin-bottom: 1.75rem;
+}
+
+.artist-epk-block h2 {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 0.65rem;
+  color: #444;
+}
+
+.artist-epk-bio {
+  line-height: 1.65;
+  margin: 0;
+}
+
+.artist-epk-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.artist-epk-badges {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.artist-epk-badges li {
+  margin-bottom: 0.45rem;
+  font-size: 0.9rem;
+}
+
+.artist-epk-quote {
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 3px solid #c00;
+  font-style: italic;
+}
+
+.artist-epk-quote footer {
+  margin-top: 0.5rem;
+  font-style: normal;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.artist-epk-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.artist-epk-links li {
+  margin-bottom: 0.35rem;
+}
+
+.artist-epk-links a {
+  color: #111;
+}
+
+.artist-epk-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  font-size: 0.85rem;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .artist-epk-page {
+    padding: 0;
+  }
+
+  .artist-epk-sheet {
+    border: none;
+    max-width: none;
+  }
+}
+
 .artist-site-lineup {
   display: flex;
   flex-direction: column;
