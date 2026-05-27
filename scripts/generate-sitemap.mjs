@@ -32,6 +32,20 @@ function loadDotEnv() {
 
 loadDotEnv()
 
+async function fetchReleaseSlugs() {
+  const url = process.env.VITE_SUPABASE_URL
+  const key = process.env.VITE_SUPABASE_ANON_KEY
+  if (!url || !key) return []
+
+  const supabase = createClient(url, key)
+  const { data, error } = await supabase.rpc('release_sitemap_slugs')
+  if (error) {
+    console.warn('[sitemap] release_sitemap_slugs:', error.message)
+    return []
+  }
+  return (data ?? []).map((row) => row?.slug?.trim()).filter(Boolean)
+}
+
 async function fetchNetworkHandles() {
   const url = process.env.VITE_SUPABASE_URL
   const key = process.env.VITE_SUPABASE_ANON_KEY
@@ -126,6 +140,10 @@ for (const p of playlists) paths.add(`/playlist/${p.slug}`)
 
 for (const handle of await fetchNetworkHandles()) {
   paths.add(`/network/${encodeURIComponent(handle)}`)
+}
+
+for (const slug of await fetchReleaseSlugs()) {
+  paths.add(`/release/${encodeURIComponent(slug)}`)
 }
 
 for (const [track, lessons] of Object.entries(lessonSlugs)) {

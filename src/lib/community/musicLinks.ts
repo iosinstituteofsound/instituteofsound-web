@@ -1,4 +1,4 @@
-export type MusicPlatform = 'spotify' | 'youtube'
+export type MusicPlatform = 'spotify' | 'youtube' | 'soundcloud'
 
 export interface ParsedMusicLink {
   platform: MusicPlatform
@@ -9,6 +9,7 @@ export interface ParsedMusicLink {
 
 const SPOTIFY_HOSTS = new Set(['open.spotify.com', 'spotify.com', 'www.spotify.com'])
 const YOUTUBE_HOSTS = new Set(['youtube.com', 'www.youtube.com', 'youtu.be', 'music.youtube.com'])
+const SOUNDCLOUD_HOSTS = new Set(['soundcloud.com', 'www.soundcloud.com', 'm.soundcloud.com'])
 
 function normalizeUrl(raw: string): URL | null {
   const trimmed = raw.trim()
@@ -104,4 +105,65 @@ export function validateSpinInput(spotifyRaw: string, youtubeRaw: string): {
   }
 
   return { spotify, youtube, error: null }
+}
+
+export function parseSoundCloudUrl(raw: string): ParsedMusicLink | null {
+  const url = normalizeUrl(raw)
+  if (!url || !SOUNDCLOUD_HOSTS.has(url.hostname)) return null
+
+  const parts = url.pathname.split('/').filter(Boolean)
+  if (parts.length < 2) return null
+
+  const canonical = `https://soundcloud.com/${parts[0]}/${parts[1]}`
+  const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(canonical)}&color=%23d40000&auto_play=false&hide_related=true&show_comments=false`
+
+  return {
+    platform: 'soundcloud',
+    url: canonical,
+    embedUrl,
+    label: 'SoundCloud',
+  }
+}
+
+export function validateReleaseEmbedInput(
+  spotifyRaw: string,
+  youtubeRaw: string,
+  soundcloudRaw: string
+): {
+  spotify: ParsedMusicLink | null
+  youtube: ParsedMusicLink | null
+  soundcloud: ParsedMusicLink | null
+  error: string | null
+} {
+  const spotify = spotifyRaw.trim() ? parseSpotifyUrl(spotifyRaw) : null
+  const youtube = youtubeRaw.trim() ? parseYouTubeUrl(youtubeRaw) : null
+  const soundcloud = soundcloudRaw.trim() ? parseSoundCloudUrl(soundcloudRaw) : null
+
+  if (!spotifyRaw.trim() && !youtubeRaw.trim() && !soundcloudRaw.trim()) {
+    return {
+      spotify: null,
+      youtube: null,
+      soundcloud: null,
+      error: 'Add a Spotify, YouTube, or SoundCloud link.',
+    }
+  }
+  if (spotifyRaw.trim() && !spotify) {
+    return { spotify: null, youtube, soundcloud, error: 'Invalid Spotify URL.' }
+  }
+  if (youtubeRaw.trim() && !youtube) {
+    return { spotify, youtube: null, soundcloud, error: 'Invalid YouTube URL.' }
+  }
+  if (soundcloudRaw.trim() && !soundcloud) {
+    return { spotify, youtube, soundcloud: null, error: 'Invalid SoundCloud URL.' }
+  }
+  if (!spotify && !youtube && !soundcloud) {
+    return {
+      spotify: null,
+      youtube: null,
+      soundcloud: null,
+      error: 'Add at least one valid embed link.',
+    }
+  }
+
+  return { spotify, youtube, soundcloud, error: null }
 }

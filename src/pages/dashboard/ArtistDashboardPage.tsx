@@ -17,12 +17,14 @@ import { ArtistProfileEditor } from '@/components/dashboard/ArtistProfileEditor'
 import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
 import { DashboardSection } from '@/components/dashboard/DashboardSection'
 import { SubmissionLifecycleTimeline } from '@/components/dashboard/SubmissionLifecycleTimeline'
+import { ReleaseEditor } from '@/components/dashboard/ReleaseEditor'
 import { getProfileForUser } from '@/lib/artist-profile/service'
 import type { TrackSubmission } from '@/lib/auth/types'
 
 const TABS = [
   { id: 'network' as const, label: 'Network', hint: 'Feed, profile, dB' },
   { id: 'profile' as const, label: 'Your page', hint: 'Profile, music, merch' },
+  { id: 'releases' as const, label: 'Releases', hint: 'Schedule premieres' },
   { id: 'submit' as const, label: 'Submit to editors', hint: 'New track review' },
   { id: 'history' as const, label: 'Submissions', hint: 'Editor feedback' },
 ]
@@ -31,7 +33,7 @@ export default function ArtistDashboardPage() {
   const { user, logout, mode } = useAuth()
   const [submissions, setSubmissions] = useState<TrackSubmission[]>([])
   const [loadingList, setLoadingList] = useState(true)
-  const [tab, setTab] = useState<'network' | 'profile' | 'submit' | 'history'>('profile')
+  const [tab, setTab] = useState<'network' | 'profile' | 'releases' | 'submit' | 'history'>('profile')
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -172,6 +174,8 @@ export default function ArtistDashboardPage() {
         {tab === 'network' && <DashboardCommunityHub />}
 
         {tab === 'profile' && <ArtistProfileEditor user={user} />}
+
+        {tab === 'releases' && <ReleaseEditor user={user} />}
 
         {tab === 'submit' && (
           <DashboardSection
