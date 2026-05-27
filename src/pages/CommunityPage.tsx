@@ -20,6 +20,7 @@ import { CommunityCrewPanel } from '@/components/community/CommunityCrewPanel'
 import { CommunityCrewLeaderboard } from '@/components/community/CommunityCrewLeaderboard'
 import { CommunityWeeklyChallenges } from '@/components/community/CommunityWeeklyChallenges'
 import { AcademyLoopMissions } from '@/components/academy/AcademyLoopMissions'
+import { DiscoveryPathsPanel } from '@/components/discovery/DiscoveryPathsPanel'
 
 export default function CommunityPage() {
   const { user } = useAuth()
@@ -60,6 +61,8 @@ export default function CommunityPage() {
           <TribeWarSeason />
           <WireDigestPanel />
         </div>
+
+        <DiscoveryPathsPanel className="mb-12" />
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
           {ranks.map((r) => (

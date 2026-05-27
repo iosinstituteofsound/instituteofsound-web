@@ -68,6 +68,39 @@ function readJson(name) {
   return JSON.parse(readFileSync(join(root, 'public/api', name), 'utf8'))
 }
 
+function slugifySceneCity(name) {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64) || 'city'
+}
+
+const SCENE_CITY_LABELS = [
+  'Delhi',
+  'Mumbai',
+  'Bangalore',
+  'Kolkata',
+  'Chennai',
+  'Hyderabad',
+  'Pune',
+  'Goa',
+  'Jaipur',
+  'Chandigarh',
+]
+
+const SCENE_GENRE_SLUGS = [
+  'electronic',
+  'metal',
+  'indie',
+  'hip-hop',
+  'rock',
+  'experimental',
+  'jazz',
+  'folk',
+]
+
 const staticPaths = [
   '/',
   '/discover',
@@ -75,6 +108,7 @@ const staticPaths = [
   '/signals',
   '/features',
   '/community',
+  '/scenes',
   '/submissions',
   '/archive',
   '/about',
@@ -144,6 +178,13 @@ for (const handle of await fetchNetworkHandles()) {
 
 for (const slug of await fetchReleaseSlugs()) {
   paths.add(`/release/${encodeURIComponent(slug)}`)
+}
+
+for (const city of SCENE_CITY_LABELS) {
+  const citySlug = slugifySceneCity(city)
+  for (const genre of SCENE_GENRE_SLUGS) {
+    paths.add(`/scenes/${citySlug}/${genre}`)
+  }
 }
 
 for (const [track, lessons] of Object.entries(lessonSlugs)) {

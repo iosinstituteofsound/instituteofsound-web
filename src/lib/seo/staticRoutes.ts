@@ -95,6 +95,17 @@ const PUBLIC_PAGES: Record<string, SeoConfig> = {
       ]),
     }
   ),
+  '/scenes': page(
+    '/scenes',
+    'India Scenes',
+    'Discover underground music by city and taste tribe — premieres, tribe boards, and spins. India-first scene density.',
+    {
+      jsonLd: breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Scenes', path: '/scenes' },
+      ]),
+    }
+  ),
   '/submissions': page(
     '/submissions',
     'Submit Your Work',
@@ -302,6 +313,8 @@ const DYNAMIC_PREFIXES = [
   /^\/feature\/[^/]+$/,
   /^\/playlist\/[^/]+$/,
   /^\/network\/[^/]+$/,
+  /^\/release\/[^/]+$/,
+  /^\/scenes\/[^/]+\/[^/]+$/,
 ]
 
 /** Static + generated route SEO (exact pathname match). */

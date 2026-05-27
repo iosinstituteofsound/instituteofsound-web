@@ -6578,6 +6578,196 @@ html[data-perf='lite'] .metal-loader-core-beat {
   padding: 1.25rem;
 }
 
+.release-scene-link {
+  display: block;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s;
+}
+
+.release-scene-link:hover {
+  border-color: var(--color-rs-red);
+}
+
+/* ── Discovery / scene hubs (Phase 14) ───────────────────────────── */
+.discovery-anti-algo {
+  font-style: italic;
+}
+
+.discovery-paths {
+  padding: 1.5rem 1.65rem;
+}
+
+.discovery-paths-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.discovery-path-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 9rem) 1fr;
+  gap: 0.75rem 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-border);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.discovery-path-row:hover {
+  border-color: var(--color-rs-red);
+  background: rgba(212, 0, 0, 0.04);
+}
+
+.discovery-path-row-accent {
+  border-color: rgba(212, 0, 0, 0.35);
+}
+
+.discovery-path-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.discovery-path-desc {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.scenes-index-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.scenes-index-city {
+  padding: 1.35rem 1.5rem;
+}
+
+.scenes-index-genres {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.scenes-index-link {
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--color-border);
+  font-size: 0.8rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.scenes-index-link:hover {
+  border-color: var(--color-rs-red);
+  color: var(--color-rs-red);
+}
+
+.scene-hub-grid {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .scene-hub-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.scene-hub-editorial {
+  padding: 1.25rem 1.5rem;
+}
+
+.scene-hub-editorial-link {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-top: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.scene-hub-editorial-art {
+  width: 10rem;
+  height: 10rem;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.scene-release-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.scene-release-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.scene-release-card-art {
+  width: 5rem;
+  height: 5rem;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.scene-release-card-art-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--color-muted);
+  background: var(--color-paper);
+}
+
+.scene-release-card-type {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.scene-rail-empty {
+  padding: 1.5rem;
+}
+
+.scene-hub-crews {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.scene-hub-crew-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+}
+
 .spin-of-week {
   padding: 1.35rem 1.5rem;
 }

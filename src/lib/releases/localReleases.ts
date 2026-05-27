@@ -43,6 +43,17 @@ export function localListReleasesForProfile(profileId: string): ArtistRelease[] 
     .sort((a, b) => b.liveAt.localeCompare(a.liveAt))
 }
 
+export function localListReleasesForScene(cityLabel: string, genreSlug: string): ArtistRelease[] {
+  return read()
+    .filter(
+      (r) =>
+        r.status !== 'draft' &&
+        r.sceneCity === cityLabel &&
+        r.sceneGenreSlug === genreSlug
+    )
+    .sort((a, b) => b.liveAt.localeCompare(a.liveAt))
+}
+
 export function localGetReleaseBySlug(slug: string): ArtistRelease | null {
   return read().find((r) => r.slug.toLowerCase() === slug.toLowerCase()) ?? null
 }

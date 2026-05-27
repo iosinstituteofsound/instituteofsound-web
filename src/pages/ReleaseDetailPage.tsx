@@ -6,6 +6,7 @@ import { IOSImage } from '@/components/ui/IOSImage'
 import { ReleaseCountdown } from '@/components/releases/ReleaseCountdown'
 import { ReleaseEmbed } from '@/components/releases/ReleaseEmbed'
 import { ReleaseWireCta } from '@/components/releases/ReleaseWireCta'
+import { RelatedSceneLink } from '@/components/releases/RelatedSceneLink'
 import { fetchPublicRelease } from '@/lib/releases/public'
 import { getProfileForUser } from '@/lib/artist-profile/service'
 import type { PublicRelease } from '@/lib/releases/types'
@@ -203,6 +204,10 @@ export default function ReleaseDetailPage() {
           </div>
 
           <aside className="release-page-aside">
+            <RelatedSceneLink
+              sceneCity={release.sceneCity}
+              sceneGenreSlug={release.sceneGenreSlug}
+            />
             <ReleaseWireCta release={release} isOwner={isOwner} />
             <div className="release-page-share ios-card mt-4">
               <p className="ios-kicker">Share</p>
