@@ -1045,18 +1045,18 @@ textarea.ios-input {
   align-items: center;
   justify-content: flex-end;
   gap: 0.65rem;
-  text-decoration: none;
-  color: inherit;
   min-width: 0;
   padding-bottom: 0.3rem;
 }
 
-.ios-nav-user-main:hover .ios-nav-user-name {
-  color: var(--color-rs-red);
-  text-shadow: 0 0 20px rgba(227, 27, 35, 0.35);
+/* avatar is the only interactive target in the info block */
+.ios-nav-user-avatar-link {
+  flex-shrink: 0;
+  display: block;
+  text-decoration: none;
 }
 
-.ios-nav-user-main:hover .ios-nav-user-avatar-ring {
+.ios-nav-user-avatar-link:hover .ios-nav-user-avatar-ring {
   box-shadow: 0 0 0 1px rgba(212, 0, 0, 0.5), 0 0 16px rgba(212, 0, 0, 0.25);
 }
 
@@ -10904,6 +10904,26 @@ html[data-perf='lite'] .metal-loader-core-beat {
   margin-top: 1.1rem;
   position: relative;
   z-index: 1;
+}
+
+/* Desk shortcut on own profile — secondary, intentionally small */
+.member-profile-desk-link {
+  margin-top: 0.65rem;
+  position: relative;
+  z-index: 1;
+}
+
+.member-profile-desk-link a {
+  font-size: 0.5625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.member-profile-desk-link a:hover {
+  color: var(--color-signal);
 }
 
 .member-profile-btn {

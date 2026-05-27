@@ -105,16 +105,9 @@ export function MemberProfileHeader({
 
       <div className="member-profile-actions">
         {isYou ? (
-          <>
-            <Link to="/community#feed" className="member-profile-btn member-profile-btn-primary">
-              New transmission
-            </Link>
-            {dashboardHref && (
-              <Link to={dashboardHref} className="member-profile-btn member-profile-btn-ghost">
-                Dashboard
-              </Link>
-            )}
-          </>
+          <Link to="/community#feed" className="member-profile-btn member-profile-btn-primary">
+            New transmission
+          </Link>
         ) : (
           <Link to="/community#feed" className="member-profile-btn member-profile-btn-ghost">
             Explore network
@@ -128,6 +121,15 @@ export function MemberProfileHeader({
           Copy link
         </button>
       </div>
+
+      {/* Desk link — secondary, tucked below actions so profile context stays primary */}
+      {isYou && dashboardHref && (
+        <p className="member-profile-desk-link">
+          <Link to={dashboardHref}>
+            ↗ Open {dashboardHref.includes('editor') ? 'editorial desk' : 'studio'}
+          </Link>
+        </p>
+      )}
     </header>
   )
 }

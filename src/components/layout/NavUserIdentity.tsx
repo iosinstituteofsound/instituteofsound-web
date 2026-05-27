@@ -32,65 +32,68 @@ export function NavUserIdentity({ onNavigate, layout = 'row', onLogout }: NavUse
   const accountId = formatAccountNumericId(user.id)
   const username = user.username?.trim() ? `@${user.username.replace(/^@/, '')}` : `@${handle}`
 
-  const avatar = (
-    <div className="ios-nav-user-avatar">
-      {user.avatarUrl ? (
-        <IOSImage src={user.avatarUrl} alt="" width={48} className="w-full h-full object-cover" />
-      ) : (
-        <span className="ios-nav-user-avatar-fallback">{user.name.charAt(0).toUpperCase()}</span>
-      )}
-      <span className="ios-nav-user-live" aria-hidden />
+  const avatarEl = (
+    /* Avatar is the ONLY click target to open the public network profile */
+    <Link
+      to={profilePath}
+      onClick={onNavigate}
+      className="ios-nav-user-avatar-link"
+      title="View public network profile"
+    >
+      <div className="ios-nav-user-avatar-ring">
+        <div className="ios-nav-user-avatar">
+          {user.avatarUrl ? (
+            <IOSImage src={user.avatarUrl} alt="Profile photo" width={48} className="w-full h-full object-cover" />
+          ) : (
+            <span className="ios-nav-user-avatar-fallback">{user.name.charAt(0).toUpperCase()}</span>
+          )}
+          <span className="ios-nav-user-live" aria-hidden />
+        </div>
+      </div>
+    </Link>
+  )
+
+  const infoBlock = (
+    /* Identity text — no link, just display */
+    <div className="ios-nav-user-copy">
+      <span className="ios-nav-user-name">{displayNavName(user.name)}</span>
+      <span className="ios-nav-user-handle">{username}</span>
+      <span className="ios-nav-user-id">ID {accountId}</span>
+    </div>
+  )
+
+  const rail = (
+    /* Primary action: Desk / Studio. Secondary: Logout */
+    <div className="ios-nav-user-rail">
+      <Link to={dashboardTo} onClick={onNavigate} className="ios-nav-user-desk">
+        {dashboardLabel} →
+      </Link>
+      <span className="ios-nav-user-sep" aria-hidden />
+      <button type="button" onClick={onLogout} className="ios-nav-user-logout">
+        Logout
+      </button>
     </div>
   )
 
   if (layout === 'stack') {
     return (
       <div className="ios-nav-user-chip ios-nav-user-chip--stack">
-        <Link to={profilePath} onClick={onNavigate} className="ios-nav-user-main">
-          <div className="ios-nav-user-copy">
-            <span className="ios-nav-user-name">{displayNavName(user.name)}</span>
-            <span className="ios-nav-user-handle">{username}</span>
-            <span className="ios-nav-user-id">ID {accountId}</span>
-          </div>
-          <div className="ios-nav-user-avatar-ring">{avatar}</div>
-        </Link>
-        <div className="ios-nav-user-rail">
-          <Link to={dashboardTo} onClick={onNavigate} className="ios-nav-user-desk">
-            {dashboardLabel}
-          </Link>
-          <span className="ios-nav-user-sep" aria-hidden />
-          <button type="button" onClick={onLogout} className="ios-nav-user-logout">
-            Logout
-          </button>
+        <div className="ios-nav-user-main">
+          {infoBlock}
+          {avatarEl}
         </div>
+        {rail}
       </div>
     )
   }
 
   return (
     <div className="ios-nav-user-chip">
-      <Link
-        to={profilePath}
-        onClick={onNavigate}
-        className="ios-nav-user-main"
-        title="Open your network profile"
-      >
-        <div className="ios-nav-user-copy">
-          <span className="ios-nav-user-name">{displayNavName(user.name)}</span>
-          <span className="ios-nav-user-handle">{username}</span>
-          <span className="ios-nav-user-id">ID {accountId}</span>
-        </div>
-        <div className="ios-nav-user-avatar-ring">{avatar}</div>
-      </Link>
-      <div className="ios-nav-user-rail">
-        <Link to={dashboardTo} onClick={onNavigate} className="ios-nav-user-desk">
-          {dashboardLabel}
-        </Link>
-        <span className="ios-nav-user-sep" aria-hidden />
-        <button type="button" onClick={onLogout} className="ios-nav-user-logout">
-          Logout
-        </button>
+      <div className="ios-nav-user-main">
+        {infoBlock}
+        {avatarEl}
       </div>
+      {rail}
     </div>
   )
 }
