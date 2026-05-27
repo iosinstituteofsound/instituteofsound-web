@@ -7,6 +7,7 @@ import { MedalIllustration } from '@/components/community/medals/MedalIllustrati
 import { badgeDefBySlug } from '@/lib/community/badges'
 import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
 import { FollowButton } from '@/components/community/FollowButton'
+import { MemberCollabSkills } from '@/components/collab/MemberCollabSkills'
 
 function formatGenre(slug: string) {
   return slug
@@ -96,6 +97,8 @@ export function MemberProfileHeader({
       </div>
 
       {profile.bio && <p className="member-profile-bio">{profile.bio}</p>}
+
+      <MemberCollabSkills handle={profile.handle} userId={profile.userId} />
 
       <IdentityCrossLinks
         artistSlug={artistSlug}

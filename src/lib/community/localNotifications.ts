@@ -1,4 +1,10 @@
-export type NotificationKind = 'follow' | 'reaction' | 'rank_up' | 'editorial_publish'
+export type NotificationKind =
+  | 'follow'
+  | 'reaction'
+  | 'rank_up'
+  | 'editorial_publish'
+  | 'collab_response'
+  | 'collab_accepted'
 
 export interface CommunityNotification {
   id: string

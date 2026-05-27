@@ -106,6 +106,18 @@ const PUBLIC_PAGES: Record<string, SeoConfig> = {
       ]),
     }
   ),
+  '/collab': page(
+    '/collab',
+    'Collab Board',
+    'Post what you need. Find who is building — open calls by city, genre, and skill on the underground network.',
+    {
+      jsonLd: breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Community', path: '/community' },
+        { name: 'Collab', path: '/collab' },
+      ]),
+    }
+  ),
   '/submissions': page(
     '/submissions',
     'Submit Your Work',

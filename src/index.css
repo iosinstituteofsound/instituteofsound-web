@@ -6768,6 +6768,183 @@ html[data-perf='lite'] .metal-loader-core-beat {
   padding: 1rem 1.25rem;
 }
 
+/* ── Collab board (Phase 15) ───────────────────────────────────────── */
+.collab-board-filters {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.collab-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.collab-filter-field select {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-paper);
+  color: inherit;
+  font-size: 0.85rem;
+}
+
+.collab-composer,
+.collab-post-card {
+  padding: 1.35rem 1.5rem;
+}
+
+.collab-composer-kind {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.collab-kind-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.collab-kind-btn-active {
+  border-color: var(--color-rs-red);
+  color: var(--color-rs-red);
+}
+
+.collab-input {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-paper);
+  color: inherit;
+  font-size: 0.9rem;
+}
+
+.collab-textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+.collab-composer-row {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.collab-skill-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.collab-skill-chip {
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--color-border);
+  font-size: 0.75rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.collab-skill-chip-on {
+  border-color: var(--color-rs-red);
+  color: var(--color-rs-red);
+}
+
+.collab-post-kind {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.collab-post-kind-need {
+  color: var(--color-rs-red);
+}
+
+.collab-post-kind-offer {
+  color: #3dffa8;
+}
+
+.collab-post-responses-pill {
+  font-size: 0.7rem;
+  color: var(--color-muted);
+  margin-left: 0.75rem;
+}
+
+.collab-post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.collab-post-skill {
+  border: 1px solid var(--color-border);
+  padding: 0.15rem 0.45rem;
+}
+
+.collab-post-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.collab-post-avatar,
+.collab-post-avatar-fallback {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+}
+
+.collab-post-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  font-weight: 700;
+}
+
+.collab-response-row {
+  border: 1px solid var(--color-border);
+  padding: 0.85rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.collab-response-author {
+  text-decoration: none;
+  color: inherit;
+}
+
+.member-collab-skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+
+.member-collab-skill-list li {
+  font-size: 0.75rem;
+  border: 1px solid var(--color-border);
+  padding: 0.2rem 0.5rem;
+}
+
 .spin-of-week {
   padding: 1.35rem 1.5rem;
 }

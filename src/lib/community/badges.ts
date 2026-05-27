@@ -8,6 +8,7 @@ export type CommunityBadgeSlug =
   | 'crew_joined'
   | 'weekly_warrior'
   | 'triple_signal'
+  | 'collab_verified'
 
 export interface CommunityBadgeDef {
   slug: CommunityBadgeSlug
@@ -70,6 +71,12 @@ export const COMMUNITY_BADGE_DEFS: CommunityBadgeDef[] = [
     name: 'Triple Signal',
     description: 'Completed all three weekly challenges in one week.',
     sortOrder: 80,
+  },
+  {
+    slug: 'collab_verified',
+    name: 'Collab Verified',
+    description: 'Completed a collab with mutual confirmation on the network.',
+    sortOrder: 85,
   },
 ]
 

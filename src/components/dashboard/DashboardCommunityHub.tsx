@@ -4,6 +4,7 @@ import { useCommunityMemberStats } from '@/hooks/useCommunity'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { CollabSkillsEditor } from '@/components/collab/CollabSkillsEditor'
 
 export function DashboardCommunityHub() {
   const { user } = useAuth()
@@ -62,8 +63,13 @@ export function DashboardCommunityHub() {
           <Link to="/community" className="ios-btn ios-btn-ghost !text-xs">
             Full community hub
           </Link>
+          <Link to="/collab" className="ios-btn ios-btn-ghost !text-xs">
+            Collab board →
+          </Link>
         </div>
       </div>
+
+      <CollabSkillsEditor />
 
       <div className="ios-card p-6 border-dashed border-border">
         <h3 className="font-display text-lg font-bold uppercase">Quick guide</h3>

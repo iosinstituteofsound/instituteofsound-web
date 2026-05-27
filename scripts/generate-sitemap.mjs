@@ -109,6 +109,7 @@ const staticPaths = [
   '/features',
   '/community',
   '/scenes',
+  '/collab',
   '/submissions',
   '/archive',
   '/about',

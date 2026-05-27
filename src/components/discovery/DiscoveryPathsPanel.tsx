@@ -63,6 +63,12 @@ export function DiscoveryPathsPanel({ className }: DiscoveryPathsPanelProps) {
           </li>
         )}
         <li>
+          <Link to="/collab" className="discovery-path-row">
+            <span className="discovery-path-label">Collab board</span>
+            <span className="discovery-path-desc">Need / offer calls — city, genre, skill filters</span>
+          </Link>
+        </li>
+        <li>
           <Link to="/scenes" className="discovery-path-row">
             <span className="discovery-path-label">India scenes</span>
             <span className="discovery-path-desc">City + genre hubs — local density first</span>
