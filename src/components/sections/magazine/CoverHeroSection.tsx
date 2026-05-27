@@ -1,4 +1,5 @@
 import type { CoverStory } from '@/types'
+import { Link } from 'react-router-dom'
 import { WaveformBackground } from '@/components/effects/WaveformBackground'
 import { Reveal } from '@/components/ui/Reveal'
 import { Button } from '@/components/ui/Button'
@@ -109,6 +110,43 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
               <Button to="/discover" variant="secondary">
                 Enter Archive
               </Button>
+            </Reveal>
+
+            <Reveal delay={0.35} className="mt-8 max-w-2xl">
+              <div className="border border-border bg-void/70 backdrop-blur-sm p-5">
+                <p className="text-[10px] tracking-[0.32em] uppercase text-muted">
+                  Institute of Sound = <span className="text-signal">Magazine</span> +{' '}
+                  <span className="text-signal">Artist Pages</span> +{' '}
+                  <span className="text-signal">Community</span>
+                </p>
+                <p className="text-sm text-muted mt-2">
+                  Read. Build. Rank up — via spins, crews, and weekly events.
+                </p>
+
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <Link
+                    to="/community"
+                    className="border border-border p-4 hover:border-mh-red/60 transition-colors"
+                  >
+                    <p className="font-display font-bold uppercase tracking-wide">I’m a Listener</p>
+                    <p className="text-xs text-muted mt-1">Spin tracks · join crews · rank up</p>
+                  </Link>
+                  <Link
+                    to="/submissions"
+                    className="border border-border p-4 hover:border-mh-red/60 transition-colors"
+                  >
+                    <p className="font-display font-bold uppercase tracking-wide">I’m an Artist</p>
+                    <p className="text-xs text-muted mt-1">Build your page · EPK · get discovered</p>
+                  </Link>
+                  <Link
+                    to="/editor/join"
+                    className="border border-border p-4 hover:border-mh-red/60 transition-colors"
+                  >
+                    <p className="font-display font-bold uppercase tracking-wide">I’m an Editor</p>
+                    <p className="text-xs text-muted mt-1">Publish features · curate the wire</p>
+                  </Link>
+                </div>
+              </div>
             </Reveal>
           </div>
 
