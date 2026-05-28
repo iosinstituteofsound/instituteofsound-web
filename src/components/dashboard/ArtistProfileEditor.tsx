@@ -73,6 +73,8 @@ import {
 } from '@/lib/artist-profile/socialOrder'
 import { ArtistSocialOrderEditor } from '@/components/dashboard/ArtistSocialOrderEditor'
 import { DashboardSection } from '@/components/dashboard/DashboardSection'
+import { parseYouTubeUrl } from '@/lib/community/musicLinks'
+import { fetchLatestVideosFromChannelUrl } from '@/lib/artist-profile/youtubeChannelImport'
 import {
   ArtistProfileSectionNav,
   type ProfileSectionLink,
@@ -150,6 +152,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [albumType, setAlbumType] = useState<'album' | 'single' | 'ep'>('album')
   const [videoTitle, setVideoTitle] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [channelImportUrl, setChannelImportUrl] = useState('')
+  const [importingChannelVideos, setImportingChannelVideos] = useState(false)
   const [bulkTrackUrls, setBulkTrackUrls] = useState('')
   const [bulkAdding, setBulkAdding] = useState(false)
   const [activeSection, setActiveSection] = useState('overview')
@@ -999,8 +1003,71 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           id="videos"
           step="10"
           title="Videos"
-          hint="YouTube links — thumbnail auto."
+          hint="YouTube links — thumbnail auto. You can also fetch latest videos from a channel URL."
         >
+        <div className="ios-card p-4 mb-4 space-y-3">
+          <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+            Channel import
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Input
+              type="url"
+              placeholder="https://www.youtube.com/@artistname"
+              value={channelImportUrl}
+              onChange={(e) => setChannelImportUrl(e.target.value)}
+              className="flex-1 min-w-[260px]"
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={importingChannelVideos}
+              onClick={async () => {
+                const p = await ensureProfile()
+                setImportingChannelVideos(true)
+                setError('')
+                try {
+                  const fetched = await fetchLatestVideosFromChannelUrl(channelImportUrl, 8)
+                  const existingUrls = new Set(
+                    videos
+                      .map((v) => parseYouTubeUrl(v.videoUrl)?.url)
+                      .filter((url): url is string => Boolean(url))
+                  )
+
+                  let added = 0
+                  for (const v of fetched) {
+                    const parsed = parseYouTubeUrl(v.videoUrl)
+                    if (!parsed || existingUrls.has(parsed.url)) continue
+                    await addArtistVideo(p.id, {
+                      title: v.title,
+                      videoUrl: parsed.url,
+                      thumbnailUrl: v.thumbnailUrl,
+                    })
+                    existingUrls.add(parsed.url)
+                    added += 1
+                  }
+
+                  await reloadMediaAndTryDiscover(p.id)
+                  setMessage(
+                    added > 0
+                      ? `Imported ${added} video${added > 1 ? 's' : ''} from YouTube channel.`
+                      : 'No new channel videos were found to import.'
+                  )
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : 'Could not import channel videos.')
+                } finally {
+                  setImportingChannelVideos(false)
+                }
+              }}
+            >
+              {importingChannelVideos ? 'Fetching…' : 'Fetch from channel'}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Supports <code>/@handle</code>, <code>/channel/UC...</code>, <code>/user/...</code>,
+            and <code>/c/...</code> channel URLs.
+          </p>
+        </div>
+
         <div className="flex flex-wrap gap-2">
           <Input
             placeholder="Video title"
