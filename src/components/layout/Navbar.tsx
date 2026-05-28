@@ -21,6 +21,7 @@ function isLinkActive(href: string, pathname: string, hash: string): boolean {
 export function Navbar({ links }: NavbarProps) {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [hiddenOnScroll, setHiddenOnScroll] = useState(false)
   const [openMenu, setOpenMenu] = useState<NavGroupId | null>(null)
   const [drawerSection, setDrawerSection] = useState<NavGroupId | null>('discover')
   const location = useLocation()
@@ -37,11 +38,32 @@ export function Navbar({ links }: NavbarProps) {
   }
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12)
+    let lastY = window.scrollY
+    const onScroll = () => {
+      const nextY = window.scrollY
+      const delta = nextY - lastY
+      setScrolled(nextY > 12)
+
+      if (open) {
+        setHiddenOnScroll(false)
+      } else if (nextY < 80) {
+        setHiddenOnScroll(false)
+      } else if (delta > 6) {
+        setHiddenOnScroll(true)
+      } else if (delta < -6) {
+        setHiddenOnScroll(false)
+      }
+
+      lastY = nextY
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [open])
+
+  useEffect(() => {
+    if (open) setHiddenOnScroll(false)
+  }, [open])
 
   useEffect(() => {
     setOpen(false)
@@ -61,6 +83,7 @@ export function Navbar({ links }: NavbarProps) {
         'ios-nav fixed top-0 left-0 right-0 z-50',
         isArtistSite && 'ios-nav-artist-site',
         scrolled && !isArtistSite && 'ios-nav-scrolled',
+        hiddenOnScroll && !isArtistSite && 'ios-nav-hidden',
         !isArtistSite && !scrolled && isHome && 'ios-nav-home',
         !isArtistSite && !isHome && 'ios-nav-solid'
       )}
