@@ -42,8 +42,24 @@ function parseChannelUrl(input: string): {
   if ((first === 'c' || first === 'user') && second) {
     return { legacySlug: second }
   }
+  if (
+    first &&
+    ![
+      'watch',
+      'shorts',
+      'embed',
+      'playlist',
+      'results',
+      'feed',
+      'channel',
+      'c',
+      'user',
+    ].includes(first)
+  ) {
+    return { legacySlug: first }
+  }
 
-  throw new Error('Unsupported channel URL. Use channel/@handle/user/c format.')
+  throw new Error('Unsupported channel URL. Use @handle, /channel, /user, /c, or custom path format.')
 }
 
 async function resolveChannelId(input: string, apiKey: string): Promise<string> {

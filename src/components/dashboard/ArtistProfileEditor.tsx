@@ -154,6 +154,9 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [videoUrl, setVideoUrl] = useState('')
   const [channelImportUrl, setChannelImportUrl] = useState('')
   const [importingChannelVideos, setImportingChannelVideos] = useState(false)
+  const [channelImportProgress, setChannelImportProgress] = useState(0)
+  const [channelImportStatus, setChannelImportStatus] = useState('')
+  const [channelImportError, setChannelImportError] = useState('')
   const [bulkTrackUrls, setBulkTrackUrls] = useState('')
   const [bulkAdding, setBulkAdding] = useState(false)
   const [activeSection, setActiveSection] = useState('overview')
@@ -1022,11 +1025,18 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
               variant="secondary"
               disabled={importingChannelVideos}
               onClick={async () => {
+                setChannelImportError('')
+                setChannelImportStatus('Validating channel URL…')
+                setChannelImportProgress(8)
                 const p = await ensureProfile()
                 setImportingChannelVideos(true)
                 setError('')
                 try {
+                  setChannelImportStatus('Connecting to YouTube…')
+                  setChannelImportProgress(28)
                   const fetched = await fetchLatestVideosFromChannelUrl(channelImportUrl, 8)
+                  setChannelImportStatus(`Found ${fetched.length} latest videos. Importing…`)
+                  setChannelImportProgress(52)
                   const existingUrls = new Set(
                     videos
                       .map((v) => parseYouTubeUrl(v.videoUrl)?.url)
@@ -1034,7 +1044,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
                   )
 
                   let added = 0
-                  for (const v of fetched) {
+                  for (let i = 0; i < fetched.length; i += 1) {
+                    const v = fetched[i]
                     const parsed = parseYouTubeUrl(v.videoUrl)
                     if (!parsed || existingUrls.has(parsed.url)) continue
                     await addArtistVideo(p.id, {
@@ -1044,15 +1055,28 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
                     })
                     existingUrls.add(parsed.url)
                     added += 1
+                    const ratio = Math.round(((i + 1) / Math.max(fetched.length, 1)) * 38)
+                    setChannelImportProgress(52 + ratio)
                   }
 
                   await reloadMediaAndTryDiscover(p.id)
+                  setChannelImportProgress(100)
+                  setChannelImportStatus(
+                    added > 0
+                      ? `Done: imported ${added} video${added > 1 ? 's' : ''}.`
+                      : 'Done: no new videos to import.'
+                  )
                   setMessage(
                     added > 0
                       ? `Imported ${added} video${added > 1 ? 's' : ''} from YouTube channel.`
                       : 'No new channel videos were found to import.'
                   )
                 } catch (err) {
+                  setChannelImportProgress(0)
+                  setChannelImportStatus('')
+                  setChannelImportError(
+                    err instanceof Error ? err.message : 'Could not import channel videos.'
+                  )
                   setError(err instanceof Error ? err.message : 'Could not import channel videos.')
                 } finally {
                   setImportingChannelVideos(false)
@@ -1064,8 +1088,20 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           </div>
           <p className="text-xs text-muted-foreground">
             Supports <code>/@handle</code>, <code>/channel/UC...</code>, <code>/user/...</code>,
-            and <code>/c/...</code> channel URLs.
+            <code>/c/...</code>, and custom channel URLs.
           </p>
+          {(importingChannelVideos || channelImportProgress > 0) && (
+            <div className="space-y-1">
+              <div className="h-2 w-full bg-surface border border-border overflow-hidden">
+                <div
+                  className="h-full bg-mh-red transition-all duration-300"
+                  style={{ width: `${Math.min(channelImportProgress, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">{channelImportStatus}</p>
+            </div>
+          )}
+          {channelImportError && <p className="text-xs text-mh-red">{channelImportError}</p>}
         </div>
 
         <div className="flex flex-wrap gap-2">
