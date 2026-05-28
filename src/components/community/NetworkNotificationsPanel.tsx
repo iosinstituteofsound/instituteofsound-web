@@ -46,13 +46,7 @@ export function NetworkNotificationsPanel({ className }: NetworkNotificationsPan
     return () => document.removeEventListener('mousedown', onDoc)
   }, [open])
 
-  const toggle = () => {
-    setOpen((v) => {
-      const next = !v
-      if (next && unread > 0) void markAllRead()
-      return next
-    })
-  }
+  const toggle = () => setOpen((v) => !v)
 
   return (
     <div className={clsx('network-notifications', className)} ref={panelRef}>

@@ -3,6 +3,7 @@ import {
   listVerificationRequestsForReview,
   reviewRoleVerificationRequest,
 } from '@/lib/verification/service'
+import { syncVerificationDeskNotifications } from '@/lib/verification/notifyEditors'
 import type { RoleVerificationRequest } from '@/lib/verification/types'
 
 function prettyRole(role: string) {
@@ -27,6 +28,7 @@ export function SuperEditorVerificationPanel() {
     try {
       const data = await listVerificationRequestsForReview()
       setRequests(data)
+      void syncVerificationDeskNotifications()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load verification requests.')
     } finally {

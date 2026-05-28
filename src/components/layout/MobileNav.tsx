@@ -52,7 +52,7 @@ export function MobileNav({ drawerOpen, onToggleDrawer, onCloseDrawer, drawer }:
       )}
       <div
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 w-[min(280px,88vw)] shadow-2xl transition-transform duration-300 lg:hidden',
+          'fixed inset-y-0 left-0 z-50 w-[min(17.25rem,92vw)] shadow-2xl transition-transform duration-300 lg:hidden',
           drawerOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >

@@ -25,13 +25,11 @@ export function Sidebar({ className, onNavigate }: Props) {
         <IosBrandLockup to="/" onClick={onNavigate} variant="frame" size="md" />
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-2 py-4">
+      <nav className="v2-sidebar-nav" aria-label="Site navigation">
         {SIDEBAR_NAV.map((group) => (
-          <div key={group.title} className="mb-6">
-            <p className="mb-2 px-2 font-display text-[9px] font-bold uppercase tracking-[0.28em] text-mh-red/90">
-              {group.title}
-            </p>
-            <ul className="space-y-0.5">
+          <div key={group.title} className="v2-nav-group">
+            <p className="v2-nav-group-title">{group.title}</p>
+            <ul className="v2-nav-list">
               {group.items.map((item) => {
                 const active = isNavActive(pathname, item.href, meta.navHref)
                 return (
@@ -42,9 +40,7 @@ export function Sidebar({ className, onNavigate }: Props) {
                       className={clsx('v2-nav-link', active && 'v2-nav-link-active')}
                     >
                       <span>{item.label}</span>
-                      {item.badge && (
-                        <span className="metal-badge !py-0.5 !text-[8px]">{item.badge}</span>
-                      )}
+                      {item.badge && <span className="v2-nav-badge">{item.badge}</span>}
                     </Link>
                   </li>
                 )
@@ -73,7 +69,7 @@ export function Sidebar({ className, onNavigate }: Props) {
             <Link
               to="/register"
               onClick={onNavigate}
-              className="ios-btn ios-btn-primary mt-3 w-full !px-3 !py-2.5 !text-[10px]"
+              className="ios-btn ios-btn-primary mt-3 w-full !px-3 !py-2.5 !text-xs"
             >
               Join the movement
             </Link>

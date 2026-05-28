@@ -17,6 +17,8 @@ export interface CommunityNotification {
   actorName?: string
   actorHandle?: string
   actorAvatarUrl?: string
+  /** Dedupe desk alerts for role verification (local demo). */
+  verificationRequestId?: string
   readAt?: string
   createdAt: string
 }

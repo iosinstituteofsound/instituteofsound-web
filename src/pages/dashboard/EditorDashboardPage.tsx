@@ -46,6 +46,7 @@ import { RichTextContent } from '@/components/editor/RichTextContent'
 import { EditorialGalleryUpload } from '@/components/editor/EditorialGalleryUpload'
 import { EDITORIAL_TYPE_OPTIONS, editorialTypeLabel } from '@/lib/editorial/labels'
 import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richText'
+import { syncVerificationDeskNotifications } from '@/lib/verification/notifyEditors'
 
 type EditorTab =
   | 'analytics'
@@ -118,6 +119,11 @@ export default function EditorDashboardPage() {
   useEffect(() => {
     refresh()
   }, [refresh])
+
+  useEffect(() => {
+    if (!isSuperEditor) return
+    void syncVerificationDeskNotifications()
+  }, [isSuperEditor])
 
   useEffect(() => {
     const desk = searchParams.get('desk')

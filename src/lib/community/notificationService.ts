@@ -90,6 +90,7 @@ export async function markNotificationsRead(ids?: string[]): Promise<void> {
 }
 
 export function notificationActorPath(n: CommunityNotification): string | null {
+  if (n.href?.startsWith('/editor/')) return n.href
   if (!n.actorHandle) return null
   const h = n.actorHandle.replace(/^@/, '')
   return `/network/${h}`
