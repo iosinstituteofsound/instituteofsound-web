@@ -15,6 +15,7 @@ import { useLenis } from '@/hooks/useLenis'
 import { useContent } from '@/hooks/useContent'
 import { getNav, getFooter } from '@/api/endpoints'
 import { useAuth } from '@/context/AuthContext'
+import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt'
 
 export function Layout() {
   useLenis()
@@ -53,6 +54,7 @@ export function Layout() {
       <AcademyProgressSync />
       <CommunityOnboardingGate />
       <GrainOverlay />
+      <PwaInstallPrompt />
       {navLoading || authLoading ? (
         <div className="h-[4.25rem] md:h-[4.5rem]" />
       ) : (
