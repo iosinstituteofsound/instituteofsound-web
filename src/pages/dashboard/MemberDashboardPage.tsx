@@ -444,24 +444,42 @@ export default function MemberDashboardPage() {
       </div>
 
       {personaModal && (
-        <div className="member-role-modal-backdrop" role="dialog" aria-modal="true">
-          <div className="member-role-modal ios-card">
-            <p className="text-[10px] tracking-widest uppercase text-mh-red">
-              Role information
-            </p>
-            <h3 className="font-display text-2xl font-bold uppercase mt-2">
-              {PERSONA_OPTIONS.find((p) => p.id === personaModal)?.title}
-            </h3>
-            <p className="text-sm text-muted mt-2">
-              {PERSONA_ROLE_INFO[personaModal].roleSummary}
-            </p>
-            <p className="text-xs uppercase tracking-widest text-muted mt-4">What you can do</p>
-            <ul className="member-dashboard-persona-list mt-2">
-              {PERSONA_ROLE_INFO[personaModal].canDo.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <div className="flex flex-wrap gap-2 mt-6">
+        <div
+          className="member-role-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => !savingPersona && setPersonaModal(null)}
+        >
+          <div className="member-role-modal ios-card" onClick={(event) => event.stopPropagation()}>
+            <div className="member-role-modal-header">
+              <div>
+                <p className="member-role-modal-eyebrow">Role information</p>
+                <h3 className="member-role-modal-title">
+                  {PERSONA_OPTIONS.find((p) => p.id === personaModal)?.title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                className="member-role-modal-close"
+                onClick={() => setPersonaModal(null)}
+                disabled={savingPersona}
+                aria-label="Close role information popup"
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="member-role-modal-summary">{PERSONA_ROLE_INFO[personaModal].roleSummary}</p>
+            <div className="member-role-modal-capabilities">
+              <p className="member-role-modal-capabilities-title">What you can do</p>
+              <ul className="member-role-modal-capabilities-list">
+                {PERSONA_ROLE_INFO[personaModal].canDo.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="member-role-modal-actions">
               <button
                 type="button"
                 className="ios-btn ios-btn-primary !text-xs"
