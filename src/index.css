@@ -2929,13 +2929,22 @@ textarea.ios-input {
 .artist-site-video-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.25rem;
+  gap: 0.95rem;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 720px) {
   .artist-site-video-grid {
-    grid-template-columns: 1.4fr 1fr;
-    align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1120px) {
+  .artist-site-video-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .artist-site-video-featured {
+    grid-column: span 2;
   }
 }
 
@@ -2957,10 +2966,6 @@ textarea.ios-input {
   overflow: hidden;
   aspect-ratio: 16 / 9;
   background: var(--color-surface);
-}
-
-.artist-site-video-lead .artist-site-video-media {
-  aspect-ratio: 16 / 10;
 }
 
 .artist-site-video-play {
@@ -2993,7 +2998,7 @@ textarea.ios-input {
 }
 
 .artist-site-video-copy {
-  padding: 0.72rem 0.78rem 0.82rem;
+  padding: 0.65rem 0.72rem 0.74rem;
 }
 
 .artist-site-video h3 {
@@ -3009,12 +3014,6 @@ textarea.ios-input {
   text-transform: uppercase;
   letter-spacing: 0.13em;
   color: var(--color-muted-foreground);
-}
-
-.artist-site-video-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
 }
 
 .artist-site-story {

@@ -304,51 +304,29 @@ function DiscographyCarousel({
 }
 
 function VideoGallery({ videos }: { videos: ArtistVideo[] }) {
-  const [lead, ...rest] = videos
   return (
     <div className="artist-site-video-grid">
-      <a
-        href={lead.videoUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="artist-site-video artist-site-video-lead group"
-      >
-        <div className="artist-site-video-media">
-          <CoverArt src={lead.thumbnailUrl} alt={lead.title} size="lg" />
-          <span className="artist-site-video-chip">Featured</span>
-          <span className="artist-site-video-play" aria-hidden>
-            ▶
-          </span>
-        </div>
-        <div className="artist-site-video-copy">
-          <h3>{lead.title}</h3>
-          <p>Watch on YouTube ↗</p>
-        </div>
-      </a>
-      {rest.length > 0 && (
-        <div className="artist-site-video-stack">
-          {rest.map((v) => (
-            <a
-              key={v.id}
-              href={v.videoUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="artist-site-video group"
-            >
-              <div className="artist-site-video-media">
-                <CoverArt src={v.thumbnailUrl} alt={v.title} size="lg" />
-                <span className="artist-site-video-play" aria-hidden>
-                  ▶
-                </span>
-              </div>
-              <div className="artist-site-video-copy">
-                <h3>{v.title}</h3>
-                <p>Watch on YouTube ↗</p>
-              </div>
-            </a>
-          ))}
-        </div>
-      )}
+      {videos.map((v, index) => (
+        <a
+          key={v.id}
+          href={v.videoUrl}
+          target="_blank"
+          rel="noreferrer"
+          className={`artist-site-video group ${index === 0 ? 'artist-site-video-featured' : ''}`}
+        >
+          <div className="artist-site-video-media">
+            <CoverArt src={v.thumbnailUrl} alt={v.title} size="lg" />
+            {index === 0 && <span className="artist-site-video-chip">Featured</span>}
+            <span className="artist-site-video-play" aria-hidden>
+              ▶
+            </span>
+          </div>
+          <div className="artist-site-video-copy">
+            <h3>{v.title}</h3>
+            <p>Watch on YouTube ↗</p>
+          </div>
+        </a>
+      ))}
     </div>
   )
 }
