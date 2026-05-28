@@ -23,6 +23,7 @@ interface MemberProfileHeaderProps {
   dashboardHref?: string
   badges: EarnedBadge[]
   artistSlug?: string | null
+  onEditProfile?: () => void
 }
 
 export function MemberProfileHeader({
@@ -32,6 +33,7 @@ export function MemberProfileHeader({
   dashboardHref,
   badges,
   artistSlug,
+  onEditProfile,
 }: MemberProfileHeaderProps) {
   return (
     <header className="member-profile-hero">
@@ -123,9 +125,18 @@ export function MemberProfileHeader({
 
       <div className="member-profile-actions">
         {isYou ? (
-          <Link to="/community#feed" className="member-profile-btn member-profile-btn-primary">
-            New transmission
-          </Link>
+          <>
+            <Link to="/community#feed" className="member-profile-btn member-profile-btn-primary">
+              New transmission
+            </Link>
+            <button
+              type="button"
+              className="member-profile-btn member-profile-btn-ghost"
+              onClick={() => onEditProfile?.()}
+            >
+              Edit profile
+            </button>
+          </>
         ) : (
           <>
             <FollowButton

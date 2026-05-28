@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { formatAccountNumericId } from '@/lib/auth/accountId'
 import { homeDashboardPath } from '@/lib/auth/roles'
@@ -31,6 +31,9 @@ import { breadcrumbJsonLd } from '@/lib/seo/jsonLd'
 import { networkProfilePath } from '@/lib/community/networkPaths'
 import { COMMUNITY_FOLLOW_EVENT } from '@/lib/community/followService'
 import { IOSImage } from '@/components/ui/IOSImage'
+import { Input, FieldLabel } from '@/components/ui/Input'
+import { ImageUpload } from '@/components/ui/ImageUpload'
+import { updateUserProfile } from '@/lib/auth/profile'
 
 function tabFromSearch(params: URLSearchParams): MemberProfileTab {
   const t = params.get('tab')
@@ -54,6 +57,15 @@ export default function CommunityMemberPage() {
   const [managedArtists, setManagedArtists] = useState<
     { profileId: string; slug: string; displayName: string; tagline?: string; avatarUrl?: string }[]
   >([])
+  const [showEditProfile, setShowEditProfile] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editHandle, setEditHandle] = useState('')
+  const [editBio, setEditBio] = useState('')
+  const [editAvatarUrl, setEditAvatarUrl] = useState('')
+  const [savingProfile, setSavingProfile] = useState(false)
+  const [editError, setEditError] = useState('')
+  const [editSuccess, setEditSuccess] = useState('')
+  const navigate = useNavigate()
 
   const { badges, loading: badgesLoading } = useCommunityBadges(profile?.userId)
 
@@ -138,6 +150,14 @@ export default function CommunityMemberPage() {
   }, [loading, profile, tab])
 
   useEffect(() => {
+    if (!profile) return
+    setEditName(profile.displayName ?? '')
+    setEditHandle(profile.handle.replace(/^@/, ''))
+    setEditBio(profile.bio ?? '')
+    setEditAvatarUrl(profile.avatarUrl ?? '')
+  }, [profile])
+
+  useEffect(() => {
     setTab(tabFromSearch(searchParams))
   }, [searchParams])
 
@@ -181,6 +201,33 @@ export default function CommunityMemberPage() {
   const accountId = formatAccountNumericId(profile.userId)
   const dashboardHref = user ? homeDashboardPath(user.role) : undefined
 
+  const saveProfileFromNetwork = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!user) return
+    setSavingProfile(true)
+    setEditError('')
+    setEditSuccess('')
+    try {
+      const updated = await updateUserProfile(user.id, {
+        name: editName,
+        username: editHandle,
+        bio: editBio,
+        avatarUrl: editAvatarUrl,
+      })
+      await loadProfile()
+      setEditSuccess('Profile updated successfully.')
+
+      const nextHandle = (updated.username ?? editHandle).replace(/^@/, '').toLowerCase()
+      if (nextHandle && nextHandle !== handle) {
+        void navigate(networkProfilePath(nextHandle), { replace: true })
+      }
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : 'Failed to update profile.')
+    } finally {
+      setSavingProfile(false)
+    }
+  }
+
   return (
     <div className="member-profile-page">
       <div className="member-profile-page-bg" aria-hidden />
@@ -198,7 +245,78 @@ export default function CommunityMemberPage() {
           dashboardHref={isYou ? dashboardHref : undefined}
           badges={badges}
           artistSlug={artistSlug}
+          onEditProfile={() => setShowEditProfile((prev) => !prev)}
         />
+
+        {isYou && showEditProfile && (
+          <section className="ios-card p-5 mb-5">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+                  Network profile editor
+                </p>
+                <h2 className="font-display text-xl font-bold uppercase mt-2">Edit your public profile</h2>
+              </div>
+            </div>
+            <form className="space-y-4" onSubmit={saveProfileFromNetwork}>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <FieldLabel htmlFor="network-edit-name">Display name</FieldLabel>
+                  <Input
+                    id="network-edit-name"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <FieldLabel htmlFor="network-edit-handle">Handle</FieldLabel>
+                  <Input
+                    id="network-edit-handle"
+                    value={editHandle}
+                    onChange={(e) => setEditHandle(e.target.value)}
+                    placeholder="yourhandle"
+                    required
+                  />
+                </div>
+              </div>
+              <ImageUpload
+                label="Avatar"
+                folder="ios/artists"
+                value={editAvatarUrl}
+                onChange={setEditAvatarUrl}
+                hint="Visible on your network profile and posts."
+              />
+              <div>
+                <FieldLabel htmlFor="network-edit-bio">Bio</FieldLabel>
+                <textarea
+                  id="network-edit-bio"
+                  className="ios-input min-h-[100px]"
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  maxLength={280}
+                  placeholder="Tell the network what you do."
+                />
+                <p className="text-xs text-muted mt-1 text-right">{editBio.length}/280</p>
+              </div>
+              {editError && <p className="text-sm text-mh-red">{editError}</p>}
+              {editSuccess && <p className="text-sm text-green-400">{editSuccess}</p>}
+              <div className="flex flex-wrap gap-2">
+                <button type="submit" className="ios-btn ios-btn-primary !text-xs" disabled={savingProfile}>
+                  {savingProfile ? 'Saving…' : 'Save profile'}
+                </button>
+                <button
+                  type="button"
+                  className="ios-btn ios-btn-ghost !text-xs"
+                  onClick={() => setShowEditProfile(false)}
+                  disabled={savingProfile}
+                >
+                  Close editor
+                </button>
+              </div>
+            </form>
+          </section>
+        )}
 
         <MemberProfileTabs
           active={tab}
