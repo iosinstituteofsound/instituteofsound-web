@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { useEffect, useCallback } from 'react'
+import clsx from 'clsx'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { GrainOverlay } from '@/components/effects/GrainOverlay'
@@ -18,7 +19,8 @@ import { useAuth } from '@/context/AuthContext'
 export function Layout() {
   useLenis()
   const location = useLocation()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
+  const appMode = Boolean(user)
   const fetchNav = useCallback(() => getNav(), [])
   const fetchFooter = useCallback(() => getFooter(), [])
   const { data: navLinks, loading: navLoading } = useContent(fetchNav)
@@ -37,6 +39,11 @@ export function Layout() {
 
   const isArtistSite = /^\/artist\/[^/]+$/.test(location.pathname)
 
+  useEffect(() => {
+    document.body.classList.toggle('ios-app-shell', appMode)
+    return () => document.body.classList.remove('ios-app-shell')
+  }, [appMode])
+
   return (
     <>
       <GlobalJsonLd />
@@ -46,15 +53,15 @@ export function Layout() {
       <AcademyProgressSync />
       <CommunityOnboardingGate />
       <GrainOverlay />
-      {navLoading ? (
+      {navLoading || authLoading ? (
         <div className="h-[4.25rem] md:h-[4.5rem]" />
       ) : (
-        navLinks && <Navbar links={navLinks} appMode={Boolean(user)} />
+        navLinks && <Navbar links={navLinks} appMode={appMode} />
       )}
-      <main className="ios-page-bg">
+      <main className={clsx('ios-page-bg', appMode && 'ios-app-shell-main')}>
         <Outlet />
       </main>
-      {!isArtistSite &&
+      {!isArtistSite && !user &&
         (footerLoading ? (
           <LoadingTransmission variant="compact" />
         ) : (

@@ -4,11 +4,13 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArtistNavActions } from '@/components/layout/ArtistNavActions'
 import { NavDrawerAccordion, NavDropdown } from '@/components/layout/NavDropdown'
 import { NavMenuToggle } from '@/components/layout/NavMenuToggle'
+import { NavUserIdentity } from '@/components/layout/NavUserIdentity'
 import { groupNavLinks } from '@/lib/nav/groupLinks'
 import { useAuth } from '@/context/AuthContext'
 import { homeDashboardPath } from '@/lib/auth/roles'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { NetworkNotificationsPanel } from '@/components/community/NetworkNotificationsPanel'
+import { IOSImage } from '@/components/ui/IOSImage'
 import type { NavGroupId, NavLink } from '@/types'
 import clsx from 'clsx'
 
@@ -18,8 +20,12 @@ interface NavbarProps {
 }
 
 function isLinkActive(href: string, pathname: string, hash: string): boolean {
+  if (href.includes('#')) {
+    const [path, fragment] = href.split('#')
+    const base = path || '/'
+    return pathname === base && hash === `#${fragment}`
+  }
   if (href === '/#reviews') return hash === '#reviews'
-  if (href.startsWith('/#')) return false
   return pathname === href || (href !== '/' && pathname.startsWith(href + '/'))
 }
 
@@ -35,7 +41,7 @@ function appSectionLabel(pathname: string) {
 }
 
 export function Navbar({ links, appMode = false }: NavbarProps) {
-  const { user, logout } = useAuth()
+  const { user, logout, isSuperEditor } = useAuth()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [hiddenOnScroll, setHiddenOnScroll] = useState(false)
@@ -95,13 +101,30 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
     }
   }, [open])
 
+  const dashboardLabel = user
+    ? isSuperEditor
+      ? 'Editorial Desk'
+      : user.role === 'artist'
+        ? 'My Studio'
+        : user.role === 'member'
+          ? 'My Network Dashboard'
+          : 'Dashboard'
+    : 'Dashboard'
+
   const appQuickLinks: { label: string; href: string }[] = [
     { label: 'Home', href: '/' },
     { label: 'Discover', href: '/discover' },
     { label: 'Community Feed', href: '/community#feed' },
-    ...(user ? [{ label: 'My Dashboard', href: homeDashboardPath(user.role) }] : []),
-    ...(user ? [{ label: 'My Profile', href: `/network/${memberHandleFromUser(user)}` }] : []),
+    { label: 'Community Hub', href: '/community' },
+    ...(user
+      ? [
+          { label: dashboardLabel, href: homeDashboardPath(user.role) },
+          { label: 'My Profile', href: `/network/${memberHandleFromUser(user)}` },
+        ]
+      : []),
   ]
+
+  const drawerSlideX = appMode ? '-100%' : '100%'
 
   return (
     <header
@@ -123,6 +146,7 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
               type="button"
               onClick={() => setOpen((v) => !v)}
               className="ios-nav-app-menu-btn"
+              aria-expanded={open}
               aria-label={open ? 'Close app menu' : 'Open app menu'}
             >
               <span className="ios-nav-app-menu-line" />
@@ -140,8 +164,18 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
                   to={`/network/${memberHandleFromUser(user)}`}
                   className="ios-nav-app-avatar-link"
                   title="Open profile"
+                  onClick={() => setOpen(false)}
                 >
-                  {user.name.charAt(0).toUpperCase()}
+                  {user.avatarUrl ? (
+                    <IOSImage
+                      src={user.avatarUrl}
+                      alt=""
+                      width={32}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    user.name.charAt(0).toUpperCase()
+                  )}
                 </Link>
               )}
             </div>
@@ -206,9 +240,9 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
               role="dialog"
               aria-modal="true"
               aria-label={appMode ? 'App menu' : 'Site menu'}
-              initial={{ opacity: 0, x: '100%' }}
+              initial={{ opacity: 0, x: drawerSlideX }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: '100%' }}
+              exit={{ opacity: 0, x: drawerSlideX }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
               className={clsx('ios-nav-drawer', appMode && 'ios-nav-drawer-app')}
             >
@@ -255,29 +289,14 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
               <div className="ios-nav-drawer-foot">
                 <p className="ios-nav-drawer-foot-label">Account</p>
                 {appMode && user ? (
-                  <div className="ios-nav-drawer-account-app">
-                    <p className="ios-nav-drawer-account-name">{user.name}</p>
-                    <p className="ios-nav-drawer-account-role">{user.role.replace('_', ' ')}</p>
-                    <div className="ios-nav-drawer-account-actions">
-                      <Link
-                        to={homeDashboardPath(user.role)}
-                        onClick={() => setOpen(false)}
-                        className="ios-btn ios-btn-ghost w-full text-center"
-                      >
-                        Open dashboard
-                      </Link>
-                      <button
-                        type="button"
-                        className="ios-btn ios-btn-ghost w-full"
-                        onClick={() => {
-                          void logout()
-                          setOpen(false)
-                        }}
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  </div>
+                  <NavUserIdentity
+                    layout="stack"
+                    onNavigate={() => setOpen(false)}
+                    onLogout={() => {
+                      void logout()
+                      setOpen(false)
+                    }}
+                  />
                 ) : (
                   <ArtistNavActions layout="stack" onNavigate={() => setOpen(false)} />
                 )}

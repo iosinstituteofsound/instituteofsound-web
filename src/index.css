@@ -937,11 +937,29 @@ textarea.ios-input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-signal);
   text-decoration: none;
   background: rgba(255, 255, 255, 0.04);
+  flex-shrink: 0;
+}
+
+.ios-nav-app-menu-btn[aria-expanded='true'] .ios-nav-app-menu-line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.ios-nav-app-menu-btn[aria-expanded='true'] .ios-nav-app-menu-line:nth-child(2) {
+  opacity: 0;
+}
+
+.ios-nav-app-menu-btn[aria-expanded='true'] .ios-nav-app-menu-line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.ios-nav-app-menu-line {
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .ios-nav-backdrop {
@@ -972,7 +990,27 @@ textarea.ios-input {
 }
 
 .ios-nav-drawer-app {
+  left: 0;
+  right: auto;
   width: min(100%, 24rem);
+  border-left: none;
+  border-right: 1px solid rgba(212, 0, 0, 0.25);
+  box-shadow: 24px 0 60px rgba(0, 0, 0, 0.65);
+}
+
+.ios-app-shell-main {
+  padding-top: 4.25rem;
+  min-height: 100dvh;
+}
+
+@media (min-width: 768px) {
+  .ios-app-shell-main {
+    padding-top: 4.5rem;
+  }
+}
+
+body.ios-app-shell {
+  overscroll-behavior-y: none;
 }
 
 .ios-nav-drawer::before {
