@@ -206,7 +206,6 @@ export default function MemberDashboardPage() {
   const profilePath = `/network/${handle}`
   const persona = user.dashboardPersona
   const personaPanel = persona ? PERSONA_CONTENT[persona] : null
-  const showOnlyRoleDashboard = Boolean(personaPanel)
 
   const savePersona = async (next: DashboardPersona | null) => {
     if (savingPersona) return
@@ -266,51 +265,37 @@ export default function MemberDashboardPage() {
           </div>
         </header>
 
-        <section className="member-dashboard-persona-picker ios-card p-6 md:p-8 mb-8">
-          <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-            Workspace roles
-          </p>
-          <h2 className="font-display text-2xl font-bold uppercase mt-2">
-            Choose how you work
-          </h2>
-          <p className="text-sm text-muted mt-2 max-w-3xl">
-            Har member yahin se role workspace select kar sakta hai. Artist manager ho, label ho,
-            promoter ho, ya brand — dashboard usi hisaab se customize hoga.
-          </p>
-          <div className="member-dashboard-persona-grid mt-6">
-            {PERSONA_OPTIONS.map((option) => {
-              const active = persona === option.id
-              return (
+        {!persona && (
+          <section className="member-dashboard-persona-picker ios-card p-6 md:p-8 mb-8">
+            <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+              Workspace roles
+            </p>
+            <h2 className="font-display text-2xl font-bold uppercase mt-2">
+              Choose how you work
+            </h2>
+            <p className="text-sm text-muted mt-2 max-w-3xl">
+              Har member yahin se role workspace select kar sakta hai. Artist manager ho, label ho,
+              promoter ho, ya brand — dashboard usi hisaab se customize hoga.
+            </p>
+            <div className="member-dashboard-persona-grid mt-6">
+              {PERSONA_OPTIONS.map((option) => (
                 <button
                   key={option.id}
                   type="button"
-                  className={`member-dashboard-persona-option ${
-                    active ? 'member-dashboard-persona-option-active' : ''
-                  }`}
+                  className="member-dashboard-persona-option"
                   onClick={() => setPersonaModal(option.id)}
                   disabled={savingPersona}
                 >
                   <p className="font-display text-base font-bold uppercase flex items-center justify-between gap-2">
                     <span>{option.title}</span>
-                    {active && <span className="text-[10px] tracking-widest text-mh-red">ACTIVE</span>}
                   </p>
                   <p className="text-xs text-muted mt-2">{option.subtitle}</p>
                 </button>
-              )
-            })}
-          </div>
-          <div className="flex flex-wrap gap-2 mt-5">
-            <button
-              type="button"
-              className="ios-btn ios-btn-ghost !text-xs !py-2"
-              onClick={() => void savePersona(null)}
-              disabled={savingPersona}
-            >
-              Use normal dashboard
-            </button>
-          </div>
-          {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
-        </section>
+              ))}
+            </div>
+            {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
+          </section>
+        )}
 
         {personaPanel && (
           <section className="member-dashboard-persona-active ios-card p-6 md:p-8 mb-8">
@@ -366,81 +351,85 @@ export default function MemberDashboardPage() {
                   {action.label} →
                 </Link>
               ))}
+              <button
+                type="button"
+                className="ios-btn ios-btn-ghost !text-xs"
+                onClick={() => void savePersona(null)}
+                disabled={savingPersona}
+              >
+                Back to normal dashboard
+              </button>
             </div>
             {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
           </section>
         )}
 
-        {!showOnlyRoleDashboard && <MemberTrustPanel user={user} persona={persona} />}
+        <MemberTrustPanel user={user} persona={persona} />
 
-        {!showOnlyRoleDashboard && (
-          <>
-            <div className="member-dashboard-paths">
-              <article className="member-dashboard-path-card member-dashboard-path-card--artist">
-                <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-                  Artist path
-                </p>
-                <h2 className="font-display text-xl font-bold uppercase mt-2">
-                  Upgrade to artist page
-                </h2>
-                <p className="text-sm text-muted mt-2">
-                  Launch My Studio — public band page, releases, merch, and editor submissions.
-                </p>
-                <Link to="/member/upgrade" className="ios-btn ios-btn-primary !text-xs mt-6 inline-flex">
-                  Start artist page →
-                </Link>
-              </article>
+        <div className="member-dashboard-paths">
+          <article className="member-dashboard-path-card member-dashboard-path-card--artist">
+            <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+              Artist path
+            </p>
+            <h2 className="font-display text-xl font-bold uppercase mt-2">
+              Upgrade to artist page
+            </h2>
+            <p className="text-sm text-muted mt-2">
+              Launch My Studio — public band page, releases, merch, and editor submissions.
+            </p>
+            <Link to="/member/upgrade" className="ios-btn ios-btn-primary !text-xs mt-6 inline-flex">
+              Start artist page →
+            </Link>
+          </article>
 
-              <article className="member-dashboard-path-card member-dashboard-path-card--editor">
-                <p className="text-[10px] tracking-[0.2em] uppercase text-muted font-bold">
-                  Editorial path
-                </p>
-                <h2 className="font-display text-xl font-bold uppercase mt-2">
-                  Become an editor
-                </h2>
-                <p className="text-sm text-muted mt-2">
-                  Apply to write features, review submissions, and curate the magazine desk.
-                </p>
-                <div className="flex flex-wrap gap-2 mt-6">
-                  <Link to="/editor/apply" className="ios-btn ios-btn-secondary !text-xs">
-                    Apply as editor →
-                  </Link>
-                  <Link to="/editor/join" className="ios-btn ios-btn-ghost !text-xs">
-                    Programme info
-                  </Link>
-                </div>
-              </article>
+          <article className="member-dashboard-path-card member-dashboard-path-card--editor">
+            <p className="text-[10px] tracking-[0.2em] uppercase text-muted font-bold">
+              Editorial path
+            </p>
+            <h2 className="font-display text-xl font-bold uppercase mt-2">
+              Become an editor
+            </h2>
+            <p className="text-sm text-muted mt-2">
+              Apply to write features, review submissions, and curate the magazine desk.
+            </p>
+            <div className="flex flex-wrap gap-2 mt-6">
+              <Link to="/editor/apply" className="ios-btn ios-btn-secondary !text-xs">
+                Apply as editor →
+              </Link>
+              <Link to="/editor/join" className="ios-btn ios-btn-ghost !text-xs">
+                Programme info
+              </Link>
             </div>
+          </article>
+        </div>
 
-            <section className="member-dashboard-explore">
-              <h2 className="font-display text-lg font-bold uppercase mb-4">Explore</h2>
-              <div className="member-dashboard-explore-grid">
-                <Link to="/scenes" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
-                  <span className="text-[10px] uppercase tracking-widest text-mh-red">Discovery</span>
-                  <p className="font-display font-bold mt-1">Scenes</p>
-                  <p className="text-xs text-muted mt-1">City × genre hubs</p>
-                </Link>
-                <Link to="/events" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
-                  <span className="text-[10px] uppercase tracking-widest text-mh-red">Live</span>
-                  <p className="font-display font-bold mt-1">Events</p>
-                  <p className="text-xs text-muted mt-1">Gigs &amp; RSVP</p>
-                </Link>
-                <Link to="/collab" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
-                  <span className="text-[10px] uppercase tracking-widest text-mh-red">Network</span>
-                  <p className="font-display font-bold mt-1">Collab</p>
-                  <p className="text-xs text-muted mt-1">Need / offer board</p>
-                </Link>
-                <Link to="/discover" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
-                  <span className="text-[10px] uppercase tracking-widest text-mh-red">Magazine</span>
-                  <p className="font-display font-bold mt-1">Discover</p>
-                  <p className="text-xs text-muted mt-1">Artists &amp; releases</p>
-                </Link>
-              </div>
-            </section>
+        <section className="member-dashboard-explore">
+          <h2 className="font-display text-lg font-bold uppercase mb-4">Explore</h2>
+          <div className="member-dashboard-explore-grid">
+            <Link to="/scenes" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
+              <span className="text-[10px] uppercase tracking-widest text-mh-red">Discovery</span>
+              <p className="font-display font-bold mt-1">Scenes</p>
+              <p className="text-xs text-muted mt-1">City × genre hubs</p>
+            </Link>
+            <Link to="/events" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
+              <span className="text-[10px] uppercase tracking-widest text-mh-red">Live</span>
+              <p className="font-display font-bold mt-1">Events</p>
+              <p className="text-xs text-muted mt-1">Gigs &amp; RSVP</p>
+            </Link>
+            <Link to="/collab" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
+              <span className="text-[10px] uppercase tracking-widest text-mh-red">Network</span>
+              <p className="font-display font-bold mt-1">Collab</p>
+              <p className="text-xs text-muted mt-1">Need / offer board</p>
+            </Link>
+            <Link to="/discover" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
+              <span className="text-[10px] uppercase tracking-widest text-mh-red">Magazine</span>
+              <p className="font-display font-bold mt-1">Discover</p>
+              <p className="text-xs text-muted mt-1">Artists &amp; releases</p>
+            </Link>
+          </div>
+        </section>
 
-            <DashboardCommunityHub />
-          </>
-        )}
+        <DashboardCommunityHub />
       </div>
 
       {personaModal && (
