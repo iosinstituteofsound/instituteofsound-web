@@ -1,9 +1,28 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
+import { useAuth } from '@/context/AuthContext'
+import { isEditorStaff } from '@/lib/auth/roles'
 import { useCommunityNotifications } from '@/hooks/useCommunityNotifications'
 import { notificationActorPath } from '@/lib/community/notificationService'
+import type { NotificationKind } from '@/lib/community/localNotifications'
 import { IOSImage } from '@/components/ui/IOSImage'
+
+function notificationFallbackIcon(kind: NotificationKind): string {
+  switch (kind) {
+    case 'role_verification':
+      return '✓'
+    case 'rank_up':
+      return '▲'
+    case 'editorial_publish':
+      return '◆'
+    case 'collab_response':
+    case 'collab_accepted':
+      return '⇄'
+    default:
+      return '◉'
+  }
+}
 
 interface NetworkNotificationsPanelProps {
   className?: string
@@ -12,6 +31,8 @@ interface NetworkNotificationsPanelProps {
 export function NetworkNotificationsPanel({ className }: NetworkNotificationsPanelProps) {
   const [open, setOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
+  const { user } = useAuth()
+  const deskMode = user && isEditorStaff(user.role)
   const { items, unread, loading, markAllRead, markRead } = useCommunityNotifications()
 
   useEffect(() => {
@@ -53,7 +74,9 @@ export function NetworkNotificationsPanel({ className }: NetworkNotificationsPan
       {open && (
         <div className="network-notifications-panel ios-card" role="dialog" aria-label="Network notifications">
           <div className="network-notifications-head">
-            <p className="network-notifications-kicker">Wire alerts</p>
+            <p className="network-notifications-kicker">
+              {deskMode ? 'Desk alerts' : 'Wire alerts'}
+            </p>
             <button
               type="button"
               className="network-notifications-mark"
@@ -69,7 +92,9 @@ export function NetworkNotificationsPanel({ className }: NetworkNotificationsPan
 
           {!loading && items.length === 0 && (
             <p className="network-notifications-empty">
-              No alerts yet — follows, reactions, and rank-ups show here.
+              {deskMode
+                ? 'No desk alerts yet — verification requests and network activity show here.'
+                : 'No alerts yet — follows, reactions, and rank-ups show here.'}
             </p>
           )}
 
@@ -96,7 +121,7 @@ export function NetworkNotificationsPanel({ className }: NetworkNotificationsPan
                       />
                     ) : (
                       <span className="network-notifications-avatar-fallback" aria-hidden>
-                        {n.kind === 'rank_up' ? '▲' : '◉'}
+                        {notificationFallbackIcon(n.kind)}
                       </span>
                     )}
                     <span className="network-notifications-copy">

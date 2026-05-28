@@ -1,4 +1,5 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { notifyDeskStaffOfVerificationRequest } from '@/lib/verification/notifyEditors'
 import type {
   RelationshipClaim,
   RelationshipClaimType,
@@ -76,9 +77,10 @@ export async function submitRoleVerificationRequest(
     return
   }
 
+  const requestId = crypto.randomUUID()
   const list = read<RoleVerificationRequest[]>(LOCAL_REQUESTS_KEY, [])
   list.unshift({
-    id: crypto.randomUUID(),
+    id: requestId,
     userId,
     roleType: input.roleType,
     proofLinks: payload.proof_links,
@@ -91,6 +93,7 @@ export async function submitRoleVerificationRequest(
     updatedAt: new Date().toISOString(),
   })
   write(LOCAL_REQUESTS_KEY, list)
+  notifyDeskStaffOfVerificationRequest(userId, input.roleType, requestId)
 }
 
 export async function getMyRoleVerificationRequests(userId: string): Promise<RoleVerificationRequest[]> {

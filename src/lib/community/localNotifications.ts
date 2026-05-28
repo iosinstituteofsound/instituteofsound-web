@@ -5,6 +5,7 @@ export type NotificationKind =
   | 'editorial_publish'
   | 'collab_response'
   | 'collab_accepted'
+  | 'role_verification'
 
 export interface CommunityNotification {
   id: string

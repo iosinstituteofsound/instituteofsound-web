@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { slugifyArtistName } from '@/lib/artist-profile/slug'
 import { useAuth } from '@/context/AuthContext'
 import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
@@ -63,6 +63,7 @@ type FilterStatus = 'all' | SubmissionStatus
 
 export default function EditorDashboardPage() {
   const { user, logout, mode, isSuperEditor, refreshUser } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [tab, setTab] = useState<EditorTab>(isSuperEditor ? 'analytics' : 'queue')
   const [analytics, setAnalytics] = useState<SuperAdminAnalytics | null>(null)
   const [filter, setFilter] = useState<FilterStatus>('pending')
@@ -117,6 +118,19 @@ export default function EditorDashboardPage() {
   useEffect(() => {
     refresh()
   }, [refresh])
+
+  useEffect(() => {
+    const desk = searchParams.get('desk')
+    if (desk !== 'verification') return
+    if (isSuperEditor) {
+      setTab('verification')
+      return
+    }
+    setTab('queue')
+    const next = new URLSearchParams(searchParams)
+    next.delete('desk')
+    setSearchParams(next, { replace: true })
+  }, [searchParams, isSuperEditor, setSearchParams])
 
   if (!user) return null
 
