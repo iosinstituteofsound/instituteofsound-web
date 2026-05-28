@@ -53,6 +53,8 @@ export function ReleaseEditor({ user }: ReleaseEditorProps) {
   const [soundcloudUrl, setSoundcloudUrl] = useState('')
   const [sceneCity, setSceneCity] = useState('')
   const [sceneGenreSlug, setSceneGenreSlug] = useState('')
+  const [albumImportUrl, setAlbumImportUrl] = useState('')
+  const [importingAlbum, setImportingAlbum] = useState(false)
 
   const [milestoneTitle, setMilestoneTitle] = useState('')
   const [milestoneBody, setMilestoneBody] = useState('')
@@ -152,6 +154,51 @@ export function ReleaseEditor({ user }: ReleaseEditorProps) {
     }
   }
 
+  const handleAlbumImport = async () => {
+    const url = albumImportUrl.trim()
+    if (!url) {
+      setError('Paste a Spotify album URL first.')
+      return
+    }
+    if (!url.includes('open.spotify.com/album/')) {
+      setError('Use a Spotify album URL in this format: https://open.spotify.com/album/...')
+      return
+    }
+
+    setImportingAlbum(true)
+    setError('')
+    setSuccess('')
+    try {
+      const response = await fetch(
+        `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`
+      )
+      if (!response.ok) {
+        throw new Error('Could not fetch album preview from Spotify.')
+      }
+      const payload = (await response.json()) as {
+        title?: string
+        author_name?: string
+        thumbnail_url?: string
+      }
+
+      const rawTitle = payload.title?.trim() ?? ''
+      const [releaseTitle, ...artistParts] = rawTitle.split(' - ')
+      const fallbackArtist = payload.author_name?.trim() ?? ''
+      const artistName = artistParts.join(' - ').trim() || fallbackArtist
+
+      if (releaseTitle) setTitle(releaseTitle)
+      if (artistName) setSubtitle(`By ${artistName}`)
+      if (payload.thumbnail_url) setCoverUrl(payload.thumbnail_url)
+      setSpotifyUrl(url)
+      setReleaseType('album')
+      setSuccess('Album details imported. Review and schedule when ready.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Album import failed.')
+    } finally {
+      setImportingAlbum(false)
+    }
+  }
+
   if (loading) {
     return <p className="text-sm text-muted py-8">Loading releases…</p>
   }
@@ -180,6 +227,34 @@ export function ReleaseEditor({ user }: ReleaseEditorProps) {
         hint="Strict live_at — embeds unlock automatically at premiere time. Share /release/your-slug"
       >
         <form onSubmit={handleSchedule} className="artist-dash-submit-card space-y-5">
+          <div className="border border-border bg-surface p-4 space-y-3">
+            <div>
+              <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+                Quick import
+              </p>
+              <p className="text-xs text-muted mt-1">
+                Paste a Spotify album URL to auto-fill album title, artist subtitle, cover art,
+                and set release type to Album.
+              </p>
+            </div>
+            <div className="artist-dash-grid-2">
+              <Input
+                type="url"
+                value={albumImportUrl}
+                onChange={(e) => setAlbumImportUrl(e.target.value)}
+                placeholder="https://open.spotify.com/album/..."
+              />
+              <button
+                type="button"
+                className="ios-btn ios-btn-secondary"
+                onClick={() => void handleAlbumImport()}
+                disabled={importingAlbum}
+              >
+                {importingAlbum ? 'Fetching album…' : 'Fetch album details'}
+              </button>
+            </div>
+          </div>
+
           <div className="artist-dash-grid-2">
             <div>
               <FieldLabel>Release title</FieldLabel>
@@ -205,6 +280,7 @@ export function ReleaseEditor({ user }: ReleaseEditorProps) {
               <FieldLabel>Type</FieldLabel>
               <select
                 className="ios-input w-full"
+                title="Release type"
                 value={releaseType}
                 onChange={(e) => setReleaseType(e.target.value as typeof releaseType)}
               >
@@ -231,6 +307,7 @@ export function ReleaseEditor({ user }: ReleaseEditorProps) {
               <FieldLabel>Scene city (India)</FieldLabel>
               <select
                 className="ios-input w-full"
+                title="Scene city"
                 value={sceneCity}
                 onChange={(e) => setSceneCity(e.target.value)}
               >
@@ -246,6 +323,7 @@ export function ReleaseEditor({ user }: ReleaseEditorProps) {
               <FieldLabel>Scene genre</FieldLabel>
               <select
                 className="ios-input w-full"
+                title="Scene genre"
                 value={sceneGenreSlug}
                 onChange={(e) => setSceneGenreSlug(e.target.value)}
               >
@@ -270,6 +348,7 @@ export function ReleaseEditor({ user }: ReleaseEditorProps) {
             <FieldLabel>Story / lore</FieldLabel>
             <textarea
               className="ios-input min-h-[100px]"
+              title="Release story"
               rows={4}
               value={story}
               onChange={(e) => setStory(e.target.value)}
@@ -367,6 +446,7 @@ export function ReleaseEditor({ user }: ReleaseEditorProps) {
                 <FieldLabel>Kind</FieldLabel>
                 <select
                   className="ios-input w-full"
+                  title="Milestone kind"
                   value={milestoneKind}
                   onChange={(e) =>
                     setMilestoneKind(e.target.value as typeof milestoneKind)
@@ -388,6 +468,7 @@ export function ReleaseEditor({ user }: ReleaseEditorProps) {
               <FieldLabel>Detail</FieldLabel>
               <textarea
                 className="ios-input min-h-[80px]"
+                title="Milestone detail"
                 value={milestoneBody}
                 onChange={(e) => setMilestoneBody(e.target.value)}
               />

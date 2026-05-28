@@ -72,6 +72,9 @@ export default function ArtistDashboardPage() {
 
   if (!user) return null
 
+  const approvedCount = submissions.filter((s) => s.status === 'approved').length
+  const pendingCount = submissions.filter((s) => s.status === 'pending').length
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -145,13 +148,54 @@ export default function ArtistDashboardPage() {
           </div>
         </header>
 
+        <section className="ios-card p-5 md:p-6 mb-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="max-w-2xl">
+              <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+                Quick start
+              </p>
+              <h2 className="font-display text-xl md:text-2xl font-bold uppercase mt-2">
+                What to do next
+              </h2>
+              <p className="text-sm text-muted mt-2">
+                1) Finish your public page, 2) schedule releases, 3) send your strongest track to
+                editors. This keeps your artist profile active and easy to discover.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 min-w-[260px]">
+              <div className="border border-border bg-surface px-3 py-2">
+                <p className="text-[10px] uppercase tracking-widest text-muted">Submissions</p>
+                <p className="font-display text-lg font-bold mt-1">{submissions.length}</p>
+              </div>
+              <div className="border border-border bg-surface px-3 py-2">
+                <p className="text-[10px] uppercase tracking-widest text-muted">Pending</p>
+                <p className="font-display text-lg font-bold mt-1">{pendingCount}</p>
+              </div>
+              <div className="border border-border bg-surface px-3 py-2">
+                <p className="text-[10px] uppercase tracking-widest text-muted">Approved</p>
+                <p className="font-display text-lg font-bold mt-1">{approvedCount}</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-4">
+            <button type="button" className="ios-btn ios-btn-primary !text-xs" onClick={() => setTab('profile')}>
+              Complete your page
+            </button>
+            <button type="button" className="ios-btn ios-btn-secondary !text-xs" onClick={() => setTab('releases')}>
+              Open releases
+            </button>
+            <button type="button" className="ios-btn ios-btn-ghost !text-xs" onClick={() => setTab('submit')}>
+              Submit a track
+            </button>
+          </div>
+        </section>
+
         <div className="artist-dashboard-tabs" role="tablist">
           {TABS.map((t) => (
             <button
               key={t.id}
               type="button"
               role="tab"
-              aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
               className={clsx(
                 'artist-dashboard-tab',
@@ -217,7 +261,7 @@ export default function ArtistDashboardPage() {
                 folder="ios/submissions"
                 value={coverImageUrl}
                 onChange={setCoverImageUrl}
-                hint="Cloudinary — editors ko fast load."
+                hint="Cloudinary-hosted artwork loads quickly for the editorial team."
               />
               <div>
                 <FieldLabel>Stream link</FieldLabel>
