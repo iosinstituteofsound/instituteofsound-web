@@ -5,6 +5,7 @@ import { roleLabel } from '@/lib/auth/roles'
 import { updateUserProfile } from '@/lib/auth/profile'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
+import { MemberTrustPanel } from '@/components/dashboard/MemberTrustPanel'
 import type { DashboardPersona } from '@/lib/auth/types'
 
 const PERSONA_OPTIONS: {
@@ -221,35 +222,51 @@ export default function MemberDashboardPage() {
           </div>
         </header>
 
-        {!persona && (
-          <section className="member-dashboard-persona-picker ios-card p-6 md:p-8 mb-8">
-            <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-              Choose your workspace
-            </p>
-            <h2 className="font-display text-2xl font-bold uppercase mt-2">
-              What best describes your work?
-            </h2>
-            <p className="text-sm text-muted mt-2 max-w-3xl">
-              Pick one option to customize your dashboard. You can switch back to the normal
-              dashboard anytime.
-            </p>
-            <div className="member-dashboard-persona-grid mt-6">
-              {PERSONA_OPTIONS.map((option) => (
+        <section className="member-dashboard-persona-picker ios-card p-6 md:p-8 mb-8">
+          <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+            Workspace roles
+          </p>
+          <h2 className="font-display text-2xl font-bold uppercase mt-2">
+            Choose how you work
+          </h2>
+          <p className="text-sm text-muted mt-2 max-w-3xl">
+            Har member yahin se role workspace select kar sakta hai. Artist manager ho, label ho,
+            promoter ho, ya brand — dashboard usi hisaab se customize hoga.
+          </p>
+          <div className="member-dashboard-persona-grid mt-6">
+            {PERSONA_OPTIONS.map((option) => {
+              const active = persona === option.id
+              return (
                 <button
                   key={option.id}
                   type="button"
-                  className="member-dashboard-persona-option"
+                  className={`member-dashboard-persona-option ${
+                    active ? 'member-dashboard-persona-option-active' : ''
+                  }`}
                   onClick={() => void savePersona(option.id)}
                   disabled={savingPersona}
                 >
-                  <p className="font-display text-base font-bold uppercase">{option.title}</p>
+                  <p className="font-display text-base font-bold uppercase flex items-center justify-between gap-2">
+                    <span>{option.title}</span>
+                    {active && <span className="text-[10px] tracking-widest text-mh-red">ACTIVE</span>}
+                  </p>
                   <p className="text-xs text-muted mt-2">{option.subtitle}</p>
                 </button>
-              ))}
-            </div>
-            {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
-          </section>
-        )}
+              )
+            })}
+          </div>
+          <div className="flex flex-wrap gap-2 mt-5">
+            <button
+              type="button"
+              className="ios-btn ios-btn-ghost !text-xs !py-2"
+              onClick={() => void savePersona(null)}
+              disabled={savingPersona}
+            >
+              Use normal dashboard
+            </button>
+          </div>
+          {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
+        </section>
 
         {personaPanel && (
           <section className="member-dashboard-persona-active ios-card p-6 md:p-8 mb-8">
@@ -257,14 +274,9 @@ export default function MemberDashboardPage() {
               <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
                 {personaPanel.badge}
               </p>
-              <button
-                type="button"
-                className="ios-btn ios-btn-ghost !text-xs !py-2"
-                onClick={() => void savePersona(null)}
-                disabled={savingPersona}
-              >
-                Revert to normal dashboard
-              </button>
+              <span className="text-xs text-muted">
+                Role switcher upar se kabhi bhi workspace change kar sakte ho.
+              </span>
             </div>
             <h2 className="font-display text-2xl md:text-3xl font-bold uppercase mt-3">
               {personaPanel.heading}
@@ -314,6 +326,8 @@ export default function MemberDashboardPage() {
             {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
           </section>
         )}
+
+        <MemberTrustPanel user={user} persona={persona} />
 
         <div className="member-dashboard-paths">
           <article className="member-dashboard-path-card member-dashboard-path-card--artist">

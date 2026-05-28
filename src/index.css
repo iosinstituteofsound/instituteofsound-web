@@ -1448,6 +1448,11 @@ textarea.ios-input {
   transform: translateY(-1px);
 }
 
+.member-dashboard-persona-option-active {
+  border-color: var(--color-mh-red);
+  background: rgba(212, 0, 0, 0.08);
+}
+
 .member-dashboard-persona-option:disabled {
   opacity: 0.65;
   cursor: not-allowed;
