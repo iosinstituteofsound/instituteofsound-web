@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import clsx from 'clsx'
 import { useAuth } from '@/context/AuthContext'
+import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
+import { MetalBadge } from '@/components/ui/MetalBadge'
 import {
   createSubmission,
   getSubmissionsForArtist,
@@ -104,117 +105,70 @@ export default function ArtistDashboardPage() {
   }
 
   return (
-    <div className="artist-dashboard">
-      <div className="artist-dashboard-inner">
-        <header className="artist-dashboard-header">
-          <div>
-            <p className="text-[11px] tracking-[0.25em] uppercase text-mh-red font-bold">
-              Artist portal
-              {mode === 'supabase' && (
-                <span className="ml-2 text-muted font-normal">· live cloud</span>
-              )}
-            </p>
-            <h1 className="font-display text-3xl md:text-5xl font-extrabold uppercase mt-1">
-              Dashboard
-            </h1>
-            <p className="text-muted text-sm mt-2 max-w-xl">
-              Build your <strong className="text-signal">public artist page</strong>, add music,
-              and submit tracks to Institute of Sound editors.
-            </p>
-            <p className="text-xs text-muted-foreground mt-2">
-              {user.name} · {user.email}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <Link to="/community#feed" className="ios-btn ios-btn-ghost !text-xs !py-2">
-              Network feed
-            </Link>
+    <RoleDeskLayout
+      user={user}
+      mode={mode}
+      kicker="Artist portal"
+      title="Artist desk"
+      summary="Build your public artist page, schedule releases, and submit tracks to Institute of Sound editors."
+      badge={
+        <MetalBadge variant="live" className="shrink-0">
+          Artist
+        </MetalBadge>
+      }
+      tab={tab}
+      onTabChange={setTab}
+      navGroups={[
+        {
+          title: 'Studio',
+          items: TABS.map((t) => ({
+            id: t.id,
+            label: t.label,
+            badge: t.id === 'history' ? submissions.length : undefined,
+          })),
+        },
+      ]}
+      quickTiles={[
+        {
+          label: 'Submissions',
+          value: submissions.length,
+          onClick: () => setTab('history'),
+        },
+        {
+          label: 'Pending',
+          value: pendingCount,
+          onClick: () => setTab('history'),
+        },
+        {
+          label: 'Approved',
+          value: approvedCount,
+          onClick: () => setTab('history'),
+        },
+        {
+          label: 'Next step',
+          value: 'Page',
+          accent: true,
+          onClick: () => setTab('profile'),
+        },
+      ]}
+      headerExtra={
+        <>
+          <Link to="/discover" className="ios-btn ios-btn-ghost !text-xs !py-2">
+            Discover
+          </Link>
+          {profileSlug && (
             <Link
-              to="/discover"
+              to={`/artist/${profileSlug}`}
               className="ios-btn ios-btn-ghost !text-xs !py-2"
             >
-              Discover
+              Public page
             </Link>
-            <Link to="/" className="ios-btn ios-btn-ghost !text-xs !py-2">
-              Site
-            </Link>
-            <button
-              type="button"
-              onClick={() => logout()}
-              className="ios-btn ios-btn-secondary !text-xs !py-2"
-            >
-              Logout
-            </button>
-          </div>
-        </header>
-
-        <section className="ios-card p-5 md:p-6 mb-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="max-w-2xl">
-              <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-                Quick start
-              </p>
-              <h2 className="font-display text-xl md:text-2xl font-bold uppercase mt-2">
-                What to do next
-              </h2>
-              <p className="text-sm text-muted mt-2">
-                1) Finish your public page, 2) schedule releases, 3) send your strongest track to
-                editors. This keeps your artist profile active and easy to discover.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 min-w-[260px]">
-              <div className="border border-border bg-surface px-3 py-2">
-                <p className="text-[10px] uppercase tracking-widest text-muted">Submissions</p>
-                <p className="font-display text-lg font-bold mt-1">{submissions.length}</p>
-              </div>
-              <div className="border border-border bg-surface px-3 py-2">
-                <p className="text-[10px] uppercase tracking-widest text-muted">Pending</p>
-                <p className="font-display text-lg font-bold mt-1">{pendingCount}</p>
-              </div>
-              <div className="border border-border bg-surface px-3 py-2">
-                <p className="text-[10px] uppercase tracking-widest text-muted">Approved</p>
-                <p className="font-display text-lg font-bold mt-1">{approvedCount}</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-4">
-            <button type="button" className="ios-btn ios-btn-primary !text-xs" onClick={() => setTab('profile')}>
-              Complete your page
-            </button>
-            <button type="button" className="ios-btn ios-btn-secondary !text-xs" onClick={() => setTab('releases')}>
-              Open releases
-            </button>
-            <button type="button" className="ios-btn ios-btn-ghost !text-xs" onClick={() => setTab('submit')}>
-              Submit a track
-            </button>
-          </div>
-        </section>
-
-        <div className="artist-dashboard-tabs" role="tablist">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              onClick={() => setTab(t.id)}
-              className={clsx(
-                'artist-dashboard-tab',
-                tab === t.id && 'artist-dashboard-tab-active'
-              )}
-            >
-              <span className="block">{t.label}</span>
-              {tab === t.id && (
-                <span className="block text-[9px] font-normal tracking-wide text-muted-foreground mt-0.5 normal-case">
-                  {t.hint}
-                </span>
-              )}
-              {t.id === 'history' && submissions.length > 0 && (
-                <span className="ml-1 text-mh-red">({submissions.length})</span>
-              )}
-            </button>
-          ))}
-        </div>
-
+          )}
+        </>
+      }
+      onLogout={() => logout()}
+      rootClassName="artist-desk"
+    >
         {tab === 'network' && <DashboardCommunityHub />}
 
         {tab === 'profile' && <ArtistProfileEditor user={user} />}
@@ -383,7 +337,6 @@ export default function ArtistDashboardPage() {
             )}
           </DashboardSection>
         )}
-      </div>
-    </div>
+    </RoleDeskLayout>
   )
 }

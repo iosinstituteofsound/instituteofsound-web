@@ -5,9 +5,11 @@ import { upgradeToArtist } from '@/lib/auth/memberUpgrade'
 import { slugifyArtistName } from '@/lib/artist-profile/slug'
 import { FieldLabel, Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
+import { MetalBadge } from '@/components/ui/MetalBadge'
 
 export default function MemberUpgradeArtistPage() {
-  const { user, refreshUser } = useAuth()
+  const { user, refreshUser, logout, mode } = useAuth()
   const navigate = useNavigate()
   const [displayName, setDisplayName] = useState(user?.name ?? '')
   const [slug, setSlug] = useState('')
@@ -49,20 +51,43 @@ export default function MemberUpgradeArtistPage() {
   }
 
   return (
-    <div className="section-padding pt-28 min-h-screen max-w-lg mx-auto">
-      <Link to="/member/dashboard" className="ios-link text-sm">
-        ← Back to dashboard
-      </Link>
-      <p className="ios-kicker mt-8">Artist upgrade</p>
-      <h1 className="font-display text-3xl font-extrabold uppercase mt-2">
-        Launch My Studio
-      </h1>
-      <p className="text-sm text-muted mt-3 leading-relaxed">
-        We&apos;ll create your draft artist page and switch your account to the artist studio.
-        You can add tracks, releases, and submit to editors from there.
-      </p>
-
-      <form onSubmit={handleSubmit} className="ios-panel ios-panel-accent mt-8 space-y-5">
+    <RoleDeskLayout
+      user={user}
+      mode={mode}
+      kicker="Artist path"
+      title="Launch My Studio"
+      summary="Create your draft artist page and switch to the artist desk — tracks, releases, and editor submissions."
+      badge={
+        <MetalBadge variant="red" className="shrink-0">
+          Upgrade
+        </MetalBadge>
+      }
+      tab="launch"
+      onTabChange={() => {}}
+      navGroups={[
+        {
+          title: 'Setup',
+          items: [
+            { id: 'launch', label: 'Launch studio' },
+          ],
+        },
+      ]}
+      quickTiles={[
+        {
+          label: 'Public URL',
+          value: previewSlug.slice(0, 12) + (previewSlug.length > 12 ? '…' : ''),
+          accent: true,
+        },
+      ]}
+      headerExtra={
+        <Link to="/member/dashboard" className="ios-btn ios-btn-ghost !text-xs !py-2">
+          Member desk
+        </Link>
+      }
+      onLogout={() => logout()}
+      rootClassName="member-upgrade-desk"
+    >
+      <form onSubmit={handleSubmit} className="ios-panel ios-panel-accent space-y-5 max-w-lg">
         <div>
           <FieldLabel htmlFor="displayName">Artist / project name</FieldLabel>
           <Input
@@ -90,6 +115,6 @@ export default function MemberUpgradeArtistPage() {
           {loading ? 'Creating studio…' : 'Create artist page →'}
         </Button>
       </form>
-    </div>
+    </RoleDeskLayout>
   )
 }

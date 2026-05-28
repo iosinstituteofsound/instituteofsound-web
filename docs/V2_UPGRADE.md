@@ -131,7 +131,7 @@
 
 ---
 
-## Phase 5 — Role dashboards (mockup skins) 🟡
+## Phase 5 — Role dashboards (mockup skins) ✅
 
 **Objective:** Same shell, role-specific sidebar block + Home tab content.
 
@@ -150,7 +150,12 @@
 
 **Exit:** Each role lands on correct dashboard; sidebar “Role desk” matches role.
 
-**Done in v2:** Shell dashboards per role + member persona picker (skin). Artist submit/history + editor queue/write/publish wired in Phase 7.
+**Done in v2:**
+- [x] `RoleDeskLayout` — shared desk chrome (header, quick strip, grouped sidebar, content) for member, artist, editor, upgrade
+- [x] `SuperEditorDeskLayout` — command + editorial nav for super editor
+- [x] `src/dashboard-studio.css` — `.desk-*` tokens aligned with V2 shell
+- [x] Member persona picker + tabbed workspace / grow / explore / network
+- [x] Artist + editor horizontal tabs replaced with desk sidebar (Phase 7 workflows unchanged)
 
 ---
 
@@ -199,7 +204,7 @@
 - [x] `ArtistDashboardPage` — submit + history + lifecycle timeline
 - [x] `EditorDashboardPage` — queue, TipTap write, drafts, publish (local + Supabase paths)
 - [x] `MemberUpgradeArtistPage` — member → artist role
-- [x] `src/dashboard-studio.css` — artist desk + RTE + lifecycle styles
+- [x] `src/dashboard-studio.css` — desk shell + artist/editor RTE + lifecycle styles
 - [x] API endpoints merge published editorials into static JSON
 
 **Local E2E:** `artist@ios.test` / `artist123` → submit · `editor@ios.test` / `editor123` → approve → write feature → publish → refresh `/features`.

@@ -103,6 +103,7 @@
   flex-shrink: 0;
 }
 
+.desk-quick-strip,
 .super-editor-quick-strip {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -111,11 +112,13 @@
 }
 
 @media (min-width: 640px) {
+  .desk-quick-strip,
   .super-editor-quick-strip {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
+.desk-quick-tile,
 .super-editor-quick-tile {
   text-align: left;
   padding: 0.85rem 1rem;
@@ -126,16 +129,20 @@
     background 0.2s ease;
 }
 
+.desk-quick-tile:hover,
 .super-editor-quick-tile:hover {
   border-color: rgba(212, 0, 0, 0.45);
   background: rgba(212, 0, 0, 0.06);
 }
 
+.desk-quick-tile-accent,
+.desk-quick-tile-static,
 .super-editor-quick-tile-accent {
   border-color: rgba(212, 0, 0, 0.35);
   background: rgba(212, 0, 0, 0.08);
 }
 
+.desk-quick-value,
 .super-editor-quick-value {
   display: block;
   font-family: var(--font-display);
@@ -145,12 +152,15 @@
   color: var(--color-signal);
 }
 
+.desk-quick-value-accent,
+.desk-quick-tile-accent .desk-quick-value,
 .super-editor-quick-tile-accent .super-editor-quick-value {
   font-size: 1rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+.desk-quick-label,
 .super-editor-quick-label {
   display: block;
   margin-top: 0.35rem;
@@ -161,6 +171,7 @@
   color: var(--color-muted);
 }
 
+.desk-layout,
 .super-editor-layout {
   display: flex;
   flex-direction: column;
@@ -169,12 +180,14 @@
 }
 
 @media (min-width: 1024px) {
+  .desk-layout,
   .super-editor-layout {
     flex-direction: row;
     gap: 1.5rem;
   }
 }
 
+.desk-nav,
 .super-editor-nav {
   flex-shrink: 0;
   width: 100%;
@@ -184,6 +197,7 @@
 }
 
 @media (min-width: 1024px) {
+  .desk-nav,
   .super-editor-nav {
     width: 14.5rem;
     position: sticky;
@@ -194,12 +208,14 @@
   }
 }
 
+.desk-nav-group + .desk-nav-group,
 .super-editor-nav-group + .super-editor-nav-group {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--color-border);
 }
 
+.desk-nav-group-title,
 .super-editor-nav-group-title {
   margin: 0 0 0.5rem;
   padding: 0 0.35rem;
@@ -211,6 +227,7 @@
   color: var(--color-mh-red);
 }
 
+.desk-nav-list,
 .super-editor-nav-list {
   list-style: none;
   margin: 0;
@@ -221,6 +238,7 @@
 }
 
 @media (max-width: 1023px) {
+  .desk-nav-list,
   .super-editor-nav-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -228,6 +246,7 @@
   }
 }
 
+.desk-nav-btn,
 .super-editor-nav-btn {
   display: flex;
   width: 100%;
@@ -247,12 +266,14 @@
     background 0.2s ease;
 }
 
+.desk-nav-btn:hover,
 .super-editor-nav-btn:hover {
   color: var(--color-signal);
   border-color: var(--color-border);
   background: rgba(255, 255, 255, 0.03);
 }
 
+.desk-nav-btn-active,
 .super-editor-nav-btn-active {
   color: var(--color-mh-red);
   border-color: rgba(212, 0, 0, 0.45);
@@ -260,6 +281,7 @@
   box-shadow: inset 2px 0 0 var(--color-mh-red);
 }
 
+.desk-nav-badge,
 .super-editor-nav-badge {
   flex-shrink: 0;
   min-width: 1.25rem;
@@ -272,6 +294,7 @@
   background: var(--color-mh-red);
 }
 
+.desk-content,
 .super-editor-content {
   min-width: 0;
   flex: 1;
@@ -310,17 +333,12 @@
   color: var(--color-mh-red);
 }
 
-.artist-dashboard {
-  width: 100%;
-  min-height: 100vh;
-  background: var(--color-void);
-}
-
-.artist-dashboard-inner {
+.artist-dashboard-inner,
+.member-dashboard-inner {
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 6.5rem clamp(1.25rem, 4vw, 3rem) 4rem;
+  padding: 0;
 }
 
 .artist-dashboard-header {

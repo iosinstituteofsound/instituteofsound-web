@@ -5,6 +5,7 @@ import { AppErrorBoundary } from '@/components/ui/AppErrorBoundary'
 import { applyPerformanceProfile } from '@/lib/performance'
 import './index.css'
 import './app-shell.css'
+import './dashboard-studio.css'
 import App from './App.tsx'
 
 applyPerformanceProfile()

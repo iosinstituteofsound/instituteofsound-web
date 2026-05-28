@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { slugifyArtistName } from '@/lib/artist-profile/slug'
 import { useAuth } from '@/context/AuthContext'
-import { roleLabel } from '@/lib/auth/roles'
+import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
+import { MetalBadge } from '@/components/ui/MetalBadge'
 import { getSuperAdminAnalytics } from '@/lib/analytics/service'
 import type { SuperAdminAnalytics } from '@/lib/analytics/types'
 import { SuperAdminAnalyticsPanel } from '@/components/dashboard/SuperAdminAnalytics'
@@ -221,16 +222,6 @@ export default function EditorDashboardPage() {
     void openReview(sub)
   }
 
-  const editorTabs: { id: EditorTab; label: string }[] = [
-    { id: 'queue', label: 'Submission Queue' },
-    { id: 'wire', label: 'Wire Picks' },
-    { id: 'events', label: 'Events' },
-    { id: 'write', label: 'Write Editorial' },
-    { id: 'drafts', label: `My Drafts (${drafts.length})` },
-    { id: 'network', label: 'Network' },
-    { id: 'profile', label: 'My Profile' },
-  ]
-
   const pipelineLabel =
     analytics?.pipeline === 'backlog'
       ? 'Backlog'
@@ -291,26 +282,6 @@ export default function EditorDashboardPage() {
           >
             {message}
           </DismissibleBanner>
-        )}
-
-        {!isSuperEditor && (
-          <div className="editor-dashboard-tabs" role="tablist">
-            {editorTabs.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={tab === id}
-                onClick={() => setTab(id)}
-                className={clsx(
-                  'editor-dashboard-tab',
-                  tab === id && 'editor-dashboard-tab-active',
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
         )}
 
         {tab === 'network' && <DashboardCommunityHub />}
@@ -855,65 +826,70 @@ export default function EditorDashboardPage() {
   }
 
   return (
-    <div className="editor-dashboard">
-      <div className="editor-dashboard-inner v2-page v2-page--wide">
-        <header className="editor-dashboard-header">
-          <div className="editor-dashboard-header-main">
-            <p className="editor-dashboard-kicker">
-              Editorial desk
-              {mode === 'supabase' && (
-                <span className="editor-dashboard-kicker-live">· live cloud</span>
-              )}
-            </p>
-            <h1 className="editor-dashboard-title">Editorial control</h1>
-            <p className="editor-dashboard-summary">
-              Review artist submissions, curate the wire, and publish features for Institute of
-              Sound.
-            </p>
-            <div className="editor-dashboard-identity">
-              {user.avatarUrl ? (
-                <IOSImage
-                  src={user.avatarUrl}
-                  alt=""
-                  width={40}
-                  className="editor-dashboard-avatar"
-                />
-              ) : (
-                <span className="editor-dashboard-avatar editor-dashboard-avatar-fallback">
-                  {user.name.charAt(0).toUpperCase()}
-                </span>
-              )}
-              <div className="min-w-0">
-                <p className="editor-dashboard-identity-name">
-                  {user.name}
-                  {user.username && (
-                    <span className="text-mh-red"> @{user.username}</span>
-                  )}
-                </p>
-                <p className="editor-dashboard-identity-meta">
-                  {user.email} · {roleLabel(user.role)}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="editor-dashboard-header-actions">
-            <Link to="/community#feed" className="ios-btn ios-btn-ghost !text-xs !py-2">
-              Network feed
-            </Link>
-            <Link to="/" className="ios-btn ios-btn-ghost !text-xs !py-2">
-              Site
-            </Link>
-            <button
-              type="button"
-              onClick={() => logout()}
-              className="ios-btn ios-btn-secondary !text-xs !py-2"
-            >
-              Logout
-            </button>
-          </div>
-        </header>
-        {deskBody}
-      </div>
-    </div>
+    <RoleDeskLayout
+      user={user}
+      mode={mode}
+      kicker="Editorial desk"
+      title="Editor desk"
+      summary="Review artist submissions, curate the wire, and publish features for Institute of Sound."
+      badge={
+        <MetalBadge variant="crimson" className="shrink-0">
+          Editor
+        </MetalBadge>
+      }
+      tab={tab}
+      onTabChange={setTab}
+      navGroups={[
+        {
+          title: 'Editorial desk',
+          items: [
+            { id: 'queue', label: 'Submission queue', badge: counts.pending },
+            { id: 'wire', label: 'Wire picks' },
+            { id: 'write', label: 'Write editorial' },
+            { id: 'drafts', label: 'My drafts', badge: drafts.length },
+            { id: 'events', label: 'Events board' },
+          ],
+        },
+        {
+          title: 'Your account',
+          items: [
+            { id: 'network', label: 'Network & feed' },
+            { id: 'profile', label: 'Editor profile' },
+          ],
+        },
+      ]}
+      quickTiles={[
+        {
+          label: 'Pending',
+          value: counts.pending,
+          onClick: () => setTab('queue'),
+        },
+        {
+          label: 'In review',
+          value: counts.in_review,
+          onClick: () => setTab('queue'),
+        },
+        {
+          label: 'Drafts',
+          value: drafts.length,
+          onClick: () => setTab('drafts'),
+        },
+        {
+          label: 'Approved',
+          value: counts.approved,
+          accent: true,
+          onClick: () => setTab('queue'),
+        },
+      ]}
+      headerExtra={
+        <Link to="/features" className="ios-btn ios-btn-ghost !text-xs !py-2">
+          Magazine
+        </Link>
+      }
+      onLogout={() => logout()}
+      rootClassName="editor-desk"
+    >
+      {deskBody}
+    </RoleDeskLayout>
   )
 }

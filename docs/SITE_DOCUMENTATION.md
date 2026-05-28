@@ -1,7 +1,7 @@
 # Institute of Sound — Site Documentation
 
 > **Local reference only.** Describes the full product: routes, roles, dashboards, components, and data flow.  
-> Last updated: May 2026 · Repo: `instituteofsound`
+> Last updated: May 2026 (V2 desk shells) · Repo: `instituteofsound`
 
 ---
 
@@ -138,41 +138,44 @@ Chosen on **Member Dashboard**; personalizes priorities, workflow, and quick lin
 
 ## 5. App shell & navigation
 
-### Layout (`src/components/layout/Layout.tsx`)
+### V2 shell (`src/components/layout/AppShell.tsx`)
 
-Wraps every page with:
+`App.tsx` wraps all routes in **`AppShell`** (not the legacy `Layout.tsx` / `Navbar.tsx` pair).
 
-- `Navbar` + `Footer` (footer hidden when logged in)
-- `GrainOverlay`, SEO (`RouteSeo`, `GlobalJsonLd`)
-- Gates: `ManifestoGateModal`, `EditorCongratsGate`, `CommunityOnboardingGate`, `AcademyProgressSync`
-- `PwaInstallPrompt` (browser install banner)
+| Piece | File | Role |
+|-------|------|------|
+| Desktop nav | `Sidebar.tsx` | Fixed left rail — Discover, Editorial, Toolkit, Academy, Access, role desk link |
+| Top bar | `TopBar.tsx` | Section title, search trigger, notifications, identity (desktop) |
+| Mobile | `MobileNav.tsx` | Bottom tabs + drawer (same `Sidebar` tree) |
+| Search | `CommandPalette.tsx` | `⌘K` / `Ctrl+K` quick jump |
+| Context | `ShellContext.tsx` | Active section title, route mode |
+| Chrome | `RouteSeo`, `GrainOverlay`, `AcademyProgressSync` | SEO + grain on main scroll area |
 
-### Logged-out vs logged-in nav
+Styles: `src/app-shell.css` · Route modes: `src/lib/nav/routeModes.ts`
 
-| State | Navbar behavior |
-|-------|-----------------|
-| **Guest / browser** | Brand lockup + **Menu** drawer (mega-nav groups from `public/api/nav.json`) |
-| **Logged in** | **App bar:** hamburger (left), section title (center), notifications + avatar (right) |
-| **PWA installed (standalone)** | Same app bar even if guest — menu always visible on mobile |
+**Inside dashboards:** pages use **`RoleDeskLayout`** (see [§7.0](#70-shared-desk-shell-roledesklayout)) — a second, role-specific sidebar *within* the main content column. Site shell = global IOS nav; desk shell = queue / studio / workspace tabs.
 
-Nav groups (`src/lib/nav/groupLinks.ts`):
+### Legacy (unused in `App.tsx`)
+
+`Layout.tsx`, `Navbar.tsx`, `Footer.tsx` remain in the repo from v1 but are **not mounted**. Do not document their behavior as live unless re-wired.
+
+### Sidebar nav groups (`src/lib/nav/groupLinks.ts`)
 
 - **Discover** — Home, Discover, Scenes, Events, …  
 - **Editorial** — Features, Signals, Archive, …  
 - **Toolkit** — Hub + all 16 tools  
 - **Academy** — Hub, quizzes, ear lab, certificates  
-- **Access** — Login, Register, Dashboard links  
+- **Access** — Login, Register, Dashboard links (role-aware)
 
 ### Key layout components
 
 | File | Role |
 |------|------|
-| `Navbar.tsx` | Header, drawer, app mode |
-| `NavDropdown.tsx` | Desktop mega-menu dropdowns |
-| `NavMenuToggle.tsx` | Mobile hamburger |
-| `NavUserIdentity.tsx` | Avatar, dashboard links, logout |
-| `ArtistNavActions.tsx` | Join with Google / editor apply CTAs |
-| `Footer.tsx` | Site footer columns from API |
+| `Sidebar.tsx` | Global V2 navigation |
+| `TopBar.tsx` | Desktop header + notifications |
+| `MobileNav.tsx` | Mobile drawer + bottom tabs |
+| `NavUserIdentity.tsx` | Avatar, dashboard links, logout (where used) |
+| `ArtistNavActions.tsx` | Join / editor CTAs (legacy navbar) |
 
 ---
 
@@ -269,19 +272,57 @@ Registry: `src/lib/tools/registry.ts` · Pages: `src/pages/tools/*`
 
 ## 7. Dashboards (detailed)
 
+All dashboards share the **V2 desk shell** ([§7.0](#70-shared-desk-shell-roledesklayout)) inside the global `AppShell`.
+
+### 7.0 Shared desk shell (`RoleDeskLayout`)
+
+**Files**
+
+| File | Role |
+|------|------|
+| `src/components/dashboard/RoleDeskLayout.tsx` | Generic desk: header, identity, quick strip, grouped sidebar, content |
+| `src/components/dashboard/SuperEditorDeskLayout.tsx` | Super-editor nav groups + pipeline quick tiles (wraps `RoleDeskLayout`) |
+| `src/dashboard-studio.css` | `.editor-dashboard`, `.desk-*` (aliases keep `.super-editor-*` for compat) |
+
+**Desk anatomy (top → bottom)**
+
+1. **Header** — kicker (optional “· live cloud” when Supabase), title, summary, avatar + name/email + `MetalBadge`, actions (`headerExtra` per role + Network feed / Site / Logout).
+2. **Quick strip** — up to four metric tiles; clickable tiles call `onTabChange` for the relevant section.
+3. **Body** — left **sidebar nav** (grouped labels + optional count badges); right **content** pane for the active tab.
+
+**Responsive:** Below `1024px`, sidebar nav becomes a two-column button grid; sidebar sticks on desktop.
+
+| Role | Page | Wrapper | `rootClassName` |
+|------|------|---------|-----------------|
+| Member | `MemberDashboardPage` | `RoleDeskLayout` | `member-desk` |
+| Artist | `ArtistDashboardPage` | `RoleDeskLayout` | `artist-desk` |
+| Editor | `EditorDashboardPage` | `RoleDeskLayout` | `editor-desk` |
+| Super Editor | `EditorDashboardPage` | `SuperEditorDeskLayout` | `super-editor-dashboard` |
+| Member upgrade | `MemberUpgradeArtistPage` | `RoleDeskLayout` | `member-upgrade-desk` |
+
+---
+
 ### 7.1 Member Dashboard — `/member/dashboard`
 
-**File:** `src/pages/dashboard/MemberDashboardPage.tsx`
+**File:** `src/pages/dashboard/MemberDashboardPage.tsx`  
+**Shell:** `RoleDeskLayout` · Badge: **Member**
 
-**Purpose:** Default home for **members** (promoters, managers, labels, brands, listeners).
+#### Desk sidebar tabs
 
-#### Header actions
-- Public profile (`/network/:handle`)
-- Community feed
-- Site home
-- Logout
+| Tab ID | Nav label | Contents |
+|--------|-----------|----------|
+| `workspace` | Workspace home | Persona picker (first visit) **or** active persona panel (priorities, workflow, toolkit, quick links, reset) + `MemberTrustPanel` |
+| `grow` | Upgrade paths | Artist path → `/member/upgrade` · Editorial path → `/editor/apply`, `/editor/join` |
+| `explore` | Explore IOS | Scenes, Events, Collab, Discover cards |
+| `network` | Feed & activity | `DashboardCommunityHub` — dB, feed link, collab skills |
 
-#### Workspace persona picker (first visit)
+#### Quick strip
+Workspace status (Setup / Live), active role name, Explore shortcut, Feed shortcut.
+
+#### Header extra
+Public profile → `/network/:handle`
+
+#### Workspace personas (modal on pick)
 User picks one of four personas (modal explains role + capabilities):
 
 | Persona | Focus |
@@ -291,45 +332,32 @@ User picks one of four personas (modal explains role + capabilities):
 | Label | Roster, release calendar, scene promotion |
 | Brand | Scene hubs, campaigns, events |
 
-After selection, dashboard shows:
-- **Priorities** list  
-- **Workflow board** (3 stages)  
-- **Toolkit focus** bullets  
-- **Quick action links** (Events, Scenes, Collab, Discover, Upgrade, etc.)  
-- **Reset** — clears persona, returns to picker  
-
-#### Always visible sections
-- **`MemberTrustPanel`** — trust/verification hints for persona  
-- **Explore grid** — Scenes, Events, Collab, Discover cards  
-- **`DashboardCommunityHub`** — dB rank, weekly dB, feed link, collab skills editor  
-
-#### Side paths (when no persona or via cards)
-- **Artist path** → `/member/upgrade` (become artist)  
-- **Editorial path** → `/editor/apply`, `/editor/join`  
+Stored as `dashboardPersona` on profile. **Reset** clears persona and returns to picker (workspace tab).
 
 ---
 
 ### 7.2 Artist Dashboard — `/artist/dashboard`
 
-**File:** `src/pages/dashboard/ArtistDashboardPage.tsx`
+**File:** `src/pages/dashboard/ArtistDashboardPage.tsx`  
+**Shell:** `RoleDeskLayout` · Badge: **Artist** (live)
 
-**Purpose:** **My Studio** — manage public artist page, releases, and editor submissions.
+**Purpose:** **My Studio** — public artist page, releases, editor submissions.
 
-#### Tabs
+#### Desk sidebar (group: Studio)
 
 | Tab ID | Label | Contents |
 |--------|-------|----------|
-| `network` | Network | `DashboardCommunityHub` — feed, dB, collab skills |
-| `profile` | Your page | `ArtistProfileEditor` — full public page builder |
-| `releases` | Releases | `ReleaseEditor` — schedule premieres |
-| `submit` | Submit to editors | Form: track title, genre, stream URL, cover, description |
-| `history` | Submissions | List + `SubmissionLifecycleTimeline` per track |
+| `network` | Network | `DashboardCommunityHub` |
+| `profile` | Your page | `ArtistProfileEditor` |
+| `releases` | Releases | `ReleaseEditor` |
+| `submit` | Submit to editors | Track submission form |
+| `history` | Submissions | List + `SubmissionLifecycleTimeline` (nav badge = submission count) |
 
-#### Stats bar
-- Total submissions, pending, approved counts  
+#### Quick strip
+Submissions total, pending, approved, **Next step** → profile tab.
 
-#### Quick start card
-Buttons: Complete your page → Open releases → Submit a track  
+#### Header extra
+Discover · Public page (when slug exists) → `/artist/:slug`
 
 #### Artist profile editor (inside `profile` tab)
 
@@ -354,30 +382,46 @@ Public result: `/artist/:slug`
 
 ### 7.3 Editor Dashboard — `/editor/dashboard`
 
-**File:** `src/pages/dashboard/EditorDashboardPage.tsx`
+**File:** `src/pages/dashboard/EditorDashboardPage.tsx`  
+**Purpose:** Review submissions, write/publish editorial, wire picks, events.
 
-**Purpose:** Review artist track submissions, write/publish editorial, manage wire picks & events.
+#### Regular editor — `RoleDeskLayout` · Badge: **Editor**
 
-#### Tabs — regular Editor
+**Sidebar — Editorial desk**
 
-| Tab | Component / function |
-|-----|----------------------|
-| **Submission Queue** | Filter: pending / in_review / approved / rejected. Open row → review panel, approve/reject, editor notes, optional wire suggestion on approve |
-| **Wire Picks** | `EditorWirePicksPanel` — curate Friday wire |
-| **Events** | `EditorEventsPanel` — moderate event listings |
-| **Write Editorial** | Rich text draft form: type (review, single, ep, feature, band_profile), title, body, cover, Spotify/YouTube, gallery, link artist profile, homepage feature flag |
-| **My Drafts** | List drafts → publish to site |
-| **Network** | `DashboardCommunityHub` |
-| **My Profile** | `EditorProfilePanel` — byline, avatar, public editor identity |
+| Tab ID | Label | Component / function |
+|--------|-------|----------------------|
+| `queue` | Submission queue | Filters: pending / in_review / approved / rejected; review panel, approve/reject, wire suggestion on approve |
+| `wire` | Wire picks | `EditorWirePicksPanel` |
+| `write` | Write editorial | TipTap draft form (types, cover, embeds, artist link, homepage flag) |
+| `drafts` | My drafts | List → publish to site (nav badge = draft count) |
+| `events` | Events board | `EditorEventsPanel` |
 
-#### Extra tabs — Super Editor only
+**Sidebar — Your account**
 
-| Tab | Component | What it does |
-|-----|-----------|--------------|
-| **Analytics** | `SuperAdminAnalytics` | User counts by role (Listeners, Artists, Editors, Super Editors, Total) — **clickable** → `AnalyticsDetailPanel` user lists |
-| **Dashboard Preview** | `SuperEditorDashboardPreview` | Preview other role dashboards |
-| **Verification Queue** | `SuperEditorVerificationPanel` | Role verification claims |
-| **Editor Applications** | `EditorApplicationsPanel` | Approve/deny editor applicants |
+| Tab ID | Label | Component |
+|--------|-------|-----------|
+| `network` | Network & feed | `DashboardCommunityHub` |
+| `profile` | Editor profile | `EditorProfilePanel` |
+
+**Quick strip:** Pending, In review, Drafts, Approved (accent).
+
+**Header extra:** Magazine → `/features`
+
+Horizontal pill tabs were removed; navigation is sidebar-only (same pattern as other desks).
+
+#### Super editor — `SuperEditorDeskLayout` · Badge: **Super editor** (live)
+
+Adds **Command** group before editorial desk:
+
+| Tab ID | Label | Component |
+|--------|-------|-----------|
+| `analytics` | Overview | `SuperAdminAnalytics` — role counts, clickable user lists |
+| `preview` | Dashboard preview | `SuperEditorDashboardPreview` |
+| `verification` | Verification queue | `SuperEditorVerificationPanel` |
+| `applications` | Editor applications | `EditorApplicationsPanel` |
+
+Editorial desk + account groups match the regular editor. **Quick strip** adds pipeline label tile (Backlog / Active / Clear).
 
 #### Submission workflow
 1. Artist submits from Artist Dashboard  
@@ -392,6 +436,17 @@ Public result: `/artist/:slug`
 
 **File:** `DashboardRedirectPage.tsx`  
 Sends user to `homeDashboardPath(role)` from `src/lib/auth/roles.ts`.
+
+---
+
+### 7.5 Member → Artist upgrade — `/member/upgrade`
+
+**File:** `src/pages/dashboard/MemberUpgradeArtistPage.tsx`  
+**Shell:** `RoleDeskLayout` · Badge: **Upgrade**
+
+Single nav item **Launch studio**; form collects display name + optional slug → `upgradeToArtist()` → redirect `/artist/dashboard`.
+
+**Header extra:** Member desk → `/member/dashboard`
 
 ---
 
@@ -592,13 +647,29 @@ Audio tools use **Web Audio API** (decode, spectrum, BPM) — runs in browser, n
 ## 15. Component library (by folder)
 
 ### `components/layout/`
-Site chrome: Navbar, Footer, nav dropdowns, identity, PWA-aware app shell.
+V2 site chrome: `AppShell`, `Sidebar`, `TopBar`, `MobileNav`, `CommandPalette`. Legacy `Navbar` / `Layout` not wired in `App.tsx`.
 
 ### `components/auth/`
 `ProtectedRoute`, `GoogleSignInButton`, `NetworkAuthPanel`, `ArtistAuthPanel`, `StatusBadge`.
 
 ### `components/dashboard/`
-All dashboard-specific panels (see [§7](#7-dashboards-detailed)).
+Desk shells and role panels (see [§7](#7-dashboards-detailed)).
+
+| File | Role |
+|------|------|
+| `RoleDeskLayout.tsx` | Shared V2 desk chrome for all roles |
+| `SuperEditorDeskLayout.tsx` | Super-editor nav + pipeline quick tiles |
+| `DashboardCommunityHub.tsx` | dB, feed, collab skills (network tab) |
+| `MemberTrustPanel.tsx` | Member trust / verification hints |
+| `ArtistProfileEditor.tsx` | Full public artist page builder |
+| `ReleaseEditor.tsx` | Premiere scheduling |
+| `EditorProfilePanel.tsx` | Editor byline / public identity |
+| `EditorWirePicksPanel.tsx` | Friday wire curation |
+| `EditorEventsPanel.tsx` | Event moderation |
+| `SuperEditorDashboardPreview.tsx` | Cross-role dashboard preview |
+| `SuperEditorVerificationPanel.tsx` | Verification claims queue |
+| `SubmissionLifecycleTimeline.tsx` | Artist submission status UI |
+| `DashboardSection.tsx` | Section wrapper (step, title, hint) |
 
 ### `components/community/`
 Feed, tribes, crews, challenges, notifications, onboarding, follow, medals.
@@ -738,10 +809,11 @@ npm run preview      # Preview production build
 ## Quick reference: who goes where
 
 ```
-New visitor → / → Register (Google) → Member Dashboard
-Member → Upgrade → Artist Dashboard + /artist/:slug
-Member → Editor Apply → Editor (after approval) → Editor Dashboard
-Super Editor → Editor Dashboard + Analytics / Verification / Applications
+New visitor → / → Register (Google) → **Member desk** (`RoleDeskLayout`)
+Member → `/member/upgrade` → **Artist desk**
+Member → Editor Apply → Editor (after approval) → **Editor desk**
+Super Editor → **Super editor desk** (Command + Editorial groups)
+All desks sit inside global **AppShell** (sidebar + top bar / mobile tabs)
 ```
 
 ---

@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { roleLabel } from '@/lib/auth/roles'
 import { updateUserProfile } from '@/lib/auth/profile'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
 import { MemberTrustPanel } from '@/components/dashboard/MemberTrustPanel'
+import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
+import { MetalBadge } from '@/components/ui/MetalBadge'
 import type { DashboardPersona } from '@/lib/auth/types'
+
+type MemberTab = 'workspace' | 'explore' | 'network' | 'grow'
 
 const PERSONA_OPTIONS: {
   id: DashboardPersona
@@ -201,6 +204,7 @@ export default function MemberDashboardPage() {
   const [personaError, setPersonaError] = useState('')
   const [personaModal, setPersonaModal] = useState<DashboardPersona | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [tab, setTab] = useState<MemberTab>('workspace')
   if (!user) return null
 
   const handle = memberHandleFromUser(user)
@@ -222,50 +226,78 @@ export default function MemberDashboardPage() {
     }
   }
 
-  return (
-    <div className="member-dashboard">
-      <div className="member-dashboard-inner">
-        <header className="member-dashboard-header">
-          <div>
-            <p className="text-[11px] tracking-[0.25em] uppercase text-mh-red font-bold">
-              Network home
-              {mode === 'supabase' && (
-                <span className="ml-2 text-muted font-normal">· live cloud</span>
-              )}
-            </p>
-            <h1 className="font-display text-3xl md:text-5xl font-extrabold uppercase mt-1">
-              Your dashboard
-            </h1>
-            <p className="text-muted text-sm mt-2 max-w-xl">
-              You&apos;re signed in as a <strong className="text-signal">{roleLabel(user.role)}</strong>
-              {persona
-                ? ` · ${PERSONA_OPTIONS.find((p) => p.id === persona)?.title ?? 'Custom workspace'} workspace active.`
-                : ' — spins, scenes, collab, and gigs. Select your work type to personalize this dashboard.'}
-            </p>
-            <p className="text-xs text-muted-foreground mt-2">
-              {user.name} · {user.email}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <Link to={profilePath} className="ios-btn ios-btn-ghost !text-xs !py-2">
-              Public profile
-            </Link>
-            <Link to="/community#feed" className="ios-btn ios-btn-ghost !text-xs !py-2">
-              Feed
-            </Link>
-            <Link to="/" className="ios-btn ios-btn-ghost !text-xs !py-2">
-              Site
-            </Link>
-            <button
-              type="button"
-              onClick={() => logout()}
-              className="ios-btn ios-btn-secondary !text-xs !py-2"
-            >
-              Logout
-            </button>
-          </div>
-        </header>
+  const personaTitle = persona
+    ? (PERSONA_OPTIONS.find((p) => p.id === persona)?.title ?? 'Workspace')
+    : 'Not set'
 
+  return (
+    <>
+      <RoleDeskLayout
+        user={user}
+        mode={mode}
+        kicker="Network home"
+        title="Member desk"
+        summary={
+          persona
+            ? `${personaTitle} workspace is active — spins, scenes, collab, and gigs in one shell.`
+            : 'Choose a workspace role, explore the network, or upgrade to artist or editor paths.'
+        }
+        badge={
+          <MetalBadge variant="red" className="shrink-0">
+            Member
+          </MetalBadge>
+        }
+        tab={tab}
+        onTabChange={setTab}
+        navGroups={[
+          {
+            title: 'Your workspace',
+            items: [
+              { id: 'workspace', label: 'Workspace home' },
+              { id: 'grow', label: 'Upgrade paths', badge: persona ? 0 : 2 },
+            ],
+          },
+          {
+            title: 'Network',
+            items: [
+              { id: 'network', label: 'Feed & activity' },
+              { id: 'explore', label: 'Explore IOS' },
+            ],
+          },
+        ]}
+        quickTiles={[
+          {
+            label: 'Workspace',
+            value: persona ? 'Live' : 'Setup',
+            accent: Boolean(persona),
+            onClick: () => setTab('workspace'),
+          },
+          {
+            label: 'Role',
+            value: personaTitle,
+            onClick: () => setTab('workspace'),
+          },
+          {
+            label: 'Explore',
+            value: 'IOS',
+            onClick: () => setTab('explore'),
+          },
+          {
+            label: 'Feed',
+            value: 'Open',
+            onClick: () => setTab('network'),
+          },
+        ]}
+        headerExtra={
+          <Link to={profilePath} className="ios-btn ios-btn-ghost !text-xs !py-2">
+            Public profile
+          </Link>
+        }
+        onLogout={() => logout()}
+        rootClassName="member-desk"
+      >
+        {tab === 'workspace' && (
+          <>
         {!persona && (
           <section className="member-dashboard-persona-picker ios-card p-6 md:p-8 mb-8">
             <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
@@ -369,8 +401,10 @@ export default function MemberDashboardPage() {
         )}
 
         <MemberTrustPanel user={user} persona={persona} />
+          </>
+        )}
 
-        {!persona && (
+        {tab === 'grow' && (
           <div className="member-dashboard-paths">
             <article className="member-dashboard-path-card member-dashboard-path-card--artist">
               <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
@@ -409,6 +443,7 @@ export default function MemberDashboardPage() {
           </div>
         )}
 
+        {tab === 'explore' && (
         <section className="member-dashboard-explore">
           <h2 className="font-display text-lg font-bold uppercase mb-4">Explore</h2>
           <div className="member-dashboard-explore-grid">
@@ -434,9 +469,10 @@ export default function MemberDashboardPage() {
             </Link>
           </div>
         </section>
+        )}
 
-        <DashboardCommunityHub />
-      </div>
+        {tab === 'network' && <DashboardCommunityHub />}
+      </RoleDeskLayout>
 
       {personaModal && (
         <div
@@ -541,6 +577,6 @@ export default function MemberDashboardPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
