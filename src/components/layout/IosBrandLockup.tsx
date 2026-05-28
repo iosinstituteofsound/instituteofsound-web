@@ -21,22 +21,29 @@ export function IosBrandLockup({
 }: Props) {
   const content = (
     <>
-      <span
-        className={clsx(
-          variant === 'frame' ? 'ios-brand-frame-title' : 'ios-brand-title font-display font-extrabold',
-          size === 'sm' && variant === 'frame' && 'ios-brand-frame-title-sm',
-          variant === 'bar' && size === 'md' && 'text-lg md:text-xl tracking-tight',
-          variant === 'bar' && size === 'sm' && 'text-base tracking-tight',
-        )}
-      >
-        INSTITUTE
-        <br />
-        OF SOUND
-      </span>
+      {variant === 'frame' ? (
+        <span
+          className={clsx('ios-brand-frame-title', size === 'sm' && 'ios-brand-frame-title-sm')}
+        >
+          <span className="ios-brand-frame-line">Institute</span>
+          <span className="ios-brand-frame-line ios-brand-frame-line-accent">of Sound</span>
+        </span>
+      ) : (
+        <span
+          className={clsx(
+            'ios-brand-title font-sans font-bold tracking-tight',
+            size === 'md' && 'text-lg md:text-xl',
+            size === 'sm' && 'text-base',
+          )}
+        >
+          Institute
+          <span className="text-mh-red"> of Sound</span>
+        </span>
+      )}
       {showSub && (
         <span
           className={clsx(
-            variant === 'frame' ? 'ios-brand-frame-sub' : 'ios-brand-sub text-[10px] tracking-[0.35em] text-muted uppercase mt-0.5',
+            variant === 'frame' ? 'ios-brand-frame-sub' : 'ios-brand-sub text-[10px] text-muted mt-1',
             size === 'sm' && variant === 'frame' && 'ios-brand-frame-sub-sm',
           )}
         >

@@ -57,26 +57,29 @@
 /* —— Brand lockup (red frame) —— */
 .ios-brand-frame {
   display: block;
-  padding: 1.05rem 1rem 1.1rem;
-  border: 1px solid rgba(212, 0, 0, 0.85);
+  padding: 1.15rem 1.05rem 1.2rem;
+  border: 1px solid rgba(212, 0, 0, 0.75);
   background:
-    linear-gradient(145deg, rgba(212, 0, 0, 0.08) 0%, transparent 42%),
-    linear-gradient(180deg, rgba(18, 18, 18, 0.95) 0%, rgba(6, 6, 6, 0.98) 100%);
+    linear-gradient(145deg, rgba(212, 0, 0, 0.06) 0%, transparent 48%),
+    linear-gradient(180deg, rgba(14, 14, 14, 0.98) 0%, rgba(5, 5, 5, 1) 100%);
   text-decoration: none;
   box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.5),
-    0 8px 28px -12px rgba(212, 0, 0, 0.25);
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 10px 32px -14px rgba(0, 0, 0, 0.85);
   transition:
     border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
+    box-shadow 0.25s ease;
 }
 
 .ios-brand-frame:hover {
   border-color: var(--color-mh-red);
   box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 0 32px -8px rgba(212, 0, 0, 0.45);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 36px -10px rgba(212, 0, 0, 0.5);
+}
+
+.ios-brand-frame:hover .ios-brand-frame-line-accent {
+  color: var(--color-mh-red);
 }
 
 .ios-brand-frame:focus-visible {
@@ -89,40 +92,57 @@
 }
 
 .ios-brand-frame-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.ios-brand-frame-line {
   display: block;
-  font-family: var(--font-display);
-  font-size: 0.9375rem;
-  font-weight: 800;
-  line-height: 1.14;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-signal);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: rgba(235, 235, 235, 0.92);
   transition: color 0.2s ease;
 }
 
-.ios-brand-frame:hover .ios-brand-frame-title {
+.ios-brand-frame-line-accent {
+  font-size: 1.1875rem;
+  font-weight: 700;
+  letter-spacing: -0.045em;
   color: #fff;
 }
 
-.ios-brand-frame-title-sm {
-  font-size: 0.8125rem;
-  letter-spacing: 0.16em;
+.ios-brand-frame-title-sm .ios-brand-frame-line {
+  font-size: 0.9375rem;
+}
+
+.ios-brand-frame-title-sm .ios-brand-frame-line-accent {
+  font-size: 1.0625rem;
 }
 
 .ios-brand-frame-sub {
   display: block;
-  margin-top: 0.7rem;
-  font-size: 0.5625rem;
-  font-weight: 600;
-  letter-spacing: 0.36em;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(160, 160, 160, 0.95);
+  color: rgba(140, 140, 140, 0.95);
+  font-variant-numeric: tabular-nums;
 }
 
 .ios-brand-frame-sub-sm {
-  margin-top: 0.55rem;
-  font-size: 0.5rem;
-  letter-spacing: 0.32em;
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  font-size: 0.5625rem;
+  letter-spacing: 0.1em;
 }
 
 .v2-sidebar-brand {
