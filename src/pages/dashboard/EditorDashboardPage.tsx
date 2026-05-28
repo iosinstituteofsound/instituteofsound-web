@@ -14,6 +14,7 @@ import { EditorProfilePanel } from '@/components/dashboard/EditorProfilePanel'
 import { EditorApplicationsPanel } from '@/components/editor-applications/EditorApplicationsPanel'
 import { EditorEventsPanel } from '@/components/dashboard/EditorEventsPanel'
 import { SuperEditorDashboardPreview } from '@/components/dashboard/SuperEditorDashboardPreview'
+import { SuperEditorVerificationPanel } from '@/components/dashboard/SuperEditorVerificationPanel'
 import { listArtistProfilesForEditor } from '@/lib/artist-profile/service'
 import type { ArtistProfile } from '@/lib/artist-profile/types'
 import {
@@ -45,6 +46,7 @@ import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richT
 type EditorTab =
   | 'analytics'
   | 'preview'
+  | 'verification'
   | 'applications'
   | 'queue'
   | 'wire'
@@ -220,6 +222,7 @@ export default function EditorDashboardPage() {
     ? [
         { id: 'analytics', label: 'Analytics' },
         { id: 'preview', label: 'Dashboard Preview' },
+        { id: 'verification', label: 'Verification Queue' },
         { id: 'applications', label: 'Editor Applications' },
         { id: 'queue', label: 'Submission Queue' },
         { id: 'wire', label: 'Wire Picks' },
@@ -381,6 +384,8 @@ export default function EditorDashboardPage() {
 
         {tab === 'preview' && isSuperEditor && <SuperEditorDashboardPreview />}
 
+        {tab === 'verification' && isSuperEditor && <SuperEditorVerificationPanel />}
+
         {tab === 'profile' && (
           <EditorProfilePanel user={user} onSaved={refreshUser} />
         )}
@@ -395,9 +400,10 @@ export default function EditorDashboardPage() {
           tab !== 'wire' &&
           tab !== 'events' &&
           tab !== 'preview' &&
+          tab !== 'verification' &&
           tab !== 'applications' ? (
           <LoadingTransmission variant="compact" />
-        ) : tab === 'profile' || tab === 'preview' ? null : tab === 'analytics' && isSuperEditor ? (
+        ) : tab === 'profile' || tab === 'preview' || tab === 'verification' ? null : tab === 'analytics' && isSuperEditor ? (
           analytics ? (
             <SuperAdminAnalyticsPanel
               data={analytics}

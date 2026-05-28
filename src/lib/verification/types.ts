@@ -5,6 +5,8 @@ export type VerificationRoleType = Exclude<DashboardPersona, 'event_promoter'> |
 export interface RoleVerificationRequest {
   id: string
   userId: string
+  userName?: string
+  userHandle?: string
   roleType: VerificationRoleType
   proofLinks: string[]
   artistConfirmationLink?: string

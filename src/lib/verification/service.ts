@@ -105,6 +105,8 @@ export async function getMyRoleVerificationRequests(userId: string): Promise<Rol
     return (data ?? []).map((row) => ({
       id: row.id,
       userId: row.user_id,
+      userName: row.profile?.name ?? undefined,
+      userHandle: row.profile?.username ?? undefined,
       roleType: row.role_type,
       proofLinks: row.proof_links ?? [],
       artistConfirmationLink: row.artist_confirmation_link ?? undefined,
@@ -119,6 +121,66 @@ export async function getMyRoleVerificationRequests(userId: string): Promise<Rol
   }
 
   return read<RoleVerificationRequest[]>(LOCAL_REQUESTS_KEY, []).filter((r) => r.userId === userId)
+}
+
+export async function listVerificationRequestsForReview(): Promise<RoleVerificationRequest[]> {
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabase()
+    const { data, error } = await supabase
+      .from('role_verification_requests')
+      .select('*, profile:profiles!role_verification_requests_user_id_fkey(name, username)')
+      .order('created_at', { ascending: false })
+    if (error) throw new Error(error.message)
+    return (data ?? []).map((row) => ({
+      id: row.id,
+      userId: row.user_id,
+      userName: row.profile?.name ?? undefined,
+      userHandle: row.profile?.username ?? undefined,
+      roleType: row.role_type,
+      proofLinks: row.proof_links ?? [],
+      artistConfirmationLink: row.artist_confirmation_link ?? undefined,
+      websiteDomain: row.website_domain ?? undefined,
+      officialEmail: row.official_email ?? undefined,
+      venuePartnerReference: row.venue_partner_reference ?? undefined,
+      status: row.status,
+      reviewNotes: row.review_notes ?? undefined,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }))
+  }
+  return read<RoleVerificationRequest[]>(LOCAL_REQUESTS_KEY, [])
+}
+
+export async function reviewRoleVerificationRequest(
+  requestId: string,
+  decision: 'approved' | 'rejected',
+  notes?: string
+) {
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabase()
+    const { error } = await supabase
+      .from('role_verification_requests')
+      .update({
+        status: decision,
+        review_notes: notes?.trim() || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', requestId)
+      .eq('status', 'pending')
+    if (error) throw new Error(error.message)
+    return
+  }
+  const list = read<RoleVerificationRequest[]>(LOCAL_REQUESTS_KEY, [])
+  const idx = list.findIndex((r) => r.id === requestId)
+  if (idx >= 0) {
+    list[idx] = {
+      ...list[idx],
+      status: decision,
+      reviewNotes: notes?.trim() || undefined,
+      updatedAt: new Date().toISOString(),
+    }
+    write(LOCAL_REQUESTS_KEY, list)
+  }
 }
 
 async function findUserByHandle(handle: string): Promise<{ id: string; name: string } | null> {
