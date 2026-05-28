@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { updateUserProfile } from '@/lib/auth/profile'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
 import { MemberTrustPanel } from '@/components/dashboard/MemberTrustPanel'
+import { syncMemberVerificationNotifications } from '@/lib/verification/notifyEditors'
+import { syncApprovedVerificationPersona } from '@/lib/verification/service'
 import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import type { DashboardPersona } from '@/lib/auth/types'
@@ -205,6 +207,18 @@ export default function MemberDashboardPage() {
   const [personaModal, setPersonaModal] = useState<DashboardPersona | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [tab, setTab] = useState<MemberTab>('workspace')
+
+  useEffect(() => {
+    if (!user?.id) return
+    void (async () => {
+      if (!user.dashboardPersona) {
+        const applied = await syncApprovedVerificationPersona(user.id)
+        if (applied) await refreshUser()
+      }
+      await syncMemberVerificationNotifications(user.id)
+    })()
+  }, [user?.id, user?.dashboardPersona, refreshUser])
+
   if (!user) return null
 
   const handle = memberHandleFromUser(user)

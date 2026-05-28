@@ -1,5 +1,9 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { notifyDeskStaffOfVerificationRequest } from '@/lib/verification/notifyEditors'
+import {
+  notifyDeskStaffOfVerificationRequest,
+  notifyMemberVerificationDecision,
+} from '@/lib/verification/notifyEditors'
+import type { DashboardPersona } from '@/lib/auth/types'
 import type {
   RelationshipClaim,
   RelationshipClaimType,
@@ -175,15 +179,61 @@ export async function reviewRoleVerificationRequest(
   }
   const list = read<RoleVerificationRequest[]>(LOCAL_REQUESTS_KEY, [])
   const idx = list.findIndex((r) => r.id === requestId)
-  if (idx >= 0) {
-    list[idx] = {
-      ...list[idx],
-      status: decision,
-      reviewNotes: notes?.trim() || undefined,
-      updatedAt: new Date().toISOString(),
-    }
-    write(LOCAL_REQUESTS_KEY, list)
+  if (idx < 0) return
+  const req = list[idx]
+  list[idx] = {
+    ...req,
+    status: decision,
+    reviewNotes: notes?.trim() || undefined,
+    updatedAt: new Date().toISOString(),
   }
+  write(LOCAL_REQUESTS_KEY, list)
+
+  if (decision === 'approved') {
+    const { getUsers, saveUsers } = await import('@/lib/auth/storage')
+    const users = getUsers()
+    const userIdx = users.findIndex((u) => u.id === req.userId)
+    if (userIdx >= 0) {
+      users[userIdx] = { ...users[userIdx], dashboardPersona: req.roleType as DashboardPersona }
+      saveUsers(users)
+    }
+  }
+
+  notifyMemberVerificationDecision(
+    req.userId,
+    req.id,
+    req.roleType,
+    decision,
+    notes,
+  )
+}
+
+/** If profile persona missing but verification was approved, apply it (safety net). */
+export async function syncApprovedVerificationPersona(userId: string): Promise<boolean> {
+  const requests = await getMyRoleVerificationRequests(userId)
+  const approved = [...requests]
+    .filter((r) => r.status === 'approved')
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]
+  if (!approved) return false
+
+  if (!isSupabaseConfigured()) {
+    const { getUsers, saveUsers, getUserById } = await import('@/lib/auth/storage')
+    const user = getUserById(userId)
+    if (user?.dashboardPersona === approved.roleType) return false
+    const users = getUsers()
+    const idx = users.findIndex((u) => u.id === userId)
+    if (idx >= 0) {
+      users[idx] = { ...users[idx], dashboardPersona: approved.roleType as DashboardPersona }
+      saveUsers(users)
+    }
+    return true
+  }
+
+  const { fetchUserProfile, updateUserProfile } = await import('@/lib/auth/profile')
+  const profile = await fetchUserProfile(userId)
+  if (profile.dashboardPersona === approved.roleType) return false
+  await updateUserProfile(userId, { dashboardPersona: approved.roleType as DashboardPersona })
+  return true
 }
 
 async function findUserByHandle(handle: string): Promise<{ id: string; name: string } | null> {

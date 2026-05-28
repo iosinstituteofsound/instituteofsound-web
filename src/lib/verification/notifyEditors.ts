@@ -80,3 +80,65 @@ export async function syncVerificationDeskNotifications(): Promise<void> {
     window.dispatchEvent(new Event(COMMUNITY_NOTIFICATION_EVENT))
   }
 }
+
+/** Notify applicant when super editor approves or rejects (local demo). */
+export function notifyMemberVerificationDecision(
+  memberUserId: string,
+  requestId: string,
+  roleType: VerificationRoleType,
+  decision: 'approved' | 'rejected',
+  reviewNotes?: string,
+): void {
+  const roleLabel = roleVerificationRoleLabel(roleType)
+  const title =
+    decision === 'approved'
+      ? 'Role verification approved'
+      : 'Role verification not approved'
+  const body =
+    decision === 'approved'
+      ? `Your ${roleLabel} workspace is now active on your member desk.`
+      : reviewNotes?.trim() ||
+        `Your ${roleLabel} proofs need more detail. You can resubmit from your dashboard.`
+
+  localAddNotification({
+    kind: 'role_verification',
+    title,
+    body,
+    href: '/member/dashboard',
+    verificationRequestId: `${requestId}:${decision}`,
+  })
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(COMMUNITY_NOTIFICATION_EVENT))
+  }
+}
+
+/** Member bell: enqueue missing approve/reject alerts (Supabase backfill). */
+export async function syncMemberVerificationNotifications(userId: string): Promise<void> {
+  if (typeof window === 'undefined' || !userId) return
+
+  const { isSupabaseConfigured, getSupabase } = await import('@/lib/supabase/client')
+
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabase()
+    const { error } = await supabase.rpc('sync_my_verification_notifications')
+    if (error) {
+      console.warn('[verification] member notification sync', error.message)
+    }
+    window.dispatchEvent(new Event(COMMUNITY_NOTIFICATION_EVENT))
+    return
+  }
+
+  const { getMyRoleVerificationRequests } = await import('@/lib/verification/service')
+  const { localListNotifications } = await import('@/lib/community/localNotifications')
+
+  const existing = localListNotifications(80).filter((n) => n.kind === 'role_verification')
+  const requests = await getMyRoleVerificationRequests(userId)
+
+  for (const req of requests) {
+    if (req.status !== 'approved' && req.status !== 'rejected') continue
+    const key = `${req.id}:${req.status}`
+    if (existing.some((n) => n.verificationRequestId === key)) continue
+    notifyMemberVerificationDecision(userId, req.id, req.roleType, req.status, req.reviewNotes)
+  }
+}
