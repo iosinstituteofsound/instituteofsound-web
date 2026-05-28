@@ -182,9 +182,9 @@ export default function ArtistDashboardPage() {
             title="Submit a track for review"
             hint="Separate from your public page — submissions go to the editorial team for review and approval."
           >
-            <form onSubmit={handleSubmit} className="artist-dash-submit-card space-y-5">
+            <form onSubmit={handleSubmit} className="artist-dash-submit-form">
               <div className="artist-dash-grid-2">
-                <div>
+                <div className="artist-dash-field">
                   <FieldLabel>Project / band name</FieldLabel>
                   <Input
                     required
@@ -192,7 +192,7 @@ export default function ArtistDashboardPage() {
                     onChange={(e) => setProjectName(e.target.value)}
                   />
                 </div>
-                <div>
+                <div className="artist-dash-field">
                   <FieldLabel>Genre</FieldLabel>
                   <Input
                     required
@@ -202,7 +202,7 @@ export default function ArtistDashboardPage() {
                   />
                 </div>
               </div>
-              <div>
+              <div className="artist-dash-field">
                 <FieldLabel>Track title</FieldLabel>
                 <Input
                   required
@@ -210,14 +210,16 @@ export default function ArtistDashboardPage() {
                   onChange={(e) => setTrackTitle(e.target.value)}
                 />
               </div>
-              <ImageUpload
-                label="Track artwork"
-                folder="ios/submissions"
-                value={coverImageUrl}
-                onChange={setCoverImageUrl}
-                hint="Cloudinary-hosted artwork loads quickly for the editorial team."
-              />
-              <div>
+              <div className="artist-dash-field">
+                <ImageUpload
+                  label="Track artwork"
+                  folder="ios/submissions"
+                  value={coverImageUrl}
+                  onChange={setCoverImageUrl}
+                  hint="Cloudinary-hosted artwork loads quickly for the editorial team."
+                />
+              </div>
+              <div className="artist-dash-field">
                 <FieldLabel>Stream link</FieldLabel>
                 <Input
                   required
@@ -227,7 +229,7 @@ export default function ArtistDashboardPage() {
                   placeholder="Spotify, SoundCloud, Drive…"
                 />
               </div>
-              <div>
+              <div className="artist-dash-field">
                 <FieldLabel>Note for editors</FieldLabel>
                 <textarea
                   required

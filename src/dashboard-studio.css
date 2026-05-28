@@ -120,8 +120,13 @@
 
 .desk-quick-tile,
 .super-editor-quick-tile {
-  text-align: left;
-  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.5rem;
+  padding: 1rem 0.85rem;
+  text-align: center;
   border: 1px solid var(--color-border);
   background: rgba(12, 12, 12, 0.85);
   transition:
@@ -163,10 +168,10 @@
 .desk-quick-label,
 .super-editor-quick-label {
   display: block;
-  margin-top: 0.35rem;
+  margin-top: 0.45rem;
   font-size: 0.625rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-muted);
 }
@@ -175,7 +180,7 @@
 .super-editor-layout {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
   align-items: stretch;
 }
 
@@ -183,7 +188,7 @@
   .desk-layout,
   .super-editor-layout {
     flex-direction: row;
-    gap: 1.5rem;
+    gap: 2rem;
   }
 }
 
@@ -511,6 +516,169 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* —— Artist desk spacing (V2 main column) —— */
+.artist-desk.editor-dashboard .editor-dashboard-inner {
+  max-width: none;
+  padding: 1rem 0.25rem 2.5rem;
+}
+
+@media (min-width: 640px) {
+  .artist-desk.editor-dashboard .editor-dashboard-inner {
+    padding: 1.25rem 0.5rem 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .artist-desk.editor-dashboard .editor-dashboard-inner {
+    padding: 1.5rem 0.75rem 3.5rem;
+  }
+}
+
+.artist-desk .editor-dashboard-header {
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.artist-desk .editor-dashboard-title {
+  font-family: var(--font-sans);
+  font-size: clamp(1.5rem, 2.8vw, 2.125rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-transform: none;
+}
+
+.artist-desk .editor-dashboard-summary {
+  margin-top: 0.75rem;
+  line-height: 1.6;
+}
+
+.artist-desk .editor-dashboard-identity {
+  margin-top: 1.25rem;
+}
+
+.artist-desk .editor-dashboard-header-actions {
+  gap: 0.5rem 0.65rem;
+}
+
+.artist-desk .desk-quick-strip {
+  gap: 0.65rem;
+  margin-bottom: 1.75rem;
+}
+
+@media (min-width: 640px) {
+  .artist-desk .desk-quick-strip {
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+}
+
+.artist-desk .desk-quick-tile {
+  min-height: 5rem;
+  padding: 1.1rem 0.75rem;
+}
+
+.artist-desk .desk-quick-value {
+  font-size: 1.625rem;
+}
+
+.artist-desk .desk-quick-tile-accent .desk-quick-value,
+.artist-desk .desk-quick-value-accent {
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+}
+
+.artist-desk .desk-nav {
+  padding: 0.85rem 0.65rem;
+}
+
+.artist-desk .desk-nav-list {
+  gap: 0.35rem;
+}
+
+.artist-desk .desk-nav-btn {
+  padding: 0.6rem 0.75rem;
+}
+
+.artist-desk .desk-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.artist-desk .artist-dash-section {
+  padding: clamp(1.35rem, 2.5vw, 2rem);
+}
+
+.artist-desk .artist-dash-section-head {
+  margin-bottom: 1.75rem;
+}
+
+.artist-desk .artist-dash-section-hint {
+  margin-top: 0.65rem;
+}
+
+.artist-desk .artist-dash-section-body {
+  gap: 1.5rem;
+}
+
+.artist-desk .artist-dash-section-body .artist-dash-submit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 42rem;
+}
+
+.artist-desk .artist-dash-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.artist-desk .artist-dash-field .ios-label {
+  margin-bottom: 0;
+}
+
+.artist-desk .artist-dash-grid-2 {
+  gap: 1.5rem 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .artist-desk .artist-dash-grid-2 {
+    gap: 1.5rem;
+  }
+}
+
+.artist-desk .artist-dash-submit-card {
+  padding: 0;
+  background: transparent;
+  border: none;
+  max-width: none;
+}
+
+.artist-desk .dashboard-community-hub {
+  margin-top: 0;
+}
+
+.artist-desk .artist-dash-layout {
+  gap: 1.75rem;
+}
+
+@media (min-width: 1024px) {
+  .artist-desk .artist-dash-layout {
+    gap: 2.25rem;
+  }
+}
+
+.artist-desk .artist-dash-main {
+  gap: 2rem;
+}
+
+.artist-desk .artist-dash-toolbar {
+  margin-bottom: 0.25rem;
+}
+
 .ios-analytics-pipeline-tile {
   text-align: left;
   padding: 1rem;
