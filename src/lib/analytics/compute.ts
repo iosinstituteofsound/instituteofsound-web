@@ -18,7 +18,7 @@ function pipelineLabel(pending: number, inReview: number): SuperAdminAnalytics['
 }
 
 export function computeSuperAdminAnalytics(source: AnalyticsSource): SuperAdminAnalytics {
-  const { submissions, drafts, artistsRegistered } = source
+  const { submissions, drafts, artistsRegistered, roleCounts } = source
   const weekAgo = daysAgo(7)
   const monthAgo = daysAgo(30)
 
@@ -95,6 +95,7 @@ export function computeSuperAdminAnalytics(source: AnalyticsSource): SuperAdminA
   return {
     generatedAt: new Date().toISOString(),
     artistsRegistered,
+    roleCounts,
     totalSubmissions: submissions.length,
     uniqueSubmittingArtists: artistIds.size,
     statusCounts,

@@ -34,6 +34,13 @@ export interface AnalyticsArtistProfile {
 export interface SuperAdminAnalytics {
   generatedAt: string
   artistsRegistered: number
+  roleCounts: {
+    listeners: number
+    artists: number
+    editors: number
+    superEditors: number
+    total: number
+  }
   totalSubmissions: number
   uniqueSubmittingArtists: number
   statusCounts: Record<SubmissionStatus, number>
@@ -55,6 +62,13 @@ export interface AnalyticsSource {
   submissions: TrackSubmission[]
   drafts: EditorialDraft[]
   artistsRegistered: number
+  roleCounts: {
+    listeners: number
+    artists: number
+    editors: number
+    superEditors: number
+    total: number
+  }
   artistAccounts: AnalyticsArtistAccount[]
   artistProfiles: AnalyticsArtistProfile[]
 }

@@ -1,6 +1,17 @@
 import { getSupabase } from '@/lib/supabase/client'
 import { mapDraft, type DraftRow } from '@/lib/supabase/mappers'
 
+async function supabaseCountProfilesByRole(role: 'member' | 'artist' | 'editor' | 'super_editor'): Promise<number> {
+  const supabase = getSupabase()
+  const { count, error } = await supabase
+    .from('profiles')
+    .select('*', { count: 'exact', head: true })
+    .eq('role', role)
+
+  if (error) throw new Error(error.message)
+  return count ?? 0
+}
+
 export async function supabaseCountArtists(): Promise<number> {
   const supabase = getSupabase()
   const { count, error } = await supabase
@@ -10,6 +21,29 @@ export async function supabaseCountArtists(): Promise<number> {
 
   if (error) throw new Error(error.message)
   return count ?? 0
+}
+
+export async function supabaseGetRoleCounts(): Promise<{
+  listeners: number
+  artists: number
+  editors: number
+  superEditors: number
+  total: number
+}> {
+  const [listeners, artists, editors, superEditors] = await Promise.all([
+    supabaseCountProfilesByRole('member'),
+    supabaseCountProfilesByRole('artist'),
+    supabaseCountProfilesByRole('editor'),
+    supabaseCountProfilesByRole('super_editor'),
+  ])
+
+  return {
+    listeners,
+    artists,
+    editors,
+    superEditors,
+    total: listeners + artists + editors + superEditors,
+  }
 }
 
 export async function supabaseListArtistAccounts(): Promise<

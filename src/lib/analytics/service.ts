@@ -8,11 +8,12 @@ import * as sb from './supabaseAnalytics'
 
 export async function getSuperAdminAnalytics(editorId: string): Promise<SuperAdminAnalytics> {
   if (isSupabaseConfigured()) {
-    const [submissions, drafts, artistsRegistered, artistAccounts, artistProfiles] =
+    const [submissions, drafts, artistsRegistered, roleCounts, artistAccounts, artistProfiles] =
       await Promise.all([
         getSubmissionsForEditor(),
         sb.supabaseGetAllDraftsForSuperEditor(),
         sb.supabaseCountArtists(),
+        sb.supabaseGetRoleCounts(),
         sb.supabaseListArtistAccounts(),
         sb.supabaseListArtistProfiles(),
       ])
@@ -20,6 +21,7 @@ export async function getSuperAdminAnalytics(editorId: string): Promise<SuperAdm
       submissions,
       drafts,
       artistsRegistered,
+      roleCounts,
       artistAccounts,
       artistProfiles,
     })
@@ -28,6 +30,14 @@ export async function getSuperAdminAnalytics(editorId: string): Promise<SuperAdm
   const submissions = getSubmissions()
   const drafts = getDrafts()
   const users = getUsers().filter((u) => u.role === 'artist')
+  const allUsers = getUsers()
+  const roleCounts = {
+    listeners: allUsers.filter((u) => u.role === 'member').length,
+    artists: allUsers.filter((u) => u.role === 'artist').length,
+    editors: allUsers.filter((u) => u.role === 'editor').length,
+    superEditors: allUsers.filter((u) => u.role === 'super_editor').length,
+    total: allUsers.length,
+  }
   const artistAccounts = users.map((u) => ({
     id: u.id,
     email: u.email,
@@ -47,6 +57,7 @@ export async function getSuperAdminAnalytics(editorId: string): Promise<SuperAdm
     submissions,
     drafts: drafts.length ? drafts : await getDraftsForEditor(editorId),
     artistsRegistered: users.length,
+    roleCounts,
     artistAccounts,
     artistProfiles,
   })

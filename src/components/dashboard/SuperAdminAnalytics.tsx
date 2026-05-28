@@ -123,6 +123,37 @@ export function SuperAdminAnalyticsPanel({
             </button>
           ))}
         </div>
+        <div className="transmission-line mt-6 mb-4" />
+        <p className="text-[10px] tracking-[0.2em] uppercase text-muted mb-3">
+          User Categories
+        </p>
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="ios-analytics-stat">
+            <span className="ios-analytics-stat-code">LST</span>
+            <span className="ios-analytics-stat-value">{data.roleCounts.listeners}</span>
+            <span className="ios-analytics-stat-label">Listeners</span>
+          </div>
+          <div className="ios-analytics-stat">
+            <span className="ios-analytics-stat-code">ART</span>
+            <span className="ios-analytics-stat-value">{data.roleCounts.artists}</span>
+            <span className="ios-analytics-stat-label">Artists</span>
+          </div>
+          <div className="ios-analytics-stat">
+            <span className="ios-analytics-stat-code">EDT</span>
+            <span className="ios-analytics-stat-value">{data.roleCounts.editors}</span>
+            <span className="ios-analytics-stat-label">Editors</span>
+          </div>
+          <div className="ios-analytics-stat">
+            <span className="ios-analytics-stat-code">SED</span>
+            <span className="ios-analytics-stat-value">{data.roleCounts.superEditors}</span>
+            <span className="ios-analytics-stat-label">Super Editors</span>
+          </div>
+          <div className="ios-analytics-stat">
+            <span className="ios-analytics-stat-code">TTL</span>
+            <span className="ios-analytics-stat-value">{data.roleCounts.total}</span>
+            <span className="ios-analytics-stat-label">Total Users</span>
+          </div>
+        </div>
       </section>
 
       {detail && (
