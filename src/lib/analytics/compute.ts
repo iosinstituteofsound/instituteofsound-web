@@ -110,6 +110,7 @@ export function computeSuperAdminAnalytics(source: AnalyticsSource): SuperAdminA
     submissionLog,
     artistAccounts: source.artistAccounts,
     artistProfiles: source.artistProfiles,
+    roleUsers: source.roleUsers,
     pipeline: pipelineLabel(statusCounts.pending, statusCounts.in_review),
   }
 }

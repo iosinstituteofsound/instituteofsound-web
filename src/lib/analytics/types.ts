@@ -1,4 +1,5 @@
 import type { EditorialDraft, SubmissionStatus, TrackSubmission } from '@/lib/auth/types'
+import type { UserRole } from '@/lib/auth/types'
 
 export interface GenreStat {
   genre: string
@@ -19,6 +20,14 @@ export interface AnalyticsArtistAccount {
   id: string
   email: string
   name: string
+  createdAt: string
+}
+
+export interface AnalyticsRoleUser {
+  id: string
+  email: string
+  name: string
+  role: UserRole
   createdAt: string
 }
 
@@ -55,6 +64,7 @@ export interface SuperAdminAnalytics {
   submissionLog: RecentActivityItem[]
   artistAccounts: AnalyticsArtistAccount[]
   artistProfiles: AnalyticsArtistProfile[]
+  roleUsers: AnalyticsRoleUser[]
   pipeline: 'clear' | 'steady' | 'backlog'
 }
 
@@ -71,4 +81,5 @@ export interface AnalyticsSource {
   }
   artistAccounts: AnalyticsArtistAccount[]
   artistProfiles: AnalyticsArtistProfile[]
+  roleUsers: AnalyticsRoleUser[]
 }

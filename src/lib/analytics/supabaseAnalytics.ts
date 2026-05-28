@@ -65,6 +65,25 @@ export async function supabaseListArtistAccounts(): Promise<
   }))
 }
 
+export async function supabaseListRoleUsers(): Promise<
+  { id: string; email: string; name: string; role: 'member' | 'artist' | 'editor' | 'super_editor'; createdAt: string }[]
+> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, email, name, role, created_at')
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    email: r.email,
+    name: r.name,
+    role: r.role,
+    createdAt: r.created_at,
+  }))
+}
+
 export async function supabaseListArtistProfiles(): Promise<
   {
     id: string

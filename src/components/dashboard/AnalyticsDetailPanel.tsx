@@ -3,17 +3,27 @@ import { StatusBadge } from '@/components/auth/StatusBadge'
 import type {
   AnalyticsArtistAccount,
   AnalyticsArtistProfile,
+  AnalyticsRoleUser,
   RecentActivityItem,
 } from '@/lib/analytics/types'
 import clsx from 'clsx'
 
-export type AnalyticsDetailKey = 'artists' | 'submissions' | 'week' | 'approval'
+export type AnalyticsDetailKey =
+  | 'artists'
+  | 'submissions'
+  | 'week'
+  | 'approval'
+  | 'listeners'
+  | 'editors'
+  | 'super_editors'
+  | 'total_users'
 
 interface AnalyticsDetailPanelProps {
   view: AnalyticsDetailKey
   onClose: () => void
   artistAccounts: AnalyticsArtistAccount[]
   artistProfiles: AnalyticsArtistProfile[]
+  roleUsers: AnalyticsRoleUser[]
   submissions: RecentActivityItem[]
   approvalRate: number
   statusApproved: number
@@ -33,6 +43,10 @@ const titles: Record<AnalyticsDetailKey, string> = {
   submissions: 'All Track Submissions',
   week: 'Submissions — Last 7 Days',
   approval: 'Approval Breakdown',
+  listeners: 'Listeners',
+  editors: 'Editors',
+  super_editors: 'Super Editors',
+  total_users: 'All Users',
 }
 
 export function AnalyticsDetailPanel({
@@ -40,6 +54,7 @@ export function AnalyticsDetailPanel({
   onClose,
   artistAccounts,
   artistProfiles,
+  roleUsers,
   submissions,
   approvalRate,
   statusApproved,
@@ -50,6 +65,14 @@ export function AnalyticsDetailPanel({
   const weekItems = submissions.filter((s) => new Date(s.createdAt).getTime() >= weekAgo)
   const approved = submissions.filter((s) => s.status === 'approved')
   const rejected = submissions.filter((s) => s.status === 'rejected')
+  const roleUsersByView =
+    view === 'listeners'
+      ? roleUsers.filter((u) => u.role === 'member')
+      : view === 'editors'
+        ? roleUsers.filter((u) => u.role === 'editor')
+        : view === 'super_editors'
+          ? roleUsers.filter((u) => u.role === 'super_editor')
+          : roleUsers
 
   return (
     <section className="ios-panel ios-analytics-detail border-mh-red/40">
@@ -163,6 +186,37 @@ export function AnalyticsDetailPanel({
           }
         />
       )}
+
+      {(view === 'listeners' ||
+        view === 'editors' ||
+        view === 'super_editors' ||
+        view === 'total_users') && (
+        <div>
+          <p className="text-xs uppercase tracking-widest text-muted mb-3">
+            {roleUsersByView.length} users
+          </p>
+          {roleUsersByView.length === 0 ? (
+            <p className="text-sm text-muted border border-dashed border-border p-4">
+              No users found for this category.
+            </p>
+          ) : (
+            <ul className="divide-y divide-border border border-border max-h-[460px] overflow-y-auto">
+              {roleUsersByView.map((u) => (
+                <li key={u.id} className="px-4 py-3 flex flex-wrap justify-between gap-2">
+                  <div>
+                    <p className="font-semibold">{u.name}</p>
+                    <p className="text-xs text-muted font-mono">{u.email}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase tracking-widest text-muted">{u.role}</p>
+                    <p className="text-[10px] text-muted mt-1">{formatDate(u.createdAt)}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </section>
   )
 }
@@ -191,6 +245,7 @@ function SubmissionList({
                 <button
                   type="button"
                   onClick={() => onOpenSubmission(item.id)}
+                  aria-label={`Open submission ${item.trackTitle}`}
                   className="w-full text-left px-4 py-3 flex flex-wrap justify-between gap-2 hover:bg-white/5 transition-colors"
                 >
                   <SubmissionRowContent item={item} />

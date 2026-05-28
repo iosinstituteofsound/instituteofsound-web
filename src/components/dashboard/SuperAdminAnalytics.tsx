@@ -128,31 +128,71 @@ export function SuperAdminAnalyticsPanel({
           User Categories
         </p>
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          <div className="ios-analytics-stat">
+          <button
+            type="button"
+            onClick={() => setDetail(detail === 'listeners' ? null : 'listeners')}
+            className={clsx(
+              'ios-analytics-stat ios-analytics-stat-btn text-left',
+              detail === 'listeners' && 'ios-analytics-stat-active'
+            )}
+          >
             <span className="ios-analytics-stat-code">LST</span>
             <span className="ios-analytics-stat-value">{data.roleCounts.listeners}</span>
             <span className="ios-analytics-stat-label">Listeners</span>
-          </div>
-          <div className="ios-analytics-stat">
+            <span className="ios-analytics-stat-hint">View users →</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDetail(detail === 'artists' ? null : 'artists')}
+            className={clsx(
+              'ios-analytics-stat ios-analytics-stat-btn text-left',
+              detail === 'artists' && 'ios-analytics-stat-active'
+            )}
+          >
             <span className="ios-analytics-stat-code">ART</span>
             <span className="ios-analytics-stat-value">{data.roleCounts.artists}</span>
             <span className="ios-analytics-stat-label">Artists</span>
-          </div>
-          <div className="ios-analytics-stat">
+            <span className="ios-analytics-stat-hint">View users →</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDetail(detail === 'editors' ? null : 'editors')}
+            className={clsx(
+              'ios-analytics-stat ios-analytics-stat-btn text-left',
+              detail === 'editors' && 'ios-analytics-stat-active'
+            )}
+          >
             <span className="ios-analytics-stat-code">EDT</span>
             <span className="ios-analytics-stat-value">{data.roleCounts.editors}</span>
             <span className="ios-analytics-stat-label">Editors</span>
-          </div>
-          <div className="ios-analytics-stat">
+            <span className="ios-analytics-stat-hint">View users →</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDetail(detail === 'super_editors' ? null : 'super_editors')}
+            className={clsx(
+              'ios-analytics-stat ios-analytics-stat-btn text-left',
+              detail === 'super_editors' && 'ios-analytics-stat-active'
+            )}
+          >
             <span className="ios-analytics-stat-code">SED</span>
             <span className="ios-analytics-stat-value">{data.roleCounts.superEditors}</span>
             <span className="ios-analytics-stat-label">Super Editors</span>
-          </div>
-          <div className="ios-analytics-stat">
+            <span className="ios-analytics-stat-hint">View users →</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDetail(detail === 'total_users' ? null : 'total_users')}
+            className={clsx(
+              'ios-analytics-stat ios-analytics-stat-btn text-left',
+              detail === 'total_users' && 'ios-analytics-stat-active'
+            )}
+          >
             <span className="ios-analytics-stat-code">TTL</span>
             <span className="ios-analytics-stat-value">{data.roleCounts.total}</span>
             <span className="ios-analytics-stat-label">Total Users</span>
-          </div>
+            <span className="ios-analytics-stat-hint">View users →</span>
+          </button>
         </div>
       </section>
 
@@ -162,6 +202,7 @@ export function SuperAdminAnalyticsPanel({
           onClose={() => setDetail(null)}
           artistAccounts={data.artistAccounts}
           artistProfiles={data.artistProfiles}
+          roleUsers={data.roleUsers}
           submissions={data.submissionLog}
           approvalRate={data.approvalRate}
           statusApproved={data.statusCounts.approved}
