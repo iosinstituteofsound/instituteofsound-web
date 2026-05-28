@@ -809,16 +809,41 @@ textarea.ios-input {
   margin-left: auto;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1279px) {
   .ios-nav:not(.ios-nav-app) .ios-nav-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem;
     padding-top: max(0.7rem, env(safe-area-inset-top, 0px));
     padding-left: max(1rem, env(safe-area-inset-left, 0px));
     padding-right: max(1rem, env(safe-area-inset-right, 0px));
     min-height: 3.35rem;
   }
 
+  .ios-nav:not(.ios-nav-app) .ios-nav-mega,
+  .ios-nav:not(.ios-nav-app) .ios-nav-actions,
+  .ios-nav:not(.ios-nav-app) .ios-nav-mobile-cta {
+    display: none !important;
+  }
+
+  .ios-nav-toggle-wrap-guest {
+    margin-left: 0;
+    grid-column: 2;
+  }
+
+  .ios-nav-toggle-wrap-guest .ios-nav-toggle {
+    display: flex !important;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    justify-content: center;
+    padding: 0.45rem 0.55rem;
+  }
+
   .ios-brand-lockup {
-    max-width: calc(100% - 3.5rem);
+    min-width: 0;
+    max-width: 100%;
+    grid-column: 1;
   }
 
   .ios-brand-title {
@@ -830,13 +855,9 @@ textarea.ios-input {
     font-size: 0.5rem;
     letter-spacing: 0.22em;
   }
-
-  .ios-nav-mobile-cta {
-    display: none;
-  }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1280px) {
   .ios-nav-toggle-wrap {
     margin-left: 0;
   }
@@ -862,7 +883,7 @@ textarea.ios-input {
   background: rgba(212, 0, 0, 0.08);
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1280px) {
   .ios-nav-toggle {
     display: none;
   }
@@ -13942,5 +13963,14 @@ body.ios-app-shell .ios-pwa-install {
 @media (display-mode: standalone) {
   .ios-pwa-install {
     display: none;
+  }
+
+  .ios-nav-hidden {
+    transform: none !important;
+  }
+
+  .ios-nav-app .ios-nav-app-menu-btn {
+    position: relative;
+    z-index: 2;
   }
 }

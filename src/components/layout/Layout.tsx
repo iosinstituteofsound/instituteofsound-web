@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom'
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import clsx from 'clsx'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
@@ -16,12 +16,14 @@ import { useContent } from '@/hooks/useContent'
 import { getNav, getFooter } from '@/api/endpoints'
 import { useAuth } from '@/context/AuthContext'
 import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt'
+import { isStandalonePwa } from '@/lib/pwa/standalone'
 
 export function Layout() {
   useLenis()
   const location = useLocation()
   const { user, loading: authLoading } = useAuth()
-  const appMode = Boolean(user)
+  const [standalonePwa] = useState(isStandalonePwa)
+  const appMode = Boolean(user) || standalonePwa
   const fetchNav = useCallback(() => getNav(), [])
   const fetchFooter = useCallback(() => getFooter(), [])
   const { data: navLinks, loading: navLoading } = useContent(fetchNav)

@@ -1,18 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import clsx from 'clsx'
+import { isStandalonePwa } from '@/lib/pwa/standalone'
 
 const DISMISS_KEY = 'ios_pwa_install_dismiss'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
-}
-
-function isStandalone() {
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
-  )
 }
 
 function isIos() {
@@ -28,7 +22,7 @@ export function PwaInstallPrompt() {
   const [installing, setInstalling] = useState(false)
 
   useEffect(() => {
-    if (isStandalone()) return
+    if (isStandalonePwa()) return
 
     if (isIos()) {
       setShowIosHint(true)
@@ -61,7 +55,7 @@ export function PwaInstallPrompt() {
     }
   }, [installEvent, dismiss])
 
-  if (isStandalone() || dismissed) return null
+  if (isStandalonePwa() || dismissed) return null
   if (!installEvent && !showIosHint) return null
 
   return (

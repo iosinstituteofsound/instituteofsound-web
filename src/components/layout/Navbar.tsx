@@ -13,6 +13,7 @@ import { NetworkNotificationsPanel } from '@/components/community/NetworkNotific
 import { IOSImage } from '@/components/ui/IOSImage'
 import type { NavGroupId, NavLink } from '@/types'
 import clsx from 'clsx'
+import { isStandalonePwa } from '@/lib/pwa/standalone'
 
 interface NavbarProps {
   links: NavLink[]
@@ -52,6 +53,7 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
   const isArtistSite = /^\/artist\/[^/]+$/.test(location.pathname)
   const groups = groupNavLinks(links)
   const appLabel = appSectionLabel(location.pathname)
+  const standalonePwa = isStandalonePwa()
 
   const linkActive = (href: string) =>
     isLinkActive(href, location.pathname, location.hash)
@@ -133,7 +135,7 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
         appMode && 'ios-nav-app',
         isArtistSite && 'ios-nav-artist-site',
         !appMode && scrolled && !isArtistSite && 'ios-nav-scrolled',
-        !appMode && hiddenOnScroll && 'ios-nav-hidden',
+        !appMode && hiddenOnScroll && !standalonePwa && 'ios-nav-hidden',
         !appMode && !isArtistSite && !scrolled && isHome && 'ios-nav-home',
         !appMode && !isArtistSite && !isHome && 'ios-nav-solid'
       )}
@@ -212,11 +214,7 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
               <ArtistNavActions />
             </div>
 
-            <div className="ios-nav-mobile-cta hidden md:flex lg:hidden">
-              <ArtistNavActions />
-            </div>
-
-            <div className="ios-nav-toggle-wrap">
+            <div className="ios-nav-toggle-wrap ios-nav-toggle-wrap-guest">
               <NavMenuToggle open={open} onClick={() => setOpen((v) => !v)} />
             </div>
           </>
