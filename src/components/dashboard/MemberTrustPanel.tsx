@@ -18,9 +18,11 @@ function roleTypeFromPersona(persona: DashboardPersona | undefined) {
 export function MemberTrustPanel({
   user,
   persona,
+  className,
 }: {
   user: User
   persona?: DashboardPersona
+  className?: string
 }) {
   const roleType = roleTypeFromPersona(persona)
   const [proofLinksText, setProofLinksText] = useState('')
@@ -122,25 +124,21 @@ export function MemberTrustPanel({
   const latestRequest = roleType ? requests.find((r) => r.roleType === roleType) : null
 
   return (
-    <section className="ios-card p-6 md:p-8 mb-8 space-y-6">
+    <section className={className ?? 'ios-card p-6 md:p-8 mb-8 space-y-6'}>
       <div>
-        <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-          Authenticity & verification
-        </p>
-        <h2 className="font-display text-xl font-bold uppercase mt-2">
-          Proofs + mutual confirmations
-        </h2>
-        <p className="text-sm text-muted mt-2">
+        <p className="member-desk-kicker">Authenticity & verification</p>
+        <h2 className="member-desk-heading">Proofs + mutual confirmations</h2>
+        <p className="member-desk-lede">
           Submit role-specific proofs and verify relationship claims through mutual confirmation
           to keep network trust high.
         </p>
       </div>
 
       {roleType && (
-        <div className="border border-border p-4 space-y-3">
-          <p className="text-xs uppercase tracking-widest text-muted">Role proof submission</p>
+        <div className="member-desk-trust-block space-y-3">
+          <p>Role proof submission</p>
           {latestRequest && (
-            <p className="text-xs text-muted">
+            <p className="member-desk-meta">
               Latest status: <span className="text-foreground uppercase">{latestRequest.status}</span>
             </p>
           )}
@@ -187,7 +185,7 @@ export function MemberTrustPanel({
             type="button"
             onClick={() => void submitProofs()}
             disabled={loading}
-            className="ios-btn ios-btn-primary !text-xs"
+            className="ios-btn ios-btn-primary"
           >
             Submit verification proofs
           </button>
@@ -195,8 +193,8 @@ export function MemberTrustPanel({
       )}
 
       {claimType && (
-        <div className="border border-border p-4 space-y-3">
-          <p className="text-xs uppercase tracking-widest text-muted">Mutual confirmation claim</p>
+        <div className="member-desk-trust-block space-y-3">
+          <p>Mutual confirmation claim</p>
           <input
             value={targetHandle}
             onChange={(e) => setTargetHandle(e.target.value)}
@@ -220,36 +218,36 @@ export function MemberTrustPanel({
             type="button"
             onClick={() => void submitClaim()}
             disabled={loading}
-            className="ios-btn ios-btn-secondary !text-xs"
+            className="ios-btn ios-btn-secondary"
           >
             Send claim for confirmation
           </button>
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <article className="border border-border p-4">
-          <p className="text-xs uppercase tracking-widest text-muted mb-3">Incoming confirmations</p>
+      <div className="grid md:grid-cols-2 gap-4 mt-1">
+        <article className="member-desk-trust-block">
+          <p>Incoming confirmations</p>
           {incomingClaims.length === 0 ? (
-            <p className="text-xs text-muted">No pending confirmations.</p>
+            <p className="member-desk-meta mt-3">No pending confirmations.</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 mt-3">
               {incomingClaims.map((claim) => (
                 <div key={claim.id} className="border border-border p-3">
-                  <p className="text-xs text-muted">
+                  <p className="member-desk-meta">
                     {claim.claimType} from {claim.claimantName}
                   </p>
                   <div className="flex gap-2 mt-2">
                     <button
                       type="button"
-                      className="ios-btn ios-btn-primary !text-xs"
+                      className="ios-btn ios-btn-primary"
                       onClick={() => void respondToClaim(claim.id, 'approved').then(reload)}
                     >
                       Approve
                     </button>
                     <button
                       type="button"
-                      className="ios-btn ios-btn-ghost !text-xs"
+                      className="ios-btn ios-btn-ghost"
                       onClick={() => void respondToClaim(claim.id, 'rejected').then(reload)}
                     >
                       Reject
@@ -261,14 +259,14 @@ export function MemberTrustPanel({
           )}
         </article>
 
-        <article className="border border-border p-4">
-          <p className="text-xs uppercase tracking-widest text-muted mb-3">Outgoing claims</p>
+        <article className="member-desk-trust-block">
+          <p>Outgoing claims</p>
           {outgoingClaims.length === 0 ? (
-            <p className="text-xs text-muted">No claims sent yet.</p>
+            <p className="member-desk-meta mt-3">No claims sent yet.</p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 mt-3">
               {outgoingClaims.map((claim) => (
-                <p key={claim.id} className="text-xs text-muted">
+                <p key={claim.id} className="member-desk-meta">
                   {claim.claimType} → {claim.targetHandle ? `@${claim.targetHandle}` : claim.targetName} ·{' '}
                   <span className="uppercase text-foreground">{claim.status}</span>
                 </p>
@@ -278,8 +276,8 @@ export function MemberTrustPanel({
         </article>
       </div>
 
-      {message && <p className="text-emerald-400 text-sm">{message}</p>}
-      {error && <p className="text-mh-red text-sm">{error}</p>}
+      {message && <p className="text-emerald-400 text-sm mt-4">{message}</p>}
+      {error && <p className="text-mh-red text-sm mt-4">{error}</p>}
     </section>
   )
 }

@@ -299,14 +299,10 @@ export default function MemberDashboardPage() {
         {tab === 'workspace' && (
           <>
         {!persona && (
-          <section className="member-dashboard-persona-picker ios-card p-6 md:p-8 mb-8">
-            <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-              Workspace roles
-            </p>
-            <h2 className="font-display text-2xl font-bold uppercase mt-2">
-              Choose how you work
-            </h2>
-            <p className="text-sm text-muted mt-2 max-w-3xl">
+          <section className="member-desk-panel member-dashboard-persona-picker">
+            <p className="member-desk-kicker">Workspace roles</p>
+            <h2 className="member-desk-heading">Choose how you work</h2>
+            <p className="member-desk-lede">
               Every member can choose a workspace role here. Whether you are an artist manager,
               label, promoter, or brand, the dashboard will personalize around that role.
             </p>
@@ -319,10 +315,8 @@ export default function MemberDashboardPage() {
                   onClick={() => setPersonaModal(option.id)}
                   disabled={savingPersona}
                 >
-                  <p className="font-display text-base font-bold uppercase flex items-center justify-between gap-2">
-                    <span>{option.title}</span>
-                  </p>
-                  <p className="text-xs text-muted mt-2">{option.subtitle}</p>
+                  <p>{option.title}</p>
+                  <p>{option.subtitle}</p>
                 </button>
               ))}
             </div>
@@ -331,19 +325,13 @@ export default function MemberDashboardPage() {
         )}
 
         {personaPanel && (
-          <section className="member-dashboard-persona-active ios-card p-6 md:p-8 mb-8">
+          <section className="member-desk-panel member-dashboard-persona-active">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-                {personaPanel.badge}
-              </p>
-              <span className="text-xs text-muted">
-                Workspace mode is active for this account.
-              </span>
+              <p className="member-desk-kicker">{personaPanel.badge}</p>
+              <span className="member-desk-meta">Workspace mode is active for this account.</span>
             </div>
-            <h2 className="font-display text-2xl md:text-3xl font-bold uppercase mt-3">
-              {personaPanel.heading}
-            </h2>
-            <p className="text-sm text-muted mt-3 max-w-3xl">{personaPanel.summary}</p>
+            <h2 className="member-desk-heading">{personaPanel.heading}</h2>
+            <p className="member-desk-lede">{personaPanel.summary}</p>
             <ul className="member-dashboard-persona-list mt-5">
               {personaPanel.priorities.map((item) => (
                 <li key={item}>{item}</li>
@@ -351,18 +339,18 @@ export default function MemberDashboardPage() {
             </ul>
             <div className="member-dashboard-workbench mt-6">
               <article className="member-dashboard-workbench-card">
-                <h3 className="font-display text-sm font-bold uppercase">Workflow board</h3>
+                <h3>Workflow board</h3>
                 <div className="member-dashboard-workflow-list mt-4">
                   {personaPanel.workflow.map((step) => (
                     <div key={step.stage} className="member-dashboard-workflow-item">
                       <p className="member-dashboard-workflow-stage">{step.stage}</p>
-                      <p className="text-xs text-muted mt-1">{step.objective}</p>
+                      <p>{step.objective}</p>
                     </div>
                   ))}
                 </div>
               </article>
               <article className="member-dashboard-workbench-card">
-                <h3 className="font-display text-sm font-bold uppercase">Toolkit focus</h3>
+                <h3>Toolkit focus</h3>
                 <ul className="member-dashboard-toolkit-list mt-4">
                   {personaPanel.toolkit.map((item) => (
                     <li key={item}>{item}</li>
@@ -370,15 +358,13 @@ export default function MemberDashboardPage() {
                 </ul>
               </article>
             </div>
-            <div className="flex flex-wrap gap-2 mt-6">
+            <div className="member-desk-actions">
               {personaPanel.actions.map((action) => (
                 <Link
                   key={action.to + action.label}
                   to={action.to}
                   className={
-                    action.primary
-                      ? 'ios-btn ios-btn-primary !text-xs'
-                      : 'ios-btn ios-btn-secondary !text-xs'
+                    action.primary ? 'ios-btn ios-btn-primary' : 'ios-btn ios-btn-secondary'
                   }
                 >
                   {action.label} →
@@ -386,56 +372,50 @@ export default function MemberDashboardPage() {
               ))}
               <button
                 type="button"
-                className="ios-btn ios-btn-ghost !text-xs"
+                className="ios-btn ios-btn-ghost"
                 onClick={() => setShowResetConfirm(true)}
                 disabled={savingPersona}
               >
                 Reset and start over
               </button>
             </div>
-            <p className="text-[11px] text-muted mt-3">
+            <p className="member-desk-footnote">
               Reset clears your selected workspace mode and returns you to the role selection screen.
             </p>
             {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
           </section>
         )}
 
-        <MemberTrustPanel user={user} persona={persona} />
+        <section className="member-desk-panel member-desk-trust-wrap">
+          <MemberTrustPanel user={user} persona={persona} className="member-desk-trust" />
+        </section>
           </>
         )}
 
         {tab === 'grow' && (
           <div className="member-dashboard-paths">
-            <article className="member-dashboard-path-card member-dashboard-path-card--artist">
-              <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-                Artist path
-              </p>
-              <h2 className="font-display text-xl font-bold uppercase mt-2">
-                Upgrade to artist page
-              </h2>
-              <p className="text-sm text-muted mt-2">
+            <article className="member-desk-panel member-dashboard-path-card member-dashboard-path-card--artist">
+              <p className="member-desk-kicker">Artist path</p>
+              <h2 className="member-desk-heading">Upgrade to artist page</h2>
+              <p className="member-desk-lede">
                 Launch My Studio — public band page, releases, merch, and editor submissions.
               </p>
-              <Link to="/member/upgrade" className="ios-btn ios-btn-primary !text-xs mt-6 inline-flex">
+              <Link to="/member/upgrade" className="ios-btn ios-btn-primary mt-6 inline-flex">
                 Start artist page →
               </Link>
             </article>
 
-            <article className="member-dashboard-path-card member-dashboard-path-card--editor">
-              <p className="text-[10px] tracking-[0.2em] uppercase text-muted font-bold">
-                Editorial path
-              </p>
-              <h2 className="font-display text-xl font-bold uppercase mt-2">
-                Become an editor
-              </h2>
-              <p className="text-sm text-muted mt-2">
+            <article className="member-desk-panel member-dashboard-path-card member-dashboard-path-card--editor">
+              <p className="member-desk-kicker">Editorial path</p>
+              <h2 className="member-desk-heading">Become an editor</h2>
+              <p className="member-desk-lede">
                 Apply to write features, review submissions, and curate the magazine desk.
               </p>
-              <div className="flex flex-wrap gap-2 mt-6">
-                <Link to="/editor/apply" className="ios-btn ios-btn-secondary !text-xs">
+              <div className="member-desk-actions">
+                <Link to="/editor/apply" className="ios-btn ios-btn-secondary">
                   Apply as editor →
                 </Link>
-                <Link to="/editor/join" className="ios-btn ios-btn-ghost !text-xs">
+                <Link to="/editor/join" className="ios-btn ios-btn-ghost">
                   Programme info
                 </Link>
               </div>
@@ -444,8 +424,8 @@ export default function MemberDashboardPage() {
         )}
 
         {tab === 'explore' && (
-        <section className="member-dashboard-explore">
-          <h2 className="font-display text-lg font-bold uppercase mb-4">Explore</h2>
+        <section className="member-desk-panel member-dashboard-explore">
+          <h2 className="member-desk-heading">Explore</h2>
           <div className="member-dashboard-explore-grid">
             <Link to="/scenes" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
               <span className="text-[10px] uppercase tracking-widest text-mh-red">Discovery</span>
