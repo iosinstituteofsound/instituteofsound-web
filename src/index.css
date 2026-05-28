@@ -1423,9 +1423,91 @@ textarea.ios-input {
   gap: 0.75rem;
 }
 
+.member-dashboard-persona-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 900px) {
+  .member-dashboard-persona-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.member-dashboard-persona-option {
+  text-align: left;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.member-dashboard-persona-option:hover:not(:disabled) {
+  border-color: rgba(212, 0, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+.member-dashboard-persona-option:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.member-dashboard-persona-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.35rem;
+  color: var(--color-muted);
+  font-size: 0.86rem;
+}
+
+.member-dashboard-workbench {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+}
+
+.member-dashboard-workbench-card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 1rem;
+}
+
+.member-dashboard-workflow-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.member-dashboard-workflow-item {
+  border-left: 2px solid rgba(212, 0, 0, 0.42);
+  padding-left: 0.65rem;
+}
+
+.member-dashboard-workflow-stage {
+  font-size: 0.66rem;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  font-weight: 700;
+}
+
+.member-dashboard-toolkit-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
 @media (min-width: 768px) {
   .member-dashboard-explore-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  .member-dashboard-workbench {
+    grid-template-columns: 1fr 1fr;
   }
 }
 

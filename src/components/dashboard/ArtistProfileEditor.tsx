@@ -117,6 +117,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [genresText, setGenresText] = useState('')
   const [influencesText, setInfluencesText] = useState('')
   const [country, setCountry] = useState('')
+  const [artistManagerName, setArtistManagerName] = useState('')
+  const [artistManagerHandle, setArtistManagerHandle] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [bannerUrl, setBannerUrl] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
@@ -192,6 +194,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         setGenresText(p.genres.join(', '))
         setInfluencesText(p.influenceTags.join(', '))
         setCountry(p.country ?? '')
+        setArtistManagerName(p.artistManagerName ?? '')
+        setArtistManagerHandle(p.artistManagerHandle ?? '')
         setAvatarUrl(p.avatarUrl ?? '')
         setBannerUrl(p.bannerUrl ?? '')
         setLogoUrl(p.logoUrl ?? '')
@@ -279,6 +283,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       genres,
       influenceTags,
       country,
+      artistManagerName,
+      artistManagerHandle,
       avatarUrl,
       bannerUrl,
       logoUrl,
@@ -599,6 +605,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
             rows={4}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
+            aria-label="Artist bio"
             className="ios-input min-h-[100px]"
           />
         </div>
@@ -633,6 +640,27 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         <div>
           <FieldLabel>Country</FieldLabel>
           <Input value={country} onChange={(e) => setCountry(e.target.value)} />
+        </div>
+        <div className="artist-dash-grid-2">
+          <div>
+            <FieldLabel>Artist manager name (optional)</FieldLabel>
+            <Input
+              value={artistManagerName}
+              onChange={(e) => setArtistManagerName(e.target.value)}
+              placeholder="e.g. Rohan Mehta"
+            />
+          </div>
+          <div>
+            <FieldLabel>Artist manager network handle (optional)</FieldLabel>
+            <Input
+              value={artistManagerHandle}
+              onChange={(e) => setArtistManagerHandle(e.target.value.replace(/^@/, ''))}
+              placeholder="e.g. rohanmgmt"
+            />
+            <p className="text-xs text-muted mt-1">
+              If set, this manager will be listed on your profile and their network page.
+            </p>
+          </div>
         </div>
         <div>
           <FieldLabel>Monthly listeners (display)</FieldLabel>
@@ -876,6 +904,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
             <select
               value={pickTrackId}
               onChange={(e) => setPickTrackId(e.target.value)}
+              aria-label="Artist pick track"
               className="ios-input w-full"
             >
               <option value="">— Select —</option>
@@ -911,6 +940,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           <select
             value={albumType}
             onChange={(e) => setAlbumType(e.target.value as 'album' | 'single' | 'ep')}
+            aria-label="Release type"
             className="ios-input"
           >
             <option value="album">Album</option>

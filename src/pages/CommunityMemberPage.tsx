@@ -26,9 +26,11 @@ import { MemberProfileAcademy } from '@/components/community/member/MemberProfil
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { useSeo } from '@/hooks/useSeo'
 import { fetchArtistSlugForUserId } from '@/lib/artist-profile/networkLink'
+import { listManagedArtistsByHandle } from '@/lib/artist-profile/service'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonLd'
 import { networkProfilePath } from '@/lib/community/networkPaths'
 import { COMMUNITY_FOLLOW_EVENT } from '@/lib/community/followService'
+import { IOSImage } from '@/components/ui/IOSImage'
 
 function tabFromSearch(params: URLSearchParams): MemberProfileTab {
   const t = params.get('tab')
@@ -49,6 +51,9 @@ export default function CommunityMemberPage() {
   const [notFound, setNotFound] = useState(false)
   const [tab, setTab] = useState<MemberProfileTab>(() => tabFromSearch(searchParams))
   const [artistSlug, setArtistSlug] = useState<string | null>(null)
+  const [managedArtists, setManagedArtists] = useState<
+    { profileId: string; slug: string; displayName: string; tagline?: string; avatarUrl?: string }[]
+  >([])
 
   const { badges, loading: badgesLoading } = useCommunityBadges(profile?.userId)
 
@@ -101,12 +106,15 @@ export default function CommunityMemberPage() {
       setPosts([])
       setActivity([])
       setArtistSlug(null)
+      setManagedArtists([])
     } else {
       setProfile(p)
       setPosts(postList)
       setActivity(act)
       const slug = await fetchArtistSlugForUserId(p.userId)
       setArtistSlug(slug)
+      const managed = await listManagedArtistsByHandle(p.handle)
+      setManagedArtists(managed)
     }
     setLoading(false)
   }, [handle])
@@ -207,6 +215,43 @@ export default function CommunityMemberPage() {
             hidden={tab !== 'feed'}
             className="member-profile-panel"
           >
+            {managedArtists.length > 0 && (
+              <section className="ios-card p-5 mb-5">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-mh-red font-bold">
+                  Managed artists
+                </p>
+                <div className="grid sm:grid-cols-2 gap-3 mt-4">
+                  {managedArtists.map((artist) => (
+                    <Link
+                      key={artist.profileId}
+                      to={`/artist/${artist.slug}`}
+                      className="border border-border p-3 hover:border-mh-red/40 transition-colors flex gap-3 items-center"
+                    >
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-surface shrink-0">
+                        {artist.avatarUrl ? (
+                          <IOSImage
+                            src={artist.avatarUrl}
+                            alt={artist.displayName}
+                            width={40}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full grid place-items-center text-xs text-muted">
+                            {artist.displayName.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-display font-bold text-sm truncate">{artist.displayName}</p>
+                        {artist.tagline && (
+                          <p className="text-xs text-muted truncate">{artist.tagline}</p>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
             <MemberProfileFeed
               posts={posts}
               isYou={isYou}

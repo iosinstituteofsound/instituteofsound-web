@@ -8,6 +8,7 @@ import { SocialIcons } from './SocialIcons'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
 import { networkProfilePath } from '@/lib/community/networkPaths'
+import { Link } from 'react-router-dom'
 
 interface ArtistListenCta {
   label: string
@@ -196,6 +197,22 @@ function HeroMetaContent({
 
       {profile.tagline && (
         <p className="artist-site-hero-tagline font-serif italic">{profile.tagline}</p>
+      )}
+
+      {(profile.artistManagerName || profile.artistManagerHandle) && (
+        <p className="text-xs text-muted mt-2">
+          Managed by{' '}
+          {profile.artistManagerHandle ? (
+            <Link
+              to={networkProfilePath(profile.artistManagerHandle)}
+              className="text-mh-red hover:underline"
+            >
+              {profile.artistManagerName || `@${profile.artistManagerHandle}`}
+            </Link>
+          ) : (
+            <span className="text-foreground">{profile.artistManagerName}</span>
+          )}
+        </p>
       )}
 
       <div className="artist-site-hero-stats">

@@ -25,6 +25,8 @@ export interface ArtistProfile {
   genres: string[]
   influenceTags: string[]
   country?: string
+  artistManagerName?: string
+  artistManagerHandle?: string
   social: ArtistSocialLinks
   monthlyListenersDisplay: string
   artistPickTrackId?: string
@@ -146,6 +148,8 @@ export interface UpsertArtistProfileInput {
   genres?: string[]
   influenceTags?: string[]
   country?: string
+  artistManagerName?: string
+  artistManagerHandle?: string
   social?: ArtistSocialLinks
   monthlyListenersDisplay?: string
   artistPickTrackId?: string | null
@@ -157,6 +161,14 @@ export interface UpsertArtistProfileInput {
   pressKitUrl?: string
   pressKitLabel?: string
   published?: boolean
+}
+
+export interface ManagedArtistSummary {
+  profileId: string
+  slug: string
+  displayName: string
+  tagline?: string
+  avatarUrl?: string
 }
 
 export interface UpsertAlbumInput {

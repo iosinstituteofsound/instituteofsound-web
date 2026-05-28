@@ -28,6 +28,11 @@ import { resolveLineupEntryType } from './lineup'
 import { normalizeSocialLinkOrder } from './socialOrder'
 import { ensureUniqueSlug, slugifyArtistName } from './slug'
 
+function normalizeManagerHandle(raw?: string | null): string | null {
+  const cleaned = (raw ?? '').trim().replace(/^@/, '').toLowerCase()
+  return cleaned || null
+}
+
 type ProfileRow = {
   id: string
   user_id: string
@@ -41,6 +46,8 @@ type ProfileRow = {
   genres: string[] | null
   influence_tags: string[] | null
   country: string | null
+  artist_manager_name: string | null
+  artist_manager_handle: string | null
   website_url: string | null
   spotify_url: string | null
   youtube_url: string | null
@@ -75,6 +82,8 @@ function mapProfile(row: ProfileRow): ArtistProfile {
     genres: row.genres ?? [],
     influenceTags: normalizeInfluenceTags(row.influence_tags ?? []),
     country: row.country ?? undefined,
+    artistManagerName: row.artist_manager_name ?? undefined,
+    artistManagerHandle: row.artist_manager_handle ?? undefined,
     social: {
       website: row.website_url ?? undefined,
       spotify: row.spotify_url ?? undefined,
@@ -110,6 +119,8 @@ function profilePayload(input: UpsertArtistProfileInput, user: User) {
     genres: input.genres ?? [],
     influence_tags: normalizeInfluenceTags(input.influenceTags ?? []),
     country: input.country?.trim() || null,
+    artist_manager_name: input.artistManagerName?.trim() || null,
+    artist_manager_handle: normalizeManagerHandle(input.artistManagerHandle),
     website_url: social.website?.trim() || null,
     spotify_url: social.spotify?.trim() || null,
     youtube_url: social.youtube?.trim() || null,
@@ -153,6 +164,37 @@ export async function supabaseGetProfileBySlug(slug: string): Promise<ArtistProf
 
   if (error) throw new Error(error.message)
   return data ? mapProfile(data as ProfileRow) : null
+}
+
+export async function supabaseListManagedArtistsByHandle(
+  handle: string
+): Promise<
+  {
+    profileId: string
+    slug: string
+    displayName: string
+    tagline?: string
+    avatarUrl?: string
+  }[]
+> {
+  const managerHandle = normalizeManagerHandle(handle)
+  if (!managerHandle) return []
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('artist_profiles')
+    .select('id, slug, display_name, tagline, avatar_url, published')
+    .eq('artist_manager_handle', managerHandle)
+    .eq('published', true)
+    .order('updated_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row) => ({
+    profileId: row.id,
+    slug: row.slug,
+    displayName: row.display_name,
+    tagline: row.tagline ?? undefined,
+    avatarUrl: row.avatar_url ?? undefined,
+  }))
 }
 
 export async function supabaseListProfileSlugs(): Promise<string[]> {

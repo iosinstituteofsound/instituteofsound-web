@@ -1,10 +1,17 @@
-import type { EditorialDraft, TrackSubmission, User, UserRole } from '@/lib/auth/types'
+import type {
+  DashboardPersona,
+  EditorialDraft,
+  TrackSubmission,
+  User,
+  UserRole,
+} from '@/lib/auth/types'
 
 export interface ProfileRow {
   id: string
   email: string
   name: string
   role: UserRole
+  dashboard_persona?: DashboardPersona | null
   avatar_url?: string | null
   username?: string | null
   bio?: string | null
@@ -59,6 +66,7 @@ export function mapProfile(row: ProfileRow): User {
     email: row.email,
     name: row.name,
     role: row.role,
+    dashboardPersona: row.dashboard_persona ?? undefined,
     avatarUrl: row.avatar_url?.trim() || undefined,
     username: row.username?.trim() || undefined,
     bio: row.bio?.trim() || undefined,

@@ -29,6 +29,11 @@ import { resolveLineupEntryType } from './lineup'
 import { normalizeSocialLinkOrder } from './socialOrder'
 import { ensureUniqueSlug, slugifyArtistName } from './slug'
 
+function normalizeManagerHandle(raw?: string): string | undefined {
+  const cleaned = (raw ?? '').trim().replace(/^@/, '').toLowerCase()
+  return cleaned || undefined
+}
+
 const PROFILES_KEY = 'ios_artist_profiles'
 const ALBUMS_KEY = 'ios_artist_albums'
 const TRACKS_KEY = 'ios_artist_tracks'
@@ -154,6 +159,14 @@ export function localUpsertProfile(
         ? normalizeInfluenceTags(input.influenceTags)
         : normalizeInfluenceTags(existing?.influenceTags ?? []),
     country: input.country,
+    artistManagerName:
+      input.artistManagerName !== undefined
+        ? input.artistManagerName?.trim() || undefined
+        : existing?.artistManagerName,
+    artistManagerHandle:
+      input.artistManagerHandle !== undefined
+        ? normalizeManagerHandle(input.artistManagerHandle)
+        : existing?.artistManagerHandle,
     social: input.social ?? existing?.social ?? {},
     monthlyListenersDisplay:
       input.monthlyListenersDisplay ?? existing?.monthlyListenersDisplay ?? '—',
@@ -202,6 +215,29 @@ export function localUpsertProfile(
   }
   saveProfiles(profiles)
   return profile
+}
+
+export function localListManagedArtistsByHandle(
+  handle: string
+): {
+  profileId: string
+  slug: string
+  displayName: string
+  tagline?: string
+  avatarUrl?: string
+}[] {
+  const managerHandle = normalizeManagerHandle(handle)
+  if (!managerHandle) return []
+  return localGetProfiles()
+    .filter((p) => p.published && p.artistManagerHandle === managerHandle)
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .map((p) => ({
+      profileId: p.id,
+      slug: p.slug,
+      displayName: p.displayName,
+      tagline: p.tagline,
+      avatarUrl: p.avatarUrl,
+    }))
 }
 
 export function localAddAlbum(profileId: string, input: UpsertAlbumInput): ArtistAlbum {

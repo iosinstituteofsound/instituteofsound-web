@@ -4,13 +4,14 @@ import type { User } from './types'
 import { normalizeUsername, validateUsername } from './username'
 
 export const PROFILE_COLUMNS =
-  'id, email, name, role, avatar_url, username, bio, created_at'
+  'id, email, name, role, dashboard_persona, avatar_url, username, bio, created_at'
 
 export interface UpdateProfileInput {
   name?: string
   username?: string
   avatarUrl?: string
   bio?: string
+  dashboardPersona?: User['dashboardPersona'] | null
 }
 
 export async function updateUserProfile(
@@ -43,6 +44,10 @@ export async function updateUserProfile(
 
   if (input.bio !== undefined) {
     patch.bio = input.bio.trim().slice(0, 280) || null
+  }
+
+  if (input.dashboardPersona !== undefined) {
+    patch.dashboard_persona = input.dashboardPersona
   }
 
   if (Object.keys(patch).length === 0) {

@@ -1,4 +1,5 @@
 export type UserRole = 'member' | 'artist' | 'editor' | 'super_editor'
+export type DashboardPersona = 'event_promoter' | 'artist_manager' | 'label' | 'brand'
 
 export type SubmissionStatus = 'pending' | 'in_review' | 'approved' | 'rejected'
 
@@ -7,6 +8,7 @@ export interface User {
   email: string
   name: string
   role: UserRole
+  dashboardPersona?: DashboardPersona
   avatarUrl?: string
   username?: string
   bio?: string

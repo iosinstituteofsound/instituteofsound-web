@@ -6,6 +6,7 @@ import type { User } from '@/lib/auth/types'
 import { mergeDiscoverArtists } from './discover'
 import type {
   ArtistEditorialFeature,
+  ManagedArtistSummary,
   ArtistProfile,
   ArtistProfilePageData,
   UpsertAlbumInput,
@@ -89,6 +90,13 @@ export async function upsertArtistProfile(
 ): Promise<ArtistProfile> {
   if (isSupabaseConfigured()) return sb.supabaseUpsertProfile(user, input)
   return local.localUpsertProfile(user, input)
+}
+
+export async function listManagedArtistsByHandle(
+  handle: string
+): Promise<ManagedArtistSummary[]> {
+  if (isSupabaseConfigured()) return sb.supabaseListManagedArtistsByHandle(handle)
+  return local.localListManagedArtistsByHandle(handle)
 }
 
 export async function getArtistProfilePage(slug: string): Promise<ArtistProfilePageData | null> {

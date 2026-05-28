@@ -1,15 +1,181 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { roleLabel } from '@/lib/auth/roles'
+import { updateUserProfile } from '@/lib/auth/profile'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
+import type { DashboardPersona } from '@/lib/auth/types'
+
+const PERSONA_OPTIONS: {
+  id: DashboardPersona
+  title: string
+  subtitle: string
+}[] = [
+  {
+    id: 'event_promoter',
+    title: 'Event Promoter',
+    subtitle: 'Publish gigs, push RSVPs, and activate local scenes.',
+  },
+  {
+    id: 'artist_manager',
+    title: 'Artist Manager',
+    subtitle: 'Coordinate releases, collabs, and artist growth loops.',
+  },
+  {
+    id: 'label',
+    title: 'Label',
+    subtitle: 'Operate roster planning, release calendars, and coverage.',
+  },
+  {
+    id: 'brand',
+    title: 'Brand',
+    subtitle: 'Run campaigns with scenes, creators, and event partnerships.',
+  },
+]
+
+const PERSONA_CONTENT: Record<
+  DashboardPersona,
+  {
+    badge: string
+    heading: string
+    summary: string
+    priorities: string[]
+    workflow: { stage: string; objective: string }[]
+    toolkit: string[]
+    actions: { to: string; label: string; primary?: boolean }[]
+  }
+> = {
+  event_promoter: {
+    badge: 'Promoter workspace',
+    heading: 'Drive event momentum',
+    summary:
+      'Use Events + Scenes to promote lineups, track demand via RSVPs, and build recurring city traffic.',
+    priorities: [
+      'Submit and manage upcoming gigs',
+      'Post collab calls for crew / tech / support acts',
+      'Push audience traffic to city × genre hubs',
+    ],
+    workflow: [
+      { stage: 'Pre-launch', objective: 'Announce lineup + open RSVP early' },
+      { stage: 'Hype week', objective: 'Drive scene hub + collab visibility' },
+      { stage: 'Post-show', objective: 'Convert attendees into recurring community' },
+    ],
+    toolkit: [
+      'Event submission checklist',
+      'City × genre targeting view',
+      'Crew sourcing via collab board',
+    ],
+    actions: [
+      { to: '/events', label: 'Open events board', primary: true },
+      { to: '/scenes', label: 'Open scene hubs' },
+      { to: '/collab', label: 'Find collaborators' },
+    ],
+  },
+  artist_manager: {
+    badge: 'Manager workspace',
+    heading: 'Coordinate artist growth',
+    summary:
+      'Plan releases, build profile visibility, and keep your artists active across community and editorial opportunities.',
+    priorities: [
+      'Prepare artist profile + release schedule',
+      'Use collab board for producers and featured artists',
+      'Route strongest tracks to editorial submit flow',
+    ],
+    workflow: [
+      { stage: 'Asset prep', objective: 'Profile, links, visual pack, release notes' },
+      { stage: 'Release run', objective: 'Coordinate scenes, collabs, and timing' },
+      { stage: 'Momentum', objective: 'Push editorial + event opportunities' },
+    ],
+    toolkit: [
+      'Release planning lane',
+      'Editorial-ready pitch framing',
+      'Cross-artist collaboration tracker',
+    ],
+    actions: [
+      { to: '/member/upgrade', label: 'Upgrade to artist studio', primary: true },
+      { to: '/collab', label: 'Open collab board' },
+      { to: '/discover', label: 'Track discovery surface' },
+    ],
+  },
+  label: {
+    badge: 'Label workspace',
+    heading: 'Manage roster and releases',
+    summary:
+      'Keep your catalog visible with artist pages, release drops, and scene-aware promotion loops.',
+    priorities: [
+      'Launch or refresh artist pages for signed acts',
+      'Build release calendar with city/genre discovery in mind',
+      'Use events + collab to support launches',
+    ],
+    workflow: [
+      { stage: 'Roster setup', objective: 'Activate artist pages + release slots' },
+      { stage: 'Campaigns', objective: 'Sync events, scenes, and collab channels' },
+      { stage: 'Optimization', objective: 'Scale acts showing traction fastest' },
+    ],
+    toolkit: [
+      'Roster visibility workflow',
+      'Launch calendar blocks',
+      'Scene-fit planning prompts',
+    ],
+    actions: [
+      { to: '/member/upgrade', label: 'Launch artist page flow', primary: true },
+      { to: '/discover', label: 'Explore release ecosystem' },
+      { to: '/events', label: 'Coordinate launch gigs' },
+    ],
+  },
+  brand: {
+    badge: 'Brand workspace',
+    heading: 'Plan music-led campaigns',
+    summary:
+      'Partner with scenes and artists through events, editorial angles, and community activation.',
+    priorities: [
+      'Identify suitable scene hubs by city and genre',
+      'Find campaign collaborators via collab board',
+      'Align branded activations with event calendar',
+    ],
+    workflow: [
+      { stage: 'Discovery', objective: 'Pick scenes with the right audience intent' },
+      { stage: 'Activation', objective: 'Ship artist + event campaign concepts' },
+      { stage: 'Scale', objective: 'Repeat formats that convert into community' },
+    ],
+    toolkit: [
+      'Partnership scouting lane',
+      'Campaign concept templates',
+      'Event-linked activation planner',
+    ],
+    actions: [
+      { to: '/scenes', label: 'Browse scene hubs', primary: true },
+      { to: '/events', label: 'Check event pipeline' },
+      { to: '/collab', label: 'Source collaborators' },
+    ],
+  },
+}
 
 export default function MemberDashboardPage() {
-  const { user, logout, mode } = useAuth()
+  const { user, logout, mode, refreshUser } = useAuth()
+  const [savingPersona, setSavingPersona] = useState(false)
+  const [personaError, setPersonaError] = useState('')
   if (!user) return null
 
   const handle = memberHandleFromUser(user)
   const profilePath = `/network/${handle}`
+  const persona = user.dashboardPersona
+  const personaPanel = persona ? PERSONA_CONTENT[persona] : null
+
+  const savePersona = async (next: DashboardPersona | null) => {
+    if (savingPersona) return
+    setPersonaError('')
+    setSavingPersona(true)
+    try {
+      await updateUserProfile(user.id, { dashboardPersona: next })
+      await refreshUser()
+    } catch (err) {
+      setPersonaError(err instanceof Error ? err.message : 'Failed to update dashboard type.')
+    } finally {
+      setSavingPersona(false)
+    }
+  }
 
   return (
     <div className="member-dashboard">
@@ -27,7 +193,9 @@ export default function MemberDashboardPage() {
             </h1>
             <p className="text-muted text-sm mt-2 max-w-xl">
               You&apos;re signed in as a <strong className="text-signal">{roleLabel(user.role)}</strong>
-              — spins, scenes, collab, and gigs. No artist page yet unless you upgrade below.
+              {persona
+                ? ` · ${PERSONA_OPTIONS.find((p) => p.id === persona)?.title ?? 'Custom workspace'} workspace active.`
+                : ' — spins, scenes, collab, and gigs. Select your work type to personalize this dashboard.'}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
               {user.name} · {user.email}
@@ -52,6 +220,100 @@ export default function MemberDashboardPage() {
             </button>
           </div>
         </header>
+
+        {!persona && (
+          <section className="member-dashboard-persona-picker ios-card p-6 md:p-8 mb-8">
+            <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+              Choose your workspace
+            </p>
+            <h2 className="font-display text-2xl font-bold uppercase mt-2">
+              What best describes your work?
+            </h2>
+            <p className="text-sm text-muted mt-2 max-w-3xl">
+              Pick one option to customize your dashboard. You can switch back to the normal
+              dashboard anytime.
+            </p>
+            <div className="member-dashboard-persona-grid mt-6">
+              {PERSONA_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  className="member-dashboard-persona-option"
+                  onClick={() => void savePersona(option.id)}
+                  disabled={savingPersona}
+                >
+                  <p className="font-display text-base font-bold uppercase">{option.title}</p>
+                  <p className="text-xs text-muted mt-2">{option.subtitle}</p>
+                </button>
+              ))}
+            </div>
+            {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
+          </section>
+        )}
+
+        {personaPanel && (
+          <section className="member-dashboard-persona-active ios-card p-6 md:p-8 mb-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+                {personaPanel.badge}
+              </p>
+              <button
+                type="button"
+                className="ios-btn ios-btn-ghost !text-xs !py-2"
+                onClick={() => void savePersona(null)}
+                disabled={savingPersona}
+              >
+                Revert to normal dashboard
+              </button>
+            </div>
+            <h2 className="font-display text-2xl md:text-3xl font-bold uppercase mt-3">
+              {personaPanel.heading}
+            </h2>
+            <p className="text-sm text-muted mt-3 max-w-3xl">{personaPanel.summary}</p>
+            <ul className="member-dashboard-persona-list mt-5">
+              {personaPanel.priorities.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <div className="member-dashboard-workbench mt-6">
+              <article className="member-dashboard-workbench-card">
+                <h3 className="font-display text-sm font-bold uppercase">Workflow board</h3>
+                <div className="member-dashboard-workflow-list mt-4">
+                  {personaPanel.workflow.map((step) => (
+                    <div key={step.stage} className="member-dashboard-workflow-item">
+                      <p className="member-dashboard-workflow-stage">{step.stage}</p>
+                      <p className="text-xs text-muted mt-1">{step.objective}</p>
+                    </div>
+                  ))}
+                </div>
+              </article>
+              <article className="member-dashboard-workbench-card">
+                <h3 className="font-display text-sm font-bold uppercase">Toolkit focus</h3>
+                <ul className="member-dashboard-toolkit-list mt-4">
+                  {personaPanel.toolkit.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-6">
+              {personaPanel.actions.map((action) => (
+                <Link
+                  key={action.to + action.label}
+                  to={action.to}
+                  className={
+                    action.primary
+                      ? 'ios-btn ios-btn-primary !text-xs'
+                      : 'ios-btn ios-btn-secondary !text-xs'
+                  }
+                >
+                  {action.label} →
+                </Link>
+              ))}
+            </div>
+            {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
+          </section>
+        )}
 
         <div className="member-dashboard-paths">
           <article className="member-dashboard-path-card member-dashboard-path-card--artist">
