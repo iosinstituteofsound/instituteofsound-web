@@ -141,7 +141,7 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
       <div className="ios-nav-rail" aria-hidden />
       <nav className="ios-nav-inner" aria-label="Main">
         {appMode ? (
-          <>
+          <div className="ios-nav-app-bar">
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
@@ -154,11 +154,11 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
               <span className="ios-nav-app-menu-line" />
             </button>
             <div className="ios-nav-app-title">
-              <p className="ios-nav-app-kicker">App</p>
+              <p className="ios-nav-app-kicker">Institute of Sound</p>
               <p className="ios-nav-app-label">{appLabel}</p>
             </div>
             <div className="ios-nav-app-actions">
-              {user && <NetworkNotificationsPanel />}
+              {user && <NetworkNotificationsPanel className="ios-nav-app-notify" />}
               {user && (
                 <Link
                   to={`/network/${memberHandleFromUser(user)}`}
@@ -179,7 +179,7 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
                 </Link>
               )}
             </div>
-          </>
+          </div>
         ) : (
           <>
             <Link to="/" className="ios-brand-lockup group flex flex-col leading-none">
