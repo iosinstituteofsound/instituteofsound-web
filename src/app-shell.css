@@ -57,7 +57,8 @@
 /* —— Brand lockup (red frame) —— */
 .ios-brand-frame {
   display: block;
-  padding: 1.15rem 1.05rem 1.2rem;
+  padding: 1.35rem 1rem 1.3rem;
+  text-align: center;
   border: 1px solid rgba(212, 0, 0, 0.75);
   background:
     linear-gradient(145deg, rgba(212, 0, 0, 0.06) 0%, transparent 48%),
@@ -88,19 +89,20 @@
 }
 
 .ios-brand-frame-sm {
-  padding: 0.85rem 0.8rem 0.9rem;
+  padding: 1rem 0.75rem 1rem;
 }
 
 .ios-brand-frame-title {
   display: flex;
   flex-direction: column;
-  gap: 0.12rem;
+  align-items: center;
+  gap: 0.15rem;
 }
 
 .ios-brand-frame-line {
   display: block;
   font-family: var(--font-sans);
-  font-size: 1.0625rem;
+  font-size: 1.25rem;
   font-weight: 500;
   line-height: 1.05;
   letter-spacing: -0.03em;
@@ -109,40 +111,41 @@
 }
 
 .ios-brand-frame-line-accent {
-  font-size: 1.1875rem;
+  font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.045em;
   color: #fff;
 }
 
 .ios-brand-frame-title-sm .ios-brand-frame-line {
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
 }
 
 .ios-brand-frame-title-sm .ios-brand-frame-line-accent {
-  font-size: 1.0625rem;
+  font-size: 1.25rem;
 }
 
 .ios-brand-frame-sub {
   display: block;
-  margin-top: 0.75rem;
-  padding-top: 0.65rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-family: var(--font-sans);
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   font-weight: 500;
   line-height: 1.2;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  text-align: center;
   color: rgba(140, 140, 140, 0.95);
   font-variant-numeric: tabular-nums;
 }
 
 .ios-brand-frame-sub-sm {
-  margin-top: 0.6rem;
-  padding-top: 0.5rem;
-  font-size: 0.5625rem;
-  letter-spacing: 0.1em;
+  margin-top: 0.65rem;
+  padding-top: 0.6rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
 }
 
 .v2-sidebar-brand {
