@@ -6,6 +6,10 @@ A premium futuristic global underground music culture platform — built with Re
 
 Not a blog. A cinematic archive of underground, alternative, cinematic, and experimental music scenes.
 
+## Full site documentation
+
+Detailed local reference (routes, roles, every dashboard tab, components, community, academy, toolkit): **[docs/SITE_DOCUMENTATION.md](./docs/SITE_DOCUMENTATION.md)**
+
 ## Tech Stack
 
 - **React 19** + **Vite 8** + **TypeScript**

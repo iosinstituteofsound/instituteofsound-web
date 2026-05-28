@@ -1,200 +1,120 @@
 import { useCallback, useMemo } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { useContent } from '@/hooks/useContent'
+import { Link, useParams } from 'react-router-dom'
 import { getFeature, getFeatures } from '@/api/endpoints'
-import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
-import { IOSImage } from '@/components/ui/IOSImage'
 import { RichTextContent } from '@/components/editor/RichTextContent'
-import { EditorByline } from '@/components/editor/EditorByline'
-import {
-  EditorialMediaBlock,
-  hasEditorialMedia,
-} from '@/components/editorial/EditorialMediaBlock'
-import { EditorialShareBar } from '@/components/editorial/EditorialShareBar'
-import { EditorialRelatedLinks } from '@/components/seo/EditorialRelatedLinks'
+import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { useContent } from '@/hooks/useContent'
 import { useSeo } from '@/hooks/useSeo'
-import { getSiteUrl } from '@/lib/auth/siteUrl'
 import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonLd'
-import { buildEditorialShareMeta } from '@/lib/share/editorialShareMeta'
-import { EditorialSubjectLinks } from '@/components/editorial/EditorialSubjectLinks'
-import { FeaturedTransmissionBlock } from '@/components/editorial/FeaturedTransmissionBlock'
-import { EditorialTribeBridge } from '@/components/editorial/EditorialTribeBridge'
-import { tribeSlugFromGenreLabel } from '@/lib/editorial/tagBridge'
+import { SITE_NAME } from '@/lib/seo/urls'
 
 export default function FeatureDetailPage() {
   const { slug } = useParams<{ slug: string }>()
-  const fetcher = useCallback(() => getFeature(slug!), [slug])
-  const { data: feature, loading, error } = useContent(fetcher)
+  const { data: feature, loading, error } = useContent(
+    useCallback(() => getFeature(slug!), [slug]),
+  )
   const { data: allFeatures } = useContent(useCallback(() => getFeatures(), []))
 
-  const shareMeta = useMemo(() => {
-    if (!slug || !feature) return null
-    return buildEditorialShareMeta(getSiteUrl(), {
-      slug,
-      title: feature.title,
-      excerpt: feature.excerpt,
-      image: feature.image,
-      subject: feature.subject,
-    })
-  }, [slug, feature])
-
   const seo = useMemo(() => {
-    if (!shareMeta || !slug) return null
+    if (!slug || !feature) return null
     const path = `/feature/${slug}`
     return {
-      title: shareMeta.title,
-      description: shareMeta.description,
+      title: `${feature.title} | ${SITE_NAME}`,
+      description: feature.excerpt,
       canonicalPath: path,
-      ogImage: shareMeta.ogImageUrl,
-      ogImageAlt: feature?.title,
+      ogImage: feature.image,
+      ogImageAlt: feature.title,
       ogType: 'article' as const,
       jsonLd: [
         breadcrumbJsonLd([
           { name: 'Home', path: '/' },
           { name: 'Features', path: '/features' },
-          { name: feature!.title, path },
+          { name: feature.title, path },
         ]),
         articleJsonLd({
-          headline: feature!.title,
-          description: shareMeta.description,
+          headline: feature.title,
+          description: feature.excerpt,
           path,
-          image: shareMeta.ogImageUrl,
-          author: feature!.authorName ?? feature!.author,
-          section: feature!.category,
+          image: feature.image,
+          author: feature.author,
+          section: feature.category,
         }),
       ],
     }
-  }, [shareMeta, slug, feature])
+  }, [slug, feature])
 
   useSeo(seo)
 
   if (loading) return <LoadingTransmission variant="hell" />
   if (error || !feature) {
     return (
-      <div className="section-padding pt-32 text-center">
-        <p className="text-crimson">Editorial not found.</p>
-        <Link to="/features" className="text-neon text-sm mt-4 inline-block">
+      <div className="p-8 text-center">
+        <p className="text-mh-red">Editorial not found.</p>
+        <Link to="/features" className="mt-4 inline-block text-sm text-mh-red">
           ← All Features
         </Link>
       </div>
     )
   }
 
-  const hasBody = feature.body?.trim().length > 0
-  const showSidebar = hasEditorialMedia(
-    feature.spotifyUrl,
-    feature.youtubeUrl,
-    feature.galleryImageUrls
-  )
+  const related = allFeatures?.filter((f) => f.slug !== slug).slice(0, 4) ?? []
 
   return (
     <article className="editorial-article">
       <header className="editorial-article-hero">
-        <IOSImage
-          src={feature.image}
-          alt=""
-          width={1600}
-          height={900}
-          priority
-          className="editorial-article-hero-img"
-        />
+        <img src={feature.image} alt="" className="editorial-article-hero-img" />
         <div className="editorial-article-hero-scrim" aria-hidden />
-        <div className="editorial-article-hero-inner section-padding">
+        <div className="editorial-article-hero-inner px-4 sm:px-6 lg:px-8">
           <Link to="/features" className="editorial-article-back">
             ← Editorial
           </Link>
           <span className="editorial-article-category">{feature.category}</span>
           <h1 className="editorial-article-title">{feature.title}</h1>
-          {feature.subject && (
-            <p className="editorial-article-dek">{feature.subject}</p>
-          )}
+          {feature.subject && <p className="editorial-article-dek">{feature.subject}</p>}
           <div className="editorial-article-meta">
-            <EditorByline
-              name={feature.authorName}
-              username={feature.authorUsername}
-              fallback={feature.author}
-            />
+            <span>{feature.author}</span>
             <span aria-hidden>·</span>
             <span>{feature.readTime}</span>
           </div>
         </div>
       </header>
 
-      <div className="editorial-article-body section-padding">
+      <div className="editorial-article-body px-4 pb-12 sm:px-6 lg:px-8">
         <div className="editorial-article-container">
           <p className="editorial-article-lead">{feature.excerpt}</p>
-
-          <EditorialSubjectLinks
-            subject={feature.subject}
-            artistProfileSlug={feature.artistProfileSlug}
-            artistProfileName={feature.artistProfileName}
-            authorUsername={feature.authorUsername}
-            tribeSlug={tribeSlugFromGenreLabel(feature.subject) ?? undefined}
-          />
-
-          <EditorialTribeBridge genreLabel={feature.subject} />
-
-          {feature.linkedTransmission && (
-            <FeaturedTransmissionBlock post={feature.linkedTransmission} />
+          {feature.body?.trim() ? (
+            <RichTextContent
+              html={feature.body}
+              className="editorial-article-prose mt-8 max-w-3xl text-signal/90 leading-relaxed"
+            />
+          ) : (
+            <p className="mt-8 max-w-2xl text-sm leading-relaxed text-muted">
+              Full article text for this feature is coming from the editorial desk. The excerpt
+              above is live — check back after the next publish cycle.
+            </p>
           )}
 
-          {shareMeta && (
-            <EditorialShareBar
-              url={shareMeta.canonicalUrl}
-              title={shareMeta.shareTitle}
-              description={shareMeta.description}
-            />
-          )}
-
-          <div
-            className={
-              showSidebar
-                ? 'editorial-article-columns'
-                : 'editorial-article-columns editorial-article-columns--solo'
-            }
-          >
-            <div className="editorial-article-main">
-              {showSidebar && (
-                <div className="editorial-article-aside-mobile">
-                  <EditorialMediaBlock
-                    layout="sidebar"
-                    spotifyUrl={feature.spotifyUrl}
-                    youtubeUrl={feature.youtubeUrl}
-                    galleryImageUrls={feature.galleryImageUrls}
-                  />
-                </div>
-              )}
-
-              <div className="editorial-article-prose-wrap">
-                {hasBody ? (
-                  <RichTextContent html={feature.body} className="ios-prose-feature" />
-                ) : (
-                  <p className="text-muted text-sm leading-relaxed">
-                    Full article text is not available for this entry yet.
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {showSidebar && (
-              <div className="editorial-article-aside">
-                <div className="editorial-article-aside-sticky">
-                  <EditorialMediaBlock
-                    layout="sidebar"
-                    spotifyUrl={feature.spotifyUrl}
-                    youtubeUrl={feature.youtubeUrl}
-                    galleryImageUrls={feature.galleryImageUrls}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {allFeatures && slug && (
-            <EditorialRelatedLinks
-              currentSlug={slug}
-              items={allFeatures.map((f) => ({ slug: f.slug, title: f.title }))}
-            />
+          {related.length > 0 && (
+            <aside className="mt-16 border-t border-border pt-10">
+              <p className="ios-kicker mb-6">More editorial</p>
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {related.map((f) => (
+                  <li key={f.id}>
+                    <Link
+                      to={`/feature/${f.slug}`}
+                      className="block rounded border border-border bg-surface p-4 transition-colors hover:border-mh-red/40"
+                    >
+                      <span className="text-[10px] uppercase tracking-wider text-mh-red">
+                        {f.category}
+                      </span>
+                      <p className="mt-2 font-display text-sm font-bold uppercase text-signal">
+                        {f.title}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </aside>
           )}
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Layout } from '@/components/layout/Layout'
+import { AppShell } from '@/components/layout/AppShell'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 
@@ -83,7 +83,7 @@ export default function App() {
     <BrowserRouter>
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route element={<Layout />}>
+          <Route element={<AppShell />}>
             <Route index element={<HomePage />} />
             <Route path="discover" element={<DiscoverPage />} />
             <Route path="playlists" element={<PlaylistsPage />} />

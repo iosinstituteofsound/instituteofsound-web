@@ -7,6 +7,7 @@ import {
   type CloudinaryFolder,
 } from '@/lib/cloudinary/upload'
 import { IOSImage } from '@/components/ui/IOSImage'
+import { FieldLabel, Input } from '@/components/ui/Input'
 
 interface ImageUploadProps {
   label: string
@@ -57,9 +58,26 @@ export function ImageUpload({ label, folder, value, onChange, hint }: ImageUploa
 
   if (!configured) {
     return (
-      <div className="border border-amber-500/40 bg-amber-500/5 p-4 text-xs text-amber-400">
-        <p className="font-bold uppercase tracking-widest mb-1">Cloudinary not configured</p>
-        <p>Add VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to .env — see CLOUDINARY_SETUP.md</p>
+      <div>
+        <FieldLabel>{label}</FieldLabel>
+        {hint && <p className="text-xs text-muted mb-2">{hint}</p>}
+        <p className="text-xs text-muted mb-2">
+          Cloudinary not configured — paste an image URL for local demo.
+        </p>
+        <Input
+          type="url"
+          value={value ?? ''}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="https://images.unsplash.com/…"
+        />
+        {value ? (
+          <IOSImage
+            src={value}
+            alt="Preview"
+            width={640}
+            className="mt-3 w-full h-40 object-cover border border-border"
+          />
+        ) : null}
       </div>
     )
   }
@@ -106,7 +124,7 @@ export function ImageUpload({ label, folder, value, onChange, hint }: ImageUploa
           onDrop={onDrop}
           className={clsx(
             'border-2 border-dashed p-8 text-center cursor-pointer transition-colors',
-            dragOver ? 'border-mh-red bg-mh-red/5' : 'border-border hover:border-mh-red/50'
+            dragOver ? 'border-mh-red bg-mh-red/5' : 'border-border hover:border-mh-red/50',
           )}
         >
           <p className="text-sm text-signal font-medium">

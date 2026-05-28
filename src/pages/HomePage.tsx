@@ -1,62 +1,73 @@
-import { useCallback } from 'react'
-import { useContent } from '@/hooks/useContent'
+import { useCallback, useMemo } from 'react'
 import {
-  getCoverStory,
-  getTrending,
-  getArtists,
-  getReviews,
   getAlbumReleases,
+  getCoverStory,
   getFeatures,
   getPlaylists,
+  getReviews,
   getSignals,
 } from '@/api/endpoints'
-import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
-import { CoverHeroSection } from '@/components/sections/magazine/CoverHeroSection'
-import { TrendingRail } from '@/components/sections/magazine/TrendingRail'
-import { BandSpotlightSection } from '@/components/sections/magazine/BandSpotlightSection'
-import { ReviewsBlock } from '@/components/sections/magazine/ReviewsBlock'
-import { AlbumArtRow } from '@/components/sections/magazine/AlbumArtRow'
-import { EditorialMagazineGrid } from '@/components/sections/magazine/EditorialMagazineGrid'
-import { PlaylistSection } from '@/components/sections/PlaylistSection'
-import { SignalsSection } from '@/components/sections/SignalsSection'
-import { CommunitySection } from '@/components/sections/CommunitySection'
-import { SubmissionSection } from '@/components/sections/SubmissionSection'
+import { RightRail } from '@/components/layout/RightRail'
+import {
+  BrowseByVibes,
+  EditorsPicks,
+  HomeError,
+  HomeFooterStrip,
+  HomeHero,
+  LatestReleases,
+  LoadingHome,
+  MovementInNumbers,
+  RecommendedRow,
+  buildEditorSideItems,
+  buildRecommendedCards,
+} from '@/components/home/HomeSections'
+import { useContent } from '@/hooks/useContent'
 
 export default function HomePage() {
   const cover = useContent(useCallback(() => getCoverStory(), []))
-  const trending = useContent(useCallback(() => getTrending(), []))
-  const artists = useContent(useCallback(() => getArtists(), []))
-  const reviews = useContent(useCallback(() => getReviews(), []))
-  const albums = useContent(useCallback(() => getAlbumReleases(), []))
   const features = useContent(useCallback(() => getFeatures(), []))
+  const reviews = useContent(useCallback(() => getReviews(), []))
+  const releases = useContent(useCallback(() => getAlbumReleases(), []))
   const playlists = useContent(useCallback(() => getPlaylists(), []))
   const signals = useContent(useCallback(() => getSignals(), []))
 
-  if (cover.loading && !cover.data) {
-    return <LoadingTransmission variant="hell" />
-  }
+  const loading =
+    cover.loading ||
+    features.loading ||
+    reviews.loading ||
+    releases.loading
 
-  if (cover.error && !cover.data) {
-    return (
-      <div className="section-padding text-center text-rs-red min-h-[50vh] flex items-center justify-center">
-        Failed to load magazine feed.
-      </div>
-    )
-  }
+  const recommended = useMemo(() => {
+    if (!features.data || !reviews.data || !playlists.data || !signals.data) return []
+    return buildRecommendedCards(features.data, reviews.data, playlists.data, signals.data)
+  }, [features.data, reviews.data, playlists.data, signals.data])
+
+  const editorSide = useMemo(() => {
+    if (!features.data || !reviews.data || !signals.data) return []
+    return buildEditorSideItems(features.data, reviews.data, signals.data)
+  }, [features.data, reviews.data, signals.data])
+
+  if (loading && !cover.data) return <LoadingHome />
+  if (cover.error && !cover.data) return <HomeError />
+  if (!cover.data || !features.data?.length || !releases.data) return <LoadingHome />
+
+  const leadFeature =
+    features.data.find((f) => f.slug === 'underground-movements') ?? features.data[0]
 
   return (
-    <>
-      {cover.data && <CoverHeroSection story={cover.data} />}
-
-      {trending.data && <TrendingRail items={trending.data} />}
-      {artists.data && <BandSpotlightSection artists={artists.data} />}
-      {reviews.data && <ReviewsBlock reviews={reviews.data} />}
-      {albums.data && <AlbumArtRow albums={albums.data} />}
-      {features.data && <EditorialMagazineGrid features={features.data} />}
-      {playlists.data && <PlaylistSection playlists={playlists.data} />}
-      {signals.data && <SignalsSection signals={signals.data} limit={4} />}
-      <CommunitySection />
-      <SubmissionSection />
-    </>
+    <div className="flex min-h-full">
+      <div className="min-w-0 flex-1 space-y-10 p-4 sm:space-y-12 sm:p-6 lg:space-y-14 lg:p-8">
+        <HomeHero cover={cover.data} />
+        {recommended.length > 0 && <RecommendedRow cards={recommended} />}
+        {editorSide.length > 0 && (
+          <EditorsPicks lead={leadFeature} items={editorSide} />
+        )}
+        <LatestReleases releases={releases.data} />
+        <BrowseByVibes />
+        <MovementInNumbers />
+        <HomeFooterStrip />
+      </div>
+      <RightRail signals={signals.data ?? []} />
+    </div>
   )
 }

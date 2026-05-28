@@ -1,0 +1,99 @@
+.ios-page-bg {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(212, 0, 0, 0.07), transparent 50%),
+    var(--color-void);
+}
+/* —— V2 shell chrome —— */
+.v2-sidebar {
+  background: linear-gradient(180deg, #080808 0%, var(--color-surface) 100%);
+  border-right: 1px solid var(--color-border);
+  box-shadow: 4px 0 24px -12px rgba(0, 0, 0, 0.6);
+}
+
+.v2-sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--color-mh-red), transparent 40%, transparent 60%, var(--color-crimson));
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.v2-nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
+  border-radius: 2px;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.v2-nav-link:hover {
+  color: var(--color-signal);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.v2-nav-link-active {
+  color: var(--color-signal);
+  background: rgba(212, 0, 0, 0.1);
+}
+
+.v2-nav-link-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.35rem;
+  bottom: 0.35rem;
+  width: 2px;
+  background: var(--color-mh-red);
+  box-shadow: 0 0 12px var(--color-mh-red);
+}
+
+.v2-topbar {
+  background: rgba(5, 5, 5, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.v2-topbar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-mh-red) 0%,
+    var(--color-rs-red) 28%,
+    transparent 72%
+  );
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.v2-search {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.v2-search:focus-within {
+  border-color: rgba(212, 0, 0, 0.45);
+  box-shadow: 0 0 0 1px rgba(212, 0, 0, 0.2);
+}
+
+.section-perf {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
