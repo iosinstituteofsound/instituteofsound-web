@@ -83,7 +83,7 @@ export function Navbar({ links }: NavbarProps) {
         'ios-nav fixed top-0 left-0 right-0 z-50',
         isArtistSite && 'ios-nav-artist-site',
         scrolled && !isArtistSite && 'ios-nav-scrolled',
-        hiddenOnScroll && !isArtistSite && 'ios-nav-hidden',
+        hiddenOnScroll && 'ios-nav-hidden',
         !isArtistSite && !scrolled && isHome && 'ios-nav-home',
         !isArtistSite && !isHome && 'ios-nav-solid'
       )}
