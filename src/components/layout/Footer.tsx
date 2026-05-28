@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { IosBrandLockup } from '@/components/layout/IosBrandLockup'
 import type { FooterData } from '@/types'
 
 interface FooterProps {
@@ -36,10 +37,7 @@ export function Footer({ data }: FooterProps) {
       <div className="max-w-7xl mx-auto pt-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-12 lg:gap-8">
           <div className="sm:col-span-2 xl:col-span-2">
-            <Link to="/" className="ios-brand-lockup inline-flex flex-col pl-3">
-              <span className="font-display text-2xl font-extrabold tracking-tight">INSTITUTE</span>
-              <span className="text-[10px] tracking-[0.35em] text-muted uppercase">of Sound</span>
-            </Link>
+            <IosBrandLockup to="/" variant="frame" size="sm" className="inline-block max-w-[14rem]" />
             <p className="text-muted mt-5 max-w-md leading-relaxed text-sm">{data.manifesto}</p>
           </div>
 
