@@ -4,11 +4,13 @@ import { useAuth } from '@/context/AuthContext'
 import { formatAccountNumericId } from '@/lib/auth/accountId'
 import { homeDashboardPath } from '@/lib/auth/roles'
 import {
+  fetchMemberConnections,
   fetchMemberActivity,
   fetchMemberPosts,
   fetchPublicMemberProfile,
   memberHandleFromUser,
   normalizeHandle,
+  type MemberConnectionProfile,
   type MemberActivityItem,
   type PublicMemberProfile,
 } from '@/lib/community/memberProfileService'
@@ -65,6 +67,10 @@ export default function CommunityMemberPage() {
   const [savingProfile, setSavingProfile] = useState(false)
   const [editError, setEditError] = useState('')
   const [editSuccess, setEditSuccess] = useState('')
+  const [connectionsOpen, setConnectionsOpen] = useState<'followers' | 'following' | null>(null)
+  const [connectionsLoading, setConnectionsLoading] = useState(false)
+  const [connectionsError, setConnectionsError] = useState('')
+  const [connections, setConnections] = useState<MemberConnectionProfile[]>([])
   const navigate = useNavigate()
 
   const { badges, loading: badgesLoading } = useCommunityBadges(profile?.userId)
@@ -228,6 +234,21 @@ export default function CommunityMemberPage() {
     }
   }
 
+  const openConnections = async (mode: 'followers' | 'following') => {
+    setConnectionsOpen(mode)
+    setConnectionsLoading(true)
+    setConnectionsError('')
+    try {
+      const list = await fetchMemberConnections(handle, mode)
+      setConnections(list)
+    } catch (err) {
+      setConnectionsError(err instanceof Error ? err.message : 'Could not load this list.')
+      setConnections([])
+    } finally {
+      setConnectionsLoading(false)
+    }
+  }
+
   return (
     <div className="member-profile-page">
       <div className="member-profile-page-bg" aria-hidden />
@@ -246,7 +267,59 @@ export default function CommunityMemberPage() {
           badges={badges}
           artistSlug={artistSlug}
           onEditProfile={() => setShowEditProfile((prev) => !prev)}
+          onOpenFollowers={() => void openConnections('followers')}
+          onOpenFollowing={() => void openConnections('following')}
         />
+
+        {connectionsOpen && (
+          <section className="ios-card p-5 mb-5">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+                  Connection list
+                </p>
+                <h2 className="font-display text-xl font-bold uppercase mt-2">
+                  {connectionsOpen === 'followers' ? 'Followers' : 'Following'}
+                </h2>
+              </div>
+              <button
+                type="button"
+                className="ios-btn ios-btn-ghost !text-xs"
+                onClick={() => setConnectionsOpen(null)}
+              >
+                Close
+              </button>
+            </div>
+
+            {connectionsLoading && <p className="text-sm text-muted">Loading list…</p>}
+            {!connectionsLoading && connectionsError && (
+              <p className="text-sm text-mh-red">{connectionsError}</p>
+            )}
+            {!connectionsLoading && !connectionsError && connections.length === 0 && (
+              <p className="text-sm text-muted border border-dashed border-border p-4">
+                No users found in this list yet.
+              </p>
+            )}
+            {!connectionsLoading && !connectionsError && connections.length > 0 && (
+              <ul className="divide-y divide-border border border-border max-h-[420px] overflow-y-auto">
+                {connections.map((connection) => (
+                  <li key={connection.userId} className="px-4 py-3 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate">{connection.displayName}</p>
+                      <p className="text-xs text-muted font-mono truncate">@{connection.handle}</p>
+                    </div>
+                    <Link
+                      to={networkProfilePath(connection.handle)}
+                      className="ios-btn ios-btn-ghost !text-[10px] !px-3 !py-1.5 shrink-0"
+                    >
+                      Open profile →
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
 
         {isYou && showEditProfile && (
           <section className="ios-card p-5 mb-5">

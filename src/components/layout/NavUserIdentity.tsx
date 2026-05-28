@@ -67,6 +67,10 @@ export function NavUserIdentity({ onNavigate, layout = 'row', onLogout }: NavUse
   const rail = (
     /* Primary action: Desk / Studio. Secondary: Logout */
     <div className="ios-nav-user-rail">
+      <Link to="/community#feed" onClick={onNavigate} className="ios-nav-user-desk">
+        Network Feed →
+      </Link>
+      <span className="ios-nav-user-sep" aria-hidden />
       <Link to={dashboardTo} onClick={onNavigate} className="ios-nav-user-desk">
         {dashboardLabel} →
       </Link>

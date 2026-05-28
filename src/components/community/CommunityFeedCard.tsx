@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
+import { useAuth } from '@/context/AuthContext'
 import { networkProfilePath } from '@/lib/community/networkPaths'
 import { formatRelativeTime } from '@/lib/community/relativeTime'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
@@ -9,6 +10,7 @@ import { parseSpotifyUrl, parseYouTubeUrl } from '@/lib/community/musicLinks'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { CommunityFeedReactions } from '@/components/community/CommunityFeedReactions'
+import { FollowButton } from '@/components/community/FollowButton'
 
 interface CommunityFeedCardProps {
   post: CommunityFeedPost
@@ -36,6 +38,7 @@ export function CommunityFeedCard({
   onHidden,
   onReactionChange,
 }: CommunityFeedCardProps) {
+  const { user } = useAuth()
   const isProfileFeed = variant === 'profile'
   const [hiding, setHiding] = useState(false)
   const spotify = post.spotifyUrl ? parseSpotifyUrl(post.spotifyUrl) : null
@@ -113,9 +116,14 @@ export function CommunityFeedCard({
             )}
             <div className="community-feed-card-meta">
               {linkProfile ? (
-                <Link to={profilePath} className="community-feed-card-profile-link block">
-                  {nameBlock}
-                </Link>
+                <div className="flex items-start justify-between gap-3">
+                  <Link to={profilePath} className="community-feed-card-profile-link block min-w-0">
+                    {nameBlock}
+                  </Link>
+                  {!isYou && user && (
+                    <FollowButton targetUserId={post.userId} className="!px-3 !py-1.5 !text-[10px] shrink-0" />
+                  )}
+                </div>
               ) : (
                 nameBlock
               )}

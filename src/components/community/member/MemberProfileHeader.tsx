@@ -24,6 +24,8 @@ interface MemberProfileHeaderProps {
   badges: EarnedBadge[]
   artistSlug?: string | null
   onEditProfile?: () => void
+  onOpenFollowers?: () => void
+  onOpenFollowing?: () => void
 }
 
 export function MemberProfileHeader({
@@ -34,6 +36,8 @@ export function MemberProfileHeader({
   badges,
   artistSlug,
   onEditProfile,
+  onOpenFollowers,
+  onOpenFollowing,
 }: MemberProfileHeaderProps) {
   return (
     <header className="member-profile-hero">
@@ -64,12 +68,16 @@ export function MemberProfileHeader({
             <span>Posts</span>
           </li>
           <li>
-            <strong>{profile.followerCount.toLocaleString()}</strong>
-            <span>Followers</span>
+            <button type="button" className="member-profile-stat-btn" onClick={onOpenFollowers}>
+              <strong>{profile.followerCount.toLocaleString()}</strong>
+              <span>Followers</span>
+            </button>
           </li>
           <li>
-            <strong>{profile.followingCount.toLocaleString()}</strong>
-            <span>Following</span>
+            <button type="button" className="member-profile-stat-btn" onClick={onOpenFollowing}>
+              <strong>{profile.followingCount.toLocaleString()}</strong>
+              <span>Following</span>
+            </button>
           </li>
           <li>
             <strong>{profile.totalDb.toLocaleString()}</strong>
