@@ -1375,7 +1375,13 @@ textarea.ios-input {
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 6.5rem clamp(1.25rem, 4vw, 3rem) 4rem;
+  padding: 7.8rem clamp(1.25rem, 4vw, 3rem) 4rem;
+}
+
+@media (max-width: 768px) {
+  .member-dashboard-inner {
+    padding-top: 7rem;
+  }
 }
 
 .member-dashboard-header {
