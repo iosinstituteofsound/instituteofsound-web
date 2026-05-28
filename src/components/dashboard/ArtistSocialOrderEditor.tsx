@@ -29,7 +29,7 @@ export function ArtistSocialOrderEditor({
   if (active.length < 2) {
     return (
       <p className="text-xs text-muted">
-        Do ya zyada links bharo — phir order change kar sakte ho.
+        Add at least two links to reorder them.
       </p>
     )
   }

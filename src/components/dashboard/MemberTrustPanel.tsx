@@ -131,8 +131,8 @@ export function MemberTrustPanel({
           Proofs + mutual confirmations
         </h2>
         <p className="text-sm text-muted mt-2">
-          Farzi profiles avoid karne ke liye role-wise proof submit karo aur relationship claims
-          mutual confirmation se verify karo.
+          Submit role-specific proofs and verify relationship claims through mutual confirmation
+          to keep network trust high.
         </p>
       </div>
 

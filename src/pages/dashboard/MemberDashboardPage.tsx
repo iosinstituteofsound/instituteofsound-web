@@ -200,6 +200,7 @@ export default function MemberDashboardPage() {
   const [savingPersona, setSavingPersona] = useState(false)
   const [personaError, setPersonaError] = useState('')
   const [personaModal, setPersonaModal] = useState<DashboardPersona | null>(null)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
   if (!user) return null
 
   const handle = memberHandleFromUser(user)
@@ -274,8 +275,8 @@ export default function MemberDashboardPage() {
               Choose how you work
             </h2>
             <p className="text-sm text-muted mt-2 max-w-3xl">
-              Har member yahin se role workspace select kar sakta hai. Artist manager ho, label ho,
-              promoter ho, ya brand — dashboard usi hisaab se customize hoga.
+              Every member can choose a workspace role here. Whether you are an artist manager,
+              label, promoter, or brand, the dashboard will personalize around that role.
             </p>
             <div className="member-dashboard-persona-grid mt-6">
               {PERSONA_OPTIONS.map((option) => (
@@ -304,7 +305,7 @@ export default function MemberDashboardPage() {
                 {personaPanel.badge}
               </p>
               <span className="text-xs text-muted">
-                Role switcher upar se kabhi bhi workspace change kar sakte ho.
+                Workspace mode is active for this account.
               </span>
             </div>
             <h2 className="font-display text-2xl md:text-3xl font-bold uppercase mt-3">
@@ -354,54 +355,59 @@ export default function MemberDashboardPage() {
               <button
                 type="button"
                 className="ios-btn ios-btn-ghost !text-xs"
-                onClick={() => void savePersona(null)}
+                onClick={() => setShowResetConfirm(true)}
                 disabled={savingPersona}
               >
-                Back to normal dashboard
+                Reset and start over
               </button>
             </div>
+            <p className="text-[11px] text-muted mt-3">
+              Reset clears your selected workspace mode and returns you to the role selection screen.
+            </p>
             {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
           </section>
         )}
 
         <MemberTrustPanel user={user} persona={persona} />
 
-        <div className="member-dashboard-paths">
-          <article className="member-dashboard-path-card member-dashboard-path-card--artist">
-            <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-              Artist path
-            </p>
-            <h2 className="font-display text-xl font-bold uppercase mt-2">
-              Upgrade to artist page
-            </h2>
-            <p className="text-sm text-muted mt-2">
-              Launch My Studio — public band page, releases, merch, and editor submissions.
-            </p>
-            <Link to="/member/upgrade" className="ios-btn ios-btn-primary !text-xs mt-6 inline-flex">
-              Start artist page →
-            </Link>
-          </article>
+        {!persona && (
+          <div className="member-dashboard-paths">
+            <article className="member-dashboard-path-card member-dashboard-path-card--artist">
+              <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
+                Artist path
+              </p>
+              <h2 className="font-display text-xl font-bold uppercase mt-2">
+                Upgrade to artist page
+              </h2>
+              <p className="text-sm text-muted mt-2">
+                Launch My Studio — public band page, releases, merch, and editor submissions.
+              </p>
+              <Link to="/member/upgrade" className="ios-btn ios-btn-primary !text-xs mt-6 inline-flex">
+                Start artist page →
+              </Link>
+            </article>
 
-          <article className="member-dashboard-path-card member-dashboard-path-card--editor">
-            <p className="text-[10px] tracking-[0.2em] uppercase text-muted font-bold">
-              Editorial path
-            </p>
-            <h2 className="font-display text-xl font-bold uppercase mt-2">
-              Become an editor
-            </h2>
-            <p className="text-sm text-muted mt-2">
-              Apply to write features, review submissions, and curate the magazine desk.
-            </p>
-            <div className="flex flex-wrap gap-2 mt-6">
-              <Link to="/editor/apply" className="ios-btn ios-btn-secondary !text-xs">
-                Apply as editor →
-              </Link>
-              <Link to="/editor/join" className="ios-btn ios-btn-ghost !text-xs">
-                Programme info
-              </Link>
-            </div>
-          </article>
-        </div>
+            <article className="member-dashboard-path-card member-dashboard-path-card--editor">
+              <p className="text-[10px] tracking-[0.2em] uppercase text-muted font-bold">
+                Editorial path
+              </p>
+              <h2 className="font-display text-xl font-bold uppercase mt-2">
+                Become an editor
+              </h2>
+              <p className="text-sm text-muted mt-2">
+                Apply to write features, review submissions, and curate the magazine desk.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-6">
+                <Link to="/editor/apply" className="ios-btn ios-btn-secondary !text-xs">
+                  Apply as editor →
+                </Link>
+                <Link to="/editor/join" className="ios-btn ios-btn-ghost !text-xs">
+                  Programme info
+                </Link>
+              </div>
+            </article>
+          </div>
+        )}
 
         <section className="member-dashboard-explore">
           <h2 className="font-display text-lg font-bold uppercase mb-4">Explore</h2>
@@ -484,6 +490,49 @@ export default function MemberDashboardPage() {
                 type="button"
                 className="ios-btn ios-btn-ghost !text-xs"
                 onClick={() => setPersonaModal(null)}
+                disabled={savingPersona}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showResetConfirm && (
+        <div
+          className="member-role-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => !savingPersona && setShowResetConfirm(false)}
+        >
+          <div className="member-role-modal ios-card" onClick={(event) => event.stopPropagation()}>
+            <div className="member-role-modal-header">
+              <div>
+                <p className="member-role-modal-eyebrow">Reset workspace</p>
+                <h3 className="member-role-modal-title">Reset your selected role dashboard?</h3>
+              </div>
+            </div>
+            <p className="member-role-modal-summary">
+              This action removes your current workspace selection and returns this account to the
+              default member role chooser. Continue only if you want to start over.
+            </p>
+            <div className="member-role-modal-actions">
+              <button
+                type="button"
+                className="ios-btn ios-btn-primary !text-xs"
+                disabled={savingPersona}
+                onClick={async () => {
+                  await savePersona(null)
+                  setShowResetConfirm(false)
+                }}
+              >
+                {savingPersona ? 'Resetting…' : 'Confirm reset'}
+              </button>
+              <button
+                type="button"
+                className="ios-btn ios-btn-ghost !text-xs"
+                onClick={() => setShowResetConfirm(false)}
                 disabled={savingPersona}
               >
                 Cancel
