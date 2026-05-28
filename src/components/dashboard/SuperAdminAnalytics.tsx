@@ -79,9 +79,9 @@ export function SuperAdminAnalyticsPanel({
       <section className="ios-panel ios-panel-accent ios-analytics-hero">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
-            <p className="ios-kicker">Personal Command</p>
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mt-3 tracking-tight">
-              Analytics — {operatorName}
+            <p className="ios-kicker">Command overview</p>
+            <h2 className="font-display text-2xl md:text-3xl font-extrabold uppercase mt-3 tracking-tight">
+              Operations — {operatorName}
             </h2>
             <p className="text-sm text-muted mt-3 max-w-xl leading-relaxed">
               Institute of Sound operations at a glance. Submissions, artists, editorial

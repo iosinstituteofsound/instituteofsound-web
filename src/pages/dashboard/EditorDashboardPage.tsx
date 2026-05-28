@@ -15,6 +15,10 @@ import { EditorApplicationsPanel } from '@/components/editor-applications/Editor
 import { EditorEventsPanel } from '@/components/dashboard/EditorEventsPanel'
 import { SuperEditorDashboardPreview } from '@/components/dashboard/SuperEditorDashboardPreview'
 import { SuperEditorVerificationPanel } from '@/components/dashboard/SuperEditorVerificationPanel'
+import {
+  SuperEditorDeskLayout,
+  type SuperEditorTab,
+} from '@/components/dashboard/SuperEditorDeskLayout'
 import { listArtistProfilesForEditor } from '@/lib/artist-profile/service'
 import type { ArtistProfile } from '@/lib/artist-profile/types'
 import {
@@ -26,7 +30,6 @@ import {
   reviewSubmission,
 } from '@/lib/submissions/service'
 import { StatusBadge } from '@/components/auth/StatusBadge'
-import { MetalBadge } from '@/components/ui/MetalBadge'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { DismissibleBanner } from '@/components/ui/DismissibleBanner'
 import { ImageUpload } from '@/components/ui/ImageUpload'
@@ -218,86 +221,27 @@ export default function EditorDashboardPage() {
     void openReview(sub)
   }
 
-  const tabs: { id: EditorTab; label: string }[] = isSuperEditor
-    ? [
-        { id: 'analytics', label: 'Analytics' },
-        { id: 'preview', label: 'Dashboard Preview' },
-        { id: 'verification', label: 'Verification Queue' },
-        { id: 'applications', label: 'Editor Applications' },
-        { id: 'queue', label: 'Submission Queue' },
-        { id: 'wire', label: 'Wire Picks' },
-        { id: 'events', label: 'Events' },
-        { id: 'write', label: 'Write Editorial' },
-        { id: 'drafts', label: `My Drafts (${drafts.length})` },
-        { id: 'network', label: 'Network' },
-        { id: 'profile', label: 'My Profile' },
-      ]
-    : [
-        { id: 'queue', label: 'Submission Queue' },
-        { id: 'wire', label: 'Wire Picks' },
-        { id: 'events', label: 'Events' },
-        { id: 'write', label: 'Write Editorial' },
-        { id: 'drafts', label: `My Drafts (${drafts.length})` },
-        { id: 'network', label: 'Network' },
-        { id: 'profile', label: 'My Profile' },
-      ]
+  const editorTabs: { id: EditorTab; label: string }[] = [
+    { id: 'queue', label: 'Submission Queue' },
+    { id: 'wire', label: 'Wire Picks' },
+    { id: 'events', label: 'Events' },
+    { id: 'write', label: 'Write Editorial' },
+    { id: 'drafts', label: `My Drafts (${drafts.length})` },
+    { id: 'network', label: 'Network' },
+    { id: 'profile', label: 'My Profile' },
+  ]
 
-  return (
-    <div className="section-padding pt-28 min-h-screen bg-void">
-      <div className="max-w-6xl mx-auto">
-        <div className="ios-panel ios-panel-accent flex flex-wrap items-start justify-between gap-4 mb-8">
-          <div>
-            <p className="ios-kicker">
-              Institute of Sound
-              {mode === 'supabase' && (
-                <span className="text-muted font-normal tracking-[0.15em] ml-2">· live</span>
-              )}
-            </p>
-            <h1 className="font-serif text-3xl md:text-4xl font-bold mt-2">
-              {isSuperEditor ? 'Editorial Command' : 'Editorial Control'}
-            </h1>
-            <div className="flex items-center gap-3 mt-2">
-              {user.avatarUrl ? (
-                <img
-                  src={user.avatarUrl}
-                  alt=""
-                  className="w-10 h-10 object-cover border border-border"
-                />
-              ) : (
-                <div
-                  className="w-10 h-10 border border-border bg-surface flex items-center justify-center text-xs font-bold text-mh-red"
-                  aria-hidden
-                >
-                  {user.name.slice(0, 1).toUpperCase()}
-                </div>
-              )}
-              <p className="text-muted text-sm">
-                {user.name}
-                {user.username && (
-                  <span className="text-mh-red"> @{user.username}</span>
-                )}{' '}
-                · {roleLabel(user.role)}
-              </p>
-            </div>
-            {isSuperEditor && (
-              <MetalBadge variant="live" className="mt-4">
-                Super Admin
-              </MetalBadge>
-            )}
-          </div>
-          <div className="flex gap-3 items-center flex-wrap justify-end">
-            <Link to="/community#feed" className="ios-link text-xs tracking-widest uppercase">
-              Network feed
-            </Link>
-            <Link to="/" className="ios-link text-xs tracking-widest uppercase">
-              ← Site
-            </Link>
-            <button type="button" onClick={() => logout()} className="ios-btn ios-btn-ghost !text-xs">
-              Logout
-            </button>
-          </div>
-        </div>
+  const pipelineLabel =
+    analytics?.pipeline === 'backlog'
+      ? 'Backlog'
+      : analytics?.pipeline === 'steady'
+        ? 'Active'
+        : analytics?.pipeline === 'clear'
+          ? 'Clear'
+          : undefined
 
+  const deskBody = (
+    <>
         {error && (
           <DismissibleBanner
             variant="error"
@@ -349,23 +293,25 @@ export default function EditorDashboardPage() {
           </DismissibleBanner>
         )}
 
-        <div className="flex flex-wrap gap-1 border-b border-border mb-8">
-          {tabs.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setTab(id)}
-              className={clsx(
-                'px-4 py-3 text-xs tracking-widest uppercase font-bold border-b-2 -mb-px transition-colors',
-                tab === id
-                  ? 'border-mh-red text-mh-red'
-                  : 'border-transparent text-muted hover:text-signal'
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        {!isSuperEditor && (
+          <div className="editor-dashboard-tabs" role="tablist">
+            {editorTabs.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={tab === id}
+                onClick={() => setTab(id)}
+                className={clsx(
+                  'editor-dashboard-tab',
+                  tab === id && 'editor-dashboard-tab-active',
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {tab === 'network' && <DashboardCommunityHub />}
 
@@ -883,6 +829,90 @@ export default function EditorDashboardPage() {
             )}
           </>
         )}
+    </>
+  )
+
+  if (isSuperEditor) {
+    return (
+      <SuperEditorDeskLayout
+        user={user}
+        mode={mode}
+        tab={tab as SuperEditorTab}
+        onTabChange={(next) => setTab(next)}
+        counts={{
+          pending: counts.pending,
+          in_review: counts.in_review,
+          approved: counts.approved,
+          rejected: counts.rejected,
+          drafts: drafts.length,
+        }}
+        pipelineLabel={pipelineLabel}
+        onLogout={() => logout()}
+      >
+        {deskBody}
+      </SuperEditorDeskLayout>
+    )
+  }
+
+  return (
+    <div className="editor-dashboard">
+      <div className="editor-dashboard-inner v2-page v2-page--wide">
+        <header className="editor-dashboard-header">
+          <div className="editor-dashboard-header-main">
+            <p className="editor-dashboard-kicker">
+              Editorial desk
+              {mode === 'supabase' && (
+                <span className="editor-dashboard-kicker-live">· live cloud</span>
+              )}
+            </p>
+            <h1 className="editor-dashboard-title">Editorial control</h1>
+            <p className="editor-dashboard-summary">
+              Review artist submissions, curate the wire, and publish features for Institute of
+              Sound.
+            </p>
+            <div className="editor-dashboard-identity">
+              {user.avatarUrl ? (
+                <IOSImage
+                  src={user.avatarUrl}
+                  alt=""
+                  width={40}
+                  className="editor-dashboard-avatar"
+                />
+              ) : (
+                <span className="editor-dashboard-avatar editor-dashboard-avatar-fallback">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+              <div className="min-w-0">
+                <p className="editor-dashboard-identity-name">
+                  {user.name}
+                  {user.username && (
+                    <span className="text-mh-red"> @{user.username}</span>
+                  )}
+                </p>
+                <p className="editor-dashboard-identity-meta">
+                  {user.email} · {roleLabel(user.role)}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="editor-dashboard-header-actions">
+            <Link to="/community#feed" className="ios-btn ios-btn-ghost !text-xs !py-2">
+              Network feed
+            </Link>
+            <Link to="/" className="ios-btn ios-btn-ghost !text-xs !py-2">
+              Site
+            </Link>
+            <button
+              type="button"
+              onClick={() => logout()}
+              className="ios-btn ios-btn-secondary !text-xs !py-2"
+            >
+              Logout
+            </button>
+          </div>
+        </header>
+        {deskBody}
       </div>
     </div>
   )
