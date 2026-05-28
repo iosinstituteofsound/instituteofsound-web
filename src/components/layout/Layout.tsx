@@ -13,10 +13,12 @@ import { RouteSeo } from '@/components/seo/RouteSeo'
 import { useLenis } from '@/hooks/useLenis'
 import { useContent } from '@/hooks/useContent'
 import { getNav, getFooter } from '@/api/endpoints'
+import { useAuth } from '@/context/AuthContext'
 
 export function Layout() {
   useLenis()
   const location = useLocation()
+  const { user } = useAuth()
   const fetchNav = useCallback(() => getNav(), [])
   const fetchFooter = useCallback(() => getFooter(), [])
   const { data: navLinks, loading: navLoading } = useContent(fetchNav)
@@ -44,7 +46,11 @@ export function Layout() {
       <AcademyProgressSync />
       <CommunityOnboardingGate />
       <GrainOverlay />
-      {navLoading ? <div className="h-[4.25rem] md:h-[4.5rem]" /> : navLinks && <Navbar links={navLinks} />}
+      {navLoading ? (
+        <div className="h-[4.25rem] md:h-[4.5rem]" />
+      ) : (
+        navLinks && <Navbar links={navLinks} appMode={Boolean(user)} />
+      )}
       <main className="ios-page-bg">
         <Outlet />
       </main>
