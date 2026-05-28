@@ -3,8 +3,40 @@
     radial-gradient(ellipse 120% 80% at 50% -20%, rgba(212, 0, 0, 0.07), transparent 50%),
     var(--color-void);
 }
+
 /* —— V2 shell chrome —— */
+.v2-shell {
+  --v2-sidebar-w: 15.5rem;
+  --v2-rail-w: 17.5rem;
+  --v2-topbar-h: 3.25rem;
+  color: var(--color-signal);
+}
+
+.v2-shell .grain-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.022;
+}
+
+.v2-main-inner {
+  isolation: isolate;
+}
+
+/* Shell focus — brand red, not browser blue */
+.v2-shell a:focus,
+.v2-shell button:focus {
+  outline: none;
+}
+
+.v2-shell a:focus-visible,
+.v2-shell button:focus-visible {
+  outline: 2px solid rgba(212, 0, 0, 0.85);
+  outline-offset: 2px;
+}
+
 .v2-sidebar {
+  width: var(--v2-sidebar-w);
   background: linear-gradient(180deg, #080808 0%, var(--color-surface) 100%);
   border-right: 1px solid var(--color-border);
   box-shadow: 4px 0 24px -12px rgba(0, 0, 0, 0.6);
@@ -27,8 +59,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0.75rem;
+  gap: 0.5rem;
+  padding: 0.45rem 0.65rem;
   font-size: 0.8125rem;
+  line-height: 1.25;
   letter-spacing: 0.02em;
   color: var(--color-muted);
   border-radius: 2px;
@@ -51,8 +85,8 @@
   content: '';
   position: absolute;
   left: 0;
-  top: 0.35rem;
-  bottom: 0.35rem;
+  top: 0.3rem;
+  bottom: 0.3rem;
   width: 2px;
   background: var(--color-mh-red);
   box-shadow: 0 0 12px var(--color-mh-red);
@@ -60,6 +94,7 @@
 
 .v2-topbar {
   background: rgba(5, 5, 5, 0.92);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--color-border);
 }
@@ -88,9 +123,160 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.v2-search:focus-within {
+.v2-search:focus-visible {
   border-color: rgba(212, 0, 0, 0.45);
   box-shadow: 0 0 0 1px rgba(212, 0, 0, 0.2);
+}
+
+/* Right rail */
+.v2-rail {
+  width: var(--v2-rail-w);
+  min-width: 0;
+}
+
+.v2-rail-heading {
+  margin-bottom: 0.75rem;
+}
+
+.v2-rail-heading .ios-kicker {
+  margin-bottom: 0.35rem;
+}
+
+.v2-rail-title {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-signal);
+  overflow-wrap: anywhere;
+}
+
+.v2-rail-widget {
+  min-width: 0;
+}
+
+.v2-rail-widget.ios-panel {
+  padding: 0.85rem 0.9rem 0.9rem 1rem;
+}
+
+.v2-activity-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(212, 0, 0, 0.12);
+  color: var(--color-mh-red);
+  font-family: var(--font-display);
+  font-size: 0.625rem;
+  font-weight: 800;
+}
+
+/* Page content inside shell — drop legacy navbar offset */
+.v2-shell .v2-main .section-padding {
+  padding-top: 1.25rem;
+  padding-bottom: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .v2-shell .v2-main .section-padding {
+    padding-top: 1.5rem;
+    padding-bottom: 3rem;
+  }
+}
+
+.v2-shell .v2-main .pt-32,
+.v2-shell .v2-main .pt-28 {
+  padding-top: 1.25rem !important;
+}
+
+@media (min-width: 768px) {
+  .v2-shell .v2-main .pt-32,
+  .v2-shell .v2-main .pt-28 {
+    padding-top: 1.5rem !important;
+  }
+}
+
+.v2-page {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding: 1rem 1rem 2.5rem;
+}
+
+@media (min-width: 640px) {
+  .v2-page {
+    padding: 1.25rem 1.5rem 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .v2-page {
+    padding: 1.5rem 2rem 3.5rem;
+  }
+}
+
+.v2-page--wide {
+  max-width: none;
+}
+
+.v2-home-layout {
+  display: flex;
+  min-height: 100%;
+  align-items: stretch;
+}
+
+.v2-home-main {
+  min-width: 0;
+  flex: 1;
+  padding: 1rem 1rem 2rem;
+}
+
+@media (min-width: 640px) {
+  .v2-home-main {
+    padding: 1.25rem 1.5rem 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .v2-home-main {
+    padding: 1.5rem 2rem 3rem;
+  }
+}
+
+/* Tighter panels site-wide in shell */
+.v2-shell .v2-main .ios-panel {
+  border-color: rgba(42, 42, 42, 0.95);
+}
+
+.v2-shell .v2-main .ios-card {
+  border-color: rgba(42, 42, 42, 0.95);
+}
+
+/* Hero — less grid noise on content */
+.v2-shell .hero-grid {
+  opacity: 0.22 !important;
+}
+
+.v2-shell .hero-scanlines {
+  opacity: 0.35;
+}
+
+.v2-shell .magazine-section-head {
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .v2-shell .magazine-section-head {
+    margin-bottom: 2rem;
+  }
+}
+
+/* Dashboard pages */
+.v2-shell .v2-main .member-dashboard,
+.v2-shell .v2-main .artist-dashboard,
+.v2-shell .v2-main .section-padding.bg-void {
+  padding-top: 1.25rem;
 }
 
 .section-perf {

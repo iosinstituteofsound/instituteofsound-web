@@ -20,9 +20,7 @@ function ShellInner() {
       <AcademyProgressSync />
       <CommandPalette />
 
-      <div className="ios-page-bg relative flex h-full min-h-dvh flex-col lg:flex-row">
-        <GrainOverlay />
-
+      <div className="v2-shell ios-page-bg relative flex h-full min-h-dvh flex-col lg:flex-row">
         <div className="hidden lg:flex">
           <Sidebar />
         </div>
@@ -38,8 +36,11 @@ function ShellInner() {
           <div className="hidden lg:block">
             <TopBar />
           </div>
-          <main className="min-h-0 flex-1 overflow-y-auto">
-            <Outlet />
+          <main className="v2-main relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+            <GrainOverlay />
+            <div className="v2-main-inner relative z-[1] min-h-full">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

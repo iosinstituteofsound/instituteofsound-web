@@ -22,8 +22,8 @@ const MARQUEE = [
 export function HomeHero({ cover }: { cover: CoverStory }) {
   return (
     <section className="relative overflow-hidden border border-border bg-surface">
-      <div className="absolute inset-0 hero-grid opacity-40" />
-      <div className="absolute inset-0 hero-scanlines pointer-events-none" />
+      <div className="absolute inset-0 hero-grid opacity-25" />
+      <div className="absolute inset-0 hero-scanlines pointer-events-none opacity-50" />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{

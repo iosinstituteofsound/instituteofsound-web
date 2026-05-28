@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { Signal } from '@/types'
 import { MetalBadge } from '@/components/ui/MetalBadge'
-import { MagazineSectionHeading } from '@/components/ui/MagazineSectionHeading'
 
 type Props = {
   signals: Signal[]
@@ -21,18 +20,23 @@ const EVENTS = [
 
 export function RightRail({ signals }: Props) {
   return (
-    <aside className="hidden w-[300px] shrink-0 flex-col gap-5 overflow-y-auto border-l border-border bg-surface/50 p-4 backdrop-blur-sm xl:flex">
+    <aside className="v2-rail hidden shrink-0 flex-col gap-4 overflow-x-hidden overflow-y-auto border-l border-border bg-surface/60 p-3 backdrop-blur-sm xl:flex">
       <Widget>
-        <MagazineSectionHeading kicker="Live" title="What's Happening" />
-        <div className="mb-4 flex gap-4 border-b border-border pb-2 text-[10px] font-bold uppercase tracking-[0.15em]">
+        <div className="v2-rail-heading">
+          <p className="ios-kicker">Live</p>
+          <h2 className="v2-rail-title">What&apos;s Happening</h2>
+        </div>
+        <div className="mb-3 flex flex-wrap gap-3 border-b border-border pb-2 text-[10px] font-bold uppercase tracking-[0.12em]">
           <span className="text-mh-red">Activity</span>
           <span className="text-muted">Signals</span>
           <span className="text-muted">Following</span>
         </div>
-        <ul className="space-y-4">
+        <ul className="space-y-3">
           {ACTIVITY.map((item) => (
-            <li key={item.time} className="flex gap-3">
-              <div className="mt-0.5 h-8 w-8 shrink-0 border border-border bg-elevated" />
+            <li key={item.time} className="flex gap-2.5">
+              <div className="v2-activity-avatar mt-0.5 h-8 w-8 shrink-0 border border-border">
+                {item.user.charAt(0)}
+              </div>
               <div>
                 <p className="text-[12px] leading-snug">
                   <span className="font-semibold text-signal">{item.user}</span>{' '}
@@ -119,5 +123,5 @@ export function RightRail({ signals }: Props) {
 }
 
 function Widget({ children }: { children: React.ReactNode }) {
-  return <section className="ios-panel p-4 pl-5">{children}</section>
+  return <section className="v2-rail-widget ios-panel">{children}</section>
 }

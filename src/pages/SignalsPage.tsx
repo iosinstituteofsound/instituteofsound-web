@@ -10,8 +10,7 @@ export default function SignalsPage() {
   const { data, loading, error } = useContent(useCallback(() => getSignals(), []))
 
   return (
-    <div className="section-padding pt-32">
-      <div className="max-w-7xl mx-auto">
+    <div className="v2-page">
         <SectionHeading
           label="Encrypted Feed"
           title="Signals"
@@ -27,7 +26,6 @@ export default function SignalsPage() {
             ))}
           </AnimatedGrid>
         )}
-      </div>
     </div>
   )
 }

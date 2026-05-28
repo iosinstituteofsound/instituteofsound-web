@@ -55,8 +55,8 @@ export default function HomePage() {
     features.data.find((f) => f.slug === 'underground-movements') ?? features.data[0]
 
   return (
-    <div className="flex min-h-full">
-      <div className="min-w-0 flex-1 space-y-10 p-4 sm:space-y-12 sm:p-6 lg:space-y-14 lg:p-8">
+    <div className="v2-home-layout">
+      <div className="v2-home-main space-y-8 sm:space-y-10 lg:space-y-12">
         <HomeHero cover={cover.data} />
         {recommended.length > 0 && <RecommendedRow cards={recommended} />}
         {editorSide.length > 0 && (

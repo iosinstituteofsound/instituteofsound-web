@@ -10,8 +10,7 @@ export default function PlaylistsPage() {
   const { data, loading, error } = useContent(useCallback(() => getPlaylists(), []))
 
   return (
-    <div className="section-padding pt-32">
-      <div className="max-w-7xl mx-auto">
+    <div className="v2-page">
         <SectionHeading
           label="Sonic Archives"
           title="Playlists"
@@ -27,7 +26,6 @@ export default function PlaylistsPage() {
             ))}
           </AnimatedGrid>
         )}
-      </div>
     </div>
   )
 }

@@ -39,8 +39,7 @@ export default function CommunityPage() {
   const spotlightGenreName = genres.find((g) => g.slug === spotlightGenreSlug)?.name
 
   return (
-    <div className="section-padding pt-32">
-      <div className="max-w-7xl mx-auto">
+    <div className="v2-page v2-page--wide">
         <SectionHeading
           label="The Network"
           title="Community"
@@ -123,7 +122,6 @@ export default function CommunityPage() {
             <CommunityLeaderboard entries={entries} highlightUserId={user?.id} />
           )}
         </section>
-      </div>
     </div>
   )
 }

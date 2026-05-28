@@ -9,8 +9,7 @@ export default function FeaturesPage() {
   const { data, loading, error } = useContent(useCallback(() => getFeatures(), []))
 
   return (
-    <div className="section-padding pt-32">
-      <div className="max-w-7xl mx-auto">
+    <div className="v2-page">
         <SectionHeading
           label="Long Form Editorial"
           title="Features"
@@ -26,7 +25,6 @@ export default function FeaturesPage() {
             ))}
           </div>
         )}
-      </div>
     </div>
   )
 }
