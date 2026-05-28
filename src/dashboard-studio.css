@@ -1023,6 +1023,36 @@
   font-size: 0.8125rem !important;
 }
 
+.member-desk .member-desk-trust-verified,
+.member-desk .member-desk-trust-pending,
+.member-desk .member-desk-trust-rejected {
+  margin-top: 0.25rem;
+}
+
+.member-desk .member-desk-trust-verified-badge,
+.member-desk .member-desk-trust-pending-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-border);
+}
+
+.member-desk .member-desk-trust-verified-badge {
+  color: #6ee7b7;
+  border-color: rgba(110, 231, 183, 0.45);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.member-desk .member-desk-trust-pending-badge {
+  color: #fcd34d;
+  border-color: rgba(252, 211, 77, 0.4);
+  background: rgba(245, 158, 11, 0.1);
+}
+
 .ios-analytics-pipeline-tile {
   text-align: left;
   padding: 1rem;

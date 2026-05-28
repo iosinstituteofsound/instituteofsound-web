@@ -9,6 +9,7 @@ import {
   respondToClaim,
   submitRoleVerificationRequest,
 } from '@/lib/verification/service'
+import { roleVerificationRoleLabel } from '@/lib/verification/notifyEditors'
 
 function roleTypeFromPersona(persona: DashboardPersona | undefined) {
   if (!persona) return null
@@ -121,7 +122,18 @@ export function MemberTrustPanel({
     }
   }
 
-  const latestRequest = roleType ? requests.find((r) => r.roleType === roleType) : null
+  const latestRequest = useMemo(() => {
+    if (!roleType) return null
+    const forRole = requests.filter((r) => r.roleType === roleType)
+    if (!forRole.length) return null
+    return forRole.reduce((latest, row) =>
+      new Date(row.updatedAt).getTime() > new Date(latest.updatedAt).getTime() ? row : latest,
+    )
+  }, [requests, roleType])
+
+  const roleLabel = roleType ? roleVerificationRoleLabel(roleType) : ''
+  const canSubmitProofs =
+    !latestRequest || latestRequest.status === 'rejected'
 
   return (
     <section className={className ?? 'ios-card p-6 md:p-8 mb-8 space-y-6'}>
@@ -137,58 +149,97 @@ export function MemberTrustPanel({
       {roleType && (
         <div className="member-desk-trust-block space-y-3">
           <p>Role proof submission</p>
-          {latestRequest && (
-            <p className="member-desk-meta">
-              Latest status: <span className="text-foreground uppercase">{latestRequest.status}</span>
-            </p>
+
+          {latestRequest?.status === 'approved' && (
+            <div className="member-desk-trust-verified" role="status">
+              <span className="member-desk-trust-verified-badge">Verified</span>
+              <p className="member-desk-lede mt-3 mb-0">
+                Your {roleLabel} role is verified by the Institute desk. No further proofs are
+                needed for this workspace.
+              </p>
+            </div>
           )}
-          <textarea
-            rows={4}
-            value={proofLinksText}
-            onChange={(e) => setProofLinksText(e.target.value)}
-            placeholder="Paste proof links (one per line)"
-            className="ios-input min-h-[90px]"
-          />
-          {roleType === 'artist_manager' && (
-            <input
-              value={artistConfirmationLink}
-              onChange={(e) => setArtistConfirmationLink(e.target.value)}
-              placeholder="Artist confirmation link"
-              className="ios-input w-full"
-            />
+
+          {latestRequest?.status === 'pending' && (
+            <div className="member-desk-trust-pending" role="status">
+              <span className="member-desk-trust-pending-badge">Under review</span>
+              <p className="member-desk-meta mt-3 mb-0">
+                Proofs submitted — the desk is reviewing your {roleLabel} verification.
+              </p>
+            </div>
           )}
-          {roleType === 'label' && (
-            <input
-              value={websiteDomain}
-              onChange={(e) => setWebsiteDomain(e.target.value)}
-              placeholder="Label website/domain"
-              className="ios-input w-full"
-            />
+
+          {latestRequest?.status === 'rejected' && (
+            <div className="member-desk-trust-rejected space-y-2" role="status">
+              <p className="member-desk-meta mb-0">
+                Latest decision:{' '}
+                <span className="text-foreground uppercase">Not approved</span>
+              </p>
+              {latestRequest.reviewNotes?.trim() && (
+                <p className="member-desk-lede mb-0">{latestRequest.reviewNotes.trim()}</p>
+              )}
+              <p className="member-desk-meta mb-0">Update your proofs below and resubmit.</p>
+            </div>
           )}
-          {roleType === 'event_promoter' && (
-            <input
-              value={venuePartnerReference}
-              onChange={(e) => setVenuePartnerReference(e.target.value)}
-              placeholder="Venue/partner reference"
-              className="ios-input w-full"
-            />
+
+          {canSubmitProofs && (
+            <>
+              {!latestRequest && (
+                <p className="member-desk-meta">
+                  Submit role-specific proofs for desk verification.
+                </p>
+              )}
+              <textarea
+                rows={4}
+                value={proofLinksText}
+                onChange={(e) => setProofLinksText(e.target.value)}
+                placeholder="Paste proof links (one per line)"
+                className="ios-input min-h-[90px]"
+              />
+              {roleType === 'artist_manager' && (
+                <input
+                  value={artistConfirmationLink}
+                  onChange={(e) => setArtistConfirmationLink(e.target.value)}
+                  placeholder="Artist confirmation link"
+                  className="ios-input w-full"
+                />
+              )}
+              {roleType === 'label' && (
+                <input
+                  value={websiteDomain}
+                  onChange={(e) => setWebsiteDomain(e.target.value)}
+                  placeholder="Label website/domain"
+                  className="ios-input w-full"
+                />
+              )}
+              {roleType === 'event_promoter' && (
+                <input
+                  value={venuePartnerReference}
+                  onChange={(e) => setVenuePartnerReference(e.target.value)}
+                  placeholder="Venue/partner reference"
+                  className="ios-input w-full"
+                />
+              )}
+              {roleType === 'brand' && (
+                <input
+                  value={officialEmail}
+                  onChange={(e) => setOfficialEmail(e.target.value)}
+                  placeholder="Official domain email"
+                  className="ios-input w-full"
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => void submitProofs()}
+                disabled={loading}
+                className="ios-btn ios-btn-primary"
+              >
+                {latestRequest?.status === 'rejected'
+                  ? 'Resubmit verification proofs'
+                  : 'Submit verification proofs'}
+              </button>
+            </>
           )}
-          {roleType === 'brand' && (
-            <input
-              value={officialEmail}
-              onChange={(e) => setOfficialEmail(e.target.value)}
-              placeholder="Official domain email"
-              className="ios-input w-full"
-            />
-          )}
-          <button
-            type="button"
-            onClick={() => void submitProofs()}
-            disabled={loading}
-            className="ios-btn ios-btn-primary"
-          >
-            Submit verification proofs
-          </button>
         </div>
       )}
 

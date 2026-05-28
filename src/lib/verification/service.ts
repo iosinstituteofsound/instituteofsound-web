@@ -63,6 +63,17 @@ export async function submitRoleVerificationRequest(
   const proofErr = roleProofError(input)
   if (proofErr) throw new Error(proofErr)
 
+  const existing = await getMyRoleVerificationRequests(userId)
+  const latestForRole = existing
+    .filter((r) => r.roleType === input.roleType)
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]
+  if (latestForRole?.status === 'approved') {
+    throw new Error('This role is already verified.')
+  }
+  if (latestForRole?.status === 'pending') {
+    throw new Error('Your verification is already under review.')
+  }
+
   const payload = {
     user_id: userId,
     role_type: input.roleType,
