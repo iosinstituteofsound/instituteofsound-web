@@ -83,7 +83,7 @@ export async function syncVerificationDeskNotifications(): Promise<void> {
 
 /** Notify applicant when super editor approves or rejects (local demo). */
 export function notifyMemberVerificationDecision(
-  memberUserId: string,
+  _memberUserId: string,
   requestId: string,
   roleType: VerificationRoleType,
   decision: 'approved' | 'rejected',
