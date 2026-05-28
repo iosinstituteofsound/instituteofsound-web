@@ -13,6 +13,7 @@ import { EditorialTribeBridge } from '@/components/editorial/EditorialTribeBridg
 import { EditorProfilePanel } from '@/components/dashboard/EditorProfilePanel'
 import { EditorApplicationsPanel } from '@/components/editor-applications/EditorApplicationsPanel'
 import { EditorEventsPanel } from '@/components/dashboard/EditorEventsPanel'
+import { SuperEditorDashboardPreview } from '@/components/dashboard/SuperEditorDashboardPreview'
 import { listArtistProfilesForEditor } from '@/lib/artist-profile/service'
 import type { ArtistProfile } from '@/lib/artist-profile/types'
 import {
@@ -43,6 +44,7 @@ import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richT
 
 type EditorTab =
   | 'analytics'
+  | 'preview'
   | 'applications'
   | 'queue'
   | 'wire'
@@ -217,6 +219,7 @@ export default function EditorDashboardPage() {
   const tabs: { id: EditorTab; label: string }[] = isSuperEditor
     ? [
         { id: 'analytics', label: 'Analytics' },
+        { id: 'preview', label: 'Dashboard Preview' },
         { id: 'applications', label: 'Editor Applications' },
         { id: 'queue', label: 'Submission Queue' },
         { id: 'wire', label: 'Wire Picks' },
@@ -376,6 +379,8 @@ export default function EditorDashboardPage() {
 
         {tab === 'events' && <EditorEventsPanel />}
 
+        {tab === 'preview' && isSuperEditor && <SuperEditorDashboardPreview />}
+
         {tab === 'profile' && (
           <EditorProfilePanel user={user} onSaved={refreshUser} />
         )}
@@ -389,9 +394,10 @@ export default function EditorDashboardPage() {
           tab !== 'network' &&
           tab !== 'wire' &&
           tab !== 'events' &&
+          tab !== 'preview' &&
           tab !== 'applications' ? (
           <LoadingTransmission variant="compact" />
-        ) : tab === 'profile' ? null : tab === 'analytics' && isSuperEditor ? (
+        ) : tab === 'profile' || tab === 'preview' ? null : tab === 'analytics' && isSuperEditor ? (
           analytics ? (
             <SuperAdminAnalyticsPanel
               data={analytics}
@@ -583,6 +589,7 @@ export default function EditorDashboardPage() {
                       setDraftType(next)
                       if (next === 'feature') setDraftFeaturedOnHomepage(true)
                     }}
+                    aria-label="Editorial draft type"
                     className="w-full bg-surface border border-border px-4 py-3 text-sm"
                   >
                     {EDITORIAL_TYPE_OPTIONS.map((opt) => (
@@ -615,6 +622,7 @@ export default function EditorDashboardPage() {
                     required
                     value={draftTitle}
                     onChange={(e) => setDraftTitle(e.target.value)}
+                    aria-label="Editorial headline"
                     className="w-full bg-surface border border-border px-4 py-3 text-sm focus:border-rs-red focus:outline-none"
                   />
                 </div>
@@ -626,6 +634,7 @@ export default function EditorDashboardPage() {
                     required
                     value={draftSubject}
                     onChange={(e) => setDraftSubject(e.target.value)}
+                    aria-label="Editorial subject"
                     className="w-full bg-surface border border-border px-4 py-3 text-sm focus:border-rs-red focus:outline-none"
                   />
                 </div>
@@ -666,6 +675,7 @@ export default function EditorDashboardPage() {
                     <select
                       value={draftArtistProfileId}
                       onChange={(e) => setDraftArtistProfileId(e.target.value)}
+                      aria-label="Linked artist profile"
                       className="w-full ios-input"
                     >
                       <option value="">— No linked profile —</option>
