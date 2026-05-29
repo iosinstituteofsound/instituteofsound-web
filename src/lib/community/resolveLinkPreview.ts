@@ -1,4 +1,4 @@
-import { resolveThumbnailFromUrl } from '@/lib/media/resolveThumbnail'
+import { resolveThumbnailFromUrl } from '../media/resolveThumbnail'
 
 export interface ResolvedLinkPreview {
   url: string
