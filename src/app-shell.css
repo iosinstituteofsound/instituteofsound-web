@@ -69,9 +69,9 @@
 .ios-brand-plate {
   position: relative;
   display: flex;
-  align-items: stretch;
-  gap: 0.65rem;
-  padding: 0.95rem 0.85rem 0.9rem;
+  align-items: center;
+  justify-content: center;
+  padding: 1.15rem 1rem 1.1rem;
   border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
   border-radius: 4px;
   background: linear-gradient(180deg, #0e0e0e 0%, #060606 100%);
@@ -115,87 +115,63 @@
   box-shadow: 0 0 28px -16px rgba(212, 0, 0, 0.45);
 }
 
-.ios-brand-frame:hover .ios-brand-plate__title {
+.ios-brand-frame:hover .ios-brand-plate__line {
+  color: #fff;
+}
+
+.ios-brand-frame:hover .ios-brand-plate__of {
   color: var(--color-mh-red);
-}
-
-.ios-brand-plate__idx {
-  flex-shrink: 0;
-  align-self: center;
-  padding-left: 0.35rem;
-  font-family: var(--font-display);
-  font-size: 2.35rem;
-  font-weight: 800;
-  line-height: 0.82;
-  letter-spacing: -0.06em;
-  color: var(--color-mh-red);
-  user-select: none;
-}
-
-.ios-brand-plate__body {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.08rem;
-  min-width: 0;
-  padding-top: 0.15rem;
-}
-
-.ios-brand-plate__eyebrow {
-  font-family: var(--font-sans);
-  font-size: 0.58rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.22em;
-  color: rgba(255, 255, 255, 0.42);
 }
 
 .ios-brand-plate__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.12rem;
+}
+
+.ios-brand-plate__line {
+  display: block;
   font-family: var(--font-display);
-  font-size: 1.35rem;
   font-weight: 800;
-  line-height: 0.92;
-  letter-spacing: 0.03em;
+  line-height: 1;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-signal);
   transition: color 0.22s ease;
 }
 
-.ios-brand-plate__sub {
-  margin-top: 0.45rem;
-  padding-top: 0.45rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  font-family: var(--font-sans);
-  font-size: 0.5625rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--color-muted);
+.ios-brand-plate__line:first-child {
+  font-size: 0.92rem;
+  letter-spacing: 0.28em;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.ios-brand-plate__line:last-child {
+  font-size: 1.28rem;
+  letter-spacing: 0.06em;
+}
+
+.ios-brand-plate__of {
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--color-mh-red);
 }
 
 /* Footer / compact */
 .ios-brand-plate--sm {
-  padding: 0.75rem 0.65rem 0.7rem;
-  gap: 0.5rem;
+  padding: 0.85rem 0.75rem 0.8rem;
 }
 
-.ios-brand-plate--sm .ios-brand-plate__idx {
-  font-size: 1.75rem;
+.ios-brand-plate--sm .ios-brand-plate__line:first-child {
+  font-size: 0.78rem;
+  letter-spacing: 0.24em;
 }
 
-.ios-brand-plate--sm .ios-brand-plate__title {
+.ios-brand-plate--sm .ios-brand-plate__line:last-child {
   font-size: 1.05rem;
-}
-
-.ios-brand-plate--sm .ios-brand-plate__eyebrow {
-  font-size: 0.5rem;
-  letter-spacing: 0.18em;
-}
-
-.ios-brand-plate--sm .ios-brand-plate__sub {
-  margin-top: 0.35rem;
-  padding-top: 0.35rem;
-  font-size: 0.5rem;
 }
 
 .v2-sidebar-brand {

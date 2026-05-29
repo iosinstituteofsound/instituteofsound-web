@@ -5,7 +5,7 @@ type Props = {
   to?: string
   onClick?: () => void
   className?: string
-  /** Sidebar / footer masthead. `bar` = compact top nav. */
+  /** Sidebar / footer plate. `bar` = compact top nav. */
   variant?: 'frame' | 'bar'
   size?: 'sm' | 'md'
   showSub?: boolean
@@ -24,13 +24,11 @@ export function IosBrandLockup({
       <span
         className={clsx('ios-brand-plate', size === 'sm' && 'ios-brand-plate--sm')}
       >
-        <span className="ios-brand-plate__idx" aria-hidden>
-          01
-        </span>
-        <span className="ios-brand-plate__body">
-          <span className="ios-brand-plate__eyebrow">Institute</span>
-          <span className="ios-brand-plate__title">of Sound</span>
-          {showSub && <span className="ios-brand-plate__sub">Underground HQ</span>}
+        <span className="ios-brand-plate__title">
+          <span className="ios-brand-plate__line">Institute</span>
+          <span className="ios-brand-plate__line">
+            <span className="ios-brand-plate__of">of</span> Sound
+          </span>
         </span>
       </span>
     ) : (
