@@ -489,7 +489,7 @@
   position: relative;
   flex-shrink: 0;
   width: min(11.5rem, 78vw);
-  padding-right: 4.25rem;
+  padding-right: 3.75rem;
   box-sizing: content-box;
   overflow: visible;
 }
@@ -510,10 +510,11 @@
 .prem-vinyl-stack--hero {
   max-width: none;
   width: 100%;
-  --prem-vinyl-offset: 63%;
+  /* Lower = disc shifts left = less peek on the right */
+  --prem-vinyl-offset: 42%;
 }
 
-/* Disc = same size as sleeve; offset tucks more under sleeve when higher */
+/* Disc = same size as sleeve; lower left % = more hidden behind cover */
 .prem-vinyl {
   position: absolute;
   top: 0;
