@@ -4,8 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 import { buildArtistCatalogFromUrl } from './api/import-catalog'
-import { resolveLinkPreview } from './src/lib/community/resolveLinkPreview'
-import { resolveThumbnailFromUrl } from './src/lib/media/resolveThumbnail'
+import { resolveLinkPreview } from './api/_lib/linkPreview'
+import { resolveThumbnailFromUrl } from './api/_lib/thumbnail'
 
 function thumbnailApiPlugin(): Plugin {
   return {

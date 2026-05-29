@@ -1,4 +1,9 @@
-import { resolveThumbnailFromUrl } from '../src/lib/media/resolveThumbnail'
+import { resolveThumbnailFromUrl } from './_lib/thumbnail.js'
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 15,
+}
 
 type VercelRequest = { query: { url?: string | string[] } }
 type VercelResponse = {

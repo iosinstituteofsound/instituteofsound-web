@@ -1,4 +1,4 @@
-import { resolveThumbnailFromUrl } from '../media/resolveThumbnail'
+import { resolveThumbnailFromUrl } from './thumbnail.js'
 
 export interface ResolvedLinkPreview {
   url: string
@@ -43,6 +43,12 @@ type NoembedPayload = {
   provider_name?: string
 }
 
+function fetchWithTimeout(url: string, init: RequestInit, ms: number): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), ms)
+  return fetch(url, { ...init, signal: controller.signal }).finally(() => clearTimeout(timer))
+}
+
 /** Server-side: resolve Open Graph / oEmbed metadata for link previews. */
 export async function resolveLinkPreview(url: string): Promise<ResolvedLinkPreview> {
   const normalized = url.trim()
@@ -72,14 +78,18 @@ export async function resolveLinkPreview(url: string): Promise<ResolvedLinkPrevi
 
   if (!preview.title || !preview.imageUrl) {
     try {
-      const res = await fetch(normalized, {
-        headers: {
-          Accept: 'text/html',
-          'User-Agent': 'Mozilla/5.0 (compatible; InstituteOfSound/1.0; +https://instituteofsound.in)',
+      const res = await fetchWithTimeout(
+        normalized,
+        {
+          headers: {
+            Accept: 'text/html',
+            'User-Agent':
+              'Mozilla/5.0 (compatible; InstituteOfSound/1.0; +https://instituteofsound.in)',
+          },
+          redirect: 'follow',
         },
-        redirect: 'follow',
-        signal: AbortSignal.timeout(10_000),
-      })
+        10_000
+      )
       if (res.ok) {
         const html = (await res.text()).slice(0, 120_000)
         preview.title =

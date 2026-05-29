@@ -1,4 +1,9 @@
-import { resolveLinkPreview } from '../src/lib/community/resolveLinkPreview'
+import { resolveLinkPreview } from './_lib/linkPreview.js'
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 15,
+}
 
 type VercelRequest = { query: { url?: string | string[] } }
 type VercelResponse = {
