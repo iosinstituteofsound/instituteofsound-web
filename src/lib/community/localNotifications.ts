@@ -7,6 +7,7 @@ export type NotificationKind =
   | 'collab_accepted'
   | 'role_verification'
   | 'dm_message'
+  | 'post_comment'
 
 export interface CommunityNotification {
   id: string

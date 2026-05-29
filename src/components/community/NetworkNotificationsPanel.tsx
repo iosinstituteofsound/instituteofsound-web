@@ -21,6 +21,8 @@ function notificationFallbackIcon(kind: NotificationKind): string {
       return '⇄'
     case 'dm_message':
       return '✉'
+    case 'post_comment':
+      return '💬'
     default:
       return '◉'
   }

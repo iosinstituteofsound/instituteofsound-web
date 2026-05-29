@@ -8747,6 +8747,112 @@ html[data-perf='lite'] .metal-loader-core-beat {
   font-weight: 600;
 }
 
+.community-feed-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.community-feed-action-btn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.45rem;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.community-feed-action-btn:hover {
+  color: var(--color-foreground);
+  background: var(--color-elevated, rgba(255, 255, 255, 0.06));
+}
+
+.community-feed-post-comments-panel {
+  padding: 1.25rem 1.35rem;
+}
+
+.community-feed-comments-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.community-feed-comment {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+}
+
+.community-feed-comment-avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-elevated, rgba(255, 255, 255, 0.04));
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.community-feed-comment-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.community-feed-comment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  margin: 0 0 0.25rem;
+}
+
+.community-feed-comment-name {
+  font-weight: 700;
+  color: var(--color-foreground);
+}
+
+.community-feed-comment-handle,
+.community-feed-comment-meta time {
+  color: var(--color-muted);
+}
+
+.community-feed-comment-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.community-feed-comment-delete {
+  margin-top: 0.35rem;
+  font-size: 0.7rem;
+  color: var(--color-muted);
+  text-decoration: underline;
+}
+
+.community-feed-comment-compose {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.community-feed-comments-empty {
+  margin: 0 0 0.75rem;
+}
+
 /* ═══════════════════════════════════════════════════════════
    IOS CREATOR TOOLKIT — infographic / workstation UI
    ═══════════════════════════════════════════════════════════ */

@@ -1,7 +1,13 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { mapFeedRow, type FeedRow } from '@/lib/community/feedService'
+import {
+  fetchCommunityPostById,
+  mapFeedRow,
+  type FeedRow,
+} from '@/lib/community/feedService'
 import { localApplyReactions, localListFeed } from '@/lib/community/localFeed'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
+
+export { fetchCommunityPostById }
 
 export interface EditorWirePick extends CommunityFeedPost {
   reactionScore: number
@@ -48,30 +54,6 @@ export async function fetchEditorWirePicks(limit = 12): Promise<EditorWirePick[]
       reactionScore: Number(row.reaction_score ?? 0),
     }
   })
-}
-
-export async function fetchCommunityPostById(
-  postId: string
-): Promise<CommunityFeedPost | null> {
-  if (!postId?.trim()) return null
-
-  if (!isSupabaseConfigured()) {
-    const post = localApplyReactions(localListFeed(50)).find((p) => p.id === postId)
-    return post ?? null
-  }
-
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_feed_post_by_id', {
-    p_post_id: postId,
-  })
-
-  if (error) {
-    console.warn('[editorial] feed post', error.message)
-    return null
-  }
-
-  const row = (data ?? [])[0] as FeedRow | undefined
-  return row ? mapFeedRow(row) : null
 }
 
 export async function updateEditorialLinkedPost(

@@ -8,6 +8,7 @@ import {
   localListFeed,
   localToggleReaction,
 } from '@/lib/community/localFeed'
+import { localCommentCount } from '@/lib/community/localComments'
 import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
 import { getCommunityGenreId } from '@/lib/community/genreContext'
 import { getLocalFollowingIds } from '@/lib/community/followService'
@@ -42,6 +43,7 @@ export type FeedRow = {
   reactions_headphones?: number | string
   reactions_bolt?: number | string
   my_reaction?: string | null
+  comment_count?: number | string
 }
 
 export function mapFeedRow(row: FeedRow): CommunityFeedPost {
@@ -71,6 +73,7 @@ function mapRow(row: FeedRow): CommunityFeedPost {
       bolt: Number(row.reactions_bolt ?? 0),
     },
     myReaction: (row.my_reaction as FeedReactionKind | null) ?? null,
+    commentCount: Number(row.comment_count ?? 0),
   }
 }
 
@@ -114,7 +117,9 @@ export async function fetchCommunityFeed(
     }
     if (kind) posts = posts.filter((p) => p.kind === kind)
     if (genreSlug) posts = posts.filter((p) => p.primaryGenreSlug === genreSlug)
-    return posts.slice(0, limit)
+    return posts
+      .map((p) => ({ ...p, commentCount: localCommentCount(p.id) }))
+      .slice(0, limit)
   }
 
   const supabase = getSupabase()
@@ -360,4 +365,29 @@ export function getEmbedForPost(post: CommunityFeedPost) {
   if (post.spotifyUrl) return parseSpotifyUrl(post.spotifyUrl)
   if (post.youtubeUrl) return parseYouTubeUrl(post.youtubeUrl)
   return null
+}
+
+export async function fetchCommunityPostById(
+  postId: string
+): Promise<CommunityFeedPost | null> {
+  if (!postId?.trim()) return null
+
+  if (!isSupabaseConfigured()) {
+    const post = localApplyReactions(localListFeed(50)).find((p) => p.id === postId)
+    if (!post) return null
+    return { ...post, commentCount: localCommentCount(postId) }
+  }
+
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('community_feed_post_by_id', {
+    p_post_id: postId,
+  })
+
+  if (error) {
+    console.warn('[community] feed post', error.message)
+    return null
+  }
+
+  const row = (data ?? [])[0] as FeedRow | undefined
+  return row ? mapRow(row) : null
 }

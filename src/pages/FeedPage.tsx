@@ -17,8 +17,8 @@ export default function FeedPage() {
           <h1 className="font-display text-2xl font-bold text-signal">Feed</h1>
           <p className="mt-1 text-sm text-muted">
             {user
-              ? 'Spins and drops from people you follow.'
-              : 'Sign in to follow operators and build your wire.'}
+              ? 'Posts from people you follow — comment, react, and share.'
+              : 'Sign in to follow operators, comment, and build your wire.'}
           </p>
         </div>
         <div className="flex shrink-0 gap-2">

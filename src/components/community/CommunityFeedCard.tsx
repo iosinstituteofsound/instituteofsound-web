@@ -7,6 +7,7 @@ import { formatRelativeTime } from '@/lib/community/relativeTime'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import { getEmbedForPost, hideCommunityPost } from '@/lib/community/feedService'
 import { parseSpotifyUrl, parseYouTubeUrl } from '@/lib/community/musicLinks'
+import { sharePost } from '@/lib/community/sharePost'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { CommunityFeedReactions } from '@/components/community/CommunityFeedReactions'
@@ -16,7 +17,7 @@ interface CommunityFeedCardProps {
   post: CommunityFeedPost
   isYou?: boolean
   linkProfile?: boolean
-  variant?: 'default' | 'profile'
+  variant?: 'default' | 'profile' | 'detail'
   className?: string
   onHidden?: () => void
   onReactionChange?: () => void
@@ -40,7 +41,9 @@ export function CommunityFeedCard({
 }: CommunityFeedCardProps) {
   const { user } = useAuth()
   const isProfileFeed = variant === 'profile'
+  const isDetail = variant === 'detail'
   const [hiding, setHiding] = useState(false)
+  const [shareLabel, setShareLabel] = useState('Share')
   const spotify = post.spotifyUrl ? parseSpotifyUrl(post.spotifyUrl) : null
   const youtube = post.youtubeUrl ? parseYouTubeUrl(post.youtubeUrl) : null
   const primaryEmbed = getEmbedForPost(post)
@@ -60,6 +63,17 @@ export function CommunityFeedCard({
 
   const when = formatRelativeTime(post.createdAt)
   const profilePath = networkProfilePath(post.handle)
+  const commentCount = post.commentCount ?? 0
+
+  const onShare = async () => {
+    try {
+      const result = await sharePost(post.id)
+      setShareLabel(result === 'copied' ? 'Link copied' : 'Shared')
+      window.setTimeout(() => setShareLabel('Share'), 2000)
+    } catch {
+      /* user cancelled share sheet */
+    }
+  }
 
   const avatar = (
     <div className="community-feed-card-avatar">
@@ -210,6 +224,17 @@ export function CommunityFeedCard({
       )}
 
       <CommunityFeedReactions post={post} onChange={onReactionChange} />
+
+      <div className="community-feed-card-actions">
+        {!isDetail && (
+          <Link to={`/feed/${post.id}`} className="community-feed-action-btn">
+            {commentCount > 0 ? `${commentCount} comment${commentCount === 1 ? '' : 's'}` : 'Comment'}
+          </Link>
+        )}
+        <button type="button" className="community-feed-action-btn" onClick={() => void onShare()}>
+          {shareLabel}
+        </button>
+      </div>
 
       <footer className="community-feed-card-foot">
         {!isProfileFeed && (

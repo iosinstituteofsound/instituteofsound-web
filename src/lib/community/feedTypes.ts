@@ -28,4 +28,5 @@ export interface CommunityFeedPost {
   status: 'visible' | 'hidden'
   reactions: FeedReactionCounts
   myReaction?: FeedReactionKind | null
+  commentCount?: number
 }

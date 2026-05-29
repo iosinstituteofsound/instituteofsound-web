@@ -5,6 +5,7 @@ import {
   type CommunityFeedPost,
 } from '@/lib/community/feedService'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
+import { COMMENT_EVENT } from '@/lib/community/commentService'
 import { COMMUNITY_FOLLOW_EVENT } from '@/lib/community/followService'
 import { useAuth } from '@/context/AuthContext'
 import {
@@ -46,10 +47,12 @@ export function useCommunityFeed(
     window.addEventListener(COMMUNITY_FEED_EVENT, onFeed)
     window.addEventListener(COMMUNITY_DB_EVENT, onFeed)
     window.addEventListener(COMMUNITY_FOLLOW_EVENT, onFeed)
+    window.addEventListener(COMMENT_EVENT, onFeed)
     return () => {
       window.removeEventListener(COMMUNITY_FEED_EVENT, onFeed)
       window.removeEventListener(COMMUNITY_DB_EVENT, onFeed)
       window.removeEventListener(COMMUNITY_FOLLOW_EVENT, onFeed)
+      window.removeEventListener(COMMENT_EVENT, onFeed)
     }
   }, [refresh])
 
