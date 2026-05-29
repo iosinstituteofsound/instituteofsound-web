@@ -23,7 +23,7 @@ export function Sidebar({ className, onNavigate }: Props) {
   return (
     <aside
       className={clsx(
-        'v2-sidebar relative flex h-full shrink-0 flex-col',
+        'v2-sidebar relative flex h-full min-h-0 max-h-full shrink-0 flex-col',
         className,
       )}
     >

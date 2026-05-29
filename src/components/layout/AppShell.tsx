@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { AcademyProgressSync } from '@/components/academy/AcademyProgressSync'
 import { RouteSeo } from '@/components/seo/RouteSeo'
@@ -15,6 +15,15 @@ function ShellInner() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   useCommandPalette()
 
+  useEffect(() => {
+    document.documentElement.classList.add('v2-app-shell')
+    document.body.classList.add('v2-app-shell')
+    return () => {
+      document.documentElement.classList.remove('v2-app-shell')
+      document.body.classList.remove('v2-app-shell')
+    }
+  }, [])
+
   return (
     <>
       <RouteSeo />
@@ -22,8 +31,8 @@ function ShellInner() {
       <CommandPalette />
       <LoginGateModal />
 
-      <div className="v2-shell ios-page-bg relative flex h-full min-h-dvh flex-col lg:flex-row">
-        <div className="hidden lg:flex">
+      <div className="v2-shell ios-page-bg relative flex h-dvh max-h-dvh overflow-hidden flex-col lg:flex-row">
+        <div className="v2-sidebar-slot hidden shrink-0 lg:flex">
           <Sidebar />
         </div>
 
@@ -34,11 +43,11 @@ function ShellInner() {
           drawer={<Sidebar onNavigate={() => setDrawerOpen(false)} className="h-full w-full" />}
         />
 
-        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col pb-[4.5rem] lg:pb-0">
-          <div className="hidden lg:block">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden pb-[4.5rem] lg:pb-0">
+          <div className="hidden shrink-0 lg:block">
             <TopBar />
           </div>
-          <main className="v2-main relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <main className="v2-main relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain">
             <GrainOverlay />
             <div className="v2-main-inner relative z-[1] min-h-full">
               <Outlet />
