@@ -206,19 +206,32 @@ begin
   set last_message_at = timezone('utc', now())
   where id = p_thread_id;
 
-  if not v_had_unread and v_thread.status = 'accepted' then
+  -- Notify the recipient: both accepted messages and new message requests.
+  if not v_had_unread then
     select name, public.dm_handle_for(id) into v_actor_name, v_actor_handle
     from public.profiles where id = v_user;
 
-    perform public.community_enqueue_notification(
-      v_recipient,
-      v_user,
-      'dm_message',
-      coalesce(v_actor_name, 'Someone') || ' sent you a message',
-      left(trim(p_body), 80),
-      '/messages?t=' || p_thread_id::text,
-      jsonb_build_object('thread_id', p_thread_id)
-    );
+    if v_thread.status = 'pending' and v_user = v_thread.requested_by then
+      perform public.community_enqueue_notification(
+        v_recipient,
+        v_user,
+        'dm_message',
+        coalesce(v_actor_name, 'Someone') || ' sent you a message request',
+        left(trim(p_body), 80),
+        '/messages?t=' || p_thread_id::text,
+        jsonb_build_object('thread_id', p_thread_id, 'request', true)
+      );
+    else
+      perform public.community_enqueue_notification(
+        v_recipient,
+        v_user,
+        'dm_message',
+        coalesce(v_actor_name, 'Someone') || ' sent you a message',
+        left(trim(p_body), 80),
+        '/messages?t=' || p_thread_id::text,
+        jsonb_build_object('thread_id', p_thread_id)
+      );
+    end if;
   end if;
 
   return v_message;
@@ -407,3 +420,50 @@ grant execute on function public.dm_list_messages(uuid, int) to authenticated;
 grant execute on function public.dm_unread_total() to authenticated;
 grant execute on function public.dm_thread_header(uuid) to authenticated;
 grant execute on function public.dm_handle_for(uuid) to authenticated;
+
+-- Backfill: enqueue a bell alert for existing unread messages / requests that
+-- predate the notification fix above (one per thread, only if missing & unread).
+do $$
+declare
+  v_row record;
+begin
+  for v_row in
+    select
+      t.id as thread_id,
+      t.status,
+      t.requested_by,
+      m.sender_id,
+      case when m.sender_id = t.user_low then t.user_high else t.user_low end as recipient,
+      m.body
+    from public.dm_threads t
+    join lateral (
+      select mm.sender_id, mm.body
+      from public.dm_messages mm
+      where mm.thread_id = t.id and mm.read_at is null
+      order by mm.created_at desc
+      limit 1
+    ) m on true
+  loop
+    if not exists (
+      select 1 from public.community_notifications n
+      where n.user_id = v_row.recipient
+        and n.kind = 'dm_message'
+        and coalesce(n.meta->>'thread_id', '') = v_row.thread_id::text
+        and n.read_at is null
+    ) then
+      perform public.community_enqueue_notification(
+        v_row.recipient,
+        v_row.sender_id,
+        'dm_message',
+        case
+          when v_row.status = 'pending' and v_row.sender_id = v_row.requested_by
+            then 'New message request'
+          else 'New message'
+        end,
+        left(v_row.body, 80),
+        '/messages?t=' || v_row.thread_id::text,
+        jsonb_build_object('thread_id', v_row.thread_id)
+      );
+    end if;
+  end loop;
+end $$;
