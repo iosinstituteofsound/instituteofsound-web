@@ -538,6 +538,15 @@
   --prem-vinyl-offset: 35%;
 }
 
+@keyframes prem-vinyl-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Disc = same size as sleeve; lower left % = more hidden behind cover */
 .prem-vinyl {
   position: absolute;
@@ -548,6 +557,7 @@
   border-radius: 50%;
   z-index: 1;
   pointer-events: none;
+  transform-origin: center center;
   background:
     repeating-conic-gradient(
       from -8deg,
@@ -567,6 +577,19 @@
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.35),
     6px 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Featured hero — continuous spin (~33 RPM feel) */
+.prem-vinyl--spin {
+  animation: prem-vinyl-spin 4.8s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prem-vinyl--spin {
+    animation: none;
+    will-change: auto;
+  }
 }
 
 .prem-vinyl::before {

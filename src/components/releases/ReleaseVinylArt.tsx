@@ -53,7 +53,10 @@ export function ReleaseVinylArt({
 
   return (
     <div className={`${stackClass} ${className}`.trim()} style={vinylStyle}>
-      <div className="prem-vinyl" aria-hidden>
+      <div
+        className={`prem-vinyl${variant === 'hero' ? ' prem-vinyl--spin' : ''}`}
+        aria-hidden
+      >
         {vinylTitle && <span className="prem-vinyl__label">{vinylTitle}</span>}
       </div>
       <div className="prem-vinyl__sleeve">
