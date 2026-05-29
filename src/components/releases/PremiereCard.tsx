@@ -53,6 +53,7 @@ export function PremiereCard({ card, headingLevel = 'h3', className }: PremiereC
           <ReleaseVinylArt
             coverUrl={card.coverUrl}
             fallbackLetter={card.trackTitle}
+            vinylTitle={card.trackTitle}
             variant="card"
             width={400}
           />

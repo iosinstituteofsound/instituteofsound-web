@@ -121,6 +121,7 @@ export default function ReleasesPage() {
               <ReleaseVinylArt
                 coverUrl={featured.coverUrl}
                 fallbackLetter={featured.trackTitle}
+                vinylTitle={featured.trackTitle}
                 variant="hero"
                 width={560}
               />

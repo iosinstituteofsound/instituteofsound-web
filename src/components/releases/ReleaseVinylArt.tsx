@@ -7,6 +7,8 @@ interface ReleaseVinylArtProps {
   coverUrl?: string
   alt?: string
   fallbackLetter?: string
+  /** Shown on the visible vinyl ring (reference mock) */
+  vinylTitle?: string
   /** `hero` = featured row; `card` = grid cards */
   variant?: 'hero' | 'card'
   width?: number
@@ -17,6 +19,7 @@ export function ReleaseVinylArt({
   coverUrl,
   alt = '',
   fallbackLetter,
+  vinylTitle,
   variant = 'card',
   width = 400,
   className = '',
@@ -50,7 +53,9 @@ export function ReleaseVinylArt({
 
   return (
     <div className={`${stackClass} ${className}`.trim()} style={vinylStyle}>
-      <div className="prem-vinyl" aria-hidden />
+      <div className="prem-vinyl" aria-hidden>
+        {vinylTitle && <span className="prem-vinyl__label">{vinylTitle}</span>}
+      </div>
       <div className="prem-vinyl__sleeve">
         {coverUrl && !broken ? (
           <IOSImage
