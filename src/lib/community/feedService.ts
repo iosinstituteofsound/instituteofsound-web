@@ -7,6 +7,7 @@ import {
   localHideFeedPost,
   localListFeed,
   localToggleReaction,
+  localUpdateFeedPost,
 } from '@/lib/community/localFeed'
 import { localCommentCount } from '@/lib/community/localComments'
 import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
@@ -409,6 +410,119 @@ export async function togglePostReaction(
   if (error) throw new Error(error.message)
   notifyFeed()
   return (data as FeedReactionKind | null) ?? null
+}
+
+export interface UpdateDropInput {
+  postId: string
+  userId: string
+  text: string
+}
+
+export async function updateDropPost(input: UpdateDropInput): Promise<void> {
+  const text = input.text.trim()
+  const postId = input.postId.trim()
+  if (!postId) throw new Error('Invalid post.')
+
+  if (!isSupabaseConfigured()) {
+    const posts = localListFeed(100)
+    const existing = posts.find((p) => p.id === postId)
+    if (!existing || existing.userId !== input.userId) {
+      throw new Error('Post not found.')
+    }
+    const imageUrl = existing.imageUrl
+    const linkUrl = existing.linkUrl
+    if (text.length < 1 && !imageUrl && !linkUrl) {
+      throw new Error('Add some text before saving.')
+    }
+    if (text.length > 280) throw new Error('Max 280 characters.')
+    if (!localUpdateFeedPost(postId, input.userId, { body: text || undefined })) {
+      throw new Error('Could not update post.')
+    }
+    notifyFeed()
+    return
+  }
+
+  const supabase = getSupabase()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+  if (authError || !user) throw new Error('Sign in to edit posts.')
+  if (user.id !== input.userId) throw new Error('You can only edit your own posts.')
+
+  const { error } = await supabase.rpc('community_update_own_drop', {
+    p_post_id: postId,
+    p_body: text,
+  })
+
+  if (error) {
+    if (/community_update_own_drop|schema cache|could not find/i.test(error.message)) {
+      throw new Error('Run migration 056-community-edit-own-post.sql in Supabase.')
+    }
+    throw new Error(friendlyPostError(error.message))
+  }
+
+  notifyFeed()
+}
+
+export interface UpdateSpinInput {
+  postId: string
+  userId: string
+  caption?: string
+  trackTitle?: string
+  spotifyRaw?: string
+  youtubeRaw?: string
+}
+
+export async function updateSpinPost(input: UpdateSpinInput): Promise<void> {
+  const postId = input.postId.trim()
+  if (!postId) throw new Error('Invalid post.')
+
+  const { spotify, youtube, error: validationError } = validateSpinInput(
+    input.spotifyRaw ?? '',
+    input.youtubeRaw ?? ''
+  )
+  if (validationError) throw new Error(validationError)
+
+  const caption = input.caption?.trim().slice(0, 280) || ''
+  const trackTitle = input.trackTitle?.trim().slice(0, 120) || ''
+
+  if (!isSupabaseConfigured()) {
+    const ok = localUpdateFeedPost(postId, input.userId, {
+      body: caption || undefined,
+      trackTitle: trackTitle || undefined,
+      spotifyUrl: spotify?.url,
+      youtubeUrl: youtube?.url,
+    })
+    if (!ok) throw new Error('Post not found.')
+    notifyFeed()
+    return
+  }
+
+  const supabase = getSupabase()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+  if (authError || !user) throw new Error('Sign in to edit posts.')
+  if (user.id !== input.userId) throw new Error('You can only edit your own posts.')
+
+  const { error } = await supabase.rpc('community_update_own_spin', {
+    p_post_id: postId,
+    p_body: caption,
+    p_track_title: trackTitle,
+    p_spotify_url: spotify?.url ?? '',
+    p_youtube_url: youtube?.url ?? '',
+  })
+
+  if (error) {
+    if (/community_update_own_spin|schema cache|could not find/i.test(error.message)) {
+      throw new Error('Run migration 056-community-edit-own-post.sql in Supabase.')
+    }
+    throw new Error(error.message)
+  }
+
+  notifyFeed()
 }
 
 export async function hideCommunityPost(postId: string, actorUserId: string): Promise<void> {

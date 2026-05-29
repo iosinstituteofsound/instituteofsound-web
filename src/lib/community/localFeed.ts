@@ -95,3 +95,16 @@ export function localHideFeedPost(postId: string, userId: string): boolean {
   write(posts)
   return true
 }
+
+export function localUpdateFeedPost(
+  postId: string,
+  userId: string,
+  patch: Partial<Pick<CommunityFeedPost, 'body' | 'spotifyUrl' | 'youtubeUrl' | 'trackTitle'>>
+): boolean {
+  const posts = read()
+  const idx = posts.findIndex((p) => p.id === postId && p.userId === userId && p.status === 'visible')
+  if (idx < 0) return false
+  posts[idx] = { ...posts[idx]!, ...patch }
+  write(posts)
+  return true
+}

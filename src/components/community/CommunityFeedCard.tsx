@@ -12,6 +12,7 @@ import { isBodyOnlyLink } from '@/lib/community/extractLink'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { CommunityFeedEngagement } from '@/components/community/CommunityFeedEngagement'
+import { CommunityFeedEditPostModal } from '@/components/community/CommunityFeedEditPostModal'
 import { CommunityLinkPreviewCard } from '@/components/community/CommunityLinkPreviewCard'
 import { FollowButton } from '@/components/community/FollowButton'
 
@@ -44,6 +45,7 @@ export function CommunityFeedCard({
   const { user } = useAuth()
   const isProfileFeed = variant === 'profile'
   const [hiding, setHiding] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const [removeError, setRemoveError] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [shareLabel, setShareLabel] = useState('Share')
@@ -93,6 +95,17 @@ export function CommunityFeedCard({
       </button>
       {menuOpen && (
         <div className="community-feed-card-menu-panel" role="menu">
+          <button
+            type="button"
+            role="menuitem"
+            className="community-feed-card-menu-item"
+            onClick={() => {
+              setMenuOpen(false)
+              setEditOpen(true)
+            }}
+          >
+            Edit post
+          </button>
           <button
             type="button"
             role="menuitem"
@@ -326,6 +339,16 @@ export function CommunityFeedCard({
         onReactionChange={onReactionChange}
         shareLabel={shareLabel}
         onShare={onShare}
+      />
+
+      <CommunityFeedEditPostModal
+        post={post}
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        onSaved={() => {
+          onReactionChange?.()
+          onHidden?.()
+        }}
       />
     </article>
   )
