@@ -411,21 +411,60 @@ export async function togglePostReaction(
   return (data as FeedReactionKind | null) ?? null
 }
 
-export async function hideCommunityPost(postId: string, userId: string): Promise<void> {
+export async function hideCommunityPost(postId: string, actorUserId: string): Promise<void> {
+  if (!postId?.trim()) throw new Error('Invalid post.')
+  if (!actorUserId?.trim()) throw new Error('Sign in to remove posts.')
+
   if (!isSupabaseConfigured()) {
-    localHideFeedPost(postId, userId)
+    const ok = localHideFeedPost(postId, actorUserId)
+    if (!ok) throw new Error('Could not remove this post.')
     notifyFeed()
     return
   }
 
   const supabase = getSupabase()
-  const { error } = await supabase
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    throw new Error('Sign in to remove posts.')
+  }
+  if (user.id !== actorUserId) {
+    throw new Error('You can only remove your own posts.')
+  }
+
+  const { data: rpcOk, error: rpcError } = await supabase.rpc('community_hide_own_post', {
+    p_post_id: postId,
+  })
+
+  if (!rpcError && rpcOk === true) {
+    notifyFeed()
+    return
+  }
+
+  if (rpcError && !/community_hide_own_post|schema cache|could not find/i.test(rpcError.message)) {
+    throw new Error(rpcError.message)
+  }
+
+  const { data, error } = await supabase
     .from('community_posts')
     .update({ status: 'hidden' })
     .eq('id', postId)
-    .eq('user_id', userId)
+    .eq('user_id', user.id)
+    .select('id')
+    .maybeSingle()
 
   if (error) throw new Error(error.message)
+  if (!data?.id) {
+    throw new Error(
+      rpcError
+        ? 'Could not remove post. Run migration 054-community-hide-own-post.sql in Supabase.'
+        : 'Post not found or already removed.'
+    )
+  }
+
   notifyFeed()
 }
 

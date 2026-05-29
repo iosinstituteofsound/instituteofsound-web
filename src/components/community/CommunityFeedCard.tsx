@@ -44,9 +44,11 @@ export function CommunityFeedCard({
   const { user } = useAuth()
   const isProfileFeed = variant === 'profile'
   const [hiding, setHiding] = useState(false)
+  const [removeError, setRemoveError] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [shareLabel, setShareLabel] = useState('Share')
   const menuRef = useRef<HTMLDivElement>(null)
+  const isOwner = Boolean(user && user.id === post.userId)
   const spotify = post.spotifyUrl ? parseSpotifyUrl(post.spotifyUrl) : null
   const youtube = post.youtubeUrl ? parseYouTubeUrl(post.youtubeUrl) : null
   const primaryEmbed = getEmbedForPost(post)
@@ -63,18 +65,47 @@ export function CommunityFeedCard({
   }, [menuOpen])
 
   const remove = async () => {
+    if (!user || !isOwner) return
     if (!confirm('Remove this post from the feed?')) return
     setMenuOpen(false)
+    setRemoveError(null)
     setHiding(true)
     try {
-      await hideCommunityPost(post.id, post.userId)
+      await hideCommunityPost(post.id, user.id)
       onHidden?.()
-    } catch {
-      /* ignore */
+    } catch (e) {
+      setRemoveError(e instanceof Error ? e.message : 'Could not remove post.')
     } finally {
       setHiding(false)
     }
   }
+
+  const postMenu = isOwner ? (
+    <div className="community-feed-card-menu" ref={menuRef}>
+      <button
+        type="button"
+        className="community-feed-card-menu-btn"
+        aria-expanded={menuOpen}
+        aria-label="Post options"
+        onClick={() => setMenuOpen((v) => !v)}
+      >
+        ···
+      </button>
+      {menuOpen && (
+        <div className="community-feed-card-menu-panel" role="menu">
+          <button
+            type="button"
+            role="menuitem"
+            className="community-feed-card-menu-item community-feed-card-menu-item-danger"
+            disabled={hiding}
+            onClick={() => void remove()}
+          >
+            {hiding ? 'Removing…' : 'Remove post'}
+          </button>
+        </div>
+      )}
+    </div>
+  ) : null
 
   const when = formatRelativeTime(post.createdAt)
   const profilePath = networkProfilePath(post.handle)
@@ -179,32 +210,7 @@ export function CommunityFeedCard({
                         className="!px-3 !py-1.5 !text-[10px]"
                       />
                     )}
-                    {isYou && (
-                      <div className="community-feed-card-menu" ref={menuRef}>
-                        <button
-                          type="button"
-                          className="community-feed-card-menu-btn"
-                          aria-expanded={menuOpen}
-                          aria-label="Post options"
-                          onClick={() => setMenuOpen((v) => !v)}
-                        >
-                          ···
-                        </button>
-                        {menuOpen && (
-                          <div className="community-feed-card-menu-panel" role="menu">
-                            <button
-                              type="button"
-                              role="menuitem"
-                              className="community-feed-card-menu-item community-feed-card-menu-item-danger"
-                              disabled={hiding}
-                              onClick={() => void remove()}
-                            >
-                              {hiding ? 'Removing…' : 'Remove post'}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    {postMenu}
                   </div>
                 </div>
               ) : (
@@ -232,6 +238,7 @@ export function CommunityFeedCard({
               {when}
             </time>
           )}
+          {isProfileFeed && postMenu}
         </div>
       </header>
 
@@ -307,6 +314,10 @@ export function CommunityFeedCard({
             )}
           </div>
         </>
+      )}
+
+      {removeError && (
+        <p className="community-feed-card-remove-error text-sm text-mh-red mt-2">{removeError}</p>
       )}
 
       <CommunityFeedEngagement
