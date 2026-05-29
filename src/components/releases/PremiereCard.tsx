@@ -45,13 +45,13 @@ export function PremiereCard({ card, headingLevel = 'h3', className }: PremiereC
       aria-label={`${card.trackTitle} by ${card.artistName}`}
     >
       <article className="prem-card__inner">
-        {badge && <span className="prem-card__badge">{badge}</span>}
-        {!isAlbum && (
-          <span className="prem-card__play" aria-hidden>
-            <PlayIcon />
-          </span>
-        )}
         <div className="prem-card__art">
+          {badge && <span className="prem-card__badge">{badge}</span>}
+          {!isAlbum && (
+            <span className="prem-card__play" aria-hidden>
+              <PlayIcon />
+            </span>
+          )}
           {card.coverUrl && !coverBroken ? (
             <IOSImage
               src={card.coverUrl}

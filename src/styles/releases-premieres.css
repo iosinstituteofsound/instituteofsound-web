@@ -174,7 +174,6 @@
   scroll-snap-align: center;
   text-decoration: none;
   color: inherit;
-  overflow: visible;
 }
 
 .prem-card__inner {
@@ -184,7 +183,7 @@
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
   background: #0a0a0a;
-  overflow: visible;
+  overflow: hidden;
   min-height: 20.5rem;
   transition: border-color 0.28s, box-shadow 0.28s, transform 0.28s;
 }
@@ -196,9 +195,36 @@
 }
 
 .prem-card__art {
-  position: relative;
+  display: grid;
+  grid-template: 1fr / 1fr;
+  flex-shrink: 0;
   aspect-ratio: 1 / 1;
-  overflow: visible;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.prem-card__art > .prem-card__img,
+.prem-card__art > .prem-card__art-fallback {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.prem-card__art > .prem-card__badge,
+.prem-card__art > .prem-card__play {
+  grid-area: 1 / 1;
+  align-self: start;
+  z-index: 2;
+}
+
+.prem-card__art > .prem-card__badge {
+  justify-self: start;
+}
+
+.prem-card__art > .prem-card__play {
+  justify-self: end;
 }
 
 .prem-card:hover .prem-card__inner,
@@ -210,10 +236,7 @@
 }
 
 .prem-card__badge {
-  position: absolute;
-  top: 0.6rem;
-  left: 0.6rem;
-  z-index: 3;
+  margin: 0.6rem 0 0 0.6rem;
   font-size: 0.46rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -234,10 +257,7 @@
 }
 
 .prem-card__play {
-  position: absolute;
-  top: 0.55rem;
-  right: 0.55rem;
-  z-index: 3;
+  margin: 0.55rem 0.55rem 0 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -258,6 +278,7 @@
 }
 
 .prem-card__img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -283,8 +304,11 @@
 }
 
 .prem-card__body {
+  position: relative;
+  z-index: 1;
   padding: 0.75rem 0.8rem 0.65rem;
   flex: 1;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .prem-card__genre {
