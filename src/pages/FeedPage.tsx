@@ -36,7 +36,7 @@ export default function FeedPage() {
       </header>
 
       <CommunityFeed
-        defaultFilter={user ? 'following' : 'all'}
+        defaultFilter="all"
         highlightUserId={user?.id}
         hideHeading
       />

@@ -17,6 +17,7 @@ export function CommunityLinkPreviewCard({
 }: CommunityLinkPreviewCardProps) {
   const { preview: display, isMinimal } = normalizeLinkPreviewForDisplay(preview)
   const inComposer = Boolean(onRemove)
+  const rich = !compact
   const showUrl = !inComposer && !compact
 
   let hostname = display.siteName
@@ -27,27 +28,71 @@ export function CommunityLinkPreviewCard({
   }
 
   return (
-    <div className={clsx('community-link-preview-wrap', inComposer && isMinimal && 'community-link-preview-wrap-minimal')}>
-      <div className={clsx('community-link-preview', compact && 'community-link-preview-compact', className)}>
-        {display.imageUrl && (
-          <div className="community-link-preview-image">
-            <IOSImage
-              src={display.imageUrl}
-              alt=""
-              width={compact ? 120 : 480}
-              crop="limit"
-              className="community-link-preview-img"
-            />
-          </div>
+    <div
+      className={clsx(
+        'community-link-preview-wrap',
+        inComposer && isMinimal && 'community-link-preview-wrap-minimal'
+      )}
+    >
+      <div
+        className={clsx(
+          'community-link-preview',
+          rich && 'community-link-preview-rich',
+          compact && 'community-link-preview-compact',
+          className
         )}
-        <div className="community-link-preview-body">
-          <p className="community-link-preview-site">{hostname}</p>
-          {display.title && <p className="community-link-preview-title">{display.title}</p>}
-          {display.description && !compact && (
-            <p className="community-link-preview-desc">{display.description}</p>
-          )}
-          {showUrl && <p className="community-link-preview-url">{display.url}</p>}
-        </div>
+      >
+        {rich ? (
+          <>
+            {display.imageUrl ? (
+              <div className="community-link-preview-hero">
+                <IOSImage
+                  src={display.imageUrl}
+                  alt=""
+                  width={760}
+                  crop="limit"
+                  className="community-link-preview-hero-img"
+                />
+              </div>
+            ) : (
+              <div className="community-link-preview-hero community-link-preview-hero-placeholder" aria-hidden>
+                <span className="community-link-preview-hero-icon">⛓</span>
+              </div>
+            )}
+            <div className="community-link-preview-body">
+              <p className="community-link-preview-site">{hostname}</p>
+              {display.title && (
+                <p className="community-link-preview-title">{display.title}</p>
+              )}
+              {display.description && (
+                <p className="community-link-preview-desc">{display.description}</p>
+              )}
+              {showUrl && <p className="community-link-preview-url">{display.url}</p>}
+            </div>
+          </>
+        ) : (
+          <>
+            {display.imageUrl && (
+              <div className="community-link-preview-image">
+                <IOSImage
+                  src={display.imageUrl}
+                  alt=""
+                  width={120}
+                  crop="limit"
+                  className="community-link-preview-img"
+                />
+              </div>
+            )}
+            <div className="community-link-preview-body">
+              <p className="community-link-preview-site">{hostname}</p>
+              {display.title && <p className="community-link-preview-title">{display.title}</p>}
+              {display.description && (
+                <p className="community-link-preview-desc">{display.description}</p>
+              )}
+              {showUrl && <p className="community-link-preview-url">{display.url}</p>}
+            </div>
+          </>
+        )}
         {onRemove && (
           <button
             type="button"
@@ -61,7 +106,8 @@ export function CommunityLinkPreviewCard({
       </div>
       {inComposer && isMinimal && (
         <p className="community-composer-preview-note text-sm text-muted">
-          This site doesn&apos;t share a full preview; your link will still post.
+          This site limits automated previews — your link will still post. Try a specific article URL
+          for a richer card.
         </p>
       )}
     </div>

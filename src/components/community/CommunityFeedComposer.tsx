@@ -25,8 +25,11 @@ import { CommunityLinkPreviewCard } from '@/components/community/CommunityLinkPr
 type ComposerOption = 'photo' | 'music' | 'spin' | 'drop'
 
 interface CommunityFeedComposerProps {
-  onPosted: () => void
+  onPosted: () => void | Promise<void>
 }
+
+const POST_CHAR_LIMIT = 280
+const CHAR_COUNTER_FROM = 200
 
 function buildAuthor(user: User, stats: CommunityMemberStats | null, primaryGenreId?: string) {
   const handle = stats?.handle
@@ -68,6 +71,12 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
   const [success, setSuccess] = useState<string | null>(null)
 
   const previewRequest = useRef(0)
+
+  useEffect(() => {
+    if (!success) return
+    const timer = window.setTimeout(() => setSuccess(null), 3200)
+    return () => window.clearTimeout(timer)
+  }, [success])
 
   useEffect(() => {
     const pending = consumePendingToolDrop()
@@ -212,6 +221,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
     clearAttachmentFields()
     setSelected(null)
     setError(null)
+    setSuccess(null)
   }
 
   const submit = async () => {
@@ -249,7 +259,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
         setSuccess(`Posted · +${DB_REWARDS.drop_post} dB`)
       }
       reset()
-      onPosted()
+      await onPosted()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not post.')
     } finally {
@@ -281,6 +291,14 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
   })()
 
   const showMusicTip = Boolean(detectedUrl && isMusicStreamUrl(detectedUrl) && allowsLinkPreview)
+  const charCount = text.length
+  const showCharCounter = charCount >= CHAR_COUNTER_FROM
+
+  const dismissLinkPreview = () => {
+    setLinkPreview(null)
+    previewRequest.current += 1
+    if (detectedUrl) setText((prev) => stripUrlFromText(prev, detectedUrl))
+  }
 
   return (
     <div className="community-feed-composer community-feed-composer-fb ios-card">
@@ -299,9 +317,21 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           value={text}
           onChange={(e) => setText(e.target.value)}
           disabled={saving}
-          maxLength={280}
+          maxLength={POST_CHAR_LIMIT}
         />
       </div>
+
+      {showCharCounter && (
+        <p
+          className={clsx(
+            'community-composer-char-count',
+            charCount >= POST_CHAR_LIMIT && 'community-composer-char-count-limit'
+          )}
+          aria-live="polite"
+        >
+          {charCount}/{POST_CHAR_LIMIT}
+        </p>
+      )}
 
       {!selected && (text.trim() || linkPreview) && (
         <p className="community-composer-mode-hint">
@@ -344,13 +374,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
       )}
 
       {linkPreview && !linkPreviewLoading && allowsLinkPreview && (
-        <CommunityLinkPreviewCard
-          preview={linkPreview}
-          onRemove={() => {
-            setLinkPreview(null)
-            previewRequest.current += 1
-          }}
-        />
+        <CommunityLinkPreviewCard preview={linkPreview} onRemove={dismissLinkPreview} />
       )}
 
       {selected === 'photo' && imageUrl && (
@@ -401,8 +425,12 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
         </div>
       )}
 
-      {error && <p className="text-sm text-mh-red mt-3">{error}</p>}
-      {success && <p className="text-sm text-muted mt-3">{success}</p>}
+      {error && <p className="community-composer-feedback community-composer-feedback-error">{error}</p>}
+      {success && (
+        <p className="community-composer-feedback community-composer-feedback-success" role="status">
+          {success}
+        </p>
+      )}
 
       <div className="community-composer-bar">
         <div className="community-composer-actions" role="radiogroup" aria-label="Post type">

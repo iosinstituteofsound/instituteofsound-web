@@ -78,6 +78,15 @@ export function CommunityFeedCard({
 
   const when = formatRelativeTime(post.createdAt)
   const profilePath = networkProfilePath(post.handle)
+  const postPath = `/feed/${post.id}`
+  const kindLabel =
+    post.kind === 'spin' ? 'Spin' : post.linkUrl ? 'Link' : 'Drop'
+  const kindClass =
+    post.kind === 'spin'
+      ? 'community-feed-kind-spin'
+      : post.linkUrl
+        ? 'community-feed-kind-link'
+        : 'community-feed-kind-drop'
 
   const onShare = async () => {
     try {
@@ -103,7 +112,9 @@ export function CommunityFeedCard({
     <p className="community-feed-card-submeta">
       {!isProfileFeed && (
         <>
-          <time dateTime={post.createdAt}>{when}</time>
+          <Link to={postPath} className="community-feed-card-time-link">
+            <time dateTime={post.createdAt}>{when}</time>
+          </Link>
           <span className="community-feed-card-dot" aria-hidden>
             ·
           </span>
@@ -214,14 +225,7 @@ export function CommunityFeedCard({
             isProfileFeed && 'community-feed-card-badges-profile'
           )}
         >
-          <span
-            className={clsx(
-              'community-feed-kind',
-              post.kind === 'spin' ? 'community-feed-kind-spin' : 'community-feed-kind-drop'
-            )}
-          >
-            {post.kind === 'spin' ? 'Spin' : 'Drop'}
-          </span>
+          <span className={clsx('community-feed-kind', kindClass)}>{kindLabel}</span>
           {!isProfileFeed && <RankBadge rank={post.rank} />}
           {isProfileFeed && (
             <time className="community-feed-time-profile" dateTime={post.createdAt}>
@@ -263,7 +267,6 @@ export function CommunityFeedCard({
               description: post.linkDescription,
               imageUrl: post.linkImageUrl,
             }}
-            compact
           />
         </a>
       )}

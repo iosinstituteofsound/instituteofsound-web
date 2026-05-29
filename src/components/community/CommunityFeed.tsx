@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useCommunityFeed } from '@/hooks/useCommunityFeed'
 import { CommunityFeedComposer } from '@/components/community/CommunityFeedComposer'
 import { CommunityFeedCard } from '@/components/community/CommunityFeedCard'
+import { CommunityFeedCardSkeleton } from '@/components/community/CommunityFeedCardSkeleton'
 import { CommunityFeedFilters } from '@/components/community/CommunityFeedFilters'
 import type { CommunityFeedFilter } from '@/lib/community/feedFilters'
 
@@ -23,6 +24,19 @@ export function CommunityFeed({
   const { user } = useAuth()
   const [filter, setFilter] = useState<CommunityFeedFilter>(defaultFilter)
   const { posts, loading, refresh } = useCommunityFeed(30, filter, tribeSlug)
+  const listRef = useRef<HTMLDivElement>(null)
+
+  const scrollToNewestPost = useCallback(() => {
+    requestAnimationFrame(() => {
+      const first = listRef.current?.querySelector('.community-feed-card')
+      first?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    })
+  }, [])
+
+  const onPosted = useCallback(async () => {
+    await refresh()
+    scrollToNewestPost()
+  }, [refresh, scrollToNewestPost])
 
   return (
     <section id="feed" className="community-feed-section" aria-labelledby="network-feed-heading">
@@ -37,33 +51,47 @@ export function CommunityFeed({
         </div>
       )}
 
-      <CommunityFeedFilters
-        value={filter}
-        onChange={setFilter}
-        tribeSlug={tribeSlug}
-        isLoggedIn={Boolean(user)}
-      />
+      <div className="community-feed-sticky-tools">
+        <CommunityFeedFilters
+          value={filter}
+          onChange={setFilter}
+          tribeSlug={tribeSlug}
+          isLoggedIn={Boolean(user)}
+        />
+        <CommunityFeedComposer onPosted={onPosted} />
+      </div>
 
-      <CommunityFeedComposer onPosted={() => void refresh()} />
-
-      <div className="community-feed-list mt-8">
+      <div ref={listRef} className="community-feed-list">
         {loading && posts.length === 0 && (
-          <p className="text-sm text-muted text-center py-8">Loading feed…</p>
+          <>
+            <CommunityFeedCardSkeleton />
+            <CommunityFeedCardSkeleton />
+            <CommunityFeedCardSkeleton />
+          </>
         )}
         {!loading && posts.length === 0 && (
           <div className="community-feed-empty ios-card">
             <p className="font-display font-bold">Silence on the wire</p>
             <p className="text-sm text-muted mt-2">
               {filter === 'following'
-                ? 'Your wire is quiet — follow operators on their profiles or join a crew to see more spins and drops.'
+                ? 'Your wire is quiet — follow operators on their profiles, or see everything on All.'
                 : filter === 'tribe'
-                ? 'No spins or drops from your tribe yet — be the first on the wire.'
-                : filter === 'spin'
-                  ? 'No spins in this view yet. Share a track from the composer above.'
-                  : filter === 'drop'
-                    ? 'No drops yet. Post a short underground transmission.'
-                    : 'Be the first to spin a track or drop a transmission this week.'}
+                  ? 'No spins or drops from your tribe yet — be the first on the wire.'
+                  : filter === 'spin'
+                    ? 'No spins in this view yet. Share a track from the composer above.'
+                    : filter === 'drop'
+                      ? 'No drops yet. Post a short transmission or paste a link.'
+                      : 'Be the first to spin a track, drop a transmission, or share a link.'}
             </p>
+            {filter === 'following' && (
+              <button
+                type="button"
+                className="ios-btn ios-btn-metal mt-4"
+                onClick={() => setFilter('all')}
+              >
+                View all posts
+              </button>
+            )}
           </div>
         )}
         {posts.map((post) => (

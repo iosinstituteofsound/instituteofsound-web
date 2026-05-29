@@ -7878,11 +7878,25 @@ html[data-perf='lite'] .metal-loader-core-beat {
   padding: 1rem 1.1rem;
 }
 
+.community-feed-sticky-tools {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin-bottom: 1rem;
+  padding-bottom: 0.35rem;
+  background: linear-gradient(
+    to bottom,
+    var(--color-background, #050505) 0%,
+    var(--color-background, #050505) 72%,
+    transparent 100%
+  );
+}
+
 .community-feed-filters {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .community-feed-filter {
@@ -8077,6 +8091,34 @@ html[data-perf='lite'] .metal-loader-core-beat {
   padding-left: calc(44px + 0.75rem);
 }
 
+.community-composer-char-count {
+  margin: 0.15rem 0 0;
+  padding-left: calc(44px + 0.75rem);
+  font-size: 0.7rem;
+  text-align: right;
+  color: var(--color-muted);
+}
+
+.community-composer-char-count-limit {
+  color: var(--color-rs-red);
+  font-weight: 600;
+}
+
+.community-composer-feedback {
+  margin: 0.65rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.community-composer-feedback-error {
+  color: var(--color-rs-red);
+}
+
+.community-composer-feedback-success {
+  color: #6ee7a0;
+  font-weight: 600;
+}
+
 .community-link-preview {
   position: relative;
   display: flex;
@@ -8085,6 +8127,53 @@ html[data-perf='lite'] .metal-loader-core-beat {
   border-radius: 0.65rem;
   overflow: hidden;
   background: var(--color-elevated, rgba(255, 255, 255, 0.03));
+}
+
+.community-link-preview-rich {
+  flex-direction: column;
+}
+
+.community-link-preview-hero {
+  width: 100%;
+  aspect-ratio: 1.91 / 1;
+  max-height: 280px;
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+.community-link-preview-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.community-link-preview-hero-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+}
+
+.community-link-preview-hero-icon {
+  font-size: 2rem;
+  opacity: 0.35;
+}
+
+.community-link-preview-rich .community-link-preview-body {
+  padding: 0.75rem 0.85rem 0.85rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.community-link-preview-rich .community-link-preview-title {
+  font-size: 0.95rem;
+  -webkit-line-clamp: 2;
+}
+
+.community-link-preview-rich .community-link-preview-desc {
+  font-size: 0.8rem;
+  -webkit-line-clamp: 3;
+  margin-top: 0.4rem;
 }
 
 .community-link-preview-compact {
@@ -8334,7 +8423,90 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .community-feed-list {
   display: flex;
   flex-direction: column;
+  gap: 0;
+  margin-top: 0.5rem;
   gap: 1rem;
+}
+
+.community-feed-card-skeleton {
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  pointer-events: none;
+}
+
+.community-feed-card-skeleton-head {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.community-feed-card-skeleton-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  animation: community-feed-pulse 1.2s ease-in-out infinite;
+}
+
+.community-feed-card-skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.community-feed-card-skeleton-line {
+  height: 0.65rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  animation: community-feed-pulse 1.2s ease-in-out infinite;
+}
+
+.community-feed-card-skeleton-line-short {
+  width: 55%;
+}
+
+.community-feed-card-skeleton-line-xs {
+  width: 35%;
+  animation-delay: 0.15s;
+}
+
+.community-feed-card-skeleton-body {
+  margin-top: 1rem;
+  height: 4.5rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  animation: community-feed-pulse 1.2s ease-in-out infinite;
+  animation-delay: 0.1s;
+}
+
+.community-feed-card-skeleton-bar {
+  margin-top: 1rem;
+  height: 2rem;
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.03);
+  animation: community-feed-pulse 1.2s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+@keyframes community-feed-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.community-feed-card-time-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.community-feed-card-time-link:hover {
+  color: var(--color-foreground);
+  text-decoration: underline;
 }
 
 .community-feed-empty {
@@ -8420,6 +8592,11 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .community-feed-kind-drop {
   border-color: rgba(227, 27, 35, 0.4);
   color: var(--color-rs-red);
+}
+
+.community-feed-kind-link {
+  border-color: rgba(96, 165, 250, 0.45);
+  color: #93c5fd;
 }
 
 .community-feed-drop-body {

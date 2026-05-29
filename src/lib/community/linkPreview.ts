@@ -49,7 +49,8 @@ export function normalizeLinkPreviewForDisplay(preview: LinkPreview): {
     title,
   }
 
-  const isMinimal = !normalized.imageUrl && !normalized.description && !normalized.title
+  const isMinimal =
+    !normalized.imageUrl && !normalized.description && (!normalized.title || normalized.title === siteName)
 
   return { preview: normalized, isMinimal }
 }
