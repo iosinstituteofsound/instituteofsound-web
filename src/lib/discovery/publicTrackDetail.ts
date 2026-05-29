@@ -10,6 +10,13 @@ export interface PublicTrackDetail {
   releaseType: 'album' | 'ep' | 'single'
   moreFromArtist: ArtistTrack[]
   moreReleases: DiscoverPremiereCard[]
+  artistStats: {
+    trackCount: number
+    albumCount: number
+    totalPlays: number
+  }
+  /** Sidebar queue — current track first, then top plays */
+  sidebarTracks: ArtistTrack[]
 }
 
 export async function fetchPublicTrackDetail(
@@ -33,6 +40,16 @@ export async function fetchPublicTrackDetail(
 
   const moreFromArtist = page.tracks.filter((t) => t.id !== trackId).slice(0, 4)
 
+  const trackCount = page.tracks.length
+  const albumCount = page.albums.length + page.singles.length
+  const totalPlays = page.tracks.reduce((sum, t) => sum + (t.playCount ?? 0), 0)
+
+  const others = page.tracks
+    .filter((t) => t.id !== trackId)
+    .sort((a, b) => b.playCount - a.playCount)
+    .slice(0, 5)
+  const sidebarTracks = [track, ...others]
+
   let moreReleases: DiscoverPremiereCard[] = []
   try {
     const catalog = await fetchReleasesCatalog()
@@ -50,5 +67,7 @@ export async function fetchPublicTrackDetail(
     releaseType,
     moreFromArtist,
     moreReleases,
+    artistStats: { trackCount, albumCount, totalPlays },
+    sidebarTracks,
   }
 }
