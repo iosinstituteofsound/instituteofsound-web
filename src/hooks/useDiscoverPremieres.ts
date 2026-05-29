@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { fetchDiscoverPremiereFeed, type DiscoverPremiereCard } from '@/lib/discovery/premieres'
 
-const HOUR_MS = 60 * 60 * 1000
-
 function msUntilNextUtcHour(): number {
   const now = Date.now()
   const d = new Date(now)

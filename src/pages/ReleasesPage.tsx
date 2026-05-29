@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import clsx from 'clsx'
-import { DiscoverReleasesSection } from '@/components/discover/DiscoverReleasesSection'
 import { GatedLink } from '@/components/auth/GatedLink'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { useDiscoverPremieres } from '@/hooks/useDiscoverPremieres'

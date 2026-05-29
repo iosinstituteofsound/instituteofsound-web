@@ -291,14 +291,19 @@ export async function listDiscoverPremierePicksForDesk(): Promise<DiscoverPremie
   return rows
 }
 
+export type PremierePickSearchHit = {
+  profile: Pick<ArtistProfile, 'id' | 'slug' | 'displayName'>
+  track: ArtistTrack
+}
+
 export async function searchArtistTracksForPremierePick(
   query: string
-): Promise<{ profile: ArtistProfile; track: ArtistTrack }[]> {
+): Promise<PremierePickSearchHit[]> {
   const q = query.trim().toLowerCase()
   if (!q) return []
 
   if (!isSupabaseConfigured()) {
-    const out: { profile: ArtistProfile; track: ArtistTrack }[] = []
+    const out: PremierePickSearchHit[] = []
     for (const profile of local.localListPublishedProfiles()) {
       if (
         !profile.slug.toLowerCase().includes(q) &&
@@ -324,7 +329,7 @@ export async function searchArtistTracksForPremierePick(
     .limit(8)
 
   if (error) throw new Error(error.message)
-  const out: { profile: ArtistProfile; track: ArtistTrack }[] = []
+  const out: PremierePickSearchHit[] = []
 
   for (const row of profiles ?? []) {
     const { data: byTitle } = await supabase
@@ -344,13 +349,8 @@ export async function searchArtistTracksForPremierePick(
       out.push({
         profile: {
           id: row.id,
-          userId: '',
           slug: row.slug,
           displayName: row.display_name,
-          genres: row.genres ?? [],
-          published: true,
-          createdAt: '',
-          updatedAt: '',
         },
         track: {
           id: t.id,
