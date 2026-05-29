@@ -94,18 +94,21 @@ export async function addPostComment(input: AddCommentInput): Promise<PostCommen
       ? input.parentAuthorUserId
       : input.postOwnerUserId
     if (notifyUserId && notifyUserId !== input.authorUserId) {
-      localAddNotification({
-        kind: 'post_comment',
-        title: input.parentId
-          ? `${input.authorDisplayName} replied to your comment`
-          : `${input.authorDisplayName} commented on your post`,
-        body: text.slice(0, 120),
-        href: `/feed/${input.postId}`,
-        actorId: input.authorUserId,
-        actorName: input.authorDisplayName,
-        actorHandle: input.authorHandle,
-        actorAvatarUrl: input.authorAvatarUrl,
-      })
+      localAddNotification(
+        {
+          kind: 'post_comment',
+          title: input.parentId
+            ? `${input.authorDisplayName} replied to your comment`
+            : `${input.authorDisplayName} commented on your post`,
+          body: text.slice(0, 120),
+          href: `/feed/${input.postId}`,
+          actorId: input.authorUserId,
+          actorName: input.authorDisplayName,
+          actorHandle: input.authorHandle,
+          actorAvatarUrl: input.authorAvatarUrl,
+        },
+        notifyUserId
+      )
       window.dispatchEvent(new Event(COMMUNITY_NOTIFICATION_EVENT))
     }
 

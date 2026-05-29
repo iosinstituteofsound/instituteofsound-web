@@ -4,7 +4,8 @@ import clsx from 'clsx'
 import { useAuth } from '@/context/AuthContext'
 import { isEditorStaff } from '@/lib/auth/roles'
 import { useCommunityNotifications } from '@/hooks/useCommunityNotifications'
-import { notificationActorPath } from '@/lib/community/notificationService'
+import { notificationTargetHref } from '@/lib/community/notificationService'
+import { formatRelativeTime } from '@/lib/community/relativeTime'
 import type { NotificationKind } from '@/lib/community/localNotifications'
 import { IOSImage } from '@/components/ui/IOSImage'
 
@@ -37,7 +38,12 @@ export function NetworkNotificationsPanel({ className }: NetworkNotificationsPan
   const panelRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
   const deskMode = user && isEditorStaff(user.role)
-  const { items, unread, loading, markAllRead, markRead } = useCommunityNotifications()
+  const { items, unread, loading, markAllRead, markRead, refresh } = useCommunityNotifications()
+
+  useEffect(() => {
+    if (!open) return
+    void refresh()
+  }, [open, refresh])
 
   useEffect(() => {
     if (!open) return
@@ -92,19 +98,23 @@ export function NetworkNotificationsPanel({ className }: NetworkNotificationsPan
             <p className="network-notifications-empty">
               {deskMode
                 ? 'No desk alerts yet — verification requests and network activity show here.'
-                : 'No alerts yet — follows, reactions, and rank-ups show here.'}
+                : 'No alerts yet — comments, follows, reactions, and rank-ups show here.'}
             </p>
           )}
 
           <ul className="network-notifications-list">
             {items.map((n) => {
-              const actorPath = notificationActorPath(n)
-              const href = n.href ?? actorPath ?? '/community'
+              const href = notificationTargetHref(n)
+              const isComment = n.kind === 'post_comment'
               return (
                 <li key={n.id}>
                   <Link
                     to={href}
-                    className={clsx('network-notifications-item', !n.readAt && 'network-notifications-item-unread')}
+                    className={clsx(
+                      'network-notifications-item',
+                      !n.readAt && 'network-notifications-item-unread',
+                      isComment && 'network-notifications-item-comment'
+                    )}
                     onClick={() => {
                       if (!n.readAt) void markRead([n.id])
                       setOpen(false)
@@ -124,15 +134,8 @@ export function NetworkNotificationsPanel({ className }: NetworkNotificationsPan
                     )}
                     <span className="network-notifications-copy">
                       <strong>{n.title}</strong>
-                      {n.body && <span>{n.body}</span>}
-                      <time dateTime={n.createdAt}>
-                        {new Date(n.createdAt).toLocaleString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </time>
+                      {n.body && <span className="network-notifications-body">{n.body}</span>}
+                      <time dateTime={n.createdAt}>{formatRelativeTime(n.createdAt)}</time>
                     </span>
                   </Link>
                 </li>

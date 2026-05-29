@@ -45,8 +45,11 @@ function mapRow(row: NotificationRow): CommunityNotification {
   }
 }
 
-export async function fetchNotifications(limit = 40): Promise<CommunityNotification[]> {
-  if (!isSupabaseConfigured()) return localListNotifications(limit)
+export async function fetchNotifications(
+  limit = 40,
+  viewerUserId?: string
+): Promise<CommunityNotification[]> {
+  if (!isSupabaseConfigured()) return localListNotifications(limit, viewerUserId)
 
   const supabase = getSupabase()
   const { data, error } = await supabase.rpc('community_notifications_list', { lim: limit })
@@ -59,8 +62,8 @@ export async function fetchNotifications(limit = 40): Promise<CommunityNotificat
   return (data ?? []).map(mapRow)
 }
 
-export async function fetchUnreadNotificationCount(): Promise<number> {
-  if (!isSupabaseConfigured()) return localUnreadCount()
+export async function fetchUnreadNotificationCount(viewerUserId?: string): Promise<number> {
+  if (!isSupabaseConfigured()) return localUnreadCount(viewerUserId)
 
   const supabase = getSupabase()
   const { data, error } = await supabase.rpc('community_notifications_unread_count')
@@ -73,9 +76,9 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
   return Number(data ?? 0)
 }
 
-export async function markNotificationsRead(ids?: string[]): Promise<void> {
+export async function markNotificationsRead(ids?: string[], viewerUserId?: string): Promise<void> {
   if (!isSupabaseConfigured()) {
-    localMarkNotificationsRead(ids)
+    localMarkNotificationsRead(ids, viewerUserId)
     notifyChange()
     return
   }
@@ -94,4 +97,14 @@ export function notificationActorPath(n: CommunityNotification): string | null {
   if (!n.actorHandle) return null
   const h = n.actorHandle.replace(/^@/, '')
   return `/network/${h}`
+}
+
+/** Where the bell item should navigate (post detail for comments, etc.). */
+export function notificationTargetHref(n: CommunityNotification): string {
+  const href = n.href?.trim()
+  if (href) return href.startsWith('/') ? href : `/${href}`
+  if (n.kind === 'post_comment' || n.kind === 'dm_message') return '/feed'
+  const actor = notificationActorPath(n)
+  if (actor) return actor
+  return '/community'
 }

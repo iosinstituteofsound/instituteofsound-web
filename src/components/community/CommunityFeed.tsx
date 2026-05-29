@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useCommunityFeed } from '@/hooks/useCommunityFeed'
 import { CommunityFeedComposer } from '@/components/community/CommunityFeedComposer'
@@ -23,8 +23,26 @@ export function CommunityFeed({
 }: CommunityFeedProps) {
   const { user } = useAuth()
   const [filter, setFilter] = useState<CommunityFeedFilter>(defaultFilter)
-  const { posts, loading, refresh } = useCommunityFeed(30, filter, tribeSlug)
+  const { posts, loading, loadingMore, hasMore, refresh, loadMore } = useCommunityFeed(
+    30,
+    filter,
+    tribeSlug
+  )
   const listRef = useRef<HTMLDivElement>(null)
+  const loadMoreRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = loadMoreRef.current
+    if (!el || !hasMore || loading || loadingMore) return
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) void loadMore()
+      },
+      { rootMargin: '240px 0px' }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [hasMore, loading, loadingMore, loadMore, posts.length])
 
   const scrollToNewestPost = useCallback(() => {
     requestAnimationFrame(() => {
@@ -103,6 +121,18 @@ export function CommunityFeed({
             onReactionChange={() => void refresh()}
           />
         ))}
+        {hasMore && posts.length > 0 && (
+          <div ref={loadMoreRef} className="community-feed-load-more">
+            <button
+              type="button"
+              className="ios-btn ios-btn-metal w-full"
+              disabled={loadingMore}
+              onClick={() => void loadMore()}
+            >
+              {loadingMore ? 'Loading…' : 'Load more'}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )

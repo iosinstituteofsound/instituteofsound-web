@@ -19,7 +19,6 @@ export interface CommunityNotification {
   actorName?: string
   actorHandle?: string
   actorAvatarUrl?: string
-  /** Dedupe desk alerts for role verification (local demo). */
   verificationRequestId?: string
   readAt?: string
   createdAt: string
@@ -27,9 +26,13 @@ export interface CommunityNotification {
 
 const KEY = 'ios_community_notifications'
 
-function read(): CommunityNotification[] {
+function storageKey(userId?: string) {
+  return userId ? `${KEY}:${userId}` : KEY
+}
+
+function read(userId?: string): CommunityNotification[] {
   try {
-    const raw = localStorage.getItem(KEY)
+    const raw = localStorage.getItem(storageKey(userId))
     if (!raw) return []
     const parsed = JSON.parse(raw) as CommunityNotification[]
     return Array.isArray(parsed) ? parsed : []
@@ -38,43 +41,60 @@ function read(): CommunityNotification[] {
   }
 }
 
-function write(items: CommunityNotification[]) {
+function write(items: CommunityNotification[], userId?: string) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(items.slice(0, 80)))
+    localStorage.setItem(storageKey(userId), JSON.stringify(items.slice(0, 80)))
   } catch {
     /* ignore */
   }
 }
 
-export function localListNotifications(limit = 40): CommunityNotification[] {
-  return read()
+export function localListNotifications(limit = 40, viewerUserId?: string): CommunityNotification[] {
+  if (!viewerUserId) {
+    return read()
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, limit)
+  }
+  return read(viewerUserId)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, limit)
 }
 
-export function localUnreadCount(): number {
-  return read().filter((n) => !n.readAt).length
+export function localUnreadCount(viewerUserId?: string): number {
+  return localListNotifications(200, viewerUserId).filter((n) => !n.readAt).length
 }
 
 export function localAddNotification(
-  input: Omit<CommunityNotification, 'id' | 'createdAt'> & { id?: string }
+  input: Omit<CommunityNotification, 'id' | 'createdAt'> & { id?: string },
+  targetUserId?: string
 ): void {
   const n: CommunityNotification = {
     id: input.id ?? crypto.randomUUID(),
     createdAt: new Date().toISOString(),
     ...input,
   }
+  const uid = targetUserId?.trim()
+  if (uid) {
+    write([n, ...read(uid)], uid)
+    return
+  }
   write([n, ...read()])
 }
 
-export function localMarkNotificationsRead(ids?: string[]): void {
+export function localMarkNotificationsRead(ids?: string[], viewerUserId?: string): void {
   const set = ids?.length ? new Set(ids) : null
   const now = new Date().toISOString()
-  write(
-    read().map((n) => {
+  const uid = viewerUserId?.trim()
+  const update = (list: CommunityNotification[]) =>
+    list.map((n) => {
       if (n.readAt) return n
       if (set && !set.has(n.id)) return n
       return { ...n, readAt: now }
     })
-  )
+
+  if (uid) {
+    write(update(read(uid)), uid)
+    return
+  }
+  write(update(read()))
 }

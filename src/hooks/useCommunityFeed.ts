@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   COMMUNITY_FEED_EVENT,
   fetchCommunityFeed,
+  type CommunityFeedCursor,
   type CommunityFeedPost,
 } from '@/lib/community/feedService'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
@@ -15,31 +16,69 @@ import {
   type CommunityFeedFilter,
 } from '@/lib/community/feedFilters'
 
+function feedCursorFromPost(post: CommunityFeedPost): CommunityFeedCursor {
+  return { createdAt: post.createdAt, id: post.id }
+}
+
+function mergeFeedPosts(
+  prev: CommunityFeedPost[],
+  next: CommunityFeedPost[]
+): CommunityFeedPost[] {
+  if (next.length === 0) return prev
+  const seen = new Set(prev.map((p) => p.id))
+  const added = next.filter((p) => !seen.has(p.id))
+  return added.length === 0 ? prev : [...prev, ...added]
+}
+
 export function useCommunityFeed(
-  limit = 30,
+  pageSize = 30,
   filter: CommunityFeedFilter = 'all',
   tribeSlug?: string | null
 ) {
   const { user } = useAuth()
   const [posts, setPosts] = useState<CommunityFeedPost[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
+  const postsRef = useRef(posts)
+  postsRef.current = posts
+
+  const feedQuery = useCallback(
+    (cursor?: CommunityFeedCursor | null) => ({
+      limit: pageSize,
+      kind: feedKindParam(filter),
+      genreSlug: feedGenreParam(filter, tribeSlug),
+      followingOnly: feedFollowingOnly(filter),
+      viewerUserId: user?.id ?? null,
+      cursor: cursor ?? null,
+    }),
+    [pageSize, filter, tribeSlug, user?.id]
+  )
 
   const refresh = useCallback(async () => {
     setLoading(true)
     try {
-      setPosts(
-        await fetchCommunityFeed({
-          limit,
-          kind: feedKindParam(filter),
-          genreSlug: feedGenreParam(filter, tribeSlug),
-          followingOnly: feedFollowingOnly(filter),
-          viewerUserId: user?.id ?? null,
-        })
-      )
+      const page = await fetchCommunityFeed(feedQuery())
+      setPosts(page)
+      setHasMore(page.length >= pageSize)
     } finally {
       setLoading(false)
     }
-  }, [limit, filter, tribeSlug, user?.id])
+  }, [feedQuery, pageSize])
+
+  const loadMore = useCallback(async () => {
+    const current = postsRef.current
+    if (current.length === 0 || loadingMore) return
+    setLoadingMore(true)
+    try {
+      const cursor = feedCursorFromPost(current[current.length - 1]!)
+      const page = await fetchCommunityFeed(feedQuery(cursor))
+      setPosts((prev) => mergeFeedPosts(prev, page))
+      setHasMore(page.length >= pageSize)
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [feedQuery, loadingMore, pageSize])
 
   useEffect(() => {
     void refresh()
@@ -56,5 +95,5 @@ export function useCommunityFeed(
     }
   }, [refresh])
 
-  return { posts, loading, refresh }
+  return { posts, loading, loadingMore, hasMore, refresh, loadMore }
 }

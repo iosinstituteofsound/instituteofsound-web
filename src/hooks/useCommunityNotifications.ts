@@ -7,7 +7,12 @@ import {
   markNotificationsRead,
   type CommunityNotification,
 } from '@/lib/community/notificationService'
+import { isSupabaseConfigured, getSupabase } from '@/lib/supabase/client'
 import { COMMUNITY_FOLLOW_EVENT } from '@/lib/community/followService'
+import { COMMENT_EVENT } from '@/lib/community/commentService'
+import { COMMUNITY_FEED_EVENT } from '@/lib/community/feedService'
+
+const POLL_MS = 45_000
 
 export function useCommunityNotifications() {
   const { user } = useAuth()
@@ -24,8 +29,8 @@ export function useCommunityNotifications() {
     setLoading(true)
     try {
       const [list, count] = await Promise.all([
-        fetchNotifications(40),
-        fetchUnreadNotificationCount(),
+        fetchNotifications(40, user.id),
+        fetchUnreadNotificationCount(user.id),
       ])
       setItems(list)
       setUnread(count)
@@ -39,23 +44,68 @@ export function useCommunityNotifications() {
     const onChange = () => void refresh()
     window.addEventListener(COMMUNITY_NOTIFICATION_EVENT, onChange)
     window.addEventListener(COMMUNITY_FOLLOW_EVENT, onChange)
+    window.addEventListener(COMMENT_EVENT, onChange)
+    window.addEventListener(COMMUNITY_FEED_EVENT, onChange)
     return () => {
       window.removeEventListener(COMMUNITY_NOTIFICATION_EVENT, onChange)
       window.removeEventListener(COMMUNITY_FOLLOW_EVENT, onChange)
+      window.removeEventListener(COMMENT_EVENT, onChange)
+      window.removeEventListener(COMMUNITY_FEED_EVENT, onChange)
     }
   }, [refresh])
 
-  const markAllRead = useCallback(async () => {
-    await markNotificationsRead()
-    await refresh()
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === 'visible') void refresh()
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
   }, [refresh])
+
+  useEffect(() => {
+    if (!user?.id || !isSupabaseConfigured()) return
+
+    const supabase = getSupabase()
+    const channel = supabase
+      .channel(`community-notifications:${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'community_notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          void refresh()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [user?.id, refresh])
+
+  useEffect(() => {
+    if (!user) return
+    const timer = window.setInterval(() => void refresh(), POLL_MS)
+    return () => window.clearInterval(timer)
+  }, [user, refresh])
+
+  const markAllRead = useCallback(async () => {
+    if (!user) return
+    await markNotificationsRead(undefined, user.id)
+    await refresh()
+  }, [refresh, user])
 
   const markRead = useCallback(
     async (ids: string[]) => {
-      await markNotificationsRead(ids)
+      if (!user) return
+      await markNotificationsRead(ids, user.id)
       await refresh()
     },
-    [refresh]
+    [refresh, user]
   )
 
   return { items, unread, loading, refresh, markAllRead, markRead }

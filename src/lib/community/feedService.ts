@@ -106,12 +106,28 @@ function notifyFeed() {
   window.dispatchEvent(new Event(COMMUNITY_FEED_EVENT))
 }
 
+export interface CommunityFeedCursor {
+  createdAt: string
+  id: string
+}
+
 export interface CommunityFeedQuery {
   limit?: number
   kind?: 'spin' | 'drop' | null
   genreSlug?: string | null
   followingOnly?: boolean
   viewerUserId?: string | null
+  cursor?: CommunityFeedCursor | null
+}
+
+function isBeforeFeedCursor(
+  post: { createdAt: string; id: string },
+  cursor: CommunityFeedCursor
+): boolean {
+  const postMs = new Date(post.createdAt).getTime()
+  const cursorMs = new Date(cursor.createdAt).getTime()
+  if (postMs !== cursorMs) return postMs < cursorMs
+  return post.id < cursor.id
 }
 
 export async function fetchCommunityFeed(
@@ -124,10 +140,11 @@ export async function fetchCommunityFeed(
   const genreSlug = query.genreSlug ?? null
   const followingOnly = query.followingOnly ?? false
   const viewerUserId = query.viewerUserId ?? null
+  const cursor = query.cursor ?? null
 
   if (!isSupabaseConfigured()) {
     let posts = localApplyReactions(
-      localListFeed(limit * 2).map((p) => ({
+      localListFeed(200).map((p) => ({
         ...p,
         reactions: p.reactions ?? emptyReactions(),
       }))
@@ -142,9 +159,15 @@ export async function fetchCommunityFeed(
     }
     if (kind) posts = posts.filter((p) => p.kind === kind)
     if (genreSlug) posts = posts.filter((p) => p.primaryGenreSlug === genreSlug)
-    return posts
+    posts = posts
       .map((p) => ({ ...p, commentCount: localCommentCount(p.id) }))
-      .slice(0, limit)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() ||
+          b.id.localeCompare(a.id)
+      )
+    if (cursor) posts = posts.filter((p) => isBeforeFeedCursor(p, cursor))
+    return posts.slice(0, limit)
   }
 
   const supabase = getSupabase()
@@ -153,6 +176,8 @@ export async function fetchCommunityFeed(
     p_kind: kind,
     p_genre_slug: genreSlug,
     p_following_only: followingOnly,
+    p_cursor_created_at: cursor?.createdAt ?? null,
+    p_cursor_id: cursor?.id ?? null,
   })
 
   if (error) {
