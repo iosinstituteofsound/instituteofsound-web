@@ -54,33 +54,77 @@
   pointer-events: none;
 }
 
-/* —— Brand lockup (red frame) —— */
+/* —— Brand lockup (editorial frame) —— */
 .ios-brand-frame {
+  position: relative;
   display: block;
-  padding: 1.35rem 1rem 1.3rem;
-  text-align: center;
-  border: 1px solid rgba(212, 0, 0, 0.75);
-  background:
-    linear-gradient(145deg, rgba(212, 0, 0, 0.06) 0%, transparent 48%),
-    linear-gradient(180deg, rgba(14, 14, 14, 0.98) 0%, rgba(5, 5, 5, 1) 100%);
+  padding: 3px;
   text-decoration: none;
+  border-radius: 2px;
+  background: linear-gradient(
+    145deg,
+    rgba(212, 0, 0, 0.55) 0%,
+    rgba(212, 0, 0, 0.15) 35%,
+    rgba(80, 0, 0, 0.35) 100%
+  );
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 10px 32px -14px rgba(0, 0, 0, 0.85);
+    0 0 40px -18px rgba(212, 0, 0, 0.55),
+    0 12px 36px -20px rgba(0, 0, 0, 0.9);
   transition:
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+}
+
+.ios-brand-frame__glow {
+  position: absolute;
+  inset: -20% -30% -30% -30%;
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 0%,
+    rgba(212, 0, 0, 0.2),
+    transparent 68%
+  );
+  pointer-events: none;
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
+.ios-brand-frame__inner {
+  position: relative;
+  display: block;
+  padding: 1.15rem 0.85rem 1.1rem;
+  text-align: center;
+  border-radius: 1px;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% -10%, rgba(212, 0, 0, 0.09), transparent 55%),
+    linear-gradient(180deg, #101010 0%, #050505 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.ios-brand-frame__inner::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(212, 0, 0, 0.22);
+  border-radius: 1px;
+  pointer-events: none;
 }
 
 .ios-brand-frame:hover {
-  border-color: var(--color-mh-red);
+  transform: translateY(-1px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 0 36px -10px rgba(212, 0, 0, 0.5);
+    0 0 52px -14px rgba(212, 0, 0, 0.65),
+    0 16px 40px -18px rgba(0, 0, 0, 0.95);
+}
+
+.ios-brand-frame:hover .ios-brand-frame__glow {
+  opacity: 1;
 }
 
 .ios-brand-frame:hover .ios-brand-frame-line-accent {
   color: var(--color-mh-red);
+  text-shadow: 0 0 28px rgba(212, 0, 0, 0.45);
 }
 
 .ios-brand-frame:focus-visible {
@@ -89,67 +133,139 @@
 }
 
 .ios-brand-frame-sm {
-  padding: 1rem 0.75rem 1rem;
+  padding: 2px;
+}
+
+.ios-brand-frame-sm .ios-brand-frame__inner {
+  padding: 0.9rem 0.65rem 0.85rem;
+}
+
+.ios-brand-frame__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ios-brand-frame__idx {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--color-mh-red);
+}
+
+.ios-brand-frame__wire {
+  font-size: 0.48rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.28);
 }
 
 .ios-brand-frame-title {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.05rem;
 }
 
 .ios-brand-frame-line {
   display: block;
-  font-family: var(--font-sans);
-  font-size: 1.25rem;
-  font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  color: rgba(235, 235, 235, 0.92);
-  transition: color 0.2s ease;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  transition:
+    color 0.25s ease,
+    text-shadow 0.25s ease;
 }
 
 .ios-brand-frame-line-accent {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.045em;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   color: #fff;
 }
 
 .ios-brand-frame-title-sm .ios-brand-frame-line {
-  font-size: 1.0625rem;
+  font-size: 0.95rem;
 }
 
 .ios-brand-frame-title-sm .ios-brand-frame-line-accent {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
+}
+
+.ios-brand-frame-title-sm .ios-brand-frame__idx {
+  font-size: 0.75rem;
 }
 
 .ios-brand-frame-sub {
-  display: block;
-  margin-top: 0.85rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  padding-top: 0.7rem;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
   font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: 500;
+  font-size: 0.58rem;
+  font-weight: 600;
   line-height: 1.2;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  text-align: center;
-  color: rgba(140, 140, 140, 0.95);
-  font-variant-numeric: tabular-nums;
+  color: rgba(160, 160, 160, 0.95);
+}
+
+.ios-brand-frame-sub-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-mh-red);
+  box-shadow: 0 0 10px var(--color-mh-red);
+  animation: ios-brand-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes ios-brand-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ios-brand-frame-sub-dot {
+    animation: none;
+  }
+
+  .ios-brand-frame:hover {
+    transform: none;
+  }
 }
 
 .ios-brand-frame-sub-sm {
-  margin-top: 0.65rem;
-  padding-top: 0.6rem;
-  font-size: 0.625rem;
-  letter-spacing: 0.12em;
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  font-size: 0.52rem;
+  letter-spacing: 0.16em;
 }
 
 .v2-sidebar-brand {
-  padding: 1.15rem 0.85rem 1.25rem;
+  padding: 1rem 0.75rem 1.15rem;
+  background: linear-gradient(180deg, rgba(212, 0, 0, 0.03) 0%, transparent 100%);
 }
 
 .v2-sidebar-footer {
