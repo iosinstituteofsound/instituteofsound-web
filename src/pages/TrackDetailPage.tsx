@@ -47,6 +47,60 @@ function releaseTypeLabel(rt: 'album' | 'ep' | 'single') {
   return 'Single'
 }
 
+function PlayIcon() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden>
+      <path d="M2 1.5v7l6-3.5-6-3.5z" />
+    </svg>
+  )
+}
+
+function BookmarkIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden>
+      <path
+        d="M2.5 1.5h6v8L5.5 8 2.5 9.5v-8z"
+        stroke="currentColor"
+        strokeWidth="1.1"
+      />
+    </svg>
+  )
+}
+
+function StreamIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path d="M3 12V6M8 12V3M13 12V8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function HeadphonesIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path
+        d="M4 9v3a1 1 0 001 1h1V8H4a2 2 0 012-2v0a4 4 0 118 0v0a2 2 0 012 2H10v5h1a1 1 0 001-1V9"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      />
+    </svg>
+  )
+}
+
+function ShareIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path
+        d="M11 5l-5-2.5v3L3 8l3 2.5v3L11 11M7 8h5"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export default function TrackDetailPage() {
   const { artistSlug, trackId } = useParams<{ artistSlug: string; trackId: string }>()
   const location = useLocation()
@@ -168,27 +222,30 @@ export default function TrackDetailPage() {
         <span aria-hidden> / </span>
         <Link to={`/artist/${profile.slug}`}>{profile.displayName}</Link>
         <span aria-hidden> / </span>
-        <span className="text-signal">{track.title}</span>
+        <span className="tk-page__crumb-current">{track.title}</span>
       </nav>
 
       <div className="tk-page__layout">
         <main>
-          <div className="tk-hero">
-            {cover ? (
-              <IOSImage
-                src={cover}
-                alt=""
-                width={560}
-                className="tk-hero__cover"
-                priority
-              />
-            ) : (
-              <div className="tk-hero__cover-fb" aria-hidden>
-                {track.title.slice(0, 1)}
+          <div className="tk-hero-shell">
+            <div className="tk-hero">
+              <div className="tk-hero__cover-wrap">
+                {cover ? (
+                  <IOSImage
+                    src={cover}
+                    alt=""
+                    width={560}
+                    className="tk-hero__cover"
+                    priority
+                  />
+                ) : (
+                  <div className="tk-hero__cover-fb" aria-hidden>
+                    {track.title.slice(0, 1)}
+                  </div>
+                )}
               </div>
-            )}
 
-            <div>
+              <div className="tk-hero__body">
               <p className="tk-hero__kicker">{releaseTypeLabel(releaseType)}</p>
               <h1 className="tk-hero__title">{track.title}</h1>
               <p className="tk-hero__artist">{profile.displayName}</p>
@@ -209,9 +266,9 @@ export default function TrackDetailPage() {
                   )}
                   {profile.displayName}
                 </Link>
-                <span aria-hidden>·</span>
+                <span className="tk-hero__meta-dot" aria-hidden>·</span>
                 <span>{catalogRef}</span>
-                <span aria-hidden>·</span>
+                <span className="tk-hero__meta-dot" aria-hidden>·</span>
                 <span>{formatPremiereDate(track.createdAt)}</span>
               </div>
 
@@ -221,14 +278,16 @@ export default function TrackDetailPage() {
                   className="tk-btn tk-btn--fill"
                   onClick={togglePlayer}
                 >
-                  ▶ Play track
+                  <PlayIcon />
+                  Play track
                 </button>
                 <button
                   type="button"
                   className={`tk-btn tk-btn--line${saved ? ' tk-btn--on' : ''}`}
                   onClick={toggleSave}
                 >
-                  {saved ? '✓ Saved' : 'Save'}
+                  <BookmarkIcon />
+                  {saved ? 'Saved' : 'Save'}
                 </button>
                 <button
                   type="button"
@@ -290,7 +349,9 @@ export default function TrackDetailPage() {
                   <span key={g}>{g}</span>
                 ))}
                 <span>{releaseTypeLabel(releaseType)}</span>
-                <span>{formatPlayCount(track.playCount)} plays</span>
+                <span className="tk-tags__hot">
+                  {formatPlayCount(track.playCount)} plays
+                </span>
               </div>
 
               {(profile.tagline || profile.bio) && (
@@ -311,7 +372,7 @@ export default function TrackDetailPage() {
                   <span className="tk-meta-grid__label">Length</span>
                   <span className="tk-meta-grid__value">—</span>
                 </div>
-                <div className="tk-meta-grid__cell">
+                <div className="tk-meta-grid__cell tk-meta-grid__cell--accent">
                   <span className="tk-meta-grid__label">Plays</span>
                   <span className="tk-meta-grid__value">
                     {formatPlayCount(track.playCount)}
@@ -342,11 +403,12 @@ export default function TrackDetailPage() {
                   </>
                 )}
               </div>
+              </div>
             </div>
           </div>
 
           {moreReleases.length > 0 && (
-            <section aria-labelledby="tk-more-heading">
+            <section className="tk-more-section" aria-labelledby="tk-more-heading">
               <div className="tk-section-head">
                 <h2 id="tk-more-heading">More releases</h2>
                 <Link to="/releases">View all →</Link>
@@ -358,22 +420,24 @@ export default function TrackDetailPage() {
                     to={catalogCardHref(card)}
                     className="tk-more-card"
                   >
-                    {card.coverUrl ? (
-                      <IOSImage
-                        src={card.coverUrl}
-                        alt=""
-                        width={200}
-                        className="tk-more-card__cover"
-                      />
-                    ) : (
-                      <div
-                        className="tk-more-card__cover tk-hero__cover-fb"
-                        style={{ fontSize: '1.25rem' }}
-                        aria-hidden
-                      >
-                        {card.trackTitle.slice(0, 1)}
-                      </div>
-                    )}
+                    <div className="tk-more-card__cover-wrap">
+                      {card.coverUrl ? (
+                        <IOSImage
+                          src={card.coverUrl}
+                          alt=""
+                          width={200}
+                          className="tk-more-card__cover"
+                        />
+                      ) : (
+                        <div
+                          className="tk-more-card__cover tk-hero__cover-fb"
+                          style={{ fontSize: '1.25rem' }}
+                          aria-hidden
+                        >
+                          {card.trackTitle.slice(0, 1)}
+                        </div>
+                      )}
+                    </div>
                     <span className="tk-more-card__title">{card.trackTitle}</span>
                     <span className="tk-more-card__sub">
                       {releaseTypeLabel(card.releaseType)} · {card.artistName}
@@ -431,10 +495,10 @@ export default function TrackDetailPage() {
                 href={track.streamUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tk-support__btn"
+                className="tk-support__btn tk-support__btn--primary"
                 onClick={logPlay}
               >
-                <span aria-hidden>🛒</span>
+                <StreamIcon />
                 Stream
               </a>
               {profile.social.spotify && (
@@ -444,7 +508,7 @@ export default function TrackDetailPage() {
                   rel="noopener noreferrer"
                   className="tk-support__btn"
                 >
-                  <span aria-hidden>🎧</span>
+                  <HeadphonesIcon />
                   Spotify
                 </a>
               )}
@@ -453,25 +517,28 @@ export default function TrackDetailPage() {
                 className="tk-support__btn"
                 onClick={() => void navigator.clipboard?.writeText(window.location.href)}
               >
-                <span aria-hidden>↗</span>
+                <ShareIcon />
                 Share
               </button>
             </div>
           </div>
 
           {moreFromArtist.length > 0 && (
-            <div className="tk-panel">
-              <div className="tk-section-head" style={{ margin: '0 0 0.75rem' }}>
-                <h2 style={{ fontSize: '0.5rem' }}>More from this artist</h2>
+            <div className="tk-panel tk-panel--tracks">
+              <div className="tk-section-head">
+                <h2>More from this artist</h2>
                 <Link to={`/artist/${profile.slug}`}>View all →</Link>
               </div>
               <ul className="tk-track-list">
-                {moreFromArtist.map((t) => (
+                {moreFromArtist.map((t, i) => (
                   <li key={t.id}>
                     <Link
                       to={`/track/${profile.slug}/${t.id}`}
                       className="tk-track-list__item"
                     >
+                      <span className="tk-track-list__idx" aria-hidden>
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
                       {t.coverUrl ? (
                         <IOSImage
                           src={t.coverUrl}
@@ -487,9 +554,12 @@ export default function TrackDetailPage() {
                       <span>
                         <span className="tk-track-list__title">{t.title}</span>
                         <span className="tk-track-list__sub block">
-                          {releaseTypeLabel(releaseType)} ·{' '}
+                          Single ·{' '}
                           {t.createdAt ? new Date(t.createdAt).getFullYear() : '—'}
                         </span>
+                      </span>
+                      <span className="tk-track-list__arrow" aria-hidden>
+                        →
                       </span>
                     </Link>
                   </li>
