@@ -22,21 +22,33 @@ interface PremiereCardProps {
 
 export function PremiereCard({ card, headingLevel = 'h3', className }: PremiereCardProps) {
   const [broken, setBroken] = useState(false)
-  const badge = card.badge ? BADGE_LABEL[card.badge] : card.isEditorPick ? 'Wire pick' : null
+  const isAlbum = card.catalogKind === 'album'
+  const badge = isAlbum
+    ? card.releaseType === 'ep'
+      ? 'EP'
+      : 'Album'
+    : card.badge
+      ? BADGE_LABEL[card.badge]
+      : card.isEditorPick
+        ? 'Wire pick'
+        : null
   const TitleTag = headingLevel
+  const artistHref = `/artist/${card.artistSlug}${isAlbum ? '#releases' : ''}`
 
   return (
     <GatedLink
-      to={`/artist/${card.artistSlug}`}
+      to={artistHref}
       forceGate
       className={className ?? 'prem-card'}
       aria-label={`${card.trackTitle} by ${card.artistName}`}
     >
       <article className="prem-card__inner">
         {badge && <span className="prem-card__badge">{badge}</span>}
-        <span className="prem-card__play" aria-hidden>
-          <PlayIcon />
-        </span>
+        {!isAlbum && (
+          <span className="prem-card__play" aria-hidden>
+            <PlayIcon />
+          </span>
+        )}
         <div className="prem-card__art">
           {card.coverUrl && !broken ? (
             <IOSImage
@@ -64,8 +76,14 @@ export function PremiereCard({ card, headingLevel = 'h3', className }: PremiereC
             {formatPremiereDate(card.trackCreatedAt)}
           </span>
           <span className="prem-card__plays">
-            <MiniWave />
-            {formatPlayCount(card.playCount)} plays
+            {isAlbum ? (
+              'Full release'
+            ) : (
+              <>
+                <MiniWave />
+                {formatPlayCount(card.playCount)} plays
+              </>
+            )}
           </span>
           <span className="prem-card__ext" aria-hidden>
             ↗

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import { getAlbumReleases } from '@/api/endpoints'
@@ -6,7 +6,7 @@ import { GatedLink } from '@/components/auth/GatedLink'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { PremiereCard } from '@/components/releases/PremiereCard'
 import { useContent } from '@/hooks/useContent'
-import { useDiscoverPremieres } from '@/hooks/useDiscoverPremieres'
+import { useReleasesCatalog } from '@/hooks/useReleasesCatalog'
 import { useSeo } from '@/hooks/useSeo'
 import { SCENE_GENRE_SLUGS } from '@/lib/releases/constants'
 import {
@@ -39,9 +39,8 @@ const GENRE_IMAGES: Record<string, string> = {
 
 export default function ReleasesPage() {
   const [filter, setFilter] = useState<ReleasesPageFilter>('all')
-  const { cards, loading } = useDiscoverPremieres(48)
+  const { cards, loading, refresh } = useReleasesCatalog()
   const upcoming = useContent(useCallback(() => getAlbumReleases(), []))
-  const trackRef = useRef<HTMLDivElement>(null)
 
   useSeo({
     title: 'Releases',
@@ -57,24 +56,27 @@ export default function ReleasesPage() {
   const all = cards ?? []
   const filtered = useMemo(() => filterForReleasesPage(all, filter), [all, filter])
 
+  const trackCount = useMemo(
+    () => all.filter((c) => c.catalogKind !== 'album').length,
+    [all]
+  )
+  const albumShellCount = useMemo(
+    () => all.filter((c) => c.catalogKind === 'album').length,
+    [all]
+  )
+
   const featured = useMemo(() => {
-    return (
-      all.find((c) => c.isEditorPick || c.badge === 'wire_pick') ?? all[0] ?? null
-    )
+    const playable =
+      all.find((c) => c.isEditorPick && c.catalogKind !== 'album' && c.streamUrl) ??
+      all.find((c) => c.catalogKind !== 'album' && c.streamUrl) ??
+      all[0]
+    return playable ?? null
   }, [all])
 
   const featuredRail = useMemo(() => {
     if (!featured) return all.slice(0, 4)
     return all.filter((c) => c.trackId !== featured.trackId).slice(0, 4)
   }, [all, featured])
-
-  const scrollLatest = useCallback((dir: -1 | 1) => {
-    const el = trackRef.current
-    if (!el) return
-    const card = el.querySelector<HTMLElement>('.prem-card')
-    const step = card ? card.offsetWidth + 14 : 240
-    el.scrollBy({ left: dir * step, behavior: 'smooth' })
-  }, [])
 
   const releaseTypeLabel = (rt: string) => {
     if (rt === 'album') return 'Album'
@@ -93,7 +95,13 @@ export default function ReleasesPage() {
             <p className="prem-page__drop">New drop</p>
             <h1 className="prem-sec__title">Releases</h1>
             <p className="prem-sec__sub">
-              Premieres from artist studios — editor picks first, then the hourly wire.
+              Every track and album from published artist studios —{' '}
+              {!loading && (
+                <strong>
+                  {trackCount} tracks
+                  {albumShellCount > 0 ? ` · ${albumShellCount} album shells` : ''}
+                </strong>
+              )}
             </p>
           </div>
         </div>
@@ -131,20 +139,24 @@ export default function ReleasesPage() {
                 <span>{featured.genreLabel}</span>
               </div>
               <p className="prem-page__hero-dek">
-                On the wire — {formatPremiereDate(featured.trackCreatedAt)}. Stream from the artist
-                studio or open the full profile.
+                {formatPremiereDate(featured.trackCreatedAt)} —{' '}
+                {featured.catalogKind === 'album'
+                  ? 'Album on the artist studio.'
+                  : 'Stream from the artist studio or open the full profile.'}
               </p>
               <div className="prem-page__hero-actions">
-                <a
-                  href={featured.streamUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="prem-page__btn prem-page__btn--fill"
-                >
-                  Listen now
-                </a>
+                {featured.catalogKind !== 'album' && featured.streamUrl && (
+                  <a
+                    href={featured.streamUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="prem-page__btn prem-page__btn--fill"
+                  >
+                    Listen now
+                  </a>
+                )}
                 <GatedLink
-                  to={`/artist/${featured.artistSlug}`}
+                  to={`/artist/${featured.artistSlug}${featured.catalogKind === 'album' ? '#releases' : ''}`}
                   forceGate
                   className="prem-page__btn prem-page__btn--line"
                 >
@@ -203,26 +215,11 @@ export default function ReleasesPage() {
 
         <div className="prem-page__latest-toolbar">
           <GatedLink to="/discover#discover-releases" forceGate className="prem-page__view-all">
-            View all on explore
+            Hourly picks on explore
           </GatedLink>
-          <div className="prem__nav">
-            <button
-              type="button"
-              className="prem__arrow"
-              aria-label="Previous"
-              onClick={() => scrollLatest(-1)}
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              className="prem__arrow"
-              aria-label="Next"
-              onClick={() => scrollLatest(1)}
-            >
-              ›
-            </button>
-          </div>
+          <button type="button" className="ios-btn ios-btn-ghost !text-xs" onClick={() => void refresh()}>
+            Refresh catalog
+          </button>
         </div>
 
         {!loading && filtered.length === 0 && (
@@ -230,16 +227,16 @@ export default function ReleasesPage() {
         )}
 
         {!loading && filtered.length > 0 && (
-          <>
-            <div ref={trackRef} className="prem__track hide-scrollbar">
-              {filtered.map((card) => (
-                <PremiereCard key={card.trackId} card={card} headingLevel="h3" />
-              ))}
-            </div>
-            <div className="prem-page__progress" aria-hidden>
-              <span />
-            </div>
-          </>
+          <div className="prem-page__grid">
+            {filtered.map((card) => (
+              <PremiereCard
+                key={card.trackId}
+                card={card}
+                headingLevel="h3"
+                className="prem-card prem-page__grid-card"
+              />
+            ))}
+          </div>
         )}
       </section>
 

@@ -20,6 +20,9 @@ export interface DiscoverPremiereCard {
   badge: PremiereBadge | null
   isEditorPick: boolean
   hourBucket: string
+  /** Full /releases catalog — album shell without tracks yet */
+  catalogKind?: 'track' | 'album'
+  albumTrackCount?: number
 }
 
 export interface DiscoverPremierePickRow {
