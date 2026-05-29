@@ -169,6 +169,7 @@
   scroll-snap-align: center;
   text-decoration: none;
   color: inherit;
+  overflow: visible;
 }
 
 .prem-card__inner {
@@ -178,9 +179,22 @@
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
   background: #0a0a0a;
-  overflow: hidden;
+  overflow: visible;
   min-height: 20.5rem;
   transition: border-color 0.28s, box-shadow 0.28s, transform 0.28s;
+}
+
+.prem-card__body,
+.prem-card__foot {
+  background: #0a0a0a;
+  border-radius: 0 0 10px 10px;
+}
+
+.prem-card__art {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: visible;
+  padding-right: 12%;
 }
 
 .prem-card:hover .prem-card__inner,
@@ -239,12 +253,6 @@
   color: var(--color-mh-red);
 }
 
-.prem-card__art {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-}
-
 .prem-card__img {
   width: 100%;
   height: 100%;
@@ -252,13 +260,14 @@
   transition: transform 0.45s ease;
 }
 
-.prem-card:hover .prem-card__img {
+.prem-card:hover .prem-vinyl__sleeve .prem-card__img {
   transform: scale(1.03);
 }
 
-.prem-card__art-fallback {
+.prem-vinyl__sleeve .prem-card__art-fallback {
   width: 100%;
   height: 100%;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -379,7 +388,7 @@
 /* All releases page */
 .prem-page__grid {
   display: grid;
-  gap: 1rem;
+  gap: 1.35rem 1rem;
   grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
 }
 
@@ -463,38 +472,117 @@
 
 .prem-page__hero-art {
   position: relative;
+  min-width: 0;
+}
+
+/* Vinyl + sleeve stack (cover color → --prem-vinyl-*) */
+.prem-vinyl-stack {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: visible;
+}
+
+.prem-vinyl-stack--hero {
+  max-width: 22rem;
+}
+
+.prem-vinyl {
+  position: absolute;
+  top: 50%;
+  right: -6%;
+  width: 94%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  z-index: 0;
+  pointer-events: none;
+  background: repeating-conic-gradient(
+    from -12deg,
+    var(--prem-vinyl-dark, #1a1a1a) 0deg 11deg,
+    var(--prem-vinyl-accent, #555) 11deg 22deg,
+    var(--prem-vinyl-light, #888) 22deg 33deg,
+    var(--prem-vinyl-dark, #1a1a1a) 33deg 44deg,
+    var(--prem-vinyl-accent, #555) 44deg 55deg,
+    var(--prem-vinyl-light, #888) 55deg 66deg,
+    var(--prem-vinyl-dark, #1a1a1a) 66deg 360deg
+  );
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--prem-vinyl-dark, #111) 80%, #000),
+    4px 6px 28px rgba(0, 0, 0, 0.55),
+    0 0 40px color-mix(in srgb, var(--prem-vinyl-accent, #333) 25%, transparent);
+}
+
+.prem-vinyl::before {
+  content: '';
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: repeating-radial-gradient(
+    circle at center,
+    transparent 0 2px,
+    rgba(0, 0, 0, 0.12) 2px 3px
+  );
+}
+
+.prem-vinyl::after {
+  content: '';
+  position: absolute;
+  inset: 31%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 38%, #1a1a1a, #050505 72%);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.04);
+}
+
+.prem-vinyl-stack--card .prem-vinyl {
+  right: -10%;
+  width: 96%;
+}
+
+.prem-vinyl-stack--hero .prem-vinyl {
+  right: -4%;
+  width: 98%;
+}
+
+.prem-vinyl__sleeve {
+  position: relative;
+  z-index: 1;
+  width: 76%;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow:
+    6px 10px 28px rgba(0, 0, 0, 0.65),
+    0 0 0 1px color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: #0a0a0a;
+}
+
+.prem-vinyl-stack--hero .prem-vinyl__sleeve {
+  width: 78%;
+  border-radius: 8px;
 }
 
 .prem-page__hero-cover {
   width: 100%;
-  aspect-ratio: 1;
+  height: 100%;
+  aspect-ratio: auto;
   object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
+  border: none;
+  border-radius: 0;
 }
 
 .prem-page__hero-cover--fallback {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(160deg, #1a1a1a, #080808);
   font-family: var(--font-display);
   font-size: 3rem;
   font-weight: 800;
   color: #333;
-}
-
-.prem-page__vinyl {
-  position: absolute;
-  top: 8%;
-  right: -12%;
-  width: 42%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #2a2a2a, #0a0a0a 65%);
-  border: 2px solid #222;
-  box-shadow: -8px 8px 24px rgba(0, 0, 0, 0.6);
-  pointer-events: none;
 }
 
 .prem-page__out {

@@ -5,6 +5,7 @@ import { getAlbumReleases } from '@/api/endpoints'
 import { GatedLink } from '@/components/auth/GatedLink'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { PremiereCard } from '@/components/releases/PremiereCard'
+import { ReleaseVinylArt } from '@/components/releases/ReleaseVinylArt'
 import { useContent } from '@/hooks/useContent'
 import { useReleasesCatalog } from '@/hooks/useReleasesCatalog'
 import { useSeo } from '@/hooks/useSeo'
@@ -117,19 +118,12 @@ export default function ReleasesPage() {
         <section className="prem-page__hero" aria-label="Featured release">
           <div className="prem-page__hero-main">
             <div className="prem-page__hero-art">
-              {featured.coverUrl ? (
-                <IOSImage
-                  src={featured.coverUrl}
-                  alt=""
-                  width={560}
-                  className="prem-page__hero-cover"
-                />
-              ) : (
-                <div className="prem-page__hero-cover prem-page__hero-cover--fallback">
-                  {featured.trackTitle.slice(0, 1)}
-                </div>
-              )}
-              <span className="prem-page__vinyl" aria-hidden />
+              <ReleaseVinylArt
+                coverUrl={featured.coverUrl}
+                fallbackLetter={featured.trackTitle}
+                variant="hero"
+                width={560}
+              />
             </div>
             <div className="prem-page__hero-copy">
               <span className="prem-page__out">Out now</span>
