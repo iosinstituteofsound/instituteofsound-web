@@ -221,9 +221,17 @@ function Conversation({
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
-    const [head, msgs] = await Promise.all([getThreadHeader(threadId), listMessages(threadId)])
-    setHeader(head)
-    setMessages(msgs)
+    // Load header and messages independently so a messages error still
+    // surfaces the header (Accept/Decline) instead of a blank pane.
+    const head = await getThreadHeader(threadId).catch(() => null)
+    if (head) setHeader(head)
+    try {
+      const msgs = await listMessages(threadId)
+      setMessages(msgs)
+      setError('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not load messages.')
+    }
   }, [threadId])
 
   useEffect(() => {
