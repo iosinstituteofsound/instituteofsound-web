@@ -14,6 +14,7 @@ type CommentRow = {
   id: string
   post_id: string
   user_id: string
+  parent_id?: string | null
   body: string
   created_at: string
   display_name: string
@@ -27,6 +28,7 @@ function mapRow(row: CommentRow): PostComment {
     id: row.id,
     postId: row.post_id,
     userId: row.user_id,
+    parentId: row.parent_id ?? undefined,
     body: row.body,
     createdAt: row.created_at,
     displayName: row.display_name,
@@ -65,6 +67,8 @@ export async function listPostComments(postId: string, limit = 100): Promise<Pos
 export interface AddCommentInput {
   postId: string
   body: string
+  parentId?: string
+  parentAuthorUserId?: string
   authorUserId: string
   authorDisplayName: string
   authorHandle: string
@@ -86,10 +90,15 @@ export async function addPostComment(input: AddCommentInput): Promise<PostCommen
       avatarUrl: input.authorAvatarUrl,
     })
 
-    if (input.postOwnerUserId !== input.authorUserId) {
+    const notifyUserId = input.parentId
+      ? input.parentAuthorUserId
+      : input.postOwnerUserId
+    if (notifyUserId && notifyUserId !== input.authorUserId) {
       localAddNotification({
         kind: 'post_comment',
-        title: `${input.authorDisplayName} commented on your post`,
+        title: input.parentId
+          ? `${input.authorDisplayName} replied to your comment`
+          : `${input.authorDisplayName} commented on your post`,
         body: text.slice(0, 120),
         href: `/feed/${input.postId}`,
         actorId: input.authorUserId,
@@ -108,6 +117,7 @@ export async function addPostComment(input: AddCommentInput): Promise<PostCommen
   const { data, error } = await supabase.rpc('community_post_comments_add', {
     p_post_id: input.postId,
     p_body: text,
+    p_parent_id: input.parentId ?? null,
   })
 
   if (error) throw new Error(error.message)
@@ -122,6 +132,7 @@ export async function addPostComment(input: AddCommentInput): Promise<PostCommen
     id: String(data),
     postId: input.postId,
     userId: input.authorUserId,
+    parentId: input.parentId,
     body: text,
     createdAt: new Date().toISOString(),
     displayName: input.authorDisplayName,
