@@ -338,7 +338,9 @@ begin
 
   update public.dm_messages
   set read_at = timezone('utc', now())
-  where thread_id = p_thread_id and sender_id <> v_user and read_at is null;
+  where dm_messages.thread_id = p_thread_id
+    and dm_messages.sender_id <> v_user
+    and dm_messages.read_at is null;
 
   return query
     select m.id, m.sender_id, m.body, m.created_at, m.read_at
