@@ -23,6 +23,8 @@ export interface DiscoverPremiereCard {
   /** Full /releases catalog — album shell without tracks yet */
   catalogKind?: 'track' | 'album'
   albumTrackCount?: number
+  /** Premiere page at /release/:slug when set */
+  releaseSlug?: string
 }
 
 export interface DiscoverPremierePickRow {

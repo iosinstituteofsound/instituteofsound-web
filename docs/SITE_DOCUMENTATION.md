@@ -188,7 +188,7 @@ Styles: `src/app-shell.css` · Route modes: `src/lib/nav/routeModes.ts`
 |------|-----------|------------|
 | `/` | `HomePage.tsx` | Cover story, trending, reviews, features, playlists, signals |
 | `/discover` | `DiscoverPage.tsx` | **Wire index** — 9 scroll sections (editorial → community); guest gate for deep links |
-| `/releases` | `ReleasesPage.tsx` | Full premiere grid (hourly rotation); filters by release type |
+| `/releases` | `ReleasesPage.tsx` | Full published-studio catalog (tracks + albums + premieres); filters by release type |
 | `/playlists` | `PlaylistsPage.tsx` | Playlist index |
 | `/playlist/:slug` | `PlaylistDetailPage.tsx` | Single playlist |
 | `/signals` | `SignalsPage.tsx` | Short “signal” transmissions |
@@ -509,7 +509,8 @@ Static magazine JSON: `public/api/*.json` · Fetched via `src/api/endpoints.ts`.
 
 | Module | Used by | Responsibility |
 |--------|---------|----------------|
-| `premieres.ts` | §03, `/releases`, editor picks | `fetchDiscoverPremiereFeed`, hourly `hour_bucket`, editor picks CRUD, search for desk |
+| `premieres.ts` | §03, editor picks | `fetchDiscoverPremiereFeed`, hourly `hour_bucket`, editor picks CRUD, search for desk |
+| `releasesCatalog.ts` | `/releases` | `fetchReleasesCatalog` — all published studio tracks, albums, live/scheduled premieres |
 | `listeners.ts` | §08 | Weekly leaderboard merge + showcase fallback |
 | `communityPulse.ts` | §09 | Tribe/spin/crew showcase merge for empty Supabase |
 | `events.ts` | §07 | Event cards + API/fallback gigs |
@@ -517,13 +518,26 @@ Static magazine JSON: `public/api/*.json` · Fetched via `src/api/endpoints.ts`.
 | `playlists.ts` | §05 | Curated playlist metadata |
 | `labels.ts` | §04 | Label imprint cards |
 
-#### Premieres system (§03 + `/releases`)
+#### Premieres system (Explore §03)
 
 - **DB:** `discover_premiere_picks` + RPC `discover_premiere_feed` — migration **`059-discover-premiere-picks.sql`**
 - **Rotation:** UTC hour bucket; client hook `useDiscoverPremieres` refetches when the hour rolls
 - **Editor desk:** `DiscoverPremierePicksPanel` on **Wire picks** tab — search track, set badge (`wire_pick` / `hot` / `new`)
-- **Public full list:** `/releases` — same cards/filters, larger limit (48)
 - **Cards link to:** `/artist/:slug` (artist profile stream)
+
+#### `/releases` catalog (menu → Releases)
+
+**Product rule:** When an artist **publishes** their studio (`artist_profiles.published`) and adds material in My Studio, it must appear on `/releases`.
+
+| Source | Artist action | On `/releases` |
+|--------|---------------|----------------|
+| `artist_tracks` | Music → add track / quick add | One card per track |
+| `artist_albums` | Discography → album / EP / single | One card per release (shows track count when linked) |
+| `artist_releases` | Dashboard → Releases → schedule or go live | Premiere + tracklist rows (`status` live or scheduled only; not draft) |
+
+- **Hook:** `useReleasesCatalog` → `fetchReleasesCatalog` in `releasesCatalog.ts` (not the hourly premiere RPC)
+- **UI:** `ReleasesPage.tsx` + same `prem-*` cards as Explore §03
+- **Links:** tracks/albums → `/artist/:slug`; premiere rows → `/release/:slug` when applicable
 
 #### §08 Listeners & §09 Community (mock-aligned UI)
 
@@ -710,8 +724,8 @@ Kinds include `post_comment`, follows, and other community events enqueued by SQ
 
 ### Releases
 
-- **Discover wire §03** + **`/releases`** — artist profile tracks via `discover_premiere_feed` (see [Discover wire](#discover-wire-discover))  
-- Scheduled editorial releases on dashboard → `ReleaseDetailPage`, `ReleaseCountdown`, `ReleaseEmbed`  
+- **Discover wire §03** — hourly premiere carousel (`discover_premiere_feed`); **menu `/releases`** — full catalog (`releasesCatalog.ts`)  
+- Artist dashboard **Releases** tab → `artist_releases` → `ReleaseDetailPage`, `ReleaseCountdown`, `ReleaseEmbed`  
 - Scene discovery: `SceneReleaseRail` on scene hubs  
 
 ---

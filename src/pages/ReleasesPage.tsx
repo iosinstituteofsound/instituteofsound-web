@@ -45,7 +45,7 @@ export default function ReleasesPage() {
   useSeo({
     title: 'Releases',
     description:
-      'Featured premieres, latest underground drops, upcoming releases, and genre browse — Institute of Sound wire.',
+      'Every track, album, and premiere release from published artist studios on Institute of Sound.',
     canonicalPath: '/releases',
     jsonLd: breadcrumbJsonLd([
       { name: 'Home', path: '/' },
@@ -95,11 +95,12 @@ export default function ReleasesPage() {
             <p className="prem-page__drop">New drop</p>
             <h1 className="prem-sec__title">Releases</h1>
             <p className="prem-sec__sub">
-              Every track and album from published artist studios —{' '}
+              Full catalog from published artist studios — Music tracks, discography, and premiere
+              releases. When an artist publishes their studio and adds material, it appears here.{' '}
               {!loading && (
                 <strong>
                   {trackCount} tracks
-                  {albumShellCount > 0 ? ` · ${albumShellCount} album shells` : ''}
+                  {albumShellCount > 0 ? ` · ${albumShellCount} albums` : ''}
                 </strong>
               )}
             </p>

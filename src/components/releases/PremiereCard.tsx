@@ -33,12 +33,14 @@ export function PremiereCard({ card, headingLevel = 'h3', className }: PremiereC
         ? 'Wire pick'
         : null
   const TitleTag = headingLevel
-  const artistHref = `/artist/${card.artistSlug}${isAlbum ? '#releases' : ''}`
+  const artistHref = card.releaseSlug
+    ? `/release/${card.releaseSlug}`
+    : `/artist/${card.artistSlug}${isAlbum ? '#releases' : ''}`
 
   return (
     <GatedLink
       to={artistHref}
-      forceGate
+      forceGate={!card.releaseSlug}
       className={className ?? 'prem-card'}
       aria-label={`${card.trackTitle} by ${card.artistName}`}
     >
@@ -77,7 +79,9 @@ export function PremiereCard({ card, headingLevel = 'h3', className }: PremiereC
           </span>
           <span className="prem-card__plays">
             {isAlbum ? (
-              'Full release'
+              card.albumTrackCount && card.albumTrackCount > 0
+                ? `${card.albumTrackCount} tracks`
+                : 'Full release'
             ) : (
               <>
                 <MiniWave />

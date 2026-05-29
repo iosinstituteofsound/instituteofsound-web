@@ -1,7 +1,22 @@
+/**
+ * /releases page catalog — product rule (keep in sync with docs):
+ *
+ * Anything a published artist adds in **My Studio** must surface here:
+ * - Music tracks (`artist_tracks`)
+ * - Discography albums / EPs / singles (`artist_albums`)
+ * - Scheduled or live premiere releases (`artist_releases`, not draft/archived)
+ *
+ * Requirements:
+ * - `artist_profiles.published = true` only (draft studios stay off the public wire)
+ * - Not the hourly one-track-per-artist discover premiere feed (`fetchDiscoverPremiereFeed`)
+ * - Explore §03 stays on the premiere feed; this module is the full catalog
+ */
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import * as local from '@/lib/artist-profile/storage'
 import { DEFAULT_HERO_LAYOUT } from '@/lib/artist-profile/heroLayout'
 import type { ArtistAlbum, ArtistProfile, ArtistTrack } from '@/lib/artist-profile/types'
+import * as localReleases from '@/lib/releases/localReleases'
+import type { ReleaseTrack } from '@/lib/releases/types'
 import {
   currentHourBucket,
   type DiscoverPremiereCard,
@@ -142,6 +157,67 @@ function sortCatalog(cards: DiscoverPremiereCard[]): DiscoverPremiereCard[] {
   })
 }
 
+function pickStreamUrl(
+  track?: ReleaseTrack,
+  fallback?: { spotifyUrl?: string; youtubeUrl?: string; soundcloudUrl?: string }
+): string {
+  const t = track?.spotifyUrl || track?.youtubeUrl || track?.soundcloudUrl
+  if (t) return t
+  return fallback?.spotifyUrl || fallback?.youtubeUrl || fallback?.soundcloudUrl || ''
+}
+
+type TrackRow = {
+  id: string
+  profile_id: string
+  album_id: string | null
+  title: string
+  stream_url: string
+  cover_url: string | null
+  play_count: number | null
+  sort_order: number | null
+  created_at: string
+}
+
+type AlbumRow = {
+  id: string
+  profile_id: string
+  title: string
+  cover_url: string | null
+  release_type: string
+  created_at: string
+}
+
+type ReleaseRow = {
+  id: string
+  profile_id: string
+  slug: string
+  title: string
+  cover_url: string | null
+  release_type: string
+  live_at: string
+  spotify_url: string | null
+  youtube_url: string | null
+  soundcloud_url: string | null
+  tracks: unknown
+}
+
+async function paginate<T>(
+  fetchPage: (from: number, to: number) => Promise<{ data: T[] | null; error: { message: string } | null }>
+): Promise<T[]> {
+  const out: T[] = []
+  const page = 1000
+  let from = 0
+  while (true) {
+    const { data, error } = await fetchPage(from, from + page - 1)
+    if (error) throw new Error(error.message)
+    if (!data?.length) break
+    out.push(...data)
+    if (data.length < page) break
+    from += page
+  }
+  return out
+}
+
 function buildLocalCatalog(): DiscoverPremiereCard[] {
   const bucket = currentHourBucket()
   const picks = readLocalPickMap()
@@ -163,11 +239,106 @@ function buildLocalCatalog(): DiscoverPremiereCard[] {
 
     for (const album of albums) {
       const count = tracksByAlbum.get(album.id) ?? 0
-      if (count === 0) cards.push(albumCard(profile, album, 0, bucket))
+      cards.push(albumCard(profile, album, count, bucket))
+    }
+
+    const releases = localReleases.localListReleasesForProfile(profile.id).filter(
+      (r) => r.status === 'live' || r.status === 'scheduled'
+    )
+    for (const release of releases) {
+      cards.push(...releaseToCards(profile, release, bucket))
     }
   }
 
-  return sortCatalog(cards)
+  return dedupeCatalog(sortCatalog(cards))
+}
+
+function releaseToCards(
+  profile: ArtistProfile,
+  release: {
+    id: string
+    slug: string
+    title: string
+    coverUrl?: string
+    releaseType: 'single' | 'ep' | 'album'
+    liveAt: string
+    spotifyUrl?: string
+    youtubeUrl?: string
+    soundcloudUrl?: string
+    tracks: ReleaseTrack[]
+  },
+  bucket: string
+): DiscoverPremiereCard[] {
+  const embed = {
+    spotifyUrl: release.spotifyUrl,
+    youtubeUrl: release.youtubeUrl,
+    soundcloudUrl: release.soundcloudUrl,
+  }
+  const rt =
+    release.releaseType === 'album' || release.releaseType === 'ep'
+      ? release.releaseType
+      : 'single'
+
+  if (release.tracks.length === 0) {
+    const url = pickStreamUrl(undefined, embed)
+    return [
+      {
+        trackId: `release-${release.id}`,
+        trackTitle: release.title,
+        coverUrl: release.coverUrl ?? profile.avatarUrl,
+        streamUrl: url,
+        playCount: 0,
+        trackCreatedAt: release.liveAt,
+        profileId: profile.id,
+        artistSlug: profile.slug,
+        artistName: profile.displayName,
+        genreLabel: genreLabel(profile.genres),
+        releaseType: rt,
+        badge: 'new',
+        isEditorPick: false,
+        hourBucket: bucket,
+        catalogKind: 'track',
+        releaseSlug: release.slug,
+      },
+    ]
+  }
+
+  return release.tracks.map((t, i) => ({
+    trackId: `release-${release.id}-t${i}`,
+    trackTitle: t.title,
+    coverUrl: release.coverUrl ?? profile.avatarUrl,
+    streamUrl: pickStreamUrl(t, embed),
+    playCount: 0,
+    trackCreatedAt: release.liveAt,
+    profileId: profile.id,
+    artistSlug: profile.slug,
+    artistName: profile.displayName,
+    genreLabel: genreLabel(profile.genres),
+    releaseType: rt,
+    badge: null,
+    isEditorPick: false,
+    hourBucket: bucket,
+    catalogKind: 'track' as const,
+    releaseSlug: release.slug,
+  }))
+}
+
+function dedupeCatalog(cards: DiscoverPremiereCard[]): DiscoverPremiereCard[] {
+  const seen = new Set<string>()
+  const out: DiscoverPremiereCard[] = []
+  for (const c of cards) {
+    const streamKey = c.streamUrl?.trim().toLowerCase()
+    const key =
+      c.catalogKind === 'album'
+        ? `album:${c.profileId}:${c.trackTitle.toLowerCase()}`
+        : streamKey
+          ? `stream:${c.profileId}:${streamKey}`
+          : `id:${c.trackId}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(c)
+  }
+  return out
 }
 
 async function fetchSupabaseCatalog(): Promise<DiscoverPremiereCard[]> {
@@ -196,21 +367,26 @@ async function fetchSupabaseCatalog(): Promise<DiscoverPremiereCard[]> {
     ])
   )
 
-  const [{ data: trackRows, error: trackErr }, { data: albumRows, error: albumErr }, { data: pickRows }] =
-    await Promise.all([
-      supabase.from('artist_tracks').select('*').in('profile_id', profileIds),
-      supabase.from('artist_albums').select('*').in('profile_id', profileIds),
+  const [trackRows, albumRows, pickResult, releaseRows] = await Promise.all([
+    paginate<TrackRow>(async (from, to) =>
+      supabase.from('artist_tracks').select('*').in('profile_id', profileIds).range(from, to)
+    ),
+    paginate<AlbumRow>(async (from, to) =>
+      supabase.from('artist_albums').select('*').in('profile_id', profileIds).range(from, to)
+    ),
+    supabase.from('discover_premiere_picks').select('track_id, badge').eq('active', true),
+    paginate<ReleaseRow>(async (from, to) =>
       supabase
-        .from('discover_premiere_picks')
-        .select('track_id, badge')
-        .eq('active', true),
-    ])
-
-  if (trackErr) throw new Error(trackErr.message)
-  if (albumErr) throw new Error(albumErr.message)
+        .from('artist_releases')
+        .select('*')
+        .in('profile_id', profileIds)
+        .in('status', ['live', 'scheduled'])
+        .range(from, to)
+    ),
+  ])
 
   const picks = new Map<string, PremiereBadge>()
-  for (const row of pickRows ?? []) {
+  for (const row of pickResult.data ?? []) {
     const b = row.badge as PremiereBadge
     if (b === 'wire_pick' || b === 'hot' || b === 'new') picks.set(row.track_id, b)
   }
@@ -274,7 +450,6 @@ async function fetchSupabaseCatalog(): Promise<DiscoverPremiereCard[]> {
 
   for (const album of albumsById.values()) {
     const count = tracksByAlbum.get(album.id) ?? 0
-    if (count > 0) continue
     const profile = profileById.get(album.profileId)
     if (!profile) continue
     cards.push(
@@ -289,16 +464,40 @@ async function fetchSupabaseCatalog(): Promise<DiscoverPremiereCard[]> {
           sortOrder: 0,
           createdAt: album.createdAt,
         },
-        0,
+        count,
         bucket
       )
     )
   }
 
-  return sortCatalog(cards)
+  for (const row of releaseRows) {
+    const profile = profileById.get(row.profile_id)
+    if (!profile) continue
+    const tracks = Array.isArray(row.tracks) ? (row.tracks as ReleaseTrack[]) : []
+    cards.push(
+      ...releaseToCards(
+        stubProfile(profile),
+        {
+          id: row.id,
+          slug: row.slug,
+          title: row.title,
+          coverUrl: row.cover_url ?? undefined,
+          releaseType: row.release_type as 'single' | 'ep' | 'album',
+          liveAt: row.live_at,
+          spotifyUrl: row.spotify_url ?? undefined,
+          youtubeUrl: row.youtube_url ?? undefined,
+          soundcloudUrl: row.soundcloud_url ?? undefined,
+          tracks,
+        },
+        bucket
+      )
+    )
+  }
+
+  return dedupeCatalog(sortCatalog(cards))
 }
 
-/** Every published track + album shells (full catalog for /releases). */
+/** Public /releases grid — full published artist studio catalog. */
 export async function fetchReleasesCatalog(): Promise<DiscoverPremiereCard[]> {
   if (!isSupabaseConfigured()) return buildLocalCatalog()
   try {
