@@ -1,7 +1,7 @@
 # Institute of Sound — Site Documentation
 
 > **Local reference only.** Describes the full product: routes, roles, dashboards, components, and data flow.  
-> Last updated: May 2026 (V2 desk shells) · Repo: `instituteofsound`
+> Last updated: May 2026 (Feed v2: comments, link previews, notifications, pagination) · Repo: `instituteofsound`
 
 ---
 
@@ -72,7 +72,8 @@ instituteofsound/
 ├── scripts/
 │   ├── generate-pwa-icons.mjs
 │   └── generate-sitemap.mjs
-├── supabase/migrations/     ← PostgreSQL schema (001–045+)
+├── api/                     ← Vercel serverless routes (link preview, OG, …)
+├── supabase/migrations/     ← PostgreSQL schema (001–058+)
 ├── src/
 │   ├── App.tsx              ← All routes
 │   ├── main.tsx             ← Providers, mount
@@ -210,7 +211,9 @@ Styles: `src/app-shell.css` · Route modes: `src/lib/nav/routeModes.ts`
 
 | Path | Page | What it is |
 |------|------|------------|
-| `/community` | `CommunityPage.tsx` | Hub: tribes, leaderboard, feed anchor `#feed` |
+| `/feed` | `FeedPage.tsx` | Primary social feed (composer, filters, load more) |
+| `/feed/:postId` | `FeedPostPage.tsx` | Single post + threaded comments (shareable URL) |
+| `/community` | `CommunityPage.tsx` | Hub: tribes, leaderboard, embedded feed (`#feed`) |
 | `/network/:handle` | `CommunityMemberPage.tsx` | Public member profile (posts, medals, follow) |
 
 ### Scenes, events, collab
@@ -477,6 +480,17 @@ Lists **live Supabase artist profiles** with search/filter — links to `/artist
 
 ## 9. Community & network
 
+### Routes
+
+| URL | Page | Role |
+|-----|------|------|
+| `/feed` | `FeedPage.tsx` | Main feed UI (logged-in wire + global filters) |
+| `/feed/:postId` | `FeedPostPage.tsx` | Permalink for one post + comment thread |
+| `/community` | `CommunityPage.tsx` | Full community hub (same `CommunityFeed` at `#feed`) |
+| `/network/:handle` | `CommunityMemberPage.tsx` | Operator profile |
+
+Home `/` stays the magazine landing; social activity lives on **`/feed`**.
+
 ### Community hub (`/community`)
 
 **Page:** `CommunityPage.tsx`
@@ -491,16 +505,89 @@ Lists **live Supabase artist profiles** with search/filter — links to `/artist
 | Rank ladder | Rank cards | Listener → Operator ranks |
 | Progress | `CommunityProgressCard` | Your dB (if logged in) |
 | Leaderboards | `CommunityLeaderboard`, `CommunityGenreLeaderboard` | Top members |
-| **Feed** | `CommunityFeed` | Posts (`#feed` anchor) — composer + cards |
+| **Feed** | `CommunityFeed` | Posts (`#feed` anchor) — same stack as `/feed` |
 | Crews | `CommunityCrewPanel`, `CommunityCrewLeaderboard` | Crew system |
 | Challenges | `CommunityWeeklyChallenges` | Weekly missions |
 | Academy loop | `AcademyLoopMissions` | Cross-link to academy |
 
-### Feed (`CommunityFeed.tsx`)
+### Feed stack
 
-- **Composer** (`CommunityFeedComposer`) — post Spin/Drop (logged in)  
-- **Cards** (`CommunityFeedCard`) — reactions, **Follow** button  
-- **Filters** (`CommunityFeedFilters`)  
+Shared by `/feed` and `CommunityFeed` on `/community`.
+
+| Piece | File | Behaviour |
+|-------|------|-----------|
+| Data hook | `useCommunityFeed.ts` | Fetches via `community_feed` RPC; **load more** with cursor; listens for feed/comment/follow events |
+| Service | `feedService.ts` | `fetchCommunityFeed`, create/update/hide posts, reactions |
+| List UI | `CommunityFeed.tsx` | Sticky filters + composer; skeletons; infinite scroll sentinel + **Load more** button |
+| Composer | `CommunityFeedComposer.tsx` | Modes: **Spin** (Spotify/YouTube), **Drop** (text, photo, external link) |
+| Card | `CommunityFeedCard.tsx` | Body, link preview card, image, reactions, share link, owner menu (edit/remove) |
+| Filters | `CommunityFeedFilters.tsx` | All · Following · Tribe · Spin · Drop |
+| Comments | `CommunityFeedComments.tsx` | Threaded replies on `FeedPostPage` |
+| Edit modal | `CommunityFeedEditPostModal.tsx` | Author edits own spin/drop (no time limit) |
+| Link preview UI | `CommunityLinkPreviewCard.tsx` | Rich card (title, description, image) |
+
+**Post kinds**
+
+- **Spin** — `spotify_url` / `youtube_url`, optional `track_title`, caption (`body`).
+- **Drop** — Short text (≤280), optional **Cloudinary** `image_url`, or **link-only** drop with OG fields stored on the row.
+
+**Filters** (`feedFilters.ts`)
+
+- `all` — everyone (default on `/feed`).
+- `following` — posts from followed operators + crewmates + self (requires login).
+- `tribe` — filtered by member primary genre slug.
+- `spin` / `drop` — kind filter.
+
+**Pagination** (migration `058`)
+
+- RPC `community_feed(lim, p_kind, p_genre_slug, p_following_only, p_cursor_created_at, p_cursor_id)`.
+- Client passes cursor from the last visible post (`created_at` + `id`); page size **30**.
+- `hasMore` when a page returns `limit` rows; append on scroll or button.
+
+### Composer & link previews
+
+1. User pastes a URL in a drop → client debounces `fetchLinkPreview` (`src/lib/community/linkPreview.ts`).
+2. **Dev:** Vite middleware serves the same logic as production.
+3. **Prod:** `GET /api/link-preview` → `api/_lib/linkPreview.ts` (Open Graph scrape + optional **Microlink** fallback when `MICROLINK_API_KEY` is set on Vercel).
+4. On publish, `link_url`, `link_title`, `link_description`, `link_image_url` are stored on `community_posts`.
+5. Display: `normalizeLinkPreviewForDisplay` hides duplicate platform titles; `stripUrlFromText` avoids showing the raw URL when a card is shown.
+
+Retail sites that block bots may return only a domain — that is expected unless Microlink (or a future dedicated scraper) is configured.
+
+### Comments & replies
+
+| Layer | File / RPC |
+|-------|------------|
+| Types | `commentTypes.ts` — `buildCommentThread` |
+| Service | `commentService.ts` — add/list/delete; dispatches `COMMENT_EVENT` |
+| DB | `052` comments + counts on feed; `055` `parent_id` + reply notifications |
+| UI | `CommunityFeedComments.tsx` — reply affordance, nested thread |
+
+**Notifications on comment**
+
+- Top-level comment → `post_comment` to **post owner**.
+- Reply → `post_comment` to **parent comment author** (not the replier).
+- `href` in DB: `/feed/{postId}`.
+
+### Post actions (owner)
+
+| Action | RPC / service |
+|--------|----------------|
+| Hide (remove from feed) | `community_hide_own_post` (`054`) — `hideCommunityPost` |
+| Edit drop caption / spin links | `community_update_own_drop` / `community_update_own_spin` (`056`) |
+
+Errors from hide/update are surfaced in the card UI (no silent failure).
+
+### Notifications (bell)
+
+| Piece | Role |
+|-------|------|
+| `NetworkNotificationsPanel.tsx` | Navbar bell, list, mark all read |
+| `useCommunityNotifications.ts` | Supabase Realtime on `community_notifications` INSERT (`057`); 45s poll; refresh on tab focus |
+| `notificationService.ts` | Fetch unread, mark read, `notificationTargetHref` → `/feed/:postId` for comments |
+| `localNotifications.ts` | Demo/local fallback inbox keyed per user when Supabase is off |
+
+Kinds include `post_comment`, follows, and other community events enqueued by SQL triggers/RPCs in `052`/`055`.
 
 ### Member profile (`/network/:handle`)
 
@@ -520,17 +607,25 @@ Lists **live Supabase artist profiles** with search/filter — links to `/artist
 - `FollowButton.tsx` · `followService.ts`  
 - Counts on profile header → list panel via `fetchMemberConnections`  
 
-### Notifications
-
-- `NetworkNotificationsPanel` — bell in app navbar  
-- `notificationService.ts`, `useCommunityNotifications` hook  
-
 ### Gamification
 
 - **dB** — community points  
 - **Ranks** — `src/lib/community/ranks.ts`  
 - **Badges / medals** — `CommunityBadgeStrip`, `MedalIllustration`  
 - **Genres / tribes** — genre onboarding gate, tribe panels  
+
+### Community migrations (run in order in Supabase SQL editor)
+
+| Migration | Purpose |
+|-----------|---------|
+| `051-community-post-images.sql` | `image_url` on posts; feed RPC columns |
+| `052-community-post-comments.sql` | Comments table, `comment_count`, `post_comment` notifications |
+| `053-community-post-link-preview.sql` | `link_*` columns; link-only drops; feed RPC |
+| `054-community-hide-own-post.sql` | `community_hide_own_post` RPC |
+| `055-community-comment-replies.sql` | `parent_id`, reply RPCs, reply notifications |
+| `056-community-edit-own-post.sql` | Author edit spin/drop RPCs |
+| `057-community-notifications-realtime.sql` | Realtime publication for `community_notifications` |
+| `058-community-feed-pagination.sql` | Cursor params on `community_feed` |
 
 ---
 
@@ -672,7 +767,7 @@ Desk shells and role panels (see [§7](#7-dashboards-detailed)).
 | `DashboardSection.tsx` | Section wrapper (step, title, hint) |
 
 ### `components/community/`
-Feed, tribes, crews, challenges, notifications, onboarding, follow, medals.
+Feed composer/cards/comments, link preview card, edit modal, tribes, crews, challenges, notifications, onboarding, follow, medals.
 
 ### `components/community/member/`
 Public profile subcomponents.
@@ -725,6 +820,8 @@ Domain-specific UI for those features.
 | Artist profiles | `006`, `010`–`017`, `038` |
 | Editorial & submissions | `018`, `024`, submissions in services |
 | Community | `025`–`036`, `031` member profiles |
+| Feed v2 (images, comments, links, pagination) | `051`–`058` (see [§9](#9-community--network)) |
+| Direct messages | `050` |
 | Social graph | `036` follows |
 | Academy progress | `023`, `035` |
 | Events | `037`, `041` |
@@ -737,7 +834,7 @@ Domain-specific UI for those features.
 | Module | Responsibility |
 |--------|----------------|
 | `auth/` | Login, session, roles, profile updates |
-| `community/` | Feed, crews, tribes, follow, notifications |
+| `community/` | Feed, comments, link previews, crews, tribes, follow, notifications |
 | `submissions/` | Track submissions + editorial drafts |
 | `artist-profile/` | CRUD public artist pages |
 | `analytics/` | Super editor stats + role user lists |
@@ -748,6 +845,13 @@ Domain-specific UI for those features.
 ### Static API (`public/api/`)
 
 Homepage magazine content until fully CMS-driven from Supabase.
+
+### Vercel serverless (`api/`)
+
+| Route | Purpose |
+|-------|---------|
+| `api/link-preview.ts` | OG scrape + optional Microlink; used by feed composer (not bundled from `src/`) |
+| `api/_lib/linkPreview.ts` | Shared implementation (also wired in `vite.config.ts` for local dev) |
 
 ---
 
@@ -780,6 +884,7 @@ Common vars:
 - `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET`  
 - `VITE_SITE_URL` — canonical URL for SEO  
 - `VITE_YOUTUBE_API_KEY` — artist catalog import  
+- `MICROLINK_API_KEY` — (Vercel only) richer link previews on bot-blocked sites  
 
 ### npm scripts
 

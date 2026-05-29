@@ -70,9 +70,9 @@ const EXACT: Record<string, RouteMeta> = {
     pipelinePhase: 0,
   }),
   '/discover': meta({
-    sectionTitle: 'Discover',
-    kicker: 'Artists',
-    description: 'Live artist profiles from the underground network.',
+    sectionTitle: 'Explore',
+    kicker: 'Discovery',
+    description: 'Editorial, artists, scenes, events, labels, and community — search with ⌘K.',
     navHref: '/discover',
   }),
   '/features': meta({

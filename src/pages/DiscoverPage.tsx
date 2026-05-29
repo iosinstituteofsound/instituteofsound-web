@@ -1,47 +1,63 @@
-import { useCallback } from 'react'
-import { useContent } from '@/hooks/useContent'
-import { listDiscoverArtists } from '@/lib/artist-profile/service'
-import { SectionHeading } from '@/components/ui/SectionHeading'
-import { AnimatedGrid } from '@/components/ui/AnimatedGrid'
-import { ArtistCard } from '@/components/cards/ArtistCard'
-import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
-import { WaveformBackground } from '@/components/effects/WaveformBackground'
+import { useEffect } from 'react'
+import { useAuth } from '@/context/AuthContext'
+import { useLoginGate } from '@/context/LoginGateContext'
+import {
+  DiscoverCommunitySection,
+  DiscoverEditorialSection,
+  DiscoverEventsSection,
+  DiscoverGuestBanner,
+  DiscoverPageIntro,
+  DiscoverLabelsSection,
+  DiscoverListenersSection,
+  DiscoverPlaylistsSection,
+  DiscoverReleasesSection,
+  DiscoverScenesSection,
+} from '@/components/discover/DiscoverSections'
+import { DiscoverArtistsSection } from '@/components/discover/DiscoverArtistsSection'
+import { useSeo } from '@/hooks/useSeo'
+
+const DISCOVER_GATE_KEY = 'ios_discover_gate_seen'
 
 export default function DiscoverPage() {
-  const { data, loading, error } = useContent(
-    useCallback(() => listDiscoverArtists(), [])
-  )
+  const { user } = useAuth()
+  const { openLoginGate } = useLoginGate()
+
+  useSeo({
+    title: 'Discover',
+    description:
+      'Search and explore editorial, artists, releases, labels, playlists, India scenes, events, operators, and community trends on Institute of Sound.',
+    canonicalPath: '/discover',
+  })
+
+  useEffect(() => {
+    if (user) return
+    try {
+      if (sessionStorage.getItem(DISCOVER_GATE_KEY) === '1') return
+      sessionStorage.setItem(DISCOVER_GATE_KEY, '1')
+    } catch {
+      /* private mode */
+    }
+    const t = window.setTimeout(() => {
+      openLoginGate(
+        'Sign in to follow operators, RSVP events, and unlock the full discovery engine.'
+      )
+    }, 700)
+    return () => window.clearTimeout(t)
+  }, [user, openLoginGate])
 
   return (
-    <div className="relative">
-      <div className="relative min-h-[50vh] flex items-end section-padding pb-0 overflow-hidden">
-        <WaveformBackground />
-        <SectionHeading
-          label="Archive Access"
-          title="Discover"
-          subtitle="Emerging artists, underground bands, experimental creators."
-          titleAs="h1"
-        />
-      </div>
-      <div className="section-padding pt-12">
-        <div className="max-w-7xl mx-auto">
-          {loading && <LoadingTransmission variant="compact" />}
-          {error && <p className="text-crimson">{error}</p>}
-          {data && data.length === 0 && (
-            <p className="text-muted text-sm max-w-lg">
-              No live artist profiles yet. Complete your profile in the dashboard — name, bio,
-              avatar, and at least one track or video — then you will appear here automatically.
-            </p>
-          )}
-          {data && data.length > 0 && (
-            <AnimatedGrid columns={3}>
-              {data.map((artist) => (
-                <ArtistCard key={artist.id} artist={artist} />
-              ))}
-            </AnimatedGrid>
-          )}
-        </div>
-      </div>
+    <div className="discover-wire mx-auto w-full max-w-[1200px] px-3 py-5 sm:px-4 lg:py-8">
+      <DiscoverGuestBanner />
+      <DiscoverPageIntro />
+      <DiscoverEditorialSection />
+      <DiscoverArtistsSection />
+      <DiscoverReleasesSection />
+      <DiscoverLabelsSection />
+      <DiscoverPlaylistsSection />
+      <DiscoverScenesSection />
+      <DiscoverEventsSection />
+      <DiscoverListenersSection />
+      <DiscoverCommunitySection />
     </div>
   )
 }

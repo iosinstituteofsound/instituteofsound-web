@@ -6,6 +6,8 @@ import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 
 const HomePage = lazy(() => import('@/pages/HomePage'))
 const DiscoverPage = lazy(() => import('@/pages/DiscoverPage'))
+const ReleasesPage = lazy(() => import('@/pages/ReleasesPage'))
+const LabelsPage = lazy(() => import('@/pages/LabelsPage'))
 const PlaylistsPage = lazy(() => import('@/pages/PlaylistsPage'))
 const SignalsPage = lazy(() => import('@/pages/SignalsPage'))
 const FeaturesPage = lazy(() => import('@/pages/FeaturesPage'))
@@ -89,6 +91,8 @@ export default function App() {
           <Route element={<AppShell />}>
             <Route index element={<HomePage />} />
             <Route path="discover" element={<DiscoverPage />} />
+            <Route path="releases" element={<ReleasesPage />} />
+            <Route path="labels" element={<LabelsPage />} />
             <Route path="playlists" element={<PlaylistsPage />} />
             <Route path="signals" element={<SignalsPage />} />
             <Route path="features" element={<FeaturesPage />} />

@@ -9,6 +9,7 @@ import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
 import { MobileNav } from './MobileNav'
 import { CommandPalette } from './CommandPalette'
+import { LoginGateModal } from '@/components/auth/LoginGateModal'
 
 function ShellInner() {
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -19,6 +20,7 @@ function ShellInner() {
       <RouteSeo />
       <AcademyProgressSync />
       <CommandPalette />
+      <LoginGateModal />
 
       <div className="v2-shell ios-page-bg relative flex h-full min-h-dvh flex-col lg:flex-row">
         <div className="hidden lg:flex">

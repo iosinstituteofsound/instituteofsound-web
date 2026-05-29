@@ -1,4 +1,15 @@
 @import 'tailwindcss';
+@import './styles/discover.css';
+@import './styles/editorial-desk.css';
+@import './styles/releases-premieres.css';
+@import './styles/labels-imprints.css';
+@import './styles/playlists-curated.css';
+@import './styles/playlists-featured.css';
+@import './styles/scene-hubs.css';
+@import './styles/events-wire.css';
+@import './styles/listeners-operators.css';
+@import './styles/community-wire.css';
+@import './styles/roster-pro.css';
 
 @theme {
   --color-void: #050505;
@@ -14884,4 +14895,23 @@ body.ios-app-shell .ios-pwa-install {
     position: relative;
     z-index: 2;
   }
+}
+
+/* ── Login gate (guest network access) ───────────────────────────────── */
+.login-gate-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+.login-gate-panel {
+  width: 100%;
+  max-width: 22rem;
+  padding: 1.5rem;
 }

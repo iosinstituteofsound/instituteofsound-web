@@ -1,0 +1,422 @@
+/* Discover — Events on the wire (07) */
+
+.evt-sec {
+  padding: 1.75rem 0 2.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+}
+
+.evt-sec__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.evt-sec__brand {
+  display: flex;
+  gap: 0.85rem 1.25rem;
+  align-items: flex-start;
+}
+
+.evt-sec__idx {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 10vw, 5.5rem);
+  font-weight: 800;
+  line-height: 0.85;
+  color: var(--color-mh-red);
+  letter-spacing: -0.05em;
+  flex-shrink: 0;
+}
+
+.evt-sec__tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: var(--color-mh-red);
+}
+
+.evt-sec__title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-signal);
+  line-height: 0.95;
+  margin-top: 0.15rem;
+}
+
+.evt-sec__sub {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-top: 0.55rem;
+  max-width: 22rem;
+  line-height: 1.5;
+}
+
+.evt__board-btn {
+  display: inline-flex;
+  align-items: stretch;
+  padding: 0;
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-signal);
+  border: 1px solid color-mix(in srgb, var(--color-mh-red) 55%, var(--color-border));
+  border-radius: 6px;
+  background: transparent;
+  text-decoration: none;
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.evt__board-btn:hover,
+.evt__board-btn:focus-visible {
+  border-color: var(--color-mh-red);
+  box-shadow: 0 0 22px -8px rgba(212, 0, 0, 0.55);
+  outline: none;
+}
+
+.evt__board-btn-text {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 1rem;
+}
+
+.evt__board-btn-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.65rem;
+  color: #fff;
+  background: var(--color-mh-red);
+  font-size: 0.85rem;
+}
+
+.evt-sec__intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.55rem;
+  margin-bottom: 1.15rem;
+}
+
+.evt-sec__intro-title {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-signal);
+}
+
+.evt-sec__intro-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-mh-red);
+  align-self: center;
+}
+
+.evt-sec__intro-sub {
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .evt-sec__intro-sub {
+    width: auto;
+  }
+}
+
+/* Card grid */
+.evt__grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 900px) {
+  .evt__grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 640px) and (max-width: 899px) {
+  .evt__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Event card */
+.evt-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  border: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent);
+  border-radius: 8px;
+  background: #080808;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.evt-card:hover {
+  border-color: color-mix(in srgb, var(--color-mh-red) 45%, var(--color-border));
+}
+
+.evt-card__poster {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 4.6;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.evt-card__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.08) saturate(0.85) brightness(0.82);
+  transition: transform 0.35s ease;
+}
+
+.evt-card:hover .evt-card__img {
+  transform: scale(1.04);
+}
+
+.evt-card__poster::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(5, 5, 5, 0.85) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+.evt-card__live {
+  position: absolute;
+  top: 0.55rem;
+  left: 0.55rem;
+  z-index: 2;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.42rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-mh-red);
+  border: 1px solid color-mix(in srgb, var(--color-mh-red) 55%, transparent);
+  border-radius: 2px;
+  background: rgba(5, 5, 5, 0.75);
+}
+
+.evt-card__date {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.evt-card__day {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--color-signal);
+}
+
+.evt-card__month {
+  margin-top: 0.15rem;
+  font-size: 0.48rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-mh-red);
+}
+
+.evt-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0.75rem 0.7rem 0.8rem;
+}
+
+.evt-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.evt-card__tags span {
+  font-size: 0.42rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.22rem 0.38rem;
+  color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 2px;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.evt-card:hover .evt-card__tags span {
+  border-color: color-mix(in srgb, var(--color-mh-red) 40%, rgba(255, 255, 255, 0.2));
+}
+
+.evt-card__title {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.05;
+  color: var(--color-signal);
+}
+
+.evt-card__sub {
+  margin: 0.3rem 0 0;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: capitalize;
+}
+
+.evt-card__meta {
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  flex: 1;
+}
+
+.evt-card__meta li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  font-size: 0.48rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.evt-card__meta svg {
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+  color: var(--color-mh-red);
+}
+
+.evt-card__rsvp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-signal);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
+}
+
+.evt-card__rsvp:hover {
+  border-color: var(--color-mh-red);
+  color: var(--color-mh-red);
+}
+
+.evt-card__rsvp-arrow {
+  color: var(--color-mh-red);
+}
+
+/* Submit CTA */
+.evt__submit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  margin-top: 1.15rem;
+  padding: 1.1rem 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  border-radius: 8px;
+  background: #0a0a0a;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s;
+}
+
+.evt__submit:hover,
+.evt__submit:focus-visible {
+  border-color: color-mix(in srgb, var(--color-mh-red) 40%, var(--color-border));
+  outline: none;
+}
+
+.evt__submit-icon {
+  display: flex;
+  color: var(--color-mh-red);
+  flex-shrink: 0;
+}
+
+.evt__submit-copy {
+  flex: 1;
+  min-width: 12rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.evt__submit-copy strong {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-signal);
+}
+
+.evt__submit-copy span {
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.evt__submit-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.54rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #fff;
+  background: var(--color-mh-red);
+  border-radius: 5px;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: box-shadow 0.2s;
+}
+
+.evt__submit:hover .evt__submit-cta {
+  box-shadow: 0 4px 18px rgba(212, 0, 0, 0.45);
+}

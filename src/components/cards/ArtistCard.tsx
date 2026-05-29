@@ -6,15 +6,13 @@ import { IOSImage } from '@/components/ui/IOSImage'
 
 interface ArtistCardProps {
   artist: Artist
+  /** Render without inner link — parent handles navigation (e.g. login gate). */
+  unlinked?: boolean
 }
 
-export function ArtistCard({ artist }: ArtistCardProps) {
-  return (
-    <motion.article
-      variants={gridItemVariants}
-      className="group relative overflow-hidden ios-card"
-    >
-      <Link to={`/artist/${artist.slug}`} className="block">
+export function ArtistCard({ artist, unlinked }: ArtistCardProps) {
+  const inner = (
+    <>
         <div className="relative aspect-[4/5] overflow-hidden">
           <IOSImage
             src={artist.image}
@@ -35,7 +33,15 @@ export function ArtistCard({ artist }: ArtistCardProps) {
             Listen
           </span>
         </div>
-      </Link>
+    </>
+  )
+
+  return (
+    <motion.article
+      variants={gridItemVariants}
+      className="group relative overflow-hidden ios-card"
+    >
+      {unlinked ? <div className="block">{inner}</div> : <Link to={`/artist/${artist.slug}`} className="block">{inner}</Link>}
     </motion.article>
   )
 }

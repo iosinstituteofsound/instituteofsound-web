@@ -8,6 +8,7 @@ import { getSuperAdminAnalytics } from '@/lib/analytics/service'
 import type { SuperAdminAnalytics } from '@/lib/analytics/types'
 import { SuperAdminAnalyticsPanel } from '@/components/dashboard/SuperAdminAnalytics'
 import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
+import { DiscoverPremierePicksPanel } from '@/components/dashboard/DiscoverPremierePicksPanel'
 import { EditorWirePicksPanel } from '@/components/dashboard/EditorWirePicksPanel'
 import { appendWireSuggestionToNotes } from '@/lib/editorial/editorialBridge'
 import { EditorialTribeBridge } from '@/components/editorial/EditorialTribeBridge'
@@ -306,15 +307,18 @@ export default function EditorDashboardPage() {
 
         {tab === 'network' && <DashboardCommunityHub />}
 
-        {tab === 'wire' && (
-          <EditorWirePicksPanel
-            selectedPostId={draftLinkedPostId}
-            onLinkToDraft={(postId) => {
-              setDraftLinkedPostId(postId)
-              setMessage('Spin linked — open Write Editorial and save draft to embed on publish.')
-              setTab('write')
-            }}
-          />
+        {tab === 'wire' && user && (
+          <div className="space-y-8">
+            <DiscoverPremierePicksPanel user={user} />
+            <EditorWirePicksPanel
+              selectedPostId={draftLinkedPostId}
+              onLinkToDraft={(postId) => {
+                setDraftLinkedPostId(postId)
+                setMessage('Spin linked — open Write Editorial and save draft to embed on publish.')
+                setTab('write')
+              }}
+            />
+          </div>
         )}
 
         {tab === 'events' && <EditorEventsPanel />}

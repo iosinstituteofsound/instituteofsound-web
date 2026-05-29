@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
 import { useShell } from '@/context/ShellContext'
+import { useLoginGate } from '@/context/LoginGateContext'
 import {
   globalSearch,
   CATEGORY_LABELS,
@@ -26,6 +27,7 @@ const EMPTY: GlobalSearchResults = { groups: [] }
 
 export function CommandPalette() {
   const { commandOpen, closeCommand } = useShell()
+  const { requireAuth } = useLoginGate()
   const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement>(null)
   const [query, setQuery] = useState('')
@@ -90,6 +92,8 @@ export function CommandPalette() {
   if (!commandOpen) return null
 
   const go = (href: string) => {
+    const path = href.startsWith('/#') ? '/' : (href.split('?')[0]?.split('#')[0] ?? href)
+    if (!requireAuth(path)) return
     closeCommand()
     if (href.startsWith('/#')) {
       navigate('/')

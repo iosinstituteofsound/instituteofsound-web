@@ -11,6 +11,8 @@ interface IOSImageProps {
   sizes?: string
   priority?: boolean
   crop?: 'fill' | 'fit' | 'limit'
+  /** Fires when both optimized and original URLs fail to load. */
+  onBroken?: () => void
 }
 
 const DEFAULT_WIDTHS = [400, 640, 960, 1280, 1600]
@@ -24,6 +26,7 @@ export function IOSImage({
   sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px',
   priority = false,
   crop = 'fill',
+  onBroken,
 }: IOSImageProps) {
   const [useOriginal, setUseOriginal] = useState(false)
 
@@ -54,6 +57,7 @@ export function IOSImage({
       className={className}
       onError={() => {
         if (!useOriginal) setUseOriginal(true)
+        else onBroken?.()
       }}
     />
   )

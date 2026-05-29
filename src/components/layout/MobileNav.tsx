@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useNavGate } from '@/hooks/useNavGate'
 import clsx from 'clsx'
 import { useShell } from '@/context/ShellContext'
 import { shellModeToMobileTab } from '@/lib/nav/routeModes'
@@ -13,6 +14,7 @@ type Props = {
 
 export function MobileNav({ drawerOpen, onToggleDrawer, onCloseDrawer, drawer }: Props) {
   const { meta, openCommand } = useShell()
+  const { guardNavClick } = useNavGate()
   const activeTabHref = shellModeToMobileTab(meta.shellMode)
 
   return (
@@ -70,6 +72,7 @@ export function MobileNav({ drawerOpen, onToggleDrawer, onCloseDrawer, drawer }:
             <Link
               key={tab.href}
               to={tab.href}
+              onClick={(e) => guardNavClick(e, tab.href)}
               className={clsx(
                 'flex flex-1 flex-col items-center gap-0.5 py-2.5 font-display text-[9px] font-bold uppercase tracking-[0.08em]',
                 active ? 'text-mh-red' : 'text-muted',

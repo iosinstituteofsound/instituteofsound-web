@@ -6,7 +6,7 @@
     "description": "Late-night transmissions for insomniacs and night operators.",
     "trackCount": 42,
     "duration": "3h 12m",
-    "cover": "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&q=80",
+    "cover": "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&h=600&q=85",
     "accent": "#d40000"
   },
   {
@@ -16,7 +16,7 @@
     "description": "Sacred noise ceremonies. Industrial hymns for the converted.",
     "trackCount": 28,
     "duration": "2h 04m",
-    "cover": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&q=80",
+    "cover": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=600&h=600&q=85",
     "accent": "#8b1538"
   },
   {
@@ -26,7 +26,7 @@
     "description": "Classified tracks from scenes that don't exist on maps.",
     "trackCount": 56,
     "duration": "4h 28m",
-    "cover": "https://images.unsplash.com/photo-1459745451990-5cd2ddb0b98a?w=600&q=80",
+    "cover": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&h=600&q=85",
     "accent": "#d40000"
   },
   {
@@ -36,7 +36,7 @@
     "description": "Encrypted moods. Darkwave, coldwave, and post-punk archives.",
     "trackCount": 35,
     "duration": "2h 41m",
-    "cover": "https://images.unsplash.com/photo-1498038432885-c6d3f1e8e8f0?w=600&q=80",
+    "cover": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&h=600&q=85",
     "accent": "#8b1538"
   },
   {
@@ -46,7 +46,7 @@
     "description": "Cyberpunk soundtracks for cities that never sleep.",
     "trackCount": 48,
     "duration": "3h 55m",
-    "cover": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80",
+    "cover": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=600&h=600&q=85",
     "accent": "#d40000"
   },
   {
@@ -56,7 +56,7 @@
     "description": "When tomorrow breaks. Experimental collapse aesthetics.",
     "trackCount": 31,
     "duration": "2h 18m",
-    "cover": "https://images.unsplash.com/photo-1598387181032-a310d89d0a38?w=600&q=80",
+    "cover": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&h=600&q=85",
     "accent": "#8b1538"
   }
 ]

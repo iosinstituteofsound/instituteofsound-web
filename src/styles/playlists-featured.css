@@ -1,0 +1,313 @@
+/* Featured playlist — two columns, centered art stack */
+
+.pl-feat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 1rem 1.15rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-mh-red) 45%, var(--color-border));
+  background: #080808;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.pl-feat:hover,
+.pl-feat:focus-visible {
+  border-color: var(--color-mh-red);
+  box-shadow: 0 0 36px -10px rgba(212, 0, 0, 0.48);
+  outline: none;
+}
+
+.pl-feat__bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 80% at 20% 50%, rgba(212, 0, 0, 0.1) 0%, transparent 55%),
+    linear-gradient(90deg, rgba(212, 0, 0, 0.05) 1px, transparent 1px) 0 0 / 24px 24px;
+  mask-image: linear-gradient(90deg, #000 0%, #000 48%, transparent 100%);
+}
+
+.pl-feat__inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 11.5rem minmax(0, 1fr);
+  flex: 1;
+  gap: 1.25rem;
+  align-items: center;
+  min-height: 0;
+  height: 100%;
+}
+
+@media (max-width: 640px) {
+  .pl-feat__inner {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+}
+
+/* Left — one centered art unit */
+.pl-feat__art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 11rem;
+}
+
+.pl-feat__stack {
+  position: relative;
+  width: 11.5rem;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.pl-feat__glow {
+  position: absolute;
+  inset: 5%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 0, 0, 0.4) 0%, transparent 70%);
+  filter: blur(18px);
+  z-index: 0;
+}
+
+.pl-feat__vinyl {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 58%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translateY(-52%) rotate(-6deg);
+  z-index: 1;
+  background: repeating-conic-gradient(
+    from -8deg,
+    #1a0808 0deg 14deg,
+    #de7828 14deg 28deg,
+    #c41810 28deg 42deg,
+    #2a1210 42deg 56deg,
+    #de7828 56deg 70deg,
+    #1a0808 70deg 360deg
+  );
+  box-shadow: 0 0 24px rgba(212, 0, 0, 0.3);
+}
+
+.pl-feat__vinyl::after {
+  content: '';
+  position: absolute;
+  inset: 33%;
+  border-radius: 50%;
+  background: #090909;
+}
+
+.pl-feat__sleeve {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 80%;
+  aspect-ratio: 1;
+  z-index: 2;
+  padding: 3px;
+  border-radius: 3px;
+  background: linear-gradient(160deg, #eee, #ccc);
+  box-shadow: 8px 10px 28px rgba(0, 0, 0, 0.75);
+  transform: rotate(-4deg);
+  overflow: hidden;
+}
+
+.pl-feat__spine {
+  position: absolute;
+  left: 0.35rem;
+  top: 50%;
+  z-index: 3;
+  transform: translateY(-50%) rotate(-90deg);
+  font-size: 0.46rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c41a12;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.pl-feat__cover {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Right — top → bottom, no floating */
+.pl-feat__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.55rem;
+  min-width: 0;
+  height: 100%;
+  padding: 0.15rem 0;
+}
+
+.pl-feat__labels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+}
+
+.pl-feat__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.24rem 0.48rem;
+  font-size: 0.46rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-signal);
+  border: 1px solid color-mix(in srgb, var(--color-mh-red) 50%, transparent);
+  border-radius: 3px;
+}
+
+.pl-feat__badge svg {
+  color: var(--color-mh-red);
+}
+
+.pl-feat__wire {
+  font-size: 0.46rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-mh-red);
+}
+
+.pl-feat__title {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.75vw, 1.5rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.08;
+  color: var(--color-signal);
+}
+
+.pl-feat__desc {
+  margin: 0;
+  font-size: 0.73rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pl-feat__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.25rem;
+  margin-top: 0.35rem;
+}
+
+.pl-feat__stat {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  column-gap: 0.35rem;
+  align-items: end;
+}
+
+.pl-feat__stat > svg {
+  grid-row: 1 / -1;
+  align-self: center;
+  color: var(--color-mh-red);
+}
+
+.pl-feat__stat-num {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-signal);
+}
+
+.pl-feat__stat-lbl {
+  grid-column: 2;
+  font-size: 0.45rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.pl-feat__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+}
+
+.pl-feat__play {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+  padding: 0.62rem 0.85rem;
+  font-size: 0.52rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #fff;
+  background: var(--color-mh-red);
+  border-radius: 5px;
+  box-shadow: 0 3px 14px rgba(212, 0, 0, 0.5);
+}
+
+.pl-feat__follow {
+  padding: 0.6rem 0.85rem;
+  font-size: 0.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-signal);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pl-feat__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex-shrink: 0;
+  padding: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+@media (min-width: 960px) {
+  .pl-feat__inner {
+    grid-template-columns: 12.5rem minmax(0, 1fr);
+    gap: 1.35rem;
+  }
+
+  .pl-feat__stack {
+    width: 12.5rem;
+  }
+}

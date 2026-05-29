@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useNavGate } from '@/hooks/useNavGate'
 import clsx from 'clsx'
 import { useShell } from '@/context/ShellContext'
 import { useAuth } from '@/context/AuthContext'
@@ -16,6 +17,7 @@ export function Sidebar({ className, onNavigate }: Props) {
   const { pathname } = useLocation()
   const { meta } = useShell()
   const { user } = useAuth()
+  const { guardNavClick } = useNavGate()
   const dmUnread = useDmUnread()
 
   return (
@@ -65,7 +67,9 @@ export function Sidebar({ className, onNavigate }: Props) {
                   <li key={`${group.title}-${item.label}`}>
                     <Link
                       to={item.href}
-                      onClick={onNavigate}
+                      onClick={(e) => {
+                        guardNavClick(e, item.href, onNavigate)
+                      }}
                       className={clsx('v2-nav-link', active && 'v2-nav-link-active')}
                     >
                       <span>{item.label}</span>
