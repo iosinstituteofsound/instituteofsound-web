@@ -78,13 +78,11 @@ export default function MessagesPage() {
   }, [threads])
 
   const openThread = (id: string) => {
-    params.set('t', id)
-    setParams(params, { replace: true })
+    setParams({ t: id }, { replace: true })
   }
 
   const closeThread = () => {
-    params.delete('t')
-    setParams(params, { replace: true })
+    setParams({}, { replace: true })
   }
 
   if (!user) return null
