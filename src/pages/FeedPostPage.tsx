@@ -64,7 +64,11 @@ export default function FeedPostPage() {
         />
       </div>
 
-      <section className="mt-4 ios-card community-feed-post-comments-panel" aria-label="Comments">
+      <section
+        id="feed-post-comments"
+        className="mt-4 ios-card community-feed-post-comments-panel"
+        aria-label="Comments"
+      >
         <h2 className="font-display text-lg font-bold mb-4">
           Comments
           {(post.commentCount ?? 0) > 0 && (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
 import { useAuth } from '@/context/AuthContext'
@@ -10,7 +10,7 @@ import { parseSpotifyUrl, parseYouTubeUrl } from '@/lib/community/musicLinks'
 import { sharePost } from '@/lib/community/sharePost'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
-import { CommunityFeedReactions } from '@/components/community/CommunityFeedReactions'
+import { CommunityFeedEngagement } from '@/components/community/CommunityFeedEngagement'
 import { FollowButton } from '@/components/community/FollowButton'
 
 interface CommunityFeedCardProps {
@@ -41,15 +41,28 @@ export function CommunityFeedCard({
 }: CommunityFeedCardProps) {
   const { user } = useAuth()
   const isProfileFeed = variant === 'profile'
-  const isDetail = variant === 'detail'
   const [hiding, setHiding] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [shareLabel, setShareLabel] = useState('Share')
+  const menuRef = useRef<HTMLDivElement>(null)
   const spotify = post.spotifyUrl ? parseSpotifyUrl(post.spotifyUrl) : null
   const youtube = post.youtubeUrl ? parseYouTubeUrl(post.youtubeUrl) : null
   const primaryEmbed = getEmbedForPost(post)
 
+  useEffect(() => {
+    if (!menuOpen) return
+    const onDoc = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [menuOpen])
+
   const remove = async () => {
     if (!confirm('Remove this post from the feed?')) return
+    setMenuOpen(false)
     setHiding(true)
     try {
       await hideCommunityPost(post.id, post.userId)
@@ -63,12 +76,11 @@ export function CommunityFeedCard({
 
   const when = formatRelativeTime(post.createdAt)
   const profilePath = networkProfilePath(post.handle)
-  const commentCount = post.commentCount ?? 0
 
   const onShare = async () => {
     try {
       const result = await sharePost(post.id)
-      setShareLabel(result === 'copied' ? 'Link copied' : 'Shared')
+      setShareLabel(result === 'copied' ? 'Copied' : 'Shared')
       window.setTimeout(() => setShareLabel('Share'), 2000)
     } catch {
       /* user cancelled share sheet */
@@ -85,19 +97,26 @@ export function CommunityFeedCard({
     </div>
   )
 
-  const nameBlock = (
-    <>
-      <p className="community-feed-card-name">
-        {post.displayName}
-        {isYou && <span className="community-feed-card-you-pill">You</span>}
-      </p>
-      <p className="community-feed-card-handle">
-        {post.handle}
-        {post.primaryGenreSlug && (
-          <span className="community-feed-card-tribe"> · {formatGenre(post.primaryGenreSlug)}</span>
-        )}
-      </p>
-    </>
+  const metaLine = (
+    <p className="community-feed-card-submeta">
+      {!isProfileFeed && (
+        <>
+          <time dateTime={post.createdAt}>{when}</time>
+          <span className="community-feed-card-dot" aria-hidden>
+            ·
+          </span>
+        </>
+      )}
+      <span>{post.handle}</span>
+      {post.primaryGenreSlug && (
+        <>
+          <span className="community-feed-card-dot" aria-hidden>
+            ·
+          </span>
+          <span className="community-feed-card-tribe">{formatGenre(post.primaryGenreSlug)}</span>
+        </>
+      )}
+    </p>
   )
 
   return (
@@ -130,16 +149,59 @@ export function CommunityFeedCard({
             )}
             <div className="community-feed-card-meta">
               {linkProfile ? (
-                <div className="flex items-start justify-between gap-3">
-                  <Link to={profilePath} className="community-feed-card-profile-link block min-w-0">
-                    {nameBlock}
-                  </Link>
-                  {!isYou && user && (
-                    <FollowButton targetUserId={post.userId} className="!px-3 !py-1.5 !text-[10px] shrink-0" />
-                  )}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <Link to={profilePath} className="community-feed-card-profile-link block min-w-0">
+                      <p className="community-feed-card-name">
+                        {post.displayName}
+                        {isYou && <span className="community-feed-card-you-pill">You</span>}
+                      </p>
+                      {metaLine}
+                    </Link>
+                  </div>
+                  <div className="flex shrink-0 items-start gap-1">
+                    {!isYou && user && (
+                      <FollowButton
+                        targetUserId={post.userId}
+                        className="!px-3 !py-1.5 !text-[10px]"
+                      />
+                    )}
+                    {isYou && (
+                      <div className="community-feed-card-menu" ref={menuRef}>
+                        <button
+                          type="button"
+                          className="community-feed-card-menu-btn"
+                          aria-expanded={menuOpen}
+                          aria-label="Post options"
+                          onClick={() => setMenuOpen((v) => !v)}
+                        >
+                          ···
+                        </button>
+                        {menuOpen && (
+                          <div className="community-feed-card-menu-panel" role="menu">
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="community-feed-card-menu-item community-feed-card-menu-item-danger"
+                              disabled={hiding}
+                              onClick={() => void remove()}
+                            >
+                              {hiding ? 'Removing…' : 'Remove post'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
-                nameBlock
+                <>
+                  <p className="community-feed-card-name">
+                    {post.displayName}
+                    {isYou && <span className="community-feed-card-you-pill">You</span>}
+                  </p>
+                  {metaLine}
+                </>
               )}
             </div>
           </>
@@ -185,9 +247,7 @@ export function CommunityFeedCard({
 
       {post.kind === 'spin' && (
         <>
-          {post.trackTitle && (
-            <p className="community-feed-spin-title">{post.trackTitle}</p>
-          )}
+          {post.trackTitle && <p className="community-feed-spin-title">{post.trackTitle}</p>}
           {post.body && <p className="community-feed-spin-caption">{post.body}</p>}
           <div className="community-feed-embeds">
             {spotify && (
@@ -223,36 +283,13 @@ export function CommunityFeedCard({
         </>
       )}
 
-      <CommunityFeedReactions post={post} onChange={onReactionChange} />
-
-      <div className="community-feed-card-actions">
-        {!isDetail && (
-          <Link to={`/feed/${post.id}`} className="community-feed-action-btn">
-            {commentCount > 0 ? `${commentCount} comment${commentCount === 1 ? '' : 's'}` : 'Comment'}
-          </Link>
-        )}
-        <button type="button" className="community-feed-action-btn" onClick={() => void onShare()}>
-          {shareLabel}
-        </button>
-      </div>
-
-      <footer className="community-feed-card-foot">
-        {!isProfileFeed && (
-          <time className="community-feed-time" dateTime={post.createdAt}>
-            {when}
-          </time>
-        )}
-        {isYou && (
-          <button
-            type="button"
-            className="community-feed-hide"
-            onClick={() => void remove()}
-            disabled={hiding}
-          >
-            {hiding ? 'Removing…' : 'Remove'}
-          </button>
-        )}
-      </footer>
+      <CommunityFeedEngagement
+        post={post}
+        isDetail={variant === 'detail'}
+        onReactionChange={onReactionChange}
+        shareLabel={shareLabel}
+        onShare={onShare}
+      />
     </article>
   )
 }
