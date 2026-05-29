@@ -96,7 +96,7 @@ export async function resolveLinkPreview(url: string): Promise<ResolvedLinkPrevi
           preview.title || readMeta(html, 'title') || readTitleTag(html) || preview.title
         preview.description = preview.description || readMeta(html, 'description')
         preview.imageUrl = preview.imageUrl || readMeta(html, 'image')
-        preview.siteName = preview.siteName || readMeta(html, 'site_name')
+        preview.siteName = readMeta(html, 'site_name') || preview.siteName
       }
     } catch {
       /* HTML fetch optional */

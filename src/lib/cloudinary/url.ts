@@ -65,6 +65,12 @@ export function cloudinaryUrl(src: string, options: CloudinaryTransformOptions =
 
   const cloudName = getCloudinaryCloudName()
   if (cloudName && (src.startsWith('http://') || src.startsWith('https://'))) {
+    try {
+      const host = new URL(src).hostname.replace(/^www\./, '')
+      if (host === 'instituteofsound.in') return src
+    } catch {
+      /* invalid URL */
+    }
     const encoded = encodeURIComponent(src)
     return `https://${CLOUDINARY_HOST}/${cloudName}/image/fetch/${transforms}/${encoded}`
   }

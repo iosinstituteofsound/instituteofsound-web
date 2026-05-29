@@ -30,7 +30,7 @@ export function IOSImage({
   if (!src?.trim()) return null
 
   const optimized = cloudinaryUrl(src, { width, height, crop })
-  const displaySrc = useOriginal && isCloudinaryUrl(src) ? src : optimized
+  const displaySrc = useOriginal ? src : optimized
   const srcSet =
     useOriginal || !isCloudinaryUrl(src)
       ? undefined
@@ -53,9 +53,7 @@ export function IOSImage({
       fetchPriority={priority ? 'high' : 'auto'}
       className={className}
       onError={() => {
-        if (!useOriginal && isCloudinaryUrl(src)) {
-          setUseOriginal(true)
-        }
+        if (!useOriginal) setUseOriginal(true)
       }}
     />
   )
