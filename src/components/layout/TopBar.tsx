@@ -26,7 +26,7 @@ export function TopBar() {
       >
         <SearchIcon />
         <span className="min-w-0 flex-1 truncate text-[13px] text-muted">
-          Search artists, tracks, news...
+          Search people, artists, music, news...
         </span>
         <kbd className="hidden shrink-0 rounded border border-edge/80 bg-void px-1.5 py-0.5 font-sans text-[10px] text-muted sm:inline">
           ⌘K
