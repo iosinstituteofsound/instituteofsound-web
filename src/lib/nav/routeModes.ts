@@ -218,6 +218,9 @@ export function getRouteMeta(pathname: string): RouteMeta {
   if (pathname.startsWith('/release/')) {
     return meta({ sectionTitle: 'Release', kicker: 'Music', description: 'Release detail.', navHref: '/releases' })
   }
+  if (pathname.startsWith('/track/')) {
+    return meta({ sectionTitle: 'Track', kicker: 'Releases', description: 'Track detail.', navHref: '/releases' })
+  }
   if (/^\/scenes\/[^/]+\/[^/]+/.test(pathname)) {
     return meta({ sectionTitle: 'Scene Hub', kicker: 'Scenes', description: 'City and genre scene.', navHref: '/scenes' })
   }

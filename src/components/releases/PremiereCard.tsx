@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { GatedLink } from '@/components/auth/GatedLink'
 import { IOSImage } from '@/components/ui/IOSImage'
+import { catalogCardHref } from '@/lib/discovery/trackPaths'
 import {
   formatPlayCount,
   formatPremiereDate,
@@ -33,14 +34,12 @@ export function PremiereCard({ card, headingLevel = 'h3', className }: PremiereC
         ? 'Wire pick'
         : null
   const TitleTag = headingLevel
-  const artistHref = card.releaseSlug
-    ? `/release/${card.releaseSlug}`
-    : `/artist/${card.artistSlug}${isAlbum ? '#releases' : ''}`
+  const href = catalogCardHref(card)
 
   return (
     <GatedLink
-      to={artistHref}
-      forceGate={!card.releaseSlug}
+      to={href}
+      forceGate={false}
       className={className ?? 'prem-card'}
       aria-label={`${card.trackTitle} by ${card.artistName}`}
     >

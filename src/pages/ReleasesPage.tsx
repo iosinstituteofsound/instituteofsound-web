@@ -15,6 +15,7 @@ import {
   RELEASES_PAGE_FILTERS,
   type ReleasesPageFilter,
 } from '@/lib/discovery/releasesPageFilters'
+import { catalogCardHref, trackDetailPath } from '@/lib/discovery/trackPaths'
 import { formatPremiereDate } from '@/lib/discovery/premieres'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonLd'
 import '@/styles/releases-premieres.css'
@@ -142,18 +143,17 @@ export default function ReleasesPage() {
               </p>
               <div className="prem-page__hero-actions">
                 {featured.catalogKind !== 'album' && featured.streamUrl && (
-                  <a
-                    href={featured.streamUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <GatedLink
+                    to={`${trackDetailPath(featured.artistSlug, featured.trackId)}#play`}
+                    forceGate={false}
                     className="prem-page__btn prem-page__btn--fill"
                   >
                     Listen now
-                  </a>
+                  </GatedLink>
                 )}
                 <GatedLink
-                  to={`/artist/${featured.artistSlug}${featured.catalogKind === 'album' ? '#releases' : ''}`}
-                  forceGate
+                  to={catalogCardHref(featured)}
+                  forceGate={false}
                   className="prem-page__btn prem-page__btn--line"
                 >
                   View release
@@ -166,8 +166,8 @@ export default function ReleasesPage() {
             {featuredRail.map((card) => (
               <GatedLink
                 key={card.trackId}
-                to={`/artist/${card.artistSlug}`}
-                forceGate
+                to={catalogCardHref(card)}
+                forceGate={false}
                 className="prem-page__rail-item"
               >
                 {card.coverUrl ? (

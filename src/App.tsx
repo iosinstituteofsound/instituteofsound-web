@@ -26,6 +26,7 @@ const ArtistEpkPage = lazy(() => import('@/pages/ArtistEpkPage'))
 const PlaylistDetailPage = lazy(() => import('@/pages/PlaylistDetailPage'))
 const FeatureDetailPage = lazy(() => import('@/pages/FeatureDetailPage'))
 const ReleaseDetailPage = lazy(() => import('@/pages/ReleaseDetailPage'))
+const TrackDetailPage = lazy(() => import('@/pages/TrackDetailPage'))
 const ScenesIndexPage = lazy(() => import('@/pages/ScenesIndexPage'))
 const SceneHubPage = lazy(() => import('@/pages/SceneHubPage'))
 const CollabBoardPage = lazy(() => import('@/pages/CollabBoardPage'))
@@ -143,6 +144,7 @@ export default function App() {
             <Route path="playlist/:slug" element={<PlaylistDetailPage />} />
             <Route path="feature/:slug" element={<FeatureDetailPage />} />
             <Route path="release/:slug" element={<ReleaseDetailPage />} />
+            <Route path="track/:artistSlug/:trackId" element={<TrackDetailPage />} />
             <Route path="scenes" element={<ScenesIndexPage />} />
             <Route path="scenes/:city/:genre" element={<SceneHubPage />} />
             <Route path="collab" element={<CollabBoardPage />} />
