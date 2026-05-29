@@ -35,6 +35,15 @@ export function Sidebar({ className, onNavigate }: Props) {
             <ul className="v2-nav-list">
               <li>
                 <Link
+                  to="/feed"
+                  onClick={onNavigate}
+                  className={clsx('v2-nav-link', pathname.startsWith('/feed') && 'v2-nav-link-active')}
+                >
+                  <span>Feed</span>
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/messages"
                   onClick={onNavigate}
                   className={clsx('v2-nav-link', pathname.startsWith('/messages') && 'v2-nav-link-active')}

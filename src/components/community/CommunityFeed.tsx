@@ -9,23 +9,33 @@ import type { CommunityFeedFilter } from '@/lib/community/feedFilters'
 interface CommunityFeedProps {
   highlightUserId?: string
   tribeSlug?: string | null
+  defaultFilter?: CommunityFeedFilter
+  /** Hide the built-in heading when the page already provides one. */
+  hideHeading?: boolean
 }
 
-export function CommunityFeed({ highlightUserId, tribeSlug }: CommunityFeedProps) {
+export function CommunityFeed({
+  highlightUserId,
+  tribeSlug,
+  defaultFilter = 'all',
+  hideHeading = false,
+}: CommunityFeedProps) {
   const { user } = useAuth()
-  const [filter, setFilter] = useState<CommunityFeedFilter>('all')
+  const [filter, setFilter] = useState<CommunityFeedFilter>(defaultFilter)
   const { posts, loading, refresh } = useCommunityFeed(30, filter, tribeSlug)
 
   return (
     <section id="feed" className="community-feed-section" aria-labelledby="network-feed-heading">
-      <div className="mb-6">
-        <h2 id="network-feed-heading" className="font-display text-2xl font-bold">
-          Network feed
-        </h2>
-        <p className="text-sm text-muted mt-1">
-          Spins share music · Drops are short underground transmissions
-        </p>
-      </div>
+      {!hideHeading && (
+        <div className="mb-6">
+          <h2 id="network-feed-heading" className="font-display text-2xl font-bold">
+            Network feed
+          </h2>
+          <p className="text-sm text-muted mt-1">
+            Spins share music · Drops are short underground transmissions
+          </p>
+        </div>
+      )}
 
       <CommunityFeedFilters
         value={filter}

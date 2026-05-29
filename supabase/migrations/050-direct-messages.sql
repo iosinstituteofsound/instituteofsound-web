@@ -332,7 +332,7 @@ returns table (
   read_at timestamptz
 )
 language plpgsql
-stable
+volatile
 security definer
 set search_path = public
 as $$
