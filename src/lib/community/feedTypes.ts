@@ -18,6 +18,10 @@ export interface CommunityFeedPost {
   youtubeUrl?: string
   trackTitle?: string
   imageUrl?: string
+  linkUrl?: string
+  linkTitle?: string
+  linkDescription?: string
+  linkImageUrl?: string
   createdAt: string
   userId: string
   displayName: string

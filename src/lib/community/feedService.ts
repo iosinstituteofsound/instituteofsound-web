@@ -24,6 +24,22 @@ const DROP_DB = 5
 
 const emptyReactions = () => ({ fire: 0, headphones: 0, bolt: 0 })
 
+function isMissingLinkColumnError(message: string): boolean {
+  return /link_url|link_title|link_description|link_image_url|column.*does not exist/i.test(
+    message
+  )
+}
+
+function friendlyPostError(message: string): string {
+  if (isMissingLinkColumnError(message)) {
+    return 'Link posts need the latest database migration (053). Run it in Supabase SQL editor, then try again.'
+  }
+  if (/community_posts_drop_requires_content|check constraint/i.test(message)) {
+    return 'Add some text, a photo, or a valid link before posting.'
+  }
+  return message
+}
+
 export type FeedRow = {
   id: string
   kind: string
@@ -32,6 +48,10 @@ export type FeedRow = {
   youtube_url: string | null
   track_title: string | null
   image_url?: string | null
+  link_url?: string | null
+  link_title?: string | null
+  link_description?: string | null
+  link_image_url?: string | null
   created_at: string
   user_id: string
   display_name: string
@@ -59,6 +79,10 @@ function mapRow(row: FeedRow): CommunityFeedPost {
     youtubeUrl: row.youtube_url ?? undefined,
     trackTitle: row.track_title ?? undefined,
     imageUrl: row.image_url ?? undefined,
+    linkUrl: row.link_url ?? undefined,
+    linkTitle: row.link_title ?? undefined,
+    linkDescription: row.link_description ?? undefined,
+    linkImageUrl: row.link_image_url ?? undefined,
     createdAt: row.created_at,
     userId: row.user_id,
     displayName: row.display_name,
@@ -132,6 +156,11 @@ export async function fetchCommunityFeed(
 
   if (error) {
     console.warn('[community] feed', error.message)
+    if (/link_url|link_title|comment_count|does not exist/i.test(error.message)) {
+      console.warn(
+        '[community] feed RPC may be out of date — run migrations 051–053 in Supabase SQL editor.'
+      )
+    }
     return []
   }
 
@@ -246,12 +275,19 @@ export interface CreateDropInput {
   primaryGenreId?: string
   text: string
   imageUrl?: string
+  linkUrl?: string
+  linkTitle?: string
+  linkDescription?: string
+  linkImageUrl?: string
 }
 
 export async function createDropPost(input: CreateDropInput): Promise<CommunityFeedPost> {
   const text = input.text.trim()
   const imageUrl = input.imageUrl?.trim() || null
-  if (text.length < 1 && !imageUrl) throw new Error('Write something or add a photo first.')
+  const linkUrl = input.linkUrl?.trim() || null
+  if (text.length < 1 && !imageUrl && !linkUrl) {
+    throw new Error('Write something, add a photo, or paste a link.')
+  }
   if (text.length > 280) throw new Error('Max 280 characters.')
   const body = text.length > 0 ? text : null
 
@@ -261,6 +297,10 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
       kind: 'drop',
       body: body ?? undefined,
       imageUrl: imageUrl ?? undefined,
+      linkUrl: linkUrl ?? undefined,
+      linkTitle: input.linkTitle?.trim() || undefined,
+      linkDescription: input.linkDescription?.trim() || undefined,
+      linkImageUrl: input.linkImageUrl?.trim() || undefined,
       createdAt: new Date().toISOString(),
       userId: input.userId,
       displayName: input.displayName,
@@ -279,18 +319,42 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
   }
 
   const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('community_posts')
-    .insert({
-      user_id: input.userId,
-      kind: 'drop',
-      body,
-      image_url: imageUrl,
-    })
-    .select('id, created_at')
-    .single()
+  const linkTitle = input.linkTitle?.trim() || null
+  const linkDescription = input.linkDescription?.trim() || null
+  const linkImageUrl = input.linkImageUrl?.trim() || null
 
-  if (error) throw new Error(error.message)
+  const fullInsert = {
+    user_id: input.userId,
+    kind: 'drop' as const,
+    body,
+    image_url: imageUrl,
+    link_url: linkUrl,
+    link_title: linkTitle,
+    link_description: linkDescription,
+    link_image_url: linkImageUrl,
+  }
+
+  let result = await supabase.from('community_posts').insert(fullInsert).select('id, created_at').single()
+
+  if (result.error && linkUrl && isMissingLinkColumnError(result.error.message)) {
+    const fallbackBody =
+      body && linkUrl && !body.includes(linkUrl) ? `${body}\n\n${linkUrl}` : body || linkUrl
+    result = await supabase
+      .from('community_posts')
+      .insert({
+        user_id: input.userId,
+        kind: 'drop',
+        body: fallbackBody,
+        image_url: imageUrl,
+      })
+      .select('id, created_at')
+      .single()
+  }
+
+  const { data, error } = result
+  if (error) {
+    throw new Error(friendlyPostError(error.message))
+  }
 
   const awarded = await awardDb({
     userId: input.userId,
@@ -309,6 +373,10 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
     kind: 'drop',
     body: body ?? undefined,
     imageUrl: imageUrl ?? undefined,
+    linkUrl: linkUrl ?? undefined,
+    linkTitle: input.linkTitle?.trim() || undefined,
+    linkDescription: input.linkDescription?.trim() || undefined,
+    linkImageUrl: input.linkImageUrl?.trim() || undefined,
     createdAt: data.created_at,
     userId: input.userId,
     displayName: input.displayName,

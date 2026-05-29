@@ -8064,6 +8064,123 @@ html[data-perf='lite'] .metal-loader-core-beat {
   color: var(--color-muted);
 }
 
+.community-composer-tip {
+  margin: 0.5rem 0 0;
+  padding-left: calc(44px + 0.75rem);
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+
+.community-composer-preview-loading {
+  margin: 0.5rem 0 0;
+  padding-left: calc(44px + 0.75rem);
+}
+
+.community-link-preview {
+  position: relative;
+  display: flex;
+  margin-top: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.65rem;
+  overflow: hidden;
+  background: var(--color-elevated, rgba(255, 255, 255, 0.03));
+}
+
+.community-link-preview-compact {
+  margin-top: 0.65rem;
+}
+
+.community-link-preview-image {
+  flex-shrink: 0;
+  width: 7.5rem;
+  min-height: 5rem;
+  background: #000;
+}
+
+.community-link-preview-compact .community-link-preview-image {
+  width: 6.5rem;
+}
+
+.community-link-preview-img {
+  width: 100%;
+  height: 100%;
+  min-height: 5rem;
+  object-fit: cover;
+}
+
+.community-link-preview-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+}
+
+.community-link-preview-site {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.community-link-preview-title {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-foreground);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.community-link-preview-desc {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--color-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.community-link-preview-url {
+  margin: 0.35rem 0 0;
+  font-size: 0.7rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.community-link-preview-remove {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.community-feed-link-preview-wrap {
+  display: block;
+  margin-top: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.15s ease;
+}
+
+.community-feed-link-preview-wrap:hover {
+  opacity: 0.92;
+}
+
 .community-composer-actions {
   display: flex;
   flex-wrap: wrap;

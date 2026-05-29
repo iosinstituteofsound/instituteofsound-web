@@ -14,6 +14,12 @@
     },
     "api/share/feature.ts": {
       "maxDuration": 10
+    },
+    "api/link-preview.ts": {
+      "maxDuration": 15
+    },
+    "api/thumbnail.ts": {
+      "maxDuration": 15
     }
   },
   "rewrites": [

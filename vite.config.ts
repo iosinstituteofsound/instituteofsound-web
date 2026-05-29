@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 import { buildArtistCatalogFromUrl } from './api/import-catalog'
+import { resolveLinkPreview } from './src/lib/community/resolveLinkPreview'
 import { resolveThumbnailFromUrl } from './src/lib/media/resolveThumbnail'
 
 function thumbnailApiPlugin(): Plugin {
@@ -32,6 +33,29 @@ function thumbnailApiPlugin(): Plugin {
               error: err instanceof Error ? err.message : 'Catalog import failed',
             })
           )
+        }
+      })
+
+      server.middlewares.use('/api/link-preview', async (req, res) => {
+        try {
+          const requestUrl = new URL(req.url ?? '', 'http://localhost')
+          const target = requestUrl.searchParams.get('url')?.trim()
+          if (!target) {
+            res.statusCode = 400
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ error: 'Missing url' }))
+            return
+          }
+          const preview = await resolveLinkPreview(
+            target.startsWith('http') ? target : `https://${target}`
+          )
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify(preview))
+        } catch {
+          res.statusCode = 502
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ error: 'Preview unavailable' }))
         }
       })
 

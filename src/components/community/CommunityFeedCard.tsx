@@ -11,6 +11,7 @@ import { sharePost } from '@/lib/community/sharePost'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { CommunityFeedEngagement } from '@/components/community/CommunityFeedEngagement'
+import { CommunityLinkPreviewCard } from '@/components/community/CommunityLinkPreviewCard'
 import { FollowButton } from '@/components/community/FollowButton'
 
 interface CommunityFeedCardProps {
@@ -243,6 +244,25 @@ export function CommunityFeedCard({
             className="community-feed-photo-img"
           />
         </div>
+      )}
+
+      {post.linkUrl && (
+        <a
+          href={post.linkUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="community-feed-link-preview-wrap"
+        >
+          <CommunityLinkPreviewCard
+            preview={{
+              url: post.linkUrl,
+              title: post.linkTitle,
+              description: post.linkDescription,
+              imageUrl: post.linkImageUrl,
+            }}
+            compact
+          />
+        </a>
       )}
 
       {post.kind === 'spin' && (

@@ -7,26 +7,53 @@ import { useCommunityGenres } from '@/hooks/useCommunityGenres'
 import { createDropPost, createSpinPost } from '@/lib/community/feedService'
 import { DB_REWARDS } from '@/lib/community/dbRewards'
 import { consumePendingToolDrop } from '@/lib/academy/academyLoop'
+import { extractFirstUrl, isMusicStreamUrl, urlsMatch } from '@/lib/community/extractLink'
+import { fetchLinkPreview, linkPreviewStub, type LinkPreview } from '@/lib/community/linkPreview'
+import type { User } from '@/lib/auth/types'
+import type { CommunityMemberStats } from '@/lib/community/service'
+import type { CommunityRank } from '@/types'
 import { uploadImageToCloudinary, validateImageFile } from '@/lib/cloudinary/upload'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { Button } from '@/components/ui/Button'
+import { CommunityLinkPreviewCard } from '@/components/community/CommunityLinkPreviewCard'
 
-/** One option at a time — switching clears the previous mode's fields. */
 type ComposerOption = 'photo' | 'music' | 'spin' | 'drop'
 
 interface CommunityFeedComposerProps {
   onPosted: () => void
 }
 
+function buildAuthor(user: User, stats: CommunityMemberStats | null, primaryGenreId?: string) {
+  const handle = stats?.handle
+    ? stats.handle
+    : user.username
+      ? user.username.startsWith('@')
+        ? user.username
+        : `@${user.username}`
+      : `@${user.email.split('@')[0] || 'member'}`
+
+  return {
+    userId: user.id,
+    displayName: stats?.name ?? user.name ?? 'Member',
+    handle,
+    avatarUrl: stats?.avatarUrl ?? user.avatarUrl,
+    rank: (stats?.rank ?? 'listener') as CommunityRank,
+    primaryGenreSlug: stats?.primaryGenreSlug,
+    primaryGenreId,
+  }
+}
+
 export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) {
   const { user } = useAuth()
-  const { stats } = useCommunityMemberStats()
+  const { stats, loading: statsLoading } = useCommunityMemberStats()
   const { genres } = useCommunityGenres()
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [selected, setSelected] = useState<ComposerOption | null>(null)
   const [text, setText] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [linkPreview, setLinkPreview] = useState<LinkPreview | null>(null)
+  const [linkPreviewLoading, setLinkPreviewLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [spotify, setSpotify] = useState('')
   const [youtube, setYoutube] = useState('')
@@ -34,6 +61,8 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+
+  const previewRequest = useRef(0)
 
   useEffect(() => {
     const pending = consumePendingToolDrop()
@@ -43,12 +72,52 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
     }
   }, [])
 
-  if (!user || !stats) {
+  const isTrackPost = selected === 'music' || selected === 'spin'
+  const allowsLinkPreview = !selected || selected === 'drop'
+  const detectedUrl = allowsLinkPreview ? extractFirstUrl(text) : null
+
+  useEffect(() => {
+    if (!allowsLinkPreview || !detectedUrl) {
+      setLinkPreview(null)
+      setLinkPreviewLoading(false)
+      return
+    }
+
+    if (isMusicStreamUrl(detectedUrl)) {
+      setLinkPreview(null)
+      setLinkPreviewLoading(false)
+      return
+    }
+
+    setLinkPreview(linkPreviewStub(detectedUrl))
+
+    const requestId = ++previewRequest.current
+    setLinkPreviewLoading(true)
+
+    const timer = window.setTimeout(() => {
+      void fetchLinkPreview(detectedUrl)
+        .then((preview) => {
+          if (previewRequest.current !== requestId) return
+          setLinkPreview(preview)
+        })
+        .catch(() => {
+          if (previewRequest.current !== requestId) return
+          setLinkPreview(linkPreviewStub(detectedUrl))
+        })
+        .finally(() => {
+          if (previewRequest.current === requestId) setLinkPreviewLoading(false)
+        })
+    }, 550)
+
+    return () => window.clearTimeout(timer)
+  }, [allowsLinkPreview, detectedUrl])
+
+  if (!user) {
     return (
       <div className="community-feed-composer community-feed-composer-guest ios-card">
         <p className="font-display font-bold">Transmit on the network</p>
         <p className="text-sm text-muted mt-2">
-          Sign in to post Spins, Drops, photos, or music links.
+          Sign in to post text, links, photos, spins, or drops.
         </p>
         <Link to="/login" className="ios-btn ios-btn-metal inline-block mt-4">
           Sign in →
@@ -57,49 +126,49 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
     )
   }
 
-  const primaryGenreId = genres.find((g) => g.slug === stats.primaryGenreSlug)?.id
-  const author = {
-    userId: user.id,
-    displayName: stats.name,
-    handle: stats.handle,
-    avatarUrl: stats.avatarUrl,
-    rank: stats.rank,
-    primaryGenreSlug: stats.primaryGenreSlug,
-    primaryGenreId,
+  if (statsLoading && !stats) {
+    return (
+      <div className="community-feed-composer community-feed-composer-fb ios-card">
+        <p className="text-sm text-muted py-4 text-center">Loading composer…</p>
+      </div>
+    )
   }
 
-  const firstName = stats.name.split(' ')[0]
+  const primaryGenreId = genres.find((g) => g.slug === stats?.primaryGenreSlug)?.id
+  const author = buildAuthor(user, stats, primaryGenreId)
+  const displayName = author.displayName
+  const firstName = displayName.split(' ')[0]
+  const avatarUrl = author.avatarUrl
   const hasMusic = spotify.trim().length > 0 || youtube.trim().length > 0
-  const isTrackPost = selected === 'music' || selected === 'spin'
 
-  const clearFields = () => {
+  const clearAttachmentFields = () => {
     setImageUrl('')
     setSpotify('')
     setYoutube('')
     setTrackTitle('')
+    setLinkPreview(null)
+    setLinkPreviewLoading(false)
+    previewRequest.current += 1
   }
 
   const pickOption = (option: ComposerOption) => {
     if (selected !== option) {
-      clearFields()
+      clearAttachmentFields()
       setSelected(option)
       setError(null)
     }
   }
 
   const canPost = (() => {
-    if (!selected || saving || uploading) return false
-    switch (selected) {
-      case 'drop':
-        return text.trim().length > 0
-      case 'photo':
-        return Boolean(imageUrl)
-      case 'music':
-      case 'spin':
-        return hasMusic
-      default:
-        return false
-    }
+    if (saving || uploading) return false
+    if (isTrackPost) return hasMusic
+    if (selected === 'photo') return Boolean(imageUrl)
+    return (
+      text.trim().length > 0 ||
+      Boolean(imageUrl) ||
+      Boolean(linkPreview?.url) ||
+      Boolean(detectedUrl)
+    )
   })()
 
   const selectPhoto = () => {
@@ -135,13 +204,13 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
 
   const reset = () => {
     setText('')
-    clearFields()
+    clearAttachmentFields()
     setSelected(null)
     setError(null)
   }
 
   const submit = async () => {
-    if (!canPost || !selected) return
+    if (!canPost) return
     setSaving(true)
     setError(null)
     setSuccess(null)
@@ -156,12 +225,22 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
         })
         setSuccess(`Spin live · +${DB_REWARDS.spin_post} dB`)
       } else {
+        const useLink =
+          detectedUrl && !isMusicStreamUrl(detectedUrl)
+            ? linkPreview?.url && urlsMatch(linkPreview.url, detectedUrl)
+              ? linkPreview
+              : linkPreviewStub(detectedUrl)
+            : null
         await createDropPost({
           ...author,
           text,
-          imageUrl: imageUrl || undefined,
+          imageUrl: selected === 'photo' ? imageUrl || undefined : undefined,
+          linkUrl: useLink?.url,
+          linkTitle: useLink?.title,
+          linkDescription: useLink?.description,
+          linkImageUrl: useLink?.imageUrl,
         })
-        setSuccess(`Drop live · +${DB_REWARDS.drop_post} dB`)
+        setSuccess(`Posted · +${DB_REWARDS.drop_post} dB`)
       }
       reset()
       onPosted()
@@ -173,7 +252,9 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
   }
 
   const textareaPlaceholder = (() => {
-    if (!selected) return `Pick Photo, Music, Spin, or Drop — then post, ${firstName}.`
+    if (!selected) {
+      return `What's on your mind, ${firstName}? Write text or paste a link…`
+    }
     switch (selected) {
       case 'photo':
         return 'Caption for your photo (optional)…'
@@ -187,20 +268,22 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
 
   const submitLabel = (() => {
     if (saving) return '…'
-    if (!selected) return 'Post'
     if (isTrackPost) return 'Post Spin'
     if (selected === 'photo') return 'Post Photo'
-    return 'Post Drop'
+    if (selected === 'drop') return 'Post Drop'
+    return 'Post'
   })()
+
+  const showMusicTip = Boolean(detectedUrl && isMusicStreamUrl(detectedUrl) && allowsLinkPreview)
 
   return (
     <div className="community-feed-composer community-feed-composer-fb ios-card">
       <div className="community-composer-top">
         <div className="community-feed-card-avatar community-composer-avatar">
-          {stats.avatarUrl ? (
-            <IOSImage src={stats.avatarUrl} alt="" width={44} className="w-full h-full object-cover" />
+          {avatarUrl ? (
+            <IOSImage src={avatarUrl} alt="" width={44} className="w-full h-full object-cover" />
           ) : (
-            <span aria-hidden>{stats.name.charAt(0).toUpperCase()}</span>
+            <span aria-hidden>{displayName.charAt(0).toUpperCase()}</span>
           )}
         </div>
         <textarea
@@ -209,32 +292,59 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           placeholder={textareaPlaceholder}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          disabled={saving || !selected}
+          disabled={saving}
           maxLength={280}
         />
       </div>
+
+      {!selected && (text.trim() || linkPreview) && (
+        <p className="community-composer-mode-hint">
+          <span className="community-composer-mode-label">Post</span>
+          <span className="text-muted"> — text or link · +{DB_REWARDS.drop_post} dB</span>
+        </p>
+      )}
 
       {selected && (
         <p className="community-composer-mode-hint">
           {selected === 'drop' && (
             <>
               <span className="community-composer-mode-label community-composer-mode-drop">Drop</span>
-              <span className="text-muted"> — write a transmission · +{DB_REWARDS.drop_post} dB</span>
+              <span className="text-muted"> — transmission · +{DB_REWARDS.drop_post} dB</span>
             </>
           )}
           {selected === 'photo' && (
             <>
               <span className="community-composer-mode-label community-composer-mode-photo">Photo</span>
-              <span className="text-muted"> — image post · +{DB_REWARDS.drop_post} dB</span>
+              <span className="text-muted"> — image · +{DB_REWARDS.drop_post} dB</span>
             </>
           )}
           {(selected === 'music' || selected === 'spin') && (
             <>
               <span className="community-composer-mode-label community-composer-mode-spin">Spin</span>
-              <span className="text-muted"> — share a track link · +{DB_REWARDS.spin_post} dB</span>
+              <span className="text-muted"> — track link · +{DB_REWARDS.spin_post} dB</span>
             </>
           )}
         </p>
+      )}
+
+      {showMusicTip && (
+        <p className="community-composer-tip">
+          For Spotify or YouTube, tap <strong>Spin</strong> or <strong>Music</strong> to embed the track.
+        </p>
+      )}
+
+      {linkPreviewLoading && detectedUrl && !isMusicStreamUrl(detectedUrl) && (
+        <p className="community-composer-preview-loading text-sm text-muted">Loading link preview…</p>
+      )}
+
+      {linkPreview && !linkPreviewLoading && allowsLinkPreview && (
+        <CommunityLinkPreviewCard
+          preview={linkPreview}
+          onRemove={() => {
+            setLinkPreview(null)
+            previewRequest.current += 1
+          }}
+        />
       )}
 
       {selected === 'photo' && imageUrl && (
