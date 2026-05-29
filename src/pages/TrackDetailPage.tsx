@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { ArtistStreamEmbed } from '@/components/artist-profile/ArtistStreamEmbed'
 import { TrackDetailAside } from '@/components/releases/TrackDetailAside'
+import { TrackDetailReleaseGrid } from '@/components/releases/TrackDetailReleaseGrid'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { recordTrackClick } from '@/lib/analytics/artistAnalytics'
@@ -12,7 +13,6 @@ import {
   STREAM_PLATFORM_LABEL,
   streamPlatform,
 } from '@/lib/artist-profile/streamPlatform'
-import { catalogCardHref } from '@/lib/discovery/trackPaths'
 import { fetchPublicTrackDetail, type PublicTrackDetail } from '@/lib/discovery/publicTrackDetail'
 import {
   formatPlayCount,
@@ -171,8 +171,16 @@ export default function TrackDetailPage() {
     )
   }
 
-  const { track, profile, album, releaseType, moreReleases, artistStats, sidebarTracks } =
-    detail
+  const {
+    track,
+    profile,
+    album,
+    releaseType,
+    artistReleases,
+    otherArtistReleases,
+    artistStats,
+    sidebarTracks,
+  } = detail
   const embed = getStreamEmbed(track.streamUrl, track.title)
   const platform = streamPlatform(track.streamUrl)
   const cover = track.coverUrl ?? album?.coverUrl ?? profile.avatarUrl
@@ -375,46 +383,22 @@ export default function TrackDetailPage() {
             </div>
           </div>
 
-          {moreReleases.length > 0 && (
-            <section className="tk-more-section" aria-labelledby="tk-more-heading">
-              <div className="tk-section-head">
-                <h2 id="tk-more-heading">More releases</h2>
-                <Link to="/releases">View all →</Link>
-              </div>
-              <div className="tk-more-grid">
-                {moreReleases.map((card) => (
-                  <Link
-                    key={card.trackId}
-                    to={catalogCardHref(card)}
-                    className="tk-more-card"
-                  >
-                    <div className="tk-more-card__cover-wrap">
-                      {card.coverUrl ? (
-                        <IOSImage
-                          src={card.coverUrl}
-                          alt=""
-                          width={200}
-                          className="tk-more-card__cover"
-                        />
-                      ) : (
-                        <div
-                          className="tk-more-card__cover tk-hero__cover-fb"
-                          style={{ fontSize: '1.25rem' }}
-                          aria-hidden
-                        >
-                          {card.trackTitle.slice(0, 1)}
-                        </div>
-                      )}
-                    </div>
-                    <span className="tk-more-card__title">{card.trackTitle}</span>
-                    <span className="tk-more-card__sub">
-                      {releaseTypeLabel(card.releaseType)} · {card.artistName}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
+          <TrackDetailReleaseGrid
+            id="tk-more-heading"
+            title="More from this artist"
+            viewAllHref={`/artist/${profile.slug}#music`}
+            cards={artistReleases}
+            releaseTypeLabel={releaseTypeLabel}
+          />
+
+          <TrackDetailReleaseGrid
+            id="tk-other-heading"
+            title="Other artists on the wire"
+            viewAllHref="/releases"
+            cards={otherArtistReleases}
+            releaseTypeLabel={releaseTypeLabel}
+            className="tk-more-section--others"
+          />
         </main>
 
         <TrackDetailAside

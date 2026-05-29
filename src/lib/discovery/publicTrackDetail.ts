@@ -9,7 +9,10 @@ export interface PublicTrackDetail {
   album?: ArtistAlbum
   releaseType: 'album' | 'ep' | 'single'
   moreFromArtist: ArtistTrack[]
-  moreReleases: DiscoverPremiereCard[]
+  /** Same artist — main column rail */
+  artistReleases: DiscoverPremiereCard[]
+  /** Other published artists — below artist rail */
+  otherArtistReleases: DiscoverPremiereCard[]
   artistStats: {
     trackCount: number
     albumCount: number
@@ -50,14 +53,18 @@ export async function fetchPublicTrackDetail(
     .slice(0, 5)
   const sidebarTracks = [track, ...others]
 
-  let moreReleases: DiscoverPremiereCard[] = []
+  let artistReleases: DiscoverPremiereCard[] = []
+  let otherArtistReleases: DiscoverPremiereCard[] = []
   try {
     const catalog = await fetchReleasesCatalog()
-    moreReleases = catalog
-      .filter((c) => c.trackId !== trackId && c.catalogKind !== 'album')
-      .slice(0, 5)
+    const playable = catalog.filter(
+      (c) => c.trackId !== trackId && c.catalogKind !== 'album' && c.streamUrl
+    )
+    artistReleases = playable.filter((c) => c.artistSlug === artistSlug).slice(0, 5)
+    otherArtistReleases = playable.filter((c) => c.artistSlug !== artistSlug).slice(0, 5)
   } catch {
-    moreReleases = []
+    artistReleases = []
+    otherArtistReleases = []
   }
 
   return {
@@ -66,7 +73,8 @@ export async function fetchPublicTrackDetail(
     album,
     releaseType,
     moreFromArtist,
-    moreReleases,
+    artistReleases,
+    otherArtistReleases,
     artistStats: { trackCount, albumCount, totalPlays },
     sidebarTracks,
   }
