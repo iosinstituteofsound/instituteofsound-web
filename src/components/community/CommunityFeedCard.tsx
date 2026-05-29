@@ -8,6 +8,7 @@ import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import { getEmbedForPost, hideCommunityPost } from '@/lib/community/feedService'
 import { parseSpotifyUrl, parseYouTubeUrl } from '@/lib/community/musicLinks'
 import { sharePost } from '@/lib/community/sharePost'
+import { isBodyOnlyLink } from '@/lib/community/extractLink'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { CommunityFeedEngagement } from '@/components/community/CommunityFeedEngagement'
@@ -230,9 +231,11 @@ export function CommunityFeedCard({
         </div>
       </header>
 
-      {post.kind === 'drop' && post.body && (
-        <p className="community-feed-drop-body">{post.body}</p>
-      )}
+      {post.kind === 'drop' &&
+        post.body &&
+        !(post.linkUrl && isBodyOnlyLink(post.body, post.linkUrl)) && (
+          <p className="community-feed-drop-body">{post.body}</p>
+        )}
 
       {post.imageUrl && (
         <div className="community-feed-photo">

@@ -7,7 +7,12 @@ import { useCommunityGenres } from '@/hooks/useCommunityGenres'
 import { createDropPost, createSpinPost } from '@/lib/community/feedService'
 import { DB_REWARDS } from '@/lib/community/dbRewards'
 import { consumePendingToolDrop } from '@/lib/academy/academyLoop'
-import { extractFirstUrl, isMusicStreamUrl, urlsMatch } from '@/lib/community/extractLink'
+import {
+  extractFirstUrl,
+  isMusicStreamUrl,
+  stripUrlFromText,
+  urlsMatch,
+} from '@/lib/community/extractLink'
 import { fetchLinkPreview, linkPreviewStub, type LinkPreview } from '@/lib/community/linkPreview'
 import type { User } from '@/lib/auth/types'
 import type { CommunityMemberStats } from '@/lib/community/service'
@@ -231,9 +236,10 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
               ? linkPreview
               : linkPreviewStub(detectedUrl)
             : null
+        const postText = useLink ? stripUrlFromText(text, useLink.url) : text
         await createDropPost({
           ...author,
-          text,
+          text: postText,
           imageUrl: selected === 'photo' ? imageUrl || undefined : undefined,
           linkUrl: useLink?.url,
           linkTitle: useLink?.title,
