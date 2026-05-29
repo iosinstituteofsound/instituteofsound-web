@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { GatedLink } from '@/components/auth/GatedLink'
-import { ReleaseVinylArt } from '@/components/releases/ReleaseVinylArt'
+import { IOSImage } from '@/components/ui/IOSImage'
 import {
   formatPlayCount,
   formatPremiereDate,
@@ -20,6 +21,7 @@ interface PremiereCardProps {
 }
 
 export function PremiereCard({ card, headingLevel = 'h3', className }: PremiereCardProps) {
+  const [coverBroken, setCoverBroken] = useState(false)
   const isAlbum = card.catalogKind === 'album'
   const badge = isAlbum
     ? card.releaseType === 'ep'
@@ -50,13 +52,19 @@ export function PremiereCard({ card, headingLevel = 'h3', className }: PremiereC
           </span>
         )}
         <div className="prem-card__art">
-          <ReleaseVinylArt
-            coverUrl={card.coverUrl}
-            alt={card.trackTitle}
-            fallbackLetter={card.trackTitle}
-            variant="card"
-            width={400}
-          />
+          {card.coverUrl && !coverBroken ? (
+            <IOSImage
+              src={card.coverUrl}
+              alt={card.trackTitle}
+              width={400}
+              className="prem-card__img"
+              onBroken={() => setCoverBroken(true)}
+            />
+          ) : (
+            <div className="prem-card__art-fallback" aria-hidden>
+              {card.trackTitle.slice(0, 1)}
+            </div>
+          )}
         </div>
         <div className="prem-card__body">
           <p className="prem-card__genre">{card.genreLabel}</p>
