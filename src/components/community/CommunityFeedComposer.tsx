@@ -11,7 +11,8 @@ import { uploadImageToCloudinary, validateImageFile } from '@/lib/cloudinary/upl
 import { IOSImage } from '@/components/ui/IOSImage'
 import { Button } from '@/components/ui/Button'
 
-type PostMode = 'drop' | 'spin'
+/** One option at a time — switching clears the previous mode's fields. */
+type ComposerOption = 'photo' | 'music' | 'spin' | 'drop'
 
 interface CommunityFeedComposerProps {
   onPosted: () => void
@@ -23,11 +24,10 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
   const { genres } = useCommunityGenres()
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const [postMode, setPostMode] = useState<PostMode>('drop')
+  const [selected, setSelected] = useState<ComposerOption | null>(null)
   const [text, setText] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [uploading, setUploading] = useState(false)
-  const [showMusic, setShowMusic] = useState(false)
   const [spotify, setSpotify] = useState('')
   const [youtube, setYoutube] = useState('')
   const [trackTitle, setTrackTitle] = useState('')
@@ -38,7 +38,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
   useEffect(() => {
     const pending = consumePendingToolDrop()
     if (pending) {
-      setPostMode('drop')
+      setSelected('drop')
       setText(pending.body)
     }
   }, [])
@@ -70,37 +70,46 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
 
   const firstName = stats.name.split(' ')[0]
   const hasMusic = spotify.trim().length > 0 || youtube.trim().length > 0
-  const isSpin = postMode === 'spin'
+  const isTrackPost = selected === 'music' || selected === 'spin'
 
-  const canPost =
-    !saving &&
-    !uploading &&
-    (isSpin ? hasMusic : text.trim().length > 0 || Boolean(imageUrl))
-
-  const selectDrop = () => {
-    setPostMode('drop')
-    setShowMusic(false)
+  const clearFields = () => {
+    setImageUrl('')
     setSpotify('')
     setYoutube('')
     setTrackTitle('')
-    setError(null)
   }
 
-  const selectSpin = () => {
-    setPostMode('spin')
-    setShowMusic(true)
-    setError(null)
-  }
-
-  const toggleMusic = () => {
-    if (isSpin && showMusic) {
-      setShowMusic(false)
-      return
+  const pickOption = (option: ComposerOption) => {
+    if (selected !== option) {
+      clearFields()
+      setSelected(option)
+      setError(null)
     }
-    selectSpin()
   }
 
-  const pickPhoto = () => fileRef.current?.click()
+  const canPost = (() => {
+    if (!selected || saving || uploading) return false
+    switch (selected) {
+      case 'drop':
+        return text.trim().length > 0
+      case 'photo':
+        return Boolean(imageUrl)
+      case 'music':
+      case 'spin':
+        return hasMusic
+      default:
+        return false
+    }
+  })()
+
+  const selectPhoto = () => {
+    pickOption('photo')
+    window.setTimeout(() => fileRef.current?.click(), 0)
+  }
+
+  const selectMusic = () => pickOption('music')
+  const selectSpin = () => pickOption('spin')
+  const selectDrop = () => pickOption('drop')
 
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -116,6 +125,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
     try {
       const result = await uploadImageToCloudinary(file, 'ios/community')
       setImageUrl(result.url)
+      setSelected('photo')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Photo upload failed.')
     } finally {
@@ -125,32 +135,32 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
 
   const reset = () => {
     setText('')
-    setImageUrl('')
-    setSpotify('')
-    setYoutube('')
-    setTrackTitle('')
-    setShowMusic(false)
-    setPostMode('drop')
+    clearFields()
+    setSelected(null)
+    setError(null)
   }
 
   const submit = async () => {
-    if (!canPost) return
+    if (!canPost || !selected) return
     setSaving(true)
     setError(null)
     setSuccess(null)
     try {
-      if (isSpin) {
+      if (isTrackPost) {
         await createSpinPost({
           ...author,
           spotifyRaw: spotify,
           youtubeRaw: youtube,
           caption: text,
           trackTitle,
-          imageUrl: imageUrl || undefined,
         })
         setSuccess(`Spin live · +${DB_REWARDS.spin_post} dB`)
       } else {
-        await createDropPost({ ...author, text, imageUrl: imageUrl || undefined })
+        await createDropPost({
+          ...author,
+          text,
+          imageUrl: imageUrl || undefined,
+        })
         setSuccess(`Drop live · +${DB_REWARDS.drop_post} dB`)
       }
       reset()
@@ -162,11 +172,26 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
     }
   }
 
-  const textareaPlaceholder = isSpin
-    ? showMusic
-      ? 'Caption for your spin (optional)…'
-      : `Share a track, ${firstName}…`
-    : `What's on your mind, ${firstName}?`
+  const textareaPlaceholder = (() => {
+    if (!selected) return `Pick Photo, Music, Spin, or Drop — then post, ${firstName}.`
+    switch (selected) {
+      case 'photo':
+        return 'Caption for your photo (optional)…'
+      case 'music':
+      case 'spin':
+        return 'Caption for your spin (optional)…'
+      default:
+        return `What's on your mind, ${firstName}?`
+    }
+  })()
+
+  const submitLabel = (() => {
+    if (saving) return '…'
+    if (!selected) return 'Post'
+    if (isTrackPost) return 'Post Spin'
+    if (selected === 'photo') return 'Post Photo'
+    return 'Post Drop'
+  })()
 
   return (
     <div className="community-feed-composer community-feed-composer-fb ios-card">
@@ -184,26 +209,35 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           placeholder={textareaPlaceholder}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          disabled={saving}
+          disabled={saving || !selected}
           maxLength={280}
         />
       </div>
 
-      <p className="community-composer-mode-hint">
-        {isSpin ? (
-          <>
-            <span className="community-composer-mode-label community-composer-mode-spin">Spin</span>
-            <span className="text-muted"> — share a track link · +{DB_REWARDS.spin_post} dB</span>
-          </>
-        ) : (
-          <>
-            <span className="community-composer-mode-label community-composer-mode-drop">Drop</span>
-            <span className="text-muted"> — short transmission · +{DB_REWARDS.drop_post} dB</span>
-          </>
-        )}
-      </p>
+      {selected && (
+        <p className="community-composer-mode-hint">
+          {selected === 'drop' && (
+            <>
+              <span className="community-composer-mode-label community-composer-mode-drop">Drop</span>
+              <span className="text-muted"> — write a transmission · +{DB_REWARDS.drop_post} dB</span>
+            </>
+          )}
+          {selected === 'photo' && (
+            <>
+              <span className="community-composer-mode-label community-composer-mode-photo">Photo</span>
+              <span className="text-muted"> — image post · +{DB_REWARDS.drop_post} dB</span>
+            </>
+          )}
+          {(selected === 'music' || selected === 'spin') && (
+            <>
+              <span className="community-composer-mode-label community-composer-mode-spin">Spin</span>
+              <span className="text-muted"> — share a track link · +{DB_REWARDS.spin_post} dB</span>
+            </>
+          )}
+        </p>
+      )}
 
-      {imageUrl && (
+      {selected === 'photo' && imageUrl && (
         <div className="community-composer-photo">
           <IOSImage src={imageUrl} alt="Attached" width={640} className="community-composer-photo-img" />
           <button
@@ -217,7 +251,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
         </div>
       )}
 
-      {isSpin && showMusic && (
+      {isTrackPost && (
         <div className="community-composer-music">
           <p className="community-composer-music-label">Track links</p>
           <input
@@ -246,7 +280,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
             maxLength={120}
           />
           {!hasMusic && (
-            <p className="community-composer-music-hint">Add Spotify or YouTube to post a Spin.</p>
+            <p className="community-composer-music-hint">Add Spotify or YouTube to post.</p>
           )}
         </div>
       )}
@@ -255,7 +289,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
       {success && <p className="text-sm text-muted mt-3">{success}</p>}
 
       <div className="community-composer-bar">
-        <div className="community-composer-actions">
+        <div className="community-composer-actions" role="radiogroup" aria-label="Post type">
           <input
             ref={fileRef}
             type="file"
@@ -266,8 +300,13 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           />
           <button
             type="button"
-            className="community-composer-action"
-            onClick={pickPhoto}
+            role="radio"
+            aria-checked={selected === 'photo'}
+            className={clsx(
+              'community-composer-action community-composer-action-photo',
+              selected === 'photo' && 'community-composer-action-photo-active'
+            )}
+            onClick={selectPhoto}
             disabled={uploading || saving}
           >
             <PhotoIcon />
@@ -275,11 +314,13 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           </button>
           <button
             type="button"
+            role="radio"
+            aria-checked={selected === 'music'}
             className={clsx(
-              'community-composer-action',
-              isSpin && showMusic && 'community-composer-action-music-active'
+              'community-composer-action community-composer-action-music',
+              selected === 'music' && 'community-composer-action-music-active'
             )}
-            onClick={toggleMusic}
+            onClick={selectMusic}
             disabled={saving}
           >
             <MusicIcon />
@@ -287,9 +328,11 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           </button>
           <button
             type="button"
+            role="radio"
+            aria-checked={selected === 'spin'}
             className={clsx(
               'community-composer-action community-composer-action-spin',
-              isSpin && 'community-composer-action-spin-active'
+              selected === 'spin' && 'community-composer-action-spin-active'
             )}
             onClick={selectSpin}
             disabled={saving}
@@ -299,9 +342,11 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           </button>
           <button
             type="button"
+            role="radio"
+            aria-checked={selected === 'drop'}
             className={clsx(
               'community-composer-action community-composer-action-drop',
-              !isSpin && 'community-composer-action-drop-active'
+              selected === 'drop' && 'community-composer-action-drop-active'
             )}
             onClick={selectDrop}
             disabled={saving}
@@ -317,7 +362,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           disabled={!canPost}
           onClick={() => void submit()}
         >
-          {saving ? '…' : isSpin ? 'Post Spin' : 'Post Drop'}
+          {submitLabel}
         </Button>
       </div>
     </div>

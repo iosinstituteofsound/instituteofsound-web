@@ -8039,6 +8039,16 @@ html[data-perf='lite'] .metal-loader-core-beat {
   color: var(--color-rs-red, #e23744);
 }
 
+.community-composer-mode-photo {
+  color: #a78bfa;
+}
+
+.community-composer-action-photo-active {
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.12);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+}
+
 .community-composer-music-label {
   margin: 0 0 0.35rem;
   font-size: 0.7rem;
