@@ -56,6 +56,11 @@
   max-width: 20rem;
 }
 
+.prem-page--full .prem-sec__sub {
+  max-width: 36rem;
+  line-height: 1.6;
+}
+
 .prem__all-btn {
   display: inline-flex;
   align-items: center;
@@ -196,6 +201,12 @@
   overflow: visible;
 }
 
+/* Full page grid: reserve right gutter for vinyl peek */
+.prem-page__grid .prem-card__art {
+  padding-right: 42%;
+  box-sizing: border-box;
+}
+
 .prem-card:hover .prem-card__inner,
 .prem-card:focus-visible .prem-card__inner {
   border-color: var(--color-mh-red);
@@ -261,6 +272,15 @@
 
 .prem-card:hover .prem-vinyl__sleeve .prem-card__img {
   transform: scale(1.03);
+}
+
+.prem-page__grid .prem-card:hover .prem-vinyl {
+  left: 54%;
+  transition: left 0.35s ease;
+}
+
+.prem-page__grid .prem-vinyl {
+  transition: left 0.35s ease;
 }
 
 .prem-vinyl__sleeve .prem-card__art-fallback {
@@ -385,15 +405,21 @@
 }
 
 /* All releases page */
+.prem-page--full.discover-wire {
+  contain: none;
+}
+
 .prem-page__grid {
   display: grid;
-  gap: 1.35rem 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 1.5rem 0.65rem;
+  grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+  overflow: visible;
 }
 
 .prem-page__grid-card {
   flex: none;
   width: auto;
+  min-width: 0;
 }
 
 .prem-page__refresh {
@@ -410,7 +436,8 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.25rem;
+  padding-top: 0.35rem;
 }
 
 .prem-page__drop {
@@ -444,35 +471,46 @@
 
 .prem-page__hero {
   display: grid;
-  gap: 1.25rem;
-  margin-bottom: 2.5rem;
-  padding-bottom: 2rem;
+  gap: 1.5rem;
+  margin-bottom: 2.75rem;
+  padding-bottom: 2.25rem;
   border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  overflow: visible;
 }
 
 @media (min-width: 900px) {
   .prem-page__hero {
-    grid-template-columns: 1fr min(16rem, 28%);
+    grid-template-columns: 1fr min(15.5rem, 26%);
     align-items: start;
+    gap: 1.75rem;
   }
 }
 
 .prem-page__hero-main {
   display: grid;
-  gap: 1.25rem;
+  gap: 1.5rem;
+  overflow: visible;
 }
 
 @media (min-width: 640px) {
   .prem-page__hero-main {
-    grid-template-columns: min(14rem, 42%) 1fr;
-    align-items: start;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 2.75rem);
   }
 }
 
 .prem-page__hero-art {
   position: relative;
-  min-width: 0;
+  flex-shrink: 0;
+  width: min(11.5rem, 78vw);
+  padding-right: 5.75rem;
+  box-sizing: content-box;
   overflow: visible;
+}
+
+.prem-page__hero-copy {
+  min-width: 0;
 }
 
 /* Vinyl behind sleeve — same height as cover, ~half disc visible right (reference mock) */
@@ -484,7 +522,8 @@
 }
 
 .prem-vinyl-stack--hero {
-  max-width: 20rem;
+  max-width: none;
+  width: 100%;
 }
 
 /* Disc = same size as sleeve; shifted right so ~50% peeks out */
@@ -619,12 +658,13 @@
 .prem-page__hero-title {
   margin: 0.35rem 0 0;
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-size: clamp(1.35rem, 3.2vw, 2rem);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  line-height: 1;
+  line-height: 1.05;
   color: var(--color-signal);
+  word-break: break-word;
 }
 
 .prem-page__hero-artist {
@@ -766,11 +806,63 @@
 
 .prem-page__latest-head {
   display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.15rem;
+}
+
+@media (min-width: 768px) {
+  .prem-page__latest-head {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 1.25rem;
+  }
+}
+
+.prem-page__latest-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .prem-page__latest-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    width: auto;
+    gap: 0.75rem 1rem;
+  }
+}
+
+.prem-page__latest-meta {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
-  margin-bottom: 0.85rem;
+  gap: 0.5rem 0.75rem;
+}
+
+.prem-page__refresh-btn {
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.42rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
+  border-radius: 999px;
+  color: var(--color-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.prem-page__refresh-btn:hover {
+  color: var(--color-signal);
+  border-color: var(--color-mh-red);
 }
 
 .prem-page__section-title {
@@ -792,14 +884,6 @@
   border-radius: 50%;
   background: var(--color-mh-red);
   box-shadow: 0 0 8px var(--color-mh-red);
-}
-
-.prem-page__latest-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
 }
 
 .prem-page__view-all {

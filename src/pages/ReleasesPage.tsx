@@ -86,7 +86,7 @@ export default function ReleasesPage() {
   }
 
   return (
-    <div className="discover-wire prem-page mx-auto w-full max-w-[1200px] px-3 py-5 sm:px-4 lg:py-8">
+    <div className="discover-wire prem-page prem-page--full mx-auto w-full max-w-[1200px] px-3 py-6 sm:px-4 sm:py-8 lg:py-10">
       <header className="prem-page__top">
         <div className="prem-sec__brand">
           <span className="prem-sec__idx" aria-hidden>
@@ -120,10 +120,10 @@ export default function ReleasesPage() {
             <div className="prem-page__hero-art">
               <ReleaseVinylArt
                 coverUrl={featured.coverUrl}
+                alt={featured.trackTitle}
                 fallbackLetter={featured.trackTitle}
-                vinylTitle={featured.trackTitle}
                 variant="hero"
-                width={560}
+                width={480}
               />
             </div>
             <div className="prem-page__hero-copy">
@@ -193,29 +193,34 @@ export default function ReleasesPage() {
             <span className="prem-page__dot" aria-hidden />
             Latest releases
           </h2>
-          <div className="prem__filters" role="tablist" aria-label="Release filters">
-            {RELEASES_PAGE_FILTERS.map((f) => (
+          <div className="prem-page__latest-actions">
+            <div className="prem__filters" role="tablist" aria-label="Release filters">
+              {RELEASES_PAGE_FILTERS.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={filter === f.id}
+                  className={clsx('prem__filter', filter === f.id && 'prem__filter--on')}
+                  onClick={() => setFilter(f.id)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            <div className="prem-page__latest-meta">
+              <GatedLink to="/discover#discover-releases" forceGate className="prem-page__view-all">
+                Explore picks
+              </GatedLink>
               <button
-                key={f.id}
                 type="button"
-                role="tab"
-                aria-selected={filter === f.id}
-                className={clsx('prem__filter', filter === f.id && 'prem__filter--on')}
-                onClick={() => setFilter(f.id)}
+                className="prem-page__refresh-btn"
+                onClick={() => void refresh()}
               >
-                {f.label}
+                Refresh catalog
               </button>
-            ))}
+            </div>
           </div>
-        </div>
-
-        <div className="prem-page__latest-toolbar">
-          <GatedLink to="/discover#discover-releases" forceGate className="prem-page__view-all">
-            Hourly picks on explore
-          </GatedLink>
-          <button type="button" className="ios-btn ios-btn-ghost !text-xs" onClick={() => void refresh()}>
-            Refresh catalog
-          </button>
         </div>
 
         {!loading && filtered.length === 0 && (
