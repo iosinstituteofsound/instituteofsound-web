@@ -157,6 +157,18 @@ export function CommunityFeedCard({
         <p className="community-feed-drop-body">{post.body}</p>
       )}
 
+      {post.imageUrl && (
+        <div className="community-feed-photo">
+          <IOSImage
+            src={post.imageUrl}
+            alt={post.trackTitle || post.body || 'Post photo'}
+            width={760}
+            crop="limit"
+            className="community-feed-photo-img"
+          />
+        </div>
+      )}
+
       {post.kind === 'spin' && (
         <>
           {post.trackTitle && (

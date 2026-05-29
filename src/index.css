@@ -7938,6 +7938,129 @@ html[data-perf='lite'] .metal-loader-core-beat {
   margin-bottom: 0;
 }
 
+/* Facebook-style unified composer */
+.community-composer-top {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.community-composer-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+}
+
+.community-composer-textarea {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 0.5rem 0;
+  outline: none;
+}
+
+.community-composer-textarea::placeholder {
+  color: var(--color-muted);
+}
+
+.community-composer-photo {
+  position: relative;
+  margin-top: 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.community-composer-photo-img {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+.community-composer-photo-remove {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.community-composer-music {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.community-composer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.community-composer-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.community-composer-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.community-composer-action:hover:not(:disabled) {
+  background: var(--color-elevated, rgba(255, 255, 255, 0.06));
+  color: var(--color-foreground);
+}
+
+.community-composer-action-active {
+  color: var(--color-mh-red, #e23744);
+}
+
+.community-composer-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Feed card photo */
+.community-feed-photo {
+  margin-top: 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.community-feed-photo-img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+
 .community-feed-composer-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;

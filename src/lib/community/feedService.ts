@@ -30,6 +30,7 @@ export type FeedRow = {
   spotify_url: string | null
   youtube_url: string | null
   track_title: string | null
+  image_url?: string | null
   created_at: string
   user_id: string
   display_name: string
@@ -55,6 +56,7 @@ function mapRow(row: FeedRow): CommunityFeedPost {
     spotifyUrl: row.spotify_url ?? undefined,
     youtubeUrl: row.youtube_url ?? undefined,
     trackTitle: row.track_title ?? undefined,
+    imageUrl: row.image_url ?? undefined,
     createdAt: row.created_at,
     userId: row.user_id,
     displayName: row.display_name,
@@ -143,6 +145,7 @@ export interface CreateSpinInput {
   youtubeRaw: string
   caption?: string
   trackTitle?: string
+  imageUrl?: string
 }
 
 export async function createSpinPost(input: CreateSpinInput): Promise<CommunityFeedPost> {
@@ -151,6 +154,7 @@ export async function createSpinPost(input: CreateSpinInput): Promise<CommunityF
 
   const body = input.caption?.trim().slice(0, 280) || null
   const trackTitle = input.trackTitle?.trim().slice(0, 120) || null
+  const imageUrl = input.imageUrl?.trim() || null
 
   if (!isSupabaseConfigured()) {
     const post: CommunityFeedPost = {
@@ -160,6 +164,7 @@ export async function createSpinPost(input: CreateSpinInput): Promise<CommunityF
       spotifyUrl: spotify?.url,
       youtubeUrl: youtube?.url,
       trackTitle: trackTitle ?? undefined,
+      imageUrl: imageUrl ?? undefined,
       createdAt: new Date().toISOString(),
       userId: input.userId,
       displayName: input.displayName,
@@ -187,6 +192,7 @@ export async function createSpinPost(input: CreateSpinInput): Promise<CommunityF
       spotify_url: spotify?.url ?? null,
       youtube_url: youtube?.url ?? null,
       track_title: trackTitle,
+      image_url: imageUrl,
     })
     .select('id, created_at')
     .single()
@@ -212,6 +218,7 @@ export async function createSpinPost(input: CreateSpinInput): Promise<CommunityF
     spotifyUrl: spotify?.url,
     youtubeUrl: youtube?.url,
     trackTitle: trackTitle ?? undefined,
+    imageUrl: imageUrl ?? undefined,
     createdAt: data.created_at,
     userId: input.userId,
     displayName: input.displayName,
@@ -233,18 +240,22 @@ export interface CreateDropInput {
   primaryGenreSlug?: string
   primaryGenreId?: string
   text: string
+  imageUrl?: string
 }
 
 export async function createDropPost(input: CreateDropInput): Promise<CommunityFeedPost> {
   const text = input.text.trim()
-  if (text.length < 1) throw new Error('Write your transmission first.')
+  const imageUrl = input.imageUrl?.trim() || null
+  if (text.length < 1 && !imageUrl) throw new Error('Write something or add a photo first.')
   if (text.length > 280) throw new Error('Max 280 characters.')
+  const body = text.length > 0 ? text : null
 
   if (!isSupabaseConfigured()) {
     const post: CommunityFeedPost = {
       id: crypto.randomUUID(),
       kind: 'drop',
-      body: text,
+      body: body ?? undefined,
+      imageUrl: imageUrl ?? undefined,
       createdAt: new Date().toISOString(),
       userId: input.userId,
       displayName: input.displayName,
@@ -268,7 +279,8 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
     .insert({
       user_id: input.userId,
       kind: 'drop',
-      body: text,
+      body,
+      image_url: imageUrl,
     })
     .select('id, created_at')
     .single()
@@ -290,7 +302,8 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
   return {
     id: data.id,
     kind: 'drop',
-    body: text,
+    body: body ?? undefined,
+    imageUrl: imageUrl ?? undefined,
     createdAt: data.created_at,
     userId: input.userId,
     displayName: input.displayName,

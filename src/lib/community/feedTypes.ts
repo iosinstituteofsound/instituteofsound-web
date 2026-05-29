@@ -17,6 +17,7 @@ export interface CommunityFeedPost {
   spotifyUrl?: string
   youtubeUrl?: string
   trackTitle?: string
+  imageUrl?: string
   createdAt: string
   userId: string
   displayName: string
