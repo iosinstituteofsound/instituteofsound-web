@@ -8156,6 +8156,11 @@ html[data-perf='lite'] .metal-loader-core-beat {
   text-overflow: ellipsis;
 }
 
+.community-composer-preview-note {
+  margin: 0.35rem 0 0;
+  line-height: 1.4;
+}
+
 .community-link-preview-remove {
   position: absolute;
   top: 0.4rem;

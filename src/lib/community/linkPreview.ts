@@ -13,11 +13,45 @@ export function linkPreviewStub(url: string): LinkPreview {
     return {
       url: parsed.href,
       siteName: parsed.hostname.replace(/^www\./, ''),
-      title: parsed.hostname.replace(/^www\./, ''),
     }
   } catch {
-    return { url: trimmed, title: trimmed }
+    return { url: trimmed }
   }
+}
+
+/** Avoid duplicate hostname + generic platform title; flag scrape-thin previews. */
+export function normalizeLinkPreviewForDisplay(preview: LinkPreview): {
+  preview: LinkPreview
+  isMinimal: boolean
+} {
+  let hostname = ''
+  try {
+    hostname = new URL(preview.url).hostname.replace(/^www\./, '')
+  } catch {
+    /* keep empty */
+  }
+
+  const siteName = preview.siteName?.trim() || hostname || 'Link'
+  let title = preview.title?.trim()
+
+  if (title && hostname) {
+    const titleKey = title.toLowerCase()
+    const hostKey = hostname.split('.')[0]?.toLowerCase() ?? ''
+    const siteKey = siteName.replace(/^www\./, '').split('.')[0]?.toLowerCase() ?? ''
+    if (titleKey === hostKey || titleKey === siteKey || titleKey === siteName.toLowerCase()) {
+      title = undefined
+    }
+  }
+
+  const normalized: LinkPreview = {
+    ...preview,
+    siteName,
+    title,
+  }
+
+  const isMinimal = !normalized.imageUrl && !normalized.description && !normalized.title
+
+  return { preview: normalized, isMinimal }
 }
 
 export async function fetchLinkPreview(url: string): Promise<LinkPreview> {
