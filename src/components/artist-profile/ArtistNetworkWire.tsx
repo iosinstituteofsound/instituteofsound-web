@@ -4,6 +4,7 @@ import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import { networkProfilePath } from '@/lib/community/networkPaths'
 import { parseSpotifyUrl, parseYouTubeUrl } from '@/lib/community/musicLinks'
 import { CommunityFeedReactions } from '@/components/community/CommunityFeedReactions'
+import { MessageButton } from '@/components/community/MessageButton'
 
 const sectionMotion = {
   initial: { opacity: 0, y: 28 },
@@ -15,9 +16,10 @@ const sectionMotion = {
 interface ArtistNetworkWireProps {
   networkHandle: string
   latestSpin: CommunityFeedPost | null
+  ownerUserId?: string
 }
 
-export function ArtistNetworkWire({ networkHandle, latestSpin }: ArtistNetworkWireProps) {
+export function ArtistNetworkWire({ networkHandle, latestSpin, ownerUserId }: ArtistNetworkWireProps) {
   const profilePath = networkProfilePath(networkHandle)
   const spotify = latestSpin?.spotifyUrl ? parseSpotifyUrl(latestSpin.spotifyUrl) : null
   const youtube = latestSpin?.youtubeUrl ? parseYouTubeUrl(latestSpin.youtubeUrl) : null
@@ -33,9 +35,17 @@ export function ArtistNetworkWire({ networkHandle, latestSpin }: ArtistNetworkWi
               Follow their transmissions, spins, and dB rank on the Institute of Sound network.
             </p>
           </div>
-          <Link to={profilePath} className="artist-site-btn artist-site-btn-primary">
-            View network profile →
-          </Link>
+          <div className="artist-network-wire-actions">
+            <Link to={profilePath} className="artist-site-btn artist-site-btn-primary">
+              View network profile →
+            </Link>
+            {ownerUserId && (
+              <MessageButton
+                targetUserId={ownerUserId}
+                className="artist-site-btn artist-site-btn-secondary"
+              />
+            )}
+          </div>
         </div>
 
         {latestSpin ? (

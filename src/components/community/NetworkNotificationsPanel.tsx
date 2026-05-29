@@ -19,6 +19,8 @@ function notificationFallbackIcon(kind: NotificationKind): string {
     case 'collab_response':
     case 'collab_accepted':
       return '⇄'
+    case 'dm_message':
+      return '✉'
     default:
       return '◉'
   }

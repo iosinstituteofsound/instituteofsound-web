@@ -3459,6 +3459,12 @@ body.ios-app-shell {
   margin-bottom: 1rem;
 }
 
+.artist-network-wire-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
 .artist-network-wire-spin {
   padding-top: 0.5rem;
   border-top: 1px solid var(--color-border);

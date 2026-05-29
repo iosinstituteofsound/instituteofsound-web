@@ -3,10 +3,12 @@ import { useAuth } from '@/context/AuthContext'
 import { homeDashboardPath } from '@/lib/auth/roles'
 import { useShell } from '@/context/ShellContext'
 import { NetworkNotificationsPanel } from '@/components/community/NetworkNotificationsPanel'
+import { useDmUnread } from '@/hooks/useDmUnread'
 
 export function TopBar() {
   const { meta, openCommand } = useShell()
   const { user } = useAuth()
+  const dmUnread = useDmUnread()
   const profileTo = user ? homeDashboardPath(user.role) : '/login'
   const profileLabel =
     user?.name && user.name.length <= 24 ? user.name : user ? 'Your desk' : 'Guest'
@@ -45,6 +47,20 @@ export function TopBar() {
           <BoltIcon />
           Signals
         </Link>
+        {user && (
+          <Link
+            to="/messages"
+            className="relative flex h-9 w-9 items-center justify-center text-muted transition-colors hover:bg-elevated hover:text-mh-red"
+            aria-label="Messages"
+          >
+            <MessageIcon />
+            {dmUnread > 0 && (
+              <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-mh-red px-1 text-[9px] font-bold text-white">
+                {dmUnread > 9 ? '9+' : dmUnread}
+              </span>
+            )}
+          </Link>
+        )}
         <NetworkNotificationsPanel />
         <Link
           to={profileTo}
@@ -82,5 +98,13 @@ function SearchIcon() {
 
 function BoltIcon() {
   return <svg className="h-3.5 w-3.5 text-mh-red" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" /></svg>
+}
+
+function MessageIcon() {
+  return (
+    <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4-.8L3 20l1.3-3.6A7.6 7.6 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+  )
 }
 

@@ -7,6 +7,7 @@ import { MedalIllustration } from '@/components/community/medals/MedalIllustrati
 import { badgeDefBySlug } from '@/lib/community/badges'
 import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
 import { FollowButton } from '@/components/community/FollowButton'
+import { MessageButton } from '@/components/community/MessageButton'
 import { MemberCollabSkills } from '@/components/collab/MemberCollabSkills'
 
 function formatGenre(slug: string) {
@@ -151,6 +152,7 @@ export function MemberProfileHeader({
               targetUserId={profile.userId}
               initialFollowing={profile.viewerIsFollowing}
             />
+            <MessageButton targetUserId={profile.userId} />
             <Link to="/community#feed" className="member-profile-btn member-profile-btn-ghost">
               Explore network
             </Link>

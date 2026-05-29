@@ -11,6 +11,7 @@ const SignalsPage = lazy(() => import('@/pages/SignalsPage'))
 const FeaturesPage = lazy(() => import('@/pages/FeaturesPage'))
 const CommunityPage = lazy(() => import('@/pages/CommunityPage'))
 const CommunityMemberPage = lazy(() => import('@/pages/CommunityMemberPage'))
+const MessagesPage = lazy(() => import('@/pages/MessagesPage'))
 const SubmissionsPage = lazy(() => import('@/pages/SubmissionsPage'))
 const ArchivePage = lazy(() => import('@/pages/ArchivePage'))
 const AboutPage = lazy(() => import('@/pages/AboutPage'))
@@ -91,6 +92,14 @@ export default function App() {
             <Route path="features" element={<FeaturesPage />} />
             <Route path="community" element={<CommunityPage />} />
             <Route path="network/:handle" element={<CommunityMemberPage />} />
+            <Route
+              path="messages"
+              element={
+                <ProtectedRoute>
+                  <MessagesPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="submissions" element={<SubmissionsPage />} />
             <Route path="academy" element={<AcademyHubPage />} />
             <Route path="academy/quizzes" element={<AcademyQuizzesHubPage />} />

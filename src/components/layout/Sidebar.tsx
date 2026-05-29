@@ -1,6 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
 import clsx from 'clsx'
 import { useShell } from '@/context/ShellContext'
+import { useAuth } from '@/context/AuthContext'
+import { useDmUnread } from '@/hooks/useDmUnread'
 import { isNavActive } from '@/lib/nav/routeModes'
 import { SIDEBAR_NAV } from '@/lib/nav/sidebar'
 import { IosBrandLockup } from '@/components/layout/IosBrandLockup'
@@ -13,6 +15,8 @@ type Props = {
 export function Sidebar({ className, onNavigate }: Props) {
   const { pathname } = useLocation()
   const { meta } = useShell()
+  const { user } = useAuth()
+  const dmUnread = useDmUnread()
 
   return (
     <aside
@@ -26,6 +30,22 @@ export function Sidebar({ className, onNavigate }: Props) {
       </div>
 
       <nav className="v2-sidebar-nav" aria-label="Site navigation">
+        {user && (
+          <div className="v2-nav-group">
+            <ul className="v2-nav-list">
+              <li>
+                <Link
+                  to="/messages"
+                  onClick={onNavigate}
+                  className={clsx('v2-nav-link', pathname.startsWith('/messages') && 'v2-nav-link-active')}
+                >
+                  <span>Messages</span>
+                  {dmUnread > 0 && <span className="v2-nav-badge">{dmUnread > 9 ? '9+' : dmUnread}</span>}
+                </Link>
+              </li>
+            </ul>
+          </div>
+        )}
         {SIDEBAR_NAV.map((group) => (
           <div key={group.title} className="v2-nav-group">
             <p className="v2-nav-group-title">{group.title}</p>

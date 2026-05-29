@@ -90,6 +90,7 @@ export function ArtistProfilePageView({
           <ArtistNetworkWire
             networkHandle={networkHandle}
             latestSpin={launchpad?.latestSpin ?? null}
+            ownerUserId={profile.userId}
           />
         )}
         {(latestAlbum || latestSingle) && (
