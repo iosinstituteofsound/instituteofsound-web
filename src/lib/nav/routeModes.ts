@@ -93,6 +93,12 @@ const EXACT: Record<string, RouteMeta> = {
     description: 'Editorial playlists and mood archives.',
     navHref: '/playlists',
   }),
+  '/releases': meta({
+    sectionTitle: 'Releases',
+    kicker: 'Premieres',
+    description: 'Featured drops, latest premieres, upcoming calendar, and genre browse.',
+    navHref: '/releases',
+  }),
   '/community': meta({ ...NETWORK, sectionTitle: 'Community', kicker: 'Network', description: 'Feed, tribes, crews, and leaderboards.', navHref: '/community' }),
   '/scenes': meta({ sectionTitle: 'Scenes', kicker: 'India', description: 'City × genre underground hubs.', navHref: '/scenes' }),
   '/events': meta({ sectionTitle: 'Events', kicker: 'Live', description: 'Gigs, RSVP, and scene calendars.', navHref: '/events' }),
@@ -210,7 +216,7 @@ export function getRouteMeta(pathname: string): RouteMeta {
     return meta({ ...NETWORK, sectionTitle: 'Profile', kicker: 'Network', description: 'Community member profile.', navHref: '/community' })
   }
   if (pathname.startsWith('/release/')) {
-    return meta({ sectionTitle: 'Release', kicker: 'Music', description: 'Release detail.', navHref: '/#releases' })
+    return meta({ sectionTitle: 'Release', kicker: 'Music', description: 'Release detail.', navHref: '/releases' })
   }
   if (/^\/scenes\/[^/]+\/[^/]+/.test(pathname)) {
     return meta({ sectionTitle: 'Scene Hub', kicker: 'Scenes', description: 'City and genre scene.', navHref: '/scenes' })

@@ -73,6 +73,17 @@ const PUBLIC_PAGES: Record<string, SeoConfig> = {
       ]),
     }
   ),
+  '/releases': page(
+    '/releases',
+    'Releases',
+    'Featured premieres, latest underground drops, upcoming releases, and browse by genre.',
+    {
+      jsonLd: breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Releases', path: '/releases' },
+      ]),
+    }
+  ),
   '/features': page(
     '/features',
     'Editorial Features',

@@ -6,6 +6,8 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
+    "dev:magazine": "vite --config experiments/monthly-magazine/vite.config.ts",
+    "preview:magazine": "vite build --config experiments/monthly-magazine/vite.config.ts && vite preview --config experiments/monthly-magazine/vite.config.ts",
     "sitemap": "node scripts/generate-sitemap.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "build": "npm run sitemap && npm run pwa:icons && tsc -b && vite build",

@@ -12,7 +12,7 @@ export const SIDEBAR_NAV: NavGroup[] = [
       { label: 'Reviews', href: '/#reviews' },
       { label: 'Signals', href: '/signals' },
       { label: 'Playlists', href: '/playlists' },
-      { label: 'Releases', href: '/#releases' },
+      { label: 'Releases', href: '/releases' },
       { label: 'Events', href: '/events' },
       { label: 'Artists', href: '/discover' },
       { label: 'Community', href: '/community' },
