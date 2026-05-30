@@ -1,6 +1,8 @@
 import { getDrafts, getSubmissions, getUsers } from '@/lib/auth/storage'
 import { localGetProfiles } from '@/lib/artist-profile/storage'
 import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1GetSuperAdminAnalytics } from '@/api/v1Phase5Client'
 import { getDraftsForEditor, getSubmissionsForEditor } from '@/lib/submissions/service'
 import { computeSuperAdminAnalytics } from './compute'
 import type { SuperAdminAnalytics } from './types'
@@ -8,25 +10,33 @@ import * as sb from './supabaseAnalytics'
 
 export async function getSuperAdminAnalytics(editorId: string): Promise<SuperAdminAnalytics> {
   if (isSupabaseConfigured()) {
-    const [submissions, drafts, artistsRegistered, roleCounts, artistAccounts, artistProfiles, roleUsers] =
-      await Promise.all([
-        getSubmissionsForEditor(),
-        sb.supabaseGetAllDraftsForSuperEditor(),
-        sb.supabaseCountArtists(),
-        sb.supabaseGetRoleCounts(),
-        sb.supabaseListArtistAccounts(),
-        sb.supabaseListArtistProfiles(),
-        sb.supabaseListRoleUsers(),
-      ])
-    return computeSuperAdminAnalytics({
-      submissions,
-      drafts,
-      artistsRegistered,
-      roleCounts,
-      artistAccounts,
-      artistProfiles,
-      roleUsers,
-    })
+    return viaV1Api(
+      async () => {
+        const { analytics } = await v1GetSuperAdminAnalytics()
+        return analytics
+      },
+      async () => {
+        const [submissions, drafts, artistsRegistered, roleCounts, artistAccounts, artistProfiles, roleUsers] =
+          await Promise.all([
+            getSubmissionsForEditor(),
+            sb.supabaseGetAllDraftsForSuperEditor(),
+            sb.supabaseCountArtists(),
+            sb.supabaseGetRoleCounts(),
+            sb.supabaseListArtistAccounts(),
+            sb.supabaseListArtistProfiles(),
+            sb.supabaseListRoleUsers(),
+          ])
+        return computeSuperAdminAnalytics({
+          submissions,
+          drafts,
+          artistsRegistered,
+          roleCounts,
+          artistAccounts,
+          artistProfiles,
+          roleUsers,
+        })
+      },
+    )
   }
 
   const submissions = getSubmissions()

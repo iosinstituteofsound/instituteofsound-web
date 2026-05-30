@@ -1,4 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1AwardDb } from '@/api/v1Phase5Client'
 import { localAwardDb } from '@/lib/community/localDb'
 import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
@@ -16,7 +18,13 @@ export async function awardDb(input: AwardDbInput): Promise<boolean> {
   }
 
   try {
-    const awarded = await repoAwardDb(getSupabase(), input)
+    const awarded = await viaV1Api(
+      async () => {
+        const { awarded: ok } = await v1AwardDb(input)
+        return ok
+      },
+      () => repoAwardDb(getSupabase(), input),
+    )
     if (awarded) {
       window.dispatchEvent(new Event(COMMUNITY_DB_EVENT))
       void evaluateWeeklyChallenges()

@@ -3,6 +3,8 @@ import { EMPTY_ACADEMY_PROGRESS } from '@/lib/academy/typesProgress'
 import type { EarLabMode } from '@/lib/academy/earLab'
 import { readLocalSnapshot, writeLocalSnapshot } from '@/lib/academy/progressStore'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1GetAcademyProgress, v1PutAcademyProgress } from '@/api/v1Phase5Client'
 
 interface AcademyProgressRow {
   user_id: string
@@ -51,15 +53,23 @@ export async function fetchCloudAcademyProgress(
   userId: string
 ): Promise<AcademyProgressSnapshot | null> {
   if (!isSupabaseConfigured()) return null
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('academy_progress')
-    .select('user_id, completed_lessons, quiz_scores, ear_lab, certificate_name')
-    .eq('user_id', userId)
-    .maybeSingle()
+  return viaV1Api(
+    async () => {
+      const { progress } = await v1GetAcademyProgress()
+      return progress
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase
+        .from('academy_progress')
+        .select('user_id, completed_lessons, quiz_scores, ear_lab, certificate_name')
+        .eq('user_id', userId)
+        .maybeSingle()
 
-  if (error || !data) return null
-  return rowToSnapshot(data as AcademyProgressRow)
+      if (error || !data) return null
+      return rowToSnapshot(data as AcademyProgressRow)
+    },
+  )
 }
 
 export async function pushCloudAcademyProgress(
@@ -67,19 +77,24 @@ export async function pushCloudAcademyProgress(
   snapshot: AcademyProgressSnapshot
 ): Promise<void> {
   if (!isSupabaseConfigured()) return
-  const supabase = getSupabase()
-  const { error } = await supabase.from('academy_progress').upsert(
-    {
-      user_id: userId,
-      completed_lessons: snapshot.completedLessons,
-      quiz_scores: snapshot.quizScores,
-      ear_lab: snapshot.earLab,
-      certificate_name: snapshot.certificateName.trim() || null,
-      updated_at: new Date().toISOString(),
+  await viaV1Api(
+    () => v1PutAcademyProgress(snapshot),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase.from('academy_progress').upsert(
+        {
+          user_id: userId,
+          completed_lessons: snapshot.completedLessons,
+          quiz_scores: snapshot.quizScores,
+          ear_lab: snapshot.earLab,
+          certificate_name: snapshot.certificateName.trim() || null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      )
+      if (error) console.warn('[academy] cloud sync failed:', error.message)
     },
-    { onConflict: 'user_id' }
   )
-  if (error) console.warn('[academy] cloud sync failed:', error.message)
 }
 
 export function scheduleCloudSync(userId: string, snapshot: AcademyProgressSnapshot): void {

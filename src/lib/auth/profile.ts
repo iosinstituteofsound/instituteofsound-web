@@ -1,6 +1,7 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { viaV1Api } from '@/lib/api/v1Route'
 import { v1PatchMemberProfile } from '@/api/v1Phase4Client'
+import { v1GetUserProfile } from '@/api/v1Phase5Client'
 import { mapProfile, type ProfileRow } from '@/lib/supabase/mappers'
 import type { User } from './types'
 import { normalizeUsername, validateUsername } from './username'
@@ -106,13 +107,25 @@ export async function updateUserProfile(
 }
 
 export async function fetchUserProfile(userId: string): Promise<User> {
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('profiles')
-    .select(PROFILE_COLUMNS)
-    .eq('id', userId)
-    .single()
+  if (!isSupabaseConfigured()) {
+    throw new Error('Profile reads require Supabase.')
+  }
 
-  if (error) throw new Error(error.message)
-  return mapProfile(data as ProfileRow)
+  return viaV1Api(
+    async () => {
+      const { user } = await v1GetUserProfile(userId)
+      return user
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(PROFILE_COLUMNS)
+        .eq('id', userId)
+        .single()
+
+      if (error) throw new Error(error.message)
+      return mapProfile(data as ProfileRow)
+    },
+  )
 }

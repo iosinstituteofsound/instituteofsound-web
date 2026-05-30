@@ -1,4 +1,11 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import {
+  v1GetCrewWarsV2,
+  v1GetFridayWire,
+  v1GetTribeWarMonthly,
+  v1GetWireDigest,
+} from '@/api/v1Phase5Client'
 import { mapFeedRow, type FeedRow } from '@/lib/community/feedService'
 import { fetchSpinOfTheWeek, type SpinOfTheWeek } from '@/lib/community/wireHighlights'
 import { localGetCrewBoard } from '@/lib/community/localCrew'
@@ -83,29 +90,37 @@ export async function fetchFridayWire(): Promise<FridayWire | null> {
     }
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_friday_wire')
-  if (error) {
-    console.warn('[community] friday wire', error.message)
-    return null
-  }
+  return viaV1Api(
+    async () => {
+      const { wire } = await v1GetFridayWire()
+      return wire
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('community_friday_wire')
+      if (error) {
+        console.warn('[community] friday wire', error.message)
+        return null
+      }
 
-  const row = (data ?? [])[0] as (FeedRow & {
-    reaction_score?: number
-    wire_live?: boolean
-    next_wire_at?: string
-    featured_friday?: string
-  }) | undefined
-  if (!row) return null
+      const row = (data ?? [])[0] as (FeedRow & {
+        reaction_score?: number
+        wire_live?: boolean
+        next_wire_at?: string
+        featured_friday?: string
+      }) | undefined
+      if (!row) return null
 
-  const post = mapFeedRow(row)
-  return {
-    ...post,
-    reactionScore: Number(row.reaction_score ?? 0),
-    wireLive: Boolean(row.wire_live),
-    nextWireAt: row.next_wire_at ?? nextFridayUtcLocal().toISOString(),
-    featuredFriday: row.featured_friday ?? new Date().toISOString().slice(0, 10),
-  }
+      const post = mapFeedRow(row)
+      return {
+        ...post,
+        reactionScore: Number(row.reaction_score ?? 0),
+        wireLive: Boolean(row.wire_live),
+        nextWireAt: row.next_wire_at ?? nextFridayUtcLocal().toISOString(),
+        featuredFriday: row.featured_friday ?? new Date().toISOString().slice(0, 10),
+      }
+    },
+  )
 }
 
 export async function fetchTribeWarMonthly(): Promise<TribeWarStanding[]> {
@@ -124,24 +139,32 @@ export async function fetchTribeWarMonthly(): Promise<TribeWarStanding[]> {
     ]
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_tribe_war_monthly')
-  if (error) {
-    console.warn('[community] tribe war', error.message)
-    return []
-  }
+  return viaV1Api(
+    async () => {
+      const { standings } = await v1GetTribeWarMonthly()
+      return standings
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('community_tribe_war_monthly')
+      if (error) {
+        console.warn('[community] tribe war', error.message)
+        return []
+      }
 
-  return (data ?? []).map((row: Record<string, unknown>) => ({
-    genreSlug: String(row.genre_slug),
-    genreName: String(row.genre_name),
-    totalDb: Number(row.total_db ?? 0),
-    activeMembers: Number(row.active_members ?? 0),
-    championUserId: row.champion_user_id ? String(row.champion_user_id) : undefined,
-    championName: row.champion_name ? String(row.champion_name) : undefined,
-    championHandle: row.champion_handle ? String(row.champion_handle) : undefined,
-    championDb: Number(row.champion_db ?? 0),
-    seasonLabel: String(row.season_label ?? ''),
-  }))
+      return (data ?? []).map((row: Record<string, unknown>) => ({
+        genreSlug: String(row.genre_slug),
+        genreName: String(row.genre_name),
+        totalDb: Number(row.total_db ?? 0),
+        activeMembers: Number(row.active_members ?? 0),
+        championUserId: row.champion_user_id ? String(row.champion_user_id) : undefined,
+        championName: row.champion_name ? String(row.champion_name) : undefined,
+        championHandle: row.champion_handle ? String(row.champion_handle) : undefined,
+        championDb: Number(row.champion_db ?? 0),
+        seasonLabel: String(row.season_label ?? ''),
+      }))
+    },
+  )
 }
 
 export async function fetchCrewWarsV2(limit = 15): Promise<CrewWarsEntry[]> {
@@ -154,26 +177,34 @@ export async function fetchCrewWarsV2(limit = 15): Promise<CrewWarsEntry[]> {
     }))
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_crew_wars_v2', { lim: limit })
-  if (error) {
-    console.warn('[community] crew wars v2', error.message)
-    return []
-  }
+  return viaV1Api(
+    async () => {
+      const { entries } = await v1GetCrewWarsV2(limit)
+      return entries
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('community_crew_wars_v2', { lim: limit })
+      if (error) {
+        console.warn('[community] crew wars v2', error.message)
+        return []
+      }
 
-  return (data ?? []).map((row: Record<string, unknown>) => ({
-    crewId: String(row.crew_id),
-    name: String(row.crew_name),
-    slug: String(row.crew_slug),
-    tagline: row.tagline ? String(row.tagline) : undefined,
-    genreSlug: row.genre_slug ? String(row.genre_slug) : undefined,
-    inviteCode: String(row.invite_code),
-    memberCount: Number(row.member_count ?? 0),
-    weeklyDb: Number(row.weekly_db ?? 0),
-    prevWeeklyDb: Number(row.prev_weekly_db ?? 0),
-    dbDelta: Number(row.db_delta ?? 0),
-    seasonLabel: String(row.season_label ?? ''),
-  }))
+      return (data ?? []).map((row: Record<string, unknown>) => ({
+        crewId: String(row.crew_id),
+        name: String(row.crew_name),
+        slug: String(row.crew_slug),
+        tagline: row.tagline ? String(row.tagline) : undefined,
+        genreSlug: row.genre_slug ? String(row.genre_slug) : undefined,
+        inviteCode: String(row.invite_code),
+        memberCount: Number(row.member_count ?? 0),
+        weeklyDb: Number(row.weekly_db ?? 0),
+        prevWeeklyDb: Number(row.prev_weekly_db ?? 0),
+        dbDelta: Number(row.db_delta ?? 0),
+        seasonLabel: String(row.season_label ?? ''),
+      }))
+    },
+  )
 }
 
 export async function fetchWireDigest(): Promise<WireDigest | null> {
@@ -193,28 +224,36 @@ export async function fetchWireDigest(): Promise<WireDigest | null> {
     }
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_wire_digest')
-  if (error) {
-    console.warn('[community] wire digest', error.message)
-    return null
-  }
+  return viaV1Api(
+    async () => {
+      const { digest } = await v1GetWireDigest()
+      return digest
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('community_wire_digest')
+      if (error) {
+        console.warn('[community] wire digest', error.message)
+        return null
+      }
 
-  const row = (data ?? [])[0] as Record<string, unknown> | undefined
-  if (!row) return null
+      const row = (data ?? [])[0] as Record<string, unknown> | undefined
+      if (!row) return null
 
-  return {
-    seasonLabel: String(row.season_label ?? seasonLabel),
-    spinTitle: row.spin_title ? String(row.spin_title) : undefined,
-    spinHandle: row.spin_handle ? String(row.spin_handle) : undefined,
-    spinPostId: row.spin_post_id ? String(row.spin_post_id) : undefined,
-    editorialTitle: row.editorial_title ? String(row.editorial_title) : undefined,
-    editorialSlug: row.editorial_slug ? String(row.editorial_slug) : undefined,
-    editorialType: row.editorial_type ? String(row.editorial_type) : undefined,
-    tribeWinnerGenre: row.tribe_winner_genre ? String(row.tribe_winner_genre) : undefined,
-    tribeWinnerChampion: row.tribe_winner_champion ? String(row.tribe_winner_champion) : undefined,
-    challengeTitle: String(row.challenge_title ?? 'Spin the wire'),
-  }
+      return {
+        seasonLabel: String(row.season_label ?? seasonLabel),
+        spinTitle: row.spin_title ? String(row.spin_title) : undefined,
+        spinHandle: row.spin_handle ? String(row.spin_handle) : undefined,
+        spinPostId: row.spin_post_id ? String(row.spin_post_id) : undefined,
+        editorialTitle: row.editorial_title ? String(row.editorial_title) : undefined,
+        editorialSlug: row.editorial_slug ? String(row.editorial_slug) : undefined,
+        editorialType: row.editorial_type ? String(row.editorial_type) : undefined,
+        tribeWinnerGenre: row.tribe_winner_genre ? String(row.tribe_winner_genre) : undefined,
+        tribeWinnerChampion: row.tribe_winner_champion ? String(row.tribe_winner_champion) : undefined,
+        challengeTitle: String(row.challenge_title ?? 'Spin the wire'),
+      }
+    },
+  )
 }
 
 /** Build plain-text newsletter body for copy/share */

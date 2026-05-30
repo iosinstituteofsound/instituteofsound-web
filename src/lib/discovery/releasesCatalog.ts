@@ -12,6 +12,8 @@
  * - Explore §03 stays on the premiere feed; this module is the full catalog
  */
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1GetReleasesCatalog } from '@/api/v1Phase5Client'
 import { isArtistDiscoverVisible } from '@/lib/artist-profile/profileVisibility'
 import * as local from '@/lib/artist-profile/storage'
 import { DEFAULT_HERO_LAYOUT } from '@/lib/artist-profile/heroLayout'
@@ -345,8 +347,9 @@ function dedupeCatalog(cards: DiscoverPremiereCard[]): DiscoverPremiereCard[] {
   return out
 }
 
-async function fetchSupabaseCatalog(): Promise<DiscoverPremiereCard[]> {
-  const supabase = getSupabase()
+export async function fetchSupabaseCatalogWithClient(
+  supabase: import('@supabase/supabase-js').SupabaseClient,
+): Promise<DiscoverPremiereCard[]> {
   const bucket = currentHourBucket()
 
   const { data: profiles, error: profileErr } = await supabase
@@ -523,11 +526,21 @@ async function fetchSupabaseCatalog(): Promise<DiscoverPremiereCard[]> {
   return dedupeCatalog(sortCatalog(cards))
 }
 
+async function fetchSupabaseCatalog(): Promise<DiscoverPremiereCard[]> {
+  return fetchSupabaseCatalogWithClient(getSupabase())
+}
+
 /** Public /releases grid — full published artist studio catalog. */
 export async function fetchReleasesCatalog(): Promise<DiscoverPremiereCard[]> {
   if (!isSupabaseConfigured()) return buildLocalCatalog()
   try {
-    return await fetchSupabaseCatalog()
+    return await viaV1Api(
+      async () => {
+        const { cards } = await v1GetReleasesCatalog()
+        return cards
+      },
+      () => fetchSupabaseCatalog(),
+    )
   } catch (e) {
     console.warn('[releases catalog]', e)
     return buildLocalCatalog()

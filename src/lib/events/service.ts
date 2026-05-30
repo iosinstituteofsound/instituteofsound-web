@@ -7,6 +7,7 @@ import {
   v1SubmitSceneEvent,
   v1ToggleEventRsvp,
 } from '@/api/v1Phase4Client'
+import { v1GetEventsByScene } from '@/api/v1Phase5Client'
 import {
   localListEventsForScene,
   localListUpcomingEvents,
@@ -100,19 +101,27 @@ export async function fetchEventsByScene(
     return localListEventsForScene(cityLabel, genreSlug, undefined, limit)
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('events_by_scene', {
-    p_city_slug: citySlug,
-    p_genre_slug: genreSlug,
-    lim: limit,
-  })
+  return viaV1Api(
+    async () => {
+      const { events } = await v1GetEventsByScene(citySlug, genreSlug, limit)
+      return events
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('events_by_scene', {
+        p_city_slug: citySlug,
+        p_genre_slug: genreSlug,
+        lim: limit,
+      })
 
-  if (error) {
-    console.warn('[events] scene', error.message)
-    return []
-  }
+      if (error) {
+        console.warn('[events] scene', error.message)
+        return []
+      }
 
-  return (data ?? []).map((row: Record<string, unknown>) => mapEventRow(row))
+      return (data ?? []).map((row: Record<string, unknown>) => mapEventRow(row))
+    },
+  )
 }
 
 export async function submitSceneEvent(input: SubmitEventInput, userId: string): Promise<string> {

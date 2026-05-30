@@ -2,6 +2,16 @@ import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { viaV1Api } from '@/lib/api/v1Route'
 import { v1CreateCollabPost, v1GetCollabBoard } from '@/api/v1Phase4Client'
 import {
+  v1AcceptCollabResponse,
+  v1ConfirmCollabComplete,
+  v1GetCollabCompletedCount,
+  v1GetCollabPost,
+  v1GetCollabProfileSkills,
+  v1GetCollabResponses,
+  v1RespondCollabPost,
+  v1SetCollabProfileSkills,
+} from '@/api/v1Phase5Client'
+import {
   localCreateCollabPost,
   localGetProfileSkills,
   localListCollabPosts,
@@ -61,16 +71,24 @@ export async function fetchCollabPost(postId: string): Promise<CollabBoardPost |
     return localListCollabPosts({}, 200).find((p) => p.id === postId) ?? null
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('collab_post_get', { p_post_id: postId })
+  return viaV1Api(
+    async () => {
+      const { post } = await v1GetCollabPost(postId)
+      return post
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('collab_post_get', { p_post_id: postId })
 
-  if (error) {
-    console.warn('[collab] post', error.message)
-    return null
-  }
+      if (error) {
+        console.warn('[collab] post', error.message)
+        return null
+      }
 
-  const row = (data ?? [])[0] as Record<string, unknown> | undefined
-  return row ? mapBoardRow(row) : null
+      const row = (data ?? [])[0] as Record<string, unknown> | undefined
+      return row ? mapBoardRow(row) : null
+    },
+  )
 }
 
 export async function fetchCollabBoard(
@@ -186,44 +204,70 @@ export async function respondToCollabPost(
     return id
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('collab_respond', {
-    p_post_id: postId,
-    p_message: message,
-  })
+  return viaV1Api(
+    async () => {
+      const { id } = await v1RespondCollabPost({ postId, message })
+      return id
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('collab_respond', {
+        p_post_id: postId,
+        p_message: message,
+      })
 
-  if (error) throw new Error(error.message)
-  return String(data)
+      if (error) throw new Error(error.message)
+      return String(data)
+    },
+  )
 }
 
 export async function fetchCollabResponses(postId: string): Promise<CollabResponse[]> {
   if (!isSupabaseConfigured()) return localListResponses(postId)
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('collab_post_responses', { p_post_id: postId })
+  return viaV1Api(
+    async () => {
+      const { responses } = await v1GetCollabResponses(postId)
+      return responses
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('collab_post_responses', { p_post_id: postId })
 
-  if (error) {
-    console.warn('[collab] responses', error.message)
-    return []
-  }
+      if (error) {
+        console.warn('[collab] responses', error.message)
+        return []
+      }
 
-  return (data ?? []).map((row: Record<string, unknown>) => mapResponseRow(row))
+      return (data ?? []).map((row: Record<string, unknown>) => mapResponseRow(row))
+    },
+  )
 }
 
 export async function acceptCollabResponse(responseId: string): Promise<void> {
   if (!isSupabaseConfigured()) return
 
-  const supabase = getSupabase()
-  const { error } = await supabase.rpc('collab_accept_response', { p_response_id: responseId })
-  if (error) throw new Error(error.message)
+  await viaV1Api(
+    () => v1AcceptCollabResponse(responseId),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase.rpc('collab_accept_response', { p_response_id: responseId })
+      if (error) throw new Error(error.message)
+    },
+  )
 }
 
 export async function confirmCollabComplete(postId: string): Promise<void> {
   if (!isSupabaseConfigured()) return
 
-  const supabase = getSupabase()
-  const { error } = await supabase.rpc('collab_confirm_complete', { p_post_id: postId })
-  if (error) throw new Error(error.message)
+  await viaV1Api(
+    () => v1ConfirmCollabComplete(postId),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase.rpc('collab_confirm_complete', { p_post_id: postId })
+      if (error) throw new Error(error.message)
+    },
+  )
 }
 
 export async function fetchProfileCollabSkills(
@@ -239,15 +283,23 @@ export async function fetchProfileCollabSkills(
     return []
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('collab_profile_skills', { p_handle: h })
+  return viaV1Api(
+    async () => {
+      const { skills } = await v1GetCollabProfileSkills(h)
+      return skills
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('collab_profile_skills', { p_handle: h })
 
-  if (error) {
-    console.warn('[collab] skills', error.message)
-    return []
-  }
+      if (error) {
+        console.warn('[collab] skills', error.message)
+        return []
+      }
 
-  return (data ?? []).map((row: { skill_slug: string }) => row.skill_slug)
+      return (data ?? []).map((row: { skill_slug: string }) => row.skill_slug)
+    },
+  )
 }
 
 export async function setProfileCollabSkills(skillSlugs: string[], userId: string): Promise<void> {
@@ -256,19 +308,32 @@ export async function setProfileCollabSkills(skillSlugs: string[], userId: strin
     return
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase.rpc('collab_set_profile_skills', {
-    p_skill_slugs: skillSlugs,
-  })
-  if (error) throw new Error(error.message)
+  await viaV1Api(
+    () => v1SetCollabProfileSkills(skillSlugs),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase.rpc('collab_set_profile_skills', {
+        p_skill_slugs: skillSlugs,
+      })
+      if (error) throw new Error(error.message)
+    },
+  )
 }
 
 export async function fetchCollabCompletedCount(userId: string): Promise<number> {
   if (!isSupabaseConfigured()) return 0
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('collab_completed_count', { p_user_id: userId })
+  return viaV1Api(
+    async () => {
+      const { count } = await v1GetCollabCompletedCount(userId)
+      return count
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('collab_completed_count', { p_user_id: userId })
 
-  if (error) return 0
-  return Number(data ?? 0)
+      if (error) return 0
+      return Number(data ?? 0)
+    },
+  )
 }

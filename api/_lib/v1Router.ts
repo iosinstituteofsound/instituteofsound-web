@@ -1,5 +1,6 @@
 import { handleV1Me } from './handlers/v1Me.js'
 import { handleV1ArtistProfile } from './handlers/v1ArtistProfile.js'
+import { handleV1ArtistStudio } from './handlers/v1ArtistStudio.js'
 import { handleV1CommunityFeed } from './handlers/v1CommunityFeed.js'
 import {
   handleV1CommunityDropCreate,
@@ -16,6 +17,7 @@ import { handleV1Network } from './handlers/v1Network.js'
 import { handleV1Phase4Community } from './handlers/v1Phase4Community.js'
 import { handleV1Phase4Content } from './handlers/v1Phase4Content.js'
 import { handleV1Phase4Platform } from './handlers/v1Phase4Platform.js'
+import { handleV1Phase5 } from './handlers/v1Phase5.js'
 import type { ApiRequest, ApiResponse } from './http.js'
 
 /** Single Vercel function for all /api/v1/* routes (Hobby plan 12-function limit). */
@@ -32,6 +34,7 @@ export async function dispatchV1Api(
     await handleV1ArtistProfile(req, res)
     return
   }
+  if (await handleV1ArtistStudio(req, res, pathname)) return
   if (pathname === '/api/v1/community/feed') {
     await handleV1CommunityFeed(req, res)
     return
@@ -65,6 +68,7 @@ export async function dispatchV1Api(
   if (await handleV1Phase4Community(req, res, pathname)) return
   if (await handleV1Phase4Content(req, res, pathname)) return
   if (await handleV1Phase4Platform(req, res, pathname)) return
+  if (await handleV1Phase5(req, res, pathname)) return
 
   res.status(404).json({ error: 'Not found' })
 }

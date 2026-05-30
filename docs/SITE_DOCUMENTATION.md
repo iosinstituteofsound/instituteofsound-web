@@ -1006,17 +1006,26 @@ Browser (React)  --Bearer JWT-->  /api/v1/*  --user or service client-->  Supaba
 | **3** | Verification, playlist curator, artist recovery | `verification/service.ts`, `playlistCurator/service.ts`, `artist-page-recovery/service.ts` |
 | **3b** | Network + public member profile | `network/connectionService.ts`, `community/memberProfileService.ts`, `community/crewService.ts` (profile crew/roster), `artist-profile/networkLink.ts` → `/api/v1/network/*` |
 | **4** | Community social, content, platform reads/writes | `followService`, `commentService`, `notificationService`, `community/service`, `crewService` (mutations + my crew), `releases/service`, `releases/public`, `submissions/service`, `auth/profile`, `events/service`, `collab/service` (board + create), `dm/service`, `discovery/premieres`, `discovery/sceneService`, `editorial/published`, `academy/academyPublic` → `/api/v1/community/*`, `/releases/*`, `/submissions/*`, `/editorial/*`, `/member/profile`, `/discovery/*`, `/events/*`, `/collab/*`, `/dm/*`, `/academy/*` |
+| **5** | Artist studio media + public page | `artist-profile/service.ts`, `mediaRepository.ts` → `/api/v1/artist/page`, `/artist/albums|tracks|videos|merch|lineup|bio-timeline`, `/artist/managed` |
 
 **Cursor rule:** `.cursor/rules/api-only-frontend.mdc` — new UI code must not call Supabase tables/RPC directly; add `/api/v1` routes instead.
 
-**Still direct Supabase when flag on (Phase 4 gaps):** community **feed** writes beyond phase 2 scope, **collab** respond/accept/skills, **crew** weekly leaderboard, wire/highlights, artist `supabaseProfile`, analytics, editor-applications, cloud progress, some discovery catalog helpers.
+**Still direct Supabase when flag on (gaps):** discover artist list, editor artist picker, analytics, wire/gamification, collab respond/accept, crew weekly leaderboard, global search, academy cloud progress, `fetchUserProfile` read.
 
 #### `/api/v1` route map
 
 | Method | Path | Auth | Notes |
 |--------|------|------|-------|
+| GET, PUT | `/api/v1/artist/profile` | Bearer | Own artist page metadata |
+| GET | `/api/v1/artist/page?slug=` | Optional | Public artist page payload (tracks, albums, etc.) |
+| GET | `/api/v1/artist/managed?handle=` | Optional | Manager-linked published artists |
+| POST, PATCH, DELETE | `/api/v1/artist/albums` | Bearer | Album CRUD (owner) |
+| POST, PATCH, DELETE | `/api/v1/artist/tracks` | Bearer | Track CRUD (owner) |
+| POST, PATCH, DELETE | `/api/v1/artist/videos` | Bearer | Video CRUD (owner) |
+| POST, PATCH, DELETE | `/api/v1/artist/merch` | Bearer | Merch CRUD (owner) |
+| POST, PATCH, DELETE | `/api/v1/artist/lineup` | Bearer | Lineup CRUD (owner) |
+| POST, PATCH, DELETE | `/api/v1/artist/bio-timeline` | Bearer | Bio timeline CRUD (owner) |
 | GET | `/api/v1/me` | Bearer | Member profile + role |
-| GET, PUT | `/api/v1/artist/profile` | Bearer | Own artist page |
 | GET | `/api/v1/community/feed` | Optional | Cursor pagination query params |
 | POST | `/api/v1/community/spins` | Bearer | Create spin |
 | POST, PATCH | `/api/v1/community/drops` | Bearer | Create / edit drop |

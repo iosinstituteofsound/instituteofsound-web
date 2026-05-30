@@ -1,4 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1GetEditorWirePicks, v1UpdateEditorialLinkedPost } from '@/api/v1Phase5Client'
 import {
   fetchCommunityPostById,
   mapFeedRow,
@@ -39,21 +41,29 @@ function localEditorWirePicks(limit: number): EditorWirePick[] {
 export async function fetchEditorWirePicks(limit = 12): Promise<EditorWirePick[]> {
   if (!isSupabaseConfigured()) return localEditorWirePicks(limit)
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_editor_wire_picks', { lim: limit })
+  return viaV1Api(
+    async () => {
+      const { picks } = await v1GetEditorWirePicks(limit)
+      return picks
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('community_editor_wire_picks', { lim: limit })
 
-  if (error) {
-    console.warn('[editorial] wire picks', error.message)
-    return []
-  }
+      if (error) {
+        console.warn('[editorial] wire picks', error.message)
+        return []
+      }
 
-  return (data ?? []).map((row: FeedRow & { reaction_score?: number }) => {
-    const post = mapFeedRow(row)
-    return {
-      ...post,
-      reactionScore: Number(row.reaction_score ?? 0),
-    }
-  })
+      return (data ?? []).map((row: FeedRow & { reaction_score?: number }) => {
+        const post = mapFeedRow(row)
+        return {
+          ...post,
+          reactionScore: Number(row.reaction_score ?? 0),
+        }
+      })
+    },
+  )
 }
 
 export async function updateEditorialLinkedPost(
@@ -62,16 +72,21 @@ export async function updateEditorialLinkedPost(
 ): Promise<void> {
   if (!isSupabaseConfigured()) return
 
-  const supabase = getSupabase()
-  const { error } = await supabase
-    .from('editorial_drafts')
-    .update({
-      linked_community_post_id: postId,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', draftId)
+  await viaV1Api(
+    () => v1UpdateEditorialLinkedPost(draftId, postId),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase
+        .from('editorial_drafts')
+        .update({
+          linked_community_post_id: postId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', draftId)
 
-  if (error) throw new Error(error.message)
+      if (error) throw new Error(error.message)
+    },
+  )
 }
 
 export const WIRE_SPIN_CTA =

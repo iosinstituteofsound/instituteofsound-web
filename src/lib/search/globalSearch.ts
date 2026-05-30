@@ -1,4 +1,6 @@
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1GlobalSearchRpc } from '@/api/v1Phase5Client'
 import { buildSearchItems, filterSearchItems } from '@/lib/nav/searchItems'
 import { listDiscoverArtists } from '@/lib/artist-profile/service'
 import { listPublishedEditorials } from '@/lib/editorial/published'
@@ -66,24 +68,48 @@ interface RpcRow {
 async function searchMembersAndMusic(q: string): Promise<SearchResult[]> {
   if (!isSupabaseConfigured()) return []
   try {
-    const supabase = getSupabase()
-    const { data, error } = await supabase.rpc('global_search', {
-      p_query: q,
-      p_limit: PER_CATEGORY,
-    })
-    if (error || !Array.isArray(data)) return []
-    return (data as RpcRow[]).map((row) => {
+    type SearchRpcRow = {
+      category: 'user' | 'editor' | 'music'
+      refId: string
+      title: string
+      subtitle: string | null
+      imageUrl: string | null
+      handle: string | null
+    }
+    const rows = await viaV1Api(
+      async () => {
+        const { rows: rpcRows } = await v1GlobalSearchRpc(q, PER_CATEGORY)
+        return rpcRows
+      },
+      async (): Promise<SearchRpcRow[]> => {
+        const supabase = getSupabase()
+        const { data, error } = await supabase.rpc('global_search', {
+          p_query: q,
+          p_limit: PER_CATEGORY,
+        })
+        if (error || !Array.isArray(data)) return []
+        return (data as RpcRow[]).map((row) => ({
+          category: row.category,
+          refId: row.ref_id,
+          title: row.title,
+          subtitle: row.subtitle,
+          imageUrl: row.image_url,
+          handle: row.handle,
+        }))
+      },
+    )
+    return rows.map((row) => {
       const handle = row.handle ?? 'member'
       const href =
         row.category === 'music'
           ? `${networkProfilePath(handle)}?tab=feed`
           : networkProfilePath(handle)
       return {
-        id: `${row.category}-${row.ref_id}`,
+        id: `${row.category}-${row.refId}`,
         category: row.category,
         title: row.title,
         subtitle: row.subtitle ?? undefined,
-        imageUrl: row.image_url ?? undefined,
+        imageUrl: row.imageUrl ?? undefined,
         href,
       }
     })

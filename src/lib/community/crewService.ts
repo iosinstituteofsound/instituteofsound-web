@@ -1,5 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { viaV1Api } from '@/lib/api/v1Route'
+import { v1GetCrewWeeklyLeaderboard } from '@/api/v1Phase5Client'
 import {
   v1CreateCrew,
   v1DisbandCrew,
@@ -138,34 +139,42 @@ export async function fetchCrewRoster(crewId: string): Promise<CrewRosterMember[
 export async function fetchCrewWeeklyLeaderboard(limit = 15): Promise<CrewLeaderboardEntry[]> {
   if (!isSupabaseConfigured()) return localGetCrewBoard().slice(0, limit)
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_crew_weekly_leaderboard', { lim: limit })
+  return viaV1Api(
+    async () => {
+      const { entries } = await v1GetCrewWeeklyLeaderboard(limit)
+      return entries
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('community_crew_weekly_leaderboard', { lim: limit })
 
-  if (error) {
-    console.warn('[community] crew leaderboard', error.message)
-    return []
-  }
+      if (error) {
+        console.warn('[community] crew leaderboard', error.message)
+        return []
+      }
 
-  return (data ?? []).map(
-    (row: {
-      crew_id: string
-      crew_name: string
-      crew_slug: string
-      tagline: string | null
-      genre_slug: string | null
-      invite_code: string
-      member_count: number
-      weekly_db: number | string
-    }) => ({
-      crewId: row.crew_id,
-      name: row.crew_name,
-      slug: row.crew_slug,
-      tagline: row.tagline ?? undefined,
-      genreSlug: row.genre_slug ?? undefined,
-      inviteCode: row.invite_code,
-      memberCount: row.member_count,
-      weeklyDb: Number(row.weekly_db),
-    })
+      return (data ?? []).map(
+        (row: {
+          crew_id: string
+          crew_name: string
+          crew_slug: string
+          tagline: string | null
+          genre_slug: string | null
+          invite_code: string
+          member_count: number
+          weekly_db: number | string
+        }) => ({
+          crewId: row.crew_id,
+          name: row.crew_name,
+          slug: row.crew_slug,
+          tagline: row.tagline ?? undefined,
+          genreSlug: row.genre_slug ?? undefined,
+          inviteCode: row.invite_code,
+          memberCount: row.member_count,
+          weeklyDb: Number(row.weekly_db),
+        })
+      )
+    },
   )
 }
 
