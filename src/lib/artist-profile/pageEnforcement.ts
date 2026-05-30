@@ -1,5 +1,4 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import type { User } from '@/lib/auth/types'
 import { archiveAndDeleteArtistProfile } from '@/lib/artist-profile/archive'
 import { evaluateArtistLifecycle } from '@/lib/artist-profile/pageLifecycle'
 import type { ArtistDeletionReason } from '@/lib/artist-page-recovery/types'

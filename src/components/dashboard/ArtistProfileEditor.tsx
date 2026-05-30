@@ -271,10 +271,10 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const publication = profile
     ? getArtistPublicationState(profile, { trackCount: tracks.length, videoCount: videos.length })
     : computeArtistPublication(buildCompletenessInput(), {
-        lastActivityAt: profile?.lastActivityAt,
-        pageRefreshedAt: profile?.pageRefreshedAt,
-        updatedAt: profile?.updatedAt ?? new Date().toISOString(),
-        createdAt: profile?.createdAt ?? new Date().toISOString(),
+        lastActivityAt: new Date().toISOString(),
+        pageRefreshedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       })
 
   type BrandingPatch = {

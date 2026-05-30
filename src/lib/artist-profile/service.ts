@@ -7,7 +7,6 @@ import { mergeDiscoverArtists } from './discover'
 import {
   enforceArtistPageLifecycle,
   getProfileForUserAfterLifecycle,
-  touchArtistPageActivity,
   touchArtistPageActivityByProfileId,
 } from './pageEnforcement'
 import { resolveArtistPageForViewer } from './profileVisibility'

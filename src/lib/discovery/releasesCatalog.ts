@@ -77,6 +77,7 @@ function stubProfile(p: {
     published: true,
     pageStatus: 'live',
     pageRefreshedAt: '',
+    lastActivityAt: '',
     createdAt: '',
     updatedAt: '',
     avatarUrl: p.avatarUrl,

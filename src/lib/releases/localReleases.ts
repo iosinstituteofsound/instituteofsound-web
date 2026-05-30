@@ -53,7 +53,9 @@ export function localDeleteReleasesForProfile(profileId: string): void {
   const releases = read().filter((r) => r.profileId === profileId)
   const releaseIds = new Set(releases.map((r) => r.id))
   write(read().filter((r) => r.profileId !== profileId))
-  writeMilestones(readMilestones().filter((m) => !releaseIds.has(m.releaseId)))
+  writeMilestones(
+    readMilestones().filter((m) => !releaseIds.has((m as StoredMilestone).releaseId)),
+  )
 }
 
 export function localListReleasesForScene(cityLabel: string, genreSlug: string): ArtistRelease[] {

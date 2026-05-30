@@ -8,7 +8,7 @@ import {
   submitArtistPageRecoveryRequest,
 } from '@/lib/artist-page-recovery/service'
 import type { ArtistPageRecoveryRequest, ArtistProfileArchive } from '@/lib/artist-page-recovery/types'
-import { uploadToCloudinary, validateImageFile } from '@/lib/cloudinary/upload'
+import { uploadImageToCloudinary, validateImageFile } from '@/lib/cloudinary/upload'
 import { Button } from '@/components/ui/Button'
 import { FieldLabel } from '@/components/ui/Input'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
@@ -62,7 +62,7 @@ export default function ArtistIosSupportPage() {
     setUploading(true)
     setError('')
     try {
-      const result = await uploadToCloudinary(file, 'ios/support')
+      const result = await uploadImageToCloudinary(file, 'ios/support')
       setGovIdUrl(result.url)
       setMessage('Government ID uploaded securely.')
     } catch (err) {
