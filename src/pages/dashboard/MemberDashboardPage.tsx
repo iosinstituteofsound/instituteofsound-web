@@ -10,6 +10,7 @@ import { syncMemberVerificationNotifications } from '@/lib/verification/notifyEd
 import { syncApprovedVerificationPersona } from '@/lib/verification/service'
 import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
 import { MetalBadge } from '@/components/ui/MetalBadge'
+import type { DashboardPersona } from '@/lib/auth/types'
 import { VerificationRequirementsList } from '@/components/dashboard/VerificationRequirementsList'
 import {
   ARTIST_PATH_REQUIREMENTS,
