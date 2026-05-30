@@ -1,3 +1,14 @@
+import {
+  isV1ApiEnabled,
+  v1CreateRelationshipClaim,
+  v1GetMyVerificationRequests,
+  v1ListIncomingClaims,
+  v1ListOutgoingClaims,
+  v1ListVerificationDeskRequests,
+  v1RespondToClaim,
+  v1ReviewVerificationRequest,
+  v1SubmitRoleVerification,
+} from '@/api/v1Client'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import {
   notifyDeskStaffOfVerificationRequest,
@@ -86,6 +97,10 @@ export async function submitRoleVerificationRequest(
   }
 
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      await v1SubmitRoleVerification(input)
+      return
+    }
     const supabase = getSupabase()
     const { error } = await supabase.from('role_verification_requests').insert(payload)
     if (error) throw new Error(error.message)
@@ -113,6 +128,10 @@ export async function submitRoleVerificationRequest(
 
 export async function getMyRoleVerificationRequests(userId: string): Promise<RoleVerificationRequest[]> {
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      const { requests } = await v1GetMyVerificationRequests()
+      return requests
+    }
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('role_verification_requests')
@@ -143,6 +162,10 @@ export async function getMyRoleVerificationRequests(userId: string): Promise<Rol
 
 export async function listVerificationRequestsForReview(): Promise<RoleVerificationRequest[]> {
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      const { requests } = await v1ListVerificationDeskRequests()
+      return requests
+    }
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('role_verification_requests')
@@ -175,6 +198,10 @@ export async function reviewRoleVerificationRequest(
   notes?: string
 ) {
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      await v1ReviewVerificationRequest({ requestId, decision, notes })
+      return
+    }
     const supabase = getSupabase()
     const { error } = await supabase
       .from('role_verification_requests')
@@ -271,6 +298,15 @@ export async function createRelationshipClaim(input: {
   if (target.id === input.claimantUserId) throw new Error('Cannot claim yourself.')
 
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      await v1CreateRelationshipClaim({
+        claimType: input.claimType,
+        targetHandle: input.targetHandle,
+        evidenceLinks: input.evidenceLinks,
+        note: input.note,
+      })
+      return
+    }
     const supabase = getSupabase()
     const { error } = await supabase.from('relationship_claims').insert({
       claim_type: input.claimType,
@@ -321,6 +357,10 @@ function mapClaimRow(row: any): RelationshipClaim {
 
 export async function listIncomingClaims(userId: string): Promise<RelationshipClaim[]> {
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      const { claims } = await v1ListIncomingClaims()
+      return claims
+    }
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('relationship_claims')
@@ -337,6 +377,10 @@ export async function listIncomingClaims(userId: string): Promise<RelationshipCl
 
 export async function listOutgoingClaims(userId: string): Promise<RelationshipClaim[]> {
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      const { claims } = await v1ListOutgoingClaims()
+      return claims
+    }
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('relationship_claims')
@@ -353,6 +397,10 @@ export async function listOutgoingClaims(userId: string): Promise<RelationshipCl
 
 export async function respondToClaim(claimId: string, decision: 'approved' | 'rejected') {
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      await v1RespondToClaim({ claimId, decision })
+      return
+    }
     const supabase = getSupabase()
     const { error } = await supabase
       .from('relationship_claims')

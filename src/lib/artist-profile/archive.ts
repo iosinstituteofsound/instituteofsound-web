@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { listReleasesForProfile } from '@/lib/releases/service'
 import type { ArtistDeletionReason, ArtistProfileSnapshotV1 } from '@/lib/artist-page-recovery/types'
@@ -135,9 +136,10 @@ function profileInsertRow(p: ArtistProfileSnapshotV1['profile']) {
 export async function restoreArtistProfileArchive(
   archiveId: string,
   restoredByUserId: string,
+  supabaseClient?: SupabaseClient,
 ): Promise<ArtistProfile> {
   if (isSupabaseConfigured()) {
-    const supabase = getSupabase()
+    const supabase = supabaseClient ?? getSupabase()
     const { data: archiveRow, error: archErr } = await supabase
       .from('artist_profile_archives')
       .select('*')

@@ -1,8 +1,16 @@
+import {
+  isV1ApiEnabled,
+  v1GetMyPlaylistCuratorApplications,
+  v1ListPlaylistCuratorDeskApplications,
+  v1ReviewPlaylistCuratorApplication,
+  v1SubmitPlaylistCuratorApplication,
+} from '@/api/v1Client'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import {
   notifyMemberPlaylistCuratorDecision,
   notifySuperEditorsOfPlaylistCuratorApplication,
 } from '@/lib/playlistCurator/notify'
+import { validatePlaylistCuratorInput } from './validate'
 import type {
   PlaylistCuratorApplication,
   SubmitPlaylistCuratorInput,
@@ -54,21 +62,7 @@ function mapRow(row: {
   }
 }
 
-export function validatePlaylistCuratorInput(input: SubmitPlaylistCuratorInput): string | null {
-  const links = cleanLinks(input.playlistLinks)
-  if (links.length < 1) return 'Add at least one playlist link.'
-  for (const link of links) {
-    try {
-      const url = new URL(link.startsWith('http') ? link : `https://${link}`)
-      if (!['http:', 'https:'].includes(url.protocol)) {
-        return 'Playlist links must be valid http(s) URLs.'
-      }
-    } catch {
-      return `Invalid link: ${link}`
-    }
-  }
-  return null
-}
+export { validatePlaylistCuratorInput } from './validate'
 
 export async function submitPlaylistCuratorApplication(
   userId: string,
@@ -91,6 +85,15 @@ export async function submitPlaylistCuratorApplication(
   }
 
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      await v1SubmitPlaylistCuratorApplication(input)
+      const { applications } = await v1GetMyPlaylistCuratorApplications()
+      const pending = applications.find((a) => a.status === 'pending')
+      if (pending) {
+        notifySuperEditorsOfPlaylistCuratorApplication(userId, pending.id)
+      }
+      return
+    }
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('playlist_curator_applications')
@@ -126,6 +129,10 @@ export async function getMyPlaylistCuratorApplications(
   userId: string,
 ): Promise<PlaylistCuratorApplication[]> {
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      const { applications } = await v1GetMyPlaylistCuratorApplications()
+      return applications
+    }
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('playlist_curator_applications')
@@ -142,6 +149,10 @@ export async function listPlaylistCuratorApplicationsForReview(): Promise<
   PlaylistCuratorApplication[]
 > {
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      const { applications } = await v1ListPlaylistCuratorDeskApplications()
+      return applications
+    }
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('playlist_curator_applications')
@@ -160,6 +171,21 @@ export async function reviewPlaylistCuratorApplication(
   reviewerId: string,
 ): Promise<void> {
   if (isSupabaseConfigured()) {
+    if (isV1ApiEnabled()) {
+      const supabase = getSupabase()
+      const { data: existing, error: fetchErr } = await supabase
+        .from('playlist_curator_applications')
+        .select('user_id, status')
+        .eq('id', applicationId)
+        .maybeSingle()
+      if (fetchErr) throw new Error(fetchErr.message)
+      if (!existing || existing.status !== 'pending') {
+        throw new Error('Application is no longer pending.')
+      }
+      await v1ReviewPlaylistCuratorApplication({ applicationId, decision, notes })
+      notifyMemberPlaylistCuratorDecision(existing.user_id, applicationId, decision, notes)
+      return
+    }
     const supabase = getSupabase()
     const { data: existing, error: fetchErr } = await supabase
       .from('playlist_curator_applications')

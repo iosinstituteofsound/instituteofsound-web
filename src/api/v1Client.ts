@@ -7,6 +7,21 @@ import type {
 import type { CommunityFeedQuery } from '@/lib/community/feedService'
 import type { CreateDropInput, CreateSpinInput } from '@/lib/community/feedService'
 import type { User } from '@/lib/auth/types'
+import type {
+  RelationshipClaim,
+  RelationshipClaimType,
+  RoleVerificationRequest,
+  SubmitRoleVerificationInput,
+} from '@/lib/verification/types'
+import type {
+  PlaylistCuratorApplication,
+  SubmitPlaylistCuratorInput,
+} from '@/lib/playlistCurator/types'
+import type {
+  ArtistPageRecoveryRequest,
+  ArtistProfileArchive,
+  DeletedArtistPageRow,
+} from '@/lib/artist-page-recovery/types'
 
 export function isV1ApiEnabled(): boolean {
   const flag = import.meta.env.VITE_USE_V1_API?.trim().toLowerCase()
@@ -151,5 +166,140 @@ export async function v1HideCommunityPost(postId: string): Promise<void> {
   await v1Fetch('/community/post', {
     method: 'DELETE',
     body: JSON.stringify({ postId }),
+  })
+}
+
+export async function v1GetMyVerificationRequests(): Promise<{
+  requests: RoleVerificationRequest[]
+}> {
+  return v1Fetch('/verification/requests')
+}
+
+export async function v1SubmitRoleVerification(
+  input: SubmitRoleVerificationInput,
+): Promise<void> {
+  await v1Fetch('/verification/requests', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function v1ListVerificationDeskRequests(): Promise<{
+  requests: RoleVerificationRequest[]
+}> {
+  return v1Fetch('/verification/desk/requests')
+}
+
+export async function v1ReviewVerificationRequest(input: {
+  requestId: string
+  decision: 'approved' | 'rejected'
+  notes?: string
+}): Promise<void> {
+  await v1Fetch('/verification/desk/requests', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function v1CreateRelationshipClaim(input: {
+  claimType: RelationshipClaimType
+  targetHandle: string
+  evidenceLinks: string[]
+  note?: string
+}): Promise<void> {
+  await v1Fetch('/verification/claims', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function v1ListIncomingClaims(): Promise<{ claims: RelationshipClaim[] }> {
+  return v1Fetch('/verification/claims/incoming')
+}
+
+export async function v1ListOutgoingClaims(): Promise<{ claims: RelationshipClaim[] }> {
+  return v1Fetch('/verification/claims/outgoing')
+}
+
+export async function v1RespondToClaim(input: {
+  claimId: string
+  decision: 'approved' | 'rejected'
+}): Promise<void> {
+  await v1Fetch('/verification/claims', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function v1GetMyPlaylistCuratorApplications(): Promise<{
+  applications: PlaylistCuratorApplication[]
+}> {
+  return v1Fetch('/playlist-curator/applications')
+}
+
+export async function v1SubmitPlaylistCuratorApplication(
+  input: SubmitPlaylistCuratorInput,
+): Promise<void> {
+  await v1Fetch('/playlist-curator/applications', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function v1ListPlaylistCuratorDeskApplications(): Promise<{
+  applications: PlaylistCuratorApplication[]
+}> {
+  return v1Fetch('/playlist-curator/desk/applications')
+}
+
+export async function v1ReviewPlaylistCuratorApplication(input: {
+  applicationId: string
+  decision: 'approved' | 'rejected'
+  notes?: string
+}): Promise<void> {
+  await v1Fetch('/playlist-curator/desk/applications', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function v1GetLatestDeletedArchive(): Promise<{
+  archive: ArtistProfileArchive | null
+}> {
+  return v1Fetch('/artist-recovery/archive')
+}
+
+export async function v1GetOwnRecoveryRequest(
+  archiveId: string,
+): Promise<{ request: ArtistPageRecoveryRequest | null }> {
+  const params = new URLSearchParams({ archiveId })
+  return v1Fetch(`/artist-recovery/request?${params}`)
+}
+
+export async function v1SubmitArtistPageRecoveryRequest(input: {
+  archiveId: string
+  govIdDocumentUrl: string
+  applicantNote?: string
+}): Promise<{ request: ArtistPageRecoveryRequest }> {
+  return v1Fetch('/artist-recovery/requests', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function v1ListDeletedArtistPagesDesk(): Promise<{
+  pages: DeletedArtistPageRow[]
+}> {
+  return v1Fetch('/artist-recovery/desk/deleted-pages')
+}
+
+export async function v1ReviewArtistPageRecoveryRequest(input: {
+  requestId: string
+  decision: 'approved' | 'rejected'
+  reviewNotes?: string
+}): Promise<void> {
+  await v1Fetch('/artist-recovery/desk/requests', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
   })
 }

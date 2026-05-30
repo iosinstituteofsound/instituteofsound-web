@@ -1,3 +1,11 @@
+import {
+  isV1ApiEnabled,
+  v1GetLatestDeletedArchive,
+  v1GetOwnRecoveryRequest,
+  v1ListDeletedArtistPagesDesk,
+  v1ReviewArtistPageRecoveryRequest,
+  v1SubmitArtistPageRecoveryRequest,
+} from '@/api/v1Client'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { restoreArtistProfileArchive } from '@/lib/artist-profile/archive'
 import type {
@@ -46,6 +54,11 @@ export async function getLatestDeletedArchiveForUser(
 ): Promise<ArtistProfileArchive | null> {
   if (!isSupabaseConfigured()) return local.localGetLatestArchiveForUser(userId)
 
+  if (isV1ApiEnabled()) {
+    const { archive } = await v1GetLatestDeletedArchive()
+    return archive
+  }
+
   const supabase = getSupabase()
   const { data, error } = await supabase
     .from('artist_profile_archives')
@@ -61,6 +74,11 @@ export async function getLatestDeletedArchiveForUser(
 }
 
 export async function listDeletedArtistPagesForDesk(): Promise<DeletedArtistPageRow[]> {
+  if (isSupabaseConfigured() && isV1ApiEnabled()) {
+    const { pages } = await v1ListDeletedArtistPagesDesk()
+    return pages
+  }
+
   if (!isSupabaseConfigured()) {
     const archives = local.localListDeletedArchivesForDesk()
     const requests = local.localListRecoveryRequests()
@@ -112,6 +130,11 @@ export async function getOwnRecoveryRequest(
     return r?.userId === userId ? r : null
   }
 
+  if (isV1ApiEnabled()) {
+    const { request } = await v1GetOwnRecoveryRequest(archiveId)
+    return request
+  }
+
   const supabase = getSupabase()
   const { data, error } = await supabase
     .from('artist_page_recovery_requests')
@@ -134,6 +157,16 @@ export async function submitArtistPageRecoveryRequest(input: {
 }): Promise<ArtistPageRecoveryRequest> {
   if (!isSupabaseConfigured()) {
     const request = local.localSubmitRecoveryRequest(input)
+    notifySuperEditorsOfRecoveryRequest(input.userId, request.id, input.archiveId)
+    return request
+  }
+
+  if (isV1ApiEnabled()) {
+    const { request } = await v1SubmitArtistPageRecoveryRequest({
+      archiveId: input.archiveId,
+      govIdDocumentUrl: input.govIdDocumentUrl,
+      applicantNote: input.applicantNote,
+    })
     notifySuperEditorsOfRecoveryRequest(input.userId, request.id, input.archiveId)
     return request
   }
@@ -183,6 +216,22 @@ export async function reviewArtistPageRecoveryRequest(
   decision: 'approved' | 'rejected',
   reviewNotes?: string,
 ): Promise<void> {
+  if (isSupabaseConfigured() && isV1ApiEnabled()) {
+    const supabase = getSupabase()
+    const { data: request, error } = await supabase
+      .from('artist_page_recovery_requests')
+      .select('user_id, status')
+      .eq('id', requestId)
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    if (!request) throw new Error('Recovery request not found.')
+    if (request.status !== 'pending') throw new Error('Request already reviewed.')
+
+    await v1ReviewArtistPageRecoveryRequest({ requestId, decision, reviewNotes })
+    notifyMemberRecoveryDecision(String(request.user_id), requestId, decision, reviewNotes)
+    return
+  }
+
   if (!isSupabaseConfigured()) {
     const requests = local.localListRecoveryRequests()
     const request = requests.find((r) => r.id === requestId)

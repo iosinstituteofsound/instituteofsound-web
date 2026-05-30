@@ -9,6 +9,9 @@ import {
   handleV1CommunitySpinCreate,
   handleV1CommunitySpinUpdate,
 } from './handlers/v1CommunityMutations.js'
+import { handleV1Verification } from './handlers/v1Verification.js'
+import { handleV1PlaylistCurator } from './handlers/v1PlaylistCurator.js'
+import { handleV1ArtistRecovery } from './handlers/v1ArtistRecovery.js'
 import type { ApiRequest, ApiResponse } from './http.js'
 
 /** Single Vercel function for all /api/v1/* routes (Hobby plan 12-function limit). */
@@ -50,6 +53,10 @@ export async function dispatchV1Api(
     await handleV1CommunityPostHide(req, res)
     return
   }
+
+  if (await handleV1Verification(req, res, pathname)) return
+  if (await handleV1PlaylistCurator(req, res, pathname)) return
+  if (await handleV1ArtistRecovery(req, res, pathname)) return
 
   res.status(404).json({ error: 'Not found' })
 }
