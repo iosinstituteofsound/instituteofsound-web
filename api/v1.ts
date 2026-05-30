@@ -1,6 +1,6 @@
-import { dispatchV1Api } from '../_lib/v1Router.js'
-import { checkRateLimit } from '../_lib/rateLimit.js'
-import { applyApiSecurityHeaders } from '../_lib/securityHeaders.js'
+import { dispatchV1Api } from './_lib/v1Router.js'
+import { checkRateLimit } from './_lib/rateLimit.js'
+import { applyApiSecurityHeaders } from './_lib/securityHeaders.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -21,24 +21,19 @@ type VercelResponse = {
   json: (body: unknown) => void
 }
 
-function segmentsFromQuery(req: VercelRequest): string[] {
-  const raw = req.query?.path
-  if (Array.isArray(raw)) return raw.filter(Boolean)
-  if (typeof raw === 'string' && raw) return [raw]
-  return []
-}
-
+/** Resolve full /api/v1/... path from the incoming request URL. */
 export function pathnameFromRequest(req: VercelRequest): string {
-  if (req.url) {
-    try {
-      const pathname = new URL(req.url, 'https://instituteofsound.in').pathname
-      if (pathname.startsWith('/api/v1')) return pathname
-    } catch {
-      /* fall through */
-    }
+  const rawUrl = req.url ?? ''
+  if (rawUrl.startsWith('/api/v1')) return rawUrl.split('?')[0] ?? '/api/v1'
+
+  try {
+    const pathname = new URL(rawUrl, 'https://instituteofsound.in').pathname
+    if (pathname.startsWith('/api/v1')) return pathname
+  } catch {
+    /* fall through */
   }
-  const tail = segmentsFromQuery(req).join('/')
-  return tail ? `/api/v1/${tail}` : '/api/v1'
+
+  return '/api/v1'
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

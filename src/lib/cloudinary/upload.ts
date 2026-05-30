@@ -1,4 +1,6 @@
-import { getCloudinaryCloudName, getCloudinaryUploadPreset, isCloudinaryConfigured } from './config'
+import { v1GetMediaUploadSign } from '@/api/v1MediaClient'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { getCloudinaryCloudName, isCloudinaryConfigured } from './config'
 
 export type CloudinaryFolder =
   | 'ios/submissions'
@@ -46,6 +48,36 @@ export function validatePdfFile(file: File): string | null {
   return null
 }
 
+async function resolveUploadSign(folder: CloudinaryFolder, resourceType: 'image' | 'raw') {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Sign in and configure Supabase to upload files securely.')
+  }
+  try {
+    const { sign } = await v1GetMediaUploadSign({ folder, resourceType })
+    return sign
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Upload sign failed'
+    if (/sign in required/i.test(message)) {
+      throw new Error('Sign in to upload files.')
+    }
+    if (/503|not configured/i.test(message)) {
+      throw new Error('Image upload is temporarily unavailable. Try again later or paste a URL.')
+    }
+    throw new Error(message)
+  }
+}
+
+function appendSignedFields(
+  body: FormData,
+  sign: Awaited<ReturnType<typeof resolveUploadSign>>,
+): void {
+  body.append('api_key', sign.apiKey)
+  body.append('timestamp', String(sign.timestamp))
+  body.append('signature', sign.signature)
+  body.append('upload_preset', sign.uploadPreset)
+  body.append('folder', sign.folder)
+}
+
 export async function uploadPdfToCloudinary(
   file: File,
   folder: CloudinaryFolder
@@ -59,13 +91,12 @@ export async function uploadPdfToCloudinary(
   const validation = validatePdfFile(file)
   if (validation) throw new Error(validation)
 
-  const cloudName = getCloudinaryCloudName()
-  const preset = getCloudinaryUploadPreset()
+  const sign = await resolveUploadSign(folder, 'raw')
+  const cloudName = sign.cloudName || getCloudinaryCloudName()
 
   const body = new FormData()
   body.append('file', file)
-  body.append('upload_preset', preset)
-  body.append('folder', folder)
+  appendSignedFields(body, sign)
 
   const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
     method: 'POST',
@@ -107,13 +138,12 @@ export async function uploadImageToCloudinary(
   const validation = validateImageFile(file)
   if (validation) throw new Error(validation)
 
-  const cloudName = getCloudinaryCloudName()
-  const preset = getCloudinaryUploadPreset()
+  const sign = await resolveUploadSign(folder, 'image')
+  const cloudName = sign.cloudName || getCloudinaryCloudName()
 
   const body = new FormData()
   body.append('file', file)
-  body.append('upload_preset', preset)
-  body.append('folder', folder)
+  appendSignedFields(body, sign)
 
   const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
     method: 'POST',

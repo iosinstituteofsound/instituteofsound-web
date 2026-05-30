@@ -7,20 +7,33 @@ All **uploaded** images (track artwork, editorial covers) go to **Cloudinary** a
 1. Go to [https://cloudinary.com](https://cloudinary.com) and sign up (free tier is fine).
 2. Open the **Dashboard** and copy your **Cloud name**.
 
-## 2. Unsigned upload preset (required for browser uploads)
+## 2. Signed upload preset (required)
 
-1. **Settings** → **Upload** → **Upload presets** → **Add upload preset**
-2. Name: e.g. `ios_unsigned`
-3. **Signing Mode**: **Unsigned**
-4. **Folder**: optional default `ios` (we also set folder per upload in code)
-5. Save
-6. For **EPK PDF uploads**: in the same preset, set **Upload preset type** to allow **Raw** (or create a second preset with **Resource type: Raw** and use it only for PDFs if you split presets later).
+1. **Settings** → **Upload** → **Upload presets** → **Add upload preset** (or edit existing)
+2. Name: e.g. `ios_signed`
+3. **Signing Mode**: **Signed** (not Unsigned — blocks random uploads without server signature)
+4. **Folder**: optional default `instituteofsound` (app sends `ios/...` subfolders via signed params)
+5. **Allowed formats**: jpg, png, webp, gif, avif (+ raw for PDFs on same or separate preset)
+6. **Max file size**: 10 MB images / 15 MB PDFs
+7. Save
 
-## 3. Add to `.env`
+## 3. API key (server only)
+
+1. **Settings** → **API Keys** → use a **non-Root** key pair
+2. Add to `.env` / Vercel (never `VITE_`):
+
+```env
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+CLOUDINARY_UPLOAD_PRESET=ios_signed
+```
+
+## 4. Add to `.env` (browser + server)
 
 ```env
 VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
-VITE_CLOUDINARY_UPLOAD_PRESET=ios_unsigned
+VITE_CLOUDINARY_UPLOAD_PRESET=ios_signed
 ```
 
 Restart dev server after saving:
@@ -29,7 +42,7 @@ Restart dev server after saving:
 npm run dev
 ```
 
-## 4. Supabase (optional)
+## 5. Supabase (optional)
 
 If you use Supabase, run in SQL Editor:
 
@@ -53,4 +66,4 @@ The app uses `IOSImage` — Cloudinary URLs get `f_auto,q_auto,w_*` transforms. 
 
 ## Security note
 
-Only the **unsigned upload preset name** and **cloud name** belong in the frontend. Never put API secret in `VITE_*` env vars.
+Uploads are **signed server-side** via `POST /api/v1/media/sign` (login required). Only whitelisted `ios/*` folders are allowed. Never put `CLOUDINARY_API_SECRET` in `VITE_*` env vars.

@@ -38,7 +38,7 @@
     "api/thumbnail.ts": {
       "maxDuration": 15
     },
-    "api/v1/[...path].ts": {
+    "api/v1.ts": {
       "maxDuration": 15,
       "includeFiles": "src/lib/**"
     },
@@ -47,6 +47,7 @@
     }
   },
   "rewrites": [
+    { "source": "/api/v1/:path*", "destination": "/api/v1" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]

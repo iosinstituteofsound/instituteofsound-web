@@ -18,6 +18,7 @@ import { handleV1Phase4Community } from './handlers/v1Phase4Community.js'
 import { handleV1Phase4Content } from './handlers/v1Phase4Content.js'
 import { handleV1Phase4Platform } from './handlers/v1Phase4Platform.js'
 import { handleV1Phase5 } from './handlers/v1Phase5.js'
+import { handleV1Media } from './handlers/v1Media.js'
 import type { ApiRequest, ApiResponse } from './http.js'
 
 /** Single Vercel function for all /api/v1/* routes (Hobby plan 12-function limit). */
@@ -69,6 +70,7 @@ export async function dispatchV1Api(
   if (await handleV1Phase4Content(req, res, pathname)) return
   if (await handleV1Phase4Platform(req, res, pathname)) return
   if (await handleV1Phase5(req, res, pathname)) return
+  if (await handleV1Media(req, res, pathname)) return
 
   res.status(404).json({ error: 'Not found' })
 }

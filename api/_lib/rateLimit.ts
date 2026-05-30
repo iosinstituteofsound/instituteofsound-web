@@ -14,6 +14,7 @@ const LIMITS: Record<RateLimitTier, { max: number; windowMs: number }> = {
 }
 
 const SENSITIVE_PATHS = [
+  '/media/sign',
   '/community/award-db',
   '/community/grant-badge',
   '/community/challenges/evaluate',
