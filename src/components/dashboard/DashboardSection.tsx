@@ -19,7 +19,7 @@ export function DashboardSection({
   className,
 }: DashboardSectionProps) {
   return (
-    <section id={id} className={clsx('artist-dash-section scroll-mt-28', className)}>
+    <section id={id} className={clsx('artist-dash-section scroll-mt-40', className)}>
       <header className="artist-dash-section-head">
         {step && <span className="artist-dash-section-step">{step}</span>}
         <h2 className="artist-dash-section-title">{title}</h2>

@@ -544,71 +544,73 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   return (
     <div className="artist-dash-studio">
       <div className="artist-dash-main">
-        <div className="artist-dash-toolbar">
-          <div className="artist-dash-toolbar-meta">
-            <MetalBadge variant={publication.pageStatus === 'live' ? 'live' : 'crimson'}>
-              {artistPageStatusLabel(publication.pageStatus, publication.inactive)}
-            </MetalBadge>
-            <span className="artist-dash-toolbar-url">/artist/{profileSlug}</span>
-            <div
-              className="artist-dash-toolbar-progress"
-              role="progressbar"
-              aria-valuenow={checklistPct}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={`Profile ${checklistPct} percent complete`}
-            >
-              <span className="artist-dash-toolbar-progress-track">
-                <span
-                  className="artist-dash-toolbar-progress-fill"
-                  style={{ width: `${checklistPct}%` }}
-                />
-              </span>
-              <span className="artist-dash-toolbar-progress-label">
-                {checklistDone}/{checklistTotal}
-              </span>
+        <div className="artist-dash-chrome">
+          <div className="artist-dash-toolbar">
+            <div className="artist-dash-toolbar-meta">
+              <MetalBadge variant={publication.pageStatus === 'live' ? 'live' : 'crimson'}>
+                {artistPageStatusLabel(publication.pageStatus, publication.inactive)}
+              </MetalBadge>
+              <span className="artist-dash-toolbar-divider" aria-hidden />
+              <span className="artist-dash-toolbar-url">/artist/{profileSlug}</span>
+              <span className="artist-dash-toolbar-divider" aria-hidden />
+              <div
+                className="artist-dash-toolbar-progress"
+                role="progressbar"
+                aria-valuenow={checklistPct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`Profile ${checklistPct} percent complete`}
+              >
+                <span className="artist-dash-toolbar-progress-track">
+                  <span
+                    className="artist-dash-toolbar-progress-fill"
+                    style={{ width: `${checklistPct}%` }}
+                  />
+                </span>
+                <span className="artist-dash-toolbar-progress-label">
+                  {checklistDone}/{checklistTotal}
+                </span>
+              </div>
+            </div>
+            <div className="artist-dash-toolbar-actions">
+              {profile && (
+                <>
+                  <Link
+                    to={`/artist/${profile.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="artist-dash-chrome-btn artist-dash-chrome-btn-ghost"
+                  >
+                    Preview ↗
+                  </Link>
+                  <Link
+                    to={`/artist/${profile.slug}/epk`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="artist-dash-chrome-btn artist-dash-chrome-btn-ghost"
+                  >
+                    EPK ↗
+                  </Link>
+                </>
+              )}
+              <Button
+                type="button"
+                variant="primary"
+                disabled={saving}
+                onClick={saveProfile}
+                className="artist-dash-chrome-btn artist-dash-chrome-btn-primary"
+              >
+                {saving ? 'Updating…' : 'Page update'}
+              </Button>
             </div>
           </div>
-          <div className="artist-dash-toolbar-actions">
-            {profile && (
-              <>
-                <Link
-                  to={`/artist/${profile.slug}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="ios-btn ios-btn-ghost !text-xs !py-2"
-                >
-                  Preview ↗
-                </Link>
-                <Link
-                  to={`/artist/${profile.slug}/epk`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="ios-btn ios-btn-ghost !text-xs !py-2"
-                >
-                  EPK ↗
-                </Link>
-              </>
-            )}
-            <Button
-              type="button"
-              variant="primary"
-              disabled={saving}
-              onClick={saveProfile}
-              className="!text-xs !py-2"
-            >
-              {saving ? 'Updating…' : 'Page update'}
-            </Button>
-          </div>
+
+          <ArtistProfileSectionNav
+            sections={PROFILE_SECTIONS}
+            activeId={activeSection}
+            onSelect={setActiveSection}
+          />
         </div>
-
-        <ArtistProfileSectionNav
-          sections={PROFILE_SECTIONS}
-          activeId={activeSection}
-          onSelect={setActiveSection}
-        />
-
-        <ArtistPageRulesCallout variant="studio" />
 
         {error && (
           <DismissibleBanner variant="error" onDismiss={() => setError('')}>
@@ -670,6 +672,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
               </p>
             )}
           </div>
+          <ArtistPageRulesCallout variant="studio" />
         </DashboardSection>
 
         <DashboardSection

@@ -790,16 +790,12 @@
   min-width: 0;
 }
 
-.artist-desk .artist-dash-section-strip {
-  top: 7.5rem;
+.artist-desk .artist-dash-chrome {
+  top: 4.25rem;
 }
 
 .artist-desk .artist-dash-main {
   gap: 1.25rem;
-}
-
-.artist-desk .artist-dash-toolbar {
-  margin-bottom: 0.25rem;
 }
 
 /* —— Member desk spacing (V2 main column) —— */
