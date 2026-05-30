@@ -1,5 +1,6 @@
 import { getArtists } from '@/api/endpoints'
 import { isV1ApiEnabled, v1GetArtistProfile, v1PutArtistProfile } from '@/api/v1Client'
+import { withV1Fallback } from '@/api/v1Fallback'
 import { isSupabaseConfigured } from '@/lib/supabase/client'
 import { getDrafts } from '@/lib/auth/storage'
 import type { Artist } from '@/types'
@@ -88,9 +89,14 @@ function localEditorialForProfile(profileId: string): ArtistEditorialFeature[] {
 
 export async function getProfileForUser(userId: string): Promise<ArtistProfile | null> {
   if (isV1ApiEnabled() && isSupabaseConfigured()) {
-    const { profile } = await v1GetArtistProfile()
-    if (!profile || profile.userId !== userId) return null
-    return enforceArtistPageLifecycle(profile)
+    return withV1Fallback(
+      async () => {
+        const { profile } = await v1GetArtistProfile()
+        if (!profile || profile.userId !== userId) return null
+        return enforceArtistPageLifecycle(profile)
+      },
+      () => getProfileForUserAfterLifecycle(userId),
+    )
   }
   return getProfileForUserAfterLifecycle(userId)
 }
@@ -106,8 +112,16 @@ export async function upsertArtistProfile(
     pageRefreshedAt: stamp,
   }
   if (isV1ApiEnabled() && isSupabaseConfigured()) {
-    const { profile } = await v1PutArtistProfile(payload)
-    return (await enforceArtistPageLifecycle(profile)) ?? profile
+    return withV1Fallback(
+      async () => {
+        const { profile } = await v1PutArtistProfile(payload)
+        return (await enforceArtistPageLifecycle(profile)) ?? profile
+      },
+      async () => {
+        const profile = await sb.supabaseUpsertProfile(user, payload)
+        return (await enforceArtistPageLifecycle(profile)) ?? profile
+      },
+    )
   }
   const profile = isSupabaseConfigured()
     ? await sb.supabaseUpsertProfile(user, payload)

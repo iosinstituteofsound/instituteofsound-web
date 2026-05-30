@@ -19,16 +19,23 @@ type VercelResponse = {
   json: (body: unknown) => void
 }
 
-function pathnameFromRequest(req: VercelRequest): string {
+function segmentsFromQuery(req: VercelRequest): string[] {
+  const raw = req.query?.path
+  if (Array.isArray(raw)) return raw.filter(Boolean)
+  if (typeof raw === 'string' && raw) return [raw]
+  return []
+}
+
+export function pathnameFromRequest(req: VercelRequest): string {
   if (req.url) {
     try {
-      return new URL(req.url, 'https://instituteofsound.in').pathname
+      const pathname = new URL(req.url, 'https://instituteofsound.in').pathname
+      if (pathname.startsWith('/api/v1')) return pathname
     } catch {
       /* fall through */
     }
   }
-  const segments = req.query?.path
-  const tail = Array.isArray(segments) ? segments.join('/') : segments ?? ''
+  const tail = segmentsFromQuery(req).join('/')
   return tail ? `/api/v1/${tail}` : '/api/v1'
 }
 

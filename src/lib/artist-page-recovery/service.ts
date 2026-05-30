@@ -1,3 +1,4 @@
+import { withV1Fallback } from '@/api/v1Fallback'
 import {
   isV1ApiEnabled,
   v1GetLatestDeletedArchive,
@@ -54,23 +55,28 @@ export async function getLatestDeletedArchiveForUser(
 ): Promise<ArtistProfileArchive | null> {
   if (!isSupabaseConfigured()) return local.localGetLatestArchiveForUser(userId)
 
-  if (isV1ApiEnabled()) {
-    const { archive } = await v1GetLatestDeletedArchive()
-    return archive
+  const loadDirect = async () => {
+    const supabase = getSupabase()
+    const { data, error } = await supabase
+      .from('artist_profile_archives')
+      .select('*')
+      .eq('user_id', userId)
+      .is('restored_at', null)
+      .order('deleted_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    return data ? mapArchive(data as Record<string, unknown>) : null
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('artist_profile_archives')
-    .select('*')
-    .eq('user_id', userId)
-    .is('restored_at', null)
-    .order('deleted_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  if (isV1ApiEnabled()) {
+    return withV1Fallback(async () => {
+      const { archive } = await v1GetLatestDeletedArchive()
+      return archive
+    }, loadDirect)
+  }
 
-  if (error) throw new Error(error.message)
-  return data ? mapArchive(data as Record<string, unknown>) : null
+  return loadDirect()
 }
 
 export async function listDeletedArtistPagesForDesk(): Promise<DeletedArtistPageRow[]> {

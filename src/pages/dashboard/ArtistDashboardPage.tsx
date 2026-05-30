@@ -53,16 +53,31 @@ export default function ArtistDashboardPage() {
     if (!user) return
     setLoadingList(true)
     try {
-      const [list, profile, deleted] = await Promise.all([
+      const [listResult, profileResult, deletedResult] = await Promise.allSettled([
         getSubmissionsForArtist(user.id),
         getProfileForUser(user.id),
         getLatestDeletedArchiveForUser(user.id),
       ])
-      setSubmissions(list)
+
+      if (listResult.status === 'fulfilled') {
+        setSubmissions(listResult.value)
+      } else {
+        setSubmissions([])
+        console.warn('[artist] submissions load', listResult.reason)
+      }
+
+      const profile = profileResult.status === 'fulfilled' ? profileResult.value : null
+      const deleted =
+        deletedResult.status === 'fulfilled' ? deletedResult.value : null
+
+      if (profileResult.status === 'rejected') {
+        console.warn('[artist] profile load', profileResult.reason)
+      }
+
       setProfileSlug(profile?.slug ?? null)
       setDeletedPageSlug(!profile && deleted ? deleted.slug : null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load submissions')
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard')
     } finally {
       setLoadingList(false)
     }
@@ -99,7 +114,12 @@ export default function ArtistDashboardPage() {
       setStreamUrl('')
       setCoverImageUrl('')
       setSuccess('Track submitted! Editors will review it in their dashboard.')
-      await refresh()
+      try {
+        const list = await getSubmissionsForArtist(user.id)
+        setSubmissions(list)
+      } catch {
+        await refresh()
+      }
       setTab('history')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Submit failed')
