@@ -18,27 +18,29 @@ export function ArtistProfileSectionNav({
   onSelect,
 }: ArtistProfileSectionNavProps) {
   return (
-    <nav className="artist-dash-nav" aria-label="Profile sections">
-      <p className="artist-dash-nav-label">Sections</p>
-      <ul className="artist-dash-nav-list">
-        {sections.map((s) => (
-          <li key={s.id}>
-            <button
-              type="button"
-              onClick={() => {
-                onSelect(s.id)
-                document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }}
-              className={clsx(
-                'artist-dash-nav-item',
-                activeId === s.id && 'artist-dash-nav-item-active'
-              )}
-            >
-              <span className="artist-dash-nav-item-label">{s.label}</span>
-              {s.hint && <span className="artist-dash-nav-item-hint">{s.hint}</span>}
-            </button>
-          </li>
-        ))}
+    <nav className="artist-dash-section-strip" aria-label="Profile sections">
+      <ul className="artist-dash-section-strip-list">
+        {sections.map((s) => {
+          const active = activeId === s.id
+          return (
+            <li key={s.id}>
+              <button
+                type="button"
+                title={s.hint}
+                onClick={() => {
+                  onSelect(s.id)
+                  document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }}
+                className={clsx(
+                  'artist-dash-section-pill',
+                  active && 'artist-dash-section-pill-active',
+                )}
+              >
+                {s.label}
+              </button>
+            </li>
+          )
+        })}
       </ul>
     </nav>
   )

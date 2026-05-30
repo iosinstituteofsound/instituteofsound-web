@@ -24,6 +24,7 @@ export function ArtistProfileQrCard({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [error, setError] = useState('')
   const [ready, setReady] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const profileUrl = `${getSiteUrl()}/artist/${slug || 'your-slug'}`
   const accent = resolveAccentColor(accentColor)
@@ -87,7 +88,7 @@ export function ArtistProfileQrCard({
         })
       }
     },
-    [profileUrl, accent, displayName]
+    [profileUrl, accent, displayName],
   )
 
   useEffect(() => {
@@ -119,14 +120,12 @@ export function ArtistProfileQrCard({
     try {
       await drawQr(canvas, poster ? POSTER_QR : QR_SIZE, poster)
       const blob = await new Promise<Blob | null>((resolve) =>
-        canvas.toBlob((b) => resolve(b), 'image/png')
+        canvas.toBlob((b) => resolve(b), 'image/png'),
       )
       if (!blob) throw new Error('Export failed')
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = poster
-        ? `ios-${slug}-poster-qr.png`
-        : `ios-${slug}-qr.png`
+      a.download = poster ? `ios-${slug}-poster-qr.png` : `ios-${slug}-qr.png`
       a.click()
       URL.revokeObjectURL(a.href)
     } catch {
@@ -134,8 +133,18 @@ export function ArtistProfileQrCard({
     }
   }
 
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(profileUrl)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setError('Could not copy link')
+    }
+  }
+
   return (
-    <section className="ios-panel space-y-5">
+    <section className="ios-panel artist-qr-card">
       <div>
         <p className="ios-kicker">QR for posters & merch</p>
         <p className="text-sm text-muted mt-2 leading-relaxed">
@@ -148,37 +157,40 @@ export function ArtistProfileQrCard({
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-6 items-start">
+      <div className="artist-qr-card-body">
         <div className="artist-qr-preview-wrap">
           <canvas ref={canvasRef} className="artist-qr-canvas" aria-label="Profile QR code" />
         </div>
-        <div className="flex-1 space-y-4 min-w-0">
+
+        <div className="artist-qr-meta">
           <div>
             <FieldLabel>Profile link</FieldLabel>
-            <p className="text-xs font-mono text-muted break-all mt-1">{profileUrl}</p>
+            <p className="artist-qr-url">{profileUrl}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="artist-qr-actions">
+            <Button type="button" variant="secondary" onClick={() => void copyLink()}>
+              {copied ? 'Copied' : 'Copy link'}
+            </Button>
             <Button
               type="button"
               variant="primary"
               disabled={!ready || !slug}
-              onClick={() => download(false)}
+              onClick={() => void download(false)}
             >
-              Download QR (PNG)
+              Download QR
             </Button>
             <Button
               type="button"
               variant="metal"
               disabled={!ready || !slug}
-              onClick={() => download(true)}
+              onClick={() => void download(true)}
             >
-              Poster pack (PNG)
+              Poster pack
             </Button>
           </div>
           <p className="text-xs text-muted leading-relaxed">
-            <strong className="text-foreground">QR PNG</strong> — square, social / small print.{' '}
-            <strong className="text-foreground">Poster pack</strong> — naam + branding + scan line,
-            Optimized for A4 print.
+            <strong className="text-foreground">QR PNG</strong> — square for social and small print.{' '}
+            <strong className="text-foreground">Poster pack</strong> — A4-ready with name and branding.
           </p>
           {error && (
             <DismissibleBanner variant="error" onDismiss={() => setError('')}>

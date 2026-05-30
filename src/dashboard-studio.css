@@ -786,18 +786,16 @@
   margin-top: 0;
 }
 
-.artist-desk .artist-dash-layout {
-  gap: 1.75rem;
+.artist-desk .artist-dash-studio {
+  min-width: 0;
 }
 
-@media (min-width: 1024px) {
-  .artist-desk .artist-dash-layout {
-    gap: 2.25rem;
-  }
+.artist-desk .artist-dash-section-strip {
+  top: 7.5rem;
 }
 
 .artist-desk .artist-dash-main {
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
 .artist-desk .artist-dash-toolbar {

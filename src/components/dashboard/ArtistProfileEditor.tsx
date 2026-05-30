@@ -508,6 +508,30 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
     }
   }
 
+  useEffect(() => {
+    if (loading) return
+
+    const sectionIds = PROFILE_SECTIONS.map((s) => s.id)
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el != null)
+    if (elements.length === 0) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+        const top = visible[0]?.target.id
+        if (top) setActiveSection(top)
+      },
+      { rootMargin: '-30% 0px -50% 0px', threshold: [0.08, 0.2, 0.45] },
+    )
+
+    for (const el of elements) observer.observe(el)
+    return () => observer.disconnect()
+  }, [loading])
+
   if (loading) return <LoadingTransmission variant="compact" />
 
   const profileSlug = profile?.slug ?? slugifyArtistName(displayName)
@@ -518,13 +542,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const checklistPct = Math.round((checklistDone / checklistTotal) * 100)
 
   return (
-    <div className="artist-dash-layout">
-      <ArtistProfileSectionNav
-        sections={PROFILE_SECTIONS}
-        activeId={activeSection}
-        onSelect={setActiveSection}
-      />
-
+    <div className="artist-dash-studio">
       <div className="artist-dash-main">
         <div className="artist-dash-toolbar">
           <div className="artist-dash-toolbar-meta">
@@ -583,6 +601,12 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
             </Button>
           </div>
         </div>
+
+        <ArtistProfileSectionNav
+          sections={PROFILE_SECTIONS}
+          activeId={activeSection}
+          onSelect={setActiveSection}
+        />
 
         <ArtistPageRulesCallout variant="studio" />
 
@@ -801,8 +825,9 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           step="06"
           title="Share & press"
           hint="QR codes for print and your EPK PDF for press and promoters."
+          className="artist-dash-section-share"
         >
-          <div className="artist-dash-grid-2">
+          <div className="artist-dash-share-stack">
             <ArtistProfileQrCard
               slug={profileSlug}
               displayName={displayName}
