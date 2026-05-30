@@ -10,6 +10,8 @@ import {
   submitRoleVerificationRequest,
 } from '@/lib/verification/service'
 import { roleVerificationRoleLabel } from '@/lib/verification/notifyEditors'
+import { getRoleVerificationRequirements } from '@/lib/verification/requirements'
+import { VerificationRequirementsList } from '@/components/dashboard/VerificationRequirementsList'
 
 function roleTypeFromPersona(persona: DashboardPersona | undefined) {
   if (!persona) return null
@@ -185,9 +187,16 @@ export function MemberTrustPanel({
           {canSubmitProofs && (
             <>
               {!latestRequest && (
-                <p className="member-desk-meta">
-                  Submit role-specific proofs for desk verification.
-                </p>
+                <VerificationRequirementsList
+                  info={getRoleVerificationRequirements(roleType)}
+                  className="mb-3"
+                />
+              )}
+              {latestRequest?.status === 'rejected' && (
+                <VerificationRequirementsList
+                  info={getRoleVerificationRequirements(roleType)}
+                  className="mb-3"
+                />
               )}
               <textarea
                 rows={4}

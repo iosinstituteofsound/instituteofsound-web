@@ -3,6 +3,8 @@ import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
 import { MetalBadge } from '@/components/ui/MetalBadge'
+import { VerificationRequirementsList } from '@/components/dashboard/VerificationRequirementsList'
+import { PLAYLIST_CURATOR_REQUIREMENTS } from '@/lib/verification/requirements'
 import { FieldLabel } from '@/components/ui/Input'
 import {
   getMyPlaylistCuratorApplications,
@@ -148,10 +150,10 @@ export default function PlaylistCuratorApplyPage() {
           <div>
             <p className="member-desk-kicker">Playlists</p>
             <h2 className="member-desk-heading">Your playlist links</h2>
-            <p className="member-desk-lede mt-2">
-              Spotify, Apple Music, YouTube Music, SoundCloud, or any public playlist URL. Add as
-              many as you want.
-            </p>
+            <VerificationRequirementsList
+              info={PLAYLIST_CURATOR_REQUIREMENTS}
+              className="mt-4"
+            />
           </div>
 
           <div className="space-y-3">

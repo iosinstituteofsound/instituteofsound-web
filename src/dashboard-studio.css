@@ -1053,6 +1053,44 @@
   background: rgba(245, 158, 11, 0.1);
 }
 
+.member-verification-reqs {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(212, 0, 0, 0.18);
+  background: rgba(212, 0, 0, 0.04);
+}
+
+.member-verification-reqs--modal {
+  margin-top: 1rem;
+}
+
+.member-verification-reqs__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+}
+
+.member-verification-reqs__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.member-verification-reqs__list li + li {
+  margin-top: 0.35rem;
+}
+
+.member-verification-reqs__note {
+  margin: 0.65rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
 .ios-analytics-pipeline-tile {
   text-align: left;
   padding: 1rem;

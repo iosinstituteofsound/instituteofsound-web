@@ -10,7 +10,14 @@ import { syncMemberVerificationNotifications } from '@/lib/verification/notifyEd
 import { syncApprovedVerificationPersona } from '@/lib/verification/service'
 import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
 import { MetalBadge } from '@/components/ui/MetalBadge'
-import type { DashboardPersona } from '@/lib/auth/types'
+import { VerificationRequirementsList } from '@/components/dashboard/VerificationRequirementsList'
+import {
+  ARTIST_PATH_REQUIREMENTS,
+  EDITOR_PATH_REQUIREMENTS,
+  getRoleVerificationRequirements,
+  PLAYLIST_CURATOR_REQUIREMENTS,
+  type PathVerificationInfo,
+} from '@/lib/verification/requirements'
 
 type MemberTab = 'workspace' | 'explore' | 'network' | 'grow'
 
@@ -210,6 +217,7 @@ type GrowPathCard =
       lede: string
       primary: { to: string; label: string }
       secondary?: { to: string; label: string }[]
+      verification: PathVerificationInfo
     }
   | {
       id: string
@@ -229,6 +237,7 @@ const GROW_PATHS: GrowPathCard[] = [
     heading: 'Upgrade to artist page',
     lede: 'Launch My Studio — public band page, releases, merch, and editor submissions.',
     primary: { to: '/member/upgrade', label: 'Start artist page' },
+    verification: ARTIST_PATH_REQUIREMENTS,
   },
   {
     id: 'artist_manager',
@@ -273,6 +282,7 @@ const GROW_PATHS: GrowPathCard[] = [
     heading: 'Apply for Playlist Curator',
     lede: 'Submit your public playlist links and a note — the super editor desk reviews every link before approval.',
     primary: { to: '/member/playlist-curator', label: 'Apply for playlist curator' },
+    verification: PLAYLIST_CURATOR_REQUIREMENTS,
   },
   {
     id: 'editor',
@@ -282,6 +292,7 @@ const GROW_PATHS: GrowPathCard[] = [
     lede: 'Apply to write features, review submissions, and curate the magazine desk.',
     primary: { to: '/editor/apply', label: 'Apply as editor' },
     secondary: [{ to: '/editor/join', label: 'Programme info' }],
+    verification: EDITOR_PATH_REQUIREMENTS,
   },
 ]
 
@@ -514,6 +525,10 @@ export default function MemberDashboardPage() {
                     <p className="member-desk-kicker">{path.kicker}</p>
                     <h2 className="member-desk-heading">{path.heading}</h2>
                     <p className="member-desk-lede">{path.lede}</p>
+                    <VerificationRequirementsList
+                      info={getRoleVerificationRequirements(path.persona)}
+                      className="mt-4"
+                    />
                     <div className="member-desk-actions">
                       {active ? (
                         <button
@@ -566,6 +581,7 @@ export default function MemberDashboardPage() {
                   <p className="member-desk-kicker">{path.kicker}</p>
                   <h2 className="member-desk-heading">{path.heading}</h2>
                   <p className="member-desk-lede">{path.lede}</p>
+                  <VerificationRequirementsList info={path.verification} className="mt-4" />
                   {path.secondary?.length ? (
                     <div className="member-desk-actions">
                       <Link to={path.primary.to} className="ios-btn ios-btn-secondary">
@@ -660,6 +676,11 @@ export default function MemberDashboardPage() {
                 ))}
               </ul>
             </div>
+
+            <VerificationRequirementsList
+              info={getRoleVerificationRequirements(personaModal)}
+              className="member-verification-reqs member-verification-reqs--modal"
+            />
 
             <div className="member-role-modal-actions">
               <button
