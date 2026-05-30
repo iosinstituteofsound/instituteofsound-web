@@ -7,7 +7,7 @@ export const config = {
 
 type VercelResponse = {
   status: (code: number) => VercelResponse
-  setHeader: (name: string, value: string) => void
+  setHeader: (name: string, value: string) => VercelResponse
   send: (body: string) => void
 }
 

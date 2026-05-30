@@ -12,7 +12,7 @@ export const config = {
 type VercelRequest = { query?: { slug?: string | string[] } }
 type VercelResponse = {
   status: (code: number) => VercelResponse
-  setHeader: (name: string, value: string) => void
+  setHeader: (name: string, value: string) => VercelResponse
   send: (body: string) => void
 }
 

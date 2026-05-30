@@ -1,10 +1,9 @@
 import {
   editorialCoverForOg,
-  escapeHtml,
   fetchPublishedEditorialForShare,
   stripHtml,
 } from '../_lib/shareEditorial.js'
-import { siteOrigin } from '../_lib/shareProfile.js'
+import { escapeHtml, siteOrigin } from '../_lib/shareProfile.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -14,7 +13,7 @@ export const config = {
 type VercelRequest = { query?: { slug?: string | string[] } }
 type VercelResponse = {
   status: (code: number) => VercelResponse
-  setHeader: (name: string, value: string) => void
+  setHeader: (name: string, value: string) => VercelResponse
   send: (body: string) => void
 }
 
