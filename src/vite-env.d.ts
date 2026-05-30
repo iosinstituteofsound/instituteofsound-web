@@ -8,6 +8,8 @@ interface ImportMetaEnv {
   readonly VITE_SITE_URL?: string
   readonly VITE_CLOUDINARY_CLOUD_NAME?: string
   readonly VITE_CLOUDINARY_UPLOAD_PRESET?: string
+  /** When true, artist profile load/save uses /api/v1 (requires server Supabase env). */
+  readonly VITE_USE_V1_API?: string
 }
 
 interface ImportMeta {

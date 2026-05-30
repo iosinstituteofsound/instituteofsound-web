@@ -1,4 +1,4 @@
-import type { EditorialType } from '@/lib/auth/types'
+import type { EditorialType } from '../auth/types'
 import type { ArtistThemePreset } from './branding'
 import type { HeroLayout } from './heroLayout'
 import type { SocialLinkKey } from './socialOrder'

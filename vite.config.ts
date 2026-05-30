@@ -11,6 +11,29 @@ function thumbnailApiPlugin(): Plugin {
   return {
     name: 'ios-thumbnail-api',
     configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        try {
+          const pathname = new URL(req.url ?? '/', 'http://localhost').pathname
+          if (!pathname.startsWith('/api/v1/')) {
+            next()
+            return
+          }
+          const { dispatchV1DevApi } = await import('./api/_lib/devV1Router')
+          const handled = await dispatchV1DevApi(req, res, pathname)
+          if (handled) return
+        } catch (err) {
+          res.statusCode = 500
+          res.setHeader('Content-Type', 'application/json')
+          res.end(
+            JSON.stringify({
+              error: err instanceof Error ? err.message : 'API error',
+            }),
+          )
+          return
+        }
+        next()
+      })
+
       server.middlewares.use('/api/import-catalog', async (req, res) => {
         try {
           const requestUrl = new URL(req.url ?? '', 'http://localhost')
