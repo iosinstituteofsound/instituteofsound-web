@@ -26,6 +26,7 @@ import { DEFAULT_HERO_LAYOUT, resolveHeroLayout } from './heroLayout'
 import { normalizeInfluenceTags } from './influences'
 import { resolveLineupEntryType } from './lineup'
 import { normalizeSocialLinkOrder } from './socialOrder'
+import { filterDiscoverProfiles } from '@/lib/artist-profile/profileVisibility'
 import { ensureUniqueSlug, slugifyArtistName } from './slug'
 
 function normalizeManagerHandle(raw?: string | null): string | null {
@@ -64,6 +65,9 @@ type ProfileRow = {
   press_kit_url: string | null
   press_kit_label: string | null
   published: boolean
+  page_status?: string | null
+  page_refreshed_at?: string | null
+  last_activity_at?: string | null
   created_at: string
   updated_at: string
 }
@@ -102,6 +106,9 @@ function mapProfile(row: ProfileRow): ArtistProfile {
     pressKitUrl: row.press_kit_url ?? undefined,
     pressKitLabel: row.press_kit_label ?? undefined,
     published: row.published,
+    pageStatus: row.page_status === 'live' ? 'live' : 'pending',
+    pageRefreshedAt: row.page_refreshed_at ?? row.updated_at,
+    lastActivityAt: row.last_activity_at ?? row.page_refreshed_at ?? row.updated_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -138,8 +145,31 @@ function profilePayload(input: UpsertArtistProfileInput, user: User) {
     press_kit_url: input.pressKitUrl?.trim() || null,
     press_kit_label: input.pressKitLabel?.trim() || null,
     published: input.published ?? false,
+    page_status: input.pageStatus ?? (input.published ? 'live' : 'pending'),
+    page_refreshed_at: input.pageRefreshedAt ?? input.lastActivityAt ?? new Date().toISOString(),
+    last_activity_at: input.lastActivityAt ?? input.pageRefreshedAt ?? new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }
+}
+
+export async function supabaseTouchActivity(profileId: string): Promise<void> {
+  const supabase = getSupabase()
+  const stamp = new Date().toISOString()
+  const { error } = await supabase
+    .from('artist_profiles')
+    .update({
+      last_activity_at: stamp,
+      page_refreshed_at: stamp,
+      updated_at: stamp,
+    })
+    .eq('id', profileId)
+  if (error) throw new Error(error.message)
+}
+
+export async function supabaseDeleteProfileForUser(userId: string): Promise<void> {
+  const supabase = getSupabase()
+  const { error } = await supabase.from('artist_profiles').delete().eq('user_id', userId)
+  if (error) throw new Error(error.message)
 }
 
 export async function supabaseGetProfileByUserId(userId: string): Promise<ArtistProfile | null> {
@@ -810,7 +840,7 @@ export async function supabaseListPublishedProfiles(): Promise<ArtistProfile[]> 
     .eq('published', true)
     .order('updated_at', { ascending: false })
   if (error) throw new Error(error.message)
-  return (data as ProfileRow[]).map(mapProfile)
+  return filterDiscoverProfiles((data as ProfileRow[]).map(mapProfile))
 }
 
 export async function supabaseGetEditorialForProfile(

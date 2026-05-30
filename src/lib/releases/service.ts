@@ -1,3 +1,4 @@
+import { touchArtistPageActivityByProfileId } from '@/lib/artist-profile/pageEnforcement'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { slugifyArtistName, ensureUniqueSlug } from '@/lib/artist-profile/slug'
 import { validateReleaseEmbedInput } from '@/lib/community/musicLinks'
@@ -93,10 +94,10 @@ export async function upsertRelease(
 
   const status = input.status === 'draft' ? 'draft' : 'scheduled'
 
+  let release: ArtistRelease
   if (!isSupabaseConfigured()) {
-    return local.localUpsertRelease(profileId, { ...input, status }, releaseId)
-  }
-
+    release = local.localUpsertRelease(profileId, { ...input, status }, releaseId)
+  } else {
   const supabase = getSupabase()
   let slug = releaseId
     ? undefined
@@ -139,9 +140,8 @@ export async function upsertRelease(
       .select('*')
       .single()
     if (error) throw new Error(error.message)
-    return mapRelease(data)
-  }
-
+    release = mapRelease(data)
+  } else {
   const { data, error } = await supabase
     .from('artist_releases')
     .insert({ ...payload, spin_promoted: false })
@@ -149,7 +149,12 @@ export async function upsertRelease(
     .single()
 
   if (error) throw new Error(error.message)
-  return mapRelease(data)
+  release = mapRelease(data)
+  }
+  }
+
+  await touchArtistPageActivityByProfileId(profileId)
+  return release
 }
 
 export async function addReleaseMilestone(

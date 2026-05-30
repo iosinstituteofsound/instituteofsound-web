@@ -70,6 +70,9 @@ const DashboardRedirectPage = lazy(
 const ArtistDashboardPage = lazy(
   () => import('@/pages/dashboard/ArtistDashboardPage')
 )
+const ArtistIosSupportPage = lazy(
+  () => import('@/pages/support/ArtistIosSupportPage')
+)
 const MemberDashboardPage = lazy(
   () => import('@/pages/dashboard/MemberDashboardPage')
 )
@@ -197,6 +200,14 @@ export default function App() {
               element={
                 <ProtectedRoute role="artist">
                   <ArtistDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="support/artist-page"
+              element={
+                <ProtectedRoute role={['artist', 'member']}>
+                  <ArtistIosSupportPage />
                 </ProtectedRoute>
               }
             />

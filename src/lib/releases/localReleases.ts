@@ -43,6 +43,19 @@ export function localListReleasesForProfile(profileId: string): ArtistRelease[] 
     .sort((a, b) => b.liveAt.localeCompare(a.liveAt))
 }
 
+export function localRestoreReleasesSnapshot(releases: ArtistRelease[]): void {
+  if (releases.length === 0) return
+  const ids = new Set(releases.map((r) => r.id))
+  write([...read().filter((r) => !ids.has(r.id)), ...releases])
+}
+
+export function localDeleteReleasesForProfile(profileId: string): void {
+  const releases = read().filter((r) => r.profileId === profileId)
+  const releaseIds = new Set(releases.map((r) => r.id))
+  write(read().filter((r) => r.profileId !== profileId))
+  writeMilestones(readMilestones().filter((m) => !releaseIds.has(m.releaseId)))
+}
+
 export function localListReleasesForScene(cityLabel: string, genreSlug: string): ArtistRelease[] {
   return read()
     .filter(

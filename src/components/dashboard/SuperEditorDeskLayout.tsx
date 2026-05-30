@@ -8,6 +8,7 @@ export type SuperEditorTab =
   | 'preview'
   | 'verification'
   | 'playlist_curators'
+  | 'deleted_pages'
   | 'applications'
   | 'queue'
   | 'wire'
@@ -25,6 +26,7 @@ const NAV_GROUPS: DeskNavGroup<SuperEditorTab>[] = [
       { id: 'preview', label: 'Dashboard preview' },
       { id: 'verification', label: 'Verification queue' },
       { id: 'playlist_curators', label: 'Playlist curators' },
+      { id: 'deleted_pages', label: 'Deleted pages' },
       { id: 'applications', label: 'Editor applications' },
     ],
   },

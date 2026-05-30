@@ -27,6 +27,17 @@ import { resolveHeroLayout } from './heroLayout'
 import { normalizeInfluenceTags } from './influences'
 import { resolveLineupEntryType } from './lineup'
 import { normalizeSocialLinkOrder } from './socialOrder'
+import { filterDiscoverProfiles } from '@/lib/artist-profile/profileVisibility'
+import type {
+  ArtistDeletionReason,
+  ArtistPageRecoveryRequest,
+  ArtistProfileArchive,
+  ArtistProfileSnapshotV1,
+} from '@/lib/artist-page-recovery/types'
+import {
+  localDeleteReleasesForProfile,
+  localRestoreReleasesSnapshot,
+} from '@/lib/releases/localReleases'
 import { ensureUniqueSlug, slugifyArtistName } from './slug'
 
 function normalizeManagerHandle(raw?: string): string | undefined {
@@ -42,6 +53,8 @@ const MERCH_KEY = 'ios_artist_merch'
 const LINEUP_KEY = 'ios_artist_lineup'
 const BIO_TIMELINE_KEY = 'ios_artist_bio_timeline'
 const EDITORIAL_LINK_KEY = 'ios_artist_editorial'
+const ARCHIVES_KEY = 'ios_artist_profile_archives'
+const RECOVERY_REQUESTS_KEY = 'ios_artist_page_recovery_requests'
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -61,23 +74,27 @@ function now() {
 }
 
 export function localGetProfiles(): ArtistProfile[] {
-  return read<Partial<ArtistProfile>[]>(PROFILES_KEY, []).map((p) => ({
-    ...(p as ArtistProfile),
-    influenceTags: normalizeInfluenceTags((p as ArtistProfile).influenceTags ?? []),
-    accentColor: resolveAccentColor((p as ArtistProfile).accentColor),
-    themePreset: resolveThemePreset((p as ArtistProfile).themePreset),
-    socialLinkOrder: normalizeSocialLinkOrder((p as ArtistProfile).socialLinkOrder),
-    heroLayout: resolveHeroLayout((p as ArtistProfile).heroLayout),
-  }))
+  return read<Partial<ArtistProfile>[]>(PROFILES_KEY, []).map((p) => {
+    const row = p as ArtistProfile
+    return {
+      ...row,
+      influenceTags: normalizeInfluenceTags(row.influenceTags ?? []),
+      accentColor: resolveAccentColor(row.accentColor),
+      themePreset: resolveThemePreset(row.themePreset),
+      socialLinkOrder: normalizeSocialLinkOrder(row.socialLinkOrder),
+      heroLayout: resolveHeroLayout(row.heroLayout),
+      pageStatus: row.pageStatus ?? (row.published ? 'live' : 'pending'),
+      pageRefreshedAt: row.pageRefreshedAt ?? row.updatedAt ?? now(),
+      lastActivityAt:
+        row.lastActivityAt ?? row.pageRefreshedAt ?? row.updatedAt ?? now(),
+    }
+  })
 }
 
 export function localListPublishedProfiles(): ArtistProfile[] {
-  return localGetProfiles()
-    .filter((p) => p.published)
-    .sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    )
+  return filterDiscoverProfiles(localGetProfiles()).sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+  )
 }
 
 function saveProfiles(profiles: ArtistProfile[]) {
@@ -203,6 +220,9 @@ export function localUpsertProfile(
         ? input.pressKitLabel?.trim() || undefined
         : existing?.pressKitLabel,
     published: input.published ?? existing?.published ?? false,
+    pageStatus: input.pageStatus ?? (input.published ? 'live' : 'pending'),
+    pageRefreshedAt: input.pageRefreshedAt ?? input.lastActivityAt ?? now(),
+    lastActivityAt: input.lastActivityAt ?? input.pageRefreshedAt ?? now(),
     createdAt: existing?.createdAt ?? now(),
     updatedAt: now(),
   }
@@ -217,6 +237,50 @@ export function localUpsertProfile(
   return profile
 }
 
+export function localTouchActivity(userId: string): void {
+  const profiles = localGetProfiles()
+  const idx = profiles.findIndex((p) => p.userId === userId)
+  if (idx < 0) return
+  const stamp = now()
+  profiles[idx] = {
+    ...profiles[idx],
+    lastActivityAt: stamp,
+    pageRefreshedAt: stamp,
+    updatedAt: stamp,
+  }
+  saveProfiles(profiles)
+}
+
+export function localDeleteProfileForUser(userId: string): void {
+  const profiles = localGetProfiles()
+  const profile = profiles.find((p) => p.userId === userId)
+  if (!profile) return
+  const profileId = profile.id
+
+  saveProfiles(profiles.filter((p) => p.userId !== userId))
+
+  const dropByProfile = <T extends { profileId: string }>(key: string) => {
+    const all = read<T[]>(key, [])
+    write(
+      key,
+      all.filter((row) => row.profileId !== profileId),
+    )
+  }
+
+  dropByProfile<ArtistAlbum>(ALBUMS_KEY)
+  dropByProfile<ArtistTrack>(TRACKS_KEY)
+  dropByProfile<ArtistVideo>(VIDEOS_KEY)
+  dropByProfile<ArtistMerchItem>(MERCH_KEY)
+  dropByProfile<ArtistLineupEntry>(LINEUP_KEY)
+  dropByProfile<ArtistBioTimelineEntry>(BIO_TIMELINE_KEY)
+
+  const links = localGetEditorialLinks()
+  delete links[profileId]
+  write(EDITORIAL_LINK_KEY, links)
+
+  localDeleteReleasesForProfile(profileId)
+}
+
 export function localListManagedArtistsByHandle(
   handle: string
 ): {
@@ -228,8 +292,8 @@ export function localListManagedArtistsByHandle(
 }[] {
   const managerHandle = normalizeManagerHandle(handle)
   if (!managerHandle) return []
-  return localGetProfiles()
-    .filter((p) => p.published && p.artistManagerHandle === managerHandle)
+  return filterDiscoverProfiles(localGetProfiles())
+    .filter((p) => p.artistManagerHandle === managerHandle)
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .map((p) => ({
       profileId: p.id,
@@ -537,4 +601,151 @@ export function localGetPageData(
     editorial,
     pickTrack,
   }
+}
+
+function readArchives(): ArtistProfileArchive[] {
+  return read<ArtistProfileArchive[]>(ARCHIVES_KEY, [])
+}
+
+function writeArchives(items: ArtistProfileArchive[]) {
+  write(ARCHIVES_KEY, items)
+}
+
+function readRecoveryRequests(): ArtistPageRecoveryRequest[] {
+  return read<ArtistPageRecoveryRequest[]>(RECOVERY_REQUESTS_KEY, [])
+}
+
+function writeRecoveryRequests(items: ArtistPageRecoveryRequest[]) {
+  write(RECOVERY_REQUESTS_KEY, items)
+}
+
+export function localInsertArchive(
+  profile: ArtistProfile,
+  reason: ArtistDeletionReason,
+  snapshot: ArtistProfileSnapshotV1,
+): string {
+  const archives = readArchives().filter((a) => a.profileId !== profile.id)
+  const id = crypto.randomUUID()
+  archives.push({
+    id,
+    userId: profile.userId,
+    profileId: profile.id,
+    slug: profile.slug,
+    displayName: profile.displayName,
+    deletionReason: reason,
+    deletedAt: now(),
+    snapshot,
+  })
+  writeArchives(archives)
+  return id
+}
+
+export function localGetLatestArchiveForUser(userId: string): ArtistProfileArchive | null {
+  const list = readArchives()
+    .filter((a) => a.userId === userId && !a.restoredAt)
+    .sort((a, b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime())
+  return list[0] ?? null
+}
+
+export function localListDeletedArchivesForDesk(): ArtistProfileArchive[] {
+  return readArchives()
+    .filter((a) => !a.restoredAt)
+    .sort((a, b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime())
+}
+
+export function localListRecoveryRequests(): ArtistPageRecoveryRequest[] {
+  return readRecoveryRequests()
+}
+
+export function localGetRecoveryRequestForArchive(
+  archiveId: string,
+): ArtistPageRecoveryRequest | null {
+  return (
+    readRecoveryRequests().find((r) => r.archiveId === archiveId && r.status === 'pending') ??
+    readRecoveryRequests().find((r) => r.archiveId === archiveId) ??
+    null
+  )
+}
+
+export function localUpdateRecoveryRequest(
+  requestId: string,
+  patch: Partial<Pick<ArtistPageRecoveryRequest, 'status' | 'reviewNotes' | 'reviewedBy'>>,
+): void {
+  writeRecoveryRequests(
+    readRecoveryRequests().map((r) =>
+      r.id === requestId
+        ? {
+            ...r,
+            ...patch,
+            updatedAt: now(),
+          }
+        : r,
+    ),
+  )
+}
+
+export function localSubmitRecoveryRequest(input: {
+  archiveId: string
+  userId: string
+  govIdDocumentUrl: string
+  applicantNote?: string
+}): ArtistPageRecoveryRequest {
+  const existing = readRecoveryRequests().find(
+    (r) => r.archiveId === input.archiveId && r.status === 'pending',
+  )
+  if (existing) throw new Error('You already have a pending recovery request for this page.')
+
+  const request: ArtistPageRecoveryRequest = {
+    id: crypto.randomUUID(),
+    archiveId: input.archiveId,
+    userId: input.userId,
+    govIdDocumentUrl: input.govIdDocumentUrl,
+    applicantNote: input.applicantNote,
+    status: 'pending',
+    createdAt: now(),
+    updatedAt: now(),
+  }
+  writeRecoveryRequests([request, ...readRecoveryRequests()])
+  return request
+}
+
+export function localRestoreArchive(
+  archiveId: string,
+  restoredByUserId: string,
+): ArtistProfile {
+  const archives = readArchives()
+  const archive = archives.find((a) => a.id === archiveId)
+  if (!archive) throw new Error('Archive not found.')
+  if (archive.restoredAt) throw new Error('This page was already restored.')
+  if (localGetProfileByUserId(archive.userId)) {
+    throw new Error('This user already has an active artist page.')
+  }
+
+  const { snapshot } = archive
+  const profiles = localGetProfiles()
+  profiles.push(snapshot.profile)
+  saveProfiles(profiles)
+
+  const writeRows = <T extends { profileId: string }>(key: string, rows: T[]) => {
+    const all = read<T[]>(key, [])
+    write(key, [...all, ...rows])
+  }
+
+  writeRows(ALBUMS_KEY, snapshot.albums)
+  writeRows(TRACKS_KEY, snapshot.tracks)
+  writeRows(VIDEOS_KEY, snapshot.videos)
+  writeRows(MERCH_KEY, snapshot.merch)
+  writeRows(LINEUP_KEY, snapshot.lineup)
+  writeRows(BIO_TIMELINE_KEY, snapshot.bioTimeline)
+
+  localRestoreReleasesSnapshot(snapshot.releases)
+
+  const stamp = now()
+  writeArchives(
+    archives.map((a) =>
+      a.id === archiveId ? { ...a, restoredAt: stamp, restoredBy: restoredByUserId } : a,
+    ),
+  )
+
+  return snapshot.profile
 }

@@ -1,3 +1,4 @@
+import { touchArtistPageActivity } from '@/lib/artist-profile/pageEnforcement'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { awardDb } from '@/lib/community/awardDb'
 import { parseSpotifyUrl, parseYouTubeUrl, validateSpinInput } from '@/lib/community/musicLinks'
@@ -237,6 +238,7 @@ export async function createSpinPost(input: CreateSpinInput): Promise<CommunityF
     }
     localAddFeedPost(post)
     void tryGrantBadge('first_spin')
+    void touchArtistPageActivity(input.userId)
     notifyFeed()
     void evaluateWeeklyChallenges()
     return post
@@ -269,6 +271,7 @@ export async function createSpinPost(input: CreateSpinInput): Promise<CommunityF
 
   if (awarded) void tryGrantBadge('first_spin')
   void evaluateWeeklyChallenges()
+  void touchArtistPageActivity(input.userId)
   notifyFeed()
 
   return {
@@ -339,6 +342,7 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
     }
     localAddFeedPost(post)
     void tryGrantBadge('first_drop')
+    void touchArtistPageActivity(input.userId)
     notifyFeed()
     void evaluateWeeklyChallenges()
     return post
@@ -392,6 +396,7 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
 
   if (awarded) void tryGrantBadge('first_drop')
   void evaluateWeeklyChallenges()
+  void touchArtistPageActivity(input.userId)
   notifyFeed()
 
   return {

@@ -15,6 +15,8 @@ function notificationFallbackIcon(kind: NotificationKind): string {
       return '✓'
     case 'playlist_curator_application':
       return '♫'
+    case 'artist_page_recovery':
+      return '🛟'
     case 'rank_up':
       return '▲'
     case 'editorial_publish':

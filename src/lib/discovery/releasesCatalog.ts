@@ -12,6 +12,7 @@
  * - Explore §03 stays on the premiere feed; this module is the full catalog
  */
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { isArtistDiscoverVisible } from '@/lib/artist-profile/profileVisibility'
 import * as local from '@/lib/artist-profile/storage'
 import { DEFAULT_HERO_LAYOUT } from '@/lib/artist-profile/heroLayout'
 import type { ArtistAlbum, ArtistProfile, ArtistTrack } from '@/lib/artist-profile/types'
@@ -74,6 +75,8 @@ function stubProfile(p: {
     heroLayout: DEFAULT_HERO_LAYOUT,
     socialLinkOrder: [],
     published: true,
+    pageStatus: 'live',
+    pageRefreshedAt: '',
     createdAt: '',
     updatedAt: '',
     avatarUrl: p.avatarUrl,
@@ -347,15 +350,37 @@ async function fetchSupabaseCatalog(): Promise<DiscoverPremiereCard[]> {
 
   const { data: profiles, error: profileErr } = await supabase
     .from('artist_profiles')
-    .select('id, slug, display_name, genres, avatar_url')
+    .select('id, slug, display_name, genres, avatar_url, last_activity_at, page_refreshed_at, published')
     .eq('published', true)
 
   if (profileErr) throw new Error(profileErr.message)
-  if (!profiles?.length) return []
+  const liveProfiles = (profiles ?? []).filter((p) =>
+    isArtistDiscoverVisible({
+      id: p.id,
+      userId: '',
+      slug: p.slug,
+      displayName: p.display_name,
+      genres: (p.genres as string[]) ?? [],
+      influenceTags: [],
+      social: {},
+      monthlyListenersDisplay: '',
+      accentColor: '#d40000',
+      themePreset: 'metal',
+      heroLayout: DEFAULT_HERO_LAYOUT,
+      socialLinkOrder: [],
+      published: p.published,
+      pageStatus: 'live',
+      pageRefreshedAt: p.page_refreshed_at ?? '',
+      lastActivityAt: p.last_activity_at ?? p.page_refreshed_at ?? '',
+      createdAt: '',
+      updatedAt: '',
+    }),
+  )
+  if (!liveProfiles.length) return []
 
-  const profileIds = profiles.map((p) => p.id)
+  const profileIds = liveProfiles.map((p) => p.id)
   const profileById = new Map(
-    profiles.map((p) => [
+    liveProfiles.map((p) => [
       p.id,
       {
         id: p.id,

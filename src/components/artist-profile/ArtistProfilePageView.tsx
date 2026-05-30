@@ -14,6 +14,7 @@ import { MetalBadge } from '@/components/ui/MetalBadge'
 import { EditorByline } from '@/components/editor/EditorByline'
 import { editorialTypeLabel } from '@/lib/editorial/labels'
 import { artistBrandingStyle, artistSiteThemeClass } from '@/lib/artist-profile/branding'
+import { getArtistPublicationState } from '@/lib/artist-profile/profileVisibility'
 import { pickListenUrl, type ArtistLaunchpadSnapshot } from '@/lib/artist-profile/launchpad'
 import { ArtistNetworkWire } from '@/components/artist-profile/ArtistNetworkWire'
 
@@ -41,6 +42,10 @@ export function ArtistProfilePageView({
 }: ArtistProfilePageViewProps) {
   const { profile, tracks, albums, singles, videos, merch, lineup, bioTimeline, editorial, pickTrack } =
     data
+  const publication = getArtistPublicationState(profile, {
+    trackCount: tracks.length,
+    videoCount: videos.length,
+  })
   const analyticsCtx = {
     profileId: profile.id,
     published: profile.published,
@@ -86,6 +91,12 @@ export function ArtistProfilePageView({
       <ArtistSiteStickyNav items={navItems} artistName={profile.displayName} />
 
       <div className="artist-site-body">
+        {isOwner && publication.inactive && (
+          <p className="artist-site-owner-notice" role="status">
+            Your page needs activity — use <strong>Page update</strong>, add music or video, post a spin/drop, or
+            schedule a release in My Studio within 60 days or your artist page will be removed.
+          </p>
+        )}
         {networkHandle && (
           <ArtistNetworkWire
             networkHandle={networkHandle}

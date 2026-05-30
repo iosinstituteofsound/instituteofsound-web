@@ -7,6 +7,7 @@ import { FieldLabel, Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
 import { MetalBadge } from '@/components/ui/MetalBadge'
+import { ArtistPageRulesCallout } from '@/components/dashboard/ArtistPageRulesCallout'
 
 export default function MemberUpgradeArtistPage() {
   const { user, refreshUser, logout, mode } = useAuth()
@@ -87,7 +88,9 @@ export default function MemberUpgradeArtistPage() {
       onLogout={() => logout()}
       rootClassName="member-upgrade-desk"
     >
-      <form onSubmit={handleSubmit} className="ios-panel ios-panel-accent space-y-5 max-w-lg">
+      <ArtistPageRulesCallout variant="create" />
+
+      <form onSubmit={handleSubmit} className="ios-panel ios-panel-accent space-y-5 max-w-lg mt-6">
         <div>
           <FieldLabel htmlFor="displayName">Artist / project name</FieldLabel>
           <Input

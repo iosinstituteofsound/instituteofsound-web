@@ -35,6 +35,17 @@ import {
   PROFILE_COMPLETION_ITEMS,
   type ProfileCompletenessInput,
 } from '@/lib/artist-profile/completeness'
+import {
+  activityDaysRemaining,
+  draftDaysRemaining,
+} from '@/lib/artist-profile/pageLifecycle'
+import {
+  artistPageStatusLabel,
+  artistPublicationHint,
+  computeArtistPublication,
+  getArtistPublicationState,
+} from '@/lib/artist-profile/profileVisibility'
+import { ArtistPageRulesCallout } from '@/components/dashboard/ArtistPageRulesCallout'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { Button } from '@/components/ui/Button'
 import { Input, FieldLabel } from '@/components/ui/Input'
@@ -178,14 +189,17 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       setMerch(m)
       setLineup(l)
       setBioTimeline(bt)
-    } else {
-      setTracks(localGetTracks(profileId))
-      setAlbums(localGetAlbums(profileId))
-      setVideos(localGetVideos(profileId))
-      setMerch(localGetMerch(profileId))
-      setLineup(localGetLineup(profileId))
-      setBioTimeline(localGetBioTimeline(profileId))
+      return { trackCount: t.length, videoCount: v.length }
     }
+    const t = localGetTracks(profileId)
+    const v = localGetVideos(profileId)
+    setTracks(t)
+    setAlbums(localGetAlbums(profileId))
+    setVideos(v)
+    setMerch(localGetMerch(profileId))
+    setLineup(localGetLineup(profileId))
+    setBioTimeline(localGetBioTimeline(profileId))
+    return { trackCount: t.length, videoCount: v.length }
   }, [])
 
   const refresh = useCallback(async () => {
@@ -207,7 +221,6 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         setBannerUrl(p.bannerUrl ?? '')
         setLogoUrl(p.logoUrl ?? '')
         setMonthlyListeners(p.monthlyListenersDisplay)
-        setPublished(p.published)
         setPickTrackId(p.artistPickTrackId ?? '')
         setSpotify(p.social.spotify ?? '')
         setYoutube(p.social.youtube ?? '')
@@ -222,7 +235,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
         setSocialLinkOrder(p.socialLinkOrder)
         setPressKitUrl(p.pressKitUrl ?? '')
         setPressKitLabel(p.pressKitLabel ?? '')
-        await loadChildData(p.id)
+        const counts = await loadChildData(p.id)
+        setPublished(getArtistPublicationState(p, counts).published)
       } else {
         setSlug(slugifyArtistName(user.name))
       }
@@ -254,6 +268,14 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   })
 
   const completionStatus = getProfileCompletionStatus(buildCompletenessInput())
+  const publication = profile
+    ? getArtistPublicationState(profile, { trackCount: tracks.length, videoCount: videos.length })
+    : computeArtistPublication(buildCompletenessInput(), {
+        lastActivityAt: profile?.lastActivityAt,
+        pageRefreshedAt: profile?.pageRefreshedAt,
+        updatedAt: profile?.updatedAt ?? new Date().toISOString(),
+        createdAt: profile?.createdAt ?? new Date().toISOString(),
+      })
 
   type BrandingPatch = {
     accentColor?: string
@@ -272,7 +294,16 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       .filter(Boolean)
     const influenceTags = normalizeInfluenceTags(influencesText)
     const completeness = evaluateProfileCompleteness(
-      buildCompletenessInput(mediaCounts?.trackCount, mediaCounts?.videoCount)
+      buildCompletenessInput(mediaCounts?.trackCount, mediaCounts?.videoCount),
+    )
+    const pub = computeArtistPublication(
+      buildCompletenessInput(mediaCounts?.trackCount, mediaCounts?.videoCount),
+      profile ?? {
+        lastActivityAt: new Date().toISOString(),
+        pageRefreshedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+      },
     )
     const nextAccent = brandingPatch?.accentColor ?? accentColor
     const nextTheme = brandingPatch?.themePreset ?? themePreset
@@ -297,7 +328,10 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       logoUrl,
       monthlyListenersDisplay: monthlyListeners,
       artistPickTrackId: pickTrackId || null,
-      published: completeness.complete,
+      published: pub.published,
+      pageStatus: pub.pageStatus,
+      pageRefreshedAt: new Date().toISOString(),
+      lastActivityAt: new Date().toISOString(),
       accentColor: nextAccent,
       themePreset: nextTheme,
       heroVideoUrl: nextHeroVideo || undefined,
@@ -308,8 +342,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       social: { spotify, youtube, instagram, facebook, bandcamp, website },
     })
     setProfile(updated)
-    setPublished(completeness.complete)
-    return { updated, completeness }
+    setPublished(pub.published)
+    return { updated, completeness, publication: pub }
   }
 
   const brandingMigrationHint = (err: unknown) => {
@@ -488,8 +522,8 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
       <div className="artist-dash-main">
         <div className="artist-dash-toolbar">
           <div className="artist-dash-toolbar-meta">
-            <MetalBadge variant={published ? 'live' : 'crimson'}>
-              {published ? 'Live on Discover' : 'Draft'}
+            <MetalBadge variant={publication.pageStatus === 'live' ? 'live' : 'crimson'}>
+              {artistPageStatusLabel(publication.pageStatus, publication.inactive)}
             </MetalBadge>
             <span className="artist-dash-toolbar-url">/artist/{profileSlug}</span>
           </div>
@@ -521,16 +555,18 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
               onClick={saveProfile}
               className="!text-xs !py-2"
             >
-              {saving ? 'Saving…' : 'Save profile'}
+              {saving ? 'Updating…' : 'Page update'}
             </Button>
           </div>
         </div>
 
         <p className="artist-dash-intro">
-          Use the section list to jump between areas. Click <strong className="text-foreground">Save profile</strong>{' '}
-          after edits. When the checklist is complete, your profile goes live on{' '}
-          <strong className="text-foreground">Discover</strong> automatically.
+          Use the section list to jump between areas. Click <strong className="text-foreground">Page update</strong>{' '}
+          after edits. Incomplete drafts are removed after 7 days; live pages need activity every 60 days or the page
+          is deleted.
         </p>
+
+        <ArtistPageRulesCallout variant="studio" />
 
         {error && (
           <DismissibleBanner variant="error" onDismiss={() => setError('')}>
@@ -574,11 +610,19 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
                 )
               })}
             </ul>
-            <p className="text-xs mt-4 text-muted-foreground">
-              {published
-                ? `Your profile is public at /artist/${profileSlug}.`
-                : 'Still a draft — add music and bio to complete your profile.'}
-            </p>
+            <p className="text-xs mt-4 text-muted-foreground">{artistPublicationHint(publication)}</p>
+            {profile && !publication.complete && (
+              <p className="text-xs mt-2 text-amber-400/90">
+                Draft expires in {draftDaysRemaining(profile)} day
+                {draftDaysRemaining(profile) === 1 ? '' : 's'} if the checklist stays incomplete.
+              </p>
+            )}
+            {profile && publication.complete && (
+              <p className="text-xs mt-2 text-muted-foreground">
+                Activity due in {activityDaysRemaining(profile)} day
+                {activityDaysRemaining(profile) === 1 ? '' : 's'} (track, video, Page update, release, spin, or drop).
+              </p>
+            )}
           </div>
         </DashboardSection>
 
@@ -819,7 +863,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
           if (s.genresText) setGenresText(s.genresText)
           if (s.spotify) setSpotify(s.spotify)
           if (s.youtube) setYoutube(s.youtube)
-          setMessage('Catalog imported — review fields below, then Save profile.')
+          setMessage('Catalog imported — review fields below, then Page update.')
         }}
         onImportMessage={(msg) => setMessage(msg)}
       />
@@ -1192,7 +1236,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
 
         <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
           <Button type="button" variant="primary" disabled={saving} onClick={saveProfile}>
-            {saving ? 'Saving…' : 'Save profile'}
+            {saving ? 'Updating…' : 'Page update'}
           </Button>
           {profile && (
             <Link

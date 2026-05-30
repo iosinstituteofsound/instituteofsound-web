@@ -48,6 +48,7 @@ import { EditorialGalleryUpload } from '@/components/editor/EditorialGalleryUplo
 import { EDITORIAL_TYPE_OPTIONS, editorialTypeLabel } from '@/lib/editorial/labels'
 import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richText'
 import { SuperEditorPlaylistCuratorPanel } from '@/components/dashboard/SuperEditorPlaylistCuratorPanel'
+import { SuperEditorDeletedPagesPanel } from '@/components/dashboard/SuperEditorDeletedPagesPanel'
 import { syncPlaylistCuratorDeskNotifications } from '@/lib/playlistCurator/notify'
 import { syncVerificationDeskNotifications } from '@/lib/verification/notifyEditors'
 
@@ -56,6 +57,7 @@ type EditorTab =
   | 'preview'
   | 'verification'
   | 'playlist_curators'
+  | 'deleted_pages'
   | 'applications'
   | 'queue'
   | 'wire'
@@ -140,7 +142,11 @@ export default function EditorDashboardPage() {
       setTab('playlist_curators')
       return
     }
-    if (desk === 'verification' || desk === 'playlist-curators') {
+    if (desk === 'deleted-pages' && isSuperEditor) {
+      setTab('deleted_pages')
+      return
+    }
+    if (desk === 'verification' || desk === 'playlist-curators' || desk === 'deleted-pages') {
       const next = new URLSearchParams(searchParams)
       next.delete('desk')
       setSearchParams(next, { replace: true })
@@ -335,6 +341,7 @@ export default function EditorDashboardPage() {
 
         {tab === 'verification' && isSuperEditor && <SuperEditorVerificationPanel />}
         {tab === 'playlist_curators' && isSuperEditor && <SuperEditorPlaylistCuratorPanel />}
+        {tab === 'deleted_pages' && isSuperEditor && <SuperEditorDeletedPagesPanel />}
 
         {tab === 'profile' && (
           <EditorProfilePanel user={user} onSaved={refreshUser} />
@@ -352,9 +359,10 @@ export default function EditorDashboardPage() {
           tab !== 'preview' &&
           tab !== 'verification' &&
           tab !== 'playlist_curators' &&
+          tab !== 'deleted_pages' &&
           tab !== 'applications' ? (
           <LoadingTransmission variant="compact" />
-        ) : tab === 'profile' || tab === 'preview' || tab === 'verification' || tab === 'playlist_curators' ? null : tab === 'analytics' && isSuperEditor ? (
+        ) : tab === 'profile' || tab === 'preview' || tab === 'verification' || tab === 'playlist_curators' || tab === 'deleted_pages' ? null : tab === 'analytics' && isSuperEditor ? (
           analytics ? (
             <SuperAdminAnalyticsPanel
               data={analytics}

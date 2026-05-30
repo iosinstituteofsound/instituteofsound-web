@@ -7,6 +7,7 @@ export type NotificationKind =
   | 'collab_accepted'
   | 'role_verification'
   | 'playlist_curator_application'
+  | 'artist_page_recovery'
   | 'dm_message'
   | 'post_comment'
 
@@ -22,6 +23,8 @@ export interface CommunityNotification {
   actorAvatarUrl?: string
   verificationRequestId?: string
   playlistCuratorApplicationId?: string
+  artistPageRecoveryRequestId?: string
+  artistProfileArchiveId?: string
   readAt?: string
   createdAt: string
 }

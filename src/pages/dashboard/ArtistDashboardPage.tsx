@@ -20,6 +20,7 @@ import { DashboardSection } from '@/components/dashboard/DashboardSection'
 import { SubmissionLifecycleTimeline } from '@/components/dashboard/SubmissionLifecycleTimeline'
 import { ReleaseEditor } from '@/components/dashboard/ReleaseEditor'
 import { getProfileForUser } from '@/lib/artist-profile/service'
+import { getLatestDeletedArchiveForUser } from '@/lib/artist-page-recovery/service'
 import type { TrackSubmission } from '@/lib/auth/types'
 
 const TABS = [
@@ -46,17 +47,20 @@ export default function ArtistDashboardPage() {
   const [streamUrl, setStreamUrl] = useState('')
   const [coverImageUrl, setCoverImageUrl] = useState('')
   const [profileSlug, setProfileSlug] = useState<string | null>(null)
+  const [deletedPageSlug, setDeletedPageSlug] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
     if (!user) return
     setLoadingList(true)
     try {
-      const [list, profile] = await Promise.all([
+      const [list, profile, deleted] = await Promise.all([
         getSubmissionsForArtist(user.id),
         getProfileForUser(user.id),
+        getLatestDeletedArchiveForUser(user.id),
       ])
       setSubmissions(list)
       setProfileSlug(profile?.slug ?? null)
+      setDeletedPageSlug(!profile && deleted ? deleted.slug : null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load submissions')
     } finally {
@@ -169,6 +173,17 @@ export default function ArtistDashboardPage() {
       onLogout={() => logout()}
       rootClassName="artist-desk"
     >
+        {deletedPageSlug && (
+          <DismissibleBanner variant="info" onDismiss={() => setDeletedPageSlug(null)}>
+            Your artist page <strong className="text-foreground">/artist/{deletedPageSlug}</strong> was removed.
+            To request recovery, contact{' '}
+            <Link to="/support/artist-page" className="text-signal underline">
+              IOS Support
+            </Link>
+            .
+          </DismissibleBanner>
+        )}
+
         {tab === 'network' && <DashboardCommunityHub />}
 
         {tab === 'profile' && <ArtistProfileEditor user={user} />}

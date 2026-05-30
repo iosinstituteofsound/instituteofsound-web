@@ -11,6 +11,7 @@ export type CloudinaryFolder =
   | 'ios/features'
   | 'ios/press-kits'
   | 'ios/community'
+  | 'ios/support'
 
 const MAX_BYTES = 10 * 1024 * 1024
 const MAX_PDF_BYTES = 15 * 1024 * 1024

@@ -12,6 +12,8 @@ export interface ArtistSocialLinks {
   website?: string
 }
 
+export type ArtistPageStatus = 'live' | 'pending'
+
 export interface ArtistProfile {
   id: string
   userId: string
@@ -38,6 +40,9 @@ export interface ArtistProfile {
   pressKitUrl?: string
   pressKitLabel?: string
   published: boolean
+  pageStatus: ArtistPageStatus
+  pageRefreshedAt: string
+  lastActivityAt: string
   createdAt: string
   updatedAt: string
 }
@@ -161,6 +166,9 @@ export interface UpsertArtistProfileInput {
   pressKitUrl?: string
   pressKitLabel?: string
   published?: boolean
+  pageStatus?: ArtistPageStatus
+  pageRefreshedAt?: string
+  lastActivityAt?: string
 }
 
 export interface ManagedArtistSummary {

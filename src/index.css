@@ -2848,6 +2848,20 @@ body.ios-app-shell {
   padding: 2.5rem clamp(1.25rem, 4vw, 3rem) 4rem;
 }
 
+.artist-page-rules {
+  margin-bottom: 1rem;
+}
+
+.artist-site-owner-notice {
+  margin: 0 0 1.5rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--artist-accent) 35%, transparent);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--artist-accent) 8%, transparent);
+  font-size: 0.8125rem;
+  color: var(--color-muted-foreground, #a1a1aa);
+}
+
 .artist-site-eyebrow {
   font-size: 0.625rem;
   font-weight: 700;

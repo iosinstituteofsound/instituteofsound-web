@@ -4,6 +4,13 @@ import { getDrafts } from '@/lib/auth/storage'
 import type { Artist } from '@/types'
 import type { User } from '@/lib/auth/types'
 import { mergeDiscoverArtists } from './discover'
+import {
+  enforceArtistPageLifecycle,
+  getProfileForUserAfterLifecycle,
+  touchArtistPageActivity,
+  touchArtistPageActivityByProfileId,
+} from './pageEnforcement'
+import { resolveArtistPageForViewer } from './profileVisibility'
 import type {
   ArtistEditorialFeature,
   ManagedArtistSummary,
@@ -80,16 +87,23 @@ function localEditorialForProfile(profileId: string): ArtistEditorialFeature[] {
 }
 
 export async function getProfileForUser(userId: string): Promise<ArtistProfile | null> {
-  if (isSupabaseConfigured()) return sb.supabaseGetProfileByUserId(userId)
-  return local.localGetProfileByUserId(userId)
+  return getProfileForUserAfterLifecycle(userId)
 }
 
 export async function upsertArtistProfile(
   user: User,
   input: UpsertArtistProfileInput
 ): Promise<ArtistProfile> {
-  if (isSupabaseConfigured()) return sb.supabaseUpsertProfile(user, input)
-  return local.localUpsertProfile(user, input)
+  const stamp = new Date().toISOString()
+  const payload: UpsertArtistProfileInput = {
+    ...input,
+    lastActivityAt: stamp,
+    pageRefreshedAt: stamp,
+  }
+  const profile = isSupabaseConfigured()
+    ? await sb.supabaseUpsertProfile(user, payload)
+    : local.localUpsertProfile(user, payload)
+  return (await enforceArtistPageLifecycle(profile)) ?? profile
 }
 
 export async function listManagedArtistsByHandle(
@@ -101,7 +115,9 @@ export async function listManagedArtistsByHandle(
 
 export async function getArtistProfilePage(slug: string): Promise<ArtistProfilePageData | null> {
   if (isSupabaseConfigured()) {
-    const profile = await sb.supabaseGetProfileBySlug(slug)
+    const raw = await sb.supabaseGetProfileBySlug(slug)
+    if (!raw) return null
+    const profile = await enforceArtistPageLifecycle(raw)
     if (!profile) return null
     const [tracks, albums, videos, merch, lineup, bioTimeline, editorialRows] =
       await Promise.all([
@@ -136,7 +152,9 @@ export async function getArtistProfilePage(slug: string): Promise<ArtistProfileP
     }
   }
 
-  const profile = local.localGetProfileBySlug(slug)
+  const raw = local.localGetProfileBySlug(slug)
+  if (!raw) return null
+  const profile = await enforceArtistPageLifecycle(raw)
   if (!profile) return null
   const data = local.localGetPageData(slug, localEditorialForProfile(profile.id))
   if (!data) return null
@@ -156,14 +174,19 @@ export async function getArtistProfilePageForViewer(
 ): Promise<ArtistProfilePageData | null> {
   const data = await getArtistProfilePage(slug)
   if (!data) return null
-  if (data.profile.published) return data
-  if (viewerId && data.profile.userId === viewerId) return data
-  return null
+  return resolveArtistPageForViewer(data, viewerId)
+}
+
+async function bumpProfileActivity(profileId: string) {
+  await touchArtistPageActivityByProfileId(profileId)
 }
 
 export async function addArtistAlbum(profileId: string, input: UpsertAlbumInput) {
-  if (isSupabaseConfigured()) return sb.supabaseAddAlbum(profileId, input)
-  return local.localAddAlbum(profileId, input)
+  const row = isSupabaseConfigured()
+    ? await sb.supabaseAddAlbum(profileId, input)
+    : local.localAddAlbum(profileId, input)
+  await bumpProfileActivity(profileId)
+  return row
 }
 
 async function trackWithThumbnail(input: UpsertTrackInput): Promise<UpsertTrackInput> {
@@ -186,14 +209,20 @@ async function merchWithThumbnail(input: UpsertMerchInput): Promise<UpsertMerchI
 
 export async function addArtistTrack(profileId: string, input: UpsertTrackInput) {
   const enriched = await trackWithThumbnail(input)
-  if (isSupabaseConfigured()) return sb.supabaseAddTrack(profileId, enriched)
-  return local.localAddTrack(profileId, enriched)
+  const row = isSupabaseConfigured()
+    ? await sb.supabaseAddTrack(profileId, enriched)
+    : local.localAddTrack(profileId, enriched)
+  await bumpProfileActivity(profileId)
+  return row
 }
 
 export async function addArtistVideo(profileId: string, input: UpsertVideoInput) {
   const enriched = await videoWithThumbnail(input)
-  if (isSupabaseConfigured()) return sb.supabaseAddVideo(profileId, enriched)
-  return local.localAddVideo(profileId, enriched)
+  const row = isSupabaseConfigured()
+    ? await sb.supabaseAddVideo(profileId, enriched)
+    : local.localAddVideo(profileId, enriched)
+  await bumpProfileActivity(profileId)
+  return row
 }
 
 export async function updateArtistTrack(trackId: string, input: UpsertTrackInput) {
@@ -261,8 +290,11 @@ export async function deleteArtistLineup(id: string) {
 }
 
 export async function addArtistBioTimeline(profileId: string, input: UpsertBioTimelineInput) {
-  if (isSupabaseConfigured()) return sb.supabaseAddBioTimeline(profileId, input)
-  return local.localAddBioTimeline(profileId, input)
+  const row = isSupabaseConfigured()
+    ? await sb.supabaseAddBioTimeline(profileId, input)
+    : local.localAddBioTimeline(profileId, input)
+  await bumpProfileActivity(profileId)
+  return row
 }
 
 export async function updateArtistBioTimeline(entryId: string, input: UpsertBioTimelineInput) {

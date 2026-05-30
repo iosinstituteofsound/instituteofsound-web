@@ -183,7 +183,11 @@ function HeroMetaContent({
         {profile.country && (
           <span className="artist-site-pill artist-site-pill-muted">{profile.country}</span>
         )}
-        {isOwner && !profile.published && <MetalBadge variant="crimson">Draft</MetalBadge>}
+        {isOwner && profile.pageStatus === 'pending' && (
+          <MetalBadge variant="crimson">
+            {profile.published ? 'Pending — update page' : 'Draft'}
+          </MetalBadge>
+        )}
       </div>
 
       <h1
