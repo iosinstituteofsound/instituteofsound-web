@@ -1679,21 +1679,59 @@ body.ios-app-shell {
   margin-bottom: 2.5rem;
 }
 
+.member-dashboard-paths-intro {
+  grid-column: 1 / -1;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(145deg, rgba(212, 0, 0, 0.04), transparent);
+}
+
 @media (min-width: 768px) {
   .member-dashboard-paths {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .member-dashboard-paths {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 .member-dashboard-path-card {
+  display: flex;
+  flex-direction: column;
   padding: 1.5rem 1.75rem;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
 }
 
+.member-dashboard-path-card .member-desk-actions {
+  margin-top: auto;
+  padding-top: 1.25rem;
+}
+
 .member-dashboard-path-card--artist {
   border-color: rgba(212, 0, 0, 0.35);
   background: linear-gradient(145deg, rgba(212, 0, 0, 0.06), transparent);
+}
+
+.member-dashboard-path-card--editor {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.member-dashboard-path-card--persona {
+  border-color: rgba(212, 0, 0, 0.2);
+}
+
+.member-dashboard-path-card--persona.member-dashboard-path-card--active {
+  border-color: rgba(212, 0, 0, 0.45);
+  background: linear-gradient(145deg, rgba(212, 0, 0, 0.08), transparent);
+}
+
+.member-dashboard-path-card--curator {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(165deg, #0c0c0c 0%, var(--color-surface) 100%);
 }
 
 .member-dashboard-explore {

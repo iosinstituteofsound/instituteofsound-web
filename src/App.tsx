@@ -76,6 +76,9 @@ const MemberDashboardPage = lazy(
 const MemberUpgradeArtistPage = lazy(
   () => import('@/pages/dashboard/MemberUpgradeArtistPage')
 )
+const PlaylistCuratorApplyPage = lazy(
+  () => import('@/pages/dashboard/PlaylistCuratorApplyPage')
+)
 const EditorDashboardPage = lazy(
   () => import('@/pages/dashboard/EditorDashboardPage')
 )
@@ -170,6 +173,14 @@ export default function App() {
               element={
                 <ProtectedRoute role="member">
                   <MemberDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="member/playlist-curator"
+              element={
+                <ProtectedRoute role="member">
+                  <PlaylistCuratorApplyPage />
                 </ProtectedRoute>
               }
             />

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import clsx from 'clsx'
 import { useAuth } from '@/context/AuthContext'
 import { updateUserProfile } from '@/lib/auth/profile'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
@@ -200,6 +201,90 @@ const PERSONA_CONTENT: Record<
   },
 }
 
+type GrowPathCard =
+  | {
+      id: string
+      variant: 'artist' | 'editor' | 'curator'
+      kicker: string
+      heading: string
+      lede: string
+      primary: { to: string; label: string }
+      secondary?: { to: string; label: string }[]
+    }
+  | {
+      id: string
+      variant: 'persona'
+      kicker: string
+      heading: string
+      lede: string
+      persona: DashboardPersona
+      primaryLabel: string
+    }
+
+const GROW_PATHS: GrowPathCard[] = [
+  {
+    id: 'artist',
+    variant: 'artist',
+    kicker: 'Artist path',
+    heading: 'Upgrade to artist page',
+    lede: 'Launch My Studio — public band page, releases, merch, and editor submissions.',
+    primary: { to: '/member/upgrade', label: 'Start artist page' },
+  },
+  {
+    id: 'artist_manager',
+    variant: 'persona',
+    kicker: 'Manager path',
+    heading: 'Upgrade to Artist Manager',
+    lede: 'Coordinate releases, roster moves, and artist growth — verified manager workspace on your desk.',
+    persona: 'artist_manager',
+    primaryLabel: 'Apply as artist manager',
+  },
+  {
+    id: 'brand',
+    variant: 'persona',
+    kicker: 'Brand path',
+    heading: 'Apply as Brand',
+    lede: 'Run music-led campaigns with scenes, events, and creator partnerships across the network.',
+    persona: 'brand',
+    primaryLabel: 'Apply as brand',
+  },
+  {
+    id: 'label',
+    variant: 'persona',
+    kicker: 'Label path',
+    heading: 'Apply as Label',
+    lede: 'Operate roster planning, release calendars, and scene-aware promotion from one workspace.',
+    persona: 'label',
+    primaryLabel: 'Apply as label',
+  },
+  {
+    id: 'event_promoter',
+    variant: 'persona',
+    kicker: 'Promoter path',
+    heading: 'Upgrade to Event Promoter',
+    lede: 'Publish gigs, push RSVPs, and activate local scenes with promoter tools and verification.',
+    persona: 'event_promoter',
+    primaryLabel: 'Upgrade to event promoter',
+  },
+  {
+    id: 'playlist_curator',
+    variant: 'curator',
+    kicker: 'Curation path',
+    heading: 'Apply for Playlist Curator',
+    lede: 'Submit your public playlist links and a note — the super editor desk reviews every link before approval.',
+    primary: { to: '/member/playlist-curator', label: 'Apply for playlist curator' },
+  },
+  {
+    id: 'editor',
+    variant: 'editor',
+    kicker: 'Editorial path',
+    heading: 'Become an editor',
+    lede: 'Apply to write features, review submissions, and curate the magazine desk.',
+    primary: { to: '/editor/apply', label: 'Apply as editor' },
+    secondary: [{ to: '/editor/join', label: 'Programme info' }],
+  },
+]
+
 export default function MemberDashboardPage() {
   const { user, logout, mode, refreshUser } = useAuth()
   const [savingPersona, setSavingPersona] = useState(false)
@@ -254,7 +339,7 @@ export default function MemberDashboardPage() {
         summary={
           persona
             ? `${personaTitle} workspace is active — spins, scenes, collab, and gigs in one shell.`
-            : 'Choose a workspace role, explore the network, or upgrade to artist or editor paths.'
+            : 'Choose a workspace role, apply for curator or editorial paths, or upgrade to a public artist page.'
         }
         badge={
           <MetalBadge variant="red" className="shrink-0">
@@ -268,7 +353,7 @@ export default function MemberDashboardPage() {
             title: 'Your workspace',
             items: [
               { id: 'workspace', label: 'Workspace home' },
-              { id: 'grow', label: 'Upgrade paths', badge: persona ? 0 : 2 },
+              { id: 'grow', label: 'Upgrade paths', badge: persona ? 0 : GROW_PATHS.length },
             ],
           },
           {
@@ -408,32 +493,103 @@ export default function MemberDashboardPage() {
 
         {tab === 'grow' && (
           <div className="member-dashboard-paths">
-            <article className="member-desk-panel member-dashboard-path-card member-dashboard-path-card--artist">
-              <p className="member-desk-kicker">Artist path</p>
-              <h2 className="member-desk-heading">Upgrade to artist page</h2>
+            <section className="member-desk-panel member-dashboard-paths-intro">
+              <p className="member-desk-kicker">Growth</p>
+              <h2 className="member-desk-heading">Upgrade &amp; apply</h2>
               <p className="member-desk-lede">
-                Launch My Studio — public band page, releases, merch, and editor submissions.
+                Pick a path below. Artist and editor flows launch immediately; manager, label,
+                brand, and promoter paths open your verified workspace after desk review.
               </p>
-              <Link to="/member/upgrade" className="ios-btn ios-btn-primary mt-6 inline-flex">
-                Start artist page →
-              </Link>
-            </article>
+            </section>
 
-            <article className="member-desk-panel member-dashboard-path-card member-dashboard-path-card--editor">
-              <p className="member-desk-kicker">Editorial path</p>
-              <h2 className="member-desk-heading">Become an editor</h2>
-              <p className="member-desk-lede">
-                Apply to write features, review submissions, and curate the magazine desk.
-              </p>
-              <div className="member-desk-actions">
-                <Link to="/editor/apply" className="ios-btn ios-btn-secondary">
-                  Apply as editor →
-                </Link>
-                <Link to="/editor/join" className="ios-btn ios-btn-ghost">
-                  Programme info
-                </Link>
-              </div>
-            </article>
+            {GROW_PATHS.map((path) => {
+              if (path.variant === 'persona') {
+                const active = persona === path.persona
+                return (
+                  <article
+                    key={path.id}
+                    className={clsx(
+                      'member-desk-panel member-dashboard-path-card member-dashboard-path-card--persona',
+                      active && 'member-dashboard-path-card--active',
+                    )}
+                  >
+                    <p className="member-desk-kicker">{path.kicker}</p>
+                    <h2 className="member-desk-heading">{path.heading}</h2>
+                    <p className="member-desk-lede">{path.lede}</p>
+                    <div className="member-desk-actions">
+                      {active ? (
+                        <button
+                          type="button"
+                          className="ios-btn ios-btn-primary"
+                          onClick={() => setTab('workspace')}
+                        >
+                          Open workspace →
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="ios-btn ios-btn-primary"
+                          onClick={() => setPersonaModal(path.persona)}
+                        >
+                          {path.primaryLabel} →
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="ios-btn ios-btn-ghost"
+                        onClick={() => {
+                          setTab('workspace')
+                          window.setTimeout(() => {
+                            document
+                              .querySelector('.member-desk-trust-wrap')
+                              ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                          }, 80)
+                        }}
+                      >
+                        Verification proofs
+                      </button>
+                    </div>
+                  </article>
+                )
+              }
+
+              const cardClass =
+                path.variant === 'artist'
+                  ? 'member-dashboard-path-card--artist'
+                  : path.variant === 'curator'
+                    ? 'member-dashboard-path-card--curator'
+                    : 'member-dashboard-path-card--editor'
+
+              return (
+                <article
+                  key={path.id}
+                  className={clsx(
+                    'member-desk-panel member-dashboard-path-card',
+                    cardClass,
+                  )}
+                >
+                  <p className="member-desk-kicker">{path.kicker}</p>
+                  <h2 className="member-desk-heading">{path.heading}</h2>
+                  <p className="member-desk-lede">{path.lede}</p>
+                  {path.secondary?.length ? (
+                    <div className="member-desk-actions">
+                      <Link to={path.primary.to} className="ios-btn ios-btn-secondary">
+                        {path.primary.label} →
+                      </Link>
+                      {path.secondary.map((link) => (
+                        <Link key={link.to} to={link.to} className="ios-btn ios-btn-ghost">
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <Link to={path.primary.to} className="ios-btn ios-btn-primary mt-6 inline-flex">
+                      {path.primary.label} →
+                    </Link>
+                  )}
+                </article>
+              )
+            })}
           </div>
         )}
 
@@ -512,6 +668,7 @@ export default function MemberDashboardPage() {
                 onClick={async () => {
                   await savePersona(personaModal)
                   setPersonaModal(null)
+                  setTab('workspace')
                 }}
               >
                 {savingPersona ? 'Applying…' : 'Apply role dashboard'}

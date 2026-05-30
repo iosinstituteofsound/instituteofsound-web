@@ -118,6 +118,13 @@ const EXACT: Record<string, RouteMeta> = {
   '/dashboard': meta({ ...YOU, sectionTitle: 'Dashboard', kicker: 'You', description: 'Redirect to your workspace.', pipelinePhase: 4 }),
   '/member/dashboard': meta({ ...YOU, sectionTitle: 'My Network', kicker: 'Member', description: 'Listener and member workspace.', pipelinePhase: 5 }),
   '/member/upgrade': meta({ ...YOU, sectionTitle: 'Become an Artist', kicker: 'Upgrade', description: 'Upgrade to artist studio.', pipelinePhase: 4 }),
+  '/member/playlist-curator': meta({
+    ...YOU,
+    sectionTitle: 'Playlist Curator',
+    kicker: 'Apply',
+    description: 'Apply as a playlist curator with your public playlist links.',
+    pipelinePhase: 4,
+  }),
   '/artist/dashboard': meta({ ...YOU, sectionTitle: 'My Studio', kicker: 'Artist', description: 'Artist profile, releases, and submissions.', pipelinePhase: 5 }),
   '/editor/dashboard': meta({ ...YOU, sectionTitle: 'Editorial Desk', kicker: 'Editor', description: 'Review queue and publishing.', pipelinePhase: 5 }),
   '/editor/join': meta({ sectionTitle: 'Join as Editor', kicker: 'Desk', description: 'Editor programme info.', navHref: '/editor/join', indexable: true }),

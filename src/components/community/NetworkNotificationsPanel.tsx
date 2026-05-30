@@ -13,6 +13,8 @@ function notificationFallbackIcon(kind: NotificationKind): string {
   switch (kind) {
     case 'role_verification':
       return '✓'
+    case 'playlist_curator_application':
+      return '♫'
     case 'rank_up':
       return '▲'
     case 'editorial_publish':

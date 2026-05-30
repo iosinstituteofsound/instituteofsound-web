@@ -47,12 +47,15 @@ import { RichTextContent } from '@/components/editor/RichTextContent'
 import { EditorialGalleryUpload } from '@/components/editor/EditorialGalleryUpload'
 import { EDITORIAL_TYPE_OPTIONS, editorialTypeLabel } from '@/lib/editorial/labels'
 import { isEditorContentEmpty, normalizeEditorHtml } from '@/lib/editorial/richText'
+import { SuperEditorPlaylistCuratorPanel } from '@/components/dashboard/SuperEditorPlaylistCuratorPanel'
+import { syncPlaylistCuratorDeskNotifications } from '@/lib/playlistCurator/notify'
 import { syncVerificationDeskNotifications } from '@/lib/verification/notifyEditors'
 
 type EditorTab =
   | 'analytics'
   | 'preview'
   | 'verification'
+  | 'playlist_curators'
   | 'applications'
   | 'queue'
   | 'wire'
@@ -124,19 +127,24 @@ export default function EditorDashboardPage() {
   useEffect(() => {
     if (!isSuperEditor) return
     void syncVerificationDeskNotifications()
+    void syncPlaylistCuratorDeskNotifications()
   }, [isSuperEditor])
 
   useEffect(() => {
     const desk = searchParams.get('desk')
-    if (desk !== 'verification') return
-    if (isSuperEditor) {
+    if (desk === 'verification' && isSuperEditor) {
       setTab('verification')
       return
     }
-    setTab('queue')
-    const next = new URLSearchParams(searchParams)
-    next.delete('desk')
-    setSearchParams(next, { replace: true })
+    if (desk === 'playlist-curators' && isSuperEditor) {
+      setTab('playlist_curators')
+      return
+    }
+    if (desk === 'verification' || desk === 'playlist-curators') {
+      const next = new URLSearchParams(searchParams)
+      next.delete('desk')
+      setSearchParams(next, { replace: true })
+    }
   }, [searchParams, isSuperEditor, setSearchParams])
 
   if (!user) return null
@@ -326,6 +334,7 @@ export default function EditorDashboardPage() {
         {tab === 'preview' && isSuperEditor && <SuperEditorDashboardPreview />}
 
         {tab === 'verification' && isSuperEditor && <SuperEditorVerificationPanel />}
+        {tab === 'playlist_curators' && isSuperEditor && <SuperEditorPlaylistCuratorPanel />}
 
         {tab === 'profile' && (
           <EditorProfilePanel user={user} onSaved={refreshUser} />
@@ -342,9 +351,10 @@ export default function EditorDashboardPage() {
           tab !== 'events' &&
           tab !== 'preview' &&
           tab !== 'verification' &&
+          tab !== 'playlist_curators' &&
           tab !== 'applications' ? (
           <LoadingTransmission variant="compact" />
-        ) : tab === 'profile' || tab === 'preview' || tab === 'verification' ? null : tab === 'analytics' && isSuperEditor ? (
+        ) : tab === 'profile' || tab === 'preview' || tab === 'verification' || tab === 'playlist_curators' ? null : tab === 'analytics' && isSuperEditor ? (
           analytics ? (
             <SuperAdminAnalyticsPanel
               data={analytics}
