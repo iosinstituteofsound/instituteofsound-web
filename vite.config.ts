@@ -18,7 +18,10 @@ function thumbnailApiPlugin(): Plugin {
             next()
             return
           }
-          const { dispatchV1DevApi } = await import('./api/_lib/devV1Router')
+          const { dispatchV1DevApi } = await import(
+            /* @vite-ignore */
+            path.join(__dirname, 'api/_lib/devV1Router.ts')
+          )
           const handled = await dispatchV1DevApi(req, res, pathname)
           if (handled) return
         } catch (err) {

@@ -8,6 +8,7 @@ import type { MyCrew } from '../../../src/lib/community/crewTypes.js'
 import type { AcademyProgressSnapshot } from '../../../src/lib/academy/typesProgress.js'
 import type { EarLabMode } from '../../../src/lib/academy/earLab.js'
 import type { SceneEvent, PendingSceneEvent, SubmitEventInput } from '../../../src/lib/events/types.js'
+import type { DiscoverPremiereCard } from '../../../src/lib/discovery/premieres.js'
 import type { CollabBoardPost, CreateCollabPostInput } from '../../../src/lib/collab/types.js'
 import type { DmMessage, DmThreadHeader, DmThreadStatus, DmThreadSummary } from '../../../src/lib/dm/types.js'
 
@@ -436,11 +437,42 @@ export async function repoDmSetThreadStatus(
   if (error) throw new Error(error.message)
 }
 
+function genreLabel(genres: string[] | null | undefined): string {
+  const g = genres?.filter(Boolean) ?? []
+  if (g.length === 0) return 'UNDERGROUND'
+  return g.slice(0, 2).join(' / ').toUpperCase()
+}
+
+function mapPremiereRow(row: Record<string, unknown>): DiscoverPremiereCard {
+  const releaseType =
+    row.release_type === 'album' || row.release_type === 'ep' ? row.release_type : 'single'
+  const badge =
+    row.badge === 'wire_pick' || row.badge === 'hot' || row.badge === 'new'
+      ? row.badge
+      : null
+  return {
+    trackId: String(row.track_id),
+    trackTitle: String(row.track_title),
+    coverUrl: row.cover_url ? String(row.cover_url) : undefined,
+    streamUrl: String(row.stream_url),
+    playCount: Number(row.play_count ?? 0),
+    trackCreatedAt: String(row.track_created_at),
+    profileId: String(row.profile_id),
+    artistSlug: String(row.artist_slug),
+    artistName: String(row.artist_name),
+    genreLabel: genreLabel(row.genres as string[] | null),
+    releaseType,
+    badge,
+    isEditorPick: Boolean(row.is_editor_pick),
+    hourBucket: String(row.hour_bucket),
+  }
+}
+
 export async function repoDiscoverPremiereFeed(
   supabase: SupabaseClient,
   limit: number,
-): Promise<Record<string, unknown>[]> {
+): Promise<DiscoverPremiereCard[]> {
   const { data, error } = await supabase.rpc('discover_premiere_feed', { p_limit: limit })
   if (error) throw new Error(error.message)
-  return (data ?? []) as Record<string, unknown>[]
+  return (data ?? []).map((row: Record<string, unknown>) => mapPremiereRow(row))
 }

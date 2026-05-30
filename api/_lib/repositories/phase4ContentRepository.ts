@@ -10,6 +10,7 @@ import type {
   CreateSubmissionInput,
   ReviewSubmissionInput,
 } from '../../../src/lib/submissions/service.js'
+import type { PublishedEditorial } from '../../../src/lib/editorial/published.js'
 
 function mapRelease(row: Record<string, unknown>): ArtistRelease {
   return {
@@ -407,4 +408,28 @@ export async function repoPublishDraft(
     .single()
   if (error) throw new Error(error.message)
   return mapDraft(data as DraftRow)
+}
+
+function rowToPublished(row: DraftRow): PublishedEditorial {
+  const draft = mapDraft(row)
+  const slug = row.slug?.trim() || slugifyArtistName(row.title)
+  return {
+    ...draft,
+    slug,
+    featuredOnHomepage: row.featured_on_homepage ?? row.type === 'feature',
+    publishedAt: row.published_at ?? row.updated_at,
+  }
+}
+
+export async function repoListPublishedEditorials(
+  supabase: SupabaseClient,
+): Promise<PublishedEditorial[]> {
+  const { data, error } = await supabase
+    .from('editorial_drafts')
+    .select('*')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false, nullsFirst: false })
+
+  if (error) throw new Error(error.message)
+  return (data as DraftRow[]).map(rowToPublished)
 }

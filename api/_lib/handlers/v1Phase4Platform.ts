@@ -10,6 +10,7 @@ import {
   repoDmThreadHeader,
   repoDmUnreadTotal,
   repoFetchAcademyPublicSummary,
+  repoDiscoverPremiereFeed,
   repoFetchCollabBoard,
   repoFetchPendingEvents,
   repoFetchUpcomingEvents,
@@ -19,9 +20,9 @@ import {
   repoToggleEventRsvp,
   repoUpdateUserProfile,
 } from '../repositories/phase4PlatformRepository.js'
-import { fetchDiscoverPremiereFeed } from '../../../src/lib/discovery/premieres.js'
-import { fetchSceneHub } from '../../../src/lib/discovery/sceneService.js'
-import { listPublishedEditorials } from '../../../src/lib/editorial/published.js'
+import { repoListPublishedEditorials } from '../repositories/phase4ContentRepository.js'
+import { repoFetchSceneHub } from '../repositories/sceneHubRepository.js'
+import { createSupabaseAnonClient } from '../supabaseServer.js'
 import type { UpdateProfileInput } from '../../../src/lib/auth/profile.js'
 import type { SubmitEventInput } from '../../../src/lib/events/types.js'
 import type { CreateCollabPostInput } from '../../../src/lib/collab/types.js'
@@ -59,8 +60,10 @@ export async function handleV1Phase4Platform(
   }
 
   if (pathname === '/api/v1/discovery/premieres' && req.method === 'GET') {
+    const resolved = await resolveSupabaseForRequest(req)
+    if ('error' in resolved) return send(res, resolved.status, { error: resolved.error })
     try {
-      const cards = await fetchDiscoverPremiereFeed(parseLimit(req, 24, 48))
+      const cards = await repoDiscoverPremiereFeed(resolved.supabase, parseLimit(req, 24, 48))
       return send(res, 200, { cards })
     } catch (err) {
       return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
@@ -71,8 +74,10 @@ export async function handleV1Phase4Platform(
     const city = queryParam(req, 'city')
     const genre = queryParam(req, 'genre')
     if (!city || !genre) return send(res, 400, { error: 'city and genre required' })
+    const resolved = await resolveSupabaseForRequest(req)
+    if ('error' in resolved) return send(res, resolved.status, { error: resolved.error })
     try {
-      const hub = await fetchSceneHub(city, genre)
+      const hub = await repoFetchSceneHub(resolved.supabase, city, genre)
       return send(res, 200, { hub })
     } catch (err) {
       return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
@@ -81,7 +86,8 @@ export async function handleV1Phase4Platform(
 
   if (pathname === '/api/v1/editorial/published' && req.method === 'GET') {
     try {
-      const editorials = await listPublishedEditorials()
+      const supabase = createSupabaseAnonClient()
+      const editorials = await repoListPublishedEditorials(supabase)
       return send(res, 200, { editorials })
     } catch (err) {
       return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })

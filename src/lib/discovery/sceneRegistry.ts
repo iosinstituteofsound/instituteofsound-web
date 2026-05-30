@@ -1,5 +1,5 @@
-import { slugifyArtistName } from '@/lib/artist-profile/slug'
-import { INDIA_SCENE_CITIES, SCENE_GENRE_SLUGS } from '@/lib/releases/constants'
+import { slugifyArtistName } from '../artist-profile/slug'
+import { INDIA_SCENE_CITIES, SCENE_GENRE_SLUGS } from '../releases/constants'
 
 export interface SceneCity {
   slug: string
