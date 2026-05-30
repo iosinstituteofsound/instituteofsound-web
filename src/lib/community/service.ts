@@ -1,4 +1,14 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import {
+  v1GetCommunityGenres,
+  v1GetGenreLeaderboard,
+  v1GetGenreRank,
+  v1GetMemberStats,
+  v1GetUserBadges,
+  v1GetWeeklyLeaderboard,
+  v1SetPrimaryGenre,
+} from '@/api/v1Phase4Client'
 import {
   dbToNextRank,
   rankFromDb,
@@ -69,9 +79,7 @@ function mapLeaderboardRow(row: {
   }
 }
 
-export async function fetchWeeklyLeaderboard(limit = 20): Promise<LeaderboardEntry[]> {
-  if (!isSupabaseConfigured()) return []
-
+async function directFetchWeeklyLeaderboard(limit = 20): Promise<LeaderboardEntry[]> {
   const supabase = getSupabase()
   const { data, error } = await supabase.rpc('community_weekly_leaderboard', { lim: limit })
 
@@ -81,6 +89,18 @@ export async function fetchWeeklyLeaderboard(limit = 20): Promise<LeaderboardEnt
   }
 
   return (data ?? []).map(mapLeaderboardRow)
+}
+
+export async function fetchWeeklyLeaderboard(limit = 20): Promise<LeaderboardEntry[]> {
+  if (!isSupabaseConfigured()) return []
+
+  return viaV1Api(
+    async () => {
+      const { entries } = await v1GetWeeklyLeaderboard(limit)
+      return entries
+    },
+    () => directFetchWeeklyLeaderboard(limit),
+  )
 }
 
 export async function fetchMemberStats(userId: string): Promise<CommunityMemberStats | null> {
@@ -101,32 +121,40 @@ export async function fetchMemberStats(userId: string): Promise<CommunityMemberS
     }
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_member_stats', {
-    p_user_id: userId,
-  })
+  return viaV1Api(
+    async () => {
+      const { stats } = await v1GetMemberStats(userId)
+      return stats
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('community_member_stats', {
+        p_user_id: userId,
+      })
 
-  if (error) {
-    console.warn('[community] member stats', error.message)
-    return null
-  }
+      if (error) {
+        console.warn('[community] member stats', error.message)
+        return null
+      }
 
-  const row = Array.isArray(data) ? data[0] : data
-  if (!row) return null
+      const row = Array.isArray(data) ? data[0] : data
+      if (!row) return null
 
-  return {
-    userId: row.user_id,
-    name: row.display_name,
-    handle: row.handle.startsWith('@') ? row.handle : `@${row.handle}`,
-    avatarUrl: row.avatar_url ?? undefined,
-    totalDb: row.total_db,
-    weeklyDb: Number(row.weekly_db),
-    rank: row.community_rank as CommunityRank,
-    nextRank: (row.next_rank as CommunityRank | null) ?? null,
-    dbToNextRank: row.db_to_next_rank,
-    rankProgressPct: row.rank_progress_pct,
-    primaryGenreSlug: row.primary_genre_slug ?? undefined,
-  }
+      return {
+        userId: row.user_id,
+        name: row.display_name,
+        handle: row.handle.startsWith('@') ? row.handle : `@${row.handle}`,
+        avatarUrl: row.avatar_url ?? undefined,
+        totalDb: row.total_db,
+        weeklyDb: Number(row.weekly_db),
+        rank: row.community_rank as CommunityRank,
+        nextRank: (row.next_rank as CommunityRank | null) ?? null,
+        dbToNextRank: row.db_to_next_rank,
+        rankProgressPct: row.rank_progress_pct,
+        primaryGenreSlug: row.primary_genre_slug ?? undefined,
+      }
+    },
+  )
 }
 
 export async function fetchCommunityGenres(): Promise<CommunityGenre[]> {
@@ -134,23 +162,31 @@ export async function fetchCommunityGenres(): Promise<CommunityGenre[]> {
     return FALLBACK_GENRES
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('community_genres')
-    .select('id, slug, name')
-    .eq('active', true)
-    .order('sort_order')
+  return viaV1Api(
+    async () => {
+      const { genres } = await v1GetCommunityGenres()
+      return genres.length ? genres : FALLBACK_GENRES
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase
+        .from('community_genres')
+        .select('id, slug, name')
+        .eq('active', true)
+        .order('sort_order')
 
-  if (error) {
-    console.warn('[community] genres', error.message)
-    return FALLBACK_GENRES
-  }
+      if (error) {
+        console.warn('[community] genres', error.message)
+        return FALLBACK_GENRES
+      }
 
-  return (data ?? []).map((g) => ({
-    id: g.id,
-    slug: g.slug,
-    name: g.name,
-  }))
+      return (data ?? []).map((g) => ({
+        id: g.id,
+        slug: g.slug,
+        name: g.name,
+      }))
+    },
+  )
 }
 
 const FALLBACK_GENRES: CommunityGenre[] = [
@@ -193,18 +229,26 @@ export async function fetchGenreWeeklyLeaderboard(
     ]
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_genre_weekly_leaderboard', {
-    p_genre_slug: genreSlug,
-    lim: limit,
-  })
+  return viaV1Api(
+    async () => {
+      const { entries } = await v1GetGenreLeaderboard(genreSlug, limit)
+      return entries
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('community_genre_weekly_leaderboard', {
+        p_genre_slug: genreSlug,
+        lim: limit,
+      })
 
-  if (error) {
-    console.warn('[community] genre leaderboard', genreSlug, error.message)
-    return []
-  }
+      if (error) {
+        console.warn('[community] genre leaderboard', genreSlug, error.message)
+        return []
+      }
 
-  return (data ?? []).map(mapLeaderboardRow)
+      return (data ?? []).map(mapLeaderboardRow)
+    },
+  )
 }
 
 export async function fetchGenreWeeklyRank(
@@ -217,18 +261,26 @@ export async function fetchGenreWeeklyRank(
     return localGetTotalDb() > 0 ? 1 : null
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_genre_weekly_rank', {
-    p_genre_slug: genreSlug,
-    p_user_id: userId,
-  })
+  return viaV1Api(
+    async () => {
+      const { rank } = await v1GetGenreRank(genreSlug, userId)
+      return rank
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('community_genre_weekly_rank', {
+        p_genre_slug: genreSlug,
+        p_user_id: userId,
+      })
 
-  if (error) {
-    console.warn('[community] genre rank', error.message)
-    return null
-  }
+      if (error) {
+        console.warn('[community] genre rank', error.message)
+        return null
+      }
 
-  return typeof data === 'number' ? data : null
+      return typeof data === 'number' ? data : null
+    },
+  )
 }
 
 export async function setPrimaryGenre(userId: string, genreId: string, genreSlug: string): Promise<void> {
@@ -240,13 +292,18 @@ export async function setPrimaryGenre(userId: string, genreId: string, genreSlug
     return
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase
-    .from('profiles')
-    .update({ primary_genre_id: genreId })
-    .eq('id', userId)
+  await viaV1Api(
+    () => v1SetPrimaryGenre(genreId),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase
+        .from('profiles')
+        .update({ primary_genre_id: genreId })
+        .eq('id', userId)
 
-  if (error) throw new Error(error.message)
+      if (error) throw new Error(error.message)
+    },
+  )
   window.dispatchEvent(new Event(COMMUNITY_DB_EVENT))
 }
 
@@ -255,22 +312,32 @@ export async function fetchUserBadges(userId: string): Promise<EarnedBadge[]> {
     return localListBadges()
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_user_badges_list', {
-    p_user_id: userId,
-  })
+  return viaV1Api(
+    async () => {
+      const { badges } = await v1GetUserBadges(userId)
+      return badges
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('community_user_badges_list', {
+        p_user_id: userId,
+      })
 
-  if (error) {
-    console.warn('[community] badges', error.message)
-    return []
-  }
+      if (error) {
+        console.warn('[community] badges', error.message)
+        return []
+      }
 
-  return (data ?? []).map((row: { slug: string; name: string; description: string; earned_at: string }) => ({
-    slug: row.slug as CommunityBadgeSlug,
-    name: row.name,
-    description: row.description,
-    earnedAt: row.earned_at,
-  }))
+      return (data ?? []).map(
+        (row: { slug: string; name: string; description: string; earned_at: string }) => ({
+          slug: row.slug as CommunityBadgeSlug,
+          name: row.name,
+          description: row.description,
+          earnedAt: row.earned_at,
+        }),
+      )
+    },
+  )
 }
 
 export function needsCommunityOnboarding(stats: CommunityMemberStats | null): boolean {

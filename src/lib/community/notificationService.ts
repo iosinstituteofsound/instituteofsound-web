@@ -1,4 +1,10 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import {
+  v1GetNotifications,
+  v1GetUnreadNotificationCount,
+  v1MarkNotificationsRead,
+} from '@/api/v1Phase4Client'
 import {
   localListNotifications,
   localMarkNotificationsRead,
@@ -45,12 +51,7 @@ function mapRow(row: NotificationRow): CommunityNotification {
   }
 }
 
-export async function fetchNotifications(
-  limit = 40,
-  viewerUserId?: string
-): Promise<CommunityNotification[]> {
-  if (!isSupabaseConfigured()) return localListNotifications(limit, viewerUserId)
-
+async function directFetchNotifications(limit = 40): Promise<CommunityNotification[]> {
   const supabase = getSupabase()
   const { data, error } = await supabase.rpc('community_notifications_list', { lim: limit })
 
@@ -62,9 +63,22 @@ export async function fetchNotifications(
   return (data ?? []).map(mapRow)
 }
 
-export async function fetchUnreadNotificationCount(viewerUserId?: string): Promise<number> {
-  if (!isSupabaseConfigured()) return localUnreadCount(viewerUserId)
+export async function fetchNotifications(
+  limit = 40,
+  viewerUserId?: string
+): Promise<CommunityNotification[]> {
+  if (!isSupabaseConfigured()) return localListNotifications(limit, viewerUserId)
 
+  return viaV1Api(
+    async () => {
+      const { notifications } = await v1GetNotifications(limit)
+      return notifications
+    },
+    () => directFetchNotifications(limit),
+  )
+}
+
+async function directFetchUnreadCount(): Promise<number> {
   const supabase = getSupabase()
   const { data, error } = await supabase.rpc('community_notifications_unread_count')
 
@@ -76,6 +90,18 @@ export async function fetchUnreadNotificationCount(viewerUserId?: string): Promi
   return Number(data ?? 0)
 }
 
+export async function fetchUnreadNotificationCount(viewerUserId?: string): Promise<number> {
+  if (!isSupabaseConfigured()) return localUnreadCount(viewerUserId)
+
+  return viaV1Api(
+    async () => {
+      const { count } = await v1GetUnreadNotificationCount()
+      return count
+    },
+    () => directFetchUnreadCount(),
+  )
+}
+
 export async function markNotificationsRead(ids?: string[], viewerUserId?: string): Promise<void> {
   if (!isSupabaseConfigured()) {
     localMarkNotificationsRead(ids, viewerUserId)
@@ -83,12 +109,16 @@ export async function markNotificationsRead(ids?: string[], viewerUserId?: strin
     return
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase.rpc('community_notifications_mark_read', {
-    p_ids: ids?.length ? ids : null,
-  })
-
-  if (error) throw new Error(error.message)
+  await viaV1Api(
+    () => v1MarkNotificationsRead(ids),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase.rpc('community_notifications_mark_read', {
+        p_ids: ids?.length ? ids : null,
+      })
+      if (error) throw new Error(error.message)
+    },
+  )
   notifyChange()
 }
 

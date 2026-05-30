@@ -1,4 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1PatchMemberProfile } from '@/api/v1Phase4Client'
 import { mapProfile, type ProfileRow } from '@/lib/supabase/mappers'
 import type { User } from './types'
 import { normalizeUsername, validateUsername } from './username'
@@ -14,7 +16,7 @@ export interface UpdateProfileInput {
   dashboardPersona?: User['dashboardPersona'] | null
 }
 
-export async function updateUserProfile(
+async function directUpdateUserProfile(
   userId: string,
   input: UpdateProfileInput
 ): Promise<User> {
@@ -84,6 +86,23 @@ export async function updateUserProfile(
   }
 
   return updated
+}
+
+export async function updateUserProfile(
+  userId: string,
+  input: UpdateProfileInput,
+): Promise<User> {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Profile updates require Supabase. Configure .env and sign in with Google.')
+  }
+
+  return viaV1Api(
+    async () => {
+      const { user } = await v1PatchMemberProfile(input)
+      return user
+    },
+    () => directUpdateUserProfile(userId, input),
+  )
 }
 
 export async function fetchUserProfile(userId: string): Promise<User> {

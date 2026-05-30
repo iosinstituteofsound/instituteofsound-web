@@ -1,4 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1CreateCollabPost, v1GetCollabBoard } from '@/api/v1Phase4Client'
 import {
   localCreateCollabPost,
   localGetProfileSkills,
@@ -87,21 +89,35 @@ export async function fetchCollabBoard(
     )
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('collab_board', {
-    p_kind: filters.kind || null,
-    p_city: filters.city || null,
-    p_genre_slug: filters.genreSlug || null,
-    p_skill: filters.skill || null,
-    lim: limit,
-  })
+  return viaV1Api(
+    async () => {
+      const { posts } = await v1GetCollabBoard({
+        kind: filters.kind || undefined,
+        city: filters.city,
+        genreSlug: filters.genreSlug,
+        skill: filters.skill,
+        limit,
+      })
+      return posts
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('collab_board', {
+        p_kind: filters.kind || null,
+        p_city: filters.city || null,
+        p_genre_slug: filters.genreSlug || null,
+        p_skill: filters.skill || null,
+        lim: limit,
+      })
 
-  if (error) {
-    console.warn('[collab] board', error.message)
-    return []
-  }
+      if (error) {
+        console.warn('[collab] board', error.message)
+        return []
+      }
 
-  return (data ?? []).map((row: Record<string, unknown>) => mapBoardRow(row))
+      return (data ?? []).map((row: Record<string, unknown>) => mapBoardRow(row))
+    },
+  )
 }
 
 export async function createCollabPost(
@@ -119,18 +135,26 @@ export async function createCollabPost(
     return localCreateCollabPost(localProfile.userId, localProfile, input)
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('collab_create_post', {
-    p_kind: input.kind,
-    p_title: input.title,
-    p_body: input.body,
-    p_scene_city: input.sceneCity ?? null,
-    p_scene_genre_slug: input.sceneGenreSlug ?? null,
-    p_skill_slugs: input.skillSlugs,
-  })
+  return viaV1Api(
+    async () => {
+      const { id } = await v1CreateCollabPost(input)
+      return id
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.rpc('collab_create_post', {
+        p_kind: input.kind,
+        p_title: input.title,
+        p_body: input.body,
+        p_scene_city: input.sceneCity ?? null,
+        p_scene_genre_slug: input.sceneGenreSlug ?? null,
+        p_skill_slugs: input.skillSlugs,
+      })
 
-  if (error) throw new Error(error.message)
-  return String(data)
+      if (error) throw new Error(error.message)
+      return String(data)
+    },
+  )
 }
 
 export async function respondToCollabPost(

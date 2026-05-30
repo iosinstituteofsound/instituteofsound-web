@@ -1,4 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1GetSceneHub } from '@/api/v1Phase4Client'
 import { fetchGenreWeeklyLeaderboard } from '@/lib/community/service'
 import { fetchCrewWarsV2 } from '@/lib/community/wireEvents'
 import { fetchTribeRecentSpins } from '@/lib/community/wireHighlights'
@@ -122,14 +124,12 @@ async function fetchSceneEditorialPick(
   }
 }
 
-export async function fetchSceneHub(
+async function buildSceneHubDirect(
   citySlug: string,
-  genreSlug: string
-): Promise<SceneHubData | null> {
-  const city = findCityBySlug(citySlug)
-  const genre = findGenreBySlug(genreSlug)
-  if (!city || !genre) return null
-
+  genreSlug: string,
+  city: NonNullable<ReturnType<typeof findCityBySlug>>,
+  genre: NonNullable<ReturnType<typeof findGenreBySlug>>,
+): Promise<SceneHubData> {
   const [releases, editorialPick, tribeLeaderboard, recentSpins, crews, events] =
     await Promise.all([
       fetchSceneReleases(citySlug, genreSlug, city.label),
@@ -140,9 +140,7 @@ export async function fetchSceneHub(
       fetchEventsByScene(citySlug, genreSlug, 8),
     ])
 
-  const crewsInScene = crews.filter(
-    (c) => !c.genreSlug || c.genreSlug === genreSlug
-  )
+  const crewsInScene = crews.filter((c) => !c.genreSlug || c.genreSlug === genreSlug)
 
   return {
     citySlug,
@@ -158,4 +156,25 @@ export async function fetchSceneHub(
     rankingNote:
       'Ranked by weekly dB in this taste tribe — not a black-box algorithm. Spins and premieres from people in the scene.',
   }
+}
+
+export async function fetchSceneHub(
+  citySlug: string,
+  genreSlug: string
+): Promise<SceneHubData | null> {
+  const city = findCityBySlug(citySlug)
+  const genre = findGenreBySlug(genreSlug)
+  if (!city || !genre) return null
+
+  if (!isSupabaseConfigured()) {
+    return buildSceneHubDirect(citySlug, genreSlug, city, genre)
+  }
+
+  return viaV1Api(
+    async () => {
+      const { hub } = await v1GetSceneHub(citySlug, genreSlug)
+      return hub
+    },
+    () => buildSceneHubDirect(citySlug, genreSlug, city, genre),
+  )
 }

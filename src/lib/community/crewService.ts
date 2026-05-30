@@ -1,5 +1,12 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { viaV1Api } from '@/lib/api/v1Route'
+import {
+  v1CreateCrew,
+  v1DisbandCrew,
+  v1GetMyCrew,
+  v1JoinCrew,
+  v1LeaveCrew,
+} from '@/api/v1Phase4Client'
 import { v1GetNetworkCrewRoster, v1GetNetworkProfileCrew } from '@/api/v1Client'
 import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
 import { tryGrantBadge } from '@/lib/community/grantBadge'
@@ -51,9 +58,7 @@ function mapMyCrew(row: {
   }
 }
 
-export async function fetchMyCrew(): Promise<MyCrew | null> {
-  if (!isSupabaseConfigured()) return localGetMyCrew()
-
+async function directFetchMyCrew(): Promise<MyCrew | null> {
   const supabase = getSupabase()
   const { data, error } = await supabase.rpc('community_my_crew')
 
@@ -65,6 +70,18 @@ export async function fetchMyCrew(): Promise<MyCrew | null> {
   const row = Array.isArray(data) ? data[0] : data
   if (!row) return null
   return mapMyCrew(row)
+}
+
+export async function fetchMyCrew(): Promise<MyCrew | null> {
+  if (!isSupabaseConfigured()) return localGetMyCrew()
+
+  return viaV1Api(
+    async () => {
+      const { crew } = await v1GetMyCrew()
+      return crew
+    },
+    () => directFetchMyCrew(),
+  )
 }
 
 async function directFetchCrewRoster(crewId: string): Promise<CrewRosterMember[]> {
@@ -190,19 +207,32 @@ export async function createCrew(input: {
     return crew
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase.rpc('community_create_crew', {
-    p_name: name,
-    p_tagline: input.tagline?.trim() || null,
-    p_genre_slug: input.genreSlug || null,
-  })
-
-  if (error) throw new Error(error.message)
+  const crew = await viaV1Api(
+    async () => {
+      const { crew: created } = await v1CreateCrew({
+        name,
+        tagline: input.tagline,
+        genreSlug: input.genreSlug,
+      })
+      if (!created) throw new Error('Crew created but could not load details.')
+      return created
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase.rpc('community_create_crew', {
+        p_name: name,
+        p_tagline: input.tagline?.trim() || null,
+        p_genre_slug: input.genreSlug || null,
+      })
+      if (error) throw new Error(error.message)
+      const loaded = await directFetchMyCrew()
+      if (!loaded) throw new Error('Crew created but could not load details.')
+      return loaded
+    },
+  )
 
   void evaluateWeeklyChallenges()
   notifyCrew()
-  const crew = await fetchMyCrew()
-  if (!crew) throw new Error('Crew created but could not load details.')
   return crew
 }
 
@@ -235,15 +265,25 @@ export async function joinCrew(inviteCode: string): Promise<MyCrew> {
     return crew
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase.rpc('community_join_crew', { p_invite_code: code })
-  if (error) throw new Error(error.message)
+  const crew = await viaV1Api(
+    async () => {
+      const { crew: joined } = await v1JoinCrew(code)
+      if (!joined) throw new Error('Joined crew but could not load details.')
+      return joined
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase.rpc('community_join_crew', { p_invite_code: code })
+      if (error) throw new Error(error.message)
+      const loaded = await directFetchMyCrew()
+      if (!loaded) throw new Error('Joined crew but could not load details.')
+      return loaded
+    },
+  )
 
   void tryGrantBadge('crew_joined')
   void evaluateWeeklyChallenges()
   notifyCrew()
-  const crew = await fetchMyCrew()
-  if (!crew) throw new Error('Joined crew but could not load details.')
   return crew
 }
 
@@ -254,9 +294,14 @@ export async function leaveCrew(): Promise<void> {
     return
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase.rpc('community_leave_crew')
-  if (error) throw new Error(error.message)
+  await viaV1Api(
+    () => v1LeaveCrew(),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase.rpc('community_leave_crew')
+      if (error) throw new Error(error.message)
+    },
+  )
   notifyCrew()
 }
 
@@ -267,9 +312,14 @@ export async function disbandCrew(): Promise<void> {
     return
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase.rpc('community_disband_crew')
-  if (error) throw new Error(error.message)
+  await viaV1Api(
+    () => v1DisbandCrew(),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase.rpc('community_disband_crew')
+      if (error) throw new Error(error.message)
+    },
+  )
   notifyCrew()
 }
 

@@ -1,4 +1,10 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import {
+  v1AddPostComment,
+  v1DeletePostComment,
+  v1ListPostComments,
+} from '@/api/v1Phase4Client'
 import type { PostComment } from '@/lib/community/commentTypes'
 import {
   localAddComment,
@@ -43,13 +49,7 @@ function notifyChange() {
   }
 }
 
-export async function listPostComments(postId: string, limit = 100): Promise<PostComment[]> {
-  if (!postId) return []
-
-  if (!isSupabaseConfigured()) {
-    return localListComments(postId, limit)
-  }
-
+async function directListPostComments(postId: string, limit = 100): Promise<PostComment[]> {
   const supabase = getSupabase()
   const { data, error } = await supabase.rpc('community_post_comments_list', {
     p_post_id: postId,
@@ -64,6 +64,22 @@ export async function listPostComments(postId: string, limit = 100): Promise<Pos
   return (data ?? []).map((row: CommentRow) => mapRow(row))
 }
 
+export async function listPostComments(postId: string, limit = 100): Promise<PostComment[]> {
+  if (!postId) return []
+
+  if (!isSupabaseConfigured()) {
+    return localListComments(postId, limit)
+  }
+
+  return viaV1Api(
+    async () => {
+      const { comments } = await v1ListPostComments(postId, limit)
+      return comments
+    },
+    () => directListPostComments(postId, limit),
+  )
+}
+
 export interface AddCommentInput {
   postId: string
   body: string
@@ -74,6 +90,35 @@ export interface AddCommentInput {
   authorHandle: string
   authorAvatarUrl?: string
   postOwnerUserId: string
+}
+
+async function directAddPostComment(input: AddCommentInput, text: string): Promise<PostComment> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('community_post_comments_add', {
+    p_post_id: input.postId,
+    p_body: text,
+    p_parent_id: input.parentId ?? null,
+  })
+
+  if (error) throw new Error(error.message)
+
+  notifyChange()
+
+  const comments = await directListPostComments(input.postId, 200)
+  const found = comments.find((c) => c.id === data)
+  if (found) return found
+
+  return {
+    id: String(data),
+    postId: input.postId,
+    userId: input.authorUserId,
+    parentId: input.parentId,
+    body: text,
+    createdAt: new Date().toISOString(),
+    displayName: input.authorDisplayName,
+    handle: input.authorHandle,
+    avatarUrl: input.authorAvatarUrl,
+  }
 }
 
 export async function addPostComment(input: AddCommentInput): Promise<PostComment> {
@@ -116,32 +161,31 @@ export async function addPostComment(input: AddCommentInput): Promise<PostCommen
     return comment
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_post_comments_add', {
-    p_post_id: input.postId,
-    p_body: text,
-    p_parent_id: input.parentId ?? null,
-  })
-
-  if (error) throw new Error(error.message)
-
-  notifyChange()
-
-  const comments = await listPostComments(input.postId, 200)
-  const found = comments.find((c) => c.id === data)
-  if (found) return found
-
-  return {
-    id: String(data),
-    postId: input.postId,
-    userId: input.authorUserId,
-    parentId: input.parentId,
-    body: text,
-    createdAt: new Date().toISOString(),
-    displayName: input.authorDisplayName,
-    handle: input.authorHandle,
-    avatarUrl: input.authorAvatarUrl,
-  }
+  return viaV1Api(
+    async () => {
+      const { id } = await v1AddPostComment({
+        postId: input.postId,
+        body: text,
+        parentId: input.parentId,
+      })
+      notifyChange()
+      const comments = await listPostComments(input.postId, 200)
+      const found = comments.find((c) => c.id === id)
+      if (found) return found
+      return {
+        id,
+        postId: input.postId,
+        userId: input.authorUserId,
+        parentId: input.parentId,
+        body: text,
+        createdAt: new Date().toISOString(),
+        displayName: input.authorDisplayName,
+        handle: input.authorHandle,
+        avatarUrl: input.authorAvatarUrl,
+      }
+    },
+    () => directAddPostComment(input, text),
+  )
 }
 
 export async function deletePostComment(
@@ -157,11 +201,15 @@ export async function deletePostComment(
     return
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase.rpc('community_post_comments_delete', {
-    p_comment_id: commentId,
-  })
-
-  if (error) throw new Error(error.message)
+  await viaV1Api(
+    () => v1DeletePostComment(commentId),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase.rpc('community_post_comments_delete', {
+        p_comment_id: commentId,
+      })
+      if (error) throw new Error(error.message)
+    },
+  )
   notifyChange()
 }

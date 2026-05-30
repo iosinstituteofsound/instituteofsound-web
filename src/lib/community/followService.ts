@@ -1,4 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1IsFollowing, v1ToggleFollow } from '@/api/v1Phase4Client'
 import {
   localIsFollowing,
   localListFollowing,
@@ -19,6 +21,15 @@ export function getLocalFollowingIds(): string[] {
   return localListFollowing()
 }
 
+async function directToggleFollow(targetUserId: string): Promise<boolean> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('community_toggle_follow', {
+    p_target_user_id: targetUserId,
+  })
+  if (error) throw new Error(error.message)
+  return Boolean(data)
+}
+
 export async function toggleFollow(targetUserId: string): Promise<boolean> {
   if (!isSupabaseConfigured()) {
     const following = localToggleFollow(targetUserId)
@@ -34,19 +45,18 @@ export async function toggleFollow(targetUserId: string): Promise<boolean> {
     return following
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_toggle_follow', {
-    p_target_user_id: targetUserId,
-  })
-
-  if (error) throw new Error(error.message)
+  const following = await viaV1Api(
+    async () => {
+      const { following: f } = await v1ToggleFollow(targetUserId)
+      return f
+    },
+    () => directToggleFollow(targetUserId),
+  )
   notifyFollow()
-  return Boolean(data)
+  return following
 }
 
-export async function isFollowingUser(targetUserId: string): Promise<boolean> {
-  if (!isSupabaseConfigured()) return localIsFollowing(targetUserId)
-
+async function directIsFollowingUser(targetUserId: string): Promise<boolean> {
   const supabase = getSupabase()
   const { data: session } = await supabase.auth.getSession()
   const uid = session.session?.user?.id
@@ -64,4 +74,16 @@ export async function isFollowingUser(targetUserId: string): Promise<boolean> {
     return false
   }
   return Boolean(data)
+}
+
+export async function isFollowingUser(targetUserId: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) return localIsFollowing(targetUserId)
+
+  return viaV1Api(
+    async () => {
+      const { following } = await v1IsFollowing(targetUserId)
+      return following
+    },
+    () => directIsFollowingUser(targetUserId),
+  )
 }

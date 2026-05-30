@@ -1,4 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1GetPublicRelease } from '@/api/v1Phase4Client'
 import type { PublicRelease, ReleaseMilestone } from '@/lib/releases/types'
 import * as local from '@/lib/releases/localReleases'
 import { listReleaseMilestones } from '@/lib/releases/service'
@@ -40,6 +42,22 @@ function mapPublic(row: Record<string, unknown>, milestones: ReleaseMilestone[])
   }
 }
 
+async function directFetchPublicRelease(slug: string): Promise<PublicRelease | null> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('release_public', { p_slug: slug })
+
+  if (error) {
+    console.warn('[release] public', error.message)
+    return null
+  }
+
+  const row = (data ?? [])[0] as Record<string, unknown> | undefined
+  if (!row) return null
+
+  const milestones = await listReleaseMilestones(String(row.id))
+  return mapPublic(row, milestones)
+}
+
 export async function fetchPublicRelease(slug: string): Promise<PublicRelease | null> {
   if (!isSupabaseConfigured()) {
     const r = local.localGetReleaseBySlug(slug)
@@ -59,19 +77,13 @@ export async function fetchPublicRelease(slug: string): Promise<PublicRelease | 
     }
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('release_public', { p_slug: slug })
-
-  if (error) {
-    console.warn('[release] public', error.message)
-    return null
-  }
-
-  const row = (data ?? [])[0] as Record<string, unknown> | undefined
-  if (!row) return null
-
-  const milestones = await listReleaseMilestones(String(row.id))
-  return mapPublic(row, milestones)
+  return viaV1Api(
+    async () => {
+      const { release } = await v1GetPublicRelease(slug)
+      return release
+    },
+    () => directFetchPublicRelease(slug),
+  )
 }
 
 export function formatPremiereCountdown(seconds: number): string {

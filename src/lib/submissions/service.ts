@@ -1,4 +1,15 @@
 import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import {
+  v1CreateEditorDraft,
+  v1CreateSubmission,
+  v1GetDeskSubmissions,
+  v1GetEditorDrafts,
+  v1GetMySubmissions,
+  v1GetSubmissionById,
+  v1PublishEditorDraft,
+  v1ReviewSubmission,
+} from '@/api/v1Phase4Client'
 import {
   getDrafts,
   getSubmissions,
@@ -54,7 +65,13 @@ export async function createSubmission(
   input: CreateSubmissionInput
 ): Promise<TrackSubmission> {
   if (isSupabaseConfigured()) {
-    return sb.supabaseCreateSubmission(artist, input)
+    return viaV1Api(
+      async () => {
+        const { submission } = await v1CreateSubmission(input)
+        return submission
+      },
+      () => sb.supabaseCreateSubmission(artist, input),
+    )
   }
 
   const submissions = getSubmissions()
@@ -82,14 +99,26 @@ export async function getSubmissionsForArtist(
   artistId: string
 ): Promise<TrackSubmission[]> {
   if (isSupabaseConfigured()) {
-    return sb.supabaseGetSubmissionsForArtist(artistId)
+    return viaV1Api(
+      async () => {
+        const { submissions } = await v1GetMySubmissions()
+        return submissions
+      },
+      () => sb.supabaseGetSubmissionsForArtist(artistId),
+    )
   }
   return getSubmissions().filter((s) => s.artistId === artistId)
 }
 
 export async function getSubmissionsForEditor(): Promise<TrackSubmission[]> {
   if (isSupabaseConfigured()) {
-    return sb.supabaseGetSubmissionsForEditor()
+    return viaV1Api(
+      async () => {
+        const { submissions } = await v1GetDeskSubmissions()
+        return submissions
+      },
+      () => sb.supabaseGetSubmissionsForEditor(),
+    )
   }
   return getSubmissions()
 }
@@ -100,7 +129,13 @@ export async function reviewSubmission(
   input: ReviewSubmissionInput
 ): Promise<TrackSubmission> {
   if (isSupabaseConfigured()) {
-    return sb.supabaseReviewSubmission(submissionId, editor, input)
+    return viaV1Api(
+      async () => {
+        const { submission } = await v1ReviewSubmission({ submissionId, review: input })
+        return submission
+      },
+      () => sb.supabaseReviewSubmission(submissionId, editor, input),
+    )
   }
 
   const submissions = getSubmissions()
@@ -132,7 +167,13 @@ export async function createEditorialDraft(
   input: CreateDraftInput
 ): Promise<EditorialDraft> {
   if (isSupabaseConfigured()) {
-    return sb.supabaseCreateDraft(editor, input)
+    return viaV1Api(
+      async () => {
+        const { draft } = await v1CreateEditorDraft(input)
+        return draft
+      },
+      () => sb.supabaseCreateDraft(editor, input),
+    )
   }
 
   const drafts = getDrafts()
@@ -167,21 +208,39 @@ export async function getDraftsForEditor(
   editorId: string
 ): Promise<EditorialDraft[]> {
   if (isSupabaseConfigured()) {
-    return sb.supabaseGetDraftsForEditor(editorId)
+    return viaV1Api(
+      async () => {
+        const { drafts } = await v1GetEditorDrafts()
+        return drafts
+      },
+      () => sb.supabaseGetDraftsForEditor(editorId),
+    )
   }
   return getDrafts().filter((d) => d.editorId === editorId)
 }
 
 export async function getSubmissionById(id: string) {
   if (isSupabaseConfigured()) {
-    return sb.supabaseGetSubmissionById(id)
+    return viaV1Api(
+      async () => {
+        const { submission } = await v1GetSubmissionById(id)
+        return submission
+      },
+      () => sb.supabaseGetSubmissionById(id),
+    )
   }
   return getSubmissions().find((s) => s.id === id) ?? null
 }
 
 export async function publishEditorialDraft(draftId: string): Promise<EditorialDraft> {
   if (isSupabaseConfigured()) {
-    return sb.supabasePublishDraft(draftId)
+    return viaV1Api(
+      async () => {
+        const { draft } = await v1PublishEditorDraft({ draftId })
+        return draft
+      },
+      () => sb.supabasePublishDraft(draftId),
+    )
   }
   const drafts = getDrafts()
   const idx = drafts.findIndex((d) => d.id === draftId)

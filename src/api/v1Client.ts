@@ -42,7 +42,7 @@ async function tryAccessToken(): Promise<string | null> {
   return data.session?.access_token ?? null
 }
 
-async function v1Fetch<T>(
+export async function v1Fetch<T>(
   path: string,
   init?: RequestInit & { auth?: 'required' | 'optional' | 'none' },
 ): Promise<T> {

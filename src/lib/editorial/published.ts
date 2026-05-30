@@ -1,4 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1ListPublishedEditorials } from '@/api/v1Phase4Client'
 import { mapDraft, type DraftRow } from '@/lib/supabase/mappers'
 import { getDrafts, getUsers } from '@/lib/auth/storage'
 import type { EditorialDraft } from '@/lib/auth/types'
@@ -200,9 +202,17 @@ function localListPublished(): PublishedEditorial[] {
 }
 
 export async function listPublishedEditorials(): Promise<PublishedEditorial[]> {
-  const rows = isSupabaseConfigured()
-    ? await supabaseListPublished()
-    : localListPublished()
+  if (!isSupabaseConfigured()) {
+    return enrichPublishedList(localListPublished())
+  }
+
+  const rows = await viaV1Api(
+    async () => {
+      const { editorials } = await v1ListPublishedEditorials()
+      return editorials
+    },
+    () => supabaseListPublished(),
+  )
   return enrichPublishedList(rows)
 }
 

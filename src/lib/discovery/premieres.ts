@@ -1,4 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1GetDiscoverPremieres } from '@/api/v1Phase4Client'
 import * as local from '@/lib/artist-profile/storage'
 import type { ArtistProfile, ArtistTrack } from '@/lib/artist-profile/types'
 
@@ -198,9 +200,7 @@ function buildLocalFeed(limit: number): DiscoverPremiereCard[] {
   return cards.slice(0, limit)
 }
 
-export async function fetchDiscoverPremiereFeed(limit = 24): Promise<DiscoverPremiereCard[]> {
-  if (!isSupabaseConfigured()) return buildLocalFeed(limit)
-
+async function directFetchDiscoverPremiereFeed(limit: number): Promise<DiscoverPremiereCard[]> {
   const supabase = getSupabase()
   const { data, error } = await supabase.rpc('discover_premiere_feed', { p_limit: limit })
   if (error) {
@@ -208,7 +208,19 @@ export async function fetchDiscoverPremiereFeed(limit = 24): Promise<DiscoverPre
     return buildLocalFeed(limit)
   }
   return (data ?? []).map((row: Record<string, unknown>) =>
-    mapRow(row as Parameters<typeof mapRow>[0])
+    mapRow(row as Parameters<typeof mapRow>[0]),
+  )
+}
+
+export async function fetchDiscoverPremiereFeed(limit = 24): Promise<DiscoverPremiereCard[]> {
+  if (!isSupabaseConfigured()) return buildLocalFeed(limit)
+
+  return viaV1Api(
+    async () => {
+      const { cards } = await v1GetDiscoverPremieres(limit)
+      return cards
+    },
+    () => directFetchDiscoverPremiereFeed(limit),
   )
 }
 

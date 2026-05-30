@@ -1,5 +1,13 @@
 import { touchArtistPageActivityByProfileId } from '@/lib/artist-profile/pageEnforcement'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import {
+  v1AddReleaseMilestone,
+  v1ListReleaseMilestones,
+  v1ListReleasesForProfile,
+  v1MarkReleaseSpinPromoted,
+  v1UpsertRelease,
+} from '@/api/v1Phase4Client'
 import { slugifyArtistName, ensureUniqueSlug } from '@/lib/artist-profile/slug'
 import { validateReleaseEmbedInput } from '@/lib/community/musicLinks'
 import type {
@@ -47,9 +55,7 @@ function mapMilestone(row: Record<string, unknown>): ReleaseMilestone {
   }
 }
 
-export async function listReleasesForProfile(profileId: string): Promise<ArtistRelease[]> {
-  if (!isSupabaseConfigured()) return local.localListReleasesForProfile(profileId)
-
+async function directListReleasesForProfile(profileId: string): Promise<ArtistRelease[]> {
   const supabase = getSupabase()
   const { data, error } = await supabase
     .from('artist_releases')
@@ -59,6 +65,18 @@ export async function listReleasesForProfile(profileId: string): Promise<ArtistR
 
   if (error) throw new Error(error.message)
   return (data ?? []).map(mapRelease)
+}
+
+export async function listReleasesForProfile(profileId: string): Promise<ArtistRelease[]> {
+  if (!isSupabaseConfigured()) return local.localListReleasesForProfile(profileId)
+
+  return viaV1Api(
+    async () => {
+      const { releases } = await v1ListReleasesForProfile(profileId)
+      return releases
+    },
+    () => directListReleasesForProfile(profileId),
+  )
 }
 
 async function ensureUniqueReleaseSlug(base: string, excludeId?: string): Promise<string> {
@@ -94,10 +112,28 @@ export async function upsertRelease(
 
   const status = input.status === 'draft' ? 'draft' : 'scheduled'
 
-  let release: ArtistRelease
-  if (!isSupabaseConfigured()) {
-    release = local.localUpsertRelease(profileId, { ...input, status }, releaseId)
-  } else {
+  const release = !isSupabaseConfigured()
+    ? local.localUpsertRelease(profileId, { ...input, status }, releaseId)
+    : await viaV1Api(
+        async () => {
+          const { release: saved } = await v1UpsertRelease({ profileId, release: input, releaseId })
+          return saved
+        },
+        () => directUpsertRelease(profileId, input, status, liveAt, embed, releaseId),
+      )
+
+  await touchArtistPageActivityByProfileId(profileId)
+  return release
+}
+
+async function directUpsertRelease(
+  profileId: string,
+  input: UpsertReleaseInput,
+  status: 'draft' | 'scheduled',
+  liveAt: Date,
+  embed: ReturnType<typeof validateReleaseEmbedInput>,
+  releaseId?: string,
+): Promise<ArtistRelease> {
   const supabase = getSupabase()
   let slug = releaseId
     ? undefined
@@ -140,8 +176,9 @@ export async function upsertRelease(
       .select('*')
       .single()
     if (error) throw new Error(error.message)
-    release = mapRelease(data)
-  } else {
+    return mapRelease(data)
+  }
+
   const { data, error } = await supabase
     .from('artist_releases')
     .insert({ ...payload, spin_promoted: false })
@@ -149,12 +186,7 @@ export async function upsertRelease(
     .single()
 
   if (error) throw new Error(error.message)
-  release = mapRelease(data)
-  }
-  }
-
-  await touchArtistPageActivityByProfileId(profileId)
-  return release
+  return mapRelease(data)
 }
 
 export async function addReleaseMilestone(
@@ -165,40 +197,61 @@ export async function addReleaseMilestone(
     return local.localAddMilestone(releaseId, input)
   }
 
-  const supabase = getSupabase()
-  const { count } = await supabase
-    .from('artist_release_milestones')
-    .select('id', { count: 'exact', head: true })
-    .eq('release_id', releaseId)
+  return viaV1Api(
+    async () => {
+      const { milestone } = await v1AddReleaseMilestone({
+        releaseId,
+        kind: input.kind,
+        title: input.title,
+        body: input.body,
+      })
+      return milestone
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { count } = await supabase
+        .from('artist_release_milestones')
+        .select('id', { count: 'exact', head: true })
+        .eq('release_id', releaseId)
 
-  const { data, error } = await supabase
-    .from('artist_release_milestones')
-    .insert({
-      release_id: releaseId,
-      kind: input.kind,
-      title: input.title.trim(),
-      body: input.body?.trim() || null,
-      sort_order: count ?? 0,
-    })
-    .select('*')
-    .single()
+      const { data, error } = await supabase
+        .from('artist_release_milestones')
+        .insert({
+          release_id: releaseId,
+          kind: input.kind,
+          title: input.title.trim(),
+          body: input.body?.trim() || null,
+          sort_order: count ?? 0,
+        })
+        .select('*')
+        .single()
 
-  if (error) throw new Error(error.message)
-  return mapMilestone(data)
+      if (error) throw new Error(error.message)
+      return mapMilestone(data)
+    },
+  )
 }
 
 export async function listReleaseMilestones(releaseId: string): Promise<ReleaseMilestone[]> {
   if (!isSupabaseConfigured()) return local.localListMilestones(releaseId)
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('artist_release_milestones')
-    .select('*')
-    .eq('release_id', releaseId)
-    .order('sort_order')
+  return viaV1Api(
+    async () => {
+      const { milestones } = await v1ListReleaseMilestones(releaseId)
+      return milestones
+    },
+    async () => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase
+        .from('artist_release_milestones')
+        .select('*')
+        .eq('release_id', releaseId)
+        .order('sort_order')
 
-  if (error) throw new Error(error.message)
-  return (data ?? []).map(mapMilestone)
+      if (error) throw new Error(error.message)
+      return (data ?? []).map(mapMilestone)
+    },
+  )
 }
 
 export async function markReleaseSpinPromoted(releaseId: string): Promise<void> {
@@ -207,11 +260,16 @@ export async function markReleaseSpinPromoted(releaseId: string): Promise<void> 
     return
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase
-    .from('artist_releases')
-    .update({ spin_promoted: true })
-    .eq('id', releaseId)
+  await viaV1Api(
+    () => v1MarkReleaseSpinPromoted(releaseId),
+    async () => {
+      const supabase = getSupabase()
+      const { error } = await supabase
+        .from('artist_releases')
+        .update({ spin_promoted: true })
+        .eq('id', releaseId)
 
-  if (error) throw new Error(error.message)
+      if (error) throw new Error(error.message)
+    },
+  )
 }

@@ -1005,11 +1005,11 @@ Browser (React)  --Bearer JWT-->  /api/v1/*  --user or service client-->  Supaba
 | **2** | Community feed | `community/feedService.ts` → feed, spins, drops, reactions, edit, hide |
 | **3** | Verification, playlist curator, artist recovery | `verification/service.ts`, `playlistCurator/service.ts`, `artist-page-recovery/service.ts` |
 | **3b** | Network + public member profile | `network/connectionService.ts`, `community/memberProfileService.ts`, `community/crewService.ts` (profile crew/roster), `artist-profile/networkLink.ts` → `/api/v1/network/*` |
-| **4** (planned) | Remaining modules, trim `localStorage` demos, optional RLS lockdown | — |
+| **4** | Community social, content, platform reads/writes | `followService`, `commentService`, `notificationService`, `community/service`, `crewService` (mutations + my crew), `releases/service`, `releases/public`, `submissions/service`, `auth/profile`, `events/service`, `collab/service` (board + create), `dm/service`, `discovery/premieres`, `discovery/sceneService`, `editorial/published`, `academy/academyPublic` → `/api/v1/community/*`, `/releases/*`, `/submissions/*`, `/editorial/*`, `/member/profile`, `/discovery/*`, `/events/*`, `/collab/*`, `/dm/*`, `/academy/*` |
 
 **Cursor rule:** `.cursor/rules/api-only-frontend.mdc` — new UI code must not call Supabase tables/RPC directly; add `/api/v1` routes instead.
 
-**Still direct Supabase (no v1 yet):** track **submissions** (`submissions/service.ts`), editorial drafts, **releases** (profile tab uses `releases/service.ts`), events, collab, academy, most discovery, follow toggles.
+**Still direct Supabase when flag on (Phase 4 gaps):** community **feed** writes beyond phase 2 scope, **collab** respond/accept/skills, **crew** weekly leaderboard, wire/highlights, artist `supabaseProfile`, analytics, editor-applications, cloud progress, some discovery catalog helpers.
 
 #### `/api/v1` route map
 
@@ -1051,6 +1051,49 @@ Browser (React)  --Bearer JWT-->  /api/v1/*  --user or service client-->  Supaba
 | GET | `/api/v1/network/requests/pending` | Bearer | Incoming connect requests |
 | GET | `/api/v1/network/people/suggested` | Optional | Suggested people |
 | GET | `/api/v1/network/people/search?q=` | Optional | People search |
+| GET, POST | `/api/v1/community/follow` | Bearer / optional | Toggle follow · check following |
+| GET, POST, DELETE | `/api/v1/community/comments` | Optional / Bearer | List · add · delete post comments |
+| GET | `/api/v1/community/notifications` | Bearer | Notification list |
+| GET | `/api/v1/community/notifications/unread` | Bearer | Unread count |
+| POST | `/api/v1/community/notifications/read` | Bearer | Mark read |
+| GET | `/api/v1/community/member-stats?userId=` | Optional | Member stats |
+| GET | `/api/v1/community/leaderboard` | Optional | Weekly leaderboard |
+| GET | `/api/v1/community/genres` | Optional | Genre list |
+| PATCH | `/api/v1/community/primary-genre` | Bearer | Set primary genre |
+| GET | `/api/v1/community/badges?userId=` | Optional | Earned badges |
+| GET | `/api/v1/community/genre-leaderboard` | Optional | Genre weekly board |
+| GET | `/api/v1/community/genre-rank` | Optional | Genre rank for user |
+| GET | `/api/v1/community/crew/my` | Bearer | My crew |
+| POST | `/api/v1/community/crew` | Bearer | Create crew |
+| POST | `/api/v1/community/crew/join` | Bearer | Join by invite |
+| POST | `/api/v1/community/crew/leave` | Bearer | Leave crew |
+| POST | `/api/v1/community/crew/disband` | Bearer | Disband (founder) |
+| GET | `/api/v1/releases?profileId=` | Optional | Profile releases |
+| PUT | `/api/v1/releases` | Bearer | Upsert release |
+| GET, POST | `/api/v1/releases/milestones` | Optional / Bearer | List · add milestones |
+| POST | `/api/v1/releases/spin-promoted` | Bearer | Mark spin promoted |
+| GET | `/api/v1/releases/public?slug=` | Optional | Public release page |
+| POST, GET | `/api/v1/submissions` | Bearer | Create · list desk/mine (see handler) |
+| PATCH | `/api/v1/submissions/review` | Super editor | Review submission |
+| GET, POST | `/api/v1/editorial/drafts` | Bearer | Editor drafts |
+| POST | `/api/v1/editorial/drafts/publish` | Bearer | Publish draft |
+| GET | `/api/v1/editorial/published` | Optional | Published editorials |
+| PATCH | `/api/v1/member/profile` | Bearer | Update member profile |
+| GET | `/api/v1/discovery/premieres` | Optional | Discover premiere feed |
+| GET | `/api/v1/discovery/scene?city=&genre=` | Optional | Scene hub aggregate |
+| GET | `/api/v1/academy/summary?userId=` | Optional | Academy progress |
+| GET | `/api/v1/events/upcoming` | Optional | Upcoming events |
+| POST | `/api/v1/events/submit` | Bearer | Submit scene event |
+| POST | `/api/v1/events/rsvp` | Bearer | Toggle RSVP |
+| GET | `/api/v1/events/pending` | Super editor | Pending events |
+| POST | `/api/v1/events/moderate` | Super editor | Publish / reject event |
+| GET | `/api/v1/collab/board` | Optional | Collab board |
+| POST | `/api/v1/collab/posts` | Bearer | Create collab post |
+| GET, POST | `/api/v1/dm/threads` | Bearer | List threads · get/create thread |
+| GET, POST | `/api/v1/dm/messages` | Bearer | List · send messages |
+| PATCH | `/api/v1/dm/thread-status` | Bearer | Accept / decline request |
+| GET | `/api/v1/dm/thread-header` | Bearer | Thread header |
+| GET | `/api/v1/dm/unread` | Bearer | Total unread DMs |
 
 Desk guard: `api/_lib/requireDesk.ts` → `profiles.role === 'super_editor'`.
 
