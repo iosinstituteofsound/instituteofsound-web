@@ -73,7 +73,7 @@ export default function PlaylistCuratorApplyPage() {
     setSubmitting(true)
     try {
       await submitPlaylistCuratorApplication(user.id, { playlistLinks: links, note })
-      setMessage('Application sent to the super editor desk for link review.')
+      setMessage('Application sent to IOS Support for link review.')
       setLinks([''])
       setNote('')
       setHistory(await getMyPlaylistCuratorApplications(user.id))
@@ -90,7 +90,7 @@ export default function PlaylistCuratorApplyPage() {
       mode={mode}
       kicker="Curation path"
       title="Playlist curator application"
-      summary="Share your public playlists and a short note. The super editor desk reviews every link before approval."
+      summary="Share your public playlists and a short note. IOS Support reviews every link before approval."
       badge={
         <MetalBadge variant="crimson" className="shrink-0">
           Curator apply
@@ -119,7 +119,7 @@ export default function PlaylistCuratorApplyPage() {
           <p className="member-desk-heading text-lg">{statusLabel(latest.status)}</p>
           {latest.status === 'pending' && (
             <p className="member-desk-lede mt-2">
-              Your playlists are in the super editor queue. We will notify you when reviewed.
+              Your playlists are with IOS Support. We will notify you when reviewed.
             </p>
           )}
           {latest.status === 'approved' && (
@@ -184,7 +184,7 @@ export default function PlaylistCuratorApplyPage() {
           </div>
 
           <div>
-            <FieldLabel>Note for the desk</FieldLabel>
+            <FieldLabel>Note for IOS Support</FieldLabel>
             <textarea
               rows={4}
               value={note}

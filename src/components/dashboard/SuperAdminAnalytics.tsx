@@ -177,7 +177,7 @@ export function SuperAdminAnalyticsPanel({
           >
             <span className="ios-analytics-stat-code">SED</span>
             <span className="ios-analytics-stat-value">{data.roleCounts.superEditors}</span>
-            <span className="ios-analytics-stat-label">Super Editors</span>
+            <span className="ios-analytics-stat-label">IOS Support</span>
             <span className="ios-analytics-stat-hint">View users →</span>
           </button>
           <button

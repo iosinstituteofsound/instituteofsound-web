@@ -129,7 +129,7 @@ const EXACT: Record<string, RouteMeta> = {
   '/editor/dashboard': meta({ ...YOU, sectionTitle: 'Editorial Desk', kicker: 'Editor', description: 'Review queue and publishing.', pipelinePhase: 5 }),
   '/editor/join': meta({ sectionTitle: 'Join as Editor', kicker: 'Desk', description: 'Editor programme info.', navHref: '/editor/join', indexable: true }),
   '/editor/apply': meta({ ...YOU, sectionTitle: 'Editor Application', kicker: 'Desk', description: 'Apply to write for IOS.' }),
-  '/desk': meta({ ...YOU, sectionTitle: 'Editor Desk Login', kicker: 'Desk', description: 'Desk email sign-in.' }),
+  '/desk': meta({ ...YOU, sectionTitle: 'IOS Support', kicker: 'Staff', description: 'Staff sign-in for IOS Support.' }),
 }
 
 const ACADEMY_TRACKS = [

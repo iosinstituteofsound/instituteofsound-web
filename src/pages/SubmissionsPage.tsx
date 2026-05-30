@@ -68,7 +68,7 @@ export default function SubmissionsPage() {
           <Link to="/editor/join" className="ios-link">
             Apply as an editor
           </Link>
-          . Desk access is approved by super editors only.
+          . Desk access is approved by IOS Support only.
         </p>
       </div>
     </div>

@@ -156,7 +156,7 @@ export function MemberTrustPanel({
             <div className="member-desk-trust-verified" role="status">
               <span className="member-desk-trust-verified-badge">Verified</span>
               <p className="member-desk-lede mt-3 mb-0">
-                Your {roleLabel} role is verified by the Institute desk. No further proofs are
+                Your {roleLabel} role is verified by IOS Support. No further proofs are
                 needed for this workspace.
               </p>
             </div>
@@ -166,7 +166,7 @@ export function MemberTrustPanel({
             <div className="member-desk-trust-pending" role="status">
               <span className="member-desk-trust-pending-badge">Under review</span>
               <p className="member-desk-meta mt-3 mb-0">
-                Proofs submitted — the desk is reviewing your {roleLabel} verification.
+                Proofs submitted — IOS Support is reviewing your {roleLabel} verification.
               </p>
             </div>
           )}

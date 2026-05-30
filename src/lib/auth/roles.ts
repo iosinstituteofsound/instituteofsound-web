@@ -15,7 +15,7 @@ export function isMember(role: UserRole): boolean {
 export function roleLabel(role: UserRole): string {
   switch (role) {
     case 'super_editor':
-      return 'Super Editor'
+      return 'IOS Support'
     case 'editor':
       return 'Editor'
     case 'artist':

@@ -25,7 +25,7 @@ export function NavUserIdentity({ onNavigate, layout = 'row', onLogout }: NavUse
   const profilePath = `/network/${handle}`
   const dashboardTo = homeDashboardPath(user.role)
   const dashboardLabel = isSuperEditor
-    ? 'Editorial Desk'
+    ? 'IOS Support'
     : user.role === 'artist'
       ? 'My Studio'
       : user.role === 'member'

@@ -42,8 +42,8 @@ export function notifyMemberPlaylistCuratorDecision(
       : 'Playlist curator application declined'
   const body =
     decision === 'approved'
-      ? 'Your playlists passed desk review — you are verified as a curator on IOS.'
-      : reviewNotes?.trim() || 'The desk could not verify your playlists this round. You may re-apply.'
+      ? 'Your playlists passed IOS Support review — you are verified as a curator on IOS.'
+      : reviewNotes?.trim() || 'IOS Support could not verify your playlists this round. You may re-apply.'
 
   localAddNotification(
     {

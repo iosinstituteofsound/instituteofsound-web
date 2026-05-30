@@ -105,7 +105,7 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
 
   const dashboardLabel = user
     ? isSuperEditor
-      ? 'Editorial Desk'
+      ? 'IOS Support'
       : user.role === 'artist'
         ? 'My Studio'
         : user.role === 'member'

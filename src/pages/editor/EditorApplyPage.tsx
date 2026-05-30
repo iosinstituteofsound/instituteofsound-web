@@ -45,7 +45,7 @@ export default function EditorApplyPage() {
         <div className="mt-6 border border-amber-500/40 bg-amber-500/5 px-4 py-4 text-sm">
           <p className="font-medium text-amber-400">Application under review</p>
           <p className="text-muted mt-2">
-            Submitted {new Date(application.createdAt).toLocaleString()}. A super editor will
+            Submitted {new Date(application.createdAt).toLocaleString()}. IOS Support will
             review your portfolio and message. You will be notified here when a decision is made.
           </p>
         </div>

@@ -45,7 +45,7 @@ const titles: Record<AnalyticsDetailKey, string> = {
   approval: 'Approval Breakdown',
   listeners: 'Listeners',
   editors: 'Editors',
-  super_editors: 'Super Editors',
+  super_editors: 'IOS Support',
   total_users: 'All Users',
 }
 

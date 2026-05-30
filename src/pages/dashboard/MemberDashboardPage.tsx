@@ -281,7 +281,7 @@ const GROW_PATHS: GrowPathCard[] = [
     variant: 'curator',
     kicker: 'Curation path',
     heading: 'Apply for Playlist Curator',
-    lede: 'Submit your public playlist links and a note — the super editor desk reviews every link before approval.',
+    lede: 'Submit your public playlist links and a note — IOS Support reviews every link before approval.',
     primary: { to: '/member/playlist-curator', label: 'Apply for playlist curator' },
     verification: PLAYLIST_CURATOR_REQUIREMENTS,
   },

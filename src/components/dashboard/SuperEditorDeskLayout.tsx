@@ -94,11 +94,11 @@ export function SuperEditorDeskLayout({
       user={user}
       mode={mode}
       kicker="Editorial command"
-      title="Super editor desk"
+      title="IOS Support desk"
       summary="Run the magazine pipeline, verify roles, and steer the network."
       badge={
         <MetalBadge variant="live" className="shrink-0">
-          Super editor
+          IOS Support
         </MetalBadge>
       }
       tab={tab}

@@ -13,7 +13,7 @@ export const ROLE_VERIFICATION_REQUIREMENTS: Record<DashboardPersona, PathVerifi
       'At least 1 public proof link (line manager profile, agency page, LinkedIn, Instagram, etc.)',
       'Artist confirmation link — public post, co-sign, or proof the artist acknowledges you as their manager',
     ],
-    note: 'After you activate the workspace, submit proofs below. Super editor desk approves before you are marked verified.',
+    note: 'After you activate the workspace, submit proofs below. IOS Support approves before you are marked verified.',
   },
   label: {
     title: 'Verification proofs needed',
@@ -21,7 +21,7 @@ export const ROLE_VERIFICATION_REQUIREMENTS: Record<DashboardPersona, PathVerifi
       'Label website or official domain',
       'At least 2 roster / release links (artist pages, Bandcamp, Spotify label profile, distro pages)',
     ],
-    note: 'Desk checks domain ownership and roster legitimacy before label verification.',
+    note: 'IOS Support checks domain ownership and roster legitimacy before label verification.',
   },
   event_promoter: {
     title: 'Verification proofs needed',
@@ -37,7 +37,7 @@ export const ROLE_VERIFICATION_REQUIREMENTS: Record<DashboardPersona, PathVerifi
       'Official email on your brand domain (e.g. you@yourbrand.com)',
       'At least 1 campaign or brand proof link (site, case study, sponsored drop, press)',
     ],
-    note: 'Desk verifies the brand is real before campaign workspace tools are trusted.',
+    note: 'IOS Support verifies the brand is real before campaign workspace tools are trusted.',
   },
 }
 
@@ -47,7 +47,7 @@ export const PLAYLIST_CURATOR_REQUIREMENTS: PathVerificationInfo = {
     'One or more public playlist URLs (Spotify, Apple Music, YouTube Music, SoundCloud, etc.)',
     'A short note — genres you curate, audience reach, and why IOS should feature your taste',
   ],
-  note: 'Super editor opens and checks every playlist link before approval.',
+  note: 'IOS Support opens and checks every playlist link before approval.',
 }
 
 export const ARTIST_PATH_REQUIREMENTS: PathVerificationInfo = {

@@ -147,7 +147,7 @@ export function EditorProfilePanel({ user, onSaved }: EditorProfilePanelProps) {
             Letters, numbers, underscore only. Minimum 3 characters.
             {isSuperEditor(user.role) && (
               <span className="block mt-1 text-foreground/80">
-                Super editor: you can claim brand handles such as <strong>@ios</strong>.
+                IOS Support: you can claim brand handles such as <strong>@ios</strong>.
               </span>
             )}
           </p>

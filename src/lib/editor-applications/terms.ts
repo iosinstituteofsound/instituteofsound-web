@@ -12,7 +12,7 @@ export const EDITOR_TERMS_SECTIONS: { title: string; paragraphs: string[] }[] = 
     title: 'Editorial independence & standards',
     paragraphs: [
       'You agree to produce original writing and honest criticism. Plagiarism, hate speech, harassment, undisclosed paid promotion, or deliberate misrepresentation will result in removal of published work and loss of access.',
-      'The super editorial team may edit for clarity, length, house style, or legal concerns while preserving your voice where possible.',
+      'The IOS Support editorial team may edit for clarity, length, house style, or legal concerns while preserving your voice where possible.',
     ],
   },
   {

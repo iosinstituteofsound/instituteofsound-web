@@ -20,7 +20,7 @@ export default function EditorJoinPage() {
       <h1 className="font-serif text-3xl md:text-4xl font-bold mt-2">Join as an editor</h1>
       <p className="text-muted text-sm mt-4 leading-relaxed">
         Sign in with Google to create your account. You start as a regular member — then apply with
-        links to your published writing. A super editor reviews every application before desk
+        links to your published writing. IOS Support reviews every application before desk
         access is granted.
       </p>
       <div className="mt-8">
@@ -33,7 +33,7 @@ export default function EditorJoinPage() {
         </Link>
       </p>
       <p className="text-xs text-muted mt-2">
-        Super editorial staff:{' '}
+        IOS Support editorial team:{' '}
         <Link to="/desk" className="ios-link">
           Desk login
         </Link>

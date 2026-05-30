@@ -20,9 +20,9 @@ export default function DeskLoginPage() {
     <div className="section-padding pt-32 min-h-screen">
       <div className="max-w-md mx-auto ios-panel">
         <p className="ios-kicker">Staff</p>
-        <h1 className="font-serif text-3xl font-bold mt-3">Editorial Desk</h1>
+        <h1 className="font-serif text-3xl font-bold mt-3">IOS Support</h1>
         <p className="text-sm text-muted mt-3">
-          Sign in with the Google account that has super editor access.
+          Sign in with the Google account that has IOS Support desk access.
         </p>
 
         {mode === 'local' && (

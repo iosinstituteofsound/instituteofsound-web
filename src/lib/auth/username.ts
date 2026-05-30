@@ -32,7 +32,7 @@ export function validateUsername(
   const u = normalizeUsername(username)
   if (u.length < 3) return 'Username must be at least 3 characters (letters, numbers, underscore).'
   if (RESERVED.has(u) && options?.role !== 'super_editor') {
-    return 'This username is reserved. Super editors can claim brand handles like @ios.'
+    return 'This username is reserved. IOS Support staff can claim brand handles like @ios.'
   }
   return null
 }

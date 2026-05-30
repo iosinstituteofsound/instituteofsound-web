@@ -285,7 +285,7 @@ export function SuperEditorDashboardPreview() {
     <section className="space-y-5">
       <div className="ios-card p-5">
         <p className="text-xs text-muted">
-          Super Editor preview mode: dashboards ka layout dekh sakte ho bina apna role ya kisi user
+          IOS Support preview mode: dashboards ka layout dekh sakte ho bina apna role ya kisi user
           ka role change kiye.
         </p>
         <div className="flex items-center gap-2 mt-3">
