@@ -1,4 +1,4 @@
-import { restoreArtistProfileArchive } from '../../../src/lib/artist-profile/archive.js'
+import { restoreArtistProfileArchiveWithAdmin } from '../artistRecoveryRestore.js'
 import type {
   ArtistPageRecoveryRequest,
   ArtistProfileArchive,
@@ -236,7 +236,11 @@ async function handleDeskReview(req: ApiRequest, res: ApiResponse) {
     if (request.status !== 'pending') throw new Error('Request already reviewed.')
 
     if (body.decision === 'approved') {
-      await restoreArtistProfileArchive(String(request.archive_id), auth.authUser.id, admin)
+      await restoreArtistProfileArchiveWithAdmin(
+        String(request.archive_id),
+        auth.authUser.id,
+        admin,
+      )
     }
 
     const { error: updateErr } = await supabase

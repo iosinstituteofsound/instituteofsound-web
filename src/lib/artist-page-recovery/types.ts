@@ -1,6 +1,13 @@
-import type { ArtistProfile } from '@/lib/artist-profile/types'
-import type { ArtistAlbum, ArtistBioTimelineEntry, ArtistLineupEntry, ArtistMerchItem, ArtistTrack, ArtistVideo } from '@/lib/artist-profile/types'
-import type { ArtistRelease } from '@/lib/releases/types'
+import type { ArtistProfile } from '../artist-profile/types'
+import type {
+  ArtistAlbum,
+  ArtistBioTimelineEntry,
+  ArtistLineupEntry,
+  ArtistMerchItem,
+  ArtistTrack,
+  ArtistVideo,
+} from '../artist-profile/types'
+import type { ArtistRelease } from '../releases/types'
 
 export type ArtistDeletionReason = 'incomplete_draft_expired' | 'inactive_live_page' | 'manual'
 

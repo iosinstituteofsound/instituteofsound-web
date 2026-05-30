@@ -1,4 +1,4 @@
-import type { DashboardPersona } from '@/lib/auth/types'
+import type { DashboardPersona } from '../auth/types'
 
 export type VerificationRoleType = Exclude<DashboardPersona, 'event_promoter'> | 'event_promoter'
 
