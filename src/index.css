@@ -1979,14 +1979,184 @@ body.ios-app-shell {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  margin-bottom: 2rem;
-  background: linear-gradient(165deg, var(--color-elevated) 0%, var(--color-surface) 100%);
+  gap: 0.85rem 1rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(165deg, rgba(18, 18, 18, 0.98) 0%, rgba(10, 10, 10, 0.98) 100%);
   border: 1px solid var(--color-border);
   position: sticky;
   top: 4.5rem;
   z-index: 30;
+}
+
+.artist-dash-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.artist-dash-toolbar-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.artist-dash-toolbar-progress-track {
+  display: block;
+  width: 4.5rem;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.artist-dash-toolbar-progress-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-mh-red), var(--color-crimson));
+  transition: width 0.25s ease;
+}
+
+.artist-dash-toolbar-progress-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--color-muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.artist-dash-checklist-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.artist-dash-checklist-title {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.artist-dash-checklist-pct {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--color-mh-red);
+  font-variant-numeric: tabular-nums;
+}
+
+.artist-dash-checklist-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+}
+
+@media (min-width: 640px) {
+  .artist-dash-checklist-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 1.25rem;
+  }
+}
+
+.artist-dash-checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--color-muted-foreground);
+}
+
+.artist-dash-checklist-item-done {
+  color: rgba(110, 231, 183, 0.92);
+}
+
+.artist-dash-checklist-mark {
+  flex-shrink: 0;
+  width: 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.artist-page-rules {
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(212, 0, 0, 0.22);
+  background: rgba(212, 0, 0, 0.04);
+}
+
+.artist-page-rules-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-signal);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.artist-page-rules-summary::-webkit-details-marker {
+  display: none;
+}
+
+.artist-page-rules-summary::before {
+  content: '▸';
+  margin-right: 0.5rem;
+  color: var(--color-mh-red);
+  transition: transform 0.15s ease;
+}
+
+.artist-page-rules[open] .artist-page-rules-summary::before {
+  transform: rotate(90deg);
+}
+
+.artist-page-rules-summary-meta {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.artist-page-rules-body {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.artist-page-rules-list {
+  margin: 0.85rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--color-muted-foreground);
+}
+
+.artist-page-rules-list li + li {
+  margin-top: 0.4rem;
+}
+
+.artist-page-rules-footnote {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+.artist-page-rules-footnote strong {
+  color: var(--color-foreground);
+  font-weight: 600;
 }
 
 .artist-dash-toolbar-meta {
@@ -2019,10 +2189,12 @@ body.ios-app-shell {
 
 .artist-dash-nav {
   position: sticky;
-  top: 8.5rem;
-  padding: 1.25rem;
-  background: var(--color-surface);
+  top: 7.25rem;
+  padding: 0.85rem;
+  background: linear-gradient(165deg, rgba(14, 14, 14, 0.95), rgba(8, 8, 8, 0.98));
   border: 1px solid var(--color-border);
+  max-height: calc(100dvh - 8.5rem);
+  overflow-y: auto;
 }
 
 .artist-dash-nav-label {
@@ -2077,16 +2249,21 @@ body.ios-app-shell {
 }
 
 .artist-dash-nav-item-active {
+  color: var(--color-mh-red);
+  border-color: rgba(212, 0, 0, 0.45);
   background: rgba(212, 0, 0, 0.1);
-  border-color: rgba(212, 0, 0, 0.35);
+  box-shadow: inset 2px 0 0 var(--color-mh-red);
+}
+
+.artist-dash-nav-item-active .artist-dash-nav-item-label {
+  color: var(--color-mh-red);
 }
 
 .artist-dash-nav-item-label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--color-foreground);
 }
 
@@ -2100,7 +2277,7 @@ body.ios-app-shell {
 .artist-dash-main {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 1.75rem;
   min-width: 0;
 }
 
@@ -2846,10 +3023,6 @@ body.ios-app-shell {
   max-width: var(--artist-site-max);
   margin: 0 auto;
   padding: 2.5rem clamp(1.25rem, 4vw, 3rem) 4rem;
-}
-
-.artist-page-rules {
-  margin-bottom: 1rem;
 }
 
 .artist-site-owner-notice {

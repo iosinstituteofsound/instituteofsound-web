@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import type { User } from '@/lib/auth/types'
 import type {
@@ -510,6 +511,11 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   if (loading) return <LoadingTransmission variant="compact" />
 
   const profileSlug = profile?.slug ?? slugifyArtistName(displayName)
+  const checklistDone = PROFILE_COMPLETION_ITEMS.filter(
+    (item) => completionStatus[item.key as keyof typeof completionStatus],
+  ).length
+  const checklistTotal = PROFILE_COMPLETION_ITEMS.length
+  const checklistPct = Math.round((checklistDone / checklistTotal) * 100)
 
   return (
     <div className="artist-dash-layout">
@@ -526,8 +532,26 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
               {artistPageStatusLabel(publication.pageStatus, publication.inactive)}
             </MetalBadge>
             <span className="artist-dash-toolbar-url">/artist/{profileSlug}</span>
+            <div
+              className="artist-dash-toolbar-progress"
+              role="progressbar"
+              aria-valuenow={checklistPct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Profile ${checklistPct} percent complete`}
+            >
+              <span className="artist-dash-toolbar-progress-track">
+                <span
+                  className="artist-dash-toolbar-progress-fill"
+                  style={{ width: `${checklistPct}%` }}
+                />
+              </span>
+              <span className="artist-dash-toolbar-progress-label">
+                {checklistDone}/{checklistTotal}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="artist-dash-toolbar-actions">
             {profile && (
               <>
                 <Link
@@ -536,7 +560,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
                   rel="noreferrer"
                   className="ios-btn ios-btn-ghost !text-xs !py-2"
                 >
-                  Preview page ↗
+                  Preview ↗
                 </Link>
                 <Link
                   to={`/artist/${profile.slug}/epk`}
@@ -559,12 +583,6 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
             </Button>
           </div>
         </div>
-
-        <p className="artist-dash-intro">
-          Use the section list to jump between areas. Click <strong className="text-foreground">Page update</strong>{' '}
-          after edits. Incomplete drafts are removed after 7 days; live pages need activity every 60 days or the page
-          is deleted.
-        </p>
 
         <ArtistPageRulesCallout variant="studio" />
 
@@ -594,18 +612,22 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
             />
           )}
           <div className="artist-dash-checklist">
-            <p className="text-xs uppercase tracking-widest text-muted mb-3">
-              Discover checklist
-            </p>
-            <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+            <div className="artist-dash-checklist-head">
+              <p className="artist-dash-checklist-title">Discover checklist</p>
+              <span className="artist-dash-checklist-pct">{checklistPct}%</span>
+            </div>
+            <ul className="artist-dash-checklist-grid">
               {PROFILE_COMPLETION_ITEMS.map((item) => {
-                const done = completionStatus[item.key]
+                const done = completionStatus[item.key as keyof typeof completionStatus]
                 return (
                   <li
                     key={item.key}
-                    className={done ? 'text-emerald-400' : 'text-muted-foreground'}
+                    className={clsx('artist-dash-checklist-item', done && 'artist-dash-checklist-item-done')}
                   >
-                    {done ? '✓' : '○'} {item.label}
+                    <span className="artist-dash-checklist-mark" aria-hidden>
+                      {done ? '✓' : '○'}
+                    </span>
+                    {item.label}
                   </li>
                 )
               })}

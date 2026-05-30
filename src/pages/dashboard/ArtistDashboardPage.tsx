@@ -132,7 +132,8 @@ export default function ArtistDashboardPage() {
     <RoleDeskLayout
       user={user}
       mode={mode}
-      kicker="Artist portal"
+      compactHeader
+      kicker="Artist studio"
       title="Artist desk"
       summary="Build your public artist page, schedule releases, and submit tracks to Institute of Sound editors."
       badge={
@@ -148,6 +149,7 @@ export default function ArtistDashboardPage() {
           items: TABS.map((t) => ({
             id: t.id,
             label: t.label,
+            hint: t.hint,
             badge: t.id === 'history' ? submissions.length : undefined,
           })),
         },
@@ -169,26 +171,23 @@ export default function ArtistDashboardPage() {
           onClick: () => setTab('history'),
         },
         {
-          label: 'Next step',
-          value: 'Page',
-          accent: true,
+          label: profileSlug ? 'Public page' : 'Finish page',
+          value: profileSlug ? `@${profileSlug}` : 'Setup',
+          accent: !profileSlug,
           onClick: () => setTab('profile'),
         },
       ]}
       headerExtra={
-        <>
-          <Link to="/discover" className="ios-btn ios-btn-ghost !text-xs !py-2">
-            Discover
+        profileSlug ? (
+          <Link
+            to={`/artist/${profileSlug}`}
+            target="_blank"
+            rel="noreferrer"
+            className="ios-btn ios-btn-ghost !text-xs !py-2"
+          >
+            Preview ↗
           </Link>
-          {profileSlug && (
-            <Link
-              to={`/artist/${profileSlug}`}
-              className="ios-btn ios-btn-ghost !text-xs !py-2"
-            >
-              Public page
-            </Link>
-          )}
-        </>
+        ) : undefined
       }
       onLogout={() => logout()}
       rootClassName="artist-desk"
@@ -304,9 +303,15 @@ export default function ArtistDashboardPage() {
             {loadingList ? (
               <LoadingTransmission variant="compact" />
             ) : submissions.length === 0 ? (
-              <p className="text-muted text-sm py-12 border border-dashed border-border text-center">
-                No submissions yet. Use the Submit to editors tab to send your first track.
-              </p>
+              <div className="artist-dash-empty">
+                <p className="artist-dash-empty-title">No submissions yet</p>
+                <p className="artist-dash-empty-hint">
+                  Send your first track to the editorial team for review.
+                </p>
+                <Button type="button" variant="secondary" onClick={() => setTab('submit')}>
+                  Submit to editors →
+                </Button>
+              </div>
             ) : (
               <>
                 {profileSlug && (

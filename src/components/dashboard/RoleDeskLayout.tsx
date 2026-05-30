@@ -15,6 +15,7 @@ export type DeskQuickTile = {
 export type DeskNavItem<T extends string> = {
   id: T
   label: string
+  hint?: string
   badge?: number
 }
 
@@ -38,6 +39,8 @@ type Props<T extends string> = {
   headerExtra?: ReactNode
   children: ReactNode
   rootClassName?: string
+  /** Tighter header — identity + actions only (artist / member desks). */
+  compactHeader?: boolean
 }
 
 export function RoleDeskLayout<T extends string>({
@@ -55,11 +58,12 @@ export function RoleDeskLayout<T extends string>({
   headerExtra,
   children,
   rootClassName,
+  compactHeader = false,
 }: Props<T>) {
   return (
-    <div className={clsx('editor-dashboard role-desk', rootClassName)}>
+    <div className={clsx('editor-dashboard role-desk', compactHeader && 'role-desk-compact', rootClassName)}>
       <div className="editor-dashboard-inner">
-        <header className="editor-dashboard-header">
+        <header className={clsx('editor-dashboard-header', compactHeader && 'editor-dashboard-header-compact')}>
           <div className="editor-dashboard-header-main">
             <p className="editor-dashboard-kicker">
               {kicker}
@@ -67,8 +71,10 @@ export function RoleDeskLayout<T extends string>({
                 <span className="editor-dashboard-kicker-live">· live cloud</span>
               )}
             </p>
-            <h1 className="editor-dashboard-title">{title}</h1>
-            <p className="editor-dashboard-summary">{summary}</p>
+            {!compactHeader && <h1 className="editor-dashboard-title">{title}</h1>}
+            {!compactHeader && summary ? (
+              <p className="editor-dashboard-summary">{summary}</p>
+            ) : null}
             <div className="editor-dashboard-identity">
               {user.avatarUrl ? (
                 <IOSImage
@@ -166,7 +172,12 @@ export function RoleDeskLayout<T extends string>({
                           onClick={() => onTabChange(item.id)}
                           className={clsx('desk-nav-btn', active && 'desk-nav-btn-active')}
                         >
-                          <span className="truncate">{item.label}</span>
+                          <span className="desk-nav-btn-text">
+                            <span className="desk-nav-btn-label">{item.label}</span>
+                            {item.hint && (
+                              <span className="desk-nav-btn-hint">{item.hint}</span>
+                            )}
+                          </span>
                           {item.badge != null && item.badge > 0 && (
                             <span className="desk-nav-badge">{item.badge}</span>
                           )}

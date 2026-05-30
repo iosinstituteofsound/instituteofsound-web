@@ -251,7 +251,53 @@
   }
 }
 
-.desk-nav-btn,
+.desk-nav-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+  color: var(--color-muted);
+  border: 1px solid transparent;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.desk-nav-btn-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.desk-nav-btn-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: inherit;
+}
+
+.desk-nav-btn-hint {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  color: var(--color-muted);
+  opacity: 0.85;
+}
+
+.desk-nav-btn-active .desk-nav-btn-hint {
+  color: rgba(212, 0, 0, 0.75);
+}
+
 .super-editor-nav-btn {
   display: flex;
   width: 100%;
@@ -535,10 +581,89 @@
   }
 }
 
-.artist-desk .editor-dashboard-header {
-  gap: 1.5rem;
-  padding-bottom: 1.5rem;
-  margin-bottom: 1.5rem;
+.artist-desk .editor-dashboard-header-compact {
+  gap: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.artist-desk.role-desk-compact .editor-dashboard-kicker {
+  margin-bottom: 0.15rem;
+}
+
+.artist-desk .desk-nav-btn {
+  padding: 0.65rem 0.7rem;
+}
+
+.artist-desk .desk-nav-btn-label {
+  text-transform: none;
+  letter-spacing: -0.01em;
+}
+
+.artist-desk .desk-quick-tile {
+  border-radius: 0;
+  background: linear-gradient(165deg, rgba(14, 14, 14, 0.95), rgba(8, 8, 8, 0.98));
+}
+
+.artist-desk .desk-quick-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.artist-desk .desk-quick-tile-accent .desk-quick-value {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-mh-red);
+}
+
+.artist-desk .artist-dash-nav {
+  padding: 0.85rem;
+  background: linear-gradient(165deg, rgba(14, 14, 14, 0.95), rgba(8, 8, 8, 0.98));
+}
+
+.artist-desk .artist-dash-main {
+  gap: 1.75rem;
+}
+
+.artist-desk .artist-dash-section {
+  scroll-margin-top: 7rem;
+}
+
+.artist-desk .artist-dash-checklist {
+  padding: 1rem 1.15rem;
+  border-style: solid;
+  border-color: var(--color-border);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.artist-dash-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  border: 1px dashed var(--color-border);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.artist-dash-empty-title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-signal);
+}
+
+.artist-dash-empty-hint {
+  margin: 0 0 0.5rem;
+  max-width: 22rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--color-muted);
 }
 
 .artist-desk .editor-dashboard-title {
