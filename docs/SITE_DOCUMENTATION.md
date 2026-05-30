@@ -1,7 +1,7 @@
 # Institute of Sound — Site Documentation
 
 > **Local reference only.** Describes the full product: routes, roles, dashboards, components, and data flow.  
-> Last updated: May 2026 (Discover wire index 01–09, premieres feed + `/releases`, spacing rhythm) · Repo: `instituteofsound`
+> Last updated: May 2026 (API v1 on Vercel, artist page lifecycle/recovery, playlist curator, build notes) · Repo: `instituteofsound`
 
 ---
 
@@ -22,7 +22,7 @@
 13. [Studio toolkit (16 tools)](#13-studio-toolkit-16-tools)
 14. [Scenes, events & collab](#14-scenes-events--collab)
 15. [Component library (by folder)](#15-component-library-by-folder)
-16. [Data & backend](#16-data--backend)
+16. [Data & backend](#16-data--backend) (includes [API v1](#164-api-v1-vercel))
 17. [PWA & install](#17-pwa--install)
 18. [Environment variables & scripts](#18-environment-variables--scripts)
 19. [SEO & contact](#19-seo--contact)
@@ -72,12 +72,15 @@ instituteofsound/
 ├── scripts/
 │   ├── generate-pwa-icons.mjs
 │   └── generate-sitemap.mjs
-├── api/                     ← Vercel serverless routes (link preview, OG, …)
-├── supabase/migrations/     ← PostgreSQL schema (001–059+)
+├── api/                     ← Vercel serverless (see [§16.4](#164-api-v1-vercel))
+│   ├── v1/[...path].ts      ← Single catch-all for all /api/v1/* (Hobby 12-fn limit)
+│   ├── _lib/v1Router.ts     ← Route dispatch + shared handlers
+│   ├── link-preview.ts, thumbnail.ts, import-catalog.ts, share/, og/
+├── supabase/migrations/     ← PostgreSQL schema (001–063+)
 ├── src/
 │   ├── App.tsx              ← All routes
 │   ├── main.tsx             ← Providers, mount
-│   ├── api/                 ← HTTP client + endpoint fetchers
+│   ├── api/                 ← `v1Client.ts`, `v1Fallback.ts`, static endpoint fetchers
 │   ├── components/          ← UI by domain (layout, community, dashboard, …)
 │   ├── context/             ← AuthContext
 │   ├── hooks/               ← Data hooks (community, content, academy, …)
@@ -357,6 +360,8 @@ Stored as `dashboardPersona` on profile. **Reset** clears persona and returns to
 | `submit` | Submit to editors | Track submission form |
 | `history` | Submissions | List + `SubmissionLifecycleTimeline` (nav badge = submission count) |
 
+**Submit to editors** (`submit` tab) posts to Supabase table `track_submissions` via `src/lib/submissions/service.ts` (direct client insert today — **not** `/api/v1`). Artwork uses Cloudinary folder `ios/submissions`. If you see `Request failed (404)` with `VITE_USE_V1_API=true`, that usually means a **dashboard refresh** called `/api/v1/*` (profile or recovery) while the v1 route was missing on Vercel — not the submission insert itself. After deploy, verify: `curl -sL -o /dev/null -w "%{http_code}" https://instituteofsound.in/api/v1/me` → expect **401** (route exists, auth required).
+
 #### Quick strip
 Submissions total, pending, approved, **Next step** → profile tab.
 
@@ -422,8 +427,12 @@ Adds **Command** group before editorial desk:
 |--------|-------|-----------|
 | `analytics` | Overview | `SuperAdminAnalytics` — role counts, clickable user lists |
 | `preview` | Dashboard preview | `SuperEditorDashboardPreview` |
-| `verification` | Verification queue | `SuperEditorVerificationPanel` |
+| `verification` | Verification queue | `SuperEditorVerificationPanel` — role verification + relationship claims |
 | `applications` | Editor applications | `EditorApplicationsPanel` |
+| `playlist_curators` | Playlist curators | `SuperEditorPlaylistCuratorPanel` — review curator applications (`060`) |
+| `deleted_pages` | Deleted artist pages | `SuperEditorDeletedPagesPanel` — archive + recovery requests (`063`) |
+
+**IOS Support** = super editor role in UI copy; DB role remains `super_editor`.
 
 Editorial desk + account groups match the regular editor. **Quick strip** adds pipeline label tile (Backlog / Active / Clear).
 
@@ -728,6 +737,19 @@ Kinds include `post_comment`, follows, and other community events enqueued by SQ
 - Artist dashboard **Releases** tab → `artist_releases` → `ReleaseDetailPage`, `ReleaseCountdown`, `ReleaseEmbed`  
 - Scene discovery: `SceneReleaseRail` on scene hubs  
 
+### Artist page lifecycle & recovery (migrations `061`–`063`)
+
+| Concept | Behaviour |
+|---------|-----------|
+| **Page status** (`061`) | `page_status`: `pending` (draft checklist) vs `live` · UI label **Page update** on publish/refresh |
+| **Activity** (`062`) | `last_activity_at` on profile; 60-day inactivity can archive live pages; 7-day incomplete drafts expire |
+| **Archive** | `artist_profile_archives` stores JSON snapshot before delete |
+| **Recovery** (`063`) | Artist uploads gov ID → `artist_page_recovery_requests` · IOS Support approves → restore via service role |
+
+**Member-facing recovery:** `/support/artist` (`ArtistIosSupportPage.tsx`) when page was removed.
+
+**Services:** `src/lib/artist-profile/pageEnforcement.ts`, `pageLifecycle.ts`, `archive.ts`, `src/lib/artist-page-recovery/service.ts`.
+
 ---
 
 ## 11. Editorial desk
@@ -910,6 +932,10 @@ Domain-specific UI for those features.
 | Collab | `040` |
 | Editor applications | `022` |
 | Scenes | `039` |
+| Playlist curator applications | `060` |
+| Artist page status | `061` |
+| Artist page lifecycle (activity, purge SQL) | `062` |
+| Artist page recovery | `063` |
 
 ### Key services (`src/lib/`)
 
@@ -923,7 +949,10 @@ Domain-specific UI for those features.
 | `academy/` | Lessons, progress, quizzes |
 | `releases/` | Release scheduling |
 | `discovery/` | Discover wire data: premieres, scenes, events, listeners, playlists, labels, community pulse |
-| `verification/` | Role verification queue |
+| `verification/` | Role verification queue, relationship claims |
+| `playlistCurator/` | Curator applications (member apply + desk review) |
+| `artist-page-recovery/` | Deleted page archives + recovery requests |
+| `editor-applications/` | Apply to join editorial desk |
 
 ### Discover hooks (`src/hooks/`)
 
@@ -940,8 +969,116 @@ Homepage magazine content until fully CMS-driven from Supabase. Discover section
 
 | Route | Purpose |
 |-------|---------|
-| `api/link-preview.ts` | OG scrape + optional Microlink; used by feed composer (not bundled from `src/`) |
-| `api/_lib/linkPreview.ts` | Shared implementation (also wired in `vite.config.ts` for local dev) |
+| `api/v1/[...path].ts` | **All** `/api/v1/*` JSON API (one function — see [§16.4](#164-api-v1-vercel)) |
+| `api/link-preview.ts` | OG scrape + optional Microlink; used by feed composer |
+| `api/thumbnail.ts` | Resolve thumbnail URL for a link |
+| `api/import-catalog.ts` | Spotify/YouTube catalog import for artist studio |
+| `api/share/artist.ts`, `feature.ts`, `site.ts` | Social share HTML/meta |
+| `api/og/artist.tsx`, `site.tsx` | OG image generation |
+| `api/_lib/linkPreview.ts` | Shared link preview (also in `vite.config.ts` dev middleware) |
+| `api/_lib/devV1Router.ts` | Local dev: Vite proxies `/api/v1/*` to `dispatchV1Api` |
+
+**Do not** use `api/v1/[[...path]].ts` (optional catch-all) on Vercel — it may not register; use `api/v1/[...path].ts`.
+
+### 16.4 API v1 (Vercel)
+
+**Goal:** Sensitive reads/writes go through **Vercel serverless** (`/api/v1/*`) with the user JWT, not direct browser → Supabase for those modules. No separate paid Node backend.
+
+```
+Browser (React)  --Bearer JWT-->  /api/v1/*  --user or service client-->  Supabase
+```
+
+| Piece | Path |
+|-------|------|
+| Entry (prod) | `api/v1/[...path].ts` → `api/_lib/v1Router.ts` |
+| Client | `src/api/v1Client.ts` · flag `isV1ApiEnabled()` |
+| Fallback | `src/api/v1Fallback.ts` — on **404**, retry direct Supabase so UI keeps working |
+| Local dev | `vite.config.ts` → `dispatchV1DevApi` for `/api/v1/*` |
+
+**Enable:** `VITE_USE_V1_API=true` in `.env` / Vercel (see `.env.example`). Server keys `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` are **not** `VITE_` prefixed.
+
+#### Migration phases (client wiring)
+
+| Phase | Domains | Wired in `src/lib/…` when flag on |
+|-------|---------|----------------------------------|
+| **1** | Session + artist profile | `artist-profile/service.ts` → `/me`, `/artist/profile` |
+| **2** | Community feed | `community/feedService.ts` → feed, spins, drops, reactions, edit, hide |
+| **3** | Verification, playlist curator, artist recovery | `verification/service.ts`, `playlistCurator/service.ts`, `artist-page-recovery/service.ts` |
+| **3b** | Network + public member profile | `network/connectionService.ts`, `community/memberProfileService.ts`, `community/crewService.ts` (profile crew/roster), `artist-profile/networkLink.ts` → `/api/v1/network/*` |
+| **4** (planned) | Remaining modules, trim `localStorage` demos, optional RLS lockdown | — |
+
+**Cursor rule:** `.cursor/rules/api-only-frontend.mdc` — new UI code must not call Supabase tables/RPC directly; add `/api/v1` routes instead.
+
+**Still direct Supabase (no v1 yet):** track **submissions** (`submissions/service.ts`), editorial drafts, **releases** (profile tab uses `releases/service.ts`), events, collab, academy, most discovery, follow toggles.
+
+#### `/api/v1` route map
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| GET | `/api/v1/me` | Bearer | Member profile + role |
+| GET, PUT | `/api/v1/artist/profile` | Bearer | Own artist page |
+| GET | `/api/v1/community/feed` | Optional | Cursor pagination query params |
+| POST | `/api/v1/community/spins` | Bearer | Create spin |
+| POST, PATCH | `/api/v1/community/drops` | Bearer | Create / edit drop |
+| PATCH | `/api/v1/community/spin` | Bearer | Edit spin |
+| POST | `/api/v1/community/reactions` | Bearer | Toggle reaction |
+| DELETE | `/api/v1/community/post` | Bearer | Hide own post |
+| GET, POST | `/api/v1/verification/requests` | Bearer | My role verification |
+| GET, PATCH | `/api/v1/verification/desk/requests` | Super editor | Queue; approve sets `dashboard_persona` |
+| GET | `/api/v1/verification/claims/incoming` | Bearer | Claims against you |
+| GET | `/api/v1/verification/claims/outgoing` | Bearer | Your claims |
+| POST, PATCH | `/api/v1/verification/claims` | Bearer | Create / respond |
+| GET, POST | `/api/v1/playlist-curator/applications` | Bearer | Apply as curator |
+| GET, PATCH | `/api/v1/playlist-curator/desk/applications` | Super editor | Review applications |
+| GET | `/api/v1/artist-recovery/archive` | Bearer | Latest deleted archive for user |
+| GET | `/api/v1/artist-recovery/request?archiveId=` | Bearer | Own recovery request |
+| POST | `/api/v1/artist-recovery/requests` | Bearer | Submit recovery |
+| GET | `/api/v1/artist-recovery/desk/deleted-pages` | Super editor | Archives + requests |
+| PATCH | `/api/v1/artist-recovery/desk/requests` | Super editor | Approve/reject; restore uses **service role** (`api/_lib/artistRecoveryRestore.ts`) |
+| GET | `/api/v1/network/profile?handle=` | Optional | Public member profile |
+| GET | `/api/v1/network/profile/posts?handle=` | Optional | Posts by handle |
+| GET | `/api/v1/network/profile/activity?handle=` | Optional | Activity log |
+| GET | `/api/v1/network/profile/followers?handle=` | Optional | Followers list |
+| GET | `/api/v1/network/profile/following?handle=` | Optional | Following list |
+| GET | `/api/v1/network/profile/artist?userId=` | Optional | Published artist id + slug |
+| GET | `/api/v1/network/profile/crew?userId=` | Optional | User's crew |
+| GET | `/api/v1/network/crew/roster?crewId=` | Optional | Crew roster |
+| POST, PATCH, DELETE | `/api/v1/network/connections/request` | Bearer | Send / respond to connect request |
+| DELETE | `/api/v1/network/connections` | Bearer | Remove connection (`targetUserId` body) |
+| GET | `/api/v1/network/connections?userId=` | Optional | Connection list |
+| GET | `/api/v1/network/connections/mutual?targetUserId=` | Optional | Mutual connections |
+| GET | `/api/v1/network/connections/incoming?fromUserId=` | Bearer | Pending request id |
+| GET | `/api/v1/network/requests/pending` | Bearer | Incoming connect requests |
+| GET | `/api/v1/network/people/suggested` | Optional | Suggested people |
+| GET | `/api/v1/network/people/search?q=` | Optional | People search |
+
+Desk guard: `api/_lib/requireDesk.ts` → `profiles.role === 'super_editor'`.
+
+#### Build & deploy
+
+```bash
+npm run build   # sitemap + pwa:icons + tsc -p api/tsconfig.json + tsc -b + vite build
+```
+
+- `api/tsconfig.json` — typechecks `api/` and shared `src/lib` imports (`@/*` paths).
+- `tsconfig.node.json` — must include `@/*` paths (vite.config imports `api/_lib/*`).
+- `vercel.json` — `functions["api/v1/[...path].ts"].includeFiles`: `src/lib/**`
+
+**Smoke test after deploy:**
+
+```bash
+curl -sL -o /dev/null -w "%{http_code}\n" "https://instituteofsound.in/api/v1/me"
+# 401 = route OK · 404 = function not deployed — check api/v1/[...path].ts and redeploy
+```
+
+**Troubleshooting**
+
+| Symptom | Likely cause |
+|---------|----------------|
+| `Request failed (404)` on dashboard with v1 flag | `/api/v1/*` not deployed or wrong filename (`[[...path]]` vs `[...path]`) |
+| Submit to editors shows 404 | Usually failed **refresh** after submit (v1 profile/recovery), not `track_submissions` |
+| Build TS2307 on `@/lib/…` during `tsc -b` | Add `paths` to `tsconfig.node.json` |
+| Hobby “12 functions” exceeded | Keep one `api/v1/[...path].ts` catch-all (do not split per route) |
 
 ---
 
@@ -970,11 +1107,22 @@ See `.env.example` and setup docs:
 
 Common vars:
 
-- `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`  
-- `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET`  
-- `VITE_SITE_URL` — canonical URL for SEO  
-- `VITE_YOUTUBE_API_KEY` — artist catalog import  
-- `MICROLINK_API_KEY` — (Vercel only) richer link previews on bot-blocked sites  
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `VITE_SUPABASE_URL` | Client | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Client | Public anon key |
+| `SUPABASE_URL` | Server (Vercel + `.env`) | Same URL for API routes |
+| `SUPABASE_ANON_KEY` | Server | Verify user JWT in `/api/v1` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server | Desk recovery restore, admin-only ops |
+| `VITE_USE_V1_API` | Client | `true` / `1` / `yes` → route wired modules through `/api/v1` |
+| `VITE_CLOUDINARY_CLOUD_NAME` | Client | Image uploads |
+| `VITE_CLOUDINARY_UPLOAD_PRESET` | Client | Unsigned preset |
+| `VITE_SITE_URL` | Client | Canonical URL for SEO / auth redirects |
+| `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` | Server | Catalog import |
+| `YOUTUBE_API_KEY` | Server | Catalog import |
+| `MICROLINK_API_KEY` | Server (optional) | Richer link previews |
+
+Never put `SUPABASE_SERVICE_ROLE_KEY` in a `VITE_` variable.
 
 ### npm scripts
 

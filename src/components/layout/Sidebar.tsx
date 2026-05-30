@@ -6,6 +6,9 @@ import { useAuth } from '@/context/AuthContext'
 import { useDmUnread } from '@/hooks/useDmUnread'
 import { isNavActive } from '@/lib/nav/routeModes'
 import { SIDEBAR_NAV } from '@/lib/nav/sidebar'
+import { NETWORK_NAV } from '@/lib/nav/networkNav'
+import { fetchUnreadNotificationCount } from '@/lib/community/notificationService'
+import { useEffect, useState } from 'react'
 import { IosBrandLockup } from '@/components/layout/IosBrandLockup'
 
 type Props = {
@@ -19,6 +22,15 @@ export function Sidebar({ className, onNavigate }: Props) {
   const { user } = useAuth()
   const { guardNavClick } = useNavGate()
   const dmUnread = useDmUnread()
+  const [notifUnread, setNotifUnread] = useState(0)
+
+  useEffect(() => {
+    if (!user) return
+    void fetchUnreadNotificationCount(user.id).then(setNotifUnread)
+    const onChange = () => void fetchUnreadNotificationCount(user.id).then(setNotifUnread)
+    window.addEventListener('ios-community-notification-change', onChange)
+    return () => window.removeEventListener('ios-community-notification-change', onChange)
+  }, [user])
 
   return (
     <aside
@@ -34,26 +46,36 @@ export function Sidebar({ className, onNavigate }: Props) {
       <nav className="v2-sidebar-nav" aria-label="Site navigation">
         {user && (
           <div className="v2-nav-group">
+            <p className="v2-nav-group-title">Network</p>
             <ul className="v2-nav-list">
-              <li>
-                <Link
-                  to="/feed"
-                  onClick={onNavigate}
-                  className={clsx('v2-nav-link', pathname.startsWith('/feed') && 'v2-nav-link-active')}
-                >
-                  <span>Feed</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/messages"
-                  onClick={onNavigate}
-                  className={clsx('v2-nav-link', pathname.startsWith('/messages') && 'v2-nav-link-active')}
-                >
-                  <span>Messages</span>
-                  {dmUnread > 0 && <span className="v2-nav-badge">{dmUnread > 9 ? '9+' : dmUnread}</span>}
-                </Link>
-              </li>
+              {NETWORK_NAV.map((item) => {
+                const active =
+                  item.href === '/network'
+                    ? pathname === '/network'
+                    : pathname.startsWith(item.href)
+                const badge =
+                  item.href === '/messages' && dmUnread > 0
+                    ? dmUnread > 9
+                      ? '9+'
+                      : String(dmUnread)
+                    : item.href === '/network' && notifUnread > 0
+                      ? notifUnread > 9
+                        ? '9+'
+                        : String(notifUnread)
+                      : undefined
+                return (
+                  <li key={item.href}>
+                    <Link
+                      to={item.href}
+                      onClick={onNavigate}
+                      className={clsx('v2-nav-link', active && 'v2-nav-link-active')}
+                    >
+                      <span>{item.label}</span>
+                      {badge && <span className="v2-nav-badge">{badge}</span>}
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           </div>
         )}

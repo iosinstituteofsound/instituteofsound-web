@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { formatAccountNumericId } from '@/lib/auth/accountId'
 import { homeDashboardPath } from '@/lib/auth/roles'
 import {
   fetchMemberConnections,
@@ -16,22 +15,33 @@ import {
 } from '@/lib/community/memberProfileService'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import { useCommunityBadges } from '@/hooks/useCommunityBadges'
-import { MemberProfileHeader } from '@/components/community/member/MemberProfileHeader'
+import { NetworkProfileHeader } from '@/components/network/NetworkProfileHeader'
+import { NetworkProfileSidebar } from '@/components/network/NetworkProfileSidebar'
 import {
   MemberProfileTabs,
   type MemberProfileTab,
 } from '@/components/community/member/MemberProfileTabs'
 import { MemberProfileFeed } from '@/components/community/member/MemberProfileFeed'
 import { MemberProfileSignalLog } from '@/components/community/member/MemberProfileSignalLog'
-import { MemberProfileMedals } from '@/components/community/member/MemberProfileMedals'
-import { MemberProfileAcademy } from '@/components/community/member/MemberProfileAcademy'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { useSeo } from '@/hooks/useSeo'
-import { fetchArtistSlugForUserId } from '@/lib/artist-profile/networkLink'
+import { fetchPublishedArtistMetaForUserId } from '@/lib/artist-profile/networkLink'
+import { NetworkProfileOverview } from '@/components/network/profile/NetworkProfileOverview'
+import { NetworkProfileAbout } from '@/components/network/profile/NetworkProfileAbout'
+import { NetworkProfileReleases } from '@/components/network/profile/NetworkProfileReleases'
+import { NetworkProfileCrews } from '@/components/network/profile/NetworkProfileCrews'
 import { listManagedArtistsByHandle } from '@/lib/artist-profile/service'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonLd'
 import { networkProfilePath } from '@/lib/community/networkPaths'
 import { COMMUNITY_FOLLOW_EVENT } from '@/lib/community/followService'
+import {
+  fetchConnectionsList,
+  fetchIncomingRequestIdFromUser,
+  fetchMutualConnections,
+  fetchSuggestedPeople,
+  NETWORK_CONNECTION_EVENT,
+} from '@/lib/network/connectionService'
+import type { NetworkPersonCard } from '@/lib/network/connectionTypes'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { Input, FieldLabel } from '@/components/ui/Input'
 import { ImageUpload } from '@/components/ui/ImageUpload'
@@ -39,8 +49,13 @@ import { updateUserProfile } from '@/lib/auth/profile'
 
 function tabFromSearch(params: URLSearchParams): MemberProfileTab {
   const t = params.get('tab')
-  if (t === 'signal' || t === 'medals' || t === 'academy') return t
-  return 'feed'
+  if (t === 'overview') return 'overview'
+  if (t === 'posts' || t === 'feed') return 'posts'
+  if (t === 'activity' || t === 'signal') return 'activity'
+  if (t === 'releases') return 'releases'
+  if (t === 'crews') return 'crews'
+  if (t === 'about' || t === 'medals' || t === 'academy') return 'about'
+  return 'overview'
 }
 
 export default function CommunityMemberPage() {
@@ -56,6 +71,7 @@ export default function CommunityMemberPage() {
   const [notFound, setNotFound] = useState(false)
   const [tab, setTab] = useState<MemberProfileTab>(() => tabFromSearch(searchParams))
   const [artistSlug, setArtistSlug] = useState<string | null>(null)
+  const [artistProfileId, setArtistProfileId] = useState<string | null>(null)
   const [managedArtists, setManagedArtists] = useState<
     { profileId: string; slug: string; displayName: string; tagline?: string; avatarUrl?: string }[]
   >([])
@@ -67,7 +83,12 @@ export default function CommunityMemberPage() {
   const [savingProfile, setSavingProfile] = useState(false)
   const [editError, setEditError] = useState('')
   const [editSuccess, setEditSuccess] = useState('')
-  const [connectionsOpen, setConnectionsOpen] = useState<'followers' | 'following' | null>(null)
+  const [connectionsOpen, setConnectionsOpen] = useState<
+    'followers' | 'following' | 'connections' | null
+  >(null)
+  const [pendingRequestId, setPendingRequestId] = useState<string | null>(null)
+  const [mutuals, setMutuals] = useState<NetworkPersonCard[]>([])
+  const [suggested, setSuggested] = useState<NetworkPersonCard[]>([])
   const [connectionsLoading, setConnectionsLoading] = useState(false)
   const [connectionsError, setConnectionsError] = useState('')
   const [connections, setConnections] = useState<MemberConnectionProfile[]>([])
@@ -124,21 +145,61 @@ export default function CommunityMemberPage() {
       setPosts([])
       setActivity([])
       setArtistSlug(null)
+      setArtistProfileId(null)
       setManagedArtists([])
     } else {
       setProfile(p)
       setPosts(postList)
       setActivity(act)
-      const slug = await fetchArtistSlugForUserId(p.userId)
-      setArtistSlug(slug)
+      const artistMeta = await fetchPublishedArtistMetaForUserId(p.userId)
+      setArtistSlug(artistMeta?.slug ?? null)
+      setArtistProfileId(artistMeta?.id ?? null)
       const managed = await listManagedArtistsByHandle(p.handle)
       setManagedArtists(managed)
     }
     setLoading(false)
-  }, [handle])
+
+    const isOwnProfile = Boolean(
+      user &&
+        p &&
+        (normalizeHandle(user.username ?? '') === handle ||
+          memberHandleFromUser(user) === handle ||
+          p.userId === user.id),
+    )
+
+    if (p && !isOwnProfile) {
+      const [reqId, mutualList, suggestedList] = await Promise.all([
+        p.viewerConnectionStatus === 'pending_in'
+          ? fetchIncomingRequestIdFromUser(p.userId)
+          : Promise.resolve(null),
+        fetchMutualConnections(p.userId),
+        fetchSuggestedPeople(6),
+      ])
+      setPendingRequestId(reqId)
+      setMutuals(
+        mutualList.map((m) => ({
+          ...m,
+          role: 'member',
+          totalDb: 0,
+          connectionStatus: 'connected' as const,
+        })),
+      )
+      setSuggested(suggestedList)
+    } else {
+      setPendingRequestId(null)
+      setMutuals([])
+      setSuggested([])
+    }
+  }, [handle, user])
 
   useEffect(() => {
     void loadProfile()
+  }, [loadProfile])
+
+  useEffect(() => {
+    const onConnection = () => void loadProfile()
+    window.addEventListener(NETWORK_CONNECTION_EVENT, onConnection)
+    return () => window.removeEventListener(NETWORK_CONNECTION_EVENT, onConnection)
   }, [loadProfile])
 
   useEffect(() => {
@@ -148,9 +209,9 @@ export default function CommunityMemberPage() {
   }, [loadProfile])
 
   useEffect(() => {
-    if (!loading && profile && tab === 'feed') {
+    if (!loading && profile && tab === 'posts') {
       requestAnimationFrame(() => {
-        document.getElementById('member-profile-feed')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        document.getElementById('member-profile-posts')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       })
     }
   }, [loading, profile, tab])
@@ -167,12 +228,19 @@ export default function CommunityMemberPage() {
     setTab(tabFromSearch(searchParams))
   }, [searchParams])
 
+  useEffect(() => {
+    if (!artistProfileId && tab === 'releases') {
+      setTab('overview')
+      setSearchParams({}, { replace: true })
+    }
+  }, [artistProfileId, tab, setSearchParams])
+
   const setActiveTab = (next: MemberProfileTab) => {
     setTab(next)
-    setSearchParams(next === 'feed' ? {} : { tab: next }, { replace: true })
-    if (next === 'feed') {
+    setSearchParams(next === 'overview' ? {} : { tab: next }, { replace: true })
+    if (next === 'posts') {
       requestAnimationFrame(() => {
-        document.getElementById('member-profile-feed')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        document.getElementById('member-profile-posts')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       })
     }
   }
@@ -204,7 +272,6 @@ export default function CommunityMemberPage() {
     )
   }
 
-  const accountId = formatAccountNumericId(profile.userId)
   const dashboardHref = user ? homeDashboardPath(user.role) : undefined
 
   const saveProfileFromNetwork = async (event: React.FormEvent) => {
@@ -234,12 +301,25 @@ export default function CommunityMemberPage() {
     }
   }
 
-  const openConnections = async (mode: 'followers' | 'following') => {
+  const openConnections = async (mode: 'followers' | 'following' | 'connections') => {
     setConnectionsOpen(mode)
     setConnectionsLoading(true)
     setConnectionsError('')
     try {
-      const list = await fetchMemberConnections(handle, mode)
+      let list: MemberConnectionProfile[]
+      if (mode === 'connections' && profile) {
+        list = (await fetchConnectionsList(profile.userId)).map((c) => ({
+          userId: c.userId,
+          displayName: c.displayName,
+          handle: c.handle,
+          avatarUrl: c.avatarUrl,
+          followedAt: new Date().toISOString(),
+        }))
+      } else if (mode === 'followers' || mode === 'following') {
+        list = await fetchMemberConnections(handle, mode)
+      } else {
+        list = []
+      }
       setConnections(list)
     } catch (err) {
       setConnectionsError(err instanceof Error ? err.message : 'Could not load this list.')
@@ -250,25 +330,27 @@ export default function CommunityMemberPage() {
   }
 
   return (
-    <div className="member-profile-page">
+    <div className="member-profile-page network-profile-page">
       <div className="member-profile-page-bg" aria-hidden />
-      <div className="member-profile-shell">
+      <div className="member-profile-shell network-profile-shell">
         <nav className="member-profile-topnav">
-          <Link to="/community" className="member-profile-back">
-            ← Network
+          <Link to="/network" className="member-profile-back">
+            ← Network home
           </Link>
         </nav>
 
-        <MemberProfileHeader
+        <NetworkProfileHeader
           profile={profile}
-          accountId={accountId}
           isYou={isYou}
           dashboardHref={isYou ? dashboardHref : undefined}
           badges={badges}
           artistSlug={artistSlug}
+          pendingRequestId={pendingRequestId}
           onEditProfile={() => setShowEditProfile((prev) => !prev)}
           onOpenFollowers={() => void openConnections('followers')}
           onOpenFollowing={() => void openConnections('following')}
+          onOpenConnections={() => void openConnections('connections')}
+          onConnectionChange={() => void loadProfile()}
         />
 
         {connectionsOpen && (
@@ -279,7 +361,11 @@ export default function CommunityMemberPage() {
                   Connection list
                 </p>
                 <h2 className="font-display text-xl font-bold uppercase mt-2">
-                  {connectionsOpen === 'followers' ? 'Followers' : 'Following'}
+                  {connectionsOpen === 'followers'
+                    ? 'Followers'
+                    : connectionsOpen === 'following'
+                      ? 'Following'
+                      : 'Connections'}
                 </h2>
               </div>
               <button
@@ -391,19 +477,39 @@ export default function CommunityMemberPage() {
           </section>
         )}
 
+        <div className="network-profile-body">
+          <div className="network-profile-main">
         <MemberProfileTabs
           active={tab}
           onChange={setActiveTab}
           postCount={profile.postCount}
-          badgeCount={badges.length}
+          showReleases={Boolean(artistProfileId)}
         />
 
         <div className="member-profile-panels">
           <section
-            id="member-profile-feed"
+            id="member-panel-overview"
             role="tabpanel"
-            aria-labelledby="member-tab-feed"
-            hidden={tab !== 'feed'}
+            aria-labelledby="member-tab-overview"
+            hidden={tab !== 'overview'}
+            className="member-profile-panel"
+          >
+            <NetworkProfileOverview
+              profile={profile}
+              posts={posts}
+              badges={badges}
+              isYou={isYou}
+              onRefresh={() => void loadProfile()}
+              onViewAllPosts={() => setActiveTab('posts')}
+              onViewAbout={() => setActiveTab('about')}
+            />
+          </section>
+
+          <section
+            id="member-profile-posts"
+            role="tabpanel"
+            aria-labelledby="member-tab-posts"
+            hidden={tab !== 'posts'}
             className="member-profile-panel"
           >
             {managedArtists.length > 0 && (
@@ -452,34 +558,67 @@ export default function CommunityMemberPage() {
           </section>
 
           <section
-            id="member-panel-signal"
+            id="member-panel-activity"
             role="tabpanel"
-            aria-labelledby="member-tab-signal"
-            hidden={tab !== 'signal'}
+            aria-labelledby="member-tab-activity"
+            hidden={tab !== 'activity'}
             className="member-profile-panel"
           >
             <MemberProfileSignalLog activity={activity} />
           </section>
 
+          {artistProfileId && artistSlug && (
+            <section
+              id="member-panel-releases"
+              role="tabpanel"
+              aria-labelledby="member-tab-releases"
+              hidden={tab !== 'releases'}
+              className="member-profile-panel"
+            >
+              <NetworkProfileReleases
+                artistProfileId={artistProfileId}
+                artistSlug={artistSlug}
+              />
+            </section>
+          )}
+
           <section
-            id="member-panel-medals"
+            id="member-panel-crews"
             role="tabpanel"
-            aria-labelledby="member-tab-medals"
-            hidden={tab !== 'medals'}
+            aria-labelledby="member-tab-crews"
+            hidden={tab !== 'crews'}
             className="member-profile-panel"
           >
-            <MemberProfileMedals badges={badges} loading={badgesLoading} />
+            <NetworkProfileCrews userId={profile.userId} isYou={isYou} />
           </section>
 
           <section
-            id="member-panel-academy"
+            id="member-panel-about"
             role="tabpanel"
-            aria-labelledby="member-tab-academy"
-            hidden={tab !== 'academy'}
+            aria-labelledby="member-tab-about"
+            hidden={tab !== 'about'}
             className="member-profile-panel"
           >
-            <MemberProfileAcademy userId={profile.userId} isYou={isYou} />
+            <NetworkProfileAbout
+              profile={profile}
+              badges={badges}
+              badgesLoading={badgesLoading}
+              isYou={isYou}
+            />
           </section>
+        </div>
+          </div>
+
+          <NetworkProfileSidebar
+            profile={profile}
+            badges={badges}
+            mutuals={mutuals}
+            suggested={suggested}
+            isYou={isYou}
+            hideBadges={tab === 'overview'}
+            onViewAllBadges={() => setActiveTab('about')}
+            onConnectionChange={() => void loadProfile()}
+          />
         </div>
       </div>
 

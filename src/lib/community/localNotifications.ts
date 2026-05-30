@@ -10,6 +10,8 @@ export type NotificationKind =
   | 'artist_page_recovery'
   | 'dm_message'
   | 'post_comment'
+  | 'connection_request'
+  | 'connection_accepted'
 
 export interface CommunityNotification {
   id: string

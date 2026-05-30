@@ -1,8 +1,17 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import {
+  v1GetNetworkProfile,
+  v1GetNetworkProfileActivity,
+  v1GetNetworkProfileFollowers,
+  v1GetNetworkProfileFollowing,
+  v1GetNetworkProfilePosts,
+} from '@/api/v1Client'
 import { mapFeedRow, type FeedRow } from '@/lib/community/feedService'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import type { CommunityRank } from '@/types'
-import type { User } from '@/lib/auth/types'
+import type { ViewerConnectionStatus } from '@/lib/network/connectionTypes'
+import type { UserRole, DashboardPersona, User } from '@/lib/auth/types'
 
 export function memberHandleFromUser(user: Pick<User, 'username' | 'email'>): string {
   if (user.username?.trim()) return normalizeHandle(user.username)
@@ -24,7 +33,11 @@ export interface PublicMemberProfile {
   postCount: number
   followerCount: number
   followingCount: number
+  connectionCount: number
   viewerIsFollowing: boolean
+  viewerConnectionStatus: ViewerConnectionStatus
+  profileRole: UserRole
+  dashboardPersona?: DashboardPersona
 }
 
 export interface MemberActivityItem {
@@ -47,13 +60,9 @@ export function normalizeHandle(raw: string): string {
   return raw.trim().replace(/^@/, '').toLowerCase()
 }
 
-export async function fetchPublicMemberProfile(
-  handle: string
-): Promise<PublicMemberProfile | null> {
+async function directFetchPublicMemberProfile(handle: string): Promise<PublicMemberProfile | null> {
   const h = normalizeHandle(handle)
-  if (!h) return null
-
-  if (!isSupabaseConfigured()) return null
+  if (!h || !isSupabaseConfigured()) return null
 
   const supabase = getSupabase()
   const { data, error } = await supabase.rpc('community_profile_public', { p_handle: h })
@@ -80,11 +89,30 @@ export async function fetchPublicMemberProfile(
     postCount: Number(row.post_count),
     followerCount: Number(row.follower_count ?? 0),
     followingCount: Number(row.following_count ?? 0),
+    connectionCount: Number(row.connection_count ?? 0),
     viewerIsFollowing: Boolean(row.viewer_is_following),
+    viewerConnectionStatus: (row.viewer_connection_status as ViewerConnectionStatus) ?? 'none',
+    profileRole: (row.profile_role as UserRole) ?? 'member',
+    dashboardPersona: row.dashboard_persona
+      ? (row.dashboard_persona as DashboardPersona)
+      : undefined,
   }
 }
 
-export async function fetchMemberPosts(handle: string, limit = 30): Promise<CommunityFeedPost[]> {
+export async function fetchPublicMemberProfile(
+  handle: string,
+): Promise<PublicMemberProfile | null> {
+  if (!isSupabaseConfigured()) return null
+  return viaV1Api(
+    async () => {
+      const { profile } = await v1GetNetworkProfile(handle)
+      return profile
+    },
+    () => directFetchPublicMemberProfile(handle),
+  )
+}
+
+async function directFetchMemberPosts(handle: string, limit: number): Promise<CommunityFeedPost[]> {
   const h = normalizeHandle(handle)
   if (!h || !isSupabaseConfigured()) return []
 
@@ -102,9 +130,20 @@ export async function fetchMemberPosts(handle: string, limit = 30): Promise<Comm
   return (data ?? []).map((row: FeedRow) => mapFeedRow(row))
 }
 
-export async function fetchMemberActivity(
+export async function fetchMemberPosts(handle: string, limit = 30): Promise<CommunityFeedPost[]> {
+  if (!isSupabaseConfigured()) return []
+  return viaV1Api(
+    async () => {
+      const { posts } = await v1GetNetworkProfilePosts(handle, limit)
+      return posts
+    },
+    () => directFetchMemberPosts(handle, limit),
+  )
+}
+
+async function directFetchMemberActivity(
   handle: string,
-  limit = 25
+  limit: number,
 ): Promise<MemberActivityItem[]> {
   const h = normalizeHandle(handle)
   if (!h || !isSupabaseConfigured()) return []
@@ -127,7 +166,21 @@ export async function fetchMemberActivity(
       detail: row.detail,
       amount: row.amount ?? undefined,
       createdAt: row.created_at,
-    })
+    }),
+  )
+}
+
+export async function fetchMemberActivity(
+  handle: string,
+  limit = 25,
+): Promise<MemberActivityItem[]> {
+  if (!isSupabaseConfigured()) return []
+  return viaV1Api(
+    async () => {
+      const { activity } = await v1GetNetworkProfileActivity(handle, limit)
+      return activity
+    },
+    () => directFetchMemberActivity(handle, limit),
   )
 }
 
@@ -150,10 +203,10 @@ async function resolveProfileIdByHandle(handle: string): Promise<string | null> 
 
 type ConnectionMode = 'followers' | 'following'
 
-export async function fetchMemberConnections(
+async function directFetchMemberConnections(
   handle: string,
   mode: ConnectionMode,
-  limit = 80
+  limit: number,
 ): Promise<MemberConnectionProfile[]> {
   const profileId = await resolveProfileIdByHandle(handle)
   if (!profileId || !isSupabaseConfigured()) return []
@@ -197,7 +250,7 @@ export async function fetchMemberConnections(
         handle: normalizeHandle(p.username ?? ''),
         avatarUrl: p.avatar_url ?? undefined,
       },
-    ])
+    ]),
   )
 
   const result: MemberConnectionProfile[] = []
@@ -212,4 +265,22 @@ export async function fetchMemberConnections(
     })
   }
   return result
+}
+
+export async function fetchMemberConnections(
+  handle: string,
+  mode: ConnectionMode,
+  limit = 80,
+): Promise<MemberConnectionProfile[]> {
+  if (!isSupabaseConfigured()) return []
+  return viaV1Api(
+    async () => {
+      const { connections } =
+        mode === 'followers'
+          ? await v1GetNetworkProfileFollowers(handle, limit)
+          : await v1GetNetworkProfileFollowing(handle, limit)
+      return connections
+    },
+    () => directFetchMemberConnections(handle, mode, limit),
+  )
 }

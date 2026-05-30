@@ -32,3 +32,15 @@ export interface CrewLeaderboardEntry {
   memberCount: number
   weeklyDb: number
 }
+
+/** Crew membership for any member (public profile crews tab). */
+export interface PublicUserCrew {
+  crewId: string
+  name: string
+  slug: string
+  tagline?: string
+  genreSlug?: string
+  memberCount: number
+  weeklyDb: number
+  role: 'founder' | 'member'
+}

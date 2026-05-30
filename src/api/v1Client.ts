@@ -22,6 +22,13 @@ import type {
   ArtistProfileArchive,
   DeletedArtistPageRow,
 } from '@/lib/artist-page-recovery/types'
+import type {
+  PublicMemberProfile,
+  MemberActivityItem,
+  MemberConnectionProfile,
+} from '@/lib/community/memberProfileService'
+import type { NetworkPendingRequest, NetworkPersonCard } from '@/lib/network/connectionTypes'
+import type { PublicUserCrew, CrewRosterMember } from '@/lib/community/crewTypes'
 
 export function isV1ApiEnabled(): boolean {
   const flag = import.meta.env.VITE_USE_V1_API?.trim().toLowerCase()
@@ -302,4 +309,126 @@ export async function v1ReviewArtistPageRecoveryRequest(input: {
     method: 'PATCH',
     body: JSON.stringify(input),
   })
+}
+
+// —— Network profile (reads) ——
+
+export async function v1GetNetworkProfile(handle: string): Promise<{ profile: PublicMemberProfile | null }> {
+  const params = new URLSearchParams({ handle })
+  return v1Fetch(`/network/profile?${params}`, { auth: 'optional' })
+}
+
+export async function v1GetNetworkProfilePosts(
+  handle: string,
+  limit = 50,
+): Promise<{ posts: CommunityFeedPost[] }> {
+  const params = new URLSearchParams({ handle, limit: String(limit) })
+  return v1Fetch(`/network/profile/posts?${params}`, { auth: 'optional' })
+}
+
+export async function v1GetNetworkProfileActivity(
+  handle: string,
+  limit = 40,
+): Promise<{ activity: MemberActivityItem[] }> {
+  const params = new URLSearchParams({ handle, limit: String(limit) })
+  return v1Fetch(`/network/profile/activity?${params}`, { auth: 'optional' })
+}
+
+export async function v1GetNetworkProfileFollowers(
+  handle: string,
+  limit = 80,
+): Promise<{ connections: MemberConnectionProfile[] }> {
+  const params = new URLSearchParams({ handle, limit: String(limit) })
+  return v1Fetch(`/network/profile/followers?${params}`, { auth: 'optional' })
+}
+
+export async function v1GetNetworkProfileFollowing(
+  handle: string,
+  limit = 80,
+): Promise<{ connections: MemberConnectionProfile[] }> {
+  const params = new URLSearchParams({ handle, limit: String(limit) })
+  return v1Fetch(`/network/profile/following?${params}`, { auth: 'optional' })
+}
+
+export async function v1GetNetworkProfileArtist(
+  userId: string,
+): Promise<{ artist: { id: string; slug: string } | null }> {
+  const params = new URLSearchParams({ userId })
+  return v1Fetch(`/network/profile/artist?${params}`, { auth: 'optional' })
+}
+
+export async function v1GetNetworkProfileCrew(
+  userId: string,
+): Promise<{ crew: PublicUserCrew | null }> {
+  const params = new URLSearchParams({ userId })
+  return v1Fetch(`/network/profile/crew?${params}`, { auth: 'optional' })
+}
+
+export async function v1GetNetworkCrewRoster(crewId: string): Promise<{ roster: CrewRosterMember[] }> {
+  const params = new URLSearchParams({ crewId })
+  return v1Fetch(`/network/crew/roster?${params}`, { auth: 'optional' })
+}
+
+// —— Network connections ——
+
+export async function v1SendConnectionRequest(targetUserId: string): Promise<void> {
+  await v1Fetch('/network/connections/request', {
+    method: 'POST',
+    body: JSON.stringify({ targetUserId }),
+  })
+}
+
+export async function v1RespondConnectionRequest(requestId: string, accept: boolean): Promise<void> {
+  await v1Fetch('/network/connections/request', {
+    method: 'PATCH',
+    body: JSON.stringify({ requestId, accept }),
+  })
+}
+
+export async function v1RemoveConnection(targetUserId: string): Promise<void> {
+  await v1Fetch('/network/connections', {
+    method: 'DELETE',
+    body: JSON.stringify({ targetUserId }),
+  })
+}
+
+export async function v1GetConnectionsList(
+  userId: string,
+): Promise<{ connections: Pick<NetworkPersonCard, 'userId' | 'displayName' | 'handle' | 'avatarUrl'>[] }> {
+  const params = new URLSearchParams({ userId })
+  return v1Fetch(`/network/connections?${params}`, { auth: 'optional' })
+}
+
+export async function v1GetMutualConnections(
+  targetUserId: string,
+  limit = 12,
+): Promise<{
+  mutuals: Pick<NetworkPersonCard, 'userId' | 'displayName' | 'handle' | 'avatarUrl'>[]
+}> {
+  const params = new URLSearchParams({ targetUserId, limit: String(limit) })
+  return v1Fetch(`/network/connections/mutual?${params}`, { auth: 'optional' })
+}
+
+export async function v1GetIncomingConnectionRequestId(
+  fromUserId: string,
+): Promise<{ requestId: string | null }> {
+  const params = new URLSearchParams({ fromUserId })
+  return v1Fetch(`/network/connections/incoming?${params}`)
+}
+
+export async function v1GetPendingConnectionRequests(): Promise<{ requests: NetworkPendingRequest[] }> {
+  return v1Fetch('/network/requests/pending')
+}
+
+export async function v1SearchNetworkPeople(
+  query: string,
+  limit = 24,
+): Promise<{ people: NetworkPersonCard[] }> {
+  const params = new URLSearchParams({ q: query, limit: String(limit) })
+  return v1Fetch(`/network/people/search?${params}`, { auth: 'optional' })
+}
+
+export async function v1GetSuggestedPeople(limit = 6): Promise<{ people: NetworkPersonCard[] }> {
+  const params = new URLSearchParams({ limit: String(limit) })
+  return v1Fetch(`/network/people/suggested?${params}`, { auth: 'optional' })
 }

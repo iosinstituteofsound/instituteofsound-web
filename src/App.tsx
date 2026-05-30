@@ -85,6 +85,8 @@ const PlaylistCuratorApplyPage = lazy(
 const EditorDashboardPage = lazy(
   () => import('@/pages/dashboard/EditorDashboardPage')
 )
+const NetworkHomePage = lazy(() => import('@/pages/network/NetworkHomePage'))
+const NetworkPeoplePage = lazy(() => import('@/pages/network/NetworkPeoplePage'))
 
 function PageLoader() {
   return <LoadingTransmission variant="hell" />
@@ -106,6 +108,22 @@ export default function App() {
             <Route path="community" element={<CommunityPage />} />
             <Route path="feed/:postId" element={<FeedPostPage />} />
             <Route path="feed" element={<FeedPage />} />
+            <Route
+              path="network"
+              element={
+                <ProtectedRoute>
+                  <NetworkHomePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="network/people"
+              element={
+                <ProtectedRoute>
+                  <NetworkPeoplePage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="network/:handle" element={<CommunityMemberPage />} />
             <Route
               path="messages"

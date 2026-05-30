@@ -1,8 +1,15 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { viaV1Api } from '@/lib/api/v1Route'
+import { v1GetNetworkCrewRoster, v1GetNetworkProfileCrew } from '@/api/v1Client'
 import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
 import { tryGrantBadge } from '@/lib/community/grantBadge'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
-import type { CrewLeaderboardEntry, CrewRosterMember, MyCrew } from '@/lib/community/crewTypes'
+import type {
+  CrewLeaderboardEntry,
+  CrewRosterMember,
+  MyCrew,
+  PublicUserCrew,
+} from '@/lib/community/crewTypes'
 import {
   localGetCrewBoard,
   localGetMyCrew,
@@ -60,7 +67,7 @@ export async function fetchMyCrew(): Promise<MyCrew | null> {
   return mapMyCrew(row)
 }
 
-export async function fetchCrewRoster(crewId: string): Promise<CrewRosterMember[]> {
+async function directFetchCrewRoster(crewId: string): Promise<CrewRosterMember[]> {
   if (!isSupabaseConfigured()) {
     const crew = localGetMyCrew()
     if (!crew || crew.crewId !== crewId) return []
@@ -92,7 +99,22 @@ export async function fetchCrewRoster(crewId: string): Promise<CrewRosterMember[
       rank: row.community_rank,
       role: row.role as CrewRosterMember['role'],
       weeklyDb: Number(row.weekly_db),
-    })
+    }),
+  )
+}
+
+export async function fetchCrewRoster(crewId: string): Promise<CrewRosterMember[]> {
+  if (!isSupabaseConfigured()) {
+    const crew = localGetMyCrew()
+    if (!crew || crew.crewId !== crewId) return []
+    return []
+  }
+  return viaV1Api(
+    async () => {
+      const { roster } = await v1GetNetworkCrewRoster(crewId)
+      return roster
+    },
+    () => directFetchCrewRoster(crewId),
   )
 }
 
@@ -249,4 +271,71 @@ export async function disbandCrew(): Promise<void> {
   const { error } = await supabase.rpc('community_disband_crew')
   if (error) throw new Error(error.message)
   notifyCrew()
+}
+
+async function directFetchCrewForUserId(userId: string): Promise<PublicUserCrew | null> {
+  if (!isSupabaseConfigured()) return null
+
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('community_crew_members')
+    .select(
+      `
+      role,
+      community_crews (
+        id,
+        name,
+        slug,
+        tagline,
+        genre_slug,
+        member_count,
+        weekly_db
+      )
+    `,
+    )
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) {
+    console.warn('[community] user crew', error.message)
+    return null
+  }
+
+  const crew = data?.community_crews as
+    | {
+        id: string
+        name: string
+        slug: string
+        tagline: string | null
+        genre_slug: string | null
+        member_count: number
+        weekly_db: number | string
+      }
+    | null
+    | undefined
+
+  if (!crew || !data) return null
+
+  return {
+    crewId: String(crew.id),
+    name: crew.name,
+    slug: crew.slug,
+    tagline: crew.tagline ?? undefined,
+    genreSlug: crew.genre_slug ?? undefined,
+    memberCount: crew.member_count,
+    weeklyDb: Number(crew.weekly_db),
+    role: (data.role === 'founder' ? 'founder' : 'member') as PublicUserCrew['role'],
+  }
+}
+
+/** Crew a user belongs to (for network profile crews tab). */
+export async function fetchCrewForUserId(userId: string): Promise<PublicUserCrew | null> {
+  if (!isSupabaseConfigured()) return null
+  return viaV1Api(
+    async () => {
+      const { crew } = await v1GetNetworkProfileCrew(userId)
+      return crew
+    },
+    () => directFetchCrewForUserId(userId),
+  )
 }

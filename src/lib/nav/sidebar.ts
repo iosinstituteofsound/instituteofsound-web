@@ -68,7 +68,7 @@ export const MOBILE_TABS = [
   { label: 'Home', href: '/', icon: 'home' },
   { label: 'Learn', href: '/academy', icon: 'learn' },
   { label: 'Make', href: '/tools', icon: 'make' },
-  { label: 'Network', href: '/community', icon: 'network' },
+  { label: 'Network', href: '/network', icon: 'network' },
   { label: 'You', href: '/login', icon: 'you' },
 ] as const
 
