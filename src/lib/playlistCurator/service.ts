@@ -5,6 +5,7 @@ import {
   v1ReviewPlaylistCuratorApplication,
   v1SubmitPlaylistCuratorApplication,
 } from '@/api/v1Client'
+import { assertDirectSupabaseAllowed } from '@/lib/api/v1Security'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import {
   notifyMemberPlaylistCuratorDecision,
@@ -94,6 +95,7 @@ export async function submitPlaylistCuratorApplication(
       }
       return
     }
+    assertDirectSupabaseAllowed('Playlist curator')
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('playlist_curator_applications')
@@ -133,6 +135,7 @@ export async function getMyPlaylistCuratorApplications(
       const { applications } = await v1GetMyPlaylistCuratorApplications()
       return applications
     }
+    assertDirectSupabaseAllowed('Playlist curator')
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('playlist_curator_applications')
@@ -153,6 +156,7 @@ export async function listPlaylistCuratorApplicationsForReview(): Promise<
       const { applications } = await v1ListPlaylistCuratorDeskApplications()
       return applications
     }
+    assertDirectSupabaseAllowed('Playlist curator')
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('playlist_curator_applications')
@@ -186,6 +190,7 @@ export async function reviewPlaylistCuratorApplication(
       notifyMemberPlaylistCuratorDecision(existing.user_id, applicationId, decision, notes)
       return
     }
+    assertDirectSupabaseAllowed('Playlist curator')
     const supabase = getSupabase()
     const { data: existing, error: fetchErr } = await supabase
       .from('playlist_curator_applications')

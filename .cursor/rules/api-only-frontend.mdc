@@ -27,8 +27,10 @@ In `src/pages/`, `src/components/`, and `src/hooks/`:
 
 ## Production
 
-- Set `VITE_USE_V1_API=true` in Vercel.
-- Verify: `curl -sL -o /dev/null -w "%{http_code}" https://<domain>/api/v1/network/profile?handle=test` → **200** or **404 profile**, not **404 route**.
+- Set `VITE_USE_V1_API=true` in Vercel (required — direct Supabase data access is blocked in production builds).
+- Server env: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (never `VITE_` for service role).
+- `/api/v1` applies rate limits + security headers; client refuses direct Supabase fallback when `import.meta.env.PROD`.
+- Verify: `curl -sL -o /dev/null -w "%{http_code}" https://<domain>/api/v1/me` → **401** (not **404**).
 
 ## Network module (reference)
 

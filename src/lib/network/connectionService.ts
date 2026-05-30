@@ -1,5 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { viaV1Api } from '@/lib/api/v1Route'
+import { assertDirectSupabaseAllowed } from '@/lib/api/v1Security'
 import {
   isV1ApiEnabled,
   v1GetConnectionsList,
@@ -121,6 +122,7 @@ export async function fetchIncomingRequestIdFromUser(
       () => directFetchIncomingRequestIdFromUser(fromUserId),
     )
   }
+  assertDirectSupabaseAllowed('Network connections')
   return directFetchIncomingRequestIdFromUser(fromUserId)
 }
 

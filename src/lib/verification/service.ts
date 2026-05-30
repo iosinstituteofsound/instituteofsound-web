@@ -9,6 +9,7 @@ import {
   v1ReviewVerificationRequest,
   v1SubmitRoleVerification,
 } from '@/api/v1Client'
+import { assertDirectSupabaseAllowed } from '@/lib/api/v1Security'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import {
   notifyDeskStaffOfVerificationRequest,
@@ -101,6 +102,7 @@ export async function submitRoleVerificationRequest(
       await v1SubmitRoleVerification(input)
       return
     }
+    assertDirectSupabaseAllowed('Verification')
     const supabase = getSupabase()
     const { error } = await supabase.from('role_verification_requests').insert(payload)
     if (error) throw new Error(error.message)
@@ -132,6 +134,7 @@ export async function getMyRoleVerificationRequests(userId: string): Promise<Rol
       const { requests } = await v1GetMyVerificationRequests()
       return requests
     }
+    assertDirectSupabaseAllowed('Verification')
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('role_verification_requests')
@@ -166,6 +169,7 @@ export async function listVerificationRequestsForReview(): Promise<RoleVerificat
       const { requests } = await v1ListVerificationDeskRequests()
       return requests
     }
+    assertDirectSupabaseAllowed('Verification')
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('role_verification_requests')
@@ -202,6 +206,7 @@ export async function reviewRoleVerificationRequest(
       await v1ReviewVerificationRequest({ requestId, decision, notes })
       return
     }
+    assertDirectSupabaseAllowed('Verification')
     const supabase = getSupabase()
     const { error } = await supabase
       .from('role_verification_requests')
@@ -307,6 +312,7 @@ export async function createRelationshipClaim(input: {
       })
       return
     }
+    assertDirectSupabaseAllowed('Verification')
     const supabase = getSupabase()
     const { error } = await supabase.from('relationship_claims').insert({
       claim_type: input.claimType,
@@ -361,6 +367,7 @@ export async function listIncomingClaims(userId: string): Promise<RelationshipCl
       const { claims } = await v1ListIncomingClaims()
       return claims
     }
+    assertDirectSupabaseAllowed('Verification')
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('relationship_claims')
@@ -381,6 +388,7 @@ export async function listOutgoingClaims(userId: string): Promise<RelationshipCl
       const { claims } = await v1ListOutgoingClaims()
       return claims
     }
+    assertDirectSupabaseAllowed('Verification')
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('relationship_claims')
@@ -401,6 +409,7 @@ export async function respondToClaim(claimId: string, decision: 'approved' | 're
       await v1RespondToClaim({ claimId, decision })
       return
     }
+    assertDirectSupabaseAllowed('Verification')
     const supabase = getSupabase()
     const { error } = await supabase
       .from('relationship_claims')

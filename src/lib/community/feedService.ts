@@ -10,6 +10,7 @@ import {
   v1UpdateSpinPost,
 } from '@/api/v1Client'
 import { touchArtistPageActivity } from '@/lib/artist-profile/pageEnforcement'
+import { assertDirectSupabaseAllowed } from '@/lib/api/v1Security'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { awardDb } from '@/lib/community/awardDb'
 import {
@@ -143,6 +144,7 @@ export async function fetchCommunityFeed(
     return posts.slice(0, limit)
   }
 
+  assertDirectSupabaseAllowed('Community feed')
   try {
     return await repoFetchCommunityFeed(getSupabase(), {
       limit,
@@ -229,6 +231,7 @@ export async function createSpinPost(input: CreateSpinInput): Promise<CommunityF
     return post
   }
 
+  assertDirectSupabaseAllowed('Create spin')
   const data = await repoInsertCommunityPost(getSupabase(), {
     user_id: input.userId,
     kind: 'spin',
@@ -342,6 +345,7 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
     return post
   }
 
+  assertDirectSupabaseAllowed('Create drop')
   const linkTitle = input.linkTitle?.trim() || null
   const linkDescription = input.linkDescription?.trim() || null
   const linkImageUrl = input.linkImageUrl?.trim() || null
@@ -429,6 +433,7 @@ export async function togglePostReaction(
     return result
   }
 
+  assertDirectSupabaseAllowed('Post reaction')
   const result = await repoTogglePostReaction(getSupabase(), postId, reaction)
   notifyFeed()
   return result
@@ -470,6 +475,7 @@ export async function updateDropPost(input: UpdateDropInput): Promise<void> {
     return
   }
 
+  assertDirectSupabaseAllowed('Update drop')
   const supabase = getSupabase()
   const {
     data: { user },
@@ -537,6 +543,7 @@ export async function updateSpinPost(input: UpdateSpinInput): Promise<void> {
     return
   }
 
+  assertDirectSupabaseAllowed('Update spin')
   const supabase = getSupabase()
   const {
     data: { user },
@@ -580,6 +587,7 @@ export async function hideCommunityPost(postId: string, actorUserId: string): Pr
     return
   }
 
+  assertDirectSupabaseAllowed('Hide post')
   const supabase = getSupabase()
   const {
     data: { user },
@@ -628,6 +636,7 @@ export async function fetchCommunityPostById(
     return { ...post, commentCount: localCommentCount(postId) }
   }
 
+  assertDirectSupabaseAllowed('Community post')
   try {
     return await repoFetchCommunityPostById(getSupabase(), postId)
   } catch (err) {

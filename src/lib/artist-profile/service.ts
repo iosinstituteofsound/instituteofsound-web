@@ -24,6 +24,7 @@ import {
 } from '@/api/v1ArtistStudioClient'
 import { withV1Fallback } from '@/api/v1Fallback'
 import { viaV1Api } from '@/lib/api/v1Route'
+import { assertDirectSupabaseAllowed } from '@/lib/api/v1Security'
 import { v1ListDiscoverArtistProfiles, v1ListArtistProfilesForEditor } from '@/api/v1Phase5Client'
 import { isSupabaseConfigured } from '@/lib/supabase/client'
 import { getDrafts } from '@/lib/auth/storage'
@@ -122,6 +123,7 @@ export async function getProfileForUser(userId: string): Promise<ArtistProfile |
       () => getProfileForUserAfterLifecycle(userId),
     )
   }
+  assertDirectSupabaseAllowed('Artist profile')
   return getProfileForUserAfterLifecycle(userId)
 }
 
@@ -147,6 +149,7 @@ export async function upsertArtistProfile(
       },
     )
   }
+  assertDirectSupabaseAllowed('Artist profile')
   const profile = isSupabaseConfigured()
     ? await sb.supabaseUpsertProfile(user, payload)
     : local.localUpsertProfile(user, payload)

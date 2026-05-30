@@ -1,4 +1,6 @@
 import { dispatchV1Api } from '../_lib/v1Router.js'
+import { checkRateLimit } from '../_lib/rateLimit.js'
+import { applyApiSecurityHeaders } from '../_lib/securityHeaders.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -40,5 +42,14 @@ export function pathnameFromRequest(req: VercelRequest): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  await dispatchV1Api(req, res, pathnameFromRequest(req))
+  applyApiSecurityHeaders(res)
+
+  const pathname = pathnameFromRequest(req)
+  const limited = checkRateLimit(req, pathname)
+  if (!limited.ok) {
+    res.setHeader('Retry-After', String(limited.retryAfterSec))
+    return res.status(429).json({ error: 'Too many requests. Please wait and try again.' })
+  }
+
+  await dispatchV1Api(req, res, pathname)
 }

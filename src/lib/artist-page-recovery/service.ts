@@ -7,6 +7,7 @@ import {
   v1ReviewArtistPageRecoveryRequest,
   v1SubmitArtistPageRecoveryRequest,
 } from '@/api/v1Client'
+import { assertDirectSupabaseAllowed } from '@/lib/api/v1Security'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { restoreArtistProfileArchive } from '@/lib/artist-profile/archive'
 import type {
@@ -76,6 +77,7 @@ export async function getLatestDeletedArchiveForUser(
     }, loadDirect)
   }
 
+  assertDirectSupabaseAllowed('Artist recovery')
   return loadDirect()
 }
 
@@ -96,6 +98,7 @@ export async function listDeletedArtistPagesForDesk(): Promise<DeletedArtistPage
     }))
   }
 
+  assertDirectSupabaseAllowed('Artist recovery')
   const supabase = getSupabase()
   const [{ data: archives, error: archErr }, { data: requests, error: reqErr }] =
     await Promise.all([
@@ -141,6 +144,7 @@ export async function getOwnRecoveryRequest(
     return request
   }
 
+  assertDirectSupabaseAllowed('Artist recovery')
   const supabase = getSupabase()
   const { data, error } = await supabase
     .from('artist_page_recovery_requests')
@@ -177,6 +181,7 @@ export async function submitArtistPageRecoveryRequest(input: {
     return request
   }
 
+  assertDirectSupabaseAllowed('Artist recovery')
   const supabase = getSupabase()
   const { data: archive, error: archErr } = await supabase
     .from('artist_profile_archives')
@@ -257,6 +262,7 @@ export async function reviewArtistPageRecoveryRequest(
     return
   }
 
+  assertDirectSupabaseAllowed('Artist recovery')
   const supabase = getSupabase()
   const { data: request, error } = await supabase
     .from('artist_page_recovery_requests')
