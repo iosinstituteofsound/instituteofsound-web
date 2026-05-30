@@ -293,6 +293,8 @@ export default function MemberDashboardPage() {
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [tab, setTab] = useState<MemberTab>('workspace')
 
+  const openUpgradePaths = () => setTab('grow')
+
   useEffect(() => {
     if (!user?.id) return
     void (async () => {
@@ -339,7 +341,7 @@ export default function MemberDashboardPage() {
         summary={
           persona
             ? `${personaTitle} workspace is active — spins, scenes, collab, and gigs in one shell.`
-            : 'Choose a workspace role, apply for curator or editorial paths, or upgrade to a public artist page.'
+            : 'Your network home — open upgrade paths when you are ready to grow into artist, curator, or desk roles.'
         }
         badge={
           <MetalBadge variant="red" className="shrink-0">
@@ -373,8 +375,8 @@ export default function MemberDashboardPage() {
           },
           {
             label: 'Role',
-            value: personaTitle,
-            onClick: () => setTab('workspace'),
+            value: persona ? personaTitle : 'Upgrade paths',
+            onClick: () => (persona ? setTab('workspace') : openUpgradePaths()),
           },
           {
             label: 'Explore',
@@ -397,33 +399,26 @@ export default function MemberDashboardPage() {
       >
         {tab === 'workspace' && (
           <>
-        {!persona && (
-          <section className="member-desk-panel member-dashboard-persona-picker">
-            <p className="member-desk-kicker">Workspace roles</p>
-            <h2 className="member-desk-heading">Choose how you work</h2>
-            <p className="member-desk-lede">
-              Every member can choose a workspace role here. Whether you are an artist manager,
-              label, promoter, or brand, the dashboard will personalize around that role.
-            </p>
-            <div className="member-dashboard-persona-grid mt-6">
-              {PERSONA_OPTIONS.map((option) => (
+            {!persona && (
+              <section className="member-desk-panel">
+                <p className="member-desk-kicker">Workspace home</p>
+                <h2 className="member-desk-heading">Start from the network</h2>
+                <p className="member-desk-lede">
+                  Use Feed and Explore while you are a member. When you are ready to level up —
+                  artist page, manager, label, brand, promoter, playlist curator, or editor — open
+                  Upgrade paths.
+                </p>
                 <button
-                  key={option.id}
                   type="button"
-                  className="member-dashboard-persona-option"
-                  onClick={() => setPersonaModal(option.id)}
-                  disabled={savingPersona}
+                  className="ios-btn ios-btn-primary mt-6"
+                  onClick={openUpgradePaths}
                 >
-                  <p>{option.title}</p>
-                  <p>{option.subtitle}</p>
+                  Open upgrade paths →
                 </button>
-              ))}
-            </div>
-            {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
-          </section>
-        )}
+              </section>
+            )}
 
-        {personaPanel && (
+            {personaPanel && (
           <section className="member-desk-panel member-dashboard-persona-active">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="member-desk-kicker">{personaPanel.badge}</p>
@@ -471,6 +466,13 @@ export default function MemberDashboardPage() {
               ))}
               <button
                 type="button"
+                className="ios-btn ios-btn-secondary"
+                onClick={openUpgradePaths}
+              >
+                More upgrade paths →
+              </button>
+              <button
+                type="button"
                 className="ios-btn ios-btn-ghost"
                 onClick={() => setShowResetConfirm(true)}
                 disabled={savingPersona}
@@ -479,15 +481,11 @@ export default function MemberDashboardPage() {
               </button>
             </div>
             <p className="member-desk-footnote">
-              Reset clears your selected workspace mode and returns you to the role selection screen.
+              Reset clears your workspace mode. Pick a new path from Upgrade paths.
             </p>
             {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
           </section>
-        )}
-
-        <section className="member-desk-panel member-desk-trust-wrap">
-          <MemberTrustPanel user={user} persona={persona} className="member-desk-trust" />
-        </section>
+            )}
           </>
         )}
 
@@ -497,8 +495,8 @@ export default function MemberDashboardPage() {
               <p className="member-desk-kicker">Growth</p>
               <h2 className="member-desk-heading">Upgrade &amp; apply</h2>
               <p className="member-desk-lede">
-                Pick a path below. Artist and editor flows launch immediately; manager, label,
-                brand, and promoter paths open your verified workspace after desk review.
+                Pick a path below — artist, editor, manager, label, brand, promoter, and playlist
+                curator. Manager, label, brand, and promoter unlock your workspace after desk review.
               </p>
             </section>
 
@@ -538,12 +536,9 @@ export default function MemberDashboardPage() {
                         type="button"
                         className="ios-btn ios-btn-ghost"
                         onClick={() => {
-                          setTab('workspace')
-                          window.setTimeout(() => {
-                            document
-                              .querySelector('.member-desk-trust-wrap')
-                              ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                          }, 80)
+                          document
+                            .querySelector('.member-desk-trust-wrap')
+                            ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                         }}
                       >
                         Verification proofs
@@ -590,10 +585,14 @@ export default function MemberDashboardPage() {
                 </article>
               )
             })}
+
+            {persona && (
+              <section className="member-desk-panel member-desk-trust-wrap">
+                <MemberTrustPanel user={user} persona={persona} className="member-desk-trust" />
+              </section>
+            )}
           </div>
         )}
-
-        {tab === 'explore' && (
         <section className="member-desk-panel member-dashboard-explore">
           <h2 className="member-desk-heading">Explore</h2>
           <div className="member-dashboard-explore-grid">
@@ -668,7 +667,7 @@ export default function MemberDashboardPage() {
                 onClick={async () => {
                   await savePersona(personaModal)
                   setPersonaModal(null)
-                  setTab('workspace')
+                  setTab('grow')
                 }}
               >
                 {savingPersona ? 'Applying…' : 'Apply role dashboard'}
