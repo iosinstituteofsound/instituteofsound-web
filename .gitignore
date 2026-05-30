@@ -14,7 +14,7 @@ experiments/monthly-magazine/dist
 .env.local
 .env.*.local
 dist-ssr
-api/v1.js
+api/_lib/v1.bundle.js
 *.local
 
 # Editor directories and files

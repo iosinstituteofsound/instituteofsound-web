@@ -38,8 +38,9 @@
     "api/thumbnail.ts": {
       "maxDuration": 15
     },
-    "api/v1.js": {
-      "maxDuration": 15
+    "api/v1.ts": {
+      "maxDuration": 15,
+      "includeFiles": "api/_lib/v1.bundle.js"
     },
     "api/import-catalog.ts": {
       "maxDuration": 30

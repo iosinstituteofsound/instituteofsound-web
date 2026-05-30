@@ -10,7 +10,7 @@
     "preview:magazine": "vite build --config experiments/monthly-magazine/vite.config.ts && vite preview --config experiments/monthly-magazine/vite.config.ts",
     "sitemap": "node scripts/generate-sitemap.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
-    "build": "npm run sitemap && npm run pwa:icons && tsc -p api/tsconfig.json && npm run bundle:api && tsc -b && vite build",
+    "build": "npm run sitemap && npm run pwa:icons && npm run bundle:api && tsc -p api/tsconfig.json && tsc -b && vite build",
     "bundle:api": "node scripts/bundle-api-v1.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
