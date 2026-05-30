@@ -1,6 +1,8 @@
 /** Supabase REST — published editorial for share previews (bots / link unfurl). */
 
-import { siteOrigin } from './shareProfile.js'
+import { escapeHtml, siteOrigin } from './shareProfile.js'
+
+export { escapeHtml }
 
 export type ShareEditorialRow = {
   title: string

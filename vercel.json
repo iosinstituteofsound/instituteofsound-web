@@ -20,6 +20,13 @@
     },
     "api/thumbnail.ts": {
       "maxDuration": 15
+    },
+    "api/v1/**/*.ts": {
+      "maxDuration": 15,
+      "includeFiles": "src/lib/**"
+    },
+    "api/import-catalog.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
