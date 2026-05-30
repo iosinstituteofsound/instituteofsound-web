@@ -1,6 +1,6 @@
-import { dispatchV1Api } from './_lib/v1Router.js'
-import { checkRateLimit } from './_lib/rateLimit.js'
-import { applyApiSecurityHeaders } from './_lib/securityHeaders.js'
+import { dispatchV1Api } from '../_lib/v1Router.js'
+import { checkRateLimit } from '../_lib/rateLimit.js'
+import { applyApiSecurityHeaders } from '../_lib/securityHeaders.js'
 
 export const config = {
   runtime: 'nodejs',

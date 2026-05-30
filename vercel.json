@@ -38,9 +38,8 @@
     "api/thumbnail.ts": {
       "maxDuration": 15
     },
-    "api/v1.ts": {
-      "maxDuration": 15,
-      "includeFiles": "src/lib/**"
+    "api/v1.js": {
+      "maxDuration": 15
     },
     "api/import-catalog.ts": {
       "maxDuration": 30
