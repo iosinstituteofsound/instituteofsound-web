@@ -1,15 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { handleV1Me } from './handlers/v1Me.js'
-import { handleV1ArtistProfile } from './handlers/v1ArtistProfile.js'
-import { handleV1CommunityFeed } from './handlers/v1CommunityFeed.js'
-import {
-  handleV1CommunityDropCreate,
-  handleV1CommunityDropUpdate,
-  handleV1CommunityPostHide,
-  handleV1CommunityReaction,
-  handleV1CommunitySpinCreate,
-  handleV1CommunitySpinUpdate,
-} from './handlers/v1CommunityMutations.js'
+import { dispatchV1Api } from './v1Router.js'
 import type { ApiRequest, ApiResponse } from './http.js'
 
 function readBody(req: IncomingMessage): Promise<unknown> {
@@ -65,44 +55,7 @@ export async function dispatchV1DevApi(
     body: req.method === 'GET' || req.method === 'HEAD' ? undefined : await readBody(req),
     query: Object.fromEntries(requestUrl.searchParams.entries()),
   }
-  const apiRes = toApiResponse(res)
 
-  if (pathname === '/api/v1/me') {
-    await handleV1Me(apiReq, apiRes)
-    return true
-  }
-  if (pathname === '/api/v1/artist/profile') {
-    await handleV1ArtistProfile(apiReq, apiRes)
-    return true
-  }
-  if (pathname === '/api/v1/community/feed') {
-    await handleV1CommunityFeed(apiReq, apiRes)
-    return true
-  }
-  if (pathname === '/api/v1/community/spins' && req.method === 'POST') {
-    await handleV1CommunitySpinCreate(apiReq, apiRes)
-    return true
-  }
-  if (pathname === '/api/v1/community/drops') {
-    if (req.method === 'PATCH') await handleV1CommunityDropUpdate(apiReq, apiRes)
-    else await handleV1CommunityDropCreate(apiReq, apiRes)
-    return true
-  }
-  if (pathname === '/api/v1/community/spin' && req.method === 'PATCH') {
-    await handleV1CommunitySpinUpdate(apiReq, apiRes)
-    return true
-  }
-  if (pathname === '/api/v1/community/reactions' && req.method === 'POST') {
-    await handleV1CommunityReaction(apiReq, apiRes)
-    return true
-  }
-  if (pathname === '/api/v1/community/post' && req.method === 'DELETE') {
-    await handleV1CommunityPostHide(apiReq, apiRes)
-    return true
-  }
-
-  res.statusCode = 404
-  res.setHeader('Content-Type', 'application/json')
-  res.end(JSON.stringify({ error: 'Not found' }))
+  await dispatchV1Api(apiReq, toApiResponse(res), pathname)
   return true
 }

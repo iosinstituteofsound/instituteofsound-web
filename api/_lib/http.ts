@@ -14,8 +14,8 @@ export function queryParam(req: ApiRequest, key: string): string | undefined {
 
 export type ApiResponse = {
   status: (code: number) => ApiResponse
-  setHeader: (name: string, value: string) => void
-  json: (body: unknown) => void
+  setHeader: (name: string, value: string) => ApiResponse
+  json: (body: unknown) => ApiResponse | void
   end?: (body?: string) => void
 }
 
