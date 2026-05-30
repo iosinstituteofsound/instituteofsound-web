@@ -1,5 +1,4 @@
 import { getUsers, getUserById } from '@/lib/auth/storage'
-import { isEditorStaff } from '@/lib/auth/roles'
 import { localAddNotification } from '@/lib/community/localNotifications'
 import { COMMUNITY_NOTIFICATION_EVENT } from '@/lib/community/notificationService'
 

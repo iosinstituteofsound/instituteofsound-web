@@ -593,6 +593,8 @@ export default function MemberDashboardPage() {
             )}
           </div>
         )}
+
+        {tab === 'explore' && (
         <section className="member-desk-panel member-dashboard-explore">
           <h2 className="member-desk-heading">Explore</h2>
           <div className="member-dashboard-explore-grid">
