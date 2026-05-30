@@ -3,8 +3,14 @@ import { mapMemberProfile } from './memberProfile.js'
 
 const PROFILE_COLUMNS =
   'id, email, name, role, dashboard_persona, avatar_url, username, bio, created_at'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ApiRequest } from './http.js'
-import { createSupabaseUserClient, getSupabaseAdmin, isSupabaseServerConfigured } from './supabaseServer.js'
+import {
+  createSupabaseAnonClient,
+  createSupabaseUserClient,
+  getSupabaseAdmin,
+  isSupabaseServerConfigured,
+} from './supabaseServer.js'
 
 export type AuthContext = {
   authUser: User
@@ -49,4 +55,32 @@ export async function fetchMemberProfile(auth: AuthContext) {
   if (error) throw new Error(error.message)
   if (!data) throw new Error('Profile row missing')
   return mapMemberProfile(data)
+}
+
+/** JWT when present; otherwise anon client (public feed reads). */
+export async function resolveSupabaseForRequest(
+  req: ApiRequest,
+): Promise<
+  | { supabase: SupabaseClient; auth: AuthContext }
+  | { supabase: SupabaseClient; auth: null }
+  | { status: number; error: string }
+> {
+  if (!isSupabaseServerConfigured()) {
+    return { status: 503, error: 'API not configured (missing Supabase server env)' }
+  }
+
+  const accessToken = bearerToken(req)
+  if (!accessToken) {
+    return { supabase: createSupabaseAnonClient(), auth: null }
+  }
+
+  const auth = await requireAuth(req)
+  if ('error' in auth) {
+    return auth
+  }
+
+  return {
+    supabase: createSupabaseUserClient(auth.accessToken),
+    auth,
+  }
 }

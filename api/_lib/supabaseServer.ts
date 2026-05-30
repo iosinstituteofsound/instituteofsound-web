@@ -30,6 +30,16 @@ export function createSupabaseUserClient(accessToken: string): SupabaseClient {
   )
 }
 
+export function createSupabaseAnonClient(): SupabaseClient {
+  return createClient(
+    requireEnv('SUPABASE_URL', 'VITE_SUPABASE_URL'),
+    requireEnv('SUPABASE_ANON_KEY', 'VITE_SUPABASE_ANON_KEY'),
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+    },
+  )
+}
+
 export function isSupabaseServerConfigured(): boolean {
   return Boolean(
     env('SUPABASE_URL', 'VITE_SUPABASE_URL') &&

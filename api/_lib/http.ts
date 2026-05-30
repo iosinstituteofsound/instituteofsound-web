@@ -2,6 +2,14 @@ export type ApiRequest = {
   method?: string
   headers?: Record<string, string | string[] | undefined>
   body?: unknown
+  query?: Record<string, string | string[] | undefined>
+}
+
+export function queryParam(req: ApiRequest, key: string): string | undefined {
+  const raw = req.query?.[key]
+  if (typeof raw === 'string') return raw
+  if (Array.isArray(raw)) return raw[0]
+  return undefined
 }
 
 export type ApiResponse = {

@@ -1,4 +1,4 @@
-import type { CommunityRank } from '@/types'
+import type { CommunityRank } from '../../types'
 
 export const COMMUNITY_RANKS: CommunityRank[] = [
   'Listener',

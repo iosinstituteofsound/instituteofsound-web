@@ -2,14 +2,9 @@ import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import { localAwardDb } from '@/lib/community/localDb'
 import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
+import { repoAwardDb, type AwardDbInput } from '@/lib/community/awardRepository'
 
-export interface AwardDbInput {
-  userId: string
-  source: string
-  sourceId: string
-  amount: number
-  genreId?: string | null
-}
+export type { AwardDbInput }
 
 export async function awardDb(input: AwardDbInput): Promise<boolean> {
   if (input.amount <= 0) return false
@@ -20,22 +15,15 @@ export async function awardDb(input: AwardDbInput): Promise<boolean> {
     return awarded
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase.from('community_db_events').insert({
-    user_id: input.userId,
-    amount: input.amount,
-    source: input.source,
-    source_id: input.sourceId,
-    genre_id: input.genreId ?? null,
-  })
-
-  if (error) {
-    if (error.code === '23505') return false
-    console.warn('[community] awardDb failed', error.message)
+  try {
+    const awarded = await repoAwardDb(getSupabase(), input)
+    if (awarded) {
+      window.dispatchEvent(new Event(COMMUNITY_DB_EVENT))
+      void evaluateWeeklyChallenges()
+    }
+    return awarded
+  } catch (err) {
+    console.warn('[community] awardDb failed', err instanceof Error ? err.message : err)
     return false
   }
-
-  window.dispatchEvent(new Event(COMMUNITY_DB_EVENT))
-  void evaluateWeeklyChallenges()
-  return true
 }

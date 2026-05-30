@@ -1,4 +1,4 @@
-import type { CommunityRank } from '@/types'
+import type { CommunityRank } from '../../types'
 
 export type CommunityPostKind = 'spin' | 'drop'
 
