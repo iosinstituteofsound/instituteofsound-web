@@ -1,4 +1,5 @@
 import { getSupabase } from '@/lib/supabase/client'
+import { assertDirectSupabaseAllowed } from '@/lib/api/v1Security'
 import type { User } from '@/lib/auth/types'
 import type {
   ArtistAlbum,
@@ -27,6 +28,7 @@ import {
 import * as media from './mediaRepository'
 
 function sb() {
+  assertDirectSupabaseAllowed('Artist studio')
   return getSupabase()
 }
 

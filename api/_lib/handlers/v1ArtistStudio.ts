@@ -1,6 +1,7 @@
 import { requireAuth, resolveSupabaseForRequest } from '../auth.js'
 import { createSupabaseUserClient } from '../supabaseServer.js'
-import { repoGetArtistProfileBySlug } from '../../../src/lib/artist-profile/profileRepository.js'
+import { repoGetArtistProfileBySlug, repoGetArtistProfileByUserId } from '../../../src/lib/artist-profile/profileRepository.js'
+import { evaluateArtistLifecycle } from '../../../src/lib/artist-profile/pageLifecycle.js'
 import {
   repoAddAlbum,
   repoAddBioTimeline,
@@ -67,6 +68,12 @@ async function loadArtistPage(supabase: ReturnType<typeof createSupabaseUserClie
     repoGetEditorialForProfile(supabase, profile.id),
   ])
 
+  const verdict = evaluateArtistLifecycle(profile, {
+    trackCount: tracks.length,
+    videoCount: videos.length,
+  })
+  if (verdict.action === 'delete') return null
+
   return {
     profile,
     tracks,
@@ -109,6 +116,29 @@ export async function handleV1ArtistStudio(
     try {
       const artists = await repoListManagedArtistsByHandle(resolved.supabase, handle)
       return send(res, 200, { artists })
+    } catch (err) {
+      return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
+    }
+  }
+
+  if (pathname === '/api/v1/artist/studio' && req.method === 'GET') {
+    const auth = await requireAuth(req)
+    if ('error' in auth) return send(res, auth.status, { error: auth.error })
+    const supabase = createSupabaseUserClient(auth.accessToken)
+    try {
+      const profile = await repoGetArtistProfileByUserId(supabase, auth.authUser.id)
+      if (!profile) return send(res, 200, { studio: null })
+      const [tracks, albums, videos, merch, lineup, bioTimeline] = await Promise.all([
+        repoGetTracks(supabase, profile.id),
+        repoGetAlbums(supabase, profile.id),
+        repoGetVideos(supabase, profile.id),
+        repoGetMerch(supabase, profile.id),
+        repoGetLineup(supabase, profile.id),
+        repoGetBioTimeline(supabase, profile.id),
+      ])
+      return send(res, 200, {
+        studio: { profile, tracks, albums, videos, merch, lineup, bioTimeline },
+      })
     } catch (err) {
       return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
     }

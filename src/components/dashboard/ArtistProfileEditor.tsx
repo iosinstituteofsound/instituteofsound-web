@@ -16,18 +16,9 @@ import {
   addArtistTrack,
   addArtistVideo,
   getProfileForUser,
+  loadArtistStudioChildData,
   upsertArtistProfile,
 } from '@/lib/artist-profile/service'
-import {
-  localGetAlbums,
-  localGetBioTimeline,
-  localGetLineup,
-  localGetMerch,
-  localGetTracks,
-  localGetVideos,
-} from '@/lib/artist-profile/storage'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
-import * as sb from '@/lib/artist-profile/supabaseProfile'
 import { normalizeInfluenceTags } from '@/lib/artist-profile/influences'
 import { slugifyArtistName } from '@/lib/artist-profile/slug'
 import {
@@ -175,32 +166,14 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [brandingSaving, setBrandingSaving] = useState(false)
 
   const loadChildData = useCallback(async (profileId: string) => {
-    if (isSupabaseConfigured()) {
-      const [t, a, v, m, l, bt] = await Promise.all([
-        sb.supabaseGetTracks(profileId),
-        sb.supabaseGetAlbums(profileId),
-        sb.supabaseGetVideos(profileId),
-        sb.supabaseGetMerch(profileId),
-        sb.supabaseGetLineup(profileId),
-        sb.supabaseGetBioTimeline(profileId),
-      ])
-      setTracks(t)
-      setAlbums(a)
-      setVideos(v)
-      setMerch(m)
-      setLineup(l)
-      setBioTimeline(bt)
-      return { trackCount: t.length, videoCount: v.length }
-    }
-    const t = localGetTracks(profileId)
-    const v = localGetVideos(profileId)
-    setTracks(t)
-    setAlbums(localGetAlbums(profileId))
-    setVideos(v)
-    setMerch(localGetMerch(profileId))
-    setLineup(localGetLineup(profileId))
-    setBioTimeline(localGetBioTimeline(profileId))
-    return { trackCount: t.length, videoCount: v.length }
+    const data = await loadArtistStudioChildData(profileId)
+    setTracks(data.tracks)
+    setAlbums(data.albums)
+    setVideos(data.videos)
+    setMerch(data.merch)
+    setLineup(data.lineup)
+    setBioTimeline(data.bioTimeline)
+    return { trackCount: data.trackCount, videoCount: data.videoCount }
   }, [])
 
   const refresh = useCallback(async () => {
@@ -405,26 +378,12 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   }
 
   const reloadMediaAndTryDiscover = async (profileId: string) => {
-    let trackCount = tracks.length
-    let videoCount = videos.length
-    if (isSupabaseConfigured()) {
-      const [t, a, v] = await Promise.all([
-        sb.supabaseGetTracks(profileId),
-        sb.supabaseGetAlbums(profileId),
-        sb.supabaseGetVideos(profileId),
-      ])
-      setTracks(t)
-      setAlbums(a)
-      setVideos(v)
-      trackCount = t.length
-      videoCount = v.length
-    } else {
-      setTracks(localGetTracks(profileId))
-      setAlbums(localGetAlbums(profileId))
-      setVideos(localGetVideos(profileId))
-      trackCount = localGetTracks(profileId).length
-      videoCount = localGetVideos(profileId).length
-    }
+    const data = await loadArtistStudioChildData(profileId)
+    setTracks(data.tracks)
+    setAlbums(data.albums)
+    setVideos(data.videos)
+    const trackCount = data.trackCount
+    const videoCount = data.videoCount
     setSaving(true)
     setError('')
     try {

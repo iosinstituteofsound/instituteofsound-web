@@ -14,6 +14,7 @@ import {
   v1DeleteArtistTrack,
   v1DeleteArtistVideo,
   v1GetArtistPage,
+  v1GetArtistStudio,
   v1ListManagedArtists,
   v1UpdateArtistAlbum,
   v1UpdateArtistBioTimeline,
@@ -32,8 +33,8 @@ import type { Artist } from '@/types'
 import type { User } from '@/lib/auth/types'
 import { mergeDiscoverArtists } from './discover'
 import {
-  enforceArtistPageLifecycle,
-  getProfileForUserAfterLifecycle,
+  getProfileForUserDirect,
+  hideIfExpiredPublicPage,
   touchArtistPageActivityByProfileId,
 } from './pageEnforcement'
 import { resolveArtistPageForViewer } from './profileVisibility'
@@ -42,6 +43,12 @@ import type {
   ManagedArtistSummary,
   ArtistProfile,
   ArtistProfilePageData,
+  ArtistAlbum,
+  ArtistBioTimelineEntry,
+  ArtistLineupEntry,
+  ArtistMerchItem,
+  ArtistTrack,
+  ArtistVideo,
   UpsertAlbumInput,
   UpsertArtistProfileInput,
   UpsertBioTimelineInput,
@@ -118,13 +125,13 @@ export async function getProfileForUser(userId: string): Promise<ArtistProfile |
       async () => {
         const { profile } = await v1GetArtistProfile()
         if (!profile || profile.userId !== userId) return null
-        return enforceArtistPageLifecycle(profile)
+        return profile
       },
-      () => getProfileForUserAfterLifecycle(userId),
+      () => getProfileForUserDirect(userId),
     )
   }
   assertDirectSupabaseAllowed('Artist profile')
-  return getProfileForUserAfterLifecycle(userId)
+  return getProfileForUserDirect(userId)
 }
 
 export async function upsertArtistProfile(
@@ -141,19 +148,15 @@ export async function upsertArtistProfile(
     return withV1Fallback(
       async () => {
         const { profile } = await v1PutArtistProfile(payload)
-        return (await enforceArtistPageLifecycle(profile)) ?? profile
+        return profile
       },
-      async () => {
-        const profile = await sb.supabaseUpsertProfile(user, payload)
-        return (await enforceArtistPageLifecycle(profile)) ?? profile
-      },
+      async () => sb.supabaseUpsertProfile(user, payload),
     )
   }
   assertDirectSupabaseAllowed('Artist profile')
-  const profile = isSupabaseConfigured()
-    ? await sb.supabaseUpsertProfile(user, payload)
+  return isSupabaseConfigured()
+    ? sb.supabaseUpsertProfile(user, payload)
     : local.localUpsertProfile(user, payload)
-  return (await enforceArtistPageLifecycle(profile)) ?? profile
 }
 
 export async function listManagedArtistsByHandle(
@@ -170,21 +173,91 @@ export async function listManagedArtistsByHandle(
   )
 }
 
+export type ArtistStudioChildData = {
+  tracks: ArtistTrack[]
+  albums: ArtistAlbum[]
+  videos: ArtistVideo[]
+  merch: ArtistMerchItem[]
+  lineup: ArtistLineupEntry[]
+  bioTimeline: ArtistBioTimelineEntry[]
+}
+
+export async function loadArtistStudioChildData(
+  profileId: string,
+): Promise<ArtistStudioChildData & { trackCount: number; videoCount: number }> {
+  if (!isSupabaseConfigured()) {
+    const tracks = local.localGetTracks(profileId)
+    const videos = local.localGetVideos(profileId)
+    return {
+      tracks,
+      albums: local.localGetAlbums(profileId),
+      videos,
+      merch: local.localGetMerch(profileId),
+      lineup: local.localGetLineup(profileId),
+      bioTimeline: local.localGetBioTimeline(profileId),
+      trackCount: tracks.length,
+      videoCount: videos.length,
+    }
+  }
+
+  return viaV1Api(
+    async () => {
+      const { studio } = await v1GetArtistStudio()
+      if (!studio || studio.profile.id !== profileId) {
+        throw new Error('Studio data unavailable for this profile.')
+      }
+      return {
+        tracks: studio.tracks,
+        albums: studio.albums,
+        videos: studio.videos,
+        merch: studio.merch,
+        lineup: studio.lineup,
+        bioTimeline: studio.bioTimeline,
+        trackCount: studio.tracks.length,
+        videoCount: studio.videos.length,
+      }
+    },
+    async () => {
+      const [tracks, albums, videos, merch, lineup, bioTimeline] = await Promise.all([
+        sb.supabaseGetTracks(profileId),
+        sb.supabaseGetAlbums(profileId),
+        sb.supabaseGetVideos(profileId),
+        sb.supabaseGetMerch(profileId),
+        sb.supabaseGetLineup(profileId),
+        sb.supabaseGetBioTimeline(profileId),
+      ])
+      return {
+        tracks,
+        albums,
+        videos,
+        merch,
+        lineup,
+        bioTimeline,
+        trackCount: tracks.length,
+        videoCount: videos.length,
+      }
+    },
+  )
+}
+
 async function directGetArtistProfilePage(slug: string): Promise<ArtistProfilePageData | null> {
   const raw = await sb.supabaseGetProfileBySlug(slug)
   if (!raw) return null
-  const profile = await enforceArtistPageLifecycle(raw)
-  if (!profile) return null
   const [tracks, albums, videos, merch, lineup, bioTimeline, editorialRows] =
     await Promise.all([
-      sb.supabaseGetTracks(profile.id),
-      sb.supabaseGetAlbums(profile.id),
-      sb.supabaseGetVideos(profile.id),
-      sb.supabaseGetMerch(profile.id),
-      sb.supabaseGetLineup(profile.id),
-      sb.supabaseGetBioTimeline(profile.id),
-      sb.supabaseGetEditorialForProfile(profile.id),
+      sb.supabaseGetTracks(raw.id),
+      sb.supabaseGetAlbums(raw.id),
+      sb.supabaseGetVideos(raw.id),
+      sb.supabaseGetMerch(raw.id),
+      sb.supabaseGetLineup(raw.id),
+      sb.supabaseGetBioTimeline(raw.id),
+      sb.supabaseGetEditorialForProfile(raw.id),
     ])
+  const profile = hideIfExpiredPublicPage(raw, {
+    trackCount: tracks.length,
+    videoCount: videos.length,
+  })
+  if (!profile) return null
   const [enrichedTracks, enrichedVideos] = await Promise.all([
     enrichTracksWithThumbnails(tracks, true),
     enrichVideosWithThumbnails(videos, true),
@@ -209,7 +282,10 @@ async function directGetArtistProfilePage(slug: string): Promise<ArtistProfilePa
 }
 
 async function finalizeArtistPage(page: NonNullable<Awaited<ReturnType<typeof v1GetArtistPage>>['page']>): Promise<ArtistProfilePageData | null> {
-  const profile = await enforceArtistPageLifecycle(page.profile)
+  const profile = hideIfExpiredPublicPage(page.profile, {
+    trackCount: page.tracks.length,
+    videoCount: page.videos.length,
+  })
   if (!profile) return null
   const [enrichedTracks, enrichedVideos] = await Promise.all([
     enrichTracksWithThumbnails(page.tracks, true),
@@ -246,7 +322,9 @@ export async function getArtistProfilePage(slug: string): Promise<ArtistProfileP
 
   const raw = local.localGetProfileBySlug(slug)
   if (!raw) return null
-  const profile = await enforceArtistPageLifecycle(raw)
+  const t = local.localGetTracks(raw.id)
+  const v = local.localGetVideos(raw.id)
+  const profile = hideIfExpiredPublicPage(raw, { trackCount: t.length, videoCount: v.length })
   if (!profile) return null
   const data = local.localGetPageData(slug, localEditorialForProfile(profile.id))
   if (!data) return null

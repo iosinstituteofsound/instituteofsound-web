@@ -39,6 +39,20 @@ export type ArtistPageApiPayload = {
   }[]
 }
 
+export type ArtistStudioApiPayload = {
+  profile: ArtistProfile
+  tracks: ArtistTrack[]
+  albums: ArtistAlbum[]
+  videos: ArtistVideo[]
+  merch: ArtistMerchItem[]
+  lineup: ArtistLineupEntry[]
+  bioTimeline: ArtistBioTimelineEntry[]
+}
+
+export async function v1GetArtistStudio(): Promise<{ studio: ArtistStudioApiPayload | null }> {
+  return v1Fetch('/artist/studio')
+}
+
 export async function v1GetArtistPage(slug: string): Promise<{ page: ArtistPageApiPayload | null }> {
   const params = new URLSearchParams({ slug })
   return v1Fetch(`/artist/page?${params}`, { auth: 'optional' })

@@ -1,34 +1,20 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { archiveAndDeleteArtistProfile } from '@/lib/artist-profile/archive'
 import { evaluateArtistLifecycle } from '@/lib/artist-profile/pageLifecycle'
-import type { ArtistDeletionReason } from '@/lib/artist-page-recovery/types'
 import type { ArtistProfile } from '@/lib/artist-profile/types'
 import * as local from '@/lib/artist-profile/storage'
 import * as sb from '@/lib/artist-profile/supabaseProfile'
 
-async function mediaCountsForProfile(profileId: string): Promise<{ trackCount: number; videoCount: number }> {
-  if (isSupabaseConfigured()) {
-    const [tracks, videos] = await Promise.all([
-      sb.supabaseGetTracks(profileId),
-      sb.supabaseGetVideos(profileId),
-    ])
-    return { trackCount: tracks.length, videoCount: videos.length }
-  }
-  return {
-    trackCount: local.localGetTracks(profileId).length,
-    videoCount: local.localGetVideos(profileId).length,
-  }
-}
-
-/** Remove expired drafts / inactive live pages; returns null if deleted. */
-export async function enforceArtistPageLifecycle(
+/**
+ * Public pages only: return null when lifecycle says the page should not be shown.
+ * Does not delete — purge runs server-side via purge_expired_artist_profiles().
+ */
+export function hideIfExpiredPublicPage(
   profile: ArtistProfile,
-): Promise<ArtistProfile | null> {
-  const media = await mediaCountsForProfile(profile.id)
+  media: { trackCount: number; videoCount: number },
+): ArtistProfile | null {
   const verdict = evaluateArtistLifecycle(profile, media)
-  if (verdict.action === 'keep') return profile
-  await archiveAndDeleteArtistProfile(profile, verdict.reason as ArtistDeletionReason)
-  return null
+  if (verdict.action === 'delete') return null
+  return profile
 }
 
 export async function touchArtistPageActivity(userId: string): Promise<void> {
@@ -58,12 +44,10 @@ export async function touchArtistPageActivityByProfileId(profileId: string): Pro
   if (profile) local.localTouchActivity(profile.userId)
 }
 
-export async function getProfileForUserAfterLifecycle(userId: string): Promise<ArtistProfile | null> {
-  const profile = isSupabaseConfigured()
-    ? await sb.supabaseGetProfileByUserId(userId)
+export async function getProfileForUserDirect(userId: string): Promise<ArtistProfile | null> {
+  return isSupabaseConfigured()
+    ? sb.supabaseGetProfileByUserId(userId)
     : local.localGetProfileByUserId(userId)
-  if (!profile) return null
-  return enforceArtistPageLifecycle(profile)
 }
 
 export function lifecycleDeletedMessage(reason: 'incomplete_draft_expired' | 'inactive_live_page'): string {
