@@ -83,9 +83,7 @@ export async function uploadPdfToCloudinary(
   folder: CloudinaryFolder
 ): Promise<{ url: string; publicId: string; bytes: number }> {
   if (!isCloudinaryConfigured()) {
-    throw new Error(
-      'Cloudinary is not configured. Add VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to .env'
-    )
+    throw new Error('Cloudinary is not configured. Add VITE_CLOUDINARY_CLOUD_NAME to .env')
   }
 
   const validation = validatePdfFile(file)
@@ -130,9 +128,7 @@ export async function uploadImageToCloudinary(
   folder: CloudinaryFolder
 ): Promise<CloudinaryUploadResult> {
   if (!isCloudinaryConfigured()) {
-    throw new Error(
-      'Cloudinary is not configured. Add VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to .env'
-    )
+    throw new Error('Cloudinary is not configured. Add VITE_CLOUDINARY_CLOUD_NAME to .env')
   }
 
   const validation = validateImageFile(file)

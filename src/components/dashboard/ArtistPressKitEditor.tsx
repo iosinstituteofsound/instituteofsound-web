@@ -27,7 +27,7 @@ export function ArtistPressKitEditor({
         folder="ios/press-kits"
         value={pressKitUrl || undefined}
         onChange={onUrlChange}
-        hint="Your Cloudinary unsigned upload preset must allow raw/PDF files."
+        hint="PDF uploads use signed server signatures (ios/press-kits). Preset must allow raw/PDF on Cloudinary."
       />
       <div>
         <FieldLabel>Or paste PDF URL</FieldLabel>

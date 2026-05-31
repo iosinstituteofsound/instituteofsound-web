@@ -12,6 +12,7 @@
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "build": "npm run sitemap && npm run pwa:icons && npm run bundle:api && tsc -p api/tsconfig.json && tsc -b && vite build",
     "bundle:api": "node scripts/bundle-api-v1.mjs",
+    "ci": "npm run bundle:api && tsc -p api/tsconfig.json && tsc -b && node scripts/smoke-v1-bundle.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

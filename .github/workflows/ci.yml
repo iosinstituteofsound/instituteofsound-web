@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bundle v1 API
+        run: npm run bundle:api
+
+      - name: Typecheck API
+        run: npx tsc -p api/tsconfig.json
+
+      - name: Typecheck app
+        run: npx tsc -b
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Smoke — v1 bundle artifact
+        run: node scripts/smoke-v1-bundle.mjs

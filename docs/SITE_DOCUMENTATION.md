@@ -1167,8 +1167,8 @@ Common vars:
 | `SUPABASE_ANON_KEY` | Server | Verify user JWT in `/api/v1` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server | Desk recovery restore, admin-only ops |
 | `VITE_USE_V1_API` | Client | `true` / `1` / `yes` → route wired modules through `/api/v1` |
-| `VITE_CLOUDINARY_CLOUD_NAME` | Client | Image uploads |
-| `VITE_CLOUDINARY_UPLOAD_PRESET` | Client | Unsigned preset |
+| `VITE_CLOUDINARY_CLOUD_NAME` | Client | CDN + signed uploads (preset from `/api/v1/media/sign`) |
+| `CLOUDINARY_*` (server) | API only | Signed upload signatures — never `VITE_` |
 | `VITE_SITE_URL` | Client | Canonical URL for SEO / auth redirects |
 | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` | Server | Catalog import |
 | `YOUTUBE_API_KEY` | Server | Catalog import |

@@ -355,6 +355,30 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://instituteofsound.in/network/darwin</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://instituteofsound.in/network/ios</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://instituteofsound.in/network/nexoveindia</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://instituteofsound.in/network/thelostsymbols</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://instituteofsound.in/playlist/dark-signal</loc>
     <lastmod>2026-05-31</lastmod>
     <changefreq>weekly</changefreq>

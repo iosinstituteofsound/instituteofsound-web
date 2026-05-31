@@ -65,7 +65,7 @@ export function PdfUpload({ label, folder, value, onChange, hint }: PdfUploadPro
     return (
       <div className="border border-amber-500/40 bg-amber-500/5 p-4 text-xs text-amber-400">
         <p className="font-bold uppercase tracking-widest mb-1">Cloudinary not configured</p>
-        <p>Add VITE_CLOUDINARY_* to .env for PDF upload, or paste a direct PDF link below.</p>
+        <p>Add VITE_CLOUDINARY_CLOUD_NAME and server signing keys for PDF upload, or paste a link below.</p>
       </div>
     )
   }
