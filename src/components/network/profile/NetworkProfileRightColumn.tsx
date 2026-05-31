@@ -7,6 +7,7 @@ import { fetchCrewForUserId } from '@/lib/community/crewService'
 import type { PublicUserCrew } from '@/lib/community/crewTypes'
 import { ConnectButton } from '@/components/network/ConnectButton'
 import { NetworkProfileReputationCard } from '@/components/network/profile/NetworkProfileReputationCard'
+import { NetworkProfileConnectsCard } from '@/components/network/profile/NetworkProfileConnectsCard'
 import { FandomPublicRecognitions } from '@/components/fandom/FandomPublicRecognitions'
 import type { NetworkPersonCard } from '@/lib/network/connectionTypes'
 import { networkProfilePath } from '@/lib/community/networkPaths'
@@ -56,6 +57,8 @@ export function NetworkProfileRightColumn({
   return (
     <div className="np-rail np-overview__stack">
       <NetworkProfileReputationCard profile={profile} posts={posts} />
+
+      <NetworkProfileConnectsCard />
 
       {(isYou || mutuals.length > 0) && (
         <section className="np-rail-card">
@@ -144,7 +147,6 @@ export function NetworkProfileRightColumn({
                     ) : (
                       <span className="np-rail-suggest__fallback">{person.displayName.charAt(0)}</span>
                     )}
-                    <span className="np-rail-suggest__online" aria-hidden />
                   </span>
                   <span className="np-rail-suggest__meta">
                     <strong>{person.displayName}</strong>

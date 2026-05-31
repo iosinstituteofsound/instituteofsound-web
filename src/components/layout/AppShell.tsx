@@ -10,6 +10,7 @@ import { TopBar } from './TopBar'
 import { MobileNav } from './MobileNav'
 import { CommandPalette } from './CommandPalette'
 import { LoginGateModal } from '@/components/auth/LoginGateModal'
+import { NetworkPresenceHeartbeat } from '@/components/network/NetworkPresenceHeartbeat'
 
 function ShellInner() {
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -30,6 +31,7 @@ function ShellInner() {
       <AcademyProgressSync />
       <CommandPalette />
       <LoginGateModal />
+      <NetworkPresenceHeartbeat />
 
       <div className="v2-shell ios-page-bg relative flex h-dvh max-h-dvh overflow-hidden flex-col lg:flex-row">
         <div className="v2-sidebar-slot hidden shrink-0 lg:flex">

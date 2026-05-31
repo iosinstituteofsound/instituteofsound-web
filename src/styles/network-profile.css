@@ -1319,6 +1319,74 @@
   background: rgba(212, 0, 0, 0.1) !important;
 }
 
+/* Connects — online connections only (Messenger-style list) */
+.np-connects__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.np-connects__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.np-connects__row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.np-connects__avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.np-connects__avatar,
+.np-connects__fallback {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.np-connects__fallback {
+  display: grid;
+  place-items: center;
+  background: #2a2a2a;
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-mh-red);
+}
+
+.np-connects__online {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid var(--color-elevated);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
+}
+
+.np-connects__name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-signal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
 .np-rail-card--fandom .np-card__title {
   margin-bottom: 0.5rem;
 }
