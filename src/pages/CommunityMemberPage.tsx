@@ -46,8 +46,15 @@ import { IOSImage } from '@/components/ui/IOSImage'
 import { Input, FieldLabel } from '@/components/ui/Input'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { updateUserProfile } from '@/lib/auth/profile'
-import { fetchPublicSupporterBadgesForUser } from '@/lib/fandom/service'
-import type { PublicSupporterBadgeOnArtist } from '@/lib/fandom/types'
+import {
+  fetchPublicRecognitionsForUser,
+  fetchPublicSupporterBadgesForUser,
+} from '@/lib/fandom/service'
+import type {
+  FandomPublicRecognitionRow,
+  PublicSupporterBadgeOnArtist,
+} from '@/lib/fandom/types'
+import { FandomPublicRecognitions } from '@/components/fandom/FandomPublicRecognitions'
 
 function tabFromSearch(params: URLSearchParams): MemberProfileTab {
   const t = params.get('tab')
@@ -95,6 +102,7 @@ export default function CommunityMemberPage() {
   const [connectionsError, setConnectionsError] = useState('')
   const [connections, setConnections] = useState<MemberConnectionProfile[]>([])
   const [fandomBadges, setFandomBadges] = useState<PublicSupporterBadgeOnArtist[]>([])
+  const [fandomRecognitions, setFandomRecognitions] = useState<FandomPublicRecognitionRow[]>([])
   const navigate = useNavigate()
 
   const { badges, loading: badgesLoading } = useCommunityBadges(profile?.userId)
@@ -151,18 +159,21 @@ export default function CommunityMemberPage() {
       setArtistProfileId(null)
       setManagedArtists([])
       setFandomBadges([])
+      setFandomRecognitions([])
     } else {
       setProfile(p)
       setPosts(postList)
       setActivity(act)
-      const [artistMeta, supporterBadges, managed] = await Promise.all([
+      const [artistMeta, supporterBadges, recognitions, managed] = await Promise.all([
         fetchPublishedArtistMetaForUserId(p.userId),
         fetchPublicSupporterBadgesForUser(p.userId),
+        fetchPublicRecognitionsForUser(p.userId),
         listManagedArtistsByHandle(p.handle),
       ])
       setArtistSlug(artistMeta?.slug ?? null)
       setArtistProfileId(artistMeta?.id ?? null)
       setFandomBadges(supporterBadges)
+      setFandomRecognitions(recognitions)
       setManagedArtists(managed)
     }
     setLoading(false)
@@ -360,6 +371,11 @@ export default function CommunityMemberPage() {
           onOpenFollowing={() => void openConnections('following')}
           onOpenConnections={() => void openConnections('connections')}
           onConnectionChange={() => void loadProfile()}
+        />
+
+        <FandomPublicRecognitions
+          recognitions={fandomRecognitions}
+          className="mb-8"
         />
 
         {connectionsOpen && (

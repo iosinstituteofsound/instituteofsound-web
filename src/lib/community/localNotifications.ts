@@ -12,6 +12,7 @@ export type NotificationKind =
   | 'post_comment'
   | 'connection_request'
   | 'connection_accepted'
+  | 'fandom_recognition'
 
 export interface CommunityNotification {
   id: string

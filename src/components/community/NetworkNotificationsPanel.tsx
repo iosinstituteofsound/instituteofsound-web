@@ -28,6 +28,8 @@ function notificationFallbackIcon(kind: NotificationKind): string {
       return '✉'
     case 'post_comment':
       return '💬'
+    case 'fandom_recognition':
+      return '♥'
     default:
       return '◉'
   }

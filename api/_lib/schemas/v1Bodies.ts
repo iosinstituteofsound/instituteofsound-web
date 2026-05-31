@@ -45,6 +45,13 @@ export const communityReactionBody = z.object({
 
 export const communityPostIdBody = z.object({ postId: zUuid })
 
+export const fandomRecognitionBody = z.object({
+  supporterUserId: zUuid,
+  message: z.string().trim().min(1).max(280),
+  kind: z.enum(['thanks', 'shoutout']).optional(),
+  isPublic: z.boolean().optional(),
+})
+
 export const communityDropUpdateBody = communityPostIdBody.extend({
   text: zShortText.optional(),
 })

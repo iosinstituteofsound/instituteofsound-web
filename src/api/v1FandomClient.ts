@@ -5,6 +5,10 @@ import type {
   ArtistRecentSupportRow,
   ArtistSupporterRow,
   FandomDiscoverArtistRow,
+  FandomMilestoneRow,
+  FandomPublicRecognitionRow,
+  FandomRecognitionKind,
+  FandomSentRecognitionRow,
   FandomWindow,
   MyFandomArtistRow,
 } from '@/lib/fandom/types'
@@ -39,4 +43,48 @@ export async function v1LogFandomShare(postId: string): Promise<void> {
     method: 'POST',
     body: JSON.stringify({ postId }),
   })
+}
+
+export async function v1SendFandomRecognition(input: {
+  supporterUserId: string
+  message: string
+  kind?: FandomRecognitionKind
+  isPublic?: boolean
+}): Promise<void> {
+  await v1Fetch('/fandom/recognize', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function v1FetchArtistSentRecognitions(
+  limit = 20,
+): Promise<FandomSentRecognitionRow[]> {
+  const { recognitions } = await v1Fetch<{ recognitions: FandomSentRecognitionRow[] }>(
+    `/fandom/recognitions/sent?limit=${limit}`,
+  )
+  return recognitions ?? []
+}
+
+export async function v1FetchPublicRecognitionsForUser(
+  userId: string,
+  limit = 12,
+): Promise<FandomPublicRecognitionRow[]> {
+  const { recognitions } = await v1Fetch<{ recognitions: FandomPublicRecognitionRow[] }>(
+    `/fandom/recognitions/public?userId=${encodeURIComponent(userId)}&limit=${limit}`,
+    { auth: 'optional' },
+  )
+  return recognitions ?? []
+}
+
+export async function v1FetchSupporterMilestones(
+  artistProfileId: string,
+  supporterUserId?: string,
+): Promise<FandomMilestoneRow[]> {
+  const params = new URLSearchParams({ artistProfileId })
+  if (supporterUserId) params.set('supporterUserId', supporterUserId)
+  const { milestones } = await v1Fetch<{ milestones: FandomMilestoneRow[] }>(
+    `/fandom/milestones?${params}`,
+  )
+  return milestones ?? []
 }

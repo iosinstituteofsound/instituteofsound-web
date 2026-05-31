@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
-import { fetchArtistFandom } from '@/lib/fandom/service'
-import type { FandomWindow } from '@/lib/fandom/types'
+import {
+  fetchArtistFandom,
+  fetchArtistSentRecognitions,
+} from '@/lib/fandom/service'
+import type { FandomSentRecognitionRow, FandomWindow } from '@/lib/fandom/types'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { networkProfilePath } from '@/lib/community/networkPaths'
+import { FandomThankSupporterModal } from '@/components/fandom/FandomThankSupporterModal'
 
 const ACTION_LABEL: Record<string, string> = {
   review: 'Review',
@@ -33,6 +37,11 @@ export function ArtistFandomPanel() {
   const [recent, setRecent] = useState<Awaited<ReturnType<typeof fetchArtistFandom>>['recent']>([])
   const [champions, setChampions] = useState<Awaited<ReturnType<typeof fetchArtistFandom>>['champions']>([])
   const [drivers, setDrivers] = useState<Awaited<ReturnType<typeof fetchArtistFandom>>['drivers']>([])
+  const [sentRecognitions, setSentRecognitions] = useState<FandomSentRecognitionRow[]>([])
+  const [thankTarget, setThankTarget] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -43,12 +52,15 @@ export function ArtistFandomPanel() {
       setRecent(data.recent)
       setChampions(data.champions)
       setDrivers(data.drivers)
+      const sent = await fetchArtistSentRecognitions()
+      setSentRecognitions(sent ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load fandom')
       setSupporters([])
       setRecent([])
       setChampions([])
       setDrivers([])
+      setSentRecognitions([])
     } finally {
       setLoading(false)
     }
@@ -59,7 +71,14 @@ export function ArtistFandomPanel() {
   }, [load])
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
+      <FandomThankSupporterModal
+        supporterUserId={thankTarget?.id ?? ''}
+        supporterName={thankTarget?.name ?? ''}
+        open={thankTarget != null}
+        onClose={() => setThankTarget(null)}
+        onSent={() => void load()}
+      />
       <div className="ios-card p-6 md:p-8">
         <p className="text-[10px] tracking-[0.25em] uppercase text-mh-red font-bold mb-2">Fandom</p>
         <h2 className="font-display text-2xl md:text-3xl font-bold uppercase">Who supports you</h2>
@@ -118,17 +137,52 @@ export function ArtistFandomPanel() {
                         {s.badgeLabel ? ` · ${s.badgeLabel}` : ''}
                       </p>
                     </div>
-                    <Link
-                      to={networkProfilePath(s.handle)}
-                      className="ios-btn ios-btn-ghost !text-xs shrink-0"
-                    >
-                      Profile
-                    </Link>
+                    <div className="flex flex-col gap-1 shrink-0">
+                      <button
+                        type="button"
+                        className="ios-btn ios-btn-primary !text-xs"
+                        onClick={() =>
+                          setThankTarget({
+                            id: s.supporterUserId,
+                            name: s.displayName,
+                          })
+                        }
+                      >
+                        Thank
+                      </button>
+                      <Link
+                        to={networkProfilePath(s.handle)}
+                        className="ios-btn ios-btn-ghost !text-xs"
+                      >
+                        Profile
+                      </Link>
+                    </div>
                   </li>
                 ))}
               </ul>
             )}
           </section>
+
+          {sentRecognitions.length > 0 && (
+            <section>
+              <h3 className="font-display text-lg font-bold uppercase mb-3">Recognition sent</h3>
+              <ul className="space-y-2">
+                {sentRecognitions.map((r) => (
+                  <li key={r.id} className="ios-card p-4">
+                    <p className="text-xs text-muted">
+                      <strong>{r.displayName}</strong>
+                      {' · '}
+                      {r.kind === 'shoutout' ? 'Shout-out' : 'Thank you'}
+                      {!r.isPublic && ' · private'}
+                      {' · '}
+                      {new Date(r.createdAt).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm mt-2">&ldquo;{r.message}&rdquo;</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section>
             <h3 className="font-display text-lg font-bold uppercase mb-3">Recent support</h3>

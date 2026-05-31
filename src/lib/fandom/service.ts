@@ -1,5 +1,13 @@
 import { isV1ApiEnabled } from '@/api/v1Client'
-import { v1FetchMyFandom, v1FetchArtistFandom, v1FetchFandomDiscover } from '@/api/v1FandomClient'
+import {
+  v1FetchMyFandom,
+  v1FetchArtistFandom,
+  v1FetchFandomDiscover,
+  v1FetchArtistSentRecognitions,
+  v1FetchPublicRecognitionsForUser,
+  v1FetchSupporterMilestones,
+  v1SendFandomRecognition,
+} from '@/api/v1FandomClient'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import {
   repoFetchArtistContentChampions,
@@ -10,11 +18,19 @@ import {
   repoFetchDiscoverRisingArtists,
   repoFetchMyFandom,
   repoFetchPublicSupporterBadge,
+  repoFetchArtistSentRecognitions,
+  repoFetchPublicRecognitionsForUser,
   repoFetchPublicSupporterBadgesForUser,
+  repoFetchSupporterMilestones,
   repoSearchArtistsForTags,
+  repoSendFandomRecognition,
 } from './fandomRepository'
 import type {
   FandomDiscoverArtistRow,
+  FandomMilestoneRow,
+  FandomPublicRecognitionRow,
+  FandomRecognitionKind,
+  FandomSentRecognitionRow,
   FandomWindow,
   PublicSupporterBadge,
   PublicSupporterBadgeOnArtist,
@@ -115,4 +131,48 @@ export async function fetchPublicSupporterBadgesForUser(
 ): Promise<PublicSupporterBadgeOnArtist[]> {
   if (!isSupabaseConfigured()) return []
   return repoFetchPublicSupporterBadgesForUser(getSupabase(), supporterUserId, limit)
+}
+
+export async function sendFandomRecognition(
+  supporterUserId: string,
+  message: string,
+  kind: FandomRecognitionKind = 'thanks',
+  isPublic = true,
+): Promise<void> {
+  if (isV1ApiEnabled()) {
+    await v1SendFandomRecognition({ supporterUserId, message, kind, isPublic })
+    return
+  }
+  if (!isSupabaseConfigured()) throw new Error('Sign in required')
+  await repoSendFandomRecognition(getSupabase(), supporterUserId, message, kind, isPublic)
+}
+
+export async function fetchArtistSentRecognitions(limit = 20): Promise<FandomSentRecognitionRow[]> {
+  if (isV1ApiEnabled()) {
+    return v1FetchArtistSentRecognitions(limit)
+  }
+  if (!isSupabaseConfigured()) return []
+  return repoFetchArtistSentRecognitions(getSupabase(), limit)
+}
+
+export async function fetchPublicRecognitionsForUser(
+  userId: string,
+  limit = 12,
+): Promise<FandomPublicRecognitionRow[]> {
+  if (isV1ApiEnabled()) {
+    return v1FetchPublicRecognitionsForUser(userId, limit)
+  }
+  if (!isSupabaseConfigured()) return []
+  return repoFetchPublicRecognitionsForUser(getSupabase(), userId, limit)
+}
+
+export async function fetchSupporterMilestones(
+  artistProfileId: string,
+  supporterUserId?: string,
+): Promise<FandomMilestoneRow[]> {
+  if (isV1ApiEnabled()) {
+    return v1FetchSupporterMilestones(artistProfileId, supporterUserId)
+  }
+  if (!isSupabaseConfigured()) return []
+  return repoFetchSupporterMilestones(getSupabase(), artistProfileId, supporterUserId)
 }

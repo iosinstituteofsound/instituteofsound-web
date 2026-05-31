@@ -108,3 +108,34 @@ export interface FandomDiscoverArtistRow {
   /** Optional hint for sorting; not shown as currency. */
   signalStrength?: number
 }
+
+export type FandomRecognitionKind = 'thanks' | 'shoutout'
+
+export interface FandomSentRecognitionRow {
+  id: string
+  supporterUserId: string
+  displayName: string
+  handle: string
+  avatarUrl?: string
+  kind: FandomRecognitionKind
+  message: string
+  isPublic: boolean
+  createdAt: string
+}
+
+export interface FandomPublicRecognitionRow {
+  id: string
+  artistProfileId: string
+  artistSlug: string
+  artistDisplayName: string
+  artistAvatarUrl?: string
+  kind: FandomRecognitionKind
+  message: string
+  createdAt: string
+}
+
+export interface FandomMilestoneRow {
+  milestoneSlug: string
+  label: string
+  earnedAt: string
+}

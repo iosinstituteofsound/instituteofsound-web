@@ -6,6 +6,10 @@ import type {
   ArtistSupporterRow,
   FandomArtistSearchHit,
   FandomDiscoverArtistRow,
+  FandomMilestoneRow,
+  FandomPublicRecognitionRow,
+  FandomRecognitionKind,
+  FandomSentRecognitionRow,
   FandomWindow,
   MyFandomArtistRow,
   PublicSupporterBadge,
@@ -248,4 +252,79 @@ export async function repoFetchPublicSupporterBadgesForUser(
       supporterRank: row.supporter_rank != null ? Number(row.supporter_rank) : null,
     }))
     .filter((row: PublicSupporterBadgeOnArtist) => row.badgeLabel.length > 0)
+}
+
+export async function repoSendFandomRecognition(
+  supabase: SupabaseClient,
+  supporterUserId: string,
+  message: string,
+  kind: FandomRecognitionKind = 'thanks',
+  isPublic = true,
+): Promise<string> {
+  const { data, error } = await supabase.rpc('fandom_send_recognition', {
+    p_supporter_user_id: supporterUserId,
+    p_message: message.trim(),
+    p_kind: kind,
+    p_is_public: isPublic,
+  })
+  if (error) throw new Error(error.message)
+  return String(data)
+}
+
+export async function repoFetchArtistSentRecognitions(
+  supabase: SupabaseClient,
+  limit = 20,
+): Promise<FandomSentRecognitionRow[]> {
+  const { data, error } = await supabase.rpc('fandom_artist_sent_recognitions', { lim: limit })
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    id: String(row.id),
+    supporterUserId: String(row.supporter_user_id),
+    displayName: String(row.display_name),
+    handle: String(row.handle),
+    avatarUrl: row.avatar_url ? String(row.avatar_url) : undefined,
+    kind: row.kind as FandomRecognitionKind,
+    message: String(row.message),
+    isPublic: Boolean(row.is_public),
+    createdAt: String(row.created_at),
+  }))
+}
+
+export async function repoFetchPublicRecognitionsForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  limit = 12,
+): Promise<FandomPublicRecognitionRow[]> {
+  const { data, error } = await supabase.rpc('fandom_public_recognitions_for_user', {
+    p_user_id: userId,
+    lim: limit,
+  })
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    id: String(row.id),
+    artistProfileId: String(row.artist_profile_id),
+    artistSlug: String(row.artist_slug),
+    artistDisplayName: String(row.artist_display_name),
+    artistAvatarUrl: row.artist_avatar_url ? String(row.artist_avatar_url) : undefined,
+    kind: row.kind as FandomRecognitionKind,
+    message: String(row.message),
+    createdAt: String(row.created_at),
+  }))
+}
+
+export async function repoFetchSupporterMilestones(
+  supabase: SupabaseClient,
+  artistProfileId: string,
+  supporterUserId?: string,
+): Promise<FandomMilestoneRow[]> {
+  const { data, error } = await supabase.rpc('fandom_supporter_milestones', {
+    p_artist_profile_id: artistProfileId,
+    p_supporter_user_id: supporterUserId ?? null,
+  })
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    milestoneSlug: String(row.milestone_slug),
+    label: String(row.label),
+    earnedAt: String(row.earned_at),
+  }))
 }

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
-import { fetchMyFandom } from '@/lib/fandom/service'
-import type { FandomWindow, MyFandomArtistRow } from '@/lib/fandom/types'
+import { fetchMyFandom, fetchSupporterMilestones } from '@/lib/fandom/service'
+import type { FandomMilestoneRow, FandomWindow, MyFandomArtistRow } from '@/lib/fandom/types'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
 
@@ -12,6 +12,8 @@ export function MyFandomPanel() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [milestones, setMilestones] = useState<FandomMilestoneRow[]>([])
+  const [milestonesLoading, setMilestonesLoading] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -30,6 +32,28 @@ export function MyFandomPanel() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (!expandedId) {
+      setMilestones([])
+      return
+    }
+    let cancelled = false
+    setMilestonesLoading(true)
+    void (async () => {
+      try {
+        const rows = await fetchSupporterMilestones(expandedId)
+        if (!cancelled) setMilestones(rows)
+      } catch {
+        if (!cancelled) setMilestones([])
+      } finally {
+        if (!cancelled) setMilestonesLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [expandedId])
 
   return (
     <div className="space-y-6">
@@ -134,6 +158,28 @@ export function MyFandomPanel() {
                         {row.lastSupportAt &&
                           ` · Last activity ${new Date(row.lastSupportAt).toLocaleDateString()}`}
                       </p>
+                    )}
+                    {(milestonesLoading || milestones.length > 0) && (
+                      <div className="mt-4">
+                        <p className="text-[10px] uppercase tracking-wider text-mh-red font-bold mb-2">
+                          Milestones
+                        </p>
+                        {milestonesLoading ? (
+                          <p className="text-xs text-muted">Loading…</p>
+                        ) : (
+                          <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
+                            {milestones.map((m) => (
+                              <li
+                                key={m.milestoneSlug}
+                                className="text-[11px] px-2 py-1 rounded-sm border border-mh-red/30 text-mh-red"
+                                title={new Date(m.earnedAt).toLocaleDateString()}
+                              >
+                                {m.label}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}
