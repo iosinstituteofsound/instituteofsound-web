@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { homeDashboardPath } from '@/lib/auth/roles'
 import {
   fetchMemberConnections,
   fetchMemberActivity,
@@ -196,7 +195,12 @@ export default function CommunityMemberPage() {
       setPendingRequestId(reqId)
       setMutuals(
         mutualList.map((m) => ({
-          ...m,
+          userId: m.userId,
+          displayName: m.displayName,
+          handle: m.handle.replace(/^@/, ''),
+          avatarUrl: m.avatarUrl,
+          role: '',
+          totalDb: 0,
           connectionStatus: 'connected' as const,
         })),
       )
@@ -236,8 +240,6 @@ export default function CommunityMemberPage() {
     setSearchParams(params, { replace: true })
   }
 
-  const dashboardHref = user ? homeDashboardPath(user.role) : undefined
-
   useEffect(() => {
     if (profile && isYou) {
       setEditName(profile.displayName)
@@ -257,8 +259,8 @@ export default function CommunityMemberPage() {
       await updateUserProfile(user.id, {
         name: editName.trim(),
         username: editHandle.trim().replace(/^@/, ''),
-        bio: editBio.trim() || null,
-        avatarUrl: editAvatarUrl.trim() || null,
+        bio: editBio.trim() || undefined,
+        avatarUrl: editAvatarUrl.trim() || undefined,
       })
       setEditSuccess('Profile updated.')
       setShowEditProfile(false)

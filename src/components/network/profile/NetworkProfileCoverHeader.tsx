@@ -30,8 +30,8 @@ function rolePills(profile: PublicMemberProfile): string[] {
   if (profile.profileRole === 'editor' || profile.profileRole === 'super_editor') pills.push('Editor')
   if (profile.profileRole === 'artist') pills.push('Artist')
   if (profile.dashboardPersona) pills.push(personaLabel(profile.dashboardPersona))
-  if (profile.rank === 'operator' || profile.rank === 'curator') {
-    pills.push(profile.rank.charAt(0).toUpperCase() + profile.rank.slice(1))
+  if (profile.rank === 'Operator' || profile.rank === 'Curator') {
+    pills.push(profile.rank)
   }
   if (profile.primaryGenreSlug) pills.push(formatGenre(profile.primaryGenreSlug))
   return [...new Set(pills)]
@@ -44,8 +44,8 @@ function subtitleLine(profile: PublicMemberProfile): string {
     if (first) parts.push(first)
   }
   const roles: string[] = []
-  if (profile.rank !== 'listener') {
-    roles.push(profile.rank.charAt(0).toUpperCase() + profile.rank.slice(1))
+  if (profile.rank !== 'Listener') {
+    roles.push(profile.rank)
   }
   if (profile.profileRole === 'editor' || profile.profileRole === 'super_editor') roles.push('Editor')
   if (roles.length) parts.push(roles.join(' · '))
