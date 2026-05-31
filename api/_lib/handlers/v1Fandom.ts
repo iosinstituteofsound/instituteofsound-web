@@ -1,10 +1,13 @@
-import { requireAuth } from '../auth.js'
+import { requireAuth, resolveSupabaseForRequest } from '../auth.js'
 import { queryParam, type ApiRequest, type ApiResponse } from '../http.js'
 import { createSupabaseUserClient } from '../supabaseServer.js'
 import {
   repoFetchArtistContentChampions,
+  repoFetchArtistDiscoveryDrivers,
   repoFetchArtistRecentSupport,
   repoFetchArtistSupporters,
+  repoFetchDiscoverFromMyFandom,
+  repoFetchDiscoverRisingArtists,
   repoFetchMyFandom,
   repoLogPostShare,
 } from '../../../src/lib/fandom/fandomRepository.js'
@@ -53,6 +56,25 @@ export async function handleV1Fandom(
         repoFetchArtistContentChampions(supabase, window),
       ])
       res.status(200).json({ supporters, recent, champions })
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : 'Failed' })
+    }
+    return true
+  }
+
+  if (pathname === '/api/v1/fandom/discover' && req.method === 'GET') {
+    const resolved = await resolveSupabaseForRequest(req)
+    if ('error' in resolved) {
+      res.status(resolved.status).json({ error: resolved.error })
+      return true
+    }
+    try {
+      const rising = await repoFetchDiscoverRisingArtists(resolved.supabase)
+      let forYou: Awaited<ReturnType<typeof repoFetchDiscoverFromMyFandom>> = []
+      if ('auth' in resolved && resolved.auth) {
+        forYou = await repoFetchDiscoverFromMyFandom(resolved.supabase)
+      }
+      res.status(200).json({ rising, forYou })
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : 'Failed' })
     }

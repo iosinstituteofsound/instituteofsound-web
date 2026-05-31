@@ -88,3 +88,23 @@ export interface PublicSupporterBadgeOnArtist {
   badgeLabel: string
   supporterRank?: number | null
 }
+
+export interface ArtistDiscoveryDriverRow {
+  supporterUserId: string
+  displayName: string
+  handle: string
+  avatarUrl?: string
+  shares: number
+  wiredReach: number
+  driverRank: number
+}
+
+export interface FandomDiscoverArtistRow {
+  artistProfileId: string
+  slug: string
+  displayName: string
+  avatarUrl?: string
+  reasonLabel: string
+  /** Optional hint for sorting; not shown as currency. */
+  signalStrength?: number
+}

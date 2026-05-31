@@ -1,9 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type {
   ArtistContentChampionRow,
+  ArtistDiscoveryDriverRow,
   ArtistRecentSupportRow,
   ArtistSupporterRow,
   FandomArtistSearchHit,
+  FandomDiscoverArtistRow,
   FandomWindow,
   MyFandomArtistRow,
   PublicSupporterBadge,
@@ -152,6 +154,59 @@ export async function repoSearchArtistsForTags(
     slug: String(row.slug),
     displayName: String(row.display_name),
     avatarUrl: row.avatar_url ? String(row.avatar_url) : undefined,
+  }))
+}
+
+export async function repoFetchArtistDiscoveryDrivers(
+  supabase: SupabaseClient,
+  window: FandomWindow = '90d',
+  limit = 10,
+): Promise<ArtistDiscoveryDriverRow[]> {
+  const { data, error } = await supabase.rpc('fandom_artist_discovery_drivers', {
+    p_window: window,
+    lim: limit,
+  })
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    supporterUserId: String(row.supporter_user_id),
+    displayName: String(row.display_name),
+    handle: String(row.handle),
+    avatarUrl: row.avatar_url ? String(row.avatar_url) : undefined,
+    shares: Number(row.shares ?? 0),
+    wiredReach: Number(row.wired_reach ?? 0),
+    driverRank: Number(row.driver_rank ?? 0),
+  }))
+}
+
+export async function repoFetchDiscoverRisingArtists(
+  supabase: SupabaseClient,
+  limit = 12,
+): Promise<FandomDiscoverArtistRow[]> {
+  const { data, error } = await supabase.rpc('fandom_discover_rising_artists', { lim: limit })
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    artistProfileId: String(row.artist_profile_id),
+    slug: String(row.slug),
+    displayName: String(row.display_name),
+    avatarUrl: row.avatar_url ? String(row.avatar_url) : undefined,
+    reasonLabel: String(row.momentum_label ?? 'Rising on the wire'),
+    signalStrength: row.recent_supporters != null ? Number(row.recent_supporters) : undefined,
+  }))
+}
+
+export async function repoFetchDiscoverFromMyFandom(
+  supabase: SupabaseClient,
+  limit = 8,
+): Promise<FandomDiscoverArtistRow[]> {
+  const { data, error } = await supabase.rpc('fandom_discover_from_my_fandom', { lim: limit })
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    artistProfileId: String(row.artist_profile_id),
+    slug: String(row.slug),
+    displayName: String(row.display_name),
+    avatarUrl: row.avatar_url ? String(row.avatar_url) : undefined,
+    reasonLabel: String(row.reason_label ?? 'Also supported by your circle'),
+    signalStrength: row.circle_overlap != null ? Number(row.circle_overlap) : undefined,
   }))
 }
 

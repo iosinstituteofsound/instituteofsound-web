@@ -28,6 +28,12 @@ export function DiscoveryPathsPanel({ className }: DiscoveryPathsPanelProps) {
 
       <ul className="discovery-paths-list mt-6">
         <li>
+          <Link to="/discover#discover-fandom" className="discovery-path-row">
+            <span className="discovery-path-label">Support graph</span>
+            <span className="discovery-path-desc">Artists rising from real supporter activity</span>
+          </Link>
+        </li>
+        <li>
           <Link to="/community#feed" className="discovery-path-row">
             <span className="discovery-path-label">Following</span>
             <span className="discovery-path-desc">Operators and crews you follow</span>

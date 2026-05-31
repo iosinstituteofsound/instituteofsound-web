@@ -24,6 +24,7 @@ export function ArtistFandomPanel() {
   const [supporters, setSupporters] = useState<Awaited<ReturnType<typeof fetchArtistFandom>>['supporters']>([])
   const [recent, setRecent] = useState<Awaited<ReturnType<typeof fetchArtistFandom>>['recent']>([])
   const [champions, setChampions] = useState<Awaited<ReturnType<typeof fetchArtistFandom>>['champions']>([])
+  const [drivers, setDrivers] = useState<Awaited<ReturnType<typeof fetchArtistFandom>>['drivers']>([])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -33,6 +34,7 @@ export function ArtistFandomPanel() {
       setSupporters(data.supporters)
       setRecent(data.recent)
       setChampions(data.champions)
+      setDrivers(data.drivers)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load fandom')
     } finally {
@@ -129,6 +131,36 @@ export function ArtistFandomPanel() {
                     <time className="text-xs text-muted shrink-0">
                       {new Date(r.createdAt).toLocaleDateString()}
                     </time>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section>
+            <h3 className="font-display text-lg font-bold uppercase mb-3">Discovery drivers</h3>
+            <p className="text-xs text-muted mb-3">
+              Supporters who share your work and pull others into the conversation on tagged
+              posts.
+            </p>
+            {drivers.length === 0 ? (
+              <p className="text-sm text-muted ios-card p-4">No amplification signals yet.</p>
+            ) : (
+              <ul className="space-y-2">
+                {drivers.map((d) => (
+                  <li key={d.supporterUserId} className="ios-card p-4 flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold">{d.displayName}</p>
+                      <p className="text-xs text-muted">
+                        #{d.driverRank} · {d.shares} shares · {d.wiredReach} wired reach
+                      </p>
+                    </div>
+                    <Link
+                      to={networkProfilePath(d.handle)}
+                      className="ios-btn ios-btn-ghost !text-xs"
+                    >
+                      Profile
+                    </Link>
                   </li>
                 ))}
               </ul>

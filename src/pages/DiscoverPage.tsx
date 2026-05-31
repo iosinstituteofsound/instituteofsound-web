@@ -14,6 +14,7 @@ import {
   DiscoverScenesSection,
 } from '@/components/discover/DiscoverSections'
 import { DiscoverArtistsSection } from '@/components/discover/DiscoverArtistsSection'
+import { DiscoverFandomSection } from '@/components/discover/DiscoverFandomSection'
 import { useSeo } from '@/hooks/useSeo'
 
 const DISCOVER_GATE_KEY = 'ios_discover_gate_seen'
@@ -51,6 +52,7 @@ export default function DiscoverPage() {
       <DiscoverPageIntro />
       <DiscoverEditorialSection />
       <DiscoverArtistsSection />
+      <DiscoverFandomSection />
       <DiscoverReleasesSection />
       <DiscoverLabelsSection />
       <DiscoverPlaylistsSection />

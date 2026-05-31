@@ -1,16 +1,24 @@
 import { isV1ApiEnabled } from '@/api/v1Client'
-import { v1FetchMyFandom, v1FetchArtistFandom } from '@/api/v1FandomClient'
+import { v1FetchMyFandom, v1FetchArtistFandom, v1FetchFandomDiscover } from '@/api/v1FandomClient'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import {
   repoFetchArtistContentChampions,
+  repoFetchArtistDiscoveryDrivers,
   repoFetchArtistRecentSupport,
   repoFetchArtistSupporters,
+  repoFetchDiscoverFromMyFandom,
+  repoFetchDiscoverRisingArtists,
   repoFetchMyFandom,
   repoFetchPublicSupporterBadge,
   repoFetchPublicSupporterBadgesForUser,
   repoSearchArtistsForTags,
 } from './fandomRepository'
-import type { FandomWindow, PublicSupporterBadge, PublicSupporterBadgeOnArtist } from './types'
+import type {
+  FandomDiscoverArtistRow,
+  FandomWindow,
+  PublicSupporterBadge,
+  PublicSupporterBadgeOnArtist,
+} from './types'
 
 export async function fetchMyFandom(window: FandomWindow = '90d') {
   if (isV1ApiEnabled()) {
@@ -25,15 +33,40 @@ export async function fetchArtistFandom(window: FandomWindow = '90d') {
     return v1FetchArtistFandom(window)
   }
   if (!isSupabaseConfigured()) {
-    return { supporters: [], recent: [], champions: [] }
+    return { supporters: [], recent: [], champions: [], drivers: [] }
   }
   const supabase = getSupabase()
-  const [supporters, recent, champions] = await Promise.all([
+  const [supporters, recent, champions, drivers] = await Promise.all([
     repoFetchArtistSupporters(supabase, window),
     repoFetchArtistRecentSupport(supabase),
     repoFetchArtistContentChampions(supabase, window),
+    repoFetchArtistDiscoveryDrivers(supabase, window),
   ])
-  return { supporters, recent, champions }
+  return { supporters, recent, champions, drivers }
+}
+
+export async function fetchFandomDiscover(): Promise<{
+  rising: FandomDiscoverArtistRow[]
+  forYou: FandomDiscoverArtistRow[]
+}> {
+  if (isV1ApiEnabled()) {
+    return v1FetchFandomDiscover()
+  }
+  if (!isSupabaseConfigured()) {
+    return { rising: [], forYou: [] }
+  }
+  const supabase = getSupabase()
+  const rising = await repoFetchDiscoverRisingArtists(supabase)
+  try {
+    const { data: session } = await supabase.auth.getSession()
+    if (!session.session?.user) {
+      return { rising, forYou: [] }
+    }
+    const forYou = await repoFetchDiscoverFromMyFandom(supabase)
+    return { rising, forYou }
+  } catch {
+    return { rising, forYou: [] }
+  }
 }
 
 export async function searchArtistsForSupportTags(query: string) {
