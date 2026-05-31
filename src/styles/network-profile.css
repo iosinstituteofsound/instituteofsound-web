@@ -398,24 +398,38 @@
 }
 
 @media (min-width: 1024px) {
+  .network-profile-page .member-profile-panel:has(.np-overview) {
+    padding: 1rem 1.25rem 1.25rem;
+  }
+
   .np-overview {
     grid-template-columns: 240px minmax(0, 1fr) 300px;
-    align-items: start;
+    align-items: stretch;
+    /* Fill viewport below app topbar + profile tabs; each column scrolls inside */
+    height: calc(100dvh - var(--v2-topbar-h, 3.625rem) - 3.5rem);
+    min-height: 22rem;
+    max-height: calc(100dvh - var(--v2-topbar-h, 3.625rem) - 3.5rem);
+    overflow: hidden;
+  }
+
+  .np-overview > .np-col--left,
+  .np-overview > .np-col--center,
+  .np-overview > .np-rail {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 0, 0, 0.35) transparent;
   }
 }
 
 .np-col--left,
+.np-col--center,
 .np-col--right {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-@media (min-width: 1024px) {
-  .np-col--right {
-    position: sticky;
-    top: 4.5rem;
-  }
 }
 
 .np-single {
@@ -674,12 +688,7 @@
   gap: 0.85rem;
 }
 
-@media (min-width: 1024px) {
-  .np-rail {
-    position: sticky;
-    top: 4.5rem;
-  }
-}
+/* Right rail scrolls inside .np-overview on desktop (no page-level sticky) */
 
 .np-rail-card {
   border: 1px solid var(--color-border);
