@@ -49,46 +49,53 @@ export function NetworkProfileRightColumn({
 
   const visibleMutuals = mutuals.slice(0, 5)
   const extraMutuals = Math.max(0, mutuals.length - visibleMutuals.length)
+  const connectionAccent = isYou
+    ? `${profile.connectionCount} Connection${profile.connectionCount === 1 ? '' : 's'}`
+    : `${mutuals.length} Mutual`
 
   return (
     <aside className="np-rail" aria-label="Profile sidebar">
       <NetworkProfileReputationCard profile={profile} posts={posts} />
 
-      {!isYou && mutuals.length > 0 && (
+      {(isYou || mutuals.length > 0) && (
         <section className="np-rail-card">
           <div className="np-rail-card__head">
-            <h2 className="np-rail-card__title">Mutual Connections</h2>
-            <span className="np-rail-card__accent">{mutuals.length} Mutual</span>
+            <h2 className="np-rail-card__title">{isYou ? 'Your Connections' : 'Mutual Connections'}</h2>
+            <span className="np-rail-card__accent">{connectionAccent}</span>
           </div>
-          <ul className="np-rail-mutuals">
-            {visibleMutuals.map((m) => (
-              <li key={m.userId}>
-                <Link to={networkProfilePath(m.handle)} title={m.displayName}>
-                  {m.avatarUrl ? (
-                    <IOSImage src={m.avatarUrl} alt="" width={40} className="np-rail-mutuals__avatar" />
-                  ) : (
-                    <span className="np-rail-mutuals__fallback">{m.displayName.charAt(0)}</span>
-                  )}
-                </Link>
-              </li>
-            ))}
-            {extraMutuals > 0 && <li className="np-rail-mutuals__more">+{extraMutuals}</li>}
-          </ul>
+          {mutuals.length > 0 ? (
+            <ul className="np-rail-mutuals">
+              {visibleMutuals.map((m) => (
+                <li key={m.userId}>
+                  <Link to={networkProfilePath(m.handle)} title={m.displayName}>
+                    {m.avatarUrl ? (
+                      <IOSImage src={m.avatarUrl} alt="" width={40} className="np-rail-mutuals__avatar" />
+                    ) : (
+                      <span className="np-rail-mutuals__fallback">{m.displayName.charAt(0)}</span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+              {extraMutuals > 0 && <li className="np-rail-mutuals__more">+{extraMutuals}</li>}
+            </ul>
+          ) : (
+            <p className="np-rail-empty">No connections yet — discover operators on the network.</p>
+          )}
           {onViewMutuals ? (
             <button type="button" className="np-rail-foot-link" onClick={onViewMutuals}>
-              View all connections →
+              {isYou ? 'Find people to connect →' : 'View all connections →'}
             </button>
           ) : (
             <Link to="/network/people" className="np-rail-foot-link">
-              View all connections →
+              {isYou ? 'Find people to connect →' : 'View all connections →'}
             </Link>
           )}
         </section>
       )}
 
-      {crew && (
-        <section className="np-rail-card">
-          <h2 className="np-rail-card__title">Member Of Crews</h2>
+      <section className="np-rail-card">
+        <h2 className="np-rail-card__title">Member Of Crews</h2>
+        {crew ? (
           <ul className="np-rail-crews">
             <li>
               <Link to="/community#crew" className="np-rail-crew-row">
@@ -100,19 +107,21 @@ export function NetworkProfileRightColumn({
               </Link>
             </li>
           </ul>
-          {onViewCrews ? (
-            <button type="button" className="np-rail-foot-link" onClick={onViewCrews}>
-              View all crews →
-            </button>
-          ) : (
-            <Link to="/community#crew" className="np-rail-foot-link">
-              View all crews →
-            </Link>
-          )}
-        </section>
-      )}
+        ) : (
+          <p className="np-rail-empty">Not in a crew yet — join one from Community.</p>
+        )}
+        {onViewCrews ? (
+          <button type="button" className="np-rail-foot-link" onClick={onViewCrews}>
+            View all crews →
+          </button>
+        ) : (
+          <Link to="/community#crew" className="np-rail-foot-link">
+            View all crews →
+          </Link>
+        )}
+      </section>
 
-      {!isYou && suggested.length > 0 && (
+      {suggested.length > 0 && (
         <section className="np-rail-card">
           <div className="np-rail-card__head">
             <h2 className="np-rail-card__title">Suggested For You</h2>

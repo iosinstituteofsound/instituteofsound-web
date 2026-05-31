@@ -184,27 +184,39 @@ export default function CommunityMemberPage() {
           p.userId === user.id),
     )
 
-    if (p && !isOwnProfile) {
-      const [reqId, mutualList, suggestedList] = await Promise.all([
-        p.viewerConnectionStatus === 'pending_in'
-          ? fetchIncomingRequestIdFromUser(p.userId)
-          : Promise.resolve(null),
-        fetchMutualConnections(p.userId),
-        fetchSuggestedPeople(6),
-      ])
-      setPendingRequestId(reqId)
-      setMutuals(
-        mutualList.map((m) => ({
-          userId: m.userId,
-          displayName: m.displayName,
-          handle: m.handle.replace(/^@/, ''),
-          avatarUrl: m.avatarUrl,
-          role: '',
-          totalDb: 0,
-          connectionStatus: 'connected' as const,
-        })),
-      )
-      setSuggested(suggestedList)
+    if (p) {
+      const mapRailPerson = (
+        m: Pick<NetworkPersonCard, 'userId' | 'displayName' | 'handle' | 'avatarUrl'>,
+      ): NetworkPersonCard => ({
+        userId: m.userId,
+        displayName: m.displayName,
+        handle: m.handle.replace(/^@/, ''),
+        avatarUrl: m.avatarUrl,
+        role: '',
+        totalDb: 0,
+        connectionStatus: 'connected',
+      })
+
+      if (isOwnProfile) {
+        const [connectionsList, suggestedList] = await Promise.all([
+          fetchConnectionsList(p.userId),
+          fetchSuggestedPeople(6),
+        ])
+        setPendingRequestId(null)
+        setMutuals(connectionsList.map(mapRailPerson))
+        setSuggested(suggestedList)
+      } else {
+        const [reqId, mutualList, suggestedList] = await Promise.all([
+          p.viewerConnectionStatus === 'pending_in'
+            ? fetchIncomingRequestIdFromUser(p.userId)
+            : Promise.resolve(null),
+          fetchMutualConnections(p.userId),
+          fetchSuggestedPeople(6),
+        ])
+        setPendingRequestId(reqId)
+        setMutuals(mutualList.map(mapRailPerson))
+        setSuggested(suggestedList)
+      }
     } else {
       setPendingRequestId(null)
       setMutuals([])

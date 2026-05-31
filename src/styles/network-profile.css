@@ -736,6 +736,13 @@
   text-decoration: underline;
 }
 
+.np-rail-empty {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--color-muted);
+}
+
 /* Reputation gauge */
 .np-rail-reputation__body {
   display: flex;
