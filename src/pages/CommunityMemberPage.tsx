@@ -15,11 +15,9 @@ import {
 } from '@/lib/community/memberProfileService'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import { useCommunityBadges } from '@/hooks/useCommunityBadges'
-import { formatAccountNumericId } from '@/lib/auth/accountId'
-import { NetworkOperatorDossier } from '@/components/network/NetworkOperatorDossier'
+import { NetworkProfileCoverHeader } from '@/components/network/profile/NetworkProfileCoverHeader'
 import { NetworkConnectionsPanel } from '@/components/network/NetworkConnectionsPanel'
 import { NetworkTransmissionFeed } from '@/components/network/NetworkTransmissionFeed'
-import { NetworkProfileSidebar } from '@/components/network/NetworkProfileSidebar'
 import {
   MemberProfileTabs,
   type MemberProfileTab,
@@ -56,6 +54,7 @@ import type {
   FandomPublicRecognitionRow,
   PublicSupporterBadgeOnArtist,
 } from '@/lib/fandom/types'
+
 function tabFromSearch(params: URLSearchParams): MemberProfileTab {
   const t = params.get('tab')
   if (t === 'overview') return 'overview'
@@ -131,7 +130,7 @@ export default function CommunityMemberPage() {
     user &&
       (normalizeHandle(user.username ?? '') === handle ||
         memberHandleFromUser(user) === handle ||
-        profile?.userId === user.id)
+        profile?.userId === user.id),
   )
 
   const loadProfile = useCallback(async () => {
@@ -198,8 +197,6 @@ export default function CommunityMemberPage() {
       setMutuals(
         mutualList.map((m) => ({
           ...m,
-          role: 'member',
-          totalDb: 0,
           connectionStatus: 'connected' as const,
         })),
       )
@@ -216,117 +213,76 @@ export default function CommunityMemberPage() {
   }, [loadProfile])
 
   useEffect(() => {
-    const onConnection = () => void loadProfile()
-    window.addEventListener(NETWORK_CONNECTION_EVENT, onConnection)
-    return () => window.removeEventListener(NETWORK_CONNECTION_EVENT, onConnection)
-  }, [loadProfile])
-
-  useEffect(() => {
     const onFollow = () => void loadProfile()
     window.addEventListener(COMMUNITY_FOLLOW_EVENT, onFollow)
     return () => window.removeEventListener(COMMUNITY_FOLLOW_EVENT, onFollow)
   }, [loadProfile])
 
   useEffect(() => {
-    if (!loading && profile && tab === 'posts') {
-      requestAnimationFrame(() => {
-        document.getElementById('member-profile-posts')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      })
-    }
-  }, [loading, profile, tab])
-
-  useEffect(() => {
-    if (!profile) return
-    setEditName(profile.displayName ?? '')
-    setEditHandle(profile.handle.replace(/^@/, ''))
-    setEditBio(profile.bio ?? '')
-    setEditAvatarUrl(profile.avatarUrl ?? '')
-  }, [profile])
+    const onConn = () => void loadProfile()
+    window.addEventListener(NETWORK_CONNECTION_EVENT, onConn)
+    return () => window.removeEventListener(NETWORK_CONNECTION_EVENT, onConn)
+  }, [loadProfile])
 
   useEffect(() => {
     setTab(tabFromSearch(searchParams))
   }, [searchParams])
 
-  useEffect(() => {
-    if (!artistProfileId && tab === 'releases') {
-      setTab('overview')
-      setSearchParams({}, { replace: true })
-    }
-  }, [artistProfileId, tab, setSearchParams])
-
   const setActiveTab = (next: MemberProfileTab) => {
     setTab(next)
-    setSearchParams(next === 'overview' ? {} : { tab: next }, { replace: true })
-    if (next === 'posts') {
-      requestAnimationFrame(() => {
-        document.getElementById('member-profile-posts')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      })
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="member-profile-page member-profile-page--loading">
-        <LoadingTransmission variant="compact" />
-      </div>
-    )
-  }
-
-  if (notFound || !profile) {
-    return (
-      <div className="member-profile-page">
-        <div className="member-profile-shell">
-          <div className="member-profile-not-found ios-card">
-            <p className="member-profile-kicker">Signal lost</p>
-            <h1 className="member-profile-name">Operator not found</h1>
-            <p className="member-profile-bio">
-              No profile for <span className="text-mh-red">@{handle}</span> on the network.
-            </p>
-            <Link to="/community" className="member-profile-btn member-profile-btn-primary mt-8">
-              Enter community →
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
+    const params = new URLSearchParams(searchParams)
+    if (next === 'overview') params.delete('tab')
+    else params.set('tab', next)
+    setSearchParams(params, { replace: true })
   }
 
   const dashboardHref = user ? homeDashboardPath(user.role) : undefined
 
-  const saveProfileFromNetwork = async (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!user) return
+  useEffect(() => {
+    if (profile && isYou) {
+      setEditName(profile.displayName)
+      setEditHandle(profile.handle.replace(/^@/, ''))
+      setEditBio(profile.bio ?? '')
+      setEditAvatarUrl(profile.avatarUrl ?? '')
+    }
+  }, [profile, isYou])
+
+  const saveProfileFromNetwork = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user || !profile) return
     setSavingProfile(true)
     setEditError('')
     setEditSuccess('')
     try {
-      const updated = await updateUserProfile(user.id, {
-        name: editName,
-        username: editHandle,
-        bio: editBio,
-        avatarUrl: editAvatarUrl,
+      await updateUserProfile(user.id, {
+        name: editName.trim(),
+        username: editHandle.trim().replace(/^@/, ''),
+        bio: editBio.trim() || null,
+        avatarUrl: editAvatarUrl.trim() || null,
       })
-      await loadProfile()
-      setEditSuccess('Profile updated successfully.')
-
-      const nextHandle = (updated.username ?? editHandle).replace(/^@/, '').toLowerCase()
-      if (nextHandle && nextHandle !== handle) {
-        void navigate(networkProfilePath(nextHandle), { replace: true })
+      setEditSuccess('Profile updated.')
+      setShowEditProfile(false)
+      const nextHandle = normalizeHandle(editHandle)
+      if (nextHandle !== handle) {
+        navigate(networkProfilePath(nextHandle))
+      } else {
+        await loadProfile()
       }
     } catch (err) {
-      setEditError(err instanceof Error ? err.message : 'Failed to update profile.')
+      setEditError(err instanceof Error ? err.message : 'Could not save profile.')
     } finally {
       setSavingProfile(false)
     }
   }
 
   const openConnections = async (mode: 'followers' | 'following' | 'connections') => {
+    if (!profile) return
     setConnectionsOpen(mode)
     setConnectionsLoading(true)
     setConnectionsError('')
     try {
       let list: MemberConnectionProfile[]
-      if (mode === 'connections' && profile) {
+      if (mode === 'connections') {
         list = (await fetchConnectionsList(profile.userId)).map((c) => ({
           userId: c.userId,
           displayName: c.displayName,
@@ -348,156 +304,163 @@ export default function CommunityMemberPage() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="np-page flex min-h-[50vh] items-center justify-center">
+        <LoadingTransmission />
+      </div>
+    )
+  }
+
+  if (notFound || !profile) {
+    return (
+      <div className="np-page py-16 text-center">
+        <p className="font-display text-xl font-bold uppercase">Operator not found</p>
+        <Link to="/network" className="np-back mt-6 inline-flex">
+          ← Network home
+        </Link>
+      </div>
+    )
+  }
+
   return (
-    <div className="member-profile-page network-profile-page">
-      <div className="member-profile-page-bg" aria-hidden />
-      <div className="member-profile-shell network-profile-shell">
-        <nav className="member-profile-topnav">
-          <Link to="/network" className="member-profile-back">
-            ← Network home
-          </Link>
-        </nav>
+    <div className="np-page network-profile-page">
+      <Link to="/network" className="np-back">
+        ← Network home
+      </Link>
 
-        <NetworkOperatorDossier
-          profile={profile}
-          accountId={formatAccountNumericId(profile.userId)}
-          isYou={isYou}
-          dashboardHref={isYou ? dashboardHref : undefined}
-          badges={badges}
-          fandomBadges={fandomBadges}
-          artistSlug={artistSlug}
-          pendingRequestId={pendingRequestId}
-          onEditProfile={() => setShowEditProfile((prev) => !prev)}
-          onOpenFollowers={() => void openConnections('followers')}
-          onOpenFollowing={() => void openConnections('following')}
-          onOpenConnections={() => void openConnections('connections')}
-          onConnectionChange={() => void loadProfile()}
+      <NetworkProfileCoverHeader
+        profile={profile}
+        isYou={isYou}
+        artistSlug={artistSlug}
+        fandomBadges={fandomBadges}
+        pendingRequestId={pendingRequestId}
+        onEditProfile={() => setShowEditProfile((prev) => !prev)}
+        onOpenFollowers={() => void openConnections('followers')}
+        onOpenFollowing={() => void openConnections('following')}
+        onOpenConnections={() => void openConnections('connections')}
+        onConnectionChange={() => void loadProfile()}
+      />
+
+      {connectionsOpen && (
+        <NetworkConnectionsPanel
+          mode={connectionsOpen}
+          loading={connectionsLoading}
+          error={connectionsError}
+          connections={connections}
+          onClose={() => setConnectionsOpen(null)}
         />
+      )}
 
-        {connectionsOpen && (
-          <NetworkConnectionsPanel
-            mode={connectionsOpen}
-            loading={connectionsLoading}
-            error={connectionsError}
-            connections={connections}
-            onClose={() => setConnectionsOpen(null)}
-          />
-        )}
-
-        {isYou && showEditProfile && (
-          <section className="ios-card p-5 mb-5">
-            <div className="flex items-start justify-between gap-3 mb-4">
+      {isYou && showEditProfile && (
+        <section className="np-card mb-4">
+          <h2 className="np-card__title">Edit profile</h2>
+          <form className="space-y-4 mt-4" onSubmit={saveProfileFromNetwork}>
+            <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-                  Network profile editor
-                </p>
-                <h2 className="font-display text-xl font-bold uppercase mt-2">Edit your public profile</h2>
+                <FieldLabel htmlFor="network-edit-name">Display name</FieldLabel>
+                <Input
+                  id="network-edit-name"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <FieldLabel htmlFor="network-edit-handle">Handle</FieldLabel>
+                <Input
+                  id="network-edit-handle"
+                  value={editHandle}
+                  onChange={(e) => setEditHandle(e.target.value)}
+                  placeholder="yourhandle"
+                  required
+                />
               </div>
             </div>
-            <form className="space-y-4" onSubmit={saveProfileFromNetwork}>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <FieldLabel htmlFor="network-edit-name">Display name</FieldLabel>
-                  <Input
-                    id="network-edit-name"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <FieldLabel htmlFor="network-edit-handle">Handle</FieldLabel>
-                  <Input
-                    id="network-edit-handle"
-                    value={editHandle}
-                    onChange={(e) => setEditHandle(e.target.value)}
-                    placeholder="yourhandle"
-                    required
-                  />
-                </div>
-              </div>
-              <ImageUpload
-                label="Avatar"
-                folder="ios/artists"
-                value={editAvatarUrl}
-                onChange={setEditAvatarUrl}
-                hint="Visible on your network profile and posts."
-              />
-              <div>
-                <FieldLabel htmlFor="network-edit-bio">Bio</FieldLabel>
-                <textarea
-                  id="network-edit-bio"
-                  className="ios-input min-h-[100px]"
-                  value={editBio}
-                  onChange={(e) => setEditBio(e.target.value)}
-                  maxLength={280}
-                  placeholder="Tell the network what you do."
-                />
-                <p className="text-xs text-muted mt-1 text-right">{editBio.length}/280</p>
-              </div>
-              {editError && <p className="text-sm text-mh-red">{editError}</p>}
-              {editSuccess && <p className="text-sm text-green-400">{editSuccess}</p>}
-              <div className="flex flex-wrap gap-2">
-                <button type="submit" className="ios-btn ios-btn-primary !text-xs" disabled={savingProfile}>
-                  {savingProfile ? 'Saving…' : 'Save profile'}
-                </button>
-                <button
-                  type="button"
-                  className="ios-btn ios-btn-ghost !text-xs"
-                  onClick={() => setShowEditProfile(false)}
-                  disabled={savingProfile}
-                >
-                  Close editor
-                </button>
-              </div>
-            </form>
-          </section>
-        )}
-
-        <div className="network-profile-body">
-          <div className="network-profile-main">
-        <MemberProfileTabs
-          active={tab}
-          onChange={setActiveTab}
-          postCount={profile.postCount}
-          showReleases={Boolean(artistProfileId)}
-        />
-
-        <div className="member-profile-panels">
-          <section
-            id="member-panel-overview"
-            role="tabpanel"
-            aria-labelledby="member-tab-overview"
-            hidden={tab !== 'overview'}
-            className="member-profile-panel"
-          >
-            <NetworkProfileOverview
-              profile={profile}
-              posts={posts}
-              isYou={isYou}
-              onRefresh={() => void loadProfile()}
-              onViewAllPosts={() => setActiveTab('posts')}
+            <ImageUpload
+              label="Avatar"
+              folder="ios/artists"
+              value={editAvatarUrl}
+              onChange={setEditAvatarUrl}
+              hint="Visible on your network profile and posts."
             />
-          </section>
+            <div>
+              <FieldLabel htmlFor="network-edit-bio">Bio</FieldLabel>
+              <textarea
+                id="network-edit-bio"
+                className="ios-input min-h-[100px]"
+                value={editBio}
+                onChange={(e) => setEditBio(e.target.value)}
+                maxLength={280}
+                placeholder="Tell the network what you do."
+              />
+              <p className="text-xs text-muted mt-1 text-right">{editBio.length}/280</p>
+            </div>
+            {editError && <p className="text-sm text-mh-red">{editError}</p>}
+            {editSuccess && <p className="text-sm text-green-400">{editSuccess}</p>}
+            <div className="flex flex-wrap gap-2">
+              <button type="submit" className="np-btn np-btn--primary" disabled={savingProfile}>
+                {savingProfile ? 'Saving…' : 'Save profile'}
+              </button>
+              <button
+                type="button"
+                className="np-btn np-btn--outline"
+                onClick={() => setShowEditProfile(false)}
+                disabled={savingProfile}
+              >
+                Close
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
 
-          <section
-            id="member-profile-posts"
-            role="tabpanel"
-            aria-labelledby="member-tab-posts"
-            hidden={tab !== 'posts'}
-            className="member-profile-panel"
-          >
+      <MemberProfileTabs
+        active={tab}
+        onChange={setActiveTab}
+        postCount={profile.postCount}
+        showReleases={Boolean(artistProfileId)}
+      />
+
+      <div className="member-profile-panels">
+        <section
+          id="member-panel-overview"
+          role="tabpanel"
+          hidden={tab !== 'overview'}
+          className="member-profile-panel"
+        >
+          <NetworkProfileOverview
+            profile={profile}
+            posts={posts}
+            badges={badges}
+            mutuals={mutuals}
+            suggested={suggested}
+            fandomRecognitions={fandomRecognitions}
+            isYou={isYou}
+            onRefresh={() => void loadProfile()}
+            onViewAllPosts={() => setActiveTab('posts')}
+            onViewAllBadges={() => setActiveTab('about')}
+            onViewCrews={() => setActiveTab('crews')}
+            onConnectionChange={() => void loadProfile()}
+          />
+        </section>
+
+        <section
+          id="member-profile-posts"
+          role="tabpanel"
+          hidden={tab !== 'posts'}
+          className="member-profile-panel"
+        >
+          <div className="np-single">
             {managedArtists.length > 0 && (
-              <section className="ios-card p-5 mb-5">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-mh-red font-bold">
-                  Managed artists
-                </p>
-                <div className="grid sm:grid-cols-2 gap-3 mt-4">
+              <section className="np-card mb-4">
+                <h2 className="np-card__title">Managed artists</h2>
+                <div className="grid sm:grid-cols-2 gap-3 mt-3">
                   {managedArtists.map((artist) => (
                     <Link
                       key={artist.profileId}
                       to={`/artist/${artist.slug}`}
-                      className="border border-border p-3 hover:border-mh-red/40 transition-colors flex gap-3 items-center"
+                      className="flex gap-3 items-center p-3 border border-border rounded-lg hover:border-mh-red/40"
                     >
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-surface shrink-0">
                         {artist.avatarUrl ? (
@@ -524,89 +487,66 @@ export default function CommunityMemberPage() {
                 </div>
               </section>
             )}
-            <header className="member-profile-wire-head mb-5">
-              <div>
-                <p className="member-profile-kicker">Full archive</p>
-                <h2 className="member-profile-wire-title">All transmissions</h2>
-              </div>
-            </header>
             <NetworkTransmissionFeed
               posts={posts}
               isYou={isYou}
               handle={profile.handle.replace(/^@/, '')}
               onRefresh={() => void loadProfile()}
             />
-          </section>
+          </div>
+        </section>
 
-          <section
-            id="member-panel-activity"
-            role="tabpanel"
-            aria-labelledby="member-tab-activity"
-            hidden={tab !== 'activity'}
-            className="member-profile-panel"
-          >
+        <section
+          id="member-panel-activity"
+          role="tabpanel"
+          hidden={tab !== 'activity'}
+          className="member-profile-panel"
+        >
+          <div className="np-single">
             <MemberProfileSignalLog activity={activity} />
-          </section>
+          </div>
+        </section>
 
-          {artistProfileId && artistSlug && (
-            <section
-              id="member-panel-releases"
-              role="tabpanel"
-              aria-labelledby="member-tab-releases"
-              hidden={tab !== 'releases'}
-              className="member-profile-panel"
-            >
-              <NetworkProfileReleases
-                artistProfileId={artistProfileId}
-                artistSlug={artistSlug}
-              />
-            </section>
-          )}
-
+        {artistProfileId && artistSlug && (
           <section
-            id="member-panel-crews"
+            id="member-panel-releases"
             role="tabpanel"
-            aria-labelledby="member-tab-crews"
-            hidden={tab !== 'crews'}
+            hidden={tab !== 'releases'}
             className="member-profile-panel"
           >
+            <div className="np-single">
+              <NetworkProfileReleases artistProfileId={artistProfileId} artistSlug={artistSlug} />
+            </div>
+          </section>
+        )}
+
+        <section
+          id="member-panel-crews"
+          role="tabpanel"
+          hidden={tab !== 'crews'}
+          className="member-profile-panel"
+        >
+          <div className="np-single">
             <NetworkProfileCrews userId={profile.userId} isYou={isYou} />
-          </section>
+          </div>
+        </section>
 
-          <section
-            id="member-panel-about"
-            role="tabpanel"
-            aria-labelledby="member-tab-about"
-            hidden={tab !== 'about'}
-            className="member-profile-panel"
-          >
+        <section
+          id="member-panel-about"
+          role="tabpanel"
+          hidden={tab !== 'about'}
+          className="member-profile-panel"
+        >
+          <div className="np-single">
             <NetworkProfileAbout
               profile={profile}
               badges={badges}
               badgesLoading={badgesLoading}
               isYou={isYou}
             />
-          </section>
-        </div>
           </div>
-
-          <NetworkProfileSidebar
-            profile={profile}
-            badges={badges}
-            mutuals={mutuals}
-            suggested={suggested}
-            fandomRecognitions={fandomRecognitions}
-            isYou={isYou}
-            hideBadges={tab === 'overview'}
-            onViewAllBadges={() => setActiveTab('about')}
-            onViewCrews={() => setActiveTab('crews')}
-            onConnectionChange={() => void loadProfile()}
-          />
-        </div>
+        </section>
       </div>
-
-      <aside className="member-profile-deco member-profile-deco-left" aria-hidden />
-      <aside className="member-profile-deco member-profile-deco-right" aria-hidden />
     </div>
   )
 }

@@ -26,11 +26,10 @@ export function NetworkConnectionsPanel({
   onClose,
 }: NetworkConnectionsPanelProps) {
   return (
-    <section className="net-connections-panel" aria-labelledby="net-connections-title">
+    <section className="np-card net-connections-panel mb-4" aria-labelledby="net-connections-title">
       <div className="net-connections-panel__head">
         <div>
-          <p className="net-dossier__kicker">Roster</p>
-          <h2 id="net-connections-title" className="net-connections-panel__title">
+          <h2 id="net-connections-title" className="np-card__title">
             {TITLES[mode]}
           </h2>
         </div>

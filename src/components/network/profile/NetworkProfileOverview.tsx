@@ -1,58 +1,105 @@
 import { Link } from 'react-router-dom'
 import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
-import { NetworkTransmissionFeed } from '@/components/network/NetworkTransmissionFeed'
-import { NetworkProfileComposerStrip } from '@/components/network/profile/NetworkProfileComposerStrip'
+import type { EarnedBadge } from '@/lib/community/service'
+import type { FandomPublicRecognitionRow } from '@/lib/fandom/types'
+import type { NetworkPersonCard } from '@/lib/network/connectionTypes'
+import { NetworkProfileLeftColumn } from '@/components/network/profile/NetworkProfileLeftColumn'
+import { NetworkProfileRightColumn } from '@/components/network/profile/NetworkProfileRightColumn'
+import { NetworkProfileComposerBar } from '@/components/network/profile/NetworkProfileComposerBar'
+import { CommunityFeedCard } from '@/components/community/CommunityFeedCard'
 
 interface NetworkProfileOverviewProps {
   profile: PublicMemberProfile
   posts: CommunityFeedPost[]
+  badges: EarnedBadge[]
+  mutuals: NetworkPersonCard[]
+  suggested: NetworkPersonCard[]
+  fandomRecognitions?: FandomPublicRecognitionRow[]
   isYou: boolean
   onRefresh: () => void | Promise<void>
   onViewAllPosts: () => void
+  onViewAllBadges?: () => void
+  onViewCrews?: () => void
+  onConnectionChange?: () => void
 }
 
-const PREVIEW_COUNT = 5
+const PREVIEW = 5
 
 export function NetworkProfileOverview({
   profile,
   posts,
+  badges,
+  mutuals,
+  suggested,
+  fandomRecognitions = [],
   isYou,
   onRefresh,
   onViewAllPosts,
+  onViewAllBadges,
+  onViewCrews,
+  onConnectionChange,
 }: NetworkProfileOverviewProps) {
   const handle = profile.handle.replace(/^@/, '')
-  const preview = posts.slice(0, PREVIEW_COUNT)
+  const preview = posts.slice(0, PREVIEW)
 
   return (
-    <div className="network-profile-overview">
-      <NetworkProfileComposerStrip isYou={isYou} onPosted={onRefresh} />
-
-      <header className="member-profile-wire-head">
-        <div>
-          <p className="member-profile-kicker">Archive</p>
-          <h2 className="member-profile-wire-title">On the wire</h2>
-        </div>
-        {posts.length > PREVIEW_COUNT && (
-          <button type="button" className="member-profile-wire-more" onClick={onViewAllPosts}>
-            All ({profile.postCount})
-          </button>
-        )}
-      </header>
-
-      <NetworkTransmissionFeed
-        posts={preview}
-        isYou={isYou}
-        handle={handle}
-        onRefresh={onRefresh}
+    <div className="np-overview">
+      <NetworkProfileLeftColumn
+        profile={profile}
+        badges={badges}
+        onViewAllBadges={onViewAllBadges}
       />
 
-      {posts.length === 0 && isYou && (
-        <p className="member-profile-wire-empty-hint">
-          Broadcast from the deck above — your transmissions archive here.{' '}
-          <Link to="/feed">Full wire</Link>
-        </p>
-      )}
+      <div className="np-col np-col--center">
+        <NetworkProfileComposerBar isYou={isYou} onPosted={onRefresh} />
+
+        {posts.length > PREVIEW && (
+          <div className="np-feed-head">
+            <h2 className="np-feed-head__title">On your wire</h2>
+            <button type="button" className="np-card__link" onClick={onViewAllPosts}>
+              See all ({profile.postCount}) →
+            </button>
+          </div>
+        )}
+
+        {preview.length === 0 ? (
+          <div className="np-card np-feed-empty">
+            <p>@{handle} hasn&apos;t posted on the wire yet.</p>
+            {isYou && (
+              <Link to="/feed" className="np-btn np-btn--primary np-feed-empty__cta">
+                Open wire feed
+              </Link>
+            )}
+          </div>
+        ) : (
+          <ul className="np-feed">
+            {preview.map((post) => (
+              <li key={post.id} className="np-feed__item">
+                <CommunityFeedCard
+                  post={post}
+                  isYou={isYou}
+                  linkProfile={false}
+                  variant="profile"
+                  onHidden={onRefresh}
+                  onReactionChange={onRefresh}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <NetworkProfileRightColumn
+        profile={profile}
+        posts={posts}
+        mutuals={mutuals}
+        suggested={suggested}
+        fandomRecognitions={fandomRecognitions}
+        isYou={isYou}
+        onViewCrews={onViewCrews}
+        onConnectionChange={onConnectionChange}
+      />
     </div>
   )
 }
