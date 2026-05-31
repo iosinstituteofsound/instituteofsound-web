@@ -14,12 +14,10 @@ export function FandomPublicRecognitions({
 
   return (
     <section className={className} aria-label="Artist recognition">
-      <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold mb-2">
-        Artist recognition
-      </p>
-      <ul className="space-y-3 list-none p-0 m-0">
+      <h2 className="network-rail-title">Artist recognition</h2>
+      <ul className="network-recognition-list list-none p-0 m-0">
         {recognitions.map((r) => (
-          <li key={r.id} className="ios-card p-4 border border-white/5">
+          <li key={r.id} className="network-recognition-item">
             <p className="text-xs text-muted">
               <Link to={`/artists/${r.artistSlug}`} className="text-mh-red hover:underline font-semibold">
                 {r.artistDisplayName}

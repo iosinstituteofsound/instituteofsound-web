@@ -54,8 +54,6 @@ import type {
   FandomPublicRecognitionRow,
   PublicSupporterBadgeOnArtist,
 } from '@/lib/fandom/types'
-import { FandomPublicRecognitions } from '@/components/fandom/FandomPublicRecognitions'
-
 function tabFromSearch(params: URLSearchParams): MemberProfileTab {
   const t = params.get('tab')
   if (t === 'overview') return 'overview'
@@ -373,11 +371,6 @@ export default function CommunityMemberPage() {
           onConnectionChange={() => void loadProfile()}
         />
 
-        <FandomPublicRecognitions
-          recognitions={fandomRecognitions}
-          className="mb-8"
-        />
-
         {connectionsOpen && (
           <section className="ios-card p-5 mb-5">
             <div className="flex items-start justify-between gap-3 mb-4">
@@ -522,11 +515,9 @@ export default function CommunityMemberPage() {
             <NetworkProfileOverview
               profile={profile}
               posts={posts}
-              badges={badges}
               isYou={isYou}
               onRefresh={() => void loadProfile()}
               onViewAllPosts={() => setActiveTab('posts')}
-              onViewAbout={() => setActiveTab('about')}
             />
           </section>
 
@@ -639,9 +630,11 @@ export default function CommunityMemberPage() {
             badges={badges}
             mutuals={mutuals}
             suggested={suggested}
+            fandomRecognitions={fandomRecognitions}
             isYou={isYou}
             hideBadges={tab === 'overview'}
             onViewAllBadges={() => setActiveTab('about')}
+            onViewCrews={() => setActiveTab('crews')}
             onConnectionChange={() => void loadProfile()}
           />
         </div>

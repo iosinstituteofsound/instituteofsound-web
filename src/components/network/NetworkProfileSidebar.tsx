@@ -1,21 +1,30 @@
 import { Link } from 'react-router-dom'
 import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { EarnedBadge } from '@/lib/community/service'
-import { RankBadge } from '@/components/ui/RankBadge'
+import type { FandomPublicRecognitionRow } from '@/lib/fandom/types'
 import { MedalIllustration } from '@/components/community/medals/MedalIllustration'
 import { ConnectButton } from '@/components/network/ConnectButton'
+import { NetworkNoiseScoreGauge } from '@/components/network/NetworkNoiseScoreGauge'
+import { NetworkProfileCrewsRail } from '@/components/network/NetworkProfileCrewsRail'
+import { FandomPublicRecognitions } from '@/components/fandom/FandomPublicRecognitions'
 import type { NetworkPersonCard } from '@/lib/network/connectionTypes'
 import { networkProfilePath } from '@/lib/community/networkPaths'
 import { IOSImage } from '@/components/ui/IOSImage'
+
+function rankHeadline(rank: string): string {
+  return rank.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
 
 interface NetworkProfileSidebarProps {
   profile: PublicMemberProfile
   badges: EarnedBadge[]
   mutuals: NetworkPersonCard[]
   suggested: NetworkPersonCard[]
+  fandomRecognitions?: FandomPublicRecognitionRow[]
   isYou: boolean
   hideBadges?: boolean
   onViewAllBadges?: () => void
+  onViewCrews?: () => void
   onConnectionChange?: () => void
 }
 
@@ -24,24 +33,32 @@ export function NetworkProfileSidebar({
   badges,
   mutuals,
   suggested,
+  fandomRecognitions = [],
   isYou,
   hideBadges = false,
   onViewAllBadges,
+  onViewCrews,
   onConnectionChange,
 }: NetworkProfileSidebarProps) {
   return (
-    <aside className="network-profile-rail space-y-5">
-      <section className="network-rail-card">
+    <aside className="network-profile-rail">
+      <section className="network-rail-card network-rail-card--reputation">
         <h2 className="network-rail-title">Reputation</h2>
-        <div className="network-reputation-row">
-          <RankBadge rank={profile.rank} size="md" />
-          <div>
-            <p className="network-reputation-db">{profile.totalDb.toLocaleString()} dB</p>
-            <p className="network-reputation-meta">
-              {profile.weeklyDb.toLocaleString()} this week · {profile.postCount} posts
-            </p>
-          </div>
-        </div>
+        <NetworkNoiseScoreGauge totalDb={profile.totalDb} rankLabel={rankHeadline(profile.rank)} />
+        <ul className="network-reputation-stats">
+          <li>
+            <span>Posts</span>
+            <strong>{profile.postCount.toLocaleString()}</strong>
+          </li>
+          <li>
+            <span>This week</span>
+            <strong>{profile.weeklyDb.toLocaleString()} dB</strong>
+          </li>
+          <li>
+            <span>Followers</span>
+            <strong>{profile.followerCount.toLocaleString()}</strong>
+          </li>
+        </ul>
       </section>
 
       {!hideBadges && badges.length > 0 && (
@@ -52,9 +69,7 @@ export function NetworkProfileSidebar({
               <button type="button" className="network-rail-link" onClick={onViewAllBadges}>
                 View all
               </button>
-            ) : (
-              <span className="network-rail-link">View all</span>
-            )}
+            ) : null}
           </div>
           <ul className="network-badge-grid">
             {badges.slice(0, 4).map((b) => (
@@ -66,11 +81,22 @@ export function NetworkProfileSidebar({
         </section>
       )}
 
+      <NetworkProfileCrewsRail userId={profile.userId} onViewCrews={onViewCrews} />
+
+      {fandomRecognitions.length > 0 && (
+        <FandomPublicRecognitions
+          recognitions={fandomRecognitions}
+          className="network-rail-card network-rail-recognitions"
+        />
+      )}
+
       {!isYou && mutuals.length > 0 && (
         <section className="network-rail-card">
-          <h2 className="network-rail-title">{mutuals.length} mutual</h2>
+          <h2 className="network-rail-title">
+            {mutuals.length} mutual connection{mutuals.length === 1 ? '' : 's'}
+          </h2>
           <ul className="network-avatar-stack">
-            {mutuals.slice(0, 5).map((m) => (
+            {mutuals.slice(0, 6).map((m) => (
               <li key={m.userId}>
                 <Link to={networkProfilePath(m.handle)} title={m.displayName}>
                   {m.avatarUrl ? (
