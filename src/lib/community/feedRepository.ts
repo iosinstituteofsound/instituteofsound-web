@@ -117,6 +117,18 @@ export async function repoUpdateOwnSpin(
   if (error) throw new Error(error.message)
 }
 
+export async function repoSetPostArtistTags(
+  supabase: SupabaseClient,
+  postId: string,
+  artistProfileIds: string[],
+): Promise<void> {
+  const { error } = await supabase.rpc('community_set_post_artist_tags', {
+    p_post_id: postId,
+    p_artist_profile_ids: artistProfileIds,
+  })
+  if (error) throw new Error(error.message)
+}
+
 export async function repoHideOwnPost(
   supabase: SupabaseClient,
   postId: string,

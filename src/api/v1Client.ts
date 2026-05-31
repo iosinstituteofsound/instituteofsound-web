@@ -112,7 +112,13 @@ export async function v1GetCommunityPost(
 export async function v1CreateSpinPost(
   input: Pick<
     CreateSpinInput,
-    'spotifyRaw' | 'youtubeRaw' | 'caption' | 'trackTitle' | 'imageUrl' | 'primaryGenreId'
+    | 'spotifyRaw'
+    | 'youtubeRaw'
+    | 'caption'
+    | 'trackTitle'
+    | 'imageUrl'
+    | 'primaryGenreId'
+    | 'artistProfileIds'
   >,
 ): Promise<{ post: CommunityFeedPost }> {
   return v1Fetch('/community/spins', {
@@ -131,6 +137,7 @@ export async function v1CreateDropPost(
     | 'linkDescription'
     | 'linkImageUrl'
     | 'primaryGenreId'
+    | 'artistProfileIds'
   >,
 ): Promise<{ post: CommunityFeedPost }> {
   return v1Fetch('/community/drops', {

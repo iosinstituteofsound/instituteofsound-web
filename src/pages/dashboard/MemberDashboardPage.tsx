@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext'
 import { updateUserProfile } from '@/lib/auth/profile'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
+import { MyFandomPanel } from '@/components/dashboard/MyFandomPanel'
 import { MemberTrustPanel } from '@/components/dashboard/MemberTrustPanel'
 import { syncMemberVerificationNotifications } from '@/lib/verification/notifyEditors'
 import { syncApprovedVerificationPersona } from '@/lib/verification/service'
@@ -20,7 +21,7 @@ import {
   type PathVerificationInfo,
 } from '@/lib/verification/requirements'
 
-type MemberTab = 'workspace' | 'explore' | 'network' | 'grow'
+type MemberTab = 'workspace' | 'explore' | 'network' | 'fandom' | 'grow'
 
 const PERSONA_OPTIONS: {
   id: DashboardPersona
@@ -374,6 +375,7 @@ export default function MemberDashboardPage() {
             title: 'Network',
             items: [
               { id: 'network', label: 'Feed & activity' },
+              { id: 'fandom', label: 'My Fandom' },
               { id: 'explore', label: 'Explore IOS' },
             ],
           },
@@ -640,6 +642,8 @@ export default function MemberDashboardPage() {
         )}
 
         {tab === 'network' && <DashboardCommunityHub />}
+
+        {tab === 'fandom' && <MyFandomPanel />}
       </RoleDeskLayout>
 
       {personaModal && (

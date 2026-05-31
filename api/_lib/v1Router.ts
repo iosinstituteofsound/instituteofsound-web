@@ -87,6 +87,10 @@ export async function dispatchV1Api(
     if (await handleV1Phase5(req, res, pathname)) return
   }
   {
+    const { handleV1Fandom } = await import('./handlers/v1Fandom.js')
+    if (await handleV1Fandom(req, res, pathname)) return
+  }
+  {
     const { handleV1Media } = await import('./handlers/v1Media.js')
     if (await handleV1Media(req, res, pathname)) return
   }

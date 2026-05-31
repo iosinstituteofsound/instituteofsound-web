@@ -15,6 +15,8 @@ import {
 } from './v1Common.js'
 
 // ── Community ───────────────────────────────────────────────────────────
+const zArtistProfileIds = z.array(zUuid).max(3).optional()
+
 export const communitySpinCreateBody = z.object({
   spotifyRaw: z.string().max(2048).optional(),
   youtubeRaw: z.string().max(2048).optional(),
@@ -22,6 +24,7 @@ export const communitySpinCreateBody = z.object({
   trackTitle: z.string().trim().max(120).optional(),
   imageUrl: zOptionalUrl,
   primaryGenreId: zOptionalUuid,
+  artistProfileIds: zArtistProfileIds,
 })
 
 export const communityDropCreateBody = z.object({
@@ -32,6 +35,7 @@ export const communityDropCreateBody = z.object({
   linkDescription: zMediumText.optional(),
   linkImageUrl: zOptionalUrl,
   primaryGenreId: zOptionalUuid,
+  artistProfileIds: zArtistProfileIds,
 })
 
 export const communityReactionBody = z.object({

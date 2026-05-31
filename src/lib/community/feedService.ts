@@ -18,6 +18,7 @@ import {
   repoFetchCommunityPostById,
   repoHideOwnPost,
   repoInsertCommunityPost,
+  repoSetPostArtistTags,
   repoTogglePostReaction,
   repoUpdateOwnDrop,
   repoUpdateOwnSpin,
@@ -179,6 +180,7 @@ export interface CreateSpinInput {
   caption?: string
   trackTitle?: string
   imageUrl?: string
+  artistProfileIds?: string[]
 }
 
 export async function createSpinPost(input: CreateSpinInput): Promise<CommunityFeedPost> {
@@ -197,6 +199,7 @@ export async function createSpinPost(input: CreateSpinInput): Promise<CommunityF
       trackTitle: input.trackTitle,
       imageUrl: input.imageUrl,
       primaryGenreId: input.primaryGenreId,
+      artistProfileIds: input.artistProfileIds,
     })
     void tryGrantBadge('first_spin')
     void evaluateWeeklyChallenges()
@@ -289,6 +292,7 @@ export interface CreateDropInput {
   linkTitle?: string
   linkDescription?: string
   linkImageUrl?: string
+  artistProfileIds?: string[]
 }
 
 export async function createDropPost(input: CreateDropInput): Promise<CommunityFeedPost> {
@@ -310,6 +314,7 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
       linkDescription: input.linkDescription,
       linkImageUrl: input.linkImageUrl,
       primaryGenreId: input.primaryGenreId,
+      artistProfileIds: input.artistProfileIds,
     })
     void tryGrantBadge('first_drop')
     void evaluateWeeklyChallenges()
@@ -349,10 +354,11 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
   const linkTitle = input.linkTitle?.trim() || null
   const linkDescription = input.linkDescription?.trim() || null
   const linkImageUrl = input.linkImageUrl?.trim() || null
+  const supabase = getSupabase()
 
   let data: { id: string; created_at: string }
   try {
-    data = await repoInsertCommunityPost(getSupabase(), {
+    data = await repoInsertCommunityPost(supabase, {
       user_id: input.userId,
       kind: 'drop',
       body,
@@ -367,7 +373,7 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
     if (linkUrl && isMissingLinkColumnError(message)) {
       const fallbackBody =
         body && linkUrl && !body.includes(linkUrl) ? `${body}\n\n${linkUrl}` : body || linkUrl
-      data = await repoInsertCommunityPost(getSupabase(), {
+      data = await repoInsertCommunityPost(supabase, {
         user_id: input.userId,
         kind: 'drop',
         body: fallbackBody,
@@ -380,6 +386,10 @@ export async function createDropPost(input: CreateDropInput): Promise<CommunityF
     } else {
       throw new Error(friendlyPostError(message))
     }
+  }
+
+  if (input.artistProfileIds?.length) {
+    await repoSetPostArtistTags(supabase, data.id, input.artistProfileIds.slice(0, 3))
   }
 
   const awarded = await awardDb({

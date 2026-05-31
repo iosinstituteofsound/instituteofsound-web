@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { repoAwardDb } from '../../src/lib/community/awardRepository.js'
 import {
   repoInsertCommunityPost,
+  repoSetPostArtistTags,
   repoTouchArtistActivity,
   type InsertDropRow,
   type InsertSpinRow,
@@ -107,6 +108,7 @@ export async function serverCreateSpinPost(
     trackTitle?: string
     imageUrl?: string
     primaryGenreId?: string | null
+    artistProfileIds?: string[]
   },
 ): Promise<CommunityFeedPost> {
   const { spotify, youtube, error } = validateSpinInput(input.spotifyRaw, input.youtubeRaw)
@@ -127,6 +129,10 @@ export async function serverCreateSpinPost(
   }
 
   const data = await repoInsertCommunityPost(supabase, row)
+
+  if (input.artistProfileIds?.length) {
+    await repoSetPostArtistTags(supabase, data.id, input.artistProfileIds.slice(0, 3))
+  }
 
   await repoAwardDb(supabase, {
     userId: author.userId,
@@ -158,6 +164,7 @@ export async function serverCreateDropPost(
     linkDescription?: string
     linkImageUrl?: string
     primaryGenreId?: string | null
+    artistProfileIds?: string[]
   },
 ): Promise<CommunityFeedPost> {
   const text = input.text.trim()
@@ -205,6 +212,10 @@ export async function serverCreateDropPost(
     } else {
       throw new Error(friendlyPostError(message))
     }
+  }
+
+  if (input.artistProfileIds?.length) {
+    await repoSetPostArtistTags(supabase, data.id, input.artistProfileIds.slice(0, 3))
   }
 
   await repoAwardDb(supabase, {

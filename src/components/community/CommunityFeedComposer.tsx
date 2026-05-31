@@ -21,6 +21,8 @@ import { uploadImageToCloudinary, validateImageFile } from '@/lib/cloudinary/upl
 import { IOSImage } from '@/components/ui/IOSImage'
 import { Button } from '@/components/ui/Button'
 import { CommunityLinkPreviewCard } from '@/components/community/CommunityLinkPreviewCard'
+import { ArtistSupportTagPicker } from '@/components/fandom/ArtistSupportTagPicker'
+import type { FandomArtistSearchHit } from '@/lib/fandom/types'
 
 type ComposerOption = 'photo' | 'music' | 'spin' | 'drop'
 
@@ -69,6 +71,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [supportedArtists, setSupportedArtists] = useState<FandomArtistSearchHit[]>([])
 
   const previewRequest = useRef(0)
 
@@ -237,6 +240,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           youtubeRaw: youtube,
           caption: text,
           trackTitle,
+          artistProfileIds: supportedArtists.map((a) => a.id),
         })
         setSuccess(`Spin live · +${DB_REWARDS.spin_post} dB`)
       } else {
@@ -255,6 +259,7 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           linkTitle: useLink?.title,
           linkDescription: useLink?.description,
           linkImageUrl: useLink?.imageUrl,
+          artistProfileIds: supportedArtists.map((a) => a.id),
         })
         setSuccess(`Posted · +${DB_REWARDS.drop_post} dB`)
       }
@@ -424,6 +429,10 @@ export function CommunityFeedComposer({ onPosted }: CommunityFeedComposerProps) 
           )}
         </div>
       )}
+
+      <div className="px-1">
+        <ArtistSupportTagPicker value={supportedArtists} onChange={setSupportedArtists} />
+      </div>
 
       {error && <p className="community-composer-feedback community-composer-feedback-error">{error}</p>}
       {success && (

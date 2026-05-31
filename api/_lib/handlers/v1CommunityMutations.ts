@@ -42,6 +42,7 @@ export async function handleV1CommunitySpinCreate(req: ApiRequest, res: ApiRespo
       trackTitle: body.trackTitle,
       imageUrl: body.imageUrl,
       primaryGenreId: body.primaryGenreId,
+      artistProfileIds: body.artistProfileIds,
     })
     return res.status(201).json({ post })
   } catch (err) {
@@ -71,6 +72,7 @@ export async function handleV1CommunityDropCreate(req: ApiRequest, res: ApiRespo
       linkDescription: body.linkDescription,
       linkImageUrl: body.linkImageUrl,
       primaryGenreId: body.primaryGenreId,
+      artistProfileIds: body.artistProfileIds,
     })
     return res.status(201).json({ post })
   } catch (err) {
