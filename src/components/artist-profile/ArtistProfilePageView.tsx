@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { fetchPublicSupporterBadge } from '@/lib/fandom/service'
 import type { ArtistAlbum, ArtistProfilePageData, ArtistTrack, ArtistVideo } from '@/lib/artist-profile/types'
 import { CoverArt } from './CoverArt'
 import { ArtistPickPlayer } from './ArtistPickPlayer'
@@ -56,6 +58,26 @@ export function ArtistProfilePageView({
   const primaryListen = pickListenUrl(data)
   const latestAlbum = albums[0]
   const latestSingle = singles[0]
+  const [supporterBadgeLabel, setSupporterBadgeLabel] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!viewerUserId || isOwner) {
+      setSupporterBadgeLabel(null)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        const badge = await fetchPublicSupporterBadge(profile.id, viewerUserId)
+        if (!cancelled) setSupporterBadgeLabel(badge?.badgeLabel ?? null)
+      } catch {
+        if (!cancelled) setSupporterBadgeLabel(null)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [profile.id, viewerUserId, isOwner])
 
   const navItems: ArtistSiteNavItem[] = [
     { id: 'overview', label: 'Overview' },
@@ -86,6 +108,7 @@ export function ArtistProfilePageView({
         trackCount={tracks.length}
         isOwner={isOwner}
         networkHandle={networkHandle}
+        supporterBadgeLabel={supporterBadgeLabel}
       />
 
       <ArtistSiteStickyNav items={navItems} artistName={profile.displayName} />

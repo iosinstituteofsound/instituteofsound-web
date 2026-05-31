@@ -6,9 +6,11 @@ import {
   repoFetchArtistRecentSupport,
   repoFetchArtistSupporters,
   repoFetchMyFandom,
+  repoFetchPublicSupporterBadge,
+  repoFetchPublicSupporterBadgesForUser,
   repoSearchArtistsForTags,
 } from './fandomRepository'
-import type { FandomWindow } from './types'
+import type { FandomWindow, PublicSupporterBadge, PublicSupporterBadgeOnArtist } from './types'
 
 export async function fetchMyFandom(window: FandomWindow = '90d') {
   if (isV1ApiEnabled()) {
@@ -37,4 +39,26 @@ export async function fetchArtistFandom(window: FandomWindow = '90d') {
 export async function searchArtistsForSupportTags(query: string) {
   if (!isSupabaseConfigured()) return []
   return repoSearchArtistsForTags(getSupabase(), query)
+}
+
+export async function fetchPublicSupporterBadge(
+  artistProfileId: string,
+  supporterUserId?: string,
+): Promise<PublicSupporterBadge | null> {
+  if (!isSupabaseConfigured()) return null
+  const badge = await repoFetchPublicSupporterBadge(
+    getSupabase(),
+    artistProfileId,
+    supporterUserId,
+  )
+  if (!badge?.badgeLabel) return null
+  return badge
+}
+
+export async function fetchPublicSupporterBadgesForUser(
+  supporterUserId: string,
+  limit = 8,
+): Promise<PublicSupporterBadgeOnArtist[]> {
+  if (!isSupabaseConfigured()) return []
+  return repoFetchPublicSupporterBadgesForUser(getSupabase(), supporterUserId, limit)
 }

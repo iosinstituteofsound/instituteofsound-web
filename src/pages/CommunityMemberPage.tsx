@@ -46,6 +46,8 @@ import { IOSImage } from '@/components/ui/IOSImage'
 import { Input, FieldLabel } from '@/components/ui/Input'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { updateUserProfile } from '@/lib/auth/profile'
+import { fetchPublicSupporterBadgesForUser } from '@/lib/fandom/service'
+import type { PublicSupporterBadgeOnArtist } from '@/lib/fandom/types'
 
 function tabFromSearch(params: URLSearchParams): MemberProfileTab {
   const t = params.get('tab')
@@ -92,6 +94,7 @@ export default function CommunityMemberPage() {
   const [connectionsLoading, setConnectionsLoading] = useState(false)
   const [connectionsError, setConnectionsError] = useState('')
   const [connections, setConnections] = useState<MemberConnectionProfile[]>([])
+  const [fandomBadges, setFandomBadges] = useState<PublicSupporterBadgeOnArtist[]>([])
   const navigate = useNavigate()
 
   const { badges, loading: badgesLoading } = useCommunityBadges(profile?.userId)
@@ -147,14 +150,19 @@ export default function CommunityMemberPage() {
       setArtistSlug(null)
       setArtistProfileId(null)
       setManagedArtists([])
+      setFandomBadges([])
     } else {
       setProfile(p)
       setPosts(postList)
       setActivity(act)
-      const artistMeta = await fetchPublishedArtistMetaForUserId(p.userId)
+      const [artistMeta, supporterBadges, managed] = await Promise.all([
+        fetchPublishedArtistMetaForUserId(p.userId),
+        fetchPublicSupporterBadgesForUser(p.userId),
+        listManagedArtistsByHandle(p.handle),
+      ])
       setArtistSlug(artistMeta?.slug ?? null)
       setArtistProfileId(artistMeta?.id ?? null)
-      const managed = await listManagedArtistsByHandle(p.handle)
+      setFandomBadges(supporterBadges)
       setManagedArtists(managed)
     }
     setLoading(false)
@@ -344,6 +352,7 @@ export default function CommunityMemberPage() {
           isYou={isYou}
           dashboardHref={isYou ? dashboardHref : undefined}
           badges={badges}
+          fandomBadges={fandomBadges}
           artistSlug={artistSlug}
           pendingRequestId={pendingRequestId}
           onEditProfile={() => setShowEditProfile((prev) => !prev)}

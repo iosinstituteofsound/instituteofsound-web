@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { EarnedBadge } from '@/lib/community/service'
+import type { PublicSupporterBadgeOnArtist } from '@/lib/fandom/types'
+import { FandomSupporterBadgesList } from '@/components/fandom/FandomSupporterBadges'
 import { roleLabel } from '@/lib/auth/roles'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { FollowButton } from '@/components/community/FollowButton'
@@ -23,6 +25,7 @@ interface NetworkProfileHeaderProps {
   profile: PublicMemberProfile
   isYou: boolean
   badges: EarnedBadge[]
+  fandomBadges?: PublicSupporterBadgeOnArtist[]
   artistSlug?: string | null
   pendingRequestId?: string | null
   dashboardHref?: string
@@ -37,6 +40,7 @@ export function NetworkProfileHeader({
   profile,
   isYou,
   badges,
+  fandomBadges = [],
   artistSlug,
   pendingRequestId,
   dashboardHref,
@@ -176,6 +180,13 @@ export function NetworkProfileHeader({
             </>
           )}
         </div>
+
+        {fandomBadges.length > 0 && (
+          <FandomSupporterBadgesList
+            badges={fandomBadges}
+            className="network-profile-fandom-badges flex flex-wrap gap-2 list-none p-0 mt-4"
+          />
+        )}
 
         {badges.length > 0 && (
           <ul className="network-profile-badges" aria-label="Badges">

@@ -80,3 +80,11 @@ export interface PublicSupporterBadge {
   badgeLabel?: string | null
   supporterRank?: number | null
 }
+
+export interface PublicSupporterBadgeOnArtist {
+  artistProfileId: string
+  artistSlug: string
+  artistDisplayName: string
+  badgeLabel: string
+  supporterRank?: number | null
+}

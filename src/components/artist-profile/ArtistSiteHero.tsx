@@ -6,6 +6,7 @@ import { heroLayoutClass } from '@/lib/artist-profile/heroLayout'
 import { CoverArt } from './CoverArt'
 import { SocialIcons } from './SocialIcons'
 import { MetalBadge } from '@/components/ui/MetalBadge'
+import { FandomSupporterBadgeChip } from '@/components/fandom/FandomSupporterBadges'
 import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
 import { networkProfilePath } from '@/lib/community/networkPaths'
 import { Link } from 'react-router-dom'
@@ -22,6 +23,7 @@ interface ArtistSiteHeroProps {
   trackCount: number
   isOwner?: boolean
   networkHandle?: string | null
+  supporterBadgeLabel?: string | null
 }
 
 export function ArtistSiteHero({
@@ -31,6 +33,7 @@ export function ArtistSiteHero({
   trackCount,
   isOwner,
   networkHandle,
+  supporterBadgeLabel,
 }: ArtistSiteHeroProps) {
   const layout = profile.heroLayout
   const primaryHref =
@@ -93,6 +96,7 @@ export function ArtistSiteHero({
             primaryLabel={primaryLabel}
             compactTitle={layout === 'logo' || layout === 'compact'}
             networkHandle={networkHandle}
+            supporterBadgeLabel={supporterBadgeLabel}
           />
         </motion.div>
 
@@ -163,6 +167,7 @@ function HeroMetaContent({
   primaryLabel = 'Listen now',
   compactTitle,
   networkHandle,
+  supporterBadgeLabel,
 }: {
   profile: ArtistProfile
   trackCount: number
@@ -171,6 +176,7 @@ function HeroMetaContent({
   primaryLabel?: string
   compactTitle?: boolean
   networkHandle?: string | null
+  supporterBadgeLabel?: string | null
 }) {
   return (
     <>
@@ -187,6 +193,12 @@ function HeroMetaContent({
           <MetalBadge variant="crimson">
             {profile.published ? 'Pending — update page' : 'Draft'}
           </MetalBadge>
+        )}
+        {!isOwner && supporterBadgeLabel && (
+          <FandomSupporterBadgeChip
+            label={supporterBadgeLabel}
+            title={`Your support rank: ${supporterBadgeLabel}`}
+          />
         )}
       </div>
 

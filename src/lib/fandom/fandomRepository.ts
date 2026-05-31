@@ -7,6 +7,7 @@ import type {
   FandomWindow,
   MyFandomArtistRow,
   PublicSupporterBadge,
+  PublicSupporterBadgeOnArtist,
 } from './types'
 
 function mapMyArtist(row: Record<string, unknown>): MyFandomArtistRow {
@@ -171,4 +172,25 @@ export async function repoFetchPublicSupporterBadge(
     badgeLabel: row.badge_label ? String(row.badge_label) : null,
     supporterRank: row.supporter_rank != null ? Number(row.supporter_rank) : null,
   }
+}
+
+export async function repoFetchPublicSupporterBadgesForUser(
+  supabase: SupabaseClient,
+  supporterUserId: string,
+  limit = 8,
+): Promise<PublicSupporterBadgeOnArtist[]> {
+  const { data, error } = await supabase.rpc('fandom_public_supporter_badges_for_user', {
+    p_supporter_user_id: supporterUserId,
+    lim: limit,
+  })
+  if (error) throw new Error(error.message)
+  return (data ?? [])
+    .map((row: Record<string, unknown>) => ({
+      artistProfileId: String(row.artist_profile_id),
+      artistSlug: String(row.artist_slug),
+      artistDisplayName: String(row.artist_display_name),
+      badgeLabel: String(row.badge_label),
+      supporterRank: row.supporter_rank != null ? Number(row.supporter_rank) : null,
+    }))
+    .filter((row: PublicSupporterBadgeOnArtist) => row.badgeLabel.length > 0)
 }
