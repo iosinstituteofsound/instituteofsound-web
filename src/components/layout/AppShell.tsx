@@ -10,7 +10,9 @@ import { TopBar } from './TopBar'
 import { MobileNav } from './MobileNav'
 import { CommandPalette } from './CommandPalette'
 import { LoginGateModal } from '@/components/auth/LoginGateModal'
+import { MessengerDock } from '@/components/messenger/MessengerDock'
 import { NetworkPresenceHeartbeat } from '@/components/network/NetworkPresenceHeartbeat'
+import { MessengerPopupProvider } from '@/context/MessengerPopupContext'
 
 function ShellInner() {
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -64,7 +66,10 @@ function ShellInner() {
 export function AppShell() {
   return (
     <ShellProvider>
-      <ShellInner />
+      <MessengerPopupProvider>
+        <ShellInner />
+        <MessengerDock />
+      </MessengerPopupProvider>
     </ShellProvider>
   )
 }

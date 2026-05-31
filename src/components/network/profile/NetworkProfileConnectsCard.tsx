@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+import { useMessengerPopupOptional } from '@/context/MessengerPopupContext'
 import {
   fetchOnlineConnections,
   ONLINE_CONNECTS_POLL_MS,
 } from '@/lib/network/presenceService'
 import type { OnlineConnection } from '@/lib/network/presenceService'
-import { networkProfilePath } from '@/lib/community/networkPaths'
 import { NETWORK_CONNECTION_EVENT } from '@/lib/network/connectionService'
+import { getOrCreateThread } from '@/lib/dm/service'
 import { IOSImage } from '@/components/ui/IOSImage'
 
 export function NetworkProfileConnectsCard() {
   const { user } = useAuth()
+  const messenger = useMessengerPopupOptional()
+  const navigate = useNavigate()
   const [online, setOnline] = useState<OnlineConnection[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -38,6 +41,16 @@ export function NetworkProfileConnectsCard() {
 
   if (!user) return null
 
+  const openChat = (userId: string) => {
+    if (messenger && window.matchMedia('(min-width: 1024px)').matches) {
+      void messenger.openChat({ userId })
+      return
+    }
+    void getOrCreateThread(userId).then((threadId) => {
+      navigate(`/messages?t=${threadId}`)
+    })
+  }
+
   return (
     <section className="np-rail-card np-connects">
       <div className="np-rail-card__head">
@@ -55,7 +68,7 @@ export function NetworkProfileConnectsCard() {
         <ul className="np-connects__list">
           {online.map((person) => (
             <li key={person.userId}>
-              <Link to={networkProfilePath(person.handle)} className="np-connects__row">
+              <button type="button" className="np-connects__row" onClick={() => openChat(person.userId)}>
                 <span className="np-connects__avatar-wrap">
                   {person.avatarUrl ? (
                     <IOSImage
@@ -72,7 +85,7 @@ export function NetworkProfileConnectsCard() {
                   <span className="np-connects__online" title="Online" aria-hidden />
                 </span>
                 <span className="np-connects__name">{person.displayName}</span>
-              </Link>
+              </button>
             </li>
           ))}
         </ul>
