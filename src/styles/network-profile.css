@@ -435,7 +435,13 @@
   background: var(--color-surface);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 20;
+}
+
+@media (min-width: 1024px) {
+  .network-profile-page .member-profile-tabs-wrap {
+    top: 0;
+  }
 }
 
 .network-profile-page .member-profile-tabs-wrap {
@@ -510,18 +516,19 @@
   .np-overview {
     grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(280px, 320px);
     gap: 1.35rem;
-    align-items: stretch;
-    position: sticky;
-    top: 0.5rem;
-    height: calc(100dvh - var(--v2-topbar-h, 3.625rem) - 3.5rem);
-    max-height: calc(100dvh - var(--v2-topbar-h, 3.625rem) - 3.5rem);
-    overflow: hidden;
+    align-items: start;
   }
 
-  /* About · Feed · Reputation — each column scrolls on its own */
-  .np-overview__col {
-    min-height: 0;
-    max-height: 100%;
+  /*
+   * Page scrolls normally (cover + feed). About & Reputation stick below tabs;
+   * only scroll inside those columns when content is taller than the viewport.
+   */
+  .np-overview__col--about,
+  .np-overview__col--side {
+    position: sticky;
+    top: 3.5rem;
+    align-self: start;
+    max-height: calc(100dvh - var(--v2-topbar-h, 3.625rem) - 4.75rem);
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior-y: contain;
