@@ -15,6 +15,7 @@ import { CommunityFeedEngagement } from '@/components/community/CommunityFeedEng
 import { CommunityFeedEditPostModal } from '@/components/community/CommunityFeedEditPostModal'
 import { CommunityLinkPreviewCard } from '@/components/community/CommunityLinkPreviewCard'
 import { FollowButton } from '@/components/community/FollowButton'
+import { FeedPostArtistTags } from '@/components/community/FeedPostArtistTags'
 
 interface CommunityFeedCardProps {
   post: CommunityFeedPost
@@ -254,6 +255,10 @@ export function CommunityFeedCard({
           {isProfileFeed && postMenu}
         </div>
       </header>
+
+      {post.artistTags && post.artistTags.length > 0 && (
+        <FeedPostArtistTags artists={post.artistTags} />
+      )}
 
       {post.kind === 'drop' &&
         post.body &&

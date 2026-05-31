@@ -2,6 +2,7 @@ import type { CommunityRank } from '../../types'
 import type {
   CommunityFeedPost,
   CommunityPostKind,
+  FeedArtistTag,
   FeedReactionKind,
 } from './feedTypes'
 
@@ -29,6 +30,33 @@ export type FeedRow = {
   reactions_bolt?: number | string
   my_reaction?: string | null
   comment_count?: number | string
+  artist_tags?: unknown
+}
+
+function parseArtistTags(raw: unknown): FeedArtistTag[] {
+  if (!raw) return []
+  const list = Array.isArray(raw) ? raw : []
+  const tags: FeedArtistTag[] = []
+  for (const item of list) {
+    const row = item as Record<string, unknown>
+    const id = row.id != null ? String(row.id) : ''
+    const slug = row.slug != null ? String(row.slug) : ''
+    if (!id || !slug) continue
+    const tag: FeedArtistTag = {
+      id,
+      slug,
+      displayName: String(row.display_name ?? row.displayName ?? slug),
+    }
+    const avatar =
+      row.avatar_url != null
+        ? String(row.avatar_url)
+        : row.avatarUrl != null
+          ? String(row.avatarUrl)
+          : undefined
+    if (avatar) tag.avatarUrl = avatar
+    tags.push(tag)
+  }
+  return tags
 }
 
 export function mapFeedRow(row: FeedRow): CommunityFeedPost {
@@ -59,5 +87,6 @@ export function mapFeedRow(row: FeedRow): CommunityFeedPost {
     },
     myReaction: (row.my_reaction as FeedReactionKind | null) ?? null,
     commentCount: Number(row.comment_count ?? 0),
+    artistTags: parseArtistTags(row.artist_tags),
   }
 }

@@ -8989,6 +8989,83 @@ html[data-perf='lite'] .metal-loader-core-beat {
   color: var(--color-muted);
 }
 
+.community-feed-artist-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0 1rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.community-feed-card-profile .community-feed-artist-tags {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.community-feed-artist-tags-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.community-feed-artist-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.community-feed-artist-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem 0.2rem 0.25rem;
+  border-radius: 999px;
+  border: 1px solid rgba(227, 27, 35, 0.35);
+  background: rgba(227, 27, 35, 0.08);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-foreground);
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.community-feed-artist-tag:hover {
+  border-color: rgba(227, 27, 35, 0.65);
+  background: rgba(227, 27, 35, 0.14);
+  color: var(--color-rs-red);
+}
+
+.community-feed-artist-tag-avatar {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.community-feed-artist-tag-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: var(--color-border);
+  font-size: 0.65rem;
+}
+
+.community-feed-artist-tag-name {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .community-feed-card-badges {
   display: flex;
   flex-direction: column;

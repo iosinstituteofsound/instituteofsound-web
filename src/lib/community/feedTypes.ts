@@ -10,6 +10,13 @@ export interface FeedReactionCounts {
   bolt: number
 }
 
+export interface FeedArtistTag {
+  id: string
+  slug: string
+  displayName: string
+  avatarUrl?: string
+}
+
 export interface CommunityFeedPost {
   id: string
   kind: CommunityPostKind
@@ -33,4 +40,5 @@ export interface CommunityFeedPost {
   reactions: FeedReactionCounts
   myReaction?: FeedReactionKind | null
   commentCount?: number
+  artistTags?: FeedArtistTag[]
 }
