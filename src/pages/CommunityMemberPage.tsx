@@ -244,6 +244,20 @@ export default function CommunityMemberPage() {
     setTab(tabFromSearch(searchParams))
   }, [searchParams])
 
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const sync = () => {
+      const lock = tab === 'overview' && mq.matches
+      document.documentElement.classList.toggle('np-profile-overview-lock', lock)
+    }
+    sync()
+    mq.addEventListener('change', sync)
+    return () => {
+      mq.removeEventListener('change', sync)
+      document.documentElement.classList.remove('np-profile-overview-lock')
+    }
+  }, [tab])
+
   const setActiveTab = (next: MemberProfileTab) => {
     setTab(next)
     const params = new URLSearchParams(searchParams)

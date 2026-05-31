@@ -54,7 +54,7 @@ export function NetworkProfileRightColumn({
     : `${mutuals.length} Mutual`
 
   return (
-    <aside className="np-rail" aria-label="Profile sidebar">
+    <div className="np-pane__stack np-rail">
       <NetworkProfileReputationCard profile={profile} posts={posts} />
 
       {(isYou || mutuals.length > 0) && (
@@ -170,6 +170,6 @@ export function NetworkProfileRightColumn({
           className="np-rail-card np-rail-card--fandom"
         />
       )}
-    </aside>
+    </div>
   )
 }

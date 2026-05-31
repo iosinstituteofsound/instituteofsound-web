@@ -27,7 +27,7 @@ export function NetworkProfileLeftColumn({
   tags.push('Digital Publishing')
 
   return (
-    <div className="np-col np-col--left">
+    <div className="np-pane__stack">
       <section className="np-card">
         <h2 className="np-card__title">About</h2>
         {profile.bio ? (

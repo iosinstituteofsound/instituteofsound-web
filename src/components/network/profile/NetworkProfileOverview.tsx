@@ -1,3 +1,4 @@
+import type { WheelEvent } from 'react'
 import { Link } from 'react-router-dom'
 import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
@@ -27,6 +28,21 @@ interface NetworkProfileOverviewProps {
 
 const PREVIEW = 5
 
+/** Keep wheel inside this pane — parent page must not scroll the other columns. */
+function keepScrollInPane(e: WheelEvent<HTMLDivElement>) {
+  const el = e.currentTarget
+  if (el.scrollHeight <= el.clientHeight + 1) return
+
+  const atTop = el.scrollTop <= 0
+  const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
+  const up = e.deltaY < 0
+  const down = e.deltaY > 0
+
+  if ((up && !atTop) || (down && !atBottom)) {
+    e.stopPropagation()
+  }
+}
+
 export function NetworkProfileOverview({
   profile,
   posts,
@@ -46,14 +62,24 @@ export function NetworkProfileOverview({
   const preview = posts.slice(0, PREVIEW)
 
   return (
-    <div className="np-overview">
-      <NetworkProfileLeftColumn
-        profile={profile}
-        badges={badges}
-        onViewAllBadges={onViewAllBadges}
-      />
+    <div className="np-three-col" role="group" aria-label="Profile overview columns">
+      <div
+        className="np-pane np-pane--left"
+        onWheel={keepScrollInPane}
+        aria-label="About and badges"
+      >
+        <NetworkProfileLeftColumn
+          profile={profile}
+          badges={badges}
+          onViewAllBadges={onViewAllBadges}
+        />
+      </div>
 
-      <div className="np-col np-col--center">
+      <div
+        className="np-pane np-pane--feed"
+        onWheel={keepScrollInPane}
+        aria-label="Posts and composer"
+      >
         <NetworkProfileComposerBar isYou={isYou} onPosted={onRefresh} />
 
         {posts.length > PREVIEW && (
@@ -92,17 +118,23 @@ export function NetworkProfileOverview({
         )}
       </div>
 
-      <NetworkProfileRightColumn
-        profile={profile}
-        posts={posts}
-        mutuals={mutuals}
-        suggested={suggested}
-        fandomRecognitions={fandomRecognitions}
-        isYou={isYou}
-        onViewCrews={onViewCrews}
-        onViewMutuals={onViewMutuals}
-        onConnectionChange={onConnectionChange}
-      />
+      <div
+        className="np-pane np-pane--right"
+        onWheel={keepScrollInPane}
+        aria-label="Reputation and network"
+      >
+        <NetworkProfileRightColumn
+          profile={profile}
+          posts={posts}
+          mutuals={mutuals}
+          suggested={suggested}
+          fandomRecognitions={fandomRecognitions}
+          isYou={isYou}
+          onViewCrews={onViewCrews}
+          onViewMutuals={onViewMutuals}
+          onConnectionChange={onConnectionChange}
+        />
+      </div>
     </div>
   )
 }
