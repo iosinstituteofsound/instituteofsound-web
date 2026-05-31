@@ -59,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     applyApiSecurityHeaders(res)
 
     const pathname = pathnameFromRequest(req)
-    const limited = checkRateLimit(req, pathname)
+    const limited = await checkRateLimit(req, pathname)
     if (!limited.ok) {
       res.setHeader('Retry-After', String(limited.retryAfterSec))
       return res.status(429).json({ error: 'Too many requests. Please wait and try again.' })
