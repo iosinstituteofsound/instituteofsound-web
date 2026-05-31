@@ -1,0 +1,1048 @@
+/* Network operator profile — IOS metal editorial dossier */
+
+.network-profile-page {
+  --net-cut: 14px;
+  --net-cut-sm: 8px;
+}
+
+.network-profile-page .member-profile-shell {
+  max-width: 76rem;
+}
+
+.network-profile-page .member-profile-page-bg {
+  background:
+    radial-gradient(ellipse 90% 55% at 12% -5%, rgba(212, 0, 0, 0.14), transparent 52%),
+    radial-gradient(ellipse 50% 40% at 95% 15%, rgba(227, 27, 35, 0.06), transparent 45%),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 80px,
+      rgba(255, 255, 255, 0.012) 80px,
+      rgba(255, 255, 255, 0.012) 81px
+    ),
+    var(--color-void, #050505);
+}
+
+@media (min-width: 1280px) {
+  .network-profile-page .member-profile-deco-left {
+    left: max(1rem, calc(50% - 38rem));
+  }
+  .network-profile-page .member-profile-deco-right {
+    right: max(1rem, calc(50% - 38rem));
+  }
+}
+
+.network-profile-page .member-profile-topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.network-profile-page .member-profile-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-border);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% 100%,
+    6px 100%,
+    0 calc(100% - 6px)
+  );
+}
+
+.network-profile-page .member-profile-back:hover {
+  border-color: rgba(212, 0, 0, 0.55);
+  background: rgba(212, 0, 0, 0.06);
+}
+
+/* —— Operator dossier masthead —— */
+.net-dossier {
+  position: relative;
+  padding: 1.35rem 1.35rem 1.5rem;
+  margin-bottom: 1.75rem;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(168deg, rgba(22, 22, 22, 0.98) 0%, rgba(6, 6, 6, 0.99) 55%, rgba(12, 0, 0, 0.35) 100%);
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--net-cut)) 0,
+    100% var(--net-cut),
+    100% 100%,
+    var(--net-cut) 100%,
+    0 calc(100% - var(--net-cut))
+  );
+  overflow: hidden;
+}
+
+.net-dossier__glow {
+  position: absolute;
+  top: -50%;
+  right: -15%;
+  width: 55%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(212, 0, 0, 0.2), transparent 68%);
+  pointer-events: none;
+}
+
+.net-dossier__scan {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.012) 2px,
+    rgba(255, 255, 255, 0.012) 3px
+  );
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.net-dossier__corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--color-mh-red);
+  border-style: solid;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.net-dossier__corner--tl {
+  top: 0.65rem;
+  left: 0.65rem;
+  border-width: 2px 0 0 2px;
+}
+
+.net-dossier__corner--br {
+  right: 0.65rem;
+  bottom: 0.65rem;
+  border-width: 0 2px 2px 0;
+}
+
+.net-dossier__mast {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.net-dossier__kicker {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  margin: 0;
+}
+
+.net-dossier__you {
+  color: var(--color-muted);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+.net-dossier__mast-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.net-dossier__idx {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 3.75rem);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: rgba(212, 0, 0, 0.25);
+}
+
+.net-dossier__id {
+  font-family: ui-monospace, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-left: auto;
+}
+
+.net-dossier__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1.25rem 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .net-dossier__grid {
+    grid-template-columns: auto 1fr minmax(9rem, 11rem);
+    align-items: start;
+  }
+}
+
+.net-dossier__portrait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.net-dossier__avatar-ring {
+  padding: 3px;
+  background: linear-gradient(145deg, var(--color-mh-red), var(--color-rs-red), transparent 55%);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+}
+
+.net-dossier__avatar {
+  width: 7.5rem;
+  height: 7.5rem;
+  background: var(--color-surface);
+  overflow: hidden;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 8px) 0,
+    100% 8px,
+    100% 100%,
+    8px 100%,
+    0 calc(100% - 8px)
+  );
+}
+
+@media (min-width: 768px) {
+  .net-dossier__avatar {
+    width: 8.5rem;
+    height: 8.5rem;
+  }
+}
+
+.net-dossier__avatar-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--color-mh-red);
+}
+
+.net-dossier__name {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4.5vw, 2.65rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  margin: 0;
+  color: var(--color-signal);
+}
+
+.net-dossier__handle {
+  font-family: ui-monospace, monospace;
+  font-size: 0.9rem;
+  color: var(--color-rs-red);
+  margin: 0.35rem 0 0;
+}
+
+.net-dossier__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.net-dossier__chip {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid rgba(212, 0, 0, 0.35);
+  background: rgba(212, 0, 0, 0.08);
+  color: var(--color-signal);
+}
+
+.net-dossier__chip--muted {
+  border-color: var(--color-border);
+  background: transparent;
+  color: var(--color-muted);
+}
+
+.net-dossier__bio {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+  margin: 0.85rem 0 0;
+  max-width: 38rem;
+}
+
+.net-dossier__crosslinks {
+  margin-top: 0.75rem;
+}
+
+.net-dossier__tower-wrap {
+  border: 1px solid var(--color-border);
+  padding: 0.85rem 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--net-cut-sm)) 0,
+    100% var(--net-cut-sm),
+    100% 100%,
+    var(--net-cut-sm) 100%,
+    0 calc(100% - var(--net-cut-sm))
+  );
+}
+
+@media (max-width: 767px) {
+  .net-dossier__tower-wrap {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Signal tower */
+.net-signal-tower__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.net-signal-tower__label {
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.net-signal-tower__lifetime {
+  margin: 0;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+}
+
+.net-signal-tower--hero .net-signal-tower__db {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-signal);
+}
+
+.net-signal-tower--rail .net-signal-tower__db {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.net-signal-tower__unit {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-mh-red);
+}
+
+.net-signal-tower__lifetime-caption {
+  display: block;
+  font-size: 0.5rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-top: 0.15rem;
+}
+
+.net-signal-tower__viz {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  margin: 0.75rem 0 0.5rem;
+  height: 3.25rem;
+}
+
+.net-signal-tower__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  height: 100%;
+}
+
+.net-signal-tower__bars li {
+  flex: 1;
+  height: var(--h, 40%);
+  min-height: 4px;
+  background: linear-gradient(180deg, var(--color-rs-red), var(--color-mh-red));
+  opacity: 0.85;
+  clip-path: polygon(0 100%, 0 0, 100% 0, 100% 100%);
+}
+
+.net-signal-tower__meter {
+  width: 6px;
+  height: 100%;
+  background: var(--color-border);
+  position: relative;
+  clip-path: polygon(0 0, 100% 4px, 100% 100%, 0 calc(100% - 4px));
+}
+
+.net-signal-tower__meter-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-mh-red);
+  box-shadow: 0 0 10px rgba(212, 0, 0, 0.5);
+  transition: height 0.4s ease;
+}
+
+.net-signal-tower__week {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.5625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.net-signal-tower__week strong {
+  color: var(--color-signal);
+  font-family: var(--font-display);
+}
+
+.net-dossier__stats {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  list-style: none;
+  padding: 0;
+  margin: 1.35rem 0 0;
+  gap: 0;
+  border: 1px solid var(--color-border);
+}
+
+@media (min-width: 640px) {
+  .net-dossier__stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.net-dossier__stat {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.02);
+  border: none;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.85rem 0.5rem;
+  text-align: center;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.net-dossier__stat:nth-child(2n) {
+  border-right: none;
+}
+
+@media (min-width: 640px) {
+  .net-dossier__stat {
+    border-bottom: none;
+  }
+  .net-dossier__stat:nth-child(2n) {
+    border-right: 1px solid var(--color-border);
+  }
+  .net-dossier__stat:last-child {
+    border-right: none;
+  }
+}
+
+.net-dossier__stat:hover {
+  background: rgba(212, 0, 0, 0.08);
+}
+
+.net-dossier__stat strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-signal);
+}
+
+.net-dossier__stat span {
+  display: block;
+  font-size: 0.5rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-top: 0.2rem;
+}
+
+.net-dossier__stat--highlight {
+  background: rgba(212, 0, 0, 0.06);
+}
+
+.net-dossier__stat--highlight strong {
+  color: var(--color-mh-red);
+}
+
+.net-dossier__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.15rem;
+}
+
+.net-dossier__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 5px) 0,
+    100% 5px,
+    100% 100%,
+    5px 100%,
+    0 calc(100% - 5px)
+  );
+}
+
+.net-dossier__btn--primary {
+  background: var(--color-mh-red);
+  border-color: var(--color-mh-red);
+  color: #fff;
+  box-shadow: 0 0 24px -8px rgba(212, 0, 0, 0.55);
+}
+
+.net-dossier__btn--primary:hover {
+  background: var(--color-rs-red);
+  border-color: var(--color-rs-red);
+}
+
+.net-dossier__btn--ghost {
+  background: transparent;
+  color: var(--color-signal);
+}
+
+.net-dossier__btn--ghost:hover {
+  border-color: var(--color-mh-red);
+  color: var(--color-mh-red);
+}
+
+.net-dossier__btn--share {
+  margin-left: auto;
+}
+
+.net-dossier__actions .member-profile-btn {
+  flex: 0 1 auto;
+  min-width: unset;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 5px) 0,
+    100% 5px,
+    100% 100%,
+    5px 100%,
+    0 calc(100% - 5px)
+  );
+}
+
+@media (max-width: 639px) {
+  .net-dossier__btn--share {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+.net-dossier__medals {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.net-dossier__medals li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.45rem 0.2rem 0.2rem;
+  border: 1px solid rgba(212, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.net-dossier__medals-more {
+  color: var(--color-muted);
+  border-color: var(--color-border);
+}
+
+.net-dossier__fandom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+}
+
+/* Body layout */
+.network-profile-body {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1100px) {
+  .network-profile-body {
+    grid-template-columns: minmax(0, 1fr) 18.5rem;
+    align-items: start;
+    gap: 2.25rem;
+  }
+
+  .network-profile-rail {
+    position: sticky;
+    top: 5rem;
+  }
+}
+
+.network-profile-page .member-profile-tabs-wrap {
+  margin-top: 0;
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--net-cut-sm)) 0,
+    100% var(--net-cut-sm),
+    100% 100%,
+    0 100%
+  );
+}
+
+.network-profile-page .member-profile-tabs {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (min-width: 720px) {
+  .network-profile-page .member-profile-tabs {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.network-profile-page .member-profile-panels {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--net-cut-sm)),
+    calc(100% - var(--net-cut-sm)) 100%,
+    0 100%
+  );
+}
+
+.network-profile-page .member-profile-panel {
+  padding: 1.35rem 1.15rem 1.75rem;
+}
+
+/* Broadcast deck */
+.member-profile-broadcast {
+  margin-bottom: 1.75rem;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(165deg, rgba(16, 16, 16, 0.98), rgba(6, 6, 6, 0.99));
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+}
+
+.member-profile-wire-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.member-profile-wire-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0.25rem 0 0;
+}
+
+.member-profile-wire-more {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  background: none;
+  border: 1px solid rgba(212, 0, 0, 0.35);
+  padding: 0.45rem 0.65rem;
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+}
+
+.member-profile-wire-more:hover {
+  background: rgba(212, 0, 0, 0.1);
+}
+
+/* Transmission feed */
+.net-transmissions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.net-transmission {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+.net-transmission__rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 0.35rem;
+}
+
+.net-transmission__idx {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-mh-red);
+  letter-spacing: 0.06em;
+}
+
+.net-transmission__line {
+  flex: 1;
+  width: 1px;
+  margin-top: 0.5rem;
+  min-height: 1.5rem;
+  background: linear-gradient(180deg, var(--color-mh-red), transparent);
+}
+
+.net-transmission:last-child .net-transmission__line {
+  display: none;
+}
+
+.net-transmission__card {
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.02);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.net-transmission__card:hover {
+  border-color: rgba(212, 0, 0, 0.45);
+  box-shadow: 0 12px 40px -16px rgba(212, 0, 0, 0.25);
+}
+
+.net-transmissions-empty {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border: 1px dashed var(--color-border);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+}
+
+.net-transmissions-empty__mark {
+  font-size: 2rem;
+  color: var(--color-mh-red);
+  opacity: 0.5;
+}
+
+.net-transmissions-empty__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0.75rem 0 0;
+}
+
+.net-transmissions-empty__text {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  margin: 0.35rem 0 0;
+}
+
+.net-transmissions-empty__cta {
+  margin-top: 1.25rem;
+  display: inline-flex;
+}
+
+/* Connections panel */
+.net-connections-panel {
+  margin-bottom: 1.5rem;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid rgba(212, 0, 0, 0.35);
+  background: linear-gradient(165deg, rgba(20, 8, 8, 0.95), rgba(8, 8, 8, 0.98));
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+}
+
+.net-connections-panel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.net-connections-panel__title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0.2rem 0 0;
+}
+
+.net-connections-panel__close {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: none;
+  border: 1px solid var(--color-border);
+  padding: 0.4rem 0.65rem;
+  cursor: pointer;
+}
+
+.net-connections-panel__close:hover {
+  color: var(--color-signal);
+  border-color: var(--color-mh-red);
+}
+
+.net-connections-panel__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 22rem;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+}
+
+.net-connections-panel__list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.net-connections-panel__list li:last-child {
+  border-bottom: none;
+}
+
+.net-connections-panel__who strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.net-connections-panel__who span {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--color-rs-red);
+}
+
+.net-connections-panel__open {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.net-connections-panel__msg {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.net-connections-panel__msg--err {
+  color: var(--color-mh-red);
+}
+
+/* Rail panels — refined */
+.network-rail-panel {
+  border: 1px solid var(--color-border);
+  padding: 1rem 1.05rem;
+  background: linear-gradient(165deg, rgba(16, 16, 16, 0.96), rgba(8, 8, 8, 0.98));
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+}
+
+.network-profile-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.network-rail-kicker {
+  font-size: 0.5rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-mh-red);
+  margin: 0;
+}
+
+.network-rail-heading {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0.15rem 0 0.65rem;
+}
+
+.network-rail-link,
+.network-rail-cta {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.network-rail-cta {
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.network-crew-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+  padding: 0.55rem 0.6rem;
+  margin-top: 0.35rem;
+  border: 1px solid var(--color-border);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.network-crew-chip:hover {
+  border-color: rgba(212, 0, 0, 0.5);
+  background: rgba(212, 0, 0, 0.06);
+}
+
+.network-crew-chip-mark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  background: rgba(212, 0, 0, 0.12);
+  color: var(--color-mh-red);
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+}
+
+.network-suggest-handle {
+  font-family: ui-monospace, monospace;
+  font-size: 0.65rem;
+  color: var(--color-rs-red);
+}
+
+.network-profile-page .network-connect-btn.member-profile-btn,
+.network-profile-page .network-connect-btn.net-dossier__btn {
+  /* inherits clip + sizing from net-dossier__btn */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .net-signal-tower__meter-fill,
+  .net-transmission__card {
+    transition: none;
+  }
+}

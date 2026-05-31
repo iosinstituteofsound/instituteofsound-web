@@ -8,6 +8,7 @@ import './index.css'
 import './app-shell.css'
 import './dashboard-studio.css'
 import './network.css'
+import './styles/network-profile.css'
 import App from './App.tsx'
 
 applyPerformanceProfile()

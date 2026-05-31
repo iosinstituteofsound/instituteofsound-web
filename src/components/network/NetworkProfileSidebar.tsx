@@ -4,7 +4,7 @@ import type { EarnedBadge } from '@/lib/community/service'
 import type { FandomPublicRecognitionRow } from '@/lib/fandom/types'
 import { MedalIllustration } from '@/components/community/medals/MedalIllustration'
 import { ConnectButton } from '@/components/network/ConnectButton'
-import { NetworkSignalReadout } from '@/components/network/NetworkSignalReadout'
+import { NetworkSignalTower } from '@/components/network/NetworkSignalTower'
 import { NetworkProfileCrewsRail } from '@/components/network/NetworkProfileCrewsRail'
 import { FandomPublicRecognitions } from '@/components/fandom/FandomPublicRecognitions'
 import type { NetworkPersonCard } from '@/lib/network/connectionTypes'
@@ -39,19 +39,9 @@ export function NetworkProfileSidebar({
   return (
     <aside className="network-profile-rail">
       <section className="network-rail-panel">
-        <p className="network-rail-kicker">Signal</p>
-        <h2 className="network-rail-heading">Readout</h2>
-        <NetworkSignalReadout profile={profile} />
-        <ul className="network-rail-metrics">
-          <li>
-            <span>Transmissions</span>
-            <strong>{profile.postCount.toLocaleString()}</strong>
-          </li>
-          <li>
-            <span>Followers</span>
-            <strong>{profile.followerCount.toLocaleString()}</strong>
-          </li>
-        </ul>
+        <p className="network-rail-kicker">Live</p>
+        <h2 className="network-rail-heading">Signal</h2>
+        <NetworkSignalTower profile={profile} variant="rail" />
       </section>
 
       {!hideBadges && badges.length > 0 && (
@@ -136,7 +126,7 @@ export function NetworkProfileSidebar({
             ))}
           </ul>
           <Link to="/network/people" className="network-rail-cta">
-            Browse people →
+            Browse operators →
           </Link>
         </section>
       )}

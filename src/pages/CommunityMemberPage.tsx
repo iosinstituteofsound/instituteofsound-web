@@ -15,14 +15,15 @@ import {
 } from '@/lib/community/memberProfileService'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import { useCommunityBadges } from '@/hooks/useCommunityBadges'
-import { MemberProfileHeader } from '@/components/community/member/MemberProfileHeader'
 import { formatAccountNumericId } from '@/lib/auth/accountId'
+import { NetworkOperatorDossier } from '@/components/network/NetworkOperatorDossier'
+import { NetworkConnectionsPanel } from '@/components/network/NetworkConnectionsPanel'
+import { NetworkTransmissionFeed } from '@/components/network/NetworkTransmissionFeed'
 import { NetworkProfileSidebar } from '@/components/network/NetworkProfileSidebar'
 import {
   MemberProfileTabs,
   type MemberProfileTab,
 } from '@/components/community/member/MemberProfileTabs'
-import { MemberProfileFeed } from '@/components/community/member/MemberProfileFeed'
 import { MemberProfileSignalLog } from '@/components/community/member/MemberProfileSignalLog'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { useSeo } from '@/hooks/useSeo'
@@ -357,7 +358,7 @@ export default function CommunityMemberPage() {
           </Link>
         </nav>
 
-        <MemberProfileHeader
+        <NetworkOperatorDossier
           profile={profile}
           accountId={formatAccountNumericId(profile.userId)}
           isYou={isYou}
@@ -374,57 +375,13 @@ export default function CommunityMemberPage() {
         />
 
         {connectionsOpen && (
-          <section className="ios-card p-5 mb-5">
-            <div className="flex items-start justify-between gap-3 mb-4">
-              <div>
-                <p className="text-[10px] tracking-[0.2em] uppercase text-mh-red font-bold">
-                  Connection list
-                </p>
-                <h2 className="font-display text-xl font-bold uppercase mt-2">
-                  {connectionsOpen === 'followers'
-                    ? 'Followers'
-                    : connectionsOpen === 'following'
-                      ? 'Following'
-                      : 'Connections'}
-                </h2>
-              </div>
-              <button
-                type="button"
-                className="ios-btn ios-btn-ghost !text-xs"
-                onClick={() => setConnectionsOpen(null)}
-              >
-                Close
-              </button>
-            </div>
-
-            {connectionsLoading && <p className="text-sm text-muted">Loading list…</p>}
-            {!connectionsLoading && connectionsError && (
-              <p className="text-sm text-mh-red">{connectionsError}</p>
-            )}
-            {!connectionsLoading && !connectionsError && connections.length === 0 && (
-              <p className="text-sm text-muted border border-dashed border-border p-4">
-                No users found in this list yet.
-              </p>
-            )}
-            {!connectionsLoading && !connectionsError && connections.length > 0 && (
-              <ul className="divide-y divide-border border border-border max-h-[420px] overflow-y-auto">
-                {connections.map((connection) => (
-                  <li key={connection.userId} className="px-4 py-3 flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-semibold truncate">{connection.displayName}</p>
-                      <p className="text-xs text-muted font-mono truncate">@{connection.handle}</p>
-                    </div>
-                    <Link
-                      to={networkProfilePath(connection.handle)}
-                      className="ios-btn ios-btn-ghost !text-[10px] !px-3 !py-1.5 shrink-0"
-                    >
-                      Open profile →
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+          <NetworkConnectionsPanel
+            mode={connectionsOpen}
+            loading={connectionsLoading}
+            error={connectionsError}
+            connections={connections}
+            onClose={() => setConnectionsOpen(null)}
+          />
         )}
 
         {isYou && showEditProfile && (
@@ -567,7 +524,13 @@ export default function CommunityMemberPage() {
                 </div>
               </section>
             )}
-            <MemberProfileFeed
+            <header className="member-profile-wire-head mb-5">
+              <div>
+                <p className="member-profile-kicker">Full archive</p>
+                <h2 className="member-profile-wire-title">All transmissions</h2>
+              </div>
+            </header>
+            <NetworkTransmissionFeed
               posts={posts}
               isYou={isYou}
               handle={profile.handle.replace(/^@/, '')}

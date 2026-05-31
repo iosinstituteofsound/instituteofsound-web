@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
-import { MemberProfileFeed } from '@/components/community/member/MemberProfileFeed'
+import { NetworkTransmissionFeed } from '@/components/network/NetworkTransmissionFeed'
 import { NetworkProfileComposerStrip } from '@/components/network/profile/NetworkProfileComposerStrip'
 
 interface NetworkProfileOverviewProps {
@@ -30,17 +30,17 @@ export function NetworkProfileOverview({
 
       <header className="member-profile-wire-head">
         <div>
-          <p className="member-profile-kicker">On the wire</p>
-          <h2 className="member-profile-wire-title">Recent transmissions</h2>
+          <p className="member-profile-kicker">Archive</p>
+          <h2 className="member-profile-wire-title">On the wire</h2>
         </div>
         {posts.length > PREVIEW_COUNT && (
           <button type="button" className="member-profile-wire-more" onClick={onViewAllPosts}>
-            Archive ({profile.postCount}) →
+            All ({profile.postCount})
           </button>
         )}
       </header>
 
-      <MemberProfileFeed
+      <NetworkTransmissionFeed
         posts={preview}
         isYou={isYou}
         handle={handle}
@@ -49,8 +49,8 @@ export function NetworkProfileOverview({
 
       {posts.length === 0 && isYou && (
         <p className="member-profile-wire-empty-hint">
-          Your first spin or drop goes live here.{' '}
-          <Link to="/feed">Tune the full wire</Link>.
+          Broadcast from the deck above — your transmissions archive here.{' '}
+          <Link to="/feed">Full wire</Link>
         </p>
       )}
     </div>
