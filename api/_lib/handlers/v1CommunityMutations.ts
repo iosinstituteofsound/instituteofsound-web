@@ -10,9 +10,17 @@ import { loadPostAuthor } from '../communityAuthor.js'
 import { friendlyPostError, serverCreateDropPost, serverCreateSpinPost } from '../communityPostLogic.js'
 import { requireAuth, fetchMemberProfile } from '../auth.js'
 import { createSupabaseUserClient } from '../supabaseServer.js'
-import { methodNotAllowed, parseJsonBody, queryParam, type ApiRequest, type ApiResponse } from '../http.js'
-
-const REACTIONS = new Set<FeedReactionKind>(['fire', 'headphones', 'bolt'])
+import { methodNotAllowed, queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { parseValidatedBody, requireValidatedBody, sendValidationError } from '../validate.js'
+import { zUuid } from '../schemas/v1Common.js'
+import {
+  communityDropCreateBody,
+  communityDropUpdateBody,
+  communityPostIdBody,
+  communityReactionBody,
+  communitySpinCreateBody,
+  communitySpinUpdateBody,
+} from '../schemas/v1Bodies.js'
 
 export async function handleV1CommunitySpinCreate(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST'])
@@ -20,26 +28,20 @@ export async function handleV1CommunitySpinCreate(req: ApiRequest, res: ApiRespo
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
 
-  const body = parseJsonBody<{
-    spotifyRaw?: string
-    youtubeRaw?: string
-    caption?: string
-    trackTitle?: string
-    imageUrl?: string
-    primaryGenreId?: string | null
-  }>(req.body)
+  const body = requireValidatedBody(res, communitySpinCreateBody, req.body)
+  if (!body) return
 
   const supabase = createSupabaseUserClient(auth.accessToken)
 
   try {
     const author = await loadPostAuthor(supabase, auth.authUser.id)
     const post = await serverCreateSpinPost(supabase, author, {
-      spotifyRaw: body?.spotifyRaw ?? '',
-      youtubeRaw: body?.youtubeRaw ?? '',
-      caption: body?.caption,
-      trackTitle: body?.trackTitle,
-      imageUrl: body?.imageUrl,
-      primaryGenreId: body?.primaryGenreId,
+      spotifyRaw: body.spotifyRaw ?? '',
+      youtubeRaw: body.youtubeRaw ?? '',
+      caption: body.caption,
+      trackTitle: body.trackTitle,
+      imageUrl: body.imageUrl,
+      primaryGenreId: body.primaryGenreId,
     })
     return res.status(201).json({ post })
   } catch (err) {
@@ -54,28 +56,21 @@ export async function handleV1CommunityDropCreate(req: ApiRequest, res: ApiRespo
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
 
-  const body = parseJsonBody<{
-    text?: string
-    imageUrl?: string
-    linkUrl?: string
-    linkTitle?: string
-    linkDescription?: string
-    linkImageUrl?: string
-    primaryGenreId?: string | null
-  }>(req.body)
+  const body = requireValidatedBody(res, communityDropCreateBody, req.body)
+  if (!body) return
 
   const supabase = createSupabaseUserClient(auth.accessToken)
 
   try {
     const author = await loadPostAuthor(supabase, auth.authUser.id)
     const post = await serverCreateDropPost(supabase, author, {
-      text: body?.text ?? '',
-      imageUrl: body?.imageUrl,
-      linkUrl: body?.linkUrl,
-      linkTitle: body?.linkTitle,
-      linkDescription: body?.linkDescription,
-      linkImageUrl: body?.linkImageUrl,
-      primaryGenreId: body?.primaryGenreId,
+      text: body.text ?? '',
+      imageUrl: body.imageUrl,
+      linkUrl: body.linkUrl,
+      linkTitle: body.linkTitle,
+      linkDescription: body.linkDescription,
+      linkImageUrl: body.linkImageUrl,
+      primaryGenreId: body.primaryGenreId,
     })
     return res.status(201).json({ post })
   } catch (err) {
@@ -90,17 +85,17 @@ export async function handleV1CommunityReaction(req: ApiRequest, res: ApiRespons
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
 
-  const body = parseJsonBody<{ postId?: string; reaction?: string }>(req.body)
-  const postId = body?.postId?.trim()
-  const reaction = body?.reaction as FeedReactionKind | undefined
-  if (!postId || !reaction || !REACTIONS.has(reaction)) {
-    return res.status(400).json({ error: 'postId and reaction (fire|headphones|bolt) required' })
-  }
+  const body = requireValidatedBody(res, communityReactionBody, req.body)
+  if (!body) return
 
   const supabase = createSupabaseUserClient(auth.accessToken)
 
   try {
-    const myReaction = await repoTogglePostReaction(supabase, postId, reaction)
+    const myReaction = await repoTogglePostReaction(
+      supabase,
+      body.postId,
+      body.reaction as FeedReactionKind,
+    )
     return res.status(200).json({ myReaction })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to update reaction'
@@ -114,15 +109,14 @@ export async function handleV1CommunityDropUpdate(req: ApiRequest, res: ApiRespo
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
 
-  const body = parseJsonBody<{ postId?: string; text?: string }>(req.body)
-  const postId = body?.postId?.trim()
-  if (!postId) return res.status(400).json({ error: 'postId required' })
+  const body = requireValidatedBody(res, communityDropUpdateBody, req.body)
+  if (!body) return
 
   await fetchMemberProfile(auth)
   const supabase = createSupabaseUserClient(auth.accessToken)
 
   try {
-    await repoUpdateOwnDrop(supabase, postId, body?.text ?? '')
+    await repoUpdateOwnDrop(supabase, body.postId, body.text ?? '')
     return res.status(200).json({ ok: true })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to update post'
@@ -136,20 +130,12 @@ export async function handleV1CommunitySpinUpdate(req: ApiRequest, res: ApiRespo
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
 
-  const body = parseJsonBody<{
-    postId?: string
-    caption?: string
-    trackTitle?: string
-    spotifyRaw?: string
-    youtubeRaw?: string
-  }>(req.body)
-
-  const postId = body?.postId?.trim()
-  if (!postId) return res.status(400).json({ error: 'postId required' })
+  const body = requireValidatedBody(res, communitySpinUpdateBody, req.body)
+  if (!body) return
 
   const { spotify, youtube, error: validationError } = validateSpinInput(
-    body?.spotifyRaw ?? '',
-    body?.youtubeRaw ?? '',
+    body.spotifyRaw ?? '',
+    body.youtubeRaw ?? '',
   )
   if (validationError) return res.status(400).json({ error: validationError })
 
@@ -157,9 +143,9 @@ export async function handleV1CommunitySpinUpdate(req: ApiRequest, res: ApiRespo
   const supabase = createSupabaseUserClient(auth.accessToken)
 
   try {
-    await repoUpdateOwnSpin(supabase, postId, {
-      p_body: body?.caption?.trim().slice(0, 280) || '',
-      p_track_title: body?.trackTitle?.trim().slice(0, 120) || '',
+    await repoUpdateOwnSpin(supabase, body.postId, {
+      p_body: body.caption?.trim().slice(0, 280) || '',
+      p_track_title: body.trackTitle?.trim().slice(0, 120) || '',
       p_spotify_url: spotify?.url ?? '',
       p_youtube_url: youtube?.url ?? '',
     })
@@ -176,9 +162,18 @@ export async function handleV1CommunityPostHide(req: ApiRequest, res: ApiRespons
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
 
-  const body = parseJsonBody<{ postId?: string }>(req.body)
-  const postId = body?.postId?.trim() ?? queryParam(req, 'postId')
-  if (!postId) return res.status(400).json({ error: 'postId required' })
+  let postId: string | null = null
+  const fromBody = parseValidatedBody(communityPostIdBody, req.body)
+  if (fromBody.ok) {
+    postId = fromBody.data.postId
+  } else {
+    const q = queryParam(req, 'postId')
+    const qParsed = zUuid.safeParse(q)
+    if (!qParsed.success) {
+      return sendValidationError(res, 'postId required')
+    }
+    postId = qParsed.data
+  }
 
   const supabase = createSupabaseUserClient(auth.accessToken)
 

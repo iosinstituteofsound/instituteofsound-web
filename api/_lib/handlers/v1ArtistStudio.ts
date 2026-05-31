@@ -47,7 +47,29 @@ import type {
   UpsertTrackInput,
   UpsertVideoInput,
 } from '../../../src/lib/artist-profile/types.js'
-import { parseJsonBody, queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { requireQueryParam, requireValidatedBody } from '../validate.js'
+import {
+  artistAlbumCreateBody,
+  artistAlbumDeleteBody,
+  artistAlbumUpdateBody,
+  artistBioCreateBody,
+  artistBioDeleteBody,
+  artistBioUpdateBody,
+  artistLineupCreateBody,
+  artistLineupDeleteBody,
+  artistLineupUpdateBody,
+  artistMerchCreateBody,
+  artistMerchDeleteBody,
+  artistMerchUpdateBody,
+  artistTrackCreateBody,
+  artistTrackDeleteBody,
+  artistTrackUpdateBody,
+  artistVideoCreateBody,
+  artistVideoDeleteBody,
+  artistVideoUpdateBody,
+} from '../schemas/v1Bodies.js'
+import { zSlug } from '../schemas/v1Common.js'
 
 function send(res: ApiResponse, status: number, body: unknown): true {
   res.status(status).json(body)
@@ -96,8 +118,8 @@ export async function handleV1ArtistStudio(
   if (pathname === '/api/v1/artist/profile') return false
 
   if (pathname === '/api/v1/artist/page' && req.method === 'GET') {
-    const slug = queryParam(req, 'slug')
-    if (!slug) return send(res, 400, { error: 'slug required' })
+    const slug = requireQueryParam(res, req, 'slug', zSlug)
+    if (!slug) return true
     const resolved = await resolveSupabaseForRequest(req)
     if ('error' in resolved) return send(res, resolved.status, { error: resolved.error })
     try {
@@ -109,8 +131,8 @@ export async function handleV1ArtistStudio(
   }
 
   if (pathname === '/api/v1/artist/managed' && req.method === 'GET') {
-    const handle = queryParam(req, 'handle')
-    if (!handle) return send(res, 400, { error: 'handle required' })
+    const handle = requireQueryParam(res, req, 'handle')
+    if (!handle) return true
     const resolved = await resolveSupabaseForRequest(req)
     if ('error' in resolved) return send(res, resolved.status, { error: resolved.error })
     try {
@@ -155,13 +177,11 @@ export async function handleV1ArtistStudio(
 
   if (pathname === '/api/v1/artist/albums') {
     if (req.method === 'POST') {
-      const body = parseJsonBody<{ profileId?: string; input?: UpsertAlbumInput }>(req.body)
-      if (!body?.profileId || !body.input?.title) {
-        return send(res, 400, { error: 'profileId and input.title required' })
-      }
+      const body = requireValidatedBody(res, artistAlbumCreateBody, req.body)
+      if (!body) return true
       try {
         await repoAssertProfileOwner(supabase, userId, body.profileId)
-        const album = await repoAddAlbum(supabase, body.profileId, body.input)
+        const album = await repoAddAlbum(supabase, body.profileId, body.input as unknown as UpsertAlbumInput)
         await touch(body.profileId)
         return send(res, 201, { album })
       } catch (err) {
@@ -169,15 +189,15 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'PATCH') {
-      const body = parseJsonBody<{ albumId?: string; input?: UpsertAlbumInput }>(req.body)
-      if (!body?.albumId || !body.input) return send(res, 400, { error: 'albumId and input required' })
+      const body = requireValidatedBody(res, artistAlbumUpdateBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
           userId,
-          await repoGetAlbumProfileId(supabase, body.albumId),
+          await repoGetAlbumProfileId(supabase, body.albumId as string),
         )
-        const album = await repoUpdateAlbum(supabase, body.albumId, body.input)
+        const album = await repoUpdateAlbum(supabase, body.albumId as string, body.input as unknown as UpsertAlbumInput)
         await touch(profileId)
         return send(res, 200, { album })
       } catch (err) {
@@ -185,8 +205,8 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'DELETE') {
-      const body = parseJsonBody<{ albumId?: string }>(req.body)
-      if (!body?.albumId) return send(res, 400, { error: 'albumId required' })
+      const body = requireValidatedBody(res, artistAlbumDeleteBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
@@ -204,13 +224,11 @@ export async function handleV1ArtistStudio(
 
   if (pathname === '/api/v1/artist/tracks') {
     if (req.method === 'POST') {
-      const body = parseJsonBody<{ profileId?: string; input?: UpsertTrackInput }>(req.body)
-      if (!body?.profileId || !body.input?.title) {
-        return send(res, 400, { error: 'profileId and input required' })
-      }
+      const body = requireValidatedBody(res, artistTrackCreateBody, req.body)
+      if (!body) return true
       try {
         await repoAssertProfileOwner(supabase, userId, body.profileId)
-        const track = await repoAddTrack(supabase, body.profileId, body.input)
+        const track = await repoAddTrack(supabase, body.profileId, body.input as unknown as UpsertTrackInput)
         await touch(body.profileId)
         return send(res, 201, { track })
       } catch (err) {
@@ -218,15 +236,19 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'PATCH') {
-      const body = parseJsonBody<{ trackId?: string; input?: UpsertTrackInput }>(req.body)
-      if (!body?.trackId || !body.input) return send(res, 400, { error: 'trackId and input required' })
+      const body = requireValidatedBody(res, artistTrackUpdateBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
           userId,
-          await repoGetTrackProfileId(supabase, body.trackId),
+          await repoGetTrackProfileId(supabase, body.trackId as string),
         )
-        const track = await repoUpdateTrack(supabase, body.trackId, body.input)
+        const track = await repoUpdateTrack(
+          supabase,
+          body.trackId as string,
+          body.input as unknown as UpsertTrackInput,
+        )
         await touch(profileId)
         return send(res, 200, { track })
       } catch (err) {
@@ -234,8 +256,8 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'DELETE') {
-      const body = parseJsonBody<{ trackId?: string }>(req.body)
-      if (!body?.trackId) return send(res, 400, { error: 'trackId required' })
+      const body = requireValidatedBody(res, artistTrackDeleteBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
@@ -253,13 +275,11 @@ export async function handleV1ArtistStudio(
 
   if (pathname === '/api/v1/artist/videos') {
     if (req.method === 'POST') {
-      const body = parseJsonBody<{ profileId?: string; input?: UpsertVideoInput }>(req.body)
-      if (!body?.profileId || !body.input?.title) {
-        return send(res, 400, { error: 'profileId and input required' })
-      }
+      const body = requireValidatedBody(res, artistVideoCreateBody, req.body)
+      if (!body) return true
       try {
         await repoAssertProfileOwner(supabase, userId, body.profileId)
-        const video = await repoAddVideo(supabase, body.profileId, body.input)
+        const video = await repoAddVideo(supabase, body.profileId, body.input as unknown as UpsertVideoInput)
         await touch(body.profileId)
         return send(res, 201, { video })
       } catch (err) {
@@ -267,15 +287,19 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'PATCH') {
-      const body = parseJsonBody<{ videoId?: string; input?: UpsertVideoInput }>(req.body)
-      if (!body?.videoId || !body.input) return send(res, 400, { error: 'videoId and input required' })
+      const body = requireValidatedBody(res, artistVideoUpdateBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
           userId,
-          await repoGetVideoProfileId(supabase, body.videoId),
+          await repoGetVideoProfileId(supabase, body.videoId as string),
         )
-        const video = await repoUpdateVideo(supabase, body.videoId, body.input)
+        const video = await repoUpdateVideo(
+          supabase,
+          body.videoId as string,
+          body.input as unknown as UpsertVideoInput,
+        )
         await touch(profileId)
         return send(res, 200, { video })
       } catch (err) {
@@ -283,8 +307,8 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'DELETE') {
-      const body = parseJsonBody<{ videoId?: string }>(req.body)
-      if (!body?.videoId) return send(res, 400, { error: 'videoId required' })
+      const body = requireValidatedBody(res, artistVideoDeleteBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
@@ -302,13 +326,11 @@ export async function handleV1ArtistStudio(
 
   if (pathname === '/api/v1/artist/merch') {
     if (req.method === 'POST') {
-      const body = parseJsonBody<{ profileId?: string; input?: UpsertMerchInput }>(req.body)
-      if (!body?.profileId || !body.input?.title) {
-        return send(res, 400, { error: 'profileId and input required' })
-      }
+      const body = requireValidatedBody(res, artistMerchCreateBody, req.body)
+      if (!body) return true
       try {
         await repoAssertProfileOwner(supabase, userId, body.profileId)
-        const merch = await repoAddMerch(supabase, body.profileId, body.input)
+        const merch = await repoAddMerch(supabase, body.profileId, body.input as unknown as UpsertMerchInput)
         await touch(body.profileId)
         return send(res, 201, { merch })
       } catch (err) {
@@ -316,15 +338,19 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'PATCH') {
-      const body = parseJsonBody<{ merchId?: string; input?: UpsertMerchInput }>(req.body)
-      if (!body?.merchId || !body.input) return send(res, 400, { error: 'merchId and input required' })
+      const body = requireValidatedBody(res, artistMerchUpdateBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
           userId,
-          await repoGetMerchProfileId(supabase, body.merchId),
+          await repoGetMerchProfileId(supabase, body.merchId as string),
         )
-        const merch = await repoUpdateMerch(supabase, body.merchId, body.input)
+        const merch = await repoUpdateMerch(
+          supabase,
+          body.merchId as string,
+          body.input as unknown as UpsertMerchInput,
+        )
         await touch(profileId)
         return send(res, 200, { merch })
       } catch (err) {
@@ -332,8 +358,8 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'DELETE') {
-      const body = parseJsonBody<{ merchId?: string }>(req.body)
-      if (!body?.merchId) return send(res, 400, { error: 'merchId required' })
+      const body = requireValidatedBody(res, artistMerchDeleteBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
@@ -351,13 +377,11 @@ export async function handleV1ArtistStudio(
 
   if (pathname === '/api/v1/artist/lineup') {
     if (req.method === 'POST') {
-      const body = parseJsonBody<{ profileId?: string; input?: UpsertLineupInput }>(req.body)
-      if (!body?.profileId || !body.input?.name) {
-        return send(res, 400, { error: 'profileId and input required' })
-      }
+      const body = requireValidatedBody(res, artistLineupCreateBody, req.body)
+      if (!body) return true
       try {
         await repoAssertProfileOwner(supabase, userId, body.profileId)
-        const entry = await repoAddLineup(supabase, body.profileId, body.input)
+        const entry = await repoAddLineup(supabase, body.profileId, body.input as unknown as UpsertLineupInput)
         await touch(body.profileId)
         return send(res, 201, { entry })
       } catch (err) {
@@ -365,15 +389,19 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'PATCH') {
-      const body = parseJsonBody<{ entryId?: string; input?: UpsertLineupInput }>(req.body)
-      if (!body?.entryId || !body.input) return send(res, 400, { error: 'entryId and input required' })
+      const body = requireValidatedBody(res, artistLineupUpdateBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
           userId,
-          await repoGetLineupProfileId(supabase, body.entryId),
+          await repoGetLineupProfileId(supabase, body.entryId as string),
         )
-        const entry = await repoUpdateLineup(supabase, body.entryId, body.input)
+        const entry = await repoUpdateLineup(
+          supabase,
+          body.entryId as string,
+          body.input as unknown as UpsertLineupInput,
+        )
         await touch(profileId)
         return send(res, 200, { entry })
       } catch (err) {
@@ -381,8 +409,8 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'DELETE') {
-      const body = parseJsonBody<{ entryId?: string }>(req.body)
-      if (!body?.entryId) return send(res, 400, { error: 'entryId required' })
+      const body = requireValidatedBody(res, artistLineupDeleteBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
@@ -400,13 +428,15 @@ export async function handleV1ArtistStudio(
 
   if (pathname === '/api/v1/artist/bio-timeline') {
     if (req.method === 'POST') {
-      const body = parseJsonBody<{ profileId?: string; input?: UpsertBioTimelineInput }>(req.body)
-      if (!body?.profileId || !body.input?.title) {
-        return send(res, 400, { error: 'profileId and input required' })
-      }
+      const body = requireValidatedBody(res, artistBioCreateBody, req.body)
+      if (!body) return true
       try {
         await repoAssertProfileOwner(supabase, userId, body.profileId)
-        const entry = await repoAddBioTimeline(supabase, body.profileId, body.input)
+        const entry = await repoAddBioTimeline(
+          supabase,
+          body.profileId,
+          body.input as unknown as UpsertBioTimelineInput,
+        )
         await touch(body.profileId)
         return send(res, 201, { entry })
       } catch (err) {
@@ -414,15 +444,19 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'PATCH') {
-      const body = parseJsonBody<{ entryId?: string; input?: UpsertBioTimelineInput }>(req.body)
-      if (!body?.entryId || !body.input) return send(res, 400, { error: 'entryId and input required' })
+      const body = requireValidatedBody(res, artistBioUpdateBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,
           userId,
-          await repoGetBioTimelineProfileId(supabase, body.entryId),
+          await repoGetBioTimelineProfileId(supabase, body.entryId as string),
         )
-        const entry = await repoUpdateBioTimeline(supabase, body.entryId, body.input)
+        const entry = await repoUpdateBioTimeline(
+          supabase,
+          body.entryId as string,
+          body.input as unknown as UpsertBioTimelineInput,
+        )
         await touch(profileId)
         return send(res, 200, { entry })
       } catch (err) {
@@ -430,8 +464,8 @@ export async function handleV1ArtistStudio(
       }
     }
     if (req.method === 'DELETE') {
-      const body = parseJsonBody<{ entryId?: string }>(req.body)
-      if (!body?.entryId) return send(res, 400, { error: 'entryId required' })
+      const body = requireValidatedBody(res, artistBioDeleteBody, req.body)
+      if (!body) return true
       try {
         const profileId = await repoAssertOwnedProfileId(
           supabase,

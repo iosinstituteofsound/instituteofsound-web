@@ -2,7 +2,9 @@ import type { UpsertArtistProfileInput } from '../../../src/lib/artist-profile/t
 import { repoGetArtistProfileByUserId, repoUpsertArtistProfile } from '../../../src/lib/artist-profile/profileRepository.js'
 import { requireAuth, fetchMemberProfile } from '../auth.js'
 import { createSupabaseUserClient } from '../supabaseServer.js'
-import { methodNotAllowed, parseJsonBody, type ApiRequest, type ApiResponse } from '../http.js'
+import { methodNotAllowed, type ApiRequest, type ApiResponse } from '../http.js'
+import { requireValidatedBody } from '../validate.js'
+import { artistProfilePutBody } from '../schemas/v1Bodies.js'
 
 export async function handleV1ArtistProfile(req: ApiRequest, res: ApiResponse) {
   const auth = await requireAuth(req)
@@ -23,11 +25,9 @@ export async function handleV1ArtistProfile(req: ApiRequest, res: ApiResponse) {
   }
 
   if (req.method === 'PUT') {
-    const body = parseJsonBody<{ profile?: UpsertArtistProfileInput }>(req.body)
-    const input = body?.profile
-    if (!input?.displayName?.trim()) {
-      return res.status(400).json({ error: 'profile.displayName is required' })
-    }
+    const body = requireValidatedBody(res, artistProfilePutBody, req.body)
+    if (!body) return
+    const input = body.profile as UpsertArtistProfileInput
 
     try {
       const user = await fetchMemberProfile(auth)

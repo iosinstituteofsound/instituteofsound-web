@@ -20,7 +20,9 @@ import {
   repoFetchPublicMemberProfile,
   repoFetchPublishedArtistMeta,
 } from '../repositories/networkProfileRepository.js'
-import { parseJsonBody, queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { requireValidatedBody } from '../validate.js'
+import { networkRespondBody, networkTargetUserBody } from '../schemas/v1Bodies.js'
 
 function parseLimit(req: ApiRequest, fallback = 30, max = 100): number {
   const n = Number(queryParam(req, 'limit') ?? fallback)
@@ -166,8 +168,8 @@ export async function handleV1Network(
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
 
-    const body = parseJsonBody<{ targetUserId?: string }>(req)
-    if (!body?.targetUserId) return send(res, 400, { error: 'targetUserId required' })
+    const body = requireValidatedBody(res, networkTargetUserBody, req.body)
+    if (!body) return true
 
     const supabase = createSupabaseUserClient(auth.accessToken)
 
@@ -184,10 +186,8 @@ export async function handleV1Network(
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
 
-    const body = parseJsonBody<{ requestId?: string; accept?: boolean }>(req)
-    if (!body?.requestId || typeof body.accept !== 'boolean') {
-      return send(res, 400, { error: 'requestId and accept required' })
-    }
+    const body = requireValidatedBody(res, networkRespondBody, req.body)
+    if (!body) return true
 
     const supabase = createSupabaseUserClient(auth.accessToken)
 
@@ -204,8 +204,8 @@ export async function handleV1Network(
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
 
-    const body = parseJsonBody<{ targetUserId?: string }>(req)
-    if (!body?.targetUserId) return send(res, 400, { error: 'targetUserId required' })
+    const body = requireValidatedBody(res, networkTargetUserBody, req.body)
+    if (!body) return true
 
     const supabase = createSupabaseUserClient(auth.accessToken)
 

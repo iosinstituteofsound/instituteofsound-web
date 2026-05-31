@@ -6,7 +6,14 @@ import type {
 } from '../../../src/lib/verification/types.js'
 import { requireAuth } from '../auth.js'
 import { requireSuperEditor } from '../requireDesk.js'
-import { methodNotAllowed, parseJsonBody, type ApiRequest, type ApiResponse } from '../http.js'
+import { methodNotAllowed, type ApiRequest, type ApiResponse } from '../http.js'
+import { requireValidatedBody } from '../validate.js'
+import {
+  claimRespondBody,
+  deskReviewBody,
+  relationshipClaimBody,
+  roleVerificationSubmitBody,
+} from '../schemas/v1Bodies.js'
 import { createSupabaseUserClient } from '../supabaseServer.js'
 
 function cleanLinks(links: string[]): string[] {
@@ -205,11 +212,11 @@ async function handleMyRequests(req: ApiRequest, res: ApiResponse) {
 async function handleSubmit(req: ApiRequest, res: ApiResponse) {
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
-  const body = parseJsonBody<SubmitRoleVerificationInput>(req.body)
-  if (!body?.roleType) return res.status(400).json({ error: 'roleType required' })
+  const body = requireValidatedBody(res, roleVerificationSubmitBody, req.body)
+  if (!body) return
   const supabase = createSupabaseUserClient(auth.accessToken)
   try {
-    await submitRequest(supabase, auth.authUser.id, body)
+    await submitRequest(supabase, auth.authUser.id, body as unknown as SubmitRoleVerificationInput)
     return res.status(201).json({ ok: true })
   } catch (err) {
     return res.status(400).json({ error: err instanceof Error ? err.message : 'Submit failed' })
@@ -240,12 +247,8 @@ async function handleDeskReview(req: ApiRequest, res: ApiResponse) {
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
   const desk = await requireSuperEditor(auth)
   if ('error' in desk) return res.status(desk.status).json({ error: desk.error })
-  const body = parseJsonBody<{ requestId?: string; decision?: 'approved' | 'rejected'; notes?: string }>(
-    req.body,
-  )
-  if (!body?.requestId || !body.decision) {
-    return res.status(400).json({ error: 'requestId and decision required' })
-  }
+  const body = requireValidatedBody(res, deskReviewBody, req.body)
+  if (!body) return
   const supabase = createSupabaseUserClient(auth.accessToken)
   try {
     const { data: row, error: fetchErr } = await supabase
@@ -283,17 +286,9 @@ async function handleDeskReview(req: ApiRequest, res: ApiResponse) {
 async function handleCreateClaim(req: ApiRequest, res: ApiResponse) {
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
-  const body = parseJsonBody<{
-    claimType?: RelationshipClaim['claimType']
-    targetHandle?: string
-    evidenceLinks?: string[]
-    note?: string
-  }>(req.body)
-  if (!body?.claimType || !body.targetHandle) {
-    return res.status(400).json({ error: 'claimType and targetHandle required' })
-  }
-  const links = cleanLinks(body.evidenceLinks ?? [])
-  if (links.length < 1) return res.status(400).json({ error: 'At least one evidence link required.' })
+  const body = requireValidatedBody(res, relationshipClaimBody, req.body)
+  if (!body) return
+  const links = cleanLinks(body.evidenceLinks)
 
   const supabase = createSupabaseUserClient(auth.accessToken)
   try {
@@ -364,10 +359,8 @@ async function handleClaimsOutgoing(req: ApiRequest, res: ApiResponse) {
 async function handleRespondClaim(req: ApiRequest, res: ApiResponse) {
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
-  const body = parseJsonBody<{ claimId?: string; decision?: 'approved' | 'rejected' }>(req.body)
-  if (!body?.claimId || !body.decision) {
-    return res.status(400).json({ error: 'claimId and decision required' })
-  }
+  const body = requireValidatedBody(res, claimRespondBody, req.body)
+  if (!body) return
   const supabase = createSupabaseUserClient(auth.accessToken)
   try {
     const { error } = await supabase

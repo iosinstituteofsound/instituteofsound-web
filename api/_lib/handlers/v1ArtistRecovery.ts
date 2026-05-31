@@ -6,7 +6,9 @@ import type {
 } from '../../../src/lib/artist-page-recovery/types.js'
 import { requireAuth } from '../auth.js'
 import { requireSuperEditor } from '../requireDesk.js'
-import { parseJsonBody, queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { requireValidatedBody } from '../validate.js'
+import { recoveryDeskPatchBody, recoveryRequestBody } from '../schemas/v1Bodies.js'
 import { createSupabaseUserClient, getSupabaseAdmin } from '../supabaseServer.js'
 
 function mapArchive(row: Record<string, unknown>): ArtistProfileArchive {
@@ -118,14 +120,8 @@ async function handleOwnRequest(req: ApiRequest, res: ApiResponse) {
 async function handleSubmitRequest(req: ApiRequest, res: ApiResponse) {
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
-  const body = parseJsonBody<{
-    archiveId?: string
-    govIdDocumentUrl?: string
-    applicantNote?: string
-  }>(req.body)
-  if (!body?.archiveId || !body.govIdDocumentUrl?.trim()) {
-    return res.status(400).json({ error: 'archiveId and govIdDocumentUrl required' })
-  }
+  const body = requireValidatedBody(res, recoveryRequestBody, req.body)
+  if (!body) return
   const supabase = createSupabaseUserClient(auth.accessToken)
   try {
     const { data: archive, error: archErr } = await supabase
@@ -156,8 +152,8 @@ async function handleSubmitRequest(req: ApiRequest, res: ApiResponse) {
       .insert({
         archive_id: body.archiveId,
         user_id: auth.authUser.id,
-        gov_id_document_url: body.govIdDocumentUrl.trim(),
-        applicant_note: body.applicantNote?.trim() || null,
+        gov_id_document_url: body.govIdDocumentUrl,
+        applicant_note: body.applicantNote ?? null,
       })
       .select('*')
       .single()
@@ -213,14 +209,8 @@ async function handleDeskReview(req: ApiRequest, res: ApiResponse) {
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
   const desk = await requireSuperEditor(auth)
   if ('error' in desk) return res.status(desk.status).json({ error: desk.error })
-  const body = parseJsonBody<{
-    requestId?: string
-    decision?: 'approved' | 'rejected'
-    reviewNotes?: string
-  }>(req.body)
-  if (!body?.requestId || !body.decision) {
-    return res.status(400).json({ error: 'requestId and decision required' })
-  }
+  const body = requireValidatedBody(res, recoveryDeskPatchBody, req.body)
+  if (!body) return
 
   const supabase = createSupabaseUserClient(auth.accessToken)
   const admin = getSupabaseAdmin()

@@ -50,7 +50,22 @@ import { fetchSupabaseCatalogWithClient } from '../../../src/lib/discovery/relea
 import type { AwardDbInput } from '../../../src/lib/community/awardRepository.js'
 import type { AcademyProgressSnapshot } from '../../../src/lib/academy/typesProgress.js'
 import type { SubmitEditorApplicationInput } from '../../../src/lib/editor-applications/types.js'
-import { parseJsonBody, queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { requireValidatedBody } from '../validate.js'
+import {
+  academyProgressBody,
+  analyticsArtistEventBody,
+  applicationIdBody,
+  applicationRejectBody,
+  awardDbBody,
+  collabRespondBody,
+  collabResponseIdBody,
+  collabSkillsBody,
+  communityPostIdBody,
+  editorApplicationBody,
+  editorialLinkedPostBody,
+  grantBadgeBody,
+} from '../schemas/v1Bodies.js'
 
 function send(res: ApiResponse, status: number, body: unknown): true {
   res.status(status).json(body)
@@ -145,11 +160,15 @@ export async function handleV1Phase5(
   if (pathname === '/api/v1/academy/progress' && req.method === 'PUT') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<AcademyProgressSnapshot>(req)
-    if (!body) return send(res, 400, { error: 'Invalid body' })
+    const body = requireValidatedBody(res, academyProgressBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
-      await repoPushAcademyProgress(supabase, auth.authUser.id, body)
+      await repoPushAcademyProgress(
+        supabase,
+        auth.authUser.id,
+        body as unknown as AcademyProgressSnapshot,
+      )
       return send(res, 200, { ok: true })
     } catch (err) {
       return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
@@ -215,11 +234,11 @@ export async function handleV1Phase5(
   if (pathname === '/api/v1/collab/respond' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ postId: string; message: string }>(req)
-    if (!body?.postId || !body.message?.trim()) return send(res, 400, { error: 'Invalid body' })
+    const body = requireValidatedBody(res, collabRespondBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
-      const id = await repoCollabRespond(supabase, body.postId, body.message.trim())
+      const id = await repoCollabRespond(supabase, body.postId, body.message)
       return send(res, 200, { id })
     } catch (err) {
       return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
@@ -229,8 +248,8 @@ export async function handleV1Phase5(
   if (pathname === '/api/v1/collab/accept' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ responseId: string }>(req)
-    if (!body?.responseId) return send(res, 400, { error: 'responseId required' })
+    const body = requireValidatedBody(res, collabResponseIdBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoCollabAcceptResponse(supabase, body.responseId)
@@ -243,8 +262,8 @@ export async function handleV1Phase5(
   if (pathname === '/api/v1/collab/complete' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ postId: string }>(req)
-    if (!body?.postId) return send(res, 400, { error: 'postId required' })
+    const body = requireValidatedBody(res, communityPostIdBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoCollabConfirmComplete(supabase, body.postId)
@@ -270,8 +289,8 @@ export async function handleV1Phase5(
   if (pathname === '/api/v1/collab/skills' && req.method === 'PUT') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ skillSlugs: string[] }>(req)
-    if (!body || !Array.isArray(body.skillSlugs)) return send(res, 400, { error: 'Invalid body' })
+    const body = requireValidatedBody(res, collabSkillsBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoCollabSetProfileSkills(supabase, body.skillSlugs)
@@ -297,11 +316,11 @@ export async function handleV1Phase5(
   if (pathname === '/api/v1/community/award-db' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<AwardDbInput>(req)
-    if (!body?.userId || !body.source || !body.sourceId) return send(res, 400, { error: 'Invalid body' })
+    const body = requireValidatedBody(res, awardDbBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
-      const awarded = await repoAwardDb(supabase, body)
+      const awarded = await repoAwardDb(supabase, body as unknown as AwardDbInput)
       return send(res, 200, { awarded })
     } catch (err) {
       return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
@@ -311,8 +330,8 @@ export async function handleV1Phase5(
   if (pathname === '/api/v1/community/grant-badge' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ slug: string }>(req)
-    if (!body?.slug) return send(res, 400, { error: 'slug required' })
+    const body = requireValidatedBody(res, grantBadgeBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       const granted = await repoGrantBadge(supabase, body.slug)
@@ -451,12 +470,8 @@ export async function handleV1Phase5(
   if (pathname === '/api/v1/analytics/artist-events' && req.method === 'POST') {
     const resolved = await resolveSupabaseForRequest(req)
     if ('error' in resolved) return send(res, resolved.status, { error: resolved.error })
-    const body = parseJsonBody<{
-      profileId: string
-      eventType: 'profile_view' | 'track_click'
-      trackId?: string
-    }>(req)
-    if (!body?.profileId || !body.eventType) return send(res, 400, { error: 'Invalid body' })
+    const body = requireValidatedBody(res, analyticsArtistEventBody, req.body)
+    if (!body) return true
     try {
       await repoInsertArtistAnalyticsEvent(
         resolved.supabase,
@@ -530,13 +545,15 @@ export async function handleV1Phase5(
   if (pathname === '/api/v1/editor-applications' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<SubmitEditorApplicationInput>(req)
-    if (!body?.portfolioLinks?.trim() || !body.motivation?.trim() || !body.termsVersion) {
-      return send(res, 400, { error: 'Invalid body' })
-    }
+    const body = requireValidatedBody(res, editorApplicationBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
-      const application = await repoSubmitEditorApplication(supabase, auth.authUser.id, body)
+      const application = await repoSubmitEditorApplication(
+        supabase,
+        auth.authUser.id,
+        body as unknown as SubmitEditorApplicationInput,
+      )
       return send(res, 200, { application })
     } catch (err) {
       return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
@@ -548,8 +565,8 @@ export async function handleV1Phase5(
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
     const desk = await requireSuperEditor(auth)
     if ('error' in desk) return send(res, desk.status, { error: desk.error })
-    const body = parseJsonBody<{ applicationId: string }>(req)
-    if (!body?.applicationId) return send(res, 400, { error: 'applicationId required' })
+    const body = requireValidatedBody(res, applicationIdBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoApproveEditorApplication(supabase, body.applicationId, auth.authUser.id)
@@ -564,8 +581,8 @@ export async function handleV1Phase5(
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
     const desk = await requireSuperEditor(auth)
     if ('error' in desk) return send(res, desk.status, { error: desk.error })
-    const body = parseJsonBody<{ applicationId: string; notes?: string }>(req)
-    if (!body?.applicationId) return send(res, 400, { error: 'applicationId required' })
+    const body = requireValidatedBody(res, applicationRejectBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoRejectEditorApplication(supabase, body.applicationId, auth.authUser.id, body.notes)
@@ -590,8 +607,8 @@ export async function handleV1Phase5(
   if (pathname === '/api/v1/editorial/linked-post' && req.method === 'PATCH') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ draftId: string; postId: string | null }>(req)
-    if (!body?.draftId) return send(res, 400, { error: 'draftId required' })
+    const body = requireValidatedBody(res, editorialLinkedPostBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoUpdateEditorialLinkedPost(supabase, body.draftId, body.postId ?? null)

@@ -20,7 +20,17 @@ import {
 import { ensureEditorialSlug } from '../../../src/lib/editorial/published.js'
 import type { CreateDraftInput, CreateSubmissionInput, ReviewSubmissionInput } from '../../../src/lib/submissions/service.js'
 import type { ReleaseMilestone, UpsertReleaseInput } from '../../../src/lib/releases/types.js'
-import { parseJsonBody, queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { requireValidatedBody } from '../validate.js'
+import {
+  editorialDraftCreateBody,
+  editorialDraftPublishBody,
+  releaseIdBody,
+  releaseMilestoneBody,
+  releaseUpsertBody,
+  submissionCreateBody,
+  submissionReviewBody,
+} from '../schemas/v1Bodies.js'
 
 function send(res: ApiResponse, status: number, body: unknown): true {
   res.status(status).json(body)
@@ -69,11 +79,16 @@ export async function handleV1Phase4Content(
   if (pathname === '/api/v1/releases' && req.method === 'PUT') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ profileId?: string; release?: UpsertReleaseInput; releaseId?: string }>(req)
-    if (!body?.profileId || !body.release) return send(res, 400, { error: 'profileId and release required' })
+    const body = requireValidatedBody(res, releaseUpsertBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
-      const release = await repoUpsertRelease(supabase, body.profileId, body.release, body.releaseId)
+      const release = await repoUpsertRelease(
+        supabase,
+        body.profileId,
+        body.release as unknown as UpsertReleaseInput,
+        body.releaseId,
+      )
       return send(res, 200, { release })
     } catch (err) {
       return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
@@ -96,15 +111,8 @@ export async function handleV1Phase4Content(
   if (pathname === '/api/v1/releases/milestones' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{
-      releaseId?: string
-      kind?: string
-      title?: string
-      body?: string
-    }>(req)
-    if (!body?.releaseId || !body.kind || !body.title) {
-      return send(res, 400, { error: 'releaseId, kind, title required' })
-    }
+    const body = requireValidatedBody(res, releaseMilestoneBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       const milestone = await repoAddReleaseMilestone(supabase, body.releaseId, {
@@ -121,8 +129,8 @@ export async function handleV1Phase4Content(
   if (pathname === '/api/v1/releases/spin-promoted' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ releaseId?: string }>(req)
-    if (!body?.releaseId) return send(res, 400, { error: 'releaseId required' })
+    const body = requireValidatedBody(res, releaseIdBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoMarkReleaseSpinPromoted(supabase, body.releaseId)
@@ -135,12 +143,16 @@ export async function handleV1Phase4Content(
   if (pathname === '/api/v1/submissions' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<CreateSubmissionInput>(req)
-    if (!body?.trackTitle) return send(res, 400, { error: 'Invalid submission' })
+    const body = requireValidatedBody(res, submissionCreateBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       const user = await fetchMemberProfile(auth)
-      const submission = await repoCreateSubmission(supabase, user, body)
+      const submission = await repoCreateSubmission(
+        supabase,
+        user,
+        body as unknown as CreateSubmissionInput,
+      )
       return send(res, 201, { submission })
     } catch (err) {
       return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
@@ -178,15 +190,15 @@ export async function handleV1Phase4Content(
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
     const desk = await requireSuperEditor(auth)
     if ('error' in desk) return send(res, desk.status, { error: desk.error })
-    const body = parseJsonBody<{ submissionId?: string; review?: ReviewSubmissionInput }>(req)
-    if (!body?.submissionId || !body.review) return send(res, 400, { error: 'submissionId and review required' })
+    const body = requireValidatedBody(res, submissionReviewBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       const submission = await repoReviewSubmission(
         supabase,
         body.submissionId,
         desk.profile,
-        body.review,
+        body.review as unknown as ReviewSubmissionInput,
       )
       return send(res, 200, { submission })
     } catch (err) {
@@ -223,13 +235,13 @@ export async function handleV1Phase4Content(
   if (pathname === '/api/v1/editorial/drafts' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<CreateDraftInput>(req)
-    if (!body?.title) return send(res, 400, { error: 'Invalid draft' })
+    const body = requireValidatedBody(res, editorialDraftCreateBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       const user = await fetchMemberProfile(auth)
       const slug = await ensureEditorialSlug(body.title)
-      const draft = await repoCreateDraft(supabase, user, body, slug)
+      const draft = await repoCreateDraft(supabase, user, body as unknown as CreateDraftInput, slug)
       return send(res, 201, { draft })
     } catch (err) {
       return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
@@ -239,8 +251,8 @@ export async function handleV1Phase4Content(
   if (pathname === '/api/v1/editorial/drafts/publish' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ draftId?: string; title?: string }>(req)
-    if (!body?.draftId) return send(res, 400, { error: 'draftId required' })
+    const body = requireValidatedBody(res, editorialDraftPublishBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       const slug = body.title ? await ensureEditorialSlug(body.title, body.draftId) : ''

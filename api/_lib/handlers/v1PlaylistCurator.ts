@@ -5,7 +5,9 @@ import type {
 import { validatePlaylistCuratorInput } from '../../../src/lib/playlistCurator/validate.js'
 import { requireAuth } from '../auth.js'
 import { requireSuperEditor } from '../requireDesk.js'
-import { methodNotAllowed, parseJsonBody, queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { methodNotAllowed, queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { requireValidatedBody } from '../validate.js'
+import { playlistCuratorDeskReviewBody, playlistCuratorSubmitBody } from '../schemas/v1Bodies.js'
 import { createSupabaseUserClient } from '../supabaseServer.js'
 
 function mapRow(row: Record<string, unknown>): PlaylistCuratorApplication {
@@ -85,9 +87,9 @@ async function handleMyApplications(req: ApiRequest, res: ApiResponse) {
 async function handleSubmit(req: ApiRequest, res: ApiResponse) {
   const auth = await requireAuth(req)
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
-  const body = parseJsonBody<SubmitPlaylistCuratorInput>(req.body)
-  if (!body?.playlistLinks) return res.status(400).json({ error: 'playlistLinks required' })
-  const err = validatePlaylistCuratorInput(body)
+  const body = requireValidatedBody(res, playlistCuratorSubmitBody, req.body)
+  if (!body) return
+  const err = validatePlaylistCuratorInput(body as unknown as SubmitPlaylistCuratorInput)
   if (err) return res.status(400).json({ error: err })
 
   const links = body.playlistLinks.map((l) => l.trim()).filter(Boolean)
@@ -146,15 +148,13 @@ async function handleDeskReview(req: ApiRequest, res: ApiResponse) {
   if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
   const desk = await requireSuperEditor(auth)
   if ('error' in desk) return res.status(desk.status).json({ error: desk.error })
-  const body = parseJsonBody<{
-    applicationId?: string
-    decision?: 'approved' | 'rejected'
-    notes?: string
-  }>(req.body)
-  const applicationId = body?.applicationId ?? queryParam(req, 'applicationId')
-  if (!applicationId || !body?.decision) {
-    return res.status(400).json({ error: 'applicationId and decision required' })
+  const parsed = requireValidatedBody(res, playlistCuratorDeskReviewBody, req.body)
+  if (!parsed) return
+  const applicationId = parsed.applicationId ?? queryParam(req, 'applicationId')
+  if (!applicationId) {
+    return res.status(400).json({ error: 'applicationId required' })
   }
+  const body = parsed
 
   const supabase = createSupabaseUserClient(auth.accessToken)
   try {

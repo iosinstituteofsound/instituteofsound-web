@@ -24,7 +24,17 @@ import {
   repoJoinCrew,
   repoLeaveCrew,
 } from '../repositories/phase4PlatformRepository.js'
-import { parseJsonBody, queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { queryParam, type ApiRequest, type ApiResponse } from '../http.js'
+import { requireValidatedBody } from '../validate.js'
+import {
+  communityCommentBody,
+  communityCommentIdBody,
+  communityNotificationsReadBody,
+  communityPrimaryGenreBody,
+  crewCreateBody,
+  crewJoinBody,
+  networkTargetUserBody,
+} from '../schemas/v1Bodies.js'
 
 function send(res: ApiResponse, status: number, body: unknown): true {
   res.status(status).json(body)
@@ -47,8 +57,8 @@ export async function handleV1Phase4Community(
   if (pathname === '/api/v1/community/follow' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ targetUserId?: string }>(req)
-    if (!body?.targetUserId) return send(res, 400, { error: 'targetUserId required' })
+    const body = requireValidatedBody(res, networkTargetUserBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       const following = await repoToggleFollow(supabase, body.targetUserId)
@@ -88,11 +98,11 @@ export async function handleV1Phase4Community(
   if (pathname === '/api/v1/community/comments' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ postId?: string; body?: string; parentId?: string }>(req)
-    if (!body?.postId || !body.body?.trim()) return send(res, 400, { error: 'postId and body required' })
+    const body = requireValidatedBody(res, communityCommentBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
-      const id = await repoAddPostComment(supabase, body.postId, body.body.trim(), body.parentId)
+      const id = await repoAddPostComment(supabase, body.postId, body.body, body.parentId)
       return send(res, 201, { id })
     } catch (err) {
       return send(res, 400, { error: err instanceof Error ? err.message : 'Comment failed' })
@@ -102,8 +112,8 @@ export async function handleV1Phase4Community(
   if (pathname === '/api/v1/community/comments' && req.method === 'DELETE') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ commentId?: string }>(req)
-    if (!body?.commentId) return send(res, 400, { error: 'commentId required' })
+    const body = requireValidatedBody(res, communityCommentIdBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoDeletePostComment(supabase, body.commentId)
@@ -140,10 +150,11 @@ export async function handleV1Phase4Community(
   if (pathname === '/api/v1/community/notifications/read' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ ids?: string[] }>(req)
+    const body = requireValidatedBody(res, communityNotificationsReadBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
-      await repoMarkNotificationsRead(supabase, body?.ids)
+      await repoMarkNotificationsRead(supabase, body.ids)
       return send(res, 200, { ok: true })
     } catch (err) {
       return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
@@ -188,8 +199,8 @@ export async function handleV1Phase4Community(
   if (pathname === '/api/v1/community/primary-genre' && req.method === 'PATCH') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ genreId?: string }>(req)
-    if (!body?.genreId) return send(res, 400, { error: 'genreId required' })
+    const body = requireValidatedBody(res, communityPrimaryGenreBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoSetPrimaryGenre(supabase, auth.authUser.id, body.genreId)
@@ -258,8 +269,8 @@ export async function handleV1Phase4Community(
   if (pathname === '/api/v1/community/crew' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ name?: string; tagline?: string; genreSlug?: string }>(req)
-    if (!body?.name) return send(res, 400, { error: 'name required' })
+    const body = requireValidatedBody(res, crewCreateBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoCreateCrew(supabase, {
@@ -277,8 +288,8 @@ export async function handleV1Phase4Community(
   if (pathname === '/api/v1/community/crew/join' && req.method === 'POST') {
     const auth = await requireAuth(req)
     if ('error' in auth) return send(res, auth.status, { error: auth.error })
-    const body = parseJsonBody<{ inviteCode?: string }>(req)
-    if (!body?.inviteCode) return send(res, 400, { error: 'inviteCode required' })
+    const body = requireValidatedBody(res, crewJoinBody, req.body)
+    if (!body) return true
     const supabase = createSupabaseUserClient(auth.accessToken)
     try {
       await repoJoinCrew(supabase, body.inviteCode)
