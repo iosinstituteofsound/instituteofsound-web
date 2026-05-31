@@ -17,6 +17,8 @@ interface NetworkProfileOverviewProps {
   suggested: NetworkPersonCard[]
   fandomRecognitions?: FandomPublicRecognitionRow[]
   isYou: boolean
+  aboutEditing?: boolean
+  onAboutEditingChange?: (editing: boolean) => void
   onRefresh: () => void | Promise<void>
   onViewAllPosts: () => void
   onViewAllBadges?: () => void
@@ -35,6 +37,8 @@ export function NetworkProfileOverview({
   suggested,
   fandomRecognitions = [],
   isYou,
+  aboutEditing = false,
+  onAboutEditingChange,
   onRefresh,
   onViewAllPosts,
   onViewAllBadges,
@@ -51,6 +55,10 @@ export function NetworkProfileOverview({
         <NetworkProfileLeftColumn
           profile={profile}
           badges={badges}
+          isYou={isYou}
+          aboutEditing={aboutEditing}
+          onAboutEditingChange={onAboutEditingChange}
+          onProfileSaved={onRefresh}
           onViewAllBadges={onViewAllBadges}
         />
       </div>

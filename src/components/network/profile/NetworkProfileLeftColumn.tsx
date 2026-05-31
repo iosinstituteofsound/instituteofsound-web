@@ -2,55 +2,36 @@ import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { EarnedBadge } from '@/lib/community/service'
 import { MedalIllustration } from '@/components/community/medals/MedalIllustration'
 import { badgeDefBySlug } from '@/lib/community/badges'
-
-function formatGenre(slug: string) {
-  return slug
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ')
-}
+import { NetworkProfileAboutCard } from '@/components/network/profile/NetworkProfileAboutCard'
 
 interface NetworkProfileLeftColumnProps {
   profile: PublicMemberProfile
   badges: EarnedBadge[]
+  isYou: boolean
+  aboutEditing?: boolean
+  onAboutEditingChange?: (editing: boolean) => void
+  onProfileSaved?: () => void | Promise<void>
   onViewAllBadges?: () => void
 }
 
 export function NetworkProfileLeftColumn({
   profile,
   badges,
+  isYou,
+  aboutEditing = false,
+  onAboutEditingChange,
+  onProfileSaved,
   onViewAllBadges,
 }: NetworkProfileLeftColumnProps) {
-  const tags: string[] = []
-  if (profile.primaryGenreSlug) tags.push(formatGenre(profile.primaryGenreSlug))
-  tags.push('Institute of Sound')
-  tags.push('Digital Publishing')
-
   return (
     <div className="np-overview__stack">
-      <section className="np-card">
-        <h2 className="np-card__title">About</h2>
-        {profile.bio ? (
-          <p className="np-about__text">{profile.bio}</p>
-        ) : (
-          <p className="np-about__text np-about__text--muted">
-            Operator on the Institute of Sound network — spins, drops, and scene signal.
-          </p>
-        )}
-        <ul className="np-about__tags">
-          {tags.map((t) => (
-            <li key={t}>{t}</li>
-          ))}
-        </ul>
-        <a
-          href="https://instituteofsound.in"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="np-about__link"
-        >
-          instituteofsound.in →
-        </a>
-      </section>
+      <NetworkProfileAboutCard
+        profile={profile}
+        isYou={isYou}
+        editing={aboutEditing}
+        onEditingChange={onAboutEditingChange}
+        onSaved={onProfileSaved}
+      />
 
       {badges.length > 0 && (
         <section className="np-card">

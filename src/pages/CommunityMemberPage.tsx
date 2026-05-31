@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import {
   fetchMemberConnections,
@@ -42,9 +42,6 @@ import {
 } from '@/lib/network/connectionService'
 import type { NetworkPersonCard } from '@/lib/network/connectionTypes'
 import { IOSImage } from '@/components/ui/IOSImage'
-import { Input, FieldLabel } from '@/components/ui/Input'
-import { ImageUpload } from '@/components/ui/ImageUpload'
-import { updateUserProfile } from '@/lib/auth/profile'
 import {
   fetchPublicRecognitionsForUser,
   fetchPublicSupporterBadgesForUser,
@@ -82,14 +79,7 @@ export default function CommunityMemberPage() {
   const [managedArtists, setManagedArtists] = useState<
     { profileId: string; slug: string; displayName: string; tagline?: string; avatarUrl?: string }[]
   >([])
-  const [showEditProfile, setShowEditProfile] = useState(false)
-  const [editName, setEditName] = useState('')
-  const [editHandle, setEditHandle] = useState('')
-  const [editBio, setEditBio] = useState('')
-  const [editAvatarUrl, setEditAvatarUrl] = useState('')
-  const [savingProfile, setSavingProfile] = useState(false)
-  const [editError, setEditError] = useState('')
-  const [editSuccess, setEditSuccess] = useState('')
+  const [aboutEditing, setAboutEditing] = useState(false)
   const [connectionsOpen, setConnectionsOpen] = useState<
     'followers' | 'following' | 'connections' | null
   >(null)
@@ -101,7 +91,6 @@ export default function CommunityMemberPage() {
   const [connections, setConnections] = useState<MemberConnectionProfile[]>([])
   const [fandomBadges, setFandomBadges] = useState<PublicSupporterBadgeOnArtist[]>([])
   const [fandomRecognitions, setFandomRecognitions] = useState<FandomPublicRecognitionRow[]>([])
-  const navigate = useNavigate()
 
   const { badges, loading: badgesLoading } = useCommunityBadges(profile?.userId)
 
@@ -252,41 +241,12 @@ export default function CommunityMemberPage() {
     setSearchParams(params, { replace: true })
   }
 
-  useEffect(() => {
-    if (profile && isYou) {
-      setEditName(profile.displayName)
-      setEditHandle(profile.handle.replace(/^@/, ''))
-      setEditBio(profile.bio ?? '')
-      setEditAvatarUrl(profile.avatarUrl ?? '')
-    }
-  }, [profile, isYou])
-
-  const saveProfileFromNetwork = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user || !profile) return
-    setSavingProfile(true)
-    setEditError('')
-    setEditSuccess('')
-    try {
-      await updateUserProfile(user.id, {
-        name: editName.trim(),
-        username: editHandle.trim().replace(/^@/, ''),
-        bio: editBio.trim() || undefined,
-        avatarUrl: editAvatarUrl.trim() || undefined,
-      })
-      setEditSuccess('Profile updated.')
-      setShowEditProfile(false)
-      const nextHandle = normalizeHandle(editHandle)
-      if (nextHandle !== handle) {
-        navigate(networkProfilePath(nextHandle))
-      } else {
-        await loadProfile()
-      }
-    } catch (err) {
-      setEditError(err instanceof Error ? err.message : 'Could not save profile.')
-    } finally {
-      setSavingProfile(false)
-    }
+  const openAboutEdit = () => {
+    setActiveTab('overview')
+    setAboutEditing(true)
+    requestAnimationFrame(() => {
+      document.getElementById('member-panel-overview')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
   }
 
   const openConnections = async (mode: 'followers' | 'following' | 'connections') => {
@@ -349,7 +309,7 @@ export default function CommunityMemberPage() {
         artistSlug={artistSlug}
         fandomBadges={fandomBadges}
         pendingRequestId={pendingRequestId}
-        onEditProfile={() => setShowEditProfile((prev) => !prev)}
+        onEditProfile={openAboutEdit}
         onOpenFollowers={() => void openConnections('followers')}
         onOpenFollowing={() => void openConnections('following')}
         onOpenConnections={() => void openConnections('connections')}
@@ -364,69 +324,6 @@ export default function CommunityMemberPage() {
           connections={connections}
           onClose={() => setConnectionsOpen(null)}
         />
-      )}
-
-      {isYou && showEditProfile && (
-        <section className="np-card mb-4">
-          <h2 className="np-card__title">Edit profile</h2>
-          <form className="space-y-4 mt-4" onSubmit={saveProfileFromNetwork}>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <FieldLabel htmlFor="network-edit-name">Display name</FieldLabel>
-                <Input
-                  id="network-edit-name"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <FieldLabel htmlFor="network-edit-handle">Handle</FieldLabel>
-                <Input
-                  id="network-edit-handle"
-                  value={editHandle}
-                  onChange={(e) => setEditHandle(e.target.value)}
-                  placeholder="yourhandle"
-                  required
-                />
-              </div>
-            </div>
-            <ImageUpload
-              label="Avatar"
-              folder="ios/artists"
-              value={editAvatarUrl}
-              onChange={setEditAvatarUrl}
-              hint="Visible on your network profile and posts."
-            />
-            <div>
-              <FieldLabel htmlFor="network-edit-bio">Bio</FieldLabel>
-              <textarea
-                id="network-edit-bio"
-                className="ios-input min-h-[100px]"
-                value={editBio}
-                onChange={(e) => setEditBio(e.target.value)}
-                maxLength={280}
-                placeholder="Tell the network what you do."
-              />
-              <p className="text-xs text-muted mt-1 text-right">{editBio.length}/280</p>
-            </div>
-            {editError && <p className="text-sm text-mh-red">{editError}</p>}
-            {editSuccess && <p className="text-sm text-green-400">{editSuccess}</p>}
-            <div className="flex flex-wrap gap-2">
-              <button type="submit" className="np-btn np-btn--primary" disabled={savingProfile}>
-                {savingProfile ? 'Saving…' : 'Save profile'}
-              </button>
-              <button
-                type="button"
-                className="np-btn np-btn--outline"
-                onClick={() => setShowEditProfile(false)}
-                disabled={savingProfile}
-              >
-                Close
-              </button>
-            </div>
-          </form>
-        </section>
       )}
 
       <MemberProfileTabs
@@ -453,6 +350,8 @@ export default function CommunityMemberPage() {
             suggested={suggested}
             fandomRecognitions={fandomRecognitions}
             isYou={isYou}
+            aboutEditing={aboutEditing}
+            onAboutEditingChange={setAboutEditing}
             onRefresh={() => void loadProfile()}
             onViewAllPosts={() => setActiveTab('posts')}
             onViewAllBadges={() => setActiveTab('about')}
