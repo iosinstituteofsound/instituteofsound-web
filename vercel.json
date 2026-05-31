@@ -44,8 +44,17 @@
     },
     "api/import-catalog.ts": {
       "maxDuration": 30
+    },
+    "api/cron/purge-artist-pages.ts": {
+      "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/purge-artist-pages",
+      "schedule": "0 4 * * *"
+    }
+  ],
   "rewrites": [
     { "source": "/api/v1/(.*)", "destination": "/api/v1?path=$1" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
