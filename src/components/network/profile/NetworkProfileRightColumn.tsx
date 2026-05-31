@@ -54,7 +54,7 @@ export function NetworkProfileRightColumn({
     : `${mutuals.length} Mutual`
 
   return (
-    <div className="np-pane__stack np-rail">
+    <div className="np-rail np-overview__stack">
       <NetworkProfileReputationCard profile={profile} posts={posts} />
 
       {(isYou || mutuals.length > 0) && (

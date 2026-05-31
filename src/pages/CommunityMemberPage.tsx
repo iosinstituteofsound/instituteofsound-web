@@ -244,20 +244,6 @@ export default function CommunityMemberPage() {
     setTab(tabFromSearch(searchParams))
   }, [searchParams])
 
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
-    const sync = () => {
-      const lock = tab === 'overview' && mq.matches
-      document.documentElement.classList.toggle('np-profile-overview-lock', lock)
-    }
-    sync()
-    mq.addEventListener('change', sync)
-    return () => {
-      mq.removeEventListener('change', sync)
-      document.documentElement.classList.remove('np-profile-overview-lock')
-    }
-  }, [tab])
-
   const setActiveTab = (next: MemberProfileTab) => {
     setTab(next)
     const params = new URLSearchParams(searchParams)
@@ -352,39 +338,36 @@ export default function CommunityMemberPage() {
   }
 
   return (
-    <div
-      className={`np-page network-profile-page${tab === 'overview' ? ' network-profile-page--split' : ''}`}
-    >
-      <div className="np-page__hero">
-        <Link to="/network" className="np-back">
-          ← Network home
-        </Link>
+    <div className="np-page network-profile-page">
+      <Link to="/network" className="np-back">
+        ← Network home
+      </Link>
 
-        <NetworkProfileCoverHeader
-          profile={profile}
-          isYou={isYou}
-          artistSlug={artistSlug}
-          fandomBadges={fandomBadges}
-          pendingRequestId={pendingRequestId}
-          onEditProfile={() => setShowEditProfile((prev) => !prev)}
-          onOpenFollowers={() => void openConnections('followers')}
-          onOpenFollowing={() => void openConnections('following')}
-          onOpenConnections={() => void openConnections('connections')}
-          onConnectionChange={() => void loadProfile()}
+      <NetworkProfileCoverHeader
+        profile={profile}
+        isYou={isYou}
+        artistSlug={artistSlug}
+        fandomBadges={fandomBadges}
+        pendingRequestId={pendingRequestId}
+        onEditProfile={() => setShowEditProfile((prev) => !prev)}
+        onOpenFollowers={() => void openConnections('followers')}
+        onOpenFollowing={() => void openConnections('following')}
+        onOpenConnections={() => void openConnections('connections')}
+        onConnectionChange={() => void loadProfile()}
+      />
+
+      {connectionsOpen && (
+        <NetworkConnectionsPanel
+          mode={connectionsOpen}
+          loading={connectionsLoading}
+          error={connectionsError}
+          connections={connections}
+          onClose={() => setConnectionsOpen(null)}
         />
+      )}
 
-        {connectionsOpen && (
-          <NetworkConnectionsPanel
-            mode={connectionsOpen}
-            loading={connectionsLoading}
-            error={connectionsError}
-            connections={connections}
-            onClose={() => setConnectionsOpen(null)}
-          />
-        )}
-
-        {isYou && showEditProfile && (
-          <section className="np-card mb-4">
+      {isYou && showEditProfile && (
+        <section className="np-card mb-4">
           <h2 className="np-card__title">Edit profile</h2>
           <form className="space-y-4 mt-4" onSubmit={saveProfileFromNetwork}>
             <div className="grid md:grid-cols-2 gap-4">
@@ -444,18 +427,18 @@ export default function CommunityMemberPage() {
             </div>
           </form>
         </section>
-        )}
-      </div>
+      )}
 
-      <div className="np-page__body">
-        <MemberProfileTabs
-          active={tab}
-          onChange={setActiveTab}
-          postCount={profile.postCount}
-          showReleases={Boolean(artistProfileId)}
-        />
+      <MemberProfileTabs
+        active={tab}
+        onChange={setActiveTab}
+        postCount={profile.postCount}
+        showReleases={Boolean(artistProfileId)}
+      />
 
-        <div className="member-profile-panels">
+      <div
+        className={`member-profile-panels${tab === 'overview' ? ' member-profile-panels--overview' : ''}`}
+      >
         <section
           id="member-panel-overview"
           role="tabpanel"
@@ -580,7 +563,6 @@ export default function CommunityMemberPage() {
             />
           </div>
         </section>
-        </div>
       </div>
     </div>
   )
