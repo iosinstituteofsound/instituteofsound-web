@@ -7,7 +7,7 @@ import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
 
 export function MyFandomPanel() {
-  const [window, setWindow] = useState<FandomWindow>('90d')
+  const [fandomWindow, setFandomWindow] = useState<FandomWindow>('90d')
   const [artists, setArtists] = useState<MyFandomArtistRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -17,15 +17,15 @@ export function MyFandomPanel() {
     setLoading(true)
     setError('')
     try {
-      const rows = await fetchMyFandom(window)
-      setArtists(rows)
+      const rows = await fetchMyFandom(fandomWindow)
+      setArtists(rows ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load fandom')
       setArtists([])
     } finally {
       setLoading(false)
     }
-  }, [window])
+  }, [fandomWindow])
 
   useEffect(() => {
     void load()
@@ -47,9 +47,9 @@ export function MyFandomPanel() {
               type="button"
               className={clsx(
                 'ios-btn !text-xs',
-                window === w ? 'ios-btn-primary' : 'ios-btn-ghost',
+                fandomWindow === w ? 'ios-btn-primary' : 'ios-btn-ghost',
               )}
-              onClick={() => setWindow(w)}
+              onClick={() => setFandomWindow(w)}
             >
               {w === '90d' ? 'Last 90 days' : 'All-time'}
             </button>

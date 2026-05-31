@@ -28,21 +28,42 @@ export async function fetchMyFandom(window: FandomWindow = '90d') {
   return repoFetchMyFandom(getSupabase(), window)
 }
 
-export async function fetchArtistFandom(window: FandomWindow = '90d') {
+function emptyArtistFandom() {
+  return { supporters: [], recent: [], champions: [], drivers: [] }
+}
+
+export async function fetchArtistFandom(fandomWindow: FandomWindow = '90d') {
   if (isV1ApiEnabled()) {
-    return v1FetchArtistFandom(window)
+    const data = await v1FetchArtistFandom(fandomWindow)
+    return {
+      supporters: data.supporters ?? [],
+      recent: data.recent ?? [],
+      champions: data.champions ?? [],
+      drivers: data.drivers ?? [],
+    }
   }
   if (!isSupabaseConfigured()) {
-    return { supporters: [], recent: [], champions: [], drivers: [] }
+    return emptyArtistFandom()
   }
   const supabase = getSupabase()
-  const [supporters, recent, champions, drivers] = await Promise.all([
-    repoFetchArtistSupporters(supabase, window),
-    repoFetchArtistRecentSupport(supabase),
-    repoFetchArtistContentChampions(supabase, window),
-    repoFetchArtistDiscoveryDrivers(supabase, window),
-  ])
-  return { supporters, recent, champions, drivers }
+  const [supportersResult, recentResult, championsResult, driversResult] =
+    await Promise.allSettled([
+      repoFetchArtistSupporters(supabase, fandomWindow),
+      repoFetchArtistRecentSupport(supabase),
+      repoFetchArtistContentChampions(supabase, fandomWindow),
+      repoFetchArtistDiscoveryDrivers(supabase, fandomWindow),
+    ])
+
+  if (supportersResult.status === 'rejected' && recentResult.status === 'rejected') {
+    throw supportersResult.reason
+  }
+
+  return {
+    supporters: supportersResult.status === 'fulfilled' ? supportersResult.value : [],
+    recent: recentResult.status === 'fulfilled' ? recentResult.value : [],
+    champions: championsResult.status === 'fulfilled' ? championsResult.value : [],
+    drivers: driversResult.status === 'fulfilled' ? driversResult.value : [],
+  }
 }
 
 export async function fetchFandomDiscover(): Promise<{

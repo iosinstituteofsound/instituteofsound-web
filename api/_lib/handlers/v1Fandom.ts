@@ -48,14 +48,15 @@ export async function handleV1Fandom(
       return true
     }
     const supabase = createSupabaseUserClient(auth.accessToken)
-    const window = parseWindow(req)
+    const fandomWindow = parseWindow(req)
     try {
-      const [supporters, recent, champions] = await Promise.all([
-        repoFetchArtistSupporters(supabase, window),
+      const [supporters, recent, champions, drivers] = await Promise.all([
+        repoFetchArtistSupporters(supabase, fandomWindow),
         repoFetchArtistRecentSupport(supabase),
-        repoFetchArtistContentChampions(supabase, window),
+        repoFetchArtistContentChampions(supabase, fandomWindow),
+        repoFetchArtistDiscoveryDrivers(supabase, fandomWindow).catch(() => []),
       ])
-      res.status(200).json({ supporters, recent, champions })
+      res.status(200).json({ supporters, recent, champions, drivers })
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : 'Failed' })
     }

@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import clsx from 'clsx'
 import { fetchArtistFandom } from '@/lib/fandom/service'
 import type { FandomWindow } from '@/lib/fandom/types'
-import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { networkProfilePath } from '@/lib/community/networkPaths'
 
@@ -17,8 +16,17 @@ const ACTION_LABEL: Record<string, string> = {
   share: 'Share',
 }
 
+function normalizeArtistFandom(data: Awaited<ReturnType<typeof fetchArtistFandom>>) {
+  return {
+    supporters: data.supporters ?? [],
+    recent: data.recent ?? [],
+    champions: data.champions ?? [],
+    drivers: data.drivers ?? [],
+  }
+}
+
 export function ArtistFandomPanel() {
-  const [window, setWindow] = useState<FandomWindow>('90d')
+  const [fandomWindow, setFandomWindow] = useState<FandomWindow>('90d')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [supporters, setSupporters] = useState<Awaited<ReturnType<typeof fetchArtistFandom>>['supporters']>([])
@@ -30,17 +38,21 @@ export function ArtistFandomPanel() {
     setLoading(true)
     setError('')
     try {
-      const data = await fetchArtistFandom(window)
+      const data = normalizeArtistFandom(await fetchArtistFandom(fandomWindow))
       setSupporters(data.supporters)
       setRecent(data.recent)
       setChampions(data.champions)
       setDrivers(data.drivers)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load fandom')
+      setSupporters([])
+      setRecent([])
+      setChampions([])
+      setDrivers([])
     } finally {
       setLoading(false)
     }
-  }, [window])
+  }, [fandomWindow])
 
   useEffect(() => {
     void load()
@@ -62,9 +74,9 @@ export function ArtistFandomPanel() {
               type="button"
               className={clsx(
                 'ios-btn !text-xs',
-                window === w ? 'ios-btn-primary' : 'ios-btn-ghost',
+                fandomWindow === w ? 'ios-btn-primary' : 'ios-btn-ghost',
               )}
-              onClick={() => setWindow(w)}
+              onClick={() => setFandomWindow(w)}
             >
               {w === '90d' ? 'Last 90 days' : 'All-time'}
             </button>
@@ -73,7 +85,9 @@ export function ArtistFandomPanel() {
       </div>
 
       {loading ? (
-        <LoadingTransmission variant="compact" />
+        <p className="text-sm text-muted ios-card p-6" role="status">
+          Loading fandom…
+        </p>
       ) : error ? (
         <p className="text-sm text-mh-red">{error}</p>
       ) : (
