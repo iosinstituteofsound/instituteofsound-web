@@ -14,17 +14,17 @@ export async function repoAwardDb(
 ): Promise<boolean> {
   if (input.amount <= 0) return false
 
-  const { error } = await supabase.from('community_db_events').insert({
-    user_id: input.userId,
-    amount: input.amount,
-    source: input.source,
-    source_id: input.sourceId,
-    genre_id: input.genreId ?? null,
+  const { data, error } = await supabase.rpc('community_award_db', {
+    p_user_id: input.userId,
+    p_amount: input.amount,
+    p_source: input.source,
+    p_source_id: input.sourceId,
+    p_genre_id: input.genreId ?? null,
   })
 
   if (error) {
     if (error.code === '23505') return false
     throw new Error(error.message)
   }
-  return true
+  return data === true
 }

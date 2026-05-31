@@ -48,10 +48,9 @@ export async function fetchEditorProfilesForDrafts(
 
   if (isSupabaseConfigured()) {
     const supabase = getSupabase()
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, name, username')
-      .in('id', unique)
+    const { data, error } = await supabase.rpc('get_editor_profiles', {
+      p_ids: unique,
+    })
 
     if (error) throw new Error(error.message)
     for (const row of data ?? []) {
