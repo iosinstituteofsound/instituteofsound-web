@@ -443,6 +443,7 @@ export default function CommunityMemberPage() {
             onViewAllPosts={() => setActiveTab('posts')}
             onViewAllBadges={() => setActiveTab('about')}
             onViewCrews={() => setActiveTab('crews')}
+            onViewMutuals={() => void openConnections('connections')}
             onConnectionChange={() => void loadProfile()}
           />
         </section>

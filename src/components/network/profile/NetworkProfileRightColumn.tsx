@@ -20,6 +20,7 @@ interface NetworkProfileRightColumnProps {
   fandomRecognitions?: FandomPublicRecognitionRow[]
   isYou: boolean
   onViewCrews?: () => void
+  onViewMutuals?: () => void
   onConnectionChange?: () => void
 }
 
@@ -31,6 +32,7 @@ export function NetworkProfileRightColumn({
   fandomRecognitions = [],
   isYou,
   onViewCrews,
+  onViewMutuals,
   onConnectionChange,
 }: NetworkProfileRightColumnProps) {
   const [crew, setCrew] = useState<PublicUserCrew | null>(null)
@@ -45,72 +47,99 @@ export function NetworkProfileRightColumn({
     }
   }, [profile.userId])
 
-  const extraMutuals = Math.max(0, mutuals.length - 5)
+  const visibleMutuals = mutuals.slice(0, 5)
+  const extraMutuals = Math.max(0, mutuals.length - visibleMutuals.length)
 
   return (
-    <div className="np-col np-col--right">
+    <aside className="np-rail" aria-label="Profile sidebar">
       <NetworkProfileReputationCard profile={profile} posts={posts} />
 
       {!isYou && mutuals.length > 0 && (
-        <section className="np-card">
-          <h2 className="np-card__title">{mutuals.length} Mutual</h2>
-          <ul className="np-mutual-stack">
-            {mutuals.slice(0, 5).map((m) => (
+        <section className="np-rail-card">
+          <div className="np-rail-card__head">
+            <h2 className="np-rail-card__title">Mutual Connections</h2>
+            <span className="np-rail-card__accent">{mutuals.length} Mutual</span>
+          </div>
+          <ul className="np-rail-mutuals">
+            {visibleMutuals.map((m) => (
               <li key={m.userId}>
                 <Link to={networkProfilePath(m.handle)} title={m.displayName}>
                   {m.avatarUrl ? (
-                    <IOSImage src={m.avatarUrl} alt="" width={40} className="np-mutual-avatar" />
+                    <IOSImage src={m.avatarUrl} alt="" width={40} className="np-rail-mutuals__avatar" />
                   ) : (
-                    <span className="np-mutual-fallback">{m.displayName.charAt(0)}</span>
+                    <span className="np-rail-mutuals__fallback">{m.displayName.charAt(0)}</span>
                   )}
                 </Link>
               </li>
             ))}
-            {extraMutuals > 0 && <li className="np-mutual-more">+{extraMutuals}</li>}
+            {extraMutuals > 0 && <li className="np-rail-mutuals__more">+{extraMutuals}</li>}
           </ul>
+          {onViewMutuals ? (
+            <button type="button" className="np-rail-foot-link" onClick={onViewMutuals}>
+              View all connections →
+            </button>
+          ) : (
+            <Link to="/network/people" className="np-rail-foot-link">
+              View all connections →
+            </Link>
+          )}
         </section>
       )}
 
       {crew && (
-        <section className="np-card">
-          <h2 className="np-card__title">Member of</h2>
-          <Link to="/community#crew" className="np-crew-row">
-            <span className="np-crew-mark">{crew.name.charAt(0)}</span>
-            <span className="np-crew-info">
-              <strong>{crew.name}</strong>
-              <span>{crew.memberCount.toLocaleString()} members</span>
-            </span>
-          </Link>
+        <section className="np-rail-card">
+          <h2 className="np-rail-card__title">Member Of Crews</h2>
+          <ul className="np-rail-crews">
+            <li>
+              <Link to="/community#crew" className="np-rail-crew-row">
+                <span className="np-rail-crew-row__logo">{crew.name.charAt(0)}</span>
+                <span className="np-rail-crew-row__info">
+                  <strong>{crew.name}</strong>
+                  <span>{crew.memberCount.toLocaleString()} Members</span>
+                </span>
+              </Link>
+            </li>
+          </ul>
           {onViewCrews ? (
-            <button type="button" className="np-card__link np-card__link--block" onClick={onViewCrews}>
-              View crew →
+            <button type="button" className="np-rail-foot-link" onClick={onViewCrews}>
+              View all crews →
             </button>
-          ) : null}
+          ) : (
+            <Link to="/community#crew" className="np-rail-foot-link">
+              View all crews →
+            </Link>
+          )}
         </section>
       )}
 
-      {fandomRecognitions.length > 0 && (
-        <FandomPublicRecognitions
-          recognitions={fandomRecognitions}
-          className="np-card np-card--recognition"
-        />
-      )}
-
       {!isYou && suggested.length > 0 && (
-        <section className="np-card">
-          <h2 className="np-card__title">Suggested for you</h2>
-          <ul className="np-suggest">
-            {suggested.slice(0, 2).map((person) => (
-              <li key={person.userId} className="np-suggest__row">
-                <Link to={networkProfilePath(person.handle)} className="np-suggest__who">
-                  {person.avatarUrl ? (
-                    <IOSImage src={person.avatarUrl} alt="" width={44} className="np-suggest__avatar" />
-                  ) : (
-                    <span className="np-suggest__fallback">{person.displayName.charAt(0)}</span>
-                  )}
-                  <span>
+        <section className="np-rail-card">
+          <div className="np-rail-card__head">
+            <h2 className="np-rail-card__title">Suggested For You</h2>
+            <Link to="/network/people" className="np-rail-card__accent np-rail-card__accent--link">
+              See All
+            </Link>
+          </div>
+          <ul className="np-rail-suggest">
+            {suggested.slice(0, 3).map((person) => (
+              <li key={person.userId} className="np-rail-suggest__row">
+                <Link to={networkProfilePath(person.handle)} className="np-rail-suggest__who">
+                  <span className="np-rail-suggest__avatar-wrap">
+                    {person.avatarUrl ? (
+                      <IOSImage
+                        src={person.avatarUrl}
+                        alt=""
+                        width={44}
+                        className="np-rail-suggest__avatar"
+                      />
+                    ) : (
+                      <span className="np-rail-suggest__fallback">{person.displayName.charAt(0)}</span>
+                    )}
+                    <span className="np-rail-suggest__online" aria-hidden />
+                  </span>
+                  <span className="np-rail-suggest__meta">
                     <strong>{person.displayName}</strong>
-                    <span className="np-suggest__handle">@{person.handle.replace(/^@/, '')}</span>
+                    <span>@{person.handle.replace(/^@/, '')}</span>
                   </span>
                 </Link>
                 <ConnectButton
@@ -118,15 +147,20 @@ export function NetworkProfileRightColumn({
                   status={person.connectionStatus}
                   size="sm"
                   onStatusChange={onConnectionChange}
+                  className="np-rail-suggest__connect network-connect-btn"
                 />
               </li>
             ))}
           </ul>
-          <Link to="/network/people" className="np-card__link np-card__link--block">
-            Discover more →
-          </Link>
         </section>
       )}
-    </div>
+
+      {fandomRecognitions.length > 0 && (
+        <FandomPublicRecognitions
+          recognitions={fandomRecognitions}
+          className="np-rail-card np-rail-card--fandom"
+        />
+      )}
+    </aside>
   )
 }

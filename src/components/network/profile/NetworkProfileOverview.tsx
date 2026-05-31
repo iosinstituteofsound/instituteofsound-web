@@ -21,6 +21,7 @@ interface NetworkProfileOverviewProps {
   onViewAllPosts: () => void
   onViewAllBadges?: () => void
   onViewCrews?: () => void
+  onViewMutuals?: () => void
   onConnectionChange?: () => void
 }
 
@@ -38,6 +39,7 @@ export function NetworkProfileOverview({
   onViewAllPosts,
   onViewAllBadges,
   onViewCrews,
+  onViewMutuals,
   onConnectionChange,
 }: NetworkProfileOverviewProps) {
   const handle = profile.handle.replace(/^@/, '')
@@ -98,6 +100,7 @@ export function NetworkProfileOverview({
         fandomRecognitions={fandomRecognitions}
         isYou={isYou}
         onViewCrews={onViewCrews}
+        onViewMutuals={onViewMutuals}
         onConnectionChange={onConnectionChange}
       />
     </div>
