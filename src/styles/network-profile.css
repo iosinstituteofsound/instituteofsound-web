@@ -1,9 +1,87 @@
-/* Network profile — mock layout (IOS data, social-style grid) */
+/* Network profile — full-width layout (IOS editorial) */
 
 .np-page {
   max-width: 1120px;
   margin: 0 auto;
   padding: 0 1rem 2.5rem;
+}
+
+.np-page.network-profile-page {
+  --np-gutter: 1rem;
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: var(--np-gutter);
+  padding-bottom: 2.5rem;
+}
+
+@media (min-width: 640px) {
+  .network-profile-page {
+    --np-gutter: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .network-profile-page {
+    --np-gutter: 1.75rem;
+    padding-bottom: 3rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .network-profile-page {
+    --np-gutter: 2.25rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .network-profile-page {
+    --np-gutter: 3rem;
+  }
+}
+
+/* Cover + tabs bleed to main edges; content columns use gutter */
+.network-profile-page .np-header {
+  margin-inline: calc(-1 * var(--np-gutter));
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+}
+
+@media (min-width: 1024px) {
+  .network-profile-page .np-header {
+    border-radius: 14px;
+    margin-inline: 0;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 24px 64px -40px rgba(0, 0, 0, 0.85);
+  }
+
+  .network-profile-page .np-header__cover {
+    height: 240px;
+    border-radius: 14px 14px 0 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  .network-profile-page .np-header__cover {
+    height: 280px;
+  }
+
+  .network-profile-page .np-header__body {
+    padding-inline: 2rem;
+  }
+
+  .network-profile-page .np-header__pills,
+  .network-profile-page .np-header__fandom,
+  .network-profile-page .np-header__role-foot {
+    padding-inline: 2rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .network-profile-page .np-header__cover {
+    height: 300px;
+  }
 }
 
 .np-page .member-profile-page-bg,
@@ -360,6 +438,25 @@
   z-index: 10;
 }
 
+.network-profile-page .member-profile-tabs-wrap {
+  margin-inline: calc(-1 * var(--np-gutter));
+  padding-inline: var(--np-gutter);
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+@media (min-width: 1024px) {
+  .network-profile-page .member-profile-tabs-wrap {
+    margin-inline: 0;
+    border-radius: 12px 12px 0 0;
+    border: 1px solid var(--color-border);
+    border-bottom: none;
+  }
+}
+
 .np-page .member-profile-tabs {
   display: flex;
 }
@@ -411,7 +508,8 @@
 
 @media (min-width: 1024px) {
   .np-overview {
-    grid-template-columns: 240px minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(280px, 320px);
+    gap: 1.35rem;
     align-items: stretch;
     position: sticky;
     top: 0.5rem;
@@ -433,6 +531,20 @@
   }
 }
 
+@media (min-width: 1280px) {
+  .np-overview {
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr) minmax(320px, 380px);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .np-overview {
+    grid-template-columns: 320px minmax(0, 1fr) 400px;
+    gap: 1.75rem;
+  }
+}
+
 .np-overview__col {
   display: flex;
   flex-direction: column;
@@ -449,6 +561,21 @@
 
 .np-single {
   max-width: 720px;
+}
+
+.network-profile-page .np-single {
+  max-width: none;
+  width: 100%;
+}
+
+@media (min-width: 1280px) {
+  .network-profile-page .np-header__stats {
+    gap: 2.25rem;
+  }
+
+  .network-profile-page .np-header__stat strong {
+    font-size: 1.5rem;
+  }
 }
 
 /* —— Cards —— */
