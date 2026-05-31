@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { EarnedBadge } from '@/lib/community/service'
+import type { PublicSupporterBadgeOnArtist } from '@/lib/fandom/types'
+import { FandomSupporterBadgesList } from '@/components/fandom/FandomSupporterBadges'
 import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { MedalIllustration } from '@/components/community/medals/MedalIllustration'
@@ -8,7 +10,9 @@ import { badgeDefBySlug } from '@/lib/community/badges'
 import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
 import { FollowButton } from '@/components/community/FollowButton'
 import { MessageButton } from '@/components/community/MessageButton'
+import { ConnectButton } from '@/components/network/ConnectButton'
 import { MemberCollabSkills } from '@/components/collab/MemberCollabSkills'
+import { formatNetworkCount } from '@/lib/network/noiseScore'
 
 function formatGenre(slug: string) {
   return slug
@@ -23,10 +27,14 @@ interface MemberProfileHeaderProps {
   isYou: boolean
   dashboardHref?: string
   badges: EarnedBadge[]
+  fandomBadges?: PublicSupporterBadgeOnArtist[]
   artistSlug?: string | null
+  pendingRequestId?: string | null
   onEditProfile?: () => void
   onOpenFollowers?: () => void
   onOpenFollowing?: () => void
+  onOpenConnections?: () => void
+  onConnectionChange?: () => void
 }
 
 export function MemberProfileHeader({
@@ -35,11 +43,17 @@ export function MemberProfileHeader({
   isYou,
   dashboardHref,
   badges,
+  fandomBadges = [],
   artistSlug,
+  pendingRequestId,
   onEditProfile,
   onOpenFollowers,
   onOpenFollowing,
+  onOpenConnections,
+  onConnectionChange,
 }: MemberProfileHeaderProps) {
+  const isNetwork = Boolean(onOpenConnections)
+
   return (
     <header className="member-profile-hero">
       <div className="member-profile-hero-glow" aria-hidden />
@@ -64,19 +78,28 @@ export function MemberProfileHeader({
         </div>
 
         <ul className="member-profile-stat-bar" aria-label="Profile stats">
-          <li>
-            <strong>{profile.postCount}</strong>
-            <span>Posts</span>
-          </li>
+          {isNetwork ? (
+            <li>
+              <button type="button" className="member-profile-stat-btn" onClick={onOpenConnections}>
+                <strong>{formatNetworkCount(profile.connectionCount)}</strong>
+                <span>Links</span>
+              </button>
+            </li>
+          ) : (
+            <li>
+              <strong>{profile.postCount}</strong>
+              <span>Posts</span>
+            </li>
+          )}
           <li>
             <button type="button" className="member-profile-stat-btn" onClick={onOpenFollowers}>
-              <strong>{profile.followerCount.toLocaleString()}</strong>
+              <strong>{formatNetworkCount(profile.followerCount)}</strong>
               <span>Followers</span>
             </button>
           </li>
           <li>
             <button type="button" className="member-profile-stat-btn" onClick={onOpenFollowing}>
-              <strong>{profile.followingCount.toLocaleString()}</strong>
+              <strong>{formatNetworkCount(profile.followingCount)}</strong>
               <span>Following</span>
             </button>
           </li>
@@ -89,7 +112,7 @@ export function MemberProfileHeader({
 
       <div className="member-profile-identity">
         <p className="member-profile-kicker">
-          Network operator
+          {isNetwork ? 'On the wire' : 'Network operator'}
           {isYou && <span className="member-profile-you-tag">· you</span>}
         </p>
         <h1 className="member-profile-name">{profile.displayName}</h1>
@@ -132,11 +155,15 @@ export function MemberProfileHeader({
         </ul>
       )}
 
+      {fandomBadges.length > 0 && (
+        <FandomSupporterBadgesList badges={fandomBadges} className="member-profile-fandom-strip" />
+      )}
+
       <div className="member-profile-actions">
         {isYou ? (
           <>
-            <Link to="/community#feed" className="member-profile-btn member-profile-btn-primary">
-              New transmission
+            <Link to="/feed" className="member-profile-btn member-profile-btn-primary">
+              Broadcast
             </Link>
             <button
               type="button"
@@ -148,13 +175,22 @@ export function MemberProfileHeader({
           </>
         ) : (
           <>
+            {isNetwork && onConnectionChange && (
+              <ConnectButton
+                targetUserId={profile.userId}
+                status={profile.viewerConnectionStatus}
+                pendingRequestId={pendingRequestId ?? undefined}
+                onStatusChange={onConnectionChange}
+                className="member-profile-btn member-profile-btn-primary network-connect-btn"
+              />
+            )}
             <FollowButton
               targetUserId={profile.userId}
               initialFollowing={profile.viewerIsFollowing}
             />
             <MessageButton targetUserId={profile.userId} />
-            <Link to="/community#feed" className="member-profile-btn member-profile-btn-ghost">
-              Explore network
+            <Link to="/feed" className="member-profile-btn member-profile-btn-ghost">
+              Wire feed
             </Link>
           </>
         )}
@@ -167,7 +203,6 @@ export function MemberProfileHeader({
         </button>
       </div>
 
-      {/* Desk link — secondary, tucked below actions so profile context stays primary */}
       {isYou && dashboardHref && (
         <p className="member-profile-desk-link">
           <Link to={dashboardHref}>

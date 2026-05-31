@@ -29,9 +29,9 @@ export function NetworkProfileCrewsRail({ userId, onViewCrews }: NetworkProfileC
 
   if (loading) {
     return (
-      <section className="network-rail-card">
-        <h2 className="network-rail-title">Crew</h2>
-        <p className="text-sm text-muted">Loading…</p>
+      <section className="network-rail-panel">
+        <p className="network-rail-kicker">Crew</p>
+        <p className="text-sm text-muted">Scanning roster…</p>
       </section>
     )
   }
@@ -39,22 +39,23 @@ export function NetworkProfileCrewsRail({ userId, onViewCrews }: NetworkProfileC
   if (!crew) return null
 
   return (
-    <section className="network-rail-card network-crew-rail">
-      <h2 className="network-rail-title">Member of</h2>
-      <Link to="/community#crew" className="network-crew-rail-card">
-        <span className="network-crew-rail-mark" aria-hidden>
+    <section className="network-rail-panel">
+      <p className="network-rail-kicker">Crew</p>
+      <h2 className="network-rail-heading">Roster</h2>
+      <Link to="/community#crew" className="network-crew-chip">
+        <span className="network-crew-chip-mark" aria-hidden>
           {crew.name.charAt(0).toUpperCase()}
         </span>
-        <span className="network-crew-rail-body">
+        <span className="network-crew-chip-body">
           <strong>{crew.name}</strong>
           <span>
-            {crew.memberCount} members · {crew.role === 'founder' ? 'Founder' : 'Member'}
+            {crew.memberCount} operators · {crew.role === 'founder' ? 'Founder' : 'Member'}
           </span>
         </span>
       </Link>
       {onViewCrews ? (
         <button type="button" className="network-rail-cta" onClick={onViewCrews}>
-          Crew details →
+          Crew dossier →
         </button>
       ) : null}
     </section>

@@ -28,14 +28,14 @@ export function NetworkProfileOverview({
     <div className="network-profile-overview">
       <NetworkProfileComposerStrip isYou={isYou} onPosted={onRefresh} />
 
-      <header className="network-profile-feed-head">
+      <header className="member-profile-wire-head">
         <div>
-          <p className="network-profile-feed-kicker">Timeline</p>
-          <h2 className="network-profile-feed-title">Recent transmissions</h2>
+          <p className="member-profile-kicker">On the wire</p>
+          <h2 className="member-profile-wire-title">Recent transmissions</h2>
         </div>
         {posts.length > PREVIEW_COUNT && (
-          <button type="button" className="network-rail-cta" onClick={onViewAllPosts}>
-            All posts ({profile.postCount}) →
+          <button type="button" className="member-profile-wire-more" onClick={onViewAllPosts}>
+            Archive ({profile.postCount}) →
           </button>
         )}
       </header>
@@ -48,9 +48,9 @@ export function NetworkProfileOverview({
       />
 
       {posts.length === 0 && isYou && (
-        <p className="network-profile-feed-hint">
-          Share a spin or drop from the composer above, or{' '}
-          <Link to="/feed">open the full feed</Link>.
+        <p className="member-profile-wire-empty-hint">
+          Your first spin or drop goes live here.{' '}
+          <Link to="/feed">Tune the full wire</Link>.
         </p>
       )}
     </div>

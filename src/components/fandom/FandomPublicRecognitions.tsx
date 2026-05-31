@@ -14,7 +14,8 @@ export function FandomPublicRecognitions({
 
   return (
     <section className={className} aria-label="Artist recognition">
-      <h2 className="network-rail-title">Artist recognition</h2>
+      <p className="network-rail-kicker">Fandom</p>
+      <h2 className="network-rail-heading">Recognition</h2>
       <ul className="network-recognition-list list-none p-0 m-0">
         {recognitions.map((r) => (
           <li key={r.id} className="network-recognition-item">

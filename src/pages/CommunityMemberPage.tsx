@@ -15,7 +15,8 @@ import {
 } from '@/lib/community/memberProfileService'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import { useCommunityBadges } from '@/hooks/useCommunityBadges'
-import { NetworkProfileHeader } from '@/components/network/NetworkProfileHeader'
+import { MemberProfileHeader } from '@/components/community/member/MemberProfileHeader'
+import { formatAccountNumericId } from '@/lib/auth/accountId'
 import { NetworkProfileSidebar } from '@/components/network/NetworkProfileSidebar'
 import {
   MemberProfileTabs,
@@ -356,8 +357,9 @@ export default function CommunityMemberPage() {
           </Link>
         </nav>
 
-        <NetworkProfileHeader
+        <MemberProfileHeader
           profile={profile}
+          accountId={formatAccountNumericId(profile.userId)}
           isYou={isYou}
           dashboardHref={isYou ? dashboardHref : undefined}
           badges={badges}

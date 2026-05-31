@@ -4,16 +4,12 @@ import type { EarnedBadge } from '@/lib/community/service'
 import type { FandomPublicRecognitionRow } from '@/lib/fandom/types'
 import { MedalIllustration } from '@/components/community/medals/MedalIllustration'
 import { ConnectButton } from '@/components/network/ConnectButton'
-import { NetworkNoiseScoreGauge } from '@/components/network/NetworkNoiseScoreGauge'
+import { NetworkSignalReadout } from '@/components/network/NetworkSignalReadout'
 import { NetworkProfileCrewsRail } from '@/components/network/NetworkProfileCrewsRail'
 import { FandomPublicRecognitions } from '@/components/fandom/FandomPublicRecognitions'
 import type { NetworkPersonCard } from '@/lib/network/connectionTypes'
 import { networkProfilePath } from '@/lib/community/networkPaths'
 import { IOSImage } from '@/components/ui/IOSImage'
-
-function rankHeadline(rank: string): string {
-  return rank.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-}
 
 interface NetworkProfileSidebarProps {
   profile: PublicMemberProfile
@@ -42,17 +38,14 @@ export function NetworkProfileSidebar({
 }: NetworkProfileSidebarProps) {
   return (
     <aside className="network-profile-rail">
-      <section className="network-rail-card network-rail-card--reputation">
-        <h2 className="network-rail-title">Reputation</h2>
-        <NetworkNoiseScoreGauge totalDb={profile.totalDb} rankLabel={rankHeadline(profile.rank)} />
-        <ul className="network-reputation-stats">
+      <section className="network-rail-panel">
+        <p className="network-rail-kicker">Signal</p>
+        <h2 className="network-rail-heading">Readout</h2>
+        <NetworkSignalReadout profile={profile} />
+        <ul className="network-rail-metrics">
           <li>
-            <span>Posts</span>
+            <span>Transmissions</span>
             <strong>{profile.postCount.toLocaleString()}</strong>
-          </li>
-          <li>
-            <span>This week</span>
-            <strong>{profile.weeklyDb.toLocaleString()} dB</strong>
           </li>
           <li>
             <span>Followers</span>
@@ -62,12 +55,15 @@ export function NetworkProfileSidebar({
       </section>
 
       {!hideBadges && badges.length > 0 && (
-        <section className="network-rail-card">
+        <section className="network-rail-panel">
           <div className="network-rail-head">
-            <h2 className="network-rail-title">Badges</h2>
+            <div>
+              <p className="network-rail-kicker">Earned</p>
+              <h2 className="network-rail-heading">Medals</h2>
+            </div>
             {onViewAllBadges ? (
               <button type="button" className="network-rail-link" onClick={onViewAllBadges}>
-                View all
+                All
               </button>
             ) : null}
           </div>
@@ -86,14 +82,15 @@ export function NetworkProfileSidebar({
       {fandomRecognitions.length > 0 && (
         <FandomPublicRecognitions
           recognitions={fandomRecognitions}
-          className="network-rail-card network-rail-recognitions"
+          className="network-rail-panel network-rail-recognitions"
         />
       )}
 
       {!isYou && mutuals.length > 0 && (
-        <section className="network-rail-card">
-          <h2 className="network-rail-title">
-            {mutuals.length} mutual connection{mutuals.length === 1 ? '' : 's'}
+        <section className="network-rail-panel">
+          <p className="network-rail-kicker">Shared</p>
+          <h2 className="network-rail-heading">
+            {mutuals.length} mutual link{mutuals.length === 1 ? '' : 's'}
           </h2>
           <ul className="network-avatar-stack">
             {mutuals.slice(0, 6).map((m) => (
@@ -112,8 +109,9 @@ export function NetworkProfileSidebar({
       )}
 
       {!isYou && suggested.length > 0 && (
-        <section className="network-rail-card">
-          <h2 className="network-rail-title">Suggested for you</h2>
+        <section className="network-rail-panel">
+          <p className="network-rail-kicker">Discover</p>
+          <h2 className="network-rail-heading">Operators</h2>
           <ul className="network-suggest-list">
             {suggested.slice(0, 3).map((person) => (
               <li key={person.userId} className="network-suggest-item">
@@ -125,7 +123,7 @@ export function NetworkProfileSidebar({
                   )}
                   <span>
                     <strong>{person.displayName}</strong>
-                    <span className="network-suggest-handle">@{person.handle}</span>
+                    <span className="network-suggest-handle">{person.handle}</span>
                   </span>
                 </Link>
                 <ConnectButton
@@ -138,7 +136,7 @@ export function NetworkProfileSidebar({
             ))}
           </ul>
           <Link to="/network/people" className="network-rail-cta">
-            Discover more people →
+            Browse people →
           </Link>
         </section>
       )}

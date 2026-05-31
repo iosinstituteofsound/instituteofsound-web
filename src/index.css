@@ -15255,6 +15255,117 @@ html[data-perf='lite'] .metal-loader-core-beat {
   border-top: 1px solid var(--border);
 }
 
+/* Network profile — broadcast deck + wire column (IOS, not social-clone) */
+.member-profile-fandom-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.member-profile-broadcast {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.15rem 1.15rem;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(165deg, rgba(18, 18, 18, 0.95), rgba(8, 8, 8, 0.98));
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+
+.member-profile-broadcast-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.member-profile-broadcast-hint {
+  font-size: 0.5625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.member-profile-broadcast .community-feed-composer-fb.ios-card {
+  border: none;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.member-profile-broadcast--visitor {
+  text-align: left;
+}
+
+.member-profile-broadcast-copy {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  line-height: 1.5;
+  margin: 0.5rem 0 0;
+}
+
+.member-profile-broadcast-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.member-profile-wire-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.member-profile-wire-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0.2rem 0 0;
+  color: var(--color-signal);
+}
+
+.member-profile-wire-more {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.member-profile-wire-more:hover {
+  text-decoration: underline;
+}
+
+.member-profile-wire-empty-hint {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-top: 1rem;
+}
+
+.member-profile-wire-empty-hint a {
+  color: var(--color-mh-red);
+}
+
+.network-profile-page .network-connect-btn.member-profile-btn {
+  font-size: 0.5625rem;
+  letter-spacing: 0.14em;
+  padding: 0.55rem 1rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .member-profile-feed-item {
     animation: none;

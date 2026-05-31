@@ -1,7 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useAuth } from '@/context/AuthContext'
 import { CommunityFeedComposer } from '@/components/community/CommunityFeedComposer'
-import { IOSImage } from '@/components/ui/IOSImage'
 
 interface NetworkProfileComposerStripProps {
   isYou: boolean
@@ -9,40 +7,32 @@ interface NetworkProfileComposerStripProps {
 }
 
 export function NetworkProfileComposerStrip({ isYou, onPosted }: NetworkProfileComposerStripProps) {
-  const { user } = useAuth()
-
   if (isYou) {
     return (
-      <section className="network-profile-composer" aria-label="Create post">
-        <p className="network-profile-composer-kicker">Share on the wire</p>
+      <section className="member-profile-broadcast" aria-label="Broadcast">
+        <div className="member-profile-broadcast-head">
+          <p className="member-profile-kicker">Broadcast</p>
+          <p className="member-profile-broadcast-hint">Spin · drop · link · photo</p>
+        </div>
         <CommunityFeedComposer onPosted={onPosted} />
       </section>
     )
   }
 
   return (
-    <section className="network-profile-composer network-profile-composer--visitor" aria-label="Community">
-      <div className="network-profile-composer-visitor-row">
-        {user?.avatarUrl ? (
-          <IOSImage src={user.avatarUrl} alt="" width={40} className="network-profile-composer-avatar" />
-        ) : (
-          <span className="network-profile-composer-avatar-fallback" aria-hidden>
-            {(user?.name ?? 'Y').charAt(0).toUpperCase()}
-          </span>
-        )}
-        <Link to="/feed" className="network-profile-composer-faux-input">
-          Share something on the wire…
+    <section className="member-profile-broadcast member-profile-broadcast--visitor" aria-label="Join the wire">
+      <p className="member-profile-kicker">The wire</p>
+      <p className="member-profile-broadcast-copy">
+        Sign in to broadcast from your profile, or tune into the live feed.
+      </p>
+      <div className="member-profile-broadcast-actions">
+        <Link to="/feed" className="member-profile-btn member-profile-btn-primary">
+          Open wire feed
+        </Link>
+        <Link to="/network/people" className="member-profile-btn member-profile-btn-ghost">
+          Find operators
         </Link>
       </div>
-      <div className="network-profile-composer-quick" aria-hidden>
-        <span>Spin</span>
-        <span>Drop</span>
-        <span>Photo</span>
-        <span>Music</span>
-      </div>
-      <Link to="/feed" className="network-rail-cta network-profile-composer-cta">
-        Open community feed →
-      </Link>
     </section>
   )
 }

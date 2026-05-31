@@ -1,10 +1,4 @@
-/** Maps lifetime dB to a 0–10 "Noise Score" for profile reputation UI. */
-export function noiseScoreFromDb(totalDb: number): number {
-  if (totalDb <= 0) return 0
-  const score = Math.min(10, Math.log10(totalDb + 1) * 2.2)
-  return Math.round(score * 10) / 10
-}
-
+/** Compact stat display for profile headers (e.g. 4.2K). */
 export function formatNetworkCount(n: number): string {
   if (n >= 1_000_000) {
     const v = n / 1_000_000
