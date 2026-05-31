@@ -573,6 +573,303 @@ body.v2-app-shell {
   color: color-mix(in srgb, var(--color-mh-red) 55%, var(--color-muted));
 }
 
+button.v2-topbar-profile {
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.v2-topbar-profile--open {
+  border-color: color-mix(in srgb, var(--color-mh-red) 55%, var(--color-border));
+  box-shadow:
+    0 0 28px -12px rgba(212, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.v2-topbar-profile__chev {
+  flex-shrink: 0;
+  margin-left: 0.15rem;
+  color: var(--color-muted);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.v2-topbar-profile__chev.is-open {
+  transform: rotate(180deg);
+  color: var(--color-mh-red);
+}
+
+.v2-topbar-profile--guest {
+  text-decoration: none;
+}
+
+/* Account menu dropdown (FB-style, IOS metal) */
+.v2-account-menu {
+  position: relative;
+}
+
+.v2-account-menu__panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.55rem);
+  z-index: 80;
+  width: min(22.5rem, calc(100vw - 1.5rem));
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, var(--color-mh-red) 12%);
+  border-radius: 14px;
+  background: linear-gradient(165deg, #141414 0%, #0a0a0a 48%, #050505 100%);
+  box-shadow:
+    0 28px 80px -24px rgba(0, 0, 0, 0.95),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 40px -20px rgba(212, 0, 0, 0.35);
+  overflow: hidden;
+  animation: v2-account-menu-in 0.2s ease;
+}
+
+@keyframes v2-account-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.v2-account-menu__hero {
+  padding: 0.85rem 0.85rem 0.65rem;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+}
+
+.v2-account-menu__kicker {
+  margin: 0 0 0.5rem 0.35rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+}
+
+.v2-account-menu__identity {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s ease;
+}
+
+.v2-account-menu__identity:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.v2-account-menu__identity--active {
+  background: rgba(212, 0, 0, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(212, 0, 0, 0.35);
+}
+
+.v2-account-menu__active-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.45);
+}
+
+.v2-account-menu__avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-elevated);
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--color-mh-red);
+}
+
+.v2-account-menu__avatar--page .v2-account-menu__switch {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+}
+
+.v2-account-menu__avatar--page .v2-account-menu__switch svg {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+.v2-account-menu__who {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.v2-account-menu__who strong {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-signal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v2-account-menu__who span {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v2-account-menu__pages {
+  list-style: none;
+  margin: 0.45rem 0 0;
+  padding: 0;
+}
+
+.v2-account-menu__all-pages {
+  display: block;
+  margin: 0.5rem 0.25rem 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-signal);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.v2-account-menu__all-pages:hover {
+  background: rgba(212, 0, 0, 0.1);
+  border-color: rgba(212, 0, 0, 0.35);
+}
+
+.v2-account-menu__list {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem;
+}
+
+.v2-account-menu__item,
+.v2-account-menu__logout {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.v2-account-menu__item:hover,
+.v2-account-menu__logout:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.v2-account-menu__item-icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #1c1c1c;
+  border: 1px solid var(--color-border);
+  color: var(--color-signal);
+}
+
+.v2-account-menu__item-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.v2-account-menu__item-icon--logout {
+  color: var(--color-mh-red);
+  border-color: rgba(212, 0, 0, 0.35);
+  background: rgba(212, 0, 0, 0.08);
+}
+
+.v2-account-menu__item-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.v2-account-menu__item-copy strong {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-signal);
+}
+
+.v2-account-menu__item-copy span {
+  font-size: 0.6875rem;
+  color: var(--color-muted);
+}
+
+.v2-account-menu__item-chev {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  opacity: 0.55;
+}
+
+.v2-account-menu__foot {
+  padding: 0.35rem 0.35rem 0.65rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.v2-account-menu__legal {
+  margin: 0.5rem 0 0;
+  padding: 0 0.5rem;
+  font-size: 0.625rem;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.v2-account-menu__legal a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.v2-account-menu__legal a:hover {
+  color: var(--color-mh-red);
+}
+
+.v2-account-menu__legal span {
+  margin: 0 0.35rem;
+  opacity: 0.45;
+}
+
 /* Right rail */
 .v2-rail {
   display: none;

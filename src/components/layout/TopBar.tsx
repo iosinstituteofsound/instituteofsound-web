@@ -1,26 +1,14 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { homeDashboardPath } from '@/lib/auth/roles'
 import { useShell } from '@/context/ShellContext'
 import { NetworkNotificationsPanel } from '@/components/community/NetworkNotificationsPanel'
+import { TopBarAccountMenu } from '@/components/layout/TopBarAccountMenu'
 import { useDmUnread } from '@/hooks/useDmUnread'
-
-function topBarProfileName(name: string): string {
-  const trimmed = name.trim()
-  if (trimmed.length <= 30) return trimmed
-  return `${trimmed.slice(0, 28)}…`
-}
 
 export function TopBar() {
   const { meta, openCommand } = useShell()
   const { user } = useAuth()
   const dmUnread = useDmUnread()
-  const profileTo = user ? homeDashboardPath(user.role) : '/login'
-  const profileLabel = user
-    ? topBarProfileName(user.name || 'Your desk')
-    : 'Guest'
-  const profileSub = user ? 'Dashboard →' : 'Sign in →'
-  const avatarSrc = user?.avatarUrl
 
   return (
     <header className="v2-topbar relative sticky top-0 z-20 flex h-[var(--v2-topbar-h)] shrink-0 items-center gap-3 px-4 lg:gap-5 lg:px-6">
@@ -66,19 +54,7 @@ export function TopBar() {
           </Link>
         )}
         <NetworkNotificationsPanel className="v2-topbar-action" />
-        <Link to={profileTo} className="v2-topbar-profile ml-0.5">
-          <div className="v2-topbar-profile__avatar">
-            {avatarSrc ? (
-              <img src={avatarSrc} alt="" className="h-full w-full object-cover" />
-            ) : (
-              profileLabel.charAt(0).toUpperCase()
-            )}
-          </div>
-          <div className="v2-topbar-profile__copy hidden sm:block">
-            <p className="v2-topbar-profile__name">{profileLabel}</p>
-            <p className="v2-topbar-profile__sub">{profileSub}</p>
-          </div>
-        </Link>
+        <TopBarAccountMenu />
       </div>
     </header>
   )
