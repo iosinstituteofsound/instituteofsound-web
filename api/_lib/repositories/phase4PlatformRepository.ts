@@ -476,3 +476,171 @@ export async function repoDiscoverPremiereFeed(
   if (error) throw new Error(error.message)
   return (data ?? []).map((row: Record<string, unknown>) => mapPremiereRow(row))
 }
+
+export type DiscoverPremierePickRowDto = {
+  id: string
+  trackId: string
+  profileId: string
+  trackTitle: string
+  artistName: string
+  artistSlug: string
+  badge: 'wire_pick' | 'hot' | 'new'
+  sortOrder: number
+  createdAt: string
+}
+
+export async function repoListDiscoverPremierePicksForDesk(
+  supabase: SupabaseClient,
+): Promise<DiscoverPremierePickRowDto[]> {
+  const { data, error } = await supabase
+    .from('discover_premiere_picks')
+    .select('id, track_id, profile_id, badge, sort_order, created_at')
+    .eq('active', true)
+    .order('sort_order')
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+
+  const rows: DiscoverPremierePickRowDto[] = []
+  for (const row of data ?? []) {
+    const [{ data: prof }, { data: tr }] = await Promise.all([
+      supabase
+        .from('artist_profiles')
+        .select('slug, display_name')
+        .eq('id', row.profile_id)
+        .maybeSingle(),
+      supabase.from('artist_tracks').select('title').eq('id', row.track_id).maybeSingle(),
+    ])
+    if (!prof || !tr) continue
+    rows.push({
+      id: row.id,
+      trackId: row.track_id,
+      profileId: row.profile_id,
+      trackTitle: tr.title,
+      artistName: prof.display_name,
+      artistSlug: prof.slug,
+      badge: row.badge as DiscoverPremierePickRowDto['badge'],
+      sortOrder: row.sort_order ?? 0,
+      createdAt: row.created_at,
+    })
+  }
+  return rows
+}
+
+export type PremierePickSearchHitDto = {
+  profile: { id: string; slug: string; displayName: string }
+  track: {
+    id: string
+    profileId: string
+    albumId?: string
+    title: string
+    streamUrl: string
+    coverUrl?: string
+    playCount: number
+    sortOrder: number
+    createdAt: string
+  }
+}
+
+export async function repoSearchArtistTracksForPremierePick(
+  supabase: SupabaseClient,
+  query: string,
+): Promise<PremierePickSearchHitDto[]> {
+  const q = query.trim().toLowerCase()
+  if (!q) return []
+
+  const { data: profiles, error } = await supabase
+    .from('artist_profiles')
+    .select('id, slug, display_name, genres, published')
+    .eq('published', true)
+    .or(`slug.ilike.%${q}%,display_name.ilike.%${q}%`)
+    .limit(8)
+
+  if (error) throw new Error(error.message)
+  const out: PremierePickSearchHitDto[] = []
+
+  for (const row of profiles ?? []) {
+    const { data: byTitle } = await supabase
+      .from('artist_tracks')
+      .select('*')
+      .eq('profile_id', row.id)
+      .ilike('title', `%${q}%`)
+      .limit(8)
+    const tracks =
+      byTitle && byTitle.length > 0
+        ? byTitle
+        : ((await supabase.from('artist_tracks').select('*').eq('profile_id', row.id).limit(8))
+            .data ?? [])
+
+    for (const t of tracks) {
+      out.push({
+        profile: {
+          id: row.id,
+          slug: row.slug,
+          displayName: row.display_name,
+        },
+        track: {
+          id: t.id,
+          profileId: t.profile_id,
+          albumId: t.album_id ?? undefined,
+          title: t.title,
+          streamUrl: t.stream_url,
+          coverUrl: t.cover_url ?? undefined,
+          playCount: t.play_count ?? 0,
+          sortOrder: t.sort_order ?? 0,
+          createdAt: t.created_at,
+        },
+      })
+    }
+  }
+  return out.slice(0, 12)
+}
+
+export async function repoAddDiscoverPremierePick(
+  supabase: SupabaseClient,
+  input: {
+    trackId: string
+    profileId: string
+    pickedBy: string
+    badge?: 'wire_pick' | 'hot' | 'new'
+    sortOrder?: number
+  },
+): Promise<void> {
+  const badge = input.badge ?? 'wire_pick'
+  const { error } = await supabase.from('discover_premiere_picks').upsert(
+    {
+      track_id: input.trackId,
+      profile_id: input.profileId,
+      picked_by: input.pickedBy,
+      badge,
+      sort_order: input.sortOrder ?? 0,
+      active: true,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'track_id' },
+  )
+  if (error) throw new Error(error.message)
+}
+
+export async function repoRemoveDiscoverPremierePick(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from('discover_premiere_picks')
+    .update({ active: false, updated_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function repoUpgradeToArtist(
+  supabase: SupabaseClient,
+  displayName: string,
+  slug?: string | null,
+): Promise<void> {
+  const { error } = await supabase.rpc('upgrade_to_artist', {
+    p_display_name: displayName,
+    p_slug: slug?.trim() || null,
+  })
+  if (error) throw new Error(error.message)
+}

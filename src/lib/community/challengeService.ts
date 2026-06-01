@@ -1,5 +1,4 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
 import { v1EvaluateWeeklyChallenges, v1GetWeeklyChallenges } from '@/api/v1Phase5Client'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
 import { COMMUNITY_BADGE_EVENT } from '@/lib/community/grantBadge'
@@ -85,64 +84,24 @@ export async function fetchWeeklyChallenges(): Promise<WeeklyChallenge[]> {
     return defaultChallenges()
   }
 
-  return viaV1Api(
-    async () => {
-      const { challenges } = await v1GetWeeklyChallenges()
-      return challenges
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { data, error } = await supabase.rpc('community_weekly_challenges')
-
-      if (error) {
-        console.warn('[community] challenges', error.message)
-        return defaultChallenges()
-      }
-
-      return (data ?? []).map(
-        (row: {
-          slug: string
-          title: string
-          description: string
-          target: number
-          progress: number
-          reward_db: number
-          completed: boolean
-        }) => ({
-          slug: row.slug,
-          title: row.title,
-          description: row.description,
-          target: row.target,
-          progress: row.progress,
-          rewardDb: row.reward_db,
-          completed: row.completed,
-        })
-      )
-    },
-  )
+  try {
+    const { challenges } = await v1GetWeeklyChallenges()
+    return challenges
+  } catch (err) {
+    console.warn('[community] challenges', err instanceof Error ? err.message : err)
+    return defaultChallenges()
+  }
 }
 
 export async function evaluateWeeklyChallenges(): Promise<number> {
   if (!isSupabaseConfigured()) return 0
 
-  const granted = await viaV1Api(
-    async () => {
-      const { granted: n } = await v1EvaluateWeeklyChallenges()
-      return n
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { data, error } = await supabase.rpc('community_evaluate_weekly_challenges')
-
-      if (error) {
-        console.warn('[community] evaluate challenges', error.message)
-        return 0
-      }
-
-      return typeof data === 'number' ? data : 0
-    },
-  )
-
-  if (granted > 0) notifyChallenges()
-  return granted
+  try {
+    const { granted: n } = await v1EvaluateWeeklyChallenges()
+    if (n > 0) notifyChallenges()
+    return n
+  } catch (err) {
+    console.warn('[community] evaluate challenges', err instanceof Error ? err.message : err)
+    return 0
+  }
 }

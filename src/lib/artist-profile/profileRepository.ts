@@ -22,6 +22,21 @@ export async function repoGetArtistProfileByUserId(
   return data ? mapArtistProfileRow(data as ArtistProfileRow) : null
 }
 
+export async function repoGetArtistPublicLinkById(
+  supabase: SupabaseClient,
+  profileId: string,
+): Promise<{ slug: string; displayName: string } | null> {
+  const { data, error } = await supabase
+    .from('artist_profiles')
+    .select('slug, display_name')
+    .eq('id', profileId)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  if (!data) return null
+  return { slug: data.slug, displayName: data.display_name }
+}
+
 export async function repoGetArtistProfileBySlug(
   supabase: SupabaseClient,
   slug: string,

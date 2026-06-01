@@ -193,6 +193,16 @@ export async function handleV1Verification(
     return true
   }
 
+  if (pathname === '/api/v1/verification/notifications/sync-desk' && req.method === 'POST') {
+    await handleSyncDeskNotifications(req, res)
+    return true
+  }
+
+  if (pathname === '/api/v1/verification/notifications/sync-member' && req.method === 'POST') {
+    await handleSyncMemberNotifications(req, res)
+    return true
+  }
+
   res.status(404).json({ error: 'Not found' })
   return true
 }
@@ -373,5 +383,31 @@ async function handleRespondClaim(req: ApiRequest, res: ApiResponse) {
     return res.status(200).json({ ok: true })
   } catch (err) {
     return res.status(400).json({ error: err instanceof Error ? err.message : 'Update failed' })
+  }
+}
+
+async function handleSyncDeskNotifications(req: ApiRequest, res: ApiResponse) {
+  const auth = await requireAuth(req)
+  if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
+  const supabase = createSupabaseUserClient(auth.accessToken)
+  try {
+    const { error } = await supabase.rpc('sync_verification_desk_notifications')
+    if (error) throw new Error(error.message)
+    return res.status(200).json({ ok: true })
+  } catch (err) {
+    return res.status(500).json({ error: err instanceof Error ? err.message : 'Sync failed' })
+  }
+}
+
+async function handleSyncMemberNotifications(req: ApiRequest, res: ApiResponse) {
+  const auth = await requireAuth(req)
+  if ('error' in auth) return res.status(auth.status).json({ error: auth.error })
+  const supabase = createSupabaseUserClient(auth.accessToken)
+  try {
+    const { error } = await supabase.rpc('sync_my_verification_notifications')
+    if (error) throw new Error(error.message)
+    return res.status(200).json({ ok: true })
+  } catch (err) {
+    return res.status(500).json({ error: err instanceof Error ? err.message : 'Sync failed' })
   }
 }

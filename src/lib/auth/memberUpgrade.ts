@@ -1,5 +1,5 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { fetchUserProfile } from '@/lib/auth/profile'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { v1UpgradeToArtist } from '@/api/v1Phase4Client'
 import type { User } from '@/lib/auth/types'
 import { getUsers, saveUsers } from '@/lib/auth/storage'
 
@@ -16,13 +16,11 @@ export async function upgradeToArtist(
   if (!displayName) throw new Error('Artist / project name is required')
 
   if (isSupabaseConfigured()) {
-    const supabase = getSupabase()
-    const { error } = await supabase.rpc('upgrade_to_artist', {
-      p_display_name: displayName,
-      p_slug: input.slug?.trim() || null,
+    const { user: updated } = await v1UpgradeToArtist({
+      displayName,
+      slug: input.slug?.trim() || undefined,
     })
-    if (error) throw new Error(error.message)
-    return fetchUserProfile(user.id)
+    return updated
   }
 
   const users = getUsers()

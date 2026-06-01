@@ -433,3 +433,26 @@ export async function repoListPublishedEditorials(
   if (error) throw new Error(error.message)
   return (data as DraftRow[]).map(rowToPublished)
 }
+
+export type EditorProfileDto = {
+  id: string
+  name: string
+  username?: string
+}
+
+export async function repoGetEditorProfiles(
+  supabase: SupabaseClient,
+  ids: string[],
+): Promise<EditorProfileDto[]> {
+  const unique = [...new Set(ids.filter(Boolean))]
+  if (unique.length === 0) return []
+
+  const { data, error } = await supabase.rpc('get_editor_profiles', { p_ids: unique })
+  if (error) throw new Error(error.message)
+
+  return (data ?? []).map((row: { id: string; name: string; username: string | null }) => ({
+    id: row.id,
+    name: row.name,
+    username: row.username ?? undefined,
+  }))
+}

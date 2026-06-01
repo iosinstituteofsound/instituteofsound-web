@@ -49,6 +49,7 @@ import type {
 } from '../../../src/lib/artist-profile/types.js'
 import { queryParam, type ApiRequest, type ApiResponse } from '../http.js'
 import { requireQueryParam, requireValidatedBody } from '../validate.js'
+import { repoTouchArtistActivity as repoTouchArtistPageActivityRpc } from '../../../src/lib/community/feedRepository.js'
 import {
   artistAlbumCreateBody,
   artistAlbumDeleteBody,
@@ -161,6 +162,26 @@ export async function handleV1ArtistStudio(
       return send(res, 200, {
         studio: { profile, tracks, albums, videos, merch, lineup, bioTimeline },
       })
+    } catch (err) {
+      return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
+    }
+  }
+
+  if (pathname === '/api/v1/artist/activity/touch' && req.method === 'POST') {
+    const auth = await requireAuth(req)
+    if ('error' in auth) return send(res, auth.status, { error: auth.error })
+    const supabase = createSupabaseUserClient(auth.accessToken)
+    const profileId =
+      typeof req.body === 'object' && req.body !== null && 'profileId' in req.body
+        ? String((req.body as { profileId?: string }).profileId ?? '').trim()
+        : ''
+    try {
+      if (profileId) {
+        await repoTouchArtistActivity(supabase, profileId)
+      } else {
+        await repoTouchArtistPageActivityRpc(supabase, auth.authUser.id)
+      }
+      return send(res, 200, { ok: true })
     } catch (err) {
       return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
     }

@@ -408,3 +408,15 @@ export const playlistCuratorDeskReviewBody = z.object({
   decision: z.enum(['approved', 'rejected']),
   notes: zMediumText.optional(),
 })
+
+export const premierePickCreateBody = z.object({
+  trackId: zUuid,
+  profileId: zUuid,
+  badge: z.enum(['wire_pick', 'hot', 'new']).optional(),
+  sortOrder: z.number().int().min(0).max(1000).optional(),
+})
+
+export const memberUpgradeArtistBody = z.object({
+  displayName: z.string().trim().min(1).max(120),
+  slug: zSlug.optional(),
+})

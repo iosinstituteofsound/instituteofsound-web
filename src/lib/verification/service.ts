@@ -1,5 +1,4 @@
 import {
-  isV1ApiEnabled,
   v1CreateRelationshipClaim,
   v1GetMyVerificationRequests,
   v1ListIncomingClaims,
@@ -9,8 +8,7 @@ import {
   v1ReviewVerificationRequest,
   v1SubmitRoleVerification,
 } from '@/api/v1Client'
-import { assertDirectSupabaseAllowed } from '@/lib/api/v1Security'
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
 import {
   notifyDeskStaffOfVerificationRequest,
   notifyMemberVerificationDecision,
@@ -41,10 +39,6 @@ function write<T>(key: string, value: T) {
 
 function cleanLinks(links: string[]): string[] {
   return links.map((l) => l.trim()).filter(Boolean)
-}
-
-function normalizeHandle(raw: string): string {
-  return raw.trim().replace(/^@/, '').toLowerCase()
 }
 
 function roleProofError(input: SubmitRoleVerificationInput): string | null {
@@ -86,26 +80,8 @@ export async function submitRoleVerificationRequest(
     throw new Error('Your verification is already under review.')
   }
 
-  const payload = {
-    user_id: userId,
-    role_type: input.roleType,
-    proof_links: cleanLinks(input.proofLinks),
-    artist_confirmation_link: input.artistConfirmationLink?.trim() || null,
-    website_domain: input.websiteDomain?.trim() || null,
-    official_email: input.officialEmail?.trim() || null,
-    venue_partner_reference: input.venuePartnerReference?.trim() || null,
-    status: 'pending',
-  }
-
   if (isSupabaseConfigured()) {
-    if (isV1ApiEnabled()) {
-      await v1SubmitRoleVerification(input)
-      return
-    }
-    assertDirectSupabaseAllowed('Verification')
-    const supabase = getSupabase()
-    const { error } = await supabase.from('role_verification_requests').insert(payload)
-    if (error) throw new Error(error.message)
+    await v1SubmitRoleVerification(input)
     return
   }
 
@@ -115,7 +91,7 @@ export async function submitRoleVerificationRequest(
     id: requestId,
     userId,
     roleType: input.roleType,
-    proofLinks: payload.proof_links,
+    proofLinks: cleanLinks(input.proofLinks),
     artistConfirmationLink: input.artistConfirmationLink,
     websiteDomain: input.websiteDomain,
     officialEmail: input.officialEmail,
@@ -130,34 +106,8 @@ export async function submitRoleVerificationRequest(
 
 export async function getMyRoleVerificationRequests(userId: string): Promise<RoleVerificationRequest[]> {
   if (isSupabaseConfigured()) {
-    if (isV1ApiEnabled()) {
-      const { requests } = await v1GetMyVerificationRequests()
-      return requests
-    }
-    assertDirectSupabaseAllowed('Verification')
-    const supabase = getSupabase()
-    const { data, error } = await supabase
-      .from('role_verification_requests')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-    if (error) throw new Error(error.message)
-    return (data ?? []).map((row) => ({
-      id: row.id,
-      userId: row.user_id,
-      userName: row.profile?.name ?? undefined,
-      userHandle: row.profile?.username ?? undefined,
-      roleType: row.role_type,
-      proofLinks: row.proof_links ?? [],
-      artistConfirmationLink: row.artist_confirmation_link ?? undefined,
-      websiteDomain: row.website_domain ?? undefined,
-      officialEmail: row.official_email ?? undefined,
-      venuePartnerReference: row.venue_partner_reference ?? undefined,
-      status: row.status,
-      reviewNotes: row.review_notes ?? undefined,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    }))
+    const { requests } = await v1GetMyVerificationRequests()
+    return requests
   }
 
   return read<RoleVerificationRequest[]>(LOCAL_REQUESTS_KEY, []).filter((r) => r.userId === userId)
@@ -165,33 +115,8 @@ export async function getMyRoleVerificationRequests(userId: string): Promise<Rol
 
 export async function listVerificationRequestsForReview(): Promise<RoleVerificationRequest[]> {
   if (isSupabaseConfigured()) {
-    if (isV1ApiEnabled()) {
-      const { requests } = await v1ListVerificationDeskRequests()
-      return requests
-    }
-    assertDirectSupabaseAllowed('Verification')
-    const supabase = getSupabase()
-    const { data, error } = await supabase
-      .from('role_verification_requests')
-      .select('*, profile:profiles!role_verification_requests_user_id_fkey(name, username)')
-      .order('created_at', { ascending: false })
-    if (error) throw new Error(error.message)
-    return (data ?? []).map((row) => ({
-      id: row.id,
-      userId: row.user_id,
-      userName: row.profile?.name ?? undefined,
-      userHandle: row.profile?.username ?? undefined,
-      roleType: row.role_type,
-      proofLinks: row.proof_links ?? [],
-      artistConfirmationLink: row.artist_confirmation_link ?? undefined,
-      websiteDomain: row.website_domain ?? undefined,
-      officialEmail: row.official_email ?? undefined,
-      venuePartnerReference: row.venue_partner_reference ?? undefined,
-      status: row.status,
-      reviewNotes: row.review_notes ?? undefined,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    }))
+    const { requests } = await v1ListVerificationDeskRequests()
+    return requests
   }
   return read<RoleVerificationRequest[]>(LOCAL_REQUESTS_KEY, [])
 }
@@ -202,22 +127,7 @@ export async function reviewRoleVerificationRequest(
   notes?: string
 ) {
   if (isSupabaseConfigured()) {
-    if (isV1ApiEnabled()) {
-      await v1ReviewVerificationRequest({ requestId, decision, notes })
-      return
-    }
-    assertDirectSupabaseAllowed('Verification')
-    const supabase = getSupabase()
-    const { error } = await supabase
-      .from('role_verification_requests')
-      .update({
-        status: decision,
-        review_notes: notes?.trim() || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', requestId)
-      .eq('status', 'pending')
-    if (error) throw new Error(error.message)
+    await v1ReviewVerificationRequest({ requestId, decision, notes })
     return
   }
   const list = read<RoleVerificationRequest[]>(LOCAL_REQUESTS_KEY, [])
@@ -279,14 +189,8 @@ export async function syncApprovedVerificationPersona(userId: string): Promise<b
   return true
 }
 
-async function findUserByHandle(handle: string): Promise<{ id: string; name: string } | null> {
-  const h = normalizeHandle(handle)
-  if (!h) return null
-  if (!isSupabaseConfigured()) return null
-  const supabase = getSupabase()
-  const { data, error } = await supabase.from('profiles').select('id, name').eq('username', h).maybeSingle()
-  if (error) throw new Error(error.message)
-  return data ? { id: data.id, name: data.name } : null
+async function findUserByHandle(_handle: string): Promise<{ id: string; name: string } | null> {
+  return null
 }
 
 export async function createRelationshipClaim(input: {
@@ -298,33 +202,20 @@ export async function createRelationshipClaim(input: {
 }) {
   const links = cleanLinks(input.evidenceLinks)
   if (links.length < 1) throw new Error('At least one evidence link required.')
+
+  if (isSupabaseConfigured()) {
+    await v1CreateRelationshipClaim({
+      claimType: input.claimType,
+      targetHandle: input.targetHandle,
+      evidenceLinks: input.evidenceLinks,
+      note: input.note,
+    })
+    return
+  }
+
   const target = await findUserByHandle(input.targetHandle)
   if (!target) throw new Error('Target handle not found. Ask user to set a public @username first.')
   if (target.id === input.claimantUserId) throw new Error('Cannot claim yourself.')
-
-  if (isSupabaseConfigured()) {
-    if (isV1ApiEnabled()) {
-      await v1CreateRelationshipClaim({
-        claimType: input.claimType,
-        targetHandle: input.targetHandle,
-        evidenceLinks: input.evidenceLinks,
-        note: input.note,
-      })
-      return
-    }
-    assertDirectSupabaseAllowed('Verification')
-    const supabase = getSupabase()
-    const { error } = await supabase.from('relationship_claims').insert({
-      claim_type: input.claimType,
-      claimant_user_id: input.claimantUserId,
-      target_user_id: target.id,
-      evidence_links: links,
-      note: input.note?.trim() || null,
-      status: 'pending',
-    })
-    if (error) throw new Error(error.message)
-    return
-  }
 
   const list = read<RelationshipClaim[]>(LOCAL_CLAIMS_KEY, [])
   list.unshift({
@@ -343,80 +234,25 @@ export async function createRelationshipClaim(input: {
   write(LOCAL_CLAIMS_KEY, list)
 }
 
-function mapClaimRow(row: any): RelationshipClaim {
-  return {
-    id: row.id,
-    claimType: row.claim_type,
-    claimantUserId: row.claimant_user_id,
-    claimantName: row.claimant?.name ?? 'Unknown',
-    claimantHandle: row.claimant?.username ?? undefined,
-    targetUserId: row.target_user_id,
-    targetName: row.target?.name ?? 'Unknown',
-    targetHandle: row.target?.username ?? undefined,
-    evidenceLinks: row.evidence_links ?? [],
-    note: row.note ?? undefined,
-    status: row.status,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  }
-}
-
 export async function listIncomingClaims(userId: string): Promise<RelationshipClaim[]> {
   if (isSupabaseConfigured()) {
-    if (isV1ApiEnabled()) {
-      const { claims } = await v1ListIncomingClaims()
-      return claims
-    }
-    assertDirectSupabaseAllowed('Verification')
-    const supabase = getSupabase()
-    const { data, error } = await supabase
-      .from('relationship_claims')
-      .select(
-        'id, claim_type, claimant_user_id, target_user_id, evidence_links, note, status, created_at, updated_at, claimant:profiles!relationship_claims_claimant_user_id_fkey(name, username), target:profiles!relationship_claims_target_user_id_fkey(name, username)'
-      )
-      .eq('target_user_id', userId)
-      .order('created_at', { ascending: false })
-    if (error) throw new Error(error.message)
-    return (data ?? []).map(mapClaimRow)
+    const { claims } = await v1ListIncomingClaims()
+    return claims
   }
   return read<RelationshipClaim[]>(LOCAL_CLAIMS_KEY, []).filter((c) => c.targetUserId === userId)
 }
 
 export async function listOutgoingClaims(userId: string): Promise<RelationshipClaim[]> {
   if (isSupabaseConfigured()) {
-    if (isV1ApiEnabled()) {
-      const { claims } = await v1ListOutgoingClaims()
-      return claims
-    }
-    assertDirectSupabaseAllowed('Verification')
-    const supabase = getSupabase()
-    const { data, error } = await supabase
-      .from('relationship_claims')
-      .select(
-        'id, claim_type, claimant_user_id, target_user_id, evidence_links, note, status, created_at, updated_at, claimant:profiles!relationship_claims_claimant_user_id_fkey(name, username), target:profiles!relationship_claims_target_user_id_fkey(name, username)'
-      )
-      .eq('claimant_user_id', userId)
-      .order('created_at', { ascending: false })
-    if (error) throw new Error(error.message)
-    return (data ?? []).map(mapClaimRow)
+    const { claims } = await v1ListOutgoingClaims()
+    return claims
   }
   return read<RelationshipClaim[]>(LOCAL_CLAIMS_KEY, []).filter((c) => c.claimantUserId === userId)
 }
 
 export async function respondToClaim(claimId: string, decision: 'approved' | 'rejected') {
   if (isSupabaseConfigured()) {
-    if (isV1ApiEnabled()) {
-      await v1RespondToClaim({ claimId, decision })
-      return
-    }
-    assertDirectSupabaseAllowed('Verification')
-    const supabase = getSupabase()
-    const { error } = await supabase
-      .from('relationship_claims')
-      .update({ status: decision, updated_at: new Date().toISOString() })
-      .eq('id', claimId)
-      .eq('status', 'pending')
-    if (error) throw new Error(error.message)
+    await v1RespondToClaim({ claimId, decision })
     return
   }
   const list = read<RelationshipClaim[]>(LOCAL_CLAIMS_KEY, [])
@@ -426,4 +262,3 @@ export async function respondToClaim(claimId: string, decision: 'approved' | 're
     write(LOCAL_CLAIMS_KEY, list)
   }
 }
-

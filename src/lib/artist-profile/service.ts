@@ -1,5 +1,5 @@
 import { getArtists } from '@/api/endpoints'
-import { isV1ApiEnabled, v1GetArtistProfile, v1PutArtistProfile } from '@/api/v1Client'
+import { v1GetArtistProfile, v1PutArtistProfile } from '@/api/v1Client'
 import {
   v1AddArtistAlbum,
   v1AddArtistBioTimeline,
@@ -23,20 +23,13 @@ import {
   v1UpdateArtistTrack,
   v1UpdateArtistVideo,
 } from '@/api/v1ArtistStudioClient'
-import { withV1Fallback } from '@/api/v1Fallback'
-import { viaV1Api } from '@/lib/api/v1Route'
-import { assertDirectSupabaseAllowed } from '@/lib/api/v1Security'
 import { v1ListDiscoverArtistProfiles, v1ListArtistProfilesForEditor } from '@/api/v1Phase5Client'
 import { isSupabaseConfigured } from '@/lib/supabase/client'
 import { getDrafts } from '@/lib/auth/storage'
 import type { Artist } from '@/types'
 import type { User } from '@/lib/auth/types'
 import { mergeDiscoverArtists } from './discover'
-import {
-  getProfileForUserDirect,
-  hideIfExpiredPublicPage,
-  touchArtistPageActivityByProfileId,
-} from './pageEnforcement'
+import { hideIfExpiredPublicPage, touchArtistPageActivityByProfileId } from './pageEnforcement'
 import { resolveArtistPageForViewer } from './profileVisibility'
 import type {
   ArtistEditorialFeature,
@@ -62,8 +55,6 @@ import { editorialExcerpt } from '@/lib/editorial/richText'
 import { fetchThumbnailFromUrl } from '@/lib/media/thumbnailFromUrl'
 import { enrichTracksWithThumbnails, enrichVideosWithThumbnails } from './enrichMedia'
 import * as local from './storage'
-import * as sb from './supabaseProfile'
-
 async function mapEditorial(
   rows: {
     id: string
@@ -120,18 +111,12 @@ function localEditorialForProfile(profileId: string): ArtistEditorialFeature[] {
 }
 
 export async function getProfileForUser(userId: string): Promise<ArtistProfile | null> {
-  if (isV1ApiEnabled() && isSupabaseConfigured()) {
-    return withV1Fallback(
-      async () => {
-        const { profile } = await v1GetArtistProfile()
-        if (!profile || profile.userId !== userId) return null
-        return profile
-      },
-      () => getProfileForUserDirect(userId),
-    )
+  if (!isSupabaseConfigured()) {
+    return local.localGetProfileByUserId(userId)
   }
-  assertDirectSupabaseAllowed('Artist profile')
-  return getProfileForUserDirect(userId)
+  const { profile } = await v1GetArtistProfile()
+  if (!profile || profile.userId !== userId) return null
+  return profile
 }
 
 export async function upsertArtistProfile(
@@ -144,19 +129,11 @@ export async function upsertArtistProfile(
     lastActivityAt: stamp,
     pageRefreshedAt: stamp,
   }
-  if (isV1ApiEnabled() && isSupabaseConfigured()) {
-    return withV1Fallback(
-      async () => {
-        const { profile } = await v1PutArtistProfile(payload)
-        return profile
-      },
-      async () => sb.supabaseUpsertProfile(user, payload),
-    )
+  if (!isSupabaseConfigured()) {
+    return local.localUpsertProfile(user, payload)
   }
-  assertDirectSupabaseAllowed('Artist profile')
-  return isSupabaseConfigured()
-    ? sb.supabaseUpsertProfile(user, payload)
-    : local.localUpsertProfile(user, payload)
+  const { profile } = await v1PutArtistProfile(payload)
+  return profile
 }
 
 export async function listManagedArtistsByHandle(
@@ -164,13 +141,8 @@ export async function listManagedArtistsByHandle(
 ): Promise<ManagedArtistSummary[]> {
   if (!isSupabaseConfigured()) return local.localListManagedArtistsByHandle(handle)
 
-  return viaV1Api(
-    async () => {
-      const { artists } = await v1ListManagedArtists(handle)
-      return artists
-    },
-    () => sb.supabaseListManagedArtistsByHandle(handle),
-  )
+  const { artists } = await v1ListManagedArtists(handle)
+  return artists
 }
 
 export type ArtistStudioChildData = {
@@ -200,84 +172,19 @@ export async function loadArtistStudioChildData(
     }
   }
 
-  return viaV1Api(
-    async () => {
-      const { studio } = await v1GetArtistStudio()
-      if (!studio || studio.profile.id !== profileId) {
-        throw new Error('Studio data unavailable for this profile.')
-      }
-      return {
-        tracks: studio.tracks,
-        albums: studio.albums,
-        videos: studio.videos,
-        merch: studio.merch,
-        lineup: studio.lineup,
-        bioTimeline: studio.bioTimeline,
-        trackCount: studio.tracks.length,
-        videoCount: studio.videos.length,
-      }
-    },
-    async () => {
-      const [tracks, albums, videos, merch, lineup, bioTimeline] = await Promise.all([
-        sb.supabaseGetTracks(profileId),
-        sb.supabaseGetAlbums(profileId),
-        sb.supabaseGetVideos(profileId),
-        sb.supabaseGetMerch(profileId),
-        sb.supabaseGetLineup(profileId),
-        sb.supabaseGetBioTimeline(profileId),
-      ])
-      return {
-        tracks,
-        albums,
-        videos,
-        merch,
-        lineup,
-        bioTimeline,
-        trackCount: tracks.length,
-        videoCount: videos.length,
-      }
-    },
-  )
-}
-
-async function directGetArtistProfilePage(slug: string): Promise<ArtistProfilePageData | null> {
-  const raw = await sb.supabaseGetProfileBySlug(slug)
-  if (!raw) return null
-  const [tracks, albums, videos, merch, lineup, bioTimeline, editorialRows] =
-    await Promise.all([
-      sb.supabaseGetTracks(raw.id),
-      sb.supabaseGetAlbums(raw.id),
-      sb.supabaseGetVideos(raw.id),
-      sb.supabaseGetMerch(raw.id),
-      sb.supabaseGetLineup(raw.id),
-      sb.supabaseGetBioTimeline(raw.id),
-      sb.supabaseGetEditorialForProfile(raw.id),
-    ])
-  const profile = hideIfExpiredPublicPage(raw, {
-    trackCount: tracks.length,
-    videoCount: videos.length,
-  })
-  if (!profile) return null
-  const [enrichedTracks, enrichedVideos] = await Promise.all([
-    enrichTracksWithThumbnails(tracks, true),
-    enrichVideosWithThumbnails(videos, true),
-  ])
-  const albumList = albums.filter((a) => a.releaseType === 'album')
-  const singles = albums.filter((a) => a.releaseType === 'single' || a.releaseType === 'ep')
-  const pickTrack = profile.artistPickTrackId
-    ? enrichedTracks.find((t) => t.id === profile.artistPickTrackId)
-    : enrichedTracks[0]
+  const { studio } = await v1GetArtistStudio()
+  if (!studio || studio.profile.id !== profileId) {
+    throw new Error('Studio data unavailable for this profile.')
+  }
   return {
-    profile,
-    tracks: enrichedTracks,
-    albums: albumList,
-    singles,
-    videos: enrichedVideos,
-    merch,
-    lineup,
-    bioTimeline,
-    editorial: await mapEditorial(editorialRows),
-    pickTrack,
+    tracks: studio.tracks,
+    albums: studio.albums,
+    videos: studio.videos,
+    merch: studio.merch,
+    lineup: studio.lineup,
+    bioTimeline: studio.bioTimeline,
+    trackCount: studio.tracks.length,
+    videoCount: studio.videos.length,
   }
 }
 
@@ -310,14 +217,9 @@ async function finalizeArtistPage(page: NonNullable<Awaited<ReturnType<typeof v1
 
 export async function getArtistProfilePage(slug: string): Promise<ArtistProfilePageData | null> {
   if (isSupabaseConfigured()) {
-    return viaV1Api(
-      async () => {
-        const { page } = await v1GetArtistPage(slug)
-        if (!page) return null
-        return finalizeArtistPage(page)
-      },
-      () => directGetArtistProfilePage(slug),
-    )
+    const { page } = await v1GetArtistPage(slug)
+    if (!page) return null
+    return finalizeArtistPage(page)
   }
 
   const raw = local.localGetProfileBySlug(slug)
@@ -354,13 +256,7 @@ async function bumpProfileActivity(profileId: string) {
 export async function addArtistAlbum(profileId: string, input: UpsertAlbumInput) {
   const row = !isSupabaseConfigured()
     ? local.localAddAlbum(profileId, input)
-    : await viaV1Api(
-        async () => {
-          const { album } = await v1AddArtistAlbum({ profileId, input })
-          return album
-        },
-        () => sb.supabaseAddAlbum(profileId, input),
-      )
+    : (await v1AddArtistAlbum({ profileId, input })).album
   await bumpProfileActivity(profileId)
   return row
 }
@@ -387,13 +283,7 @@ export async function addArtistTrack(profileId: string, input: UpsertTrackInput)
   const enriched = await trackWithThumbnail(input)
   const row = !isSupabaseConfigured()
     ? local.localAddTrack(profileId, enriched)
-    : await viaV1Api(
-        async () => {
-          const { track } = await v1AddArtistTrack({ profileId, input: enriched })
-          return track
-        },
-        () => sb.supabaseAddTrack(profileId, enriched),
-      )
+    : (await v1AddArtistTrack({ profileId, input: enriched })).track
   await bumpProfileActivity(profileId)
   return row
 }
@@ -402,13 +292,7 @@ export async function addArtistVideo(profileId: string, input: UpsertVideoInput)
   const enriched = await videoWithThumbnail(input)
   const row = !isSupabaseConfigured()
     ? local.localAddVideo(profileId, enriched)
-    : await viaV1Api(
-        async () => {
-          const { video } = await v1AddArtistVideo({ profileId, input: enriched })
-          return video
-        },
-        () => sb.supabaseAddVideo(profileId, enriched),
-      )
+    : (await v1AddArtistVideo({ profileId, input: enriched })).video
   await bumpProfileActivity(profileId)
   return row
 }
@@ -416,36 +300,21 @@ export async function addArtistVideo(profileId: string, input: UpsertVideoInput)
 export async function updateArtistTrack(trackId: string, input: UpsertTrackInput) {
   const enriched = await trackWithThumbnail(input)
   if (!isSupabaseConfigured()) return local.localUpdateTrack(trackId, enriched)
-  return viaV1Api(
-    async () => {
-      const { track } = await v1UpdateArtistTrack({ trackId, input: enriched })
-      return track
-    },
-    () => sb.supabaseUpdateTrack(trackId, enriched),
-  )
+  const { track } = await v1UpdateArtistTrack({ trackId, input: enriched })
+  return track
 }
 
 export async function updateArtistAlbum(albumId: string, input: UpsertAlbumInput) {
   if (!isSupabaseConfigured()) return local.localUpdateAlbum(albumId, input)
-  return viaV1Api(
-    async () => {
-      const { album } = await v1UpdateArtistAlbum({ albumId, input })
-      return album
-    },
-    () => sb.supabaseUpdateAlbum(albumId, input),
-  )
+  const { album } = await v1UpdateArtistAlbum({ albumId, input })
+  return album
 }
 
 export async function updateArtistVideo(videoId: string, input: UpsertVideoInput) {
   const enriched = await videoWithThumbnail(input)
   if (!isSupabaseConfigured()) return local.localUpdateVideo(videoId, enriched)
-  return viaV1Api(
-    async () => {
-      const { video } = await v1UpdateArtistVideo({ videoId, input: enriched })
-      return video
-    },
-    () => sb.supabaseUpdateVideo(videoId, enriched),
-  )
+  const { video } = await v1UpdateArtistVideo({ videoId, input: enriched })
+  return video
 }
 
 export async function deleteArtistAlbum(id: string) {
@@ -453,10 +322,7 @@ export async function deleteArtistAlbum(id: string) {
     local.localDeleteAlbum(id)
     return
   }
-  await viaV1Api(
-    () => v1DeleteArtistAlbum(id),
-    () => sb.supabaseDeleteAlbum(id),
-  )
+  await v1DeleteArtistAlbum(id)
 }
 
 export async function deleteArtistTrack(id: string) {
@@ -464,10 +330,7 @@ export async function deleteArtistTrack(id: string) {
     local.localDeleteTrack(id)
     return
   }
-  await viaV1Api(
-    () => v1DeleteArtistTrack(id),
-    () => sb.supabaseDeleteTrack(id),
-  )
+  await v1DeleteArtistTrack(id)
 }
 
 export async function deleteArtistVideo(id: string) {
@@ -475,34 +338,21 @@ export async function deleteArtistVideo(id: string) {
     local.localDeleteVideo(id)
     return
   }
-  await viaV1Api(
-    () => v1DeleteArtistVideo(id),
-    () => sb.supabaseDeleteVideo(id),
-  )
+  await v1DeleteArtistVideo(id)
 }
 
 export async function addArtistMerch(profileId: string, input: UpsertMerchInput) {
   const enriched = await merchWithThumbnail(input)
   if (!isSupabaseConfigured()) return local.localAddMerch(profileId, enriched)
-  return viaV1Api(
-    async () => {
-      const { merch } = await v1AddArtistMerch({ profileId, input: enriched })
-      return merch
-    },
-    () => sb.supabaseAddMerch(profileId, enriched),
-  )
+  const { merch } = await v1AddArtistMerch({ profileId, input: enriched })
+  return merch
 }
 
 export async function updateArtistMerch(merchId: string, input: UpsertMerchInput) {
   const enriched = await merchWithThumbnail(input)
   if (!isSupabaseConfigured()) return local.localUpdateMerch(merchId, enriched)
-  return viaV1Api(
-    async () => {
-      const { merch } = await v1UpdateArtistMerch({ merchId, input: enriched })
-      return merch
-    },
-    () => sb.supabaseUpdateMerch(merchId, enriched),
-  )
+  const { merch } = await v1UpdateArtistMerch({ merchId, input: enriched })
+  return merch
 }
 
 export async function deleteArtistMerch(id: string) {
@@ -510,32 +360,19 @@ export async function deleteArtistMerch(id: string) {
     local.localDeleteMerch(id)
     return
   }
-  await viaV1Api(
-    () => v1DeleteArtistMerch(id),
-    () => sb.supabaseDeleteMerch(id),
-  )
+  await v1DeleteArtistMerch(id)
 }
 
 export async function addArtistLineup(profileId: string, input: UpsertLineupInput) {
   if (!isSupabaseConfigured()) return local.localAddLineup(profileId, input)
-  return viaV1Api(
-    async () => {
-      const { entry } = await v1AddArtistLineup({ profileId, input })
-      return entry
-    },
-    () => sb.supabaseAddLineup(profileId, input),
-  )
+  const { entry } = await v1AddArtistLineup({ profileId, input })
+  return entry
 }
 
 export async function updateArtistLineup(entryId: string, input: UpsertLineupInput) {
   if (!isSupabaseConfigured()) return local.localUpdateLineup(entryId, input)
-  return viaV1Api(
-    async () => {
-      const { entry } = await v1UpdateArtistLineup({ entryId, input })
-      return entry
-    },
-    () => sb.supabaseUpdateLineup(entryId, input),
-  )
+  const { entry } = await v1UpdateArtistLineup({ entryId, input })
+  return entry
 }
 
 export async function deleteArtistLineup(id: string) {
@@ -543,35 +380,21 @@ export async function deleteArtistLineup(id: string) {
     local.localDeleteLineup(id)
     return
   }
-  await viaV1Api(
-    () => v1DeleteArtistLineup(id),
-    () => sb.supabaseDeleteLineup(id),
-  )
+  await v1DeleteArtistLineup(id)
 }
 
 export async function addArtistBioTimeline(profileId: string, input: UpsertBioTimelineInput) {
   const row = !isSupabaseConfigured()
     ? local.localAddBioTimeline(profileId, input)
-    : await viaV1Api(
-        async () => {
-          const { entry } = await v1AddArtistBioTimeline({ profileId, input })
-          return entry
-        },
-        () => sb.supabaseAddBioTimeline(profileId, input),
-      )
+    : (await v1AddArtistBioTimeline({ profileId, input })).entry
   await bumpProfileActivity(profileId)
   return row
 }
 
 export async function updateArtistBioTimeline(entryId: string, input: UpsertBioTimelineInput) {
   if (!isSupabaseConfigured()) return local.localUpdateBioTimeline(entryId, input)
-  return viaV1Api(
-    async () => {
-      const { entry } = await v1UpdateArtistBioTimeline({ entryId, input })
-      return entry
-    },
-    () => sb.supabaseUpdateBioTimeline(entryId, input),
-  )
+  const { entry } = await v1UpdateArtistBioTimeline({ entryId, input })
+  return entry
 }
 
 export async function deleteArtistBioTimeline(id: string) {
@@ -579,34 +402,20 @@ export async function deleteArtistBioTimeline(id: string) {
     local.localDeleteBioTimeline(id)
     return
   }
-  await viaV1Api(
-    () => v1DeleteArtistBioTimeline(id),
-    () => sb.supabaseDeleteBioTimeline(id),
-  )
+  await v1DeleteArtistBioTimeline(id)
 }
 
 export async function listArtistProfilesForEditor(): Promise<ArtistProfile[]> {
   if (!isSupabaseConfigured()) return local.localGetProfiles()
-  return viaV1Api(
-    async () => {
-      const { profiles } = await v1ListArtistProfilesForEditor()
-      return profiles
-    },
-    () => sb.supabaseListProfilesForEditor(),
-  )
+  const { profiles } = await v1ListArtistProfilesForEditor()
+  return profiles
 }
 
 /** Published artist profiles + legacy demo artists (deduped by slug) */
 export async function listDiscoverArtists(): Promise<Artist[]> {
   const legacy = await getArtists().catch(() => [] as Artist[])
   const published = isSupabaseConfigured()
-    ? await viaV1Api(
-        async () => {
-          const { profiles } = await v1ListDiscoverArtistProfiles()
-          return profiles
-        },
-        () => sb.supabaseListPublishedProfiles(),
-      )
+    ? (await v1ListDiscoverArtistProfiles()).profiles
     : local.localListPublishedProfiles()
   return mergeDiscoverArtists(published, legacy)
 }

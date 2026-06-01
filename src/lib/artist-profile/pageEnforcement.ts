@@ -1,8 +1,8 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { v1TouchArtistPageActivity } from '@/api/v1Client'
 import { evaluateArtistLifecycle } from '@/lib/artist-profile/pageLifecycle'
 import type { ArtistProfile } from '@/lib/artist-profile/types'
 import * as local from '@/lib/artist-profile/storage'
-import * as sb from '@/lib/artist-profile/supabaseProfile'
 
 /**
  * Public pages only: return null when lifecycle says the page should not be shown.
@@ -19,17 +19,11 @@ export function hideIfExpiredPublicPage(
 
 export async function touchArtistPageActivity(userId: string): Promise<void> {
   if (isSupabaseConfigured()) {
-    const profile = await sb.supabaseGetProfileByUserId(userId)
-    if (!profile) return
-    const supabase = getSupabase()
-    const { error } = await supabase.rpc('touch_artist_page_activity', {
-      p_profile_id: profile.id,
-    })
-    if (!error) return
-    if (!/touch_artist_page_activity|schema cache|could not find/i.test(error.message)) {
-      console.warn('[artist] touch activity rpc', error.message)
+    try {
+      await v1TouchArtistPageActivity()
+    } catch (err) {
+      console.warn('[artist] touch activity', err instanceof Error ? err.message : err)
     }
-    await sb.supabaseTouchActivity(profile.id)
     return
   }
   local.localTouchActivity(userId)
@@ -37,17 +31,15 @@ export async function touchArtistPageActivity(userId: string): Promise<void> {
 
 export async function touchArtistPageActivityByProfileId(profileId: string): Promise<void> {
   if (isSupabaseConfigured()) {
-    await sb.supabaseTouchActivity(profileId)
+    try {
+      await v1TouchArtistPageActivity(profileId)
+    } catch (err) {
+      console.warn('[artist] touch activity', err instanceof Error ? err.message : err)
+    }
     return
   }
   const profile = local.localGetProfiles().find((p) => p.id === profileId)
   if (profile) local.localTouchActivity(profile.userId)
-}
-
-export async function getProfileForUserDirect(userId: string): Promise<ArtistProfile | null> {
-  return isSupabaseConfigured()
-    ? sb.supabaseGetProfileByUserId(userId)
-    : local.localGetProfileByUserId(userId)
 }
 
 export function lifecycleDeletedMessage(reason: 'incomplete_draft_expired' | 'inactive_live_page'): string {

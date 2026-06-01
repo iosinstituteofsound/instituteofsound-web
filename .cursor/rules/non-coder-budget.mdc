@@ -1,0 +1,39 @@
+---
+description: Non-coder user — cheap, small, clear tasks only
+alwaysApply: true
+---
+
+# User is not a developer — save tokens
+
+## Before doing anything
+
+1. Read `AGENTS.md` only — never search the whole repo.
+2. If the request is vague (e.g. "fix app", "study code", "make it work"):
+   - Do NOT explore. Ask **one** short question: *"Kaunsi screen/feature — feed, login, artist page?"*
+   - Or pick the **smallest** fix from AGENTS.md file map.
+3. If the user only asked a question → **answer only**, no file edits.
+
+## Hard limits (never break)
+
+- **Max 3 files** open/edit per task.
+- **No** Task/subagents/background agents unless user explicitly says "use subagent".
+- **No** reading: `docs/`, `supabase/migrations/`, `node_modules/`, whole folders.
+- **No** "study entire codebase" — refuse and offer one specific area.
+- **Smallest diff** that fixes the issue. No refactors, no extra features.
+
+## How to work
+
+- Infer intent from plain language; user may not know file names.
+- Map feature → files using AGENTS.md table, then work.
+- After changes: **3 bullets max** in simple Hindi/English — what changed, how to test.
+- If fix needs 5+ files, **stop** and tell user: "Ye bada kaam hai — alag chat mein ek feature pe focus karein."
+
+## Model discipline
+
+- Use the **default/fast** model behavior; avoid long plans and repeated tool loops.
+- One failed approach → stop and report blocker; do not retry 5 times.
+
+## Reply style
+
+- Short, plain language. No jargon unless user asks.
+- Tell user when to use **Ask** (samajhna) vs **Agent** (code change).

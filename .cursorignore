@@ -1,0 +1,34 @@
+# Dependencies & build
+node_modules/
+dist/
+dist-ssr/
+experiments/
+.vercel/
+package-lock.json
+*.log
+api/_lib/v1.bundle.js
+
+# Heavy docs (use AGENTS.md instead)
+docs/
+
+# Schema history (only open one migration if SQL error names it)
+supabase/migrations/
+
+# Static assets
+public/
+*.svg
+*.png
+*.jpg
+*.webp
+*.ico
+
+# Academy lesson text (rarely needed for code tasks)
+src/lib/academy/content/
+
+# CI/scripts
+.github/
+scripts/
+
+# Maps & lockfiles
+*.map
+*.lock

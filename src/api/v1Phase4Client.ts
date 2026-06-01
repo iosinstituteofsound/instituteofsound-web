@@ -19,7 +19,7 @@ import type { CollabBoardPost, CreateCollabPostInput } from '@/lib/collab/types'
 import type { DmMessage, DmThreadHeader, DmThreadSummary } from '@/lib/dm/types'
 import type { AcademyProgressSnapshot } from '@/lib/academy/typesProgress'
 import type { PublishedEditorial } from '@/lib/editorial/published'
-import type { DiscoverPremiereCard } from '@/lib/discovery/premieres'
+import type { DiscoverPremiereCard, DiscoverPremierePickRow, PremiereBadge, PremierePickSearchHit } from '@/lib/discovery/premieres'
 import type { SceneHubData } from '@/lib/discovery/sceneService'
 import type {
   CreateDraftInput,
@@ -218,6 +218,54 @@ export async function v1PatchMemberProfile(input: UpdateProfileInput): Promise<{
 export async function v1GetDiscoverPremieres(limit = 24): Promise<{ cards: DiscoverPremiereCard[] }> {
   const params = new URLSearchParams({ limit: String(limit) })
   return v1Fetch(`/discovery/premieres?${params}`, { auth: 'optional' })
+}
+
+export async function v1ListDiscoverPremierePicksForDesk(): Promise<{
+  picks: DiscoverPremierePickRow[]
+}> {
+  return v1Fetch('/discovery/premiere-picks')
+}
+
+export async function v1SearchArtistTracksForPremierePick(
+  query: string,
+): Promise<{ results: PremierePickSearchHit[] }> {
+  const params = new URLSearchParams({ q: query })
+  return v1Fetch(`/discovery/premiere-picks/search?${params}`)
+}
+
+export async function v1AddDiscoverPremierePick(input: {
+  trackId: string
+  profileId: string
+  badge?: PremiereBadge
+  sortOrder?: number
+}): Promise<void> {
+  await v1Fetch('/discovery/premiere-picks', { method: 'POST', body: JSON.stringify(input) })
+}
+
+export async function v1RemoveDiscoverPremierePick(id: string): Promise<void> {
+  const params = new URLSearchParams({ id })
+  await v1Fetch(`/discovery/premiere-picks?${params}`, { method: 'DELETE' })
+}
+
+export async function v1GetEditorProfiles(
+  ids: string[],
+): Promise<{ profiles: { id: string; name: string; username?: string }[] }> {
+  const params = new URLSearchParams({ ids: ids.join(',') })
+  return v1Fetch(`/editorial/editor-profiles?${params}`, { auth: 'none' })
+}
+
+export async function v1GetArtistPublicLink(
+  profileId: string,
+): Promise<{ link: { slug: string; displayName: string } | null }> {
+  const params = new URLSearchParams({ profileId })
+  return v1Fetch(`/artist/public-link?${params}`, { auth: 'optional' })
+}
+
+export async function v1UpgradeToArtist(input: {
+  displayName: string
+  slug?: string
+}): Promise<{ user: User }> {
+  return v1Fetch('/me/upgrade-artist', { method: 'POST', body: JSON.stringify(input) })
 }
 
 export async function v1GetSceneHub(city: string, genre: string): Promise<{ hub: SceneHubData }> {

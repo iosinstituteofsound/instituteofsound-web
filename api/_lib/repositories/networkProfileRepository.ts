@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { memberHandleFromUser } from '../../../src/lib/community/memberProfileService.js'
 import { mapFeedRow, type FeedRow } from '../../../src/lib/community/feedRow.js'
 import type { CommunityFeedPost } from '../../../src/lib/community/feedTypes.js'
 import type { CommunityRank } from '../../../src/types/index.js'
@@ -300,4 +301,52 @@ export async function repoFetchCrewRoster(
       weeklyDb: Number(row.weekly_db),
     }),
   )
+}
+
+export type OnlineConnectionDto = {
+  userId: string
+  displayName: string
+  handle: string
+  avatarUrl?: string
+  lastSeenAt: string
+}
+
+export async function repoNetworkPingPresence(supabase: SupabaseClient): Promise<void> {
+  const { error } = await supabase.rpc('network_ping_presence')
+  if (error) throw new Error(error.message)
+}
+
+export async function repoNetworkOnlineConnections(
+  supabase: SupabaseClient,
+  windowMinutes: number,
+): Promise<OnlineConnectionDto[]> {
+  const { data, error } = await supabase.rpc('network_online_connections', {
+    p_window_minutes: windowMinutes,
+  })
+  if (error) throw new Error(error.message)
+
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    userId: String(row.user_id),
+    displayName: String(row.display_name),
+    handle: String(row.handle).replace(/^@/, ''),
+    avatarUrl: row.avatar_url ? String(row.avatar_url) : undefined,
+    lastSeenAt: String(row.last_seen_at),
+  }))
+}
+
+export async function repoFetchNetworkHandleForUserId(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('username, email')
+    .eq('id', userId)
+    .maybeSingle()
+
+  if (error || !data) return null
+  return memberHandleFromUser({
+    username: data.username ?? undefined,
+    email: data.email ?? '',
+  })
 }

@@ -1,7 +1,9 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
-import { v1ListPublishedEditorials } from '@/api/v1Phase4Client'
-import { mapDraft, type DraftRow } from '@/lib/supabase/mappers'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
+import {
+  v1ListPublishedEditorials,
+  v1GetEditorProfiles,
+  v1GetArtistPublicLink,
+} from '@/api/v1Phase4Client'
 import { getDrafts, getUsers } from '@/lib/auth/storage'
 import type { EditorialDraft } from '@/lib/auth/types'
 import { EDITORIAL_TYPE_CATEGORY } from '@/lib/editorial/labels'
@@ -22,17 +24,6 @@ export type PublishedEditorial = EditorialDraft & {
   publishedAt?: string
 }
 
-function rowToPublished(row: DraftRow): PublishedEditorial {
-  const draft = mapDraft(row)
-  const slug = row.slug?.trim() || slugifyArtistName(row.title)
-  return {
-    ...draft,
-    slug,
-    featuredOnHomepage: row.featured_on_homepage ?? row.type === 'feature',
-    publishedAt: row.published_at ?? row.updated_at,
-  }
-}
-
 function estimateReadTime(htmlOrText: string): string {
   const words = editorialExcerpt(htmlOrText, 50_000).split(/\s+/).filter(Boolean).length
   const mins = Math.max(1, Math.round(words / 220))
@@ -47,13 +38,8 @@ export async function fetchEditorProfilesForDrafts(
   if (unique.length === 0) return map
 
   if (isSupabaseConfigured()) {
-    const supabase = getSupabase()
-    const { data, error } = await supabase.rpc('get_editor_profiles', {
-      p_ids: unique,
-    })
-
-    if (error) throw new Error(error.message)
-    for (const row of data ?? []) {
+    const { profiles } = await v1GetEditorProfiles(unique)
+    for (const row of profiles) {
       map.set(row.id, {
         name: row.name,
         username: row.username ?? undefined,
@@ -177,18 +163,6 @@ async function enrichPublishedList(
   return rows.map((r) => enrichWithLiveEditor(r, editors))
 }
 
-async function supabaseListPublished(): Promise<PublishedEditorial[]> {
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('editorial_drafts')
-    .select('*')
-    .eq('status', 'published')
-    .order('published_at', { ascending: false, nullsFirst: false })
-
-  if (error) throw new Error(error.message)
-  return (data as DraftRow[]).map(rowToPublished)
-}
-
 function localListPublished(): PublishedEditorial[] {
   return getDrafts()
     .filter((d) => d.status === 'published')
@@ -205,14 +179,8 @@ export async function listPublishedEditorials(): Promise<PublishedEditorial[]> {
     return enrichPublishedList(localListPublished())
   }
 
-  const rows = await viaV1Api(
-    async () => {
-      const { editorials } = await v1ListPublishedEditorials()
-      return editorials
-    },
-    () => supabaseListPublished(),
-  )
-  return enrichPublishedList(rows)
+  const { editorials } = await v1ListPublishedEditorials()
+  return enrichPublishedList(editorials)
 }
 
 export async function listHomepageFeatures(): Promise<Feature[]> {
@@ -253,14 +221,13 @@ async function resolveArtistProfileLink(
   draft: PublishedEditorial
 ): Promise<{ slug?: string; name?: string }> {
   if (!draft.artistProfileId?.trim() || !isSupabaseConfigured()) return {}
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('artist_profiles')
-    .select('slug, display_name')
-    .eq('id', draft.artistProfileId)
-    .maybeSingle()
-  if (error || !data) return {}
-  return { slug: data.slug, name: data.display_name }
+  try {
+    const { link } = await v1GetArtistPublicLink(draft.artistProfileId)
+    if (!link) return {}
+    return { slug: link.slug, name: link.displayName }
+  } catch {
+    return {}
+  }
 }
 
 export async function getPublishedFeatureBySlug(

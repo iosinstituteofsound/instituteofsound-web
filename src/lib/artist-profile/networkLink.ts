@@ -1,6 +1,5 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
-import { v1GetNetworkProfileArtist } from '@/api/v1Client'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { v1GetNetworkProfileArtist, v1GetNetworkProfileHandle } from '@/api/v1Client'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { networkProfilePath } from '@/lib/community/networkPaths'
 
@@ -10,40 +9,13 @@ export async function fetchArtistSlugForUserId(userId: string): Promise<string |
   return meta?.slug ?? null
 }
 
-async function directFetchPublishedArtistMetaForUserId(
-  userId: string,
-): Promise<{ id: string; slug: string } | null> {
-  if (!isSupabaseConfigured()) return null
-
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('artist_profiles')
-    .select('id, slug')
-    .eq('user_id', userId)
-    .eq('published', true)
-    .maybeSingle()
-
-  if (error) {
-    console.warn('[artist] profile lookup', error.message)
-    return null
-  }
-  const slug = data?.slug?.trim()
-  if (!data?.id || !slug) return null
-  return { id: String(data.id), slug }
-}
-
 /** Published artist profile id + slug for releases and artist page links. */
 export async function fetchPublishedArtistMetaForUserId(
   userId: string,
 ): Promise<{ id: string; slug: string } | null> {
   if (!isSupabaseConfigured()) return null
-  return viaV1Api(
-    async () => {
-      const { artist } = await v1GetNetworkProfileArtist(userId)
-      return artist
-    },
-    () => directFetchPublishedArtistMetaForUserId(userId),
-  )
+  const { artist } = await v1GetNetworkProfileArtist(userId)
+  return artist
 }
 
 /** Network handle for artist page owner. */
@@ -52,18 +24,8 @@ export async function fetchNetworkHandleForUserId(
 ): Promise<string | null> {
   if (!isSupabaseConfigured()) return null
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('username, email')
-    .eq('id', userId)
-    .maybeSingle()
-
-  if (error || !data) return null
-  return memberHandleFromUser({
-    username: data.username ?? undefined,
-    email: data.email ?? '',
-  })
+  const { handle } = await v1GetNetworkProfileHandle(userId)
+  return handle
 }
 
 export function artistPagePath(slug: string): string {

@@ -439,3 +439,44 @@ export async function v1GetSuggestedPeople(limit = 6): Promise<{ people: Network
   const params = new URLSearchParams({ limit: String(limit) })
   return v1Fetch(`/network/people/suggested?${params}`, { auth: 'optional' })
 }
+
+export async function v1PingNetworkPresence(): Promise<void> {
+  await v1Fetch('/network/presence/ping', { method: 'POST' })
+}
+
+export async function v1FetchOnlineConnections(
+  windowMinutes = 3,
+): Promise<{
+  connections: {
+    userId: string
+    displayName: string
+    handle: string
+    avatarUrl?: string
+    lastSeenAt: string
+  }[]
+}> {
+  const params = new URLSearchParams({ windowMinutes: String(windowMinutes) })
+  return v1Fetch(`/network/presence/online?${params}`)
+}
+
+export async function v1GetNetworkProfileHandle(
+  userId: string,
+): Promise<{ handle: string | null }> {
+  const params = new URLSearchParams({ userId })
+  return v1Fetch(`/network/profile/handle?${params}`, { auth: 'optional' })
+}
+
+export async function v1TouchArtistPageActivity(profileId?: string): Promise<void> {
+  await v1Fetch('/artist/activity/touch', {
+    method: 'POST',
+    body: profileId ? JSON.stringify({ profileId }) : undefined,
+  })
+}
+
+export async function v1SyncVerificationDeskNotifications(): Promise<void> {
+  await v1Fetch('/verification/notifications/sync-desk', { method: 'POST' })
+}
+
+export async function v1SyncMemberVerificationNotifications(): Promise<void> {
+  await v1Fetch('/verification/notifications/sync-member', { method: 'POST' })
+}

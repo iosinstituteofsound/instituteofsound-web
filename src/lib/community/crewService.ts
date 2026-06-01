@@ -1,5 +1,4 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
 import { v1GetCrewWeeklyLeaderboard } from '@/api/v1Phase5Client'
 import {
   v1CreateCrew,
@@ -31,94 +30,11 @@ function notifyCrew() {
   window.dispatchEvent(new Event(COMMUNITY_DB_EVENT))
 }
 
-function mapMyCrew(row: {
-  crew_id: string
-  crew_name: string
-  crew_slug: string
-  invite_code: string
-  tagline: string | null
-  genre_slug: string | null
-  founder_id: string
-  my_role: string
-  member_count: number
-  weekly_db: number | string
-  max_members: number
-}): MyCrew {
-  return {
-    crewId: row.crew_id,
-    name: row.crew_name,
-    slug: row.crew_slug,
-    inviteCode: row.invite_code,
-    tagline: row.tagline ?? undefined,
-    genreSlug: row.genre_slug ?? undefined,
-    founderId: row.founder_id,
-    myRole: row.my_role as MyCrew['myRole'],
-    memberCount: row.member_count,
-    weeklyDb: Number(row.weekly_db),
-    maxMembers: row.max_members,
-  }
-}
-
-async function directFetchMyCrew(): Promise<MyCrew | null> {
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_my_crew')
-
-  if (error) {
-    console.warn('[community] my crew', error.message)
-    return null
-  }
-
-  const row = Array.isArray(data) ? data[0] : data
-  if (!row) return null
-  return mapMyCrew(row)
-}
-
 export async function fetchMyCrew(): Promise<MyCrew | null> {
   if (!isSupabaseConfigured()) return localGetMyCrew()
 
-  return viaV1Api(
-    async () => {
-      const { crew } = await v1GetMyCrew()
-      return crew
-    },
-    () => directFetchMyCrew(),
-  )
-}
-
-async function directFetchCrewRoster(crewId: string): Promise<CrewRosterMember[]> {
-  if (!isSupabaseConfigured()) {
-    const crew = localGetMyCrew()
-    if (!crew || crew.crewId !== crewId) return []
-    return []
-  }
-
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_crew_roster', { p_crew_id: crewId })
-
-  if (error) {
-    console.warn('[community] crew roster', error.message)
-    return []
-  }
-
-  return (data ?? []).map(
-    (row: {
-      user_id: string
-      display_name: string
-      handle: string
-      avatar_url: string | null
-      community_rank: string
-      role: string
-      weekly_db: number | string
-    }) => ({
-      userId: row.user_id,
-      name: row.display_name,
-      handle: row.handle.startsWith('@') ? row.handle : `@${row.handle}`,
-      avatarUrl: row.avatar_url ?? undefined,
-      rank: row.community_rank,
-      role: row.role as CrewRosterMember['role'],
-      weeklyDb: Number(row.weekly_db),
-    }),
-  )
+  const { crew } = await v1GetMyCrew()
+  return crew
 }
 
 export async function fetchCrewRoster(crewId: string): Promise<CrewRosterMember[]> {
@@ -127,55 +43,15 @@ export async function fetchCrewRoster(crewId: string): Promise<CrewRosterMember[
     if (!crew || crew.crewId !== crewId) return []
     return []
   }
-  return viaV1Api(
-    async () => {
-      const { roster } = await v1GetNetworkCrewRoster(crewId)
-      return roster
-    },
-    () => directFetchCrewRoster(crewId),
-  )
+  const { roster } = await v1GetNetworkCrewRoster(crewId)
+  return roster
 }
 
 export async function fetchCrewWeeklyLeaderboard(limit = 15): Promise<CrewLeaderboardEntry[]> {
   if (!isSupabaseConfigured()) return localGetCrewBoard().slice(0, limit)
 
-  return viaV1Api(
-    async () => {
-      const { entries } = await v1GetCrewWeeklyLeaderboard(limit)
-      return entries
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { data, error } = await supabase.rpc('community_crew_weekly_leaderboard', { lim: limit })
-
-      if (error) {
-        console.warn('[community] crew leaderboard', error.message)
-        return []
-      }
-
-      return (data ?? []).map(
-        (row: {
-          crew_id: string
-          crew_name: string
-          crew_slug: string
-          tagline: string | null
-          genre_slug: string | null
-          invite_code: string
-          member_count: number
-          weekly_db: number | string
-        }) => ({
-          crewId: row.crew_id,
-          name: row.crew_name,
-          slug: row.crew_slug,
-          tagline: row.tagline ?? undefined,
-          genreSlug: row.genre_slug ?? undefined,
-          inviteCode: row.invite_code,
-          memberCount: row.member_count,
-          weeklyDb: Number(row.weekly_db),
-        })
-      )
-    },
-  )
+  const { entries } = await v1GetCrewWeeklyLeaderboard(limit)
+  return entries
 }
 
 export async function createCrew(input: {
@@ -216,33 +92,16 @@ export async function createCrew(input: {
     return crew
   }
 
-  const crew = await viaV1Api(
-    async () => {
-      const { crew: created } = await v1CreateCrew({
-        name,
-        tagline: input.tagline,
-        genreSlug: input.genreSlug,
-      })
-      if (!created) throw new Error('Crew created but could not load details.')
-      return created
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { error } = await supabase.rpc('community_create_crew', {
-        p_name: name,
-        p_tagline: input.tagline?.trim() || null,
-        p_genre_slug: input.genreSlug || null,
-      })
-      if (error) throw new Error(error.message)
-      const loaded = await directFetchMyCrew()
-      if (!loaded) throw new Error('Crew created but could not load details.')
-      return loaded
-    },
-  )
+  const { crew: created } = await v1CreateCrew({
+    name,
+    tagline: input.tagline,
+    genreSlug: input.genreSlug,
+  })
+  if (!created) throw new Error('Crew created but could not load details.')
 
   void evaluateWeeklyChallenges()
   notifyCrew()
-  return crew
+  return created
 }
 
 export async function joinCrew(inviteCode: string): Promise<MyCrew> {
@@ -274,26 +133,13 @@ export async function joinCrew(inviteCode: string): Promise<MyCrew> {
     return crew
   }
 
-  const crew = await viaV1Api(
-    async () => {
-      const { crew: joined } = await v1JoinCrew(code)
-      if (!joined) throw new Error('Joined crew but could not load details.')
-      return joined
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { error } = await supabase.rpc('community_join_crew', { p_invite_code: code })
-      if (error) throw new Error(error.message)
-      const loaded = await directFetchMyCrew()
-      if (!loaded) throw new Error('Joined crew but could not load details.')
-      return loaded
-    },
-  )
+  const { crew: joined } = await v1JoinCrew(code)
+  if (!joined) throw new Error('Joined crew but could not load details.')
 
   void tryGrantBadge('crew_joined')
   void evaluateWeeklyChallenges()
   notifyCrew()
-  return crew
+  return joined
 }
 
 export async function leaveCrew(): Promise<void> {
@@ -303,14 +149,7 @@ export async function leaveCrew(): Promise<void> {
     return
   }
 
-  await viaV1Api(
-    () => v1LeaveCrew(),
-    async () => {
-      const supabase = getSupabase()
-      const { error } = await supabase.rpc('community_leave_crew')
-      if (error) throw new Error(error.message)
-    },
-  )
+  await v1LeaveCrew()
   notifyCrew()
 }
 
@@ -321,80 +160,13 @@ export async function disbandCrew(): Promise<void> {
     return
   }
 
-  await viaV1Api(
-    () => v1DisbandCrew(),
-    async () => {
-      const supabase = getSupabase()
-      const { error } = await supabase.rpc('community_disband_crew')
-      if (error) throw new Error(error.message)
-    },
-  )
+  await v1DisbandCrew()
   notifyCrew()
-}
-
-async function directFetchCrewForUserId(userId: string): Promise<PublicUserCrew | null> {
-  if (!isSupabaseConfigured()) return null
-
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('community_crew_members')
-    .select(
-      `
-      role,
-      community_crews (
-        id,
-        name,
-        slug,
-        tagline,
-        genre_slug,
-        member_count,
-        weekly_db
-      )
-    `,
-    )
-    .eq('user_id', userId)
-    .maybeSingle()
-
-  if (error) {
-    console.warn('[community] user crew', error.message)
-    return null
-  }
-
-  const crew = data?.community_crews as
-    | {
-        id: string
-        name: string
-        slug: string
-        tagline: string | null
-        genre_slug: string | null
-        member_count: number
-        weekly_db: number | string
-      }
-    | null
-    | undefined
-
-  if (!crew || !data) return null
-
-  return {
-    crewId: String(crew.id),
-    name: crew.name,
-    slug: crew.slug,
-    tagline: crew.tagline ?? undefined,
-    genreSlug: crew.genre_slug ?? undefined,
-    memberCount: crew.member_count,
-    weeklyDb: Number(crew.weekly_db),
-    role: (data.role === 'founder' ? 'founder' : 'member') as PublicUserCrew['role'],
-  }
 }
 
 /** Crew a user belongs to (for network profile crews tab). */
 export async function fetchCrewForUserId(userId: string): Promise<PublicUserCrew | null> {
   if (!isSupabaseConfigured()) return null
-  return viaV1Api(
-    async () => {
-      const { crew } = await v1GetNetworkProfileCrew(userId)
-      return crew
-    },
-    () => directFetchCrewForUserId(userId),
-  )
+  const { crew } = await v1GetNetworkProfileCrew(userId)
+  return crew
 }

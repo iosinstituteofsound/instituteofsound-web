@@ -19,6 +19,9 @@ import {
   repoFetchMemberPosts,
   repoFetchPublicMemberProfile,
   repoFetchPublishedArtistMeta,
+  repoNetworkPingPresence,
+  repoNetworkOnlineConnections,
+  repoFetchNetworkHandleForUserId,
 } from '../repositories/networkProfileRepository.js'
 import { queryParam, type ApiRequest, type ApiResponse } from '../http.js'
 import { requireValidatedBody } from '../validate.js'
@@ -127,6 +130,22 @@ export async function handleV1Network(
       return send(res, 200, { artist })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load artist meta'
+      return send(res, 500, { error: message })
+    }
+  }
+
+  if (pathname === '/api/v1/network/profile/handle' && req.method === 'GET') {
+    const userId = queryParam(req, 'userId')
+    if (!userId) return send(res, 400, { error: 'userId query required' })
+
+    const resolved = await resolveSupabaseForRequest(req)
+    if ('error' in resolved) return send(res, resolved.status, { error: resolved.error })
+
+    try {
+      const handle = await repoFetchNetworkHandleForUserId(resolved.supabase, userId)
+      return send(res, 200, { handle })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load handle'
       return send(res, 500, { error: message })
     }
   }
@@ -315,6 +334,40 @@ export async function handleV1Network(
       return send(res, 200, { people })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Search failed'
+      return send(res, 500, { error: message })
+    }
+  }
+
+  if (pathname === '/api/v1/network/presence/ping' && req.method === 'POST') {
+    const auth = await requireAuth(req)
+    if ('error' in auth) return send(res, auth.status, { error: auth.error })
+
+    const supabase = createSupabaseUserClient(auth.accessToken)
+
+    try {
+      await repoNetworkPingPresence(supabase)
+      return send(res, 200, { ok: true })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Presence ping failed'
+      return send(res, 500, { error: message })
+    }
+  }
+
+  if (pathname === '/api/v1/network/presence/online' && req.method === 'GET') {
+    const auth = await requireAuth(req)
+    if ('error' in auth) return send(res, auth.status, { error: auth.error })
+
+    const windowMinutes = Number(queryParam(req, 'windowMinutes') ?? 3)
+    const supabase = createSupabaseUserClient(auth.accessToken)
+
+    try {
+      const connections = await repoNetworkOnlineConnections(
+        supabase,
+        Number.isFinite(windowMinutes) ? windowMinutes : 3,
+      )
+      return send(res, 200, { connections })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load online connections'
       return send(res, 500, { error: message })
     }
   }

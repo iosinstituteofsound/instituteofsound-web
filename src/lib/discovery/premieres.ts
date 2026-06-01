@@ -1,6 +1,11 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
-import { v1GetDiscoverPremieres } from '@/api/v1Phase4Client'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
+import {
+  v1GetDiscoverPremieres,
+  v1ListDiscoverPremierePicksForDesk,
+  v1SearchArtistTracksForPremierePick,
+  v1AddDiscoverPremierePick,
+  v1RemoveDiscoverPremierePick,
+} from '@/api/v1Phase4Client'
 import * as local from '@/lib/artist-profile/storage'
 import type { ArtistProfile, ArtistTrack } from '@/lib/artist-profile/types'
 
@@ -80,43 +85,6 @@ function autoBadge(track: ArtistTrack): PremiereBadge | null {
   if (ageDays <= 14) return 'new'
   if (track.playCount >= 400) return 'hot'
   return null
-}
-
-function mapRow(row: {
-  track_id: string
-  track_title: string
-  cover_url: string | null
-  stream_url: string
-  play_count: number
-  track_created_at: string
-  profile_id: string
-  artist_slug: string
-  artist_name: string
-  genres: string[] | null
-  release_type: string
-  badge: string | null
-  is_editor_pick: boolean
-  hour_bucket: string
-}): DiscoverPremiereCard {
-  const rt = row.release_type === 'album' || row.release_type === 'ep' ? row.release_type : 'single'
-  const badge =
-    row.badge === 'wire_pick' || row.badge === 'hot' || row.badge === 'new' ? row.badge : null
-  return {
-    trackId: row.track_id,
-    trackTitle: row.track_title,
-    coverUrl: row.cover_url ?? undefined,
-    streamUrl: row.stream_url,
-    playCount: row.play_count ?? 0,
-    trackCreatedAt: row.track_created_at,
-    profileId: row.profile_id,
-    artistSlug: row.artist_slug,
-    artistName: row.artist_name,
-    genreLabel: genreLabel(row.genres),
-    releaseType: rt,
-    badge,
-    isEditorPick: row.is_editor_pick,
-    hourBucket: row.hour_bucket,
-  }
 }
 
 function readLocalPicks(): LocalPick[] {
@@ -200,28 +168,11 @@ function buildLocalFeed(limit: number): DiscoverPremiereCard[] {
   return cards.slice(0, limit)
 }
 
-async function directFetchDiscoverPremiereFeed(limit: number): Promise<DiscoverPremiereCard[]> {
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('discover_premiere_feed', { p_limit: limit })
-  if (error) {
-    console.warn('[premieres] feed', error.message)
-    return buildLocalFeed(limit)
-  }
-  return (data ?? []).map((row: Record<string, unknown>) =>
-    mapRow(row as Parameters<typeof mapRow>[0]),
-  )
-}
-
 export async function fetchDiscoverPremiereFeed(limit = 24): Promise<DiscoverPremiereCard[]> {
   if (!isSupabaseConfigured()) return buildLocalFeed(limit)
 
-  return viaV1Api(
-    async () => {
-      const { cards } = await v1GetDiscoverPremieres(limit)
-      return cards
-    },
-    () => directFetchDiscoverPremiereFeed(limit),
-  )
+  const { cards } = await v1GetDiscoverPremieres(limit)
+  return cards
 }
 
 export function filterPremiereCards(
@@ -272,40 +223,8 @@ export async function listDiscoverPremierePicksForDesk(): Promise<DiscoverPremie
       })
   }
 
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('discover_premiere_picks')
-    .select('id, track_id, profile_id, badge, sort_order, created_at')
-    .eq('active', true)
-    .order('sort_order')
-    .order('created_at', { ascending: false })
-
-  if (error) throw new Error(error.message)
-
-  const rows: DiscoverPremierePickRow[] = []
-  for (const row of data ?? []) {
-    const [{ data: prof }, { data: tr }] = await Promise.all([
-      supabase
-        .from('artist_profiles')
-        .select('slug, display_name')
-        .eq('id', row.profile_id)
-        .maybeSingle(),
-      supabase.from('artist_tracks').select('title').eq('id', row.track_id).maybeSingle(),
-    ])
-    if (!prof || !tr) continue
-    rows.push({
-      id: row.id,
-      trackId: row.track_id,
-      profileId: row.profile_id,
-      trackTitle: tr.title,
-      artistName: prof.display_name,
-      artistSlug: prof.slug,
-      badge: row.badge as PremiereBadge,
-      sortOrder: row.sort_order ?? 0,
-      createdAt: row.created_at,
-    })
-  }
-  return rows
+  const { picks } = await v1ListDiscoverPremierePicksForDesk()
+  return picks
 }
 
 export type PremierePickSearchHit = {
@@ -337,53 +256,8 @@ export async function searchArtistTracksForPremierePick(
     return out.slice(0, 12)
   }
 
-  const supabase = getSupabase()
-  const { data: profiles, error } = await supabase
-    .from('artist_profiles')
-    .select('id, slug, display_name, genres, published')
-    .eq('published', true)
-    .or(`slug.ilike.%${q}%,display_name.ilike.%${q}%`)
-    .limit(8)
-
-  if (error) throw new Error(error.message)
-  const out: PremierePickSearchHit[] = []
-
-  for (const row of profiles ?? []) {
-    const { data: byTitle } = await supabase
-      .from('artist_tracks')
-      .select('*')
-      .eq('profile_id', row.id)
-      .ilike('title', `%${q}%`)
-      .limit(8)
-    const tracks =
-      byTitle && byTitle.length > 0
-        ? byTitle
-        : (
-            await supabase.from('artist_tracks').select('*').eq('profile_id', row.id).limit(8)
-          ).data ?? []
-
-    for (const t of tracks) {
-      out.push({
-        profile: {
-          id: row.id,
-          slug: row.slug,
-          displayName: row.display_name,
-        },
-        track: {
-          id: t.id,
-          profileId: t.profile_id,
-          albumId: t.album_id ?? undefined,
-          title: t.title,
-          streamUrl: t.stream_url,
-          coverUrl: t.cover_url ?? undefined,
-          playCount: t.play_count ?? 0,
-          sortOrder: t.sort_order ?? 0,
-          createdAt: t.created_at,
-        },
-      })
-    }
-  }
-  return out.slice(0, 12)
+  const { results } = await v1SearchArtistTracksForPremierePick(q)
+  return results
 }
 
 export async function addDiscoverPremierePick(input: {
@@ -410,20 +284,12 @@ export async function addDiscoverPremierePick(input: {
     return
   }
 
-  const supabase = getSupabase()
-  const { error } = await supabase.from('discover_premiere_picks').upsert(
-    {
-      track_id: input.trackId,
-      profile_id: input.profileId,
-      picked_by: input.pickedBy,
-      badge,
-      sort_order: input.sortOrder ?? 0,
-      active: true,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: 'track_id' }
-  )
-  if (error) throw new Error(error.message)
+  await v1AddDiscoverPremierePick({
+    trackId: input.trackId,
+    profileId: input.profileId,
+    badge,
+    sortOrder: input.sortOrder,
+  })
 }
 
 export async function removeDiscoverPremierePick(id: string): Promise<void> {
@@ -431,10 +297,5 @@ export async function removeDiscoverPremierePick(id: string): Promise<void> {
     writeLocalPicks(readLocalPicks().map((p) => (p.id === id ? { ...p, active: false } : p)))
     return
   }
-  const supabase = getSupabase()
-  const { error } = await supabase
-    .from('discover_premiere_picks')
-    .update({ active: false, updated_at: new Date().toISOString() })
-    .eq('id', id)
-  if (error) throw new Error(error.message)
+  await v1RemoveDiscoverPremierePick(id)
 }

@@ -11,8 +11,7 @@
  * - Not the hourly one-track-per-artist discover premiere feed (`fetchDiscoverPremiereFeed`)
  * - Explore §03 stays on the premiere feed; this module is the full catalog
  */
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
 import { v1GetReleasesCatalog } from '@/api/v1Phase5Client'
 import { isArtistDiscoverVisible } from '@/lib/artist-profile/profileVisibility'
 import * as local from '@/lib/artist-profile/storage'
@@ -526,21 +525,12 @@ export async function fetchSupabaseCatalogWithClient(
   return dedupeCatalog(sortCatalog(cards))
 }
 
-async function fetchSupabaseCatalog(): Promise<DiscoverPremiereCard[]> {
-  return fetchSupabaseCatalogWithClient(getSupabase())
-}
-
 /** Public /releases grid — full published artist studio catalog. */
 export async function fetchReleasesCatalog(): Promise<DiscoverPremiereCard[]> {
   if (!isSupabaseConfigured()) return buildLocalCatalog()
   try {
-    return await viaV1Api(
-      async () => {
-        const { cards } = await v1GetReleasesCatalog()
-        return cards
-      },
-      () => fetchSupabaseCatalog(),
-    )
+    const { cards } = await v1GetReleasesCatalog()
+    return cards
   } catch (e) {
     console.warn('[releases catalog]', e)
     return buildLocalCatalog()

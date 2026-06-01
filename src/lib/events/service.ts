@@ -1,5 +1,4 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
 import {
   v1GetPendingEvents,
   v1GetUpcomingEvents,
@@ -22,38 +21,6 @@ import type {
   SubmitEventInput,
 } from '@/lib/events/types'
 
-function mapEventRow(row: Record<string, unknown>): SceneEvent {
-  return {
-    id: String(row.id),
-    title: String(row.title),
-    description: row.description ? String(row.description) : undefined,
-    eventKind: String(row.event_kind),
-    sceneCity: String(row.scene_city),
-    sceneGenreSlug: row.scene_genre_slug ? String(row.scene_genre_slug) : undefined,
-    venueName: String(row.venue_name),
-    startsAt: String(row.starts_at),
-    externalUrl: String(row.external_url),
-    rsvpCount: Number(row.rsvp_count ?? 0),
-    viewerRsvped: Boolean(row.viewer_rsvped),
-  }
-}
-
-function mapPendingRow(row: Record<string, unknown>): PendingSceneEvent {
-  return {
-    id: String(row.id),
-    title: String(row.title),
-    eventKind: String(row.event_kind),
-    sceneCity: String(row.scene_city),
-    sceneGenreSlug: row.scene_genre_slug ? String(row.scene_genre_slug) : undefined,
-    venueName: String(row.venue_name),
-    startsAt: String(row.starts_at),
-    externalUrl: String(row.external_url),
-    submittedAt: String(row.submitted_at),
-    submitterName: String(row.submitter_name),
-    submitterHandle: String(row.submitter_handle),
-  }
-}
-
 export async function fetchUpcomingEvents(
   filters: EventFilters = {},
   limit = 40,
@@ -63,32 +30,12 @@ export async function fetchUpcomingEvents(
     return localListUpcomingEvents(filters, userId, limit)
   }
 
-  return viaV1Api(
-    async () => {
-      const { events } = await v1GetUpcomingEvents({
-        city: filters.city,
-        genreSlug: filters.genreSlug,
-        limit,
-      })
-      return events
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { data, error } = await supabase.rpc('events_upcoming', {
-        p_city: filters.city ?? null,
-        p_genre_slug: filters.genreSlug ?? null,
-        p_days_ahead: 45,
-        lim: limit,
-      })
-
-      if (error) {
-        console.warn('[events] upcoming', error.message)
-        return []
-      }
-
-      return (data ?? []).map((row: Record<string, unknown>) => mapEventRow(row))
-    },
-  )
+  const { events } = await v1GetUpcomingEvents({
+    city: filters.city,
+    genreSlug: filters.genreSlug,
+    limit,
+  })
+  return events
 }
 
 export async function fetchEventsByScene(
@@ -101,27 +48,8 @@ export async function fetchEventsByScene(
     return localListEventsForScene(cityLabel, genreSlug, undefined, limit)
   }
 
-  return viaV1Api(
-    async () => {
-      const { events } = await v1GetEventsByScene(citySlug, genreSlug, limit)
-      return events
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { data, error } = await supabase.rpc('events_by_scene', {
-        p_city_slug: citySlug,
-        p_genre_slug: genreSlug,
-        lim: limit,
-      })
-
-      if (error) {
-        console.warn('[events] scene', error.message)
-        return []
-      }
-
-      return (data ?? []).map((row: Record<string, unknown>) => mapEventRow(row))
-    },
-  )
+  const { events } = await v1GetEventsByScene(citySlug, genreSlug, limit)
+  return events
 }
 
 export async function submitSceneEvent(input: SubmitEventInput, userId: string): Promise<string> {
@@ -129,28 +57,8 @@ export async function submitSceneEvent(input: SubmitEventInput, userId: string):
     return localSubmitEvent(userId, input)
   }
 
-  return viaV1Api(
-    async () => {
-      const { id } = await v1SubmitSceneEvent(input)
-      return id
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { data, error } = await supabase.rpc('events_submit', {
-        p_title: input.title,
-        p_description: input.description ?? null,
-        p_event_kind: input.eventKind,
-        p_scene_city: input.sceneCity,
-        p_scene_genre_slug: input.sceneGenreSlug ?? null,
-        p_venue_name: input.venueName,
-        p_starts_at: new Date(input.startsAt).toISOString(),
-        p_external_url: input.externalUrl,
-      })
-
-      if (error) throw new Error(error.message)
-      return String(data)
-    },
-  )
+  const { id } = await v1SubmitSceneEvent(input)
+  return id
 }
 
 export async function toggleEventRsvp(eventId: string, userId: string): Promise<boolean> {
@@ -158,40 +66,15 @@ export async function toggleEventRsvp(eventId: string, userId: string): Promise<
     return localToggleRsvp(eventId, userId)
   }
 
-  return viaV1Api(
-    async () => {
-      const { rsvped } = await v1ToggleEventRsvp(eventId)
-      return rsvped
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { data, error } = await supabase.rpc('events_rsvp_toggle', { p_event_id: eventId })
-      if (error) throw new Error(error.message)
-      return Boolean(data)
-    },
-  )
+  const { rsvped } = await v1ToggleEventRsvp(eventId)
+  return rsvped
 }
 
 export async function fetchPendingEvents(limit = 30): Promise<PendingSceneEvent[]> {
   if (!isSupabaseConfigured()) return []
 
-  return viaV1Api(
-    async () => {
-      const { events } = await v1GetPendingEvents(limit)
-      return events
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { data, error } = await supabase.rpc('events_pending', { lim: limit })
-
-      if (error) {
-        console.warn('[events] pending', error.message)
-        return []
-      }
-
-      return (data ?? []).map((row: Record<string, unknown>) => mapPendingRow(row))
-    },
-  )
+  const { events } = await v1GetPendingEvents(limit)
+  return events
 }
 
 export async function moderateEvent(
@@ -201,16 +84,5 @@ export async function moderateEvent(
 ): Promise<void> {
   if (!isSupabaseConfigured()) return
 
-  await viaV1Api(
-    () => v1ModerateEvent({ eventId, action, note: rejectionNote }),
-    async () => {
-      const supabase = getSupabase()
-      const { error } = await supabase.rpc('events_moderate', {
-        p_event_id: eventId,
-        p_action: action,
-        p_rejection_note: rejectionNote ?? null,
-      })
-      if (error) throw new Error(error.message)
-    },
-  )
+  await v1ModerateEvent({ eventId, action, note: rejectionNote })
 }

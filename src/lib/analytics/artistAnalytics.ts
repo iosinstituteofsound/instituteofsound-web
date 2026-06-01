@@ -1,6 +1,4 @@
 import { isSupabaseConfigured } from '@/lib/supabase/client'
-import { getSupabase } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
 import { v1GetArtistAnalyticsEvents, v1PostArtistAnalyticsEvent } from '@/api/v1Phase5Client'
 import type { ArtistProfileAnalytics, ArtistTrackClickStat } from './artistTypes'
 import {
@@ -10,12 +8,6 @@ import {
 } from './artistAnalyticsStorage'
 
 const SESSION_VIEW_PREFIX = 'ios_profile_view_'
-
-function daysAgo(n: number) {
-  const d = new Date()
-  d.setDate(d.getDate() - n)
-  return d.toISOString()
-}
 
 function shouldSkipOwnerView(viewerUserId?: string, ownerUserId?: string) {
   return !!viewerUserId && !!ownerUserId && viewerUserId === ownerUserId
@@ -37,30 +29,6 @@ function markSessionProfileView(profileId: string) {
   }
 }
 
-async function supabaseInsertEvent(
-  profileId: string,
-  eventType: 'profile_view' | 'track_click',
-  trackId?: string
-) {
-  await viaV1Api(
-    () =>
-      v1PostArtistAnalyticsEvent({
-        profileId,
-        eventType,
-        trackId,
-      }),
-    async () => {
-      const supabase = getSupabase()
-      const { error } = await supabase.from('artist_analytics_events').insert({
-        profile_id: profileId,
-        track_id: trackId ?? null,
-        event_type: eventType,
-      })
-      if (error) throw new Error(error.message)
-    },
-  )
-}
-
 /** One profile view per browser session; skips owner viewing own page. */
 export async function recordProfileView(
   profileId: string,
@@ -75,7 +43,10 @@ export async function recordProfileView(
 
   try {
     if (isSupabaseConfigured()) {
-      await supabaseInsertEvent(profileId, 'profile_view')
+      await v1PostArtistAnalyticsEvent({
+        profileId,
+        eventType: 'profile_view',
+      })
     } else {
       localAppendAnalyticsEvent(profileId, 'profile_view')
     }
@@ -96,7 +67,11 @@ export async function recordTrackClick(
 
   try {
     if (isSupabaseConfigured()) {
-      await supabaseInsertEvent(profileId, 'track_click', trackId)
+      await v1PostArtistAnalyticsEvent({
+        profileId,
+        eventType: 'track_click',
+        trackId,
+      })
     } else {
       localAppendAnalyticsEvent(profileId, 'track_click', trackId)
     }
@@ -156,35 +131,6 @@ function aggregateEvents(
   }
 }
 
-async function supabaseFetchEvents(profileId: string): Promise<StoredAnalyticsEvent[]> {
-  return viaV1Api(
-    async () => {
-      const { events } = await v1GetArtistAnalyticsEvents(profileId)
-      return events
-    },
-    async () => {
-      const supabase = getSupabase()
-      const since = daysAgo(90)
-      const { data, error } = await supabase
-        .from('artist_analytics_events')
-        .select('id, profile_id, track_id, event_type, created_at')
-        .eq('profile_id', profileId)
-        .gte('created_at', since)
-        .order('created_at', { ascending: false })
-        .limit(5000)
-
-      if (error) throw new Error(error.message)
-      return (data ?? []).map((r) => ({
-        id: r.id,
-        profileId: r.profile_id,
-        trackId: r.track_id ?? undefined,
-        eventType: r.event_type as StoredAnalyticsEvent['eventType'],
-        createdAt: r.created_at,
-      }))
-    },
-  )
-}
-
 export async function getArtistProfileAnalytics(
   profileId: string,
   tracks: { id: string; title: string }[]
@@ -201,7 +147,7 @@ export async function getArtistProfileAnalytics(
 
   try {
     const events = isSupabaseConfigured()
-      ? await supabaseFetchEvents(profileId)
+      ? (await v1GetArtistAnalyticsEvents(profileId)).events
       : localGetAnalyticsEvents(profileId)
     return aggregateEvents(events, trackTitles)
   } catch {

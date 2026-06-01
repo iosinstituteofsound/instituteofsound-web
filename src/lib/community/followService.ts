@@ -1,5 +1,4 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
 import { v1IsFollowing, v1ToggleFollow } from '@/api/v1Phase4Client'
 import {
   localIsFollowing,
@@ -21,15 +20,6 @@ export function getLocalFollowingIds(): string[] {
   return localListFollowing()
 }
 
-async function directToggleFollow(targetUserId: string): Promise<boolean> {
-  const supabase = getSupabase()
-  const { data, error } = await supabase.rpc('community_toggle_follow', {
-    p_target_user_id: targetUserId,
-  })
-  if (error) throw new Error(error.message)
-  return Boolean(data)
-}
-
 export async function toggleFollow(targetUserId: string): Promise<boolean> {
   if (!isSupabaseConfigured()) {
     const following = localToggleFollow(targetUserId)
@@ -45,45 +35,13 @@ export async function toggleFollow(targetUserId: string): Promise<boolean> {
     return following
   }
 
-  const following = await viaV1Api(
-    async () => {
-      const { following: f } = await v1ToggleFollow(targetUserId)
-      return f
-    },
-    () => directToggleFollow(targetUserId),
-  )
+  const { following } = await v1ToggleFollow(targetUserId)
   notifyFollow()
   return following
 }
 
-async function directIsFollowingUser(targetUserId: string): Promise<boolean> {
-  const supabase = getSupabase()
-  const { data: session } = await supabase.auth.getSession()
-  const uid = session.session?.user?.id
-  if (!uid) return false
-
-  const { data, error } = await supabase
-    .from('community_follows')
-    .select('follower_id')
-    .eq('follower_id', uid)
-    .eq('following_id', targetUserId)
-    .maybeSingle()
-
-  if (error) {
-    console.warn('[community] follow check', error.message)
-    return false
-  }
-  return Boolean(data)
-}
-
 export async function isFollowingUser(targetUserId: string): Promise<boolean> {
   if (!isSupabaseConfigured()) return localIsFollowing(targetUserId)
-
-  return viaV1Api(
-    async () => {
-      const { following } = await v1IsFollowing(targetUserId)
-      return following
-    },
-    () => directIsFollowingUser(targetUserId),
-  )
+  const { following } = await v1IsFollowing(targetUserId)
+  return following
 }

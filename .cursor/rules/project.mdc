@@ -1,0 +1,11 @@
+---
+description: IOS — minimal tokens, API-only frontend
+alwaysApply: true
+---
+
+# IOS (read AGENTS.md first)
+
+- **Max 3 files** per task. No repo-wide search unless user asks.
+- **Data path:** `service.ts` → `v1Client` → `/api/v1`. No `getSupabase().from/rpc` in pages/components/hooks (auth OK).
+- **New endpoint:** handler → `v1Router.ts` → v1Client → service.
+- **Never open:** `docs/`, `supabase/migrations/`, `node_modules/`, `dist/`, `package-lock.json`, `src/lib/academy/content/`.

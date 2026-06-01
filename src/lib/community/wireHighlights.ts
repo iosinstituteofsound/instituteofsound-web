@@ -1,7 +1,5 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
 import { v1GetSpinOfTheWeek, v1GetTribeRecentSpins } from '@/api/v1Phase5Client'
-import { mapFeedRow, type FeedRow } from '@/lib/community/feedService'
 import { localApplyReactions, localListFeed } from '@/lib/community/localFeed'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'
 import {
@@ -36,30 +34,8 @@ function pickLocalSpinOfWeek(): SpinOfTheWeek | null {
 export async function fetchSpinOfTheWeek(): Promise<SpinOfTheWeek | null> {
   if (!isSupabaseConfigured()) return pickLocalSpinOfWeek()
 
-  return viaV1Api(
-    async () => {
-      const { spin } = await v1GetSpinOfTheWeek()
-      return spin
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { data, error } = await supabase.rpc('community_spin_of_the_week')
-
-      if (error) {
-        console.warn('[community] spin of week', error.message)
-        return null
-      }
-
-      const row = (data ?? [])[0] as (FeedRow & { reaction_score?: number }) | undefined
-      if (!row) return null
-
-      const post = mapFeedRow(row)
-      return {
-        ...post,
-        reactionScore: Number(row.reaction_score ?? 0),
-      }
-    },
-  )
+  const { spin } = await v1GetSpinOfTheWeek()
+  return spin
 }
 
 export async function fetchTribeRecentSpins(
@@ -78,26 +54,8 @@ export async function fetchTribeRecentSpins(
     return weekPosts.slice(0, limit)
   }
 
-  return viaV1Api(
-    async () => {
-      const { posts } = await v1GetTribeRecentSpins(genreSlug, limit)
-      return posts
-    },
-    async () => {
-      const supabase = getSupabase()
-      const { data, error } = await supabase.rpc('community_tribe_recent_spins', {
-        p_genre_slug: genreSlug,
-        lim: limit,
-      })
-
-      if (error) {
-        console.warn('[community] tribe spins', error.message)
-        return []
-      }
-
-      return (data ?? []).map(mapFeedRow)
-    },
-  )
+  const { posts } = await v1GetTribeRecentSpins(genreSlug, limit)
+  return posts
 }
 
 export async function fetchTribeSpotlightWinner(

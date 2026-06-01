@@ -1,10 +1,9 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
-import { viaV1Api } from '@/lib/api/v1Route'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
 import { v1AwardDb } from '@/api/v1Phase5Client'
 import { localAwardDb } from '@/lib/community/localDb'
 import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
-import { repoAwardDb, type AwardDbInput } from '@/lib/community/awardRepository'
+import type { AwardDbInput } from '@/lib/community/awardRepository'
 
 export type { AwardDbInput }
 
@@ -18,18 +17,12 @@ export async function awardDb(input: AwardDbInput): Promise<boolean> {
   }
 
   try {
-    const awarded = await viaV1Api(
-      async () => {
-        const { awarded: ok } = await v1AwardDb(input)
-        return ok
-      },
-      () => repoAwardDb(getSupabase(), input),
-    )
-    if (awarded) {
+    const { awarded: ok } = await v1AwardDb(input)
+    if (ok) {
       window.dispatchEvent(new Event(COMMUNITY_DB_EVENT))
       void evaluateWeeklyChallenges()
     }
-    return awarded
+    return ok
   } catch (err) {
     console.warn('[community] awardDb failed', err instanceof Error ? err.message : err)
     return false

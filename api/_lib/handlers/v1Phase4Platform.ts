@@ -19,8 +19,14 @@ import {
   repoSubmitSceneEvent,
   repoToggleEventRsvp,
   repoUpdateUserProfile,
+  repoListDiscoverPremierePicksForDesk,
+  repoSearchArtistTracksForPremierePick,
+  repoAddDiscoverPremierePick,
+  repoRemoveDiscoverPremierePick,
+  repoUpgradeToArtist,
 } from '../repositories/phase4PlatformRepository.js'
-import { repoListPublishedEditorials } from '../repositories/phase4ContentRepository.js'
+import { repoListPublishedEditorials, repoGetEditorProfiles } from '../repositories/phase4ContentRepository.js'
+import { repoGetArtistPublicLinkById } from '../../../src/lib/artist-profile/profileRepository.js'
 import { repoFetchSceneHub } from '../repositories/sceneHubRepository.js'
 import { createSupabaseAnonClient } from '../supabaseServer.js'
 import type { SubmitEventInput } from '../../../src/lib/events/types.js'
@@ -37,6 +43,8 @@ import {
   eventRsvpBody,
   eventSubmitBody,
   memberProfilePatchBody,
+  memberUpgradeArtistBody,
+  premierePickCreateBody,
 } from '../schemas/v1Bodies.js'
 
 function send(res: ApiResponse, status: number, body: unknown): true {
@@ -86,6 +94,69 @@ export async function handleV1Phase4Platform(
     }
   }
 
+  if (pathname === '/api/v1/discovery/premiere-picks' && req.method === 'GET') {
+    const auth = await requireAuth(req)
+    if ('error' in auth) return send(res, auth.status, { error: auth.error })
+    const supabase = createSupabaseUserClient(auth.accessToken)
+    try {
+      const picks = await repoListDiscoverPremierePicksForDesk(supabase)
+      return send(res, 200, { picks })
+    } catch (err) {
+      return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
+    }
+  }
+
+  if (pathname === '/api/v1/discovery/premiere-picks/search' && req.method === 'GET') {
+    const q = queryParam(req, 'q') ?? ''
+    const auth = await requireAuth(req)
+    if ('error' in auth) return send(res, auth.status, { error: auth.error })
+    const supabase = createSupabaseUserClient(auth.accessToken)
+    try {
+      const results = await repoSearchArtistTracksForPremierePick(supabase, q)
+      return send(res, 200, { results })
+    } catch (err) {
+      return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
+    }
+  }
+
+  if (pathname === '/api/v1/discovery/premiere-picks' && req.method === 'POST') {
+    const auth = await requireAuth(req)
+    if ('error' in auth) return send(res, auth.status, { error: auth.error })
+    const desk = await requireSuperEditor(auth)
+    if ('error' in desk) return send(res, desk.status, { error: desk.error })
+    const body = requireValidatedBody(res, premierePickCreateBody, req.body)
+    if (!body) return true
+    const supabase = createSupabaseUserClient(auth.accessToken)
+    try {
+      await repoAddDiscoverPremierePick(supabase, {
+        trackId: body.trackId,
+        profileId: body.profileId,
+        pickedBy: auth.authUser.id,
+        badge: body.badge,
+        sortOrder: body.sortOrder,
+      })
+      return send(res, 201, { ok: true })
+    } catch (err) {
+      return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
+    }
+  }
+
+  if (pathname === '/api/v1/discovery/premiere-picks' && req.method === 'DELETE') {
+    const id = queryParam(req, 'id')
+    if (!id) return send(res, 400, { error: 'id required' })
+    const auth = await requireAuth(req)
+    if ('error' in auth) return send(res, auth.status, { error: auth.error })
+    const desk = await requireSuperEditor(auth)
+    if ('error' in desk) return send(res, desk.status, { error: desk.error })
+    const supabase = createSupabaseUserClient(auth.accessToken)
+    try {
+      await repoRemoveDiscoverPremierePick(supabase, id)
+      return send(res, 200, { ok: true })
+    } catch (err) {
+      return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
+    }
+  }
+
   if (pathname === '/api/v1/discovery/scene' && req.method === 'GET') {
     const city = queryParam(req, 'city')
     const genre = queryParam(req, 'genre')
@@ -107,6 +178,50 @@ export async function handleV1Phase4Platform(
       return send(res, 200, { editorials })
     } catch (err) {
       return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
+    }
+  }
+
+  if (pathname === '/api/v1/editorial/editor-profiles' && req.method === 'GET') {
+    const idsParam = queryParam(req, 'ids') ?? ''
+    const ids = idsParam
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+    if (ids.length === 0) return send(res, 400, { error: 'ids required' })
+    try {
+      const supabase = createSupabaseAnonClient()
+      const profiles = await repoGetEditorProfiles(supabase, ids)
+      return send(res, 200, { profiles })
+    } catch (err) {
+      return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
+    }
+  }
+
+  if (pathname === '/api/v1/artist/public-link' && req.method === 'GET') {
+    const profileId = queryParam(req, 'profileId')
+    if (!profileId) return send(res, 400, { error: 'profileId required' })
+    const resolved = await resolveSupabaseForRequest(req)
+    if ('error' in resolved) return send(res, resolved.status, { error: resolved.error })
+    try {
+      const link = await repoGetArtistPublicLinkById(resolved.supabase, profileId)
+      return send(res, 200, { link })
+    } catch (err) {
+      return send(res, 500, { error: err instanceof Error ? err.message : 'Failed' })
+    }
+  }
+
+  if (pathname === '/api/v1/me/upgrade-artist' && req.method === 'POST') {
+    const auth = await requireAuth(req)
+    if ('error' in auth) return send(res, auth.status, { error: auth.error })
+    const body = requireValidatedBody(res, memberUpgradeArtistBody, req.body)
+    if (!body) return true
+    const supabase = createSupabaseUserClient(auth.accessToken)
+    try {
+      await repoUpgradeToArtist(supabase, body.displayName, body.slug)
+      const user = await fetchMemberProfile(auth)
+      return send(res, 200, { user })
+    } catch (err) {
+      return send(res, 400, { error: err instanceof Error ? err.message : 'Failed' })
     }
   }
 
@@ -326,8 +441,9 @@ export async function handleV1Phase4Platform(
 
   if (
     !pathname.startsWith('/api/v1/member/') &&
+    !pathname.startsWith('/api/v1/me/') &&
     !pathname.startsWith('/api/v1/discovery/') &&
-    !pathname.startsWith('/api/v1/editorial/published') &&
+    !pathname.startsWith('/api/v1/editorial/') &&
     !pathname.startsWith('/api/v1/academy/') &&
     !pathname.startsWith('/api/v1/events/') &&
     !pathname.startsWith('/api/v1/collab/') &&
