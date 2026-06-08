@@ -8,6 +8,7 @@ import {
 import { fetchSpinOfTheWeek, type SpinOfTheWeek } from '@/lib/community/wireHighlights'
 import { localGetCrewBoard } from '@/lib/community/localCrew'
 import type { CrewLeaderboardEntry } from '@/lib/community/crewTypes'
+import { absoluteUrl } from '@/lib/seo/urls'
 
 export interface FridayWire extends SpinOfTheWeek {
   wireLive: boolean
@@ -154,14 +155,14 @@ export function formatWireDigestText(d: WireDigest): string {
     '',
     d.spinTitle ? `Spin of the Week: ${d.spinTitle}${d.spinHandle ? ` by ${d.spinHandle}` : ''}` : null,
     d.editorialTitle && d.editorialSlug
-      ? `Editorial: ${d.editorialTitle} → https://instituteofsound.in/feature/${d.editorialSlug}`
+      ? `Editorial: ${d.editorialTitle} → ${absoluteUrl(`/feature/${d.editorialSlug}`)}`
       : null,
     d.tribeWinnerGenre
       ? `Tribe War lead: ${d.tribeWinnerGenre}${d.tribeWinnerChampion ? ` · ${d.tribeWinnerChampion}` : ''}`
       : null,
     `Weekly challenge: ${d.challengeTitle}`,
     '',
-    'https://instituteofsound.in/community',
+    absoluteUrl('/community'),
   ]
   return lines.filter(Boolean).join('\n')
 }

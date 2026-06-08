@@ -12,6 +12,7 @@ dist
 experiments/monthly-magazine/dist
 .env
 .env.local
+.env.production
 .env.*.local
 dist-ssr
 

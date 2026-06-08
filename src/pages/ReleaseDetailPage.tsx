@@ -12,6 +12,7 @@ import { getProfileForUser } from '@/lib/artist-profile/service'
 import type { PublicRelease } from '@/lib/releases/types'
 import { useSeo } from '@/hooks/useSeo'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonLd'
+import { getSiteHost } from '@/lib/auth/siteUrl'
 import { SCENE_GENRE_SLUGS } from '@/lib/releases/constants'
 
 export default function ReleaseDetailPage() {
@@ -230,7 +231,7 @@ export default function ReleaseDetailPage() {
             <div className="release-page-share ios-card mt-4">
               <p className="ios-kicker">Share</p>
               <p className="text-sm text-muted mt-2 break-all">
-                instituteofsound.in/release/{release.slug}
+                {getSiteHost()}/release/{release.slug}
               </p>
               <button
                 type="button"

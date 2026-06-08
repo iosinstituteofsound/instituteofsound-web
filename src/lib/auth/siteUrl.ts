@@ -1,6 +1,6 @@
 /** Production canonical URL (SEO, OG, share meta). */
 
-const PRODUCTION_FALLBACK = 'https://instituteofsound.in'
+const PRODUCTION_FALLBACK = 'https://www.instituteofsound.in'
 
 export function getSiteUrl(): string {
   const fromEnv = import.meta.env.VITE_SITE_URL?.trim()
@@ -11,6 +11,15 @@ export function getSiteUrl(): string {
   }
 
   return PRODUCTION_FALLBACK
+}
+
+/** Hostname for display (no www), e.g. instituteofsound.in or localhost:5173 */
+export function getSiteHost(): string {
+  try {
+    return new URL(getSiteUrl()).host.replace(/^www\./, '')
+  } catch {
+    return 'instituteofsound.in'
+  }
 }
 
 /**

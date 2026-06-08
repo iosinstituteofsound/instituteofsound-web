@@ -1,3 +1,5 @@
+import { getSiteHost } from '@/lib/auth/siteUrl'
+
 export const EDITOR_TERMS_VERSION = '2026-05'
 
 export const EDITOR_TERMS_SECTIONS: { title: string; paragraphs: string[] }[] = [
@@ -24,7 +26,7 @@ export const EDITOR_TERMS_SECTIONS: { title: string; paragraphs: string[] }[] = 
   {
     title: 'Publication & platform use',
     paragraphs: [
-      'When approved, you may publish reviews, features, and band profiles through the Institute of Sound editorial desk. Published work may appear on instituteofsound.in, associated artist profiles, and promotional channels.',
+      `When approved, you may publish reviews, features, and band profiles through the Institute of Sound editorial desk. Published work may appear on ${getSiteHost()}, associated artist profiles, and promotional channels.`,
       'You grant Institute of Sound a non-exclusive licence to display, promote, and archive your submitted editorial content on the platform.',
     ],
   },

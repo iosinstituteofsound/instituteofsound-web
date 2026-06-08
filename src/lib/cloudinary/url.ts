@@ -1,3 +1,4 @@
+import { getSiteHost } from '@/lib/auth/siteUrl'
 import { getCloudinaryCloudName } from './config'
 
 const CLOUDINARY_HOST = 'res.cloudinary.com'
@@ -67,7 +68,7 @@ export function cloudinaryUrl(src: string, options: CloudinaryTransformOptions =
   if (cloudName && (src.startsWith('http://') || src.startsWith('https://'))) {
     try {
       const host = new URL(src).hostname.replace(/^www\./, '')
-      if (host === 'instituteofsound.in') return src
+      if (host === getSiteHost()) return src
     } catch {
       /* invalid URL */
     }

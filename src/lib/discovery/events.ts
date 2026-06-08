@@ -1,6 +1,9 @@
 import { eventKindLabel } from '@/lib/events/constants'
 import { fetchUpcomingEvents } from '@/lib/events/service'
 import type { SceneEvent } from '@/lib/events/types'
+import { absoluteUrl } from '@/lib/seo/urls'
+
+const EVENTS_PAGE_URL = absoluteUrl('/events')
 
 const IMG = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=600&h=720&q=85`
@@ -56,7 +59,7 @@ const SHOWCASE: DiscoverEventCard[] = [
     sceneGenreSlug: 'electronic',
     venueName: 'antiSOCIAL',
     startsAt: '2026-06-14T14:30:00.000Z',
-    externalUrl: 'https://instituteofsound.in/events',
+    externalUrl: EVENTS_PAGE_URL,
     rsvpCount: 128,
     viewerRsvped: false,
     tagPrimary: 'LIVE SET',
@@ -72,7 +75,7 @@ const SHOWCASE: DiscoverEventCard[] = [
     sceneGenreSlug: 'metal',
     venueName: 'Summer House',
     startsAt: '2026-06-21T13:00:00.000Z',
-    externalUrl: 'https://instituteofsound.in/events',
+    externalUrl: EVENTS_PAGE_URL,
     rsvpCount: 86,
     viewerRsvped: false,
     tagPrimary: 'LIVE SET',
@@ -88,7 +91,7 @@ const SHOWCASE: DiscoverEventCard[] = [
     sceneGenreSlug: 'electronic',
     venueName: 'The Humming Tree',
     startsAt: '2026-06-28T15:30:00.000Z',
-    externalUrl: 'https://instituteofsound.in/events',
+    externalUrl: EVENTS_PAGE_URL,
     rsvpCount: 204,
     viewerRsvped: false,
     tagPrimary: 'LIVE SET',
@@ -104,7 +107,7 @@ const SHOWCASE: DiscoverEventCard[] = [
     sceneGenreSlug: 'experimental',
     venueName: 'Someplace Else',
     startsAt: '2026-07-05T14:00:00.000Z',
-    externalUrl: 'https://instituteofsound.in/events',
+    externalUrl: EVENTS_PAGE_URL,
     rsvpCount: 57,
     viewerRsvped: false,
     tagPrimary: 'LISTENING',
@@ -120,7 +123,7 @@ const SHOWCASE: DiscoverEventCard[] = [
     sceneGenreSlug: 'electronic',
     venueName: 'Club M',
     startsAt: '2026-07-12T16:00:00.000Z',
-    externalUrl: 'https://instituteofsound.in/events',
+    externalUrl: EVENTS_PAGE_URL,
     rsvpCount: 312,
     viewerRsvped: false,
     tagPrimary: 'DJ SET',

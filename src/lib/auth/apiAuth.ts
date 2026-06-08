@@ -17,7 +17,10 @@ export { ensureValidAccessToken } from './accessToken'
 
 export function startGoogleSignIn(intent: GoogleOAuthIntent = 'member'): void {
   sessionStorage.setItem(OAUTH_INTENT_KEY, intent)
-  window.location.href = authApiUrl(`/api/auth/google?intent=${encodeURIComponent(intent)}`)
+  const returnTo = encodeURIComponent(window.location.origin)
+  window.location.href = authApiUrl(
+    `/api/auth/google?intent=${encodeURIComponent(intent)}&return_to=${returnTo}`,
+  )
 }
 
 function readOAuthIntentFromHash(hash: string): GoogleOAuthIntent | null {

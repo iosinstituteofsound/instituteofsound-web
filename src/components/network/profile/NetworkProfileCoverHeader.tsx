@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { PublicSupporterBadgeOnArtist } from '@/lib/fandom/types'
 import { roleLabel } from '@/lib/auth/roles'
+import { getSiteHost, getSiteUrl } from '@/lib/auth/siteUrl'
 import { formatNetworkCount } from '@/lib/network/noiseScore'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { ConnectButton } from '@/components/network/ConnectButton'
@@ -125,8 +126,8 @@ export function NetworkProfileCoverHeader({
             <p className="np-header__loc">
               <span>Institute of Sound</span>
               <span className="np-header__loc-dot">·</span>
-              <a href="https://instituteofsound.in" target="_blank" rel="noopener noreferrer">
-                instituteofsound.in
+              <a href={getSiteUrl()} target="_blank" rel="noopener noreferrer">
+                {getSiteHost()}
               </a>
             </p>
 

@@ -12,6 +12,7 @@ import { RankBadge } from '@/components/ui/RankBadge'
 import { IOSImage } from '@/components/ui/IOSImage'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { SocialIcons } from '@/components/artist-profile/SocialIcons'
+import { getSiteHost } from '@/lib/auth/siteUrl'
 import type { ArtistProfilePageData } from '@/lib/artist-profile/types'
 
 export default function ArtistEpkPage() {
@@ -114,7 +115,7 @@ export default function ArtistEpkPage() {
               <p className="text-sm mt-2">
                 {snapshot.networkHandle} ·{' '}
                 <span className="font-mono text-xs">
-                  instituteofsound.in{networkProfilePath(snapshot.networkHandle)}
+                  {getSiteHost()}{networkProfilePath(snapshot.networkHandle)}
                 </span>
               </p>
             )}
@@ -181,7 +182,7 @@ export default function ArtistEpkPage() {
         <footer className="artist-epk-footer">
           <p>
             Public page:{' '}
-            <span className="font-mono text-sm">instituteofsound.in/artist/{profile.slug}</span>
+            <span className="font-mono text-sm">{getSiteHost()}/artist/{profile.slug}</span>
           </p>
           <p className="text-xs text-muted mt-2">
             Generated {new Date().toLocaleDateString('en-IN', { dateStyle: 'long' })}

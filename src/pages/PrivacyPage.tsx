@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { LegalPageShell } from '@/components/legal/LegalPageShell'
+import { getSiteHost } from '@/lib/auth/siteUrl'
 import { SITE_EMAIL } from '@/lib/site/contact'
 
 const LAST_UPDATED = 'May 2026'
@@ -14,7 +15,7 @@ export default function PrivacyPage() {
       <section className="legal-block">
         <h2>Overview</h2>
         <p>
-          Institute of Sound (<strong>instituteofsound.in</strong>) is operated as an underground
+          Institute of Sound (<strong>{getSiteHost()}</strong>) is operated as an underground
           music magazine, artist archive, and free production academy. This policy describes what
           we collect, why we use it, and the choices you have. If anything here is unclear, email{' '}
           <a href={`mailto:${SITE_EMAIL}`}>{SITE_EMAIL}</a>.
