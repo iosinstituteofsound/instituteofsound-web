@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GetPublicRelease } from '@/api/v1Phase4Client'
 import type { PublicRelease } from '@/lib/releases/types'
 import * as local from '@/lib/releases/localReleases'

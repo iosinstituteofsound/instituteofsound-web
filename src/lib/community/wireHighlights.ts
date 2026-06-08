@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GetSpinOfTheWeek, v1GetTribeRecentSpins } from '@/api/v1Phase5Client'
 import { localApplyReactions, localListFeed } from '@/lib/community/localFeed'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'

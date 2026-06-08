@@ -1,5 +1,5 @@
 import { v1GetMediaUploadSign } from '@/api/v1MediaClient'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isLiveApiMode } from '@/lib/api/liveMode'
 import { getCloudinaryCloudName, isCloudinaryConfigured } from './config'
 
 export type CloudinaryFolder =
@@ -49,8 +49,8 @@ export function validatePdfFile(file: File): string | null {
 }
 
 async function resolveUploadSign(folder: CloudinaryFolder, resourceType: 'image' | 'raw') {
-  if (!isSupabaseConfigured()) {
-    throw new Error('Sign in and configure Supabase to upload files securely.')
+  if (!isLiveApiMode()) {
+    throw new Error('Sign in and start instituteofsound-api to upload files securely.')
   }
   try {
     const { sign } = await v1GetMediaUploadSign({ folder, resourceType })

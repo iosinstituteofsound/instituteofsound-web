@@ -9,7 +9,7 @@ import {
   v1UpdateSpinPost,
 } from '@/api/v1Client'
 import { touchArtistPageActivity } from '@/lib/artist-profile/pageEnforcement'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { parseSpotifyUrl, parseYouTubeUrl, validateSpinInput } from '@/lib/community/musicLinks'
 import {
   localAddFeedPost,

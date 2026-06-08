@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GetArtistAnalyticsEvents, v1PostArtistAnalyticsEvent } from '@/api/v1Phase5Client'
 import type { ArtistProfileAnalytics, ArtistTrackClickStat } from './artistTypes'
 import {

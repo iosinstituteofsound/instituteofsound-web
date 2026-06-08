@@ -1,4 +1,6 @@
-# Institute of Sound
+# Institute of Sound — Web (`instituteofsound-web`)
+
+React/Vite UI for [instituteofsound.in](https://instituteofsound.in). Business logic and REST API live in the sibling repo **`instituteofsound-api`** (Express on Railway). Future clients: **`instituteofsound-mobile`**.
 
 A premium futuristic global underground music culture platform — built with React, Vite, and React Router.
 
@@ -46,12 +48,13 @@ Ready to connect: Supabase (auth, profiles, editorial), Cloudinary (media).
 1. Follow **[CLOUDINARY_SETUP.md](./CLOUDINARY_SETUP.md)**
 2. Add `VITE_CLOUDINARY_CLOUD_NAME` + `VITE_CLOUDINARY_UPLOAD_PRESET` to `.env`
 
-### Supabase (production)
+### Supabase (database + auth)
 
-1. Follow **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**
-2. Copy `.env.example` → `.env`
-3. Run migrations in `supabase/migrations/` (including `023-academy-progress.sql` for cloud academy sync)
-4. Artists sign in at `/login` with Google
+Supabase lives in **`instituteofsound-api`** only (schema, migrations, env keys). The web app calls the API — no Supabase client in web.
+
+1. Follow **[../instituteofsound-api/SUPABASE_SETUP.md](../instituteofsound-api/SUPABASE_SETUP.md)**
+2. Run migrations in `instituteofsound-api/supabase/migrations/` (002–072 in order)
+3. Artists sign in at `/login` with Google (via API OAuth)
 
 ### Local demo (no `.env`)
 
@@ -152,11 +155,14 @@ Defined in `src/lib/site/contact.ts`.
 
 ```bash
 npm install
-npm run dev          # http://localhost:5173
+npm run dev          # http://localhost:5173 (proxy /api → instituteofsound-api)
 npm run build        # runs sitemap generation + TypeScript + Vite
+npm run ci           # typecheck + production build (same as CI)
 npm run sitemap      # regenerate public/sitemap.xml
 npm run preview
 ```
+
+Start **`instituteofsound-api`** on port 4000 first — see repo root [README](../README.md).
 
 ## SEO
 

@@ -11,11 +11,9 @@
  * - Not the hourly one-track-per-artist discover premiere feed (`fetchDiscoverPremiereFeed`)
  * - Explore §03 stays on the premiere feed; this module is the full catalog
  */
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GetReleasesCatalog } from '@/api/v1Phase5Client'
-import { isArtistDiscoverVisible } from '@/lib/artist-profile/profileVisibility'
 import * as local from '@/lib/artist-profile/storage'
-import { DEFAULT_HERO_LAYOUT } from '@/lib/artist-profile/heroLayout'
 import type { ArtistAlbum, ArtistProfile, ArtistTrack } from '@/lib/artist-profile/types'
 import * as localReleases from '@/lib/releases/localReleases'
 import type { ReleaseTrack } from '@/lib/releases/types'
@@ -53,36 +51,6 @@ function releaseTypeFor(
     return album.releaseType
   }
   return 'single'
-}
-
-function stubProfile(p: {
-  id: string
-  slug: string
-  displayName: string
-  genres: string[]
-  avatarUrl?: string
-}): ArtistProfile {
-  return {
-    id: p.id,
-    userId: '',
-    slug: p.slug,
-    displayName: p.displayName,
-    genres: p.genres,
-    influenceTags: [],
-    social: {},
-    monthlyListenersDisplay: '',
-    accentColor: '#d40000',
-    themePreset: 'metal',
-    heroLayout: DEFAULT_HERO_LAYOUT,
-    socialLinkOrder: [],
-    published: true,
-    pageStatus: 'live',
-    pageRefreshedAt: '',
-    lastActivityAt: '',
-    createdAt: '',
-    updatedAt: '',
-    avatarUrl: p.avatarUrl,
-  }
 }
 
 function readLocalPickMap(): Map<string, PremiereBadge> {
@@ -169,58 +137,6 @@ function pickStreamUrl(
   const t = track?.spotifyUrl || track?.youtubeUrl || track?.soundcloudUrl
   if (t) return t
   return fallback?.spotifyUrl || fallback?.youtubeUrl || fallback?.soundcloudUrl || ''
-}
-
-type TrackRow = {
-  id: string
-  profile_id: string
-  album_id: string | null
-  title: string
-  stream_url: string
-  cover_url: string | null
-  play_count: number | null
-  sort_order: number | null
-  created_at: string
-}
-
-type AlbumRow = {
-  id: string
-  profile_id: string
-  title: string
-  cover_url: string | null
-  release_type: string
-  created_at: string
-}
-
-type ReleaseRow = {
-  id: string
-  profile_id: string
-  slug: string
-  title: string
-  cover_url: string | null
-  release_type: string
-  live_at: string
-  spotify_url: string | null
-  youtube_url: string | null
-  soundcloud_url: string | null
-  tracks: unknown
-}
-
-async function paginate<T>(
-  fetchPage: (from: number, to: number) => Promise<{ data: T[] | null; error: { message: string } | null }>
-): Promise<T[]> {
-  const out: T[] = []
-  const page = 1000
-  let from = 0
-  while (true) {
-    const { data, error } = await fetchPage(from, from + page - 1)
-    if (error) throw new Error(error.message)
-    if (!data?.length) break
-    out.push(...data)
-    if (data.length < page) break
-    from += page
-  }
-  return out
 }
 
 function buildLocalCatalog(): DiscoverPremiereCard[] {
@@ -344,185 +260,6 @@ function dedupeCatalog(cards: DiscoverPremiereCard[]): DiscoverPremiereCard[] {
     out.push(c)
   }
   return out
-}
-
-export async function fetchSupabaseCatalogWithClient(
-  supabase: import('@supabase/supabase-js').SupabaseClient,
-): Promise<DiscoverPremiereCard[]> {
-  const bucket = currentHourBucket()
-
-  const { data: profiles, error: profileErr } = await supabase
-    .from('artist_profiles')
-    .select('id, slug, display_name, genres, avatar_url, last_activity_at, page_refreshed_at, published')
-    .eq('published', true)
-
-  if (profileErr) throw new Error(profileErr.message)
-  const liveProfiles = (profiles ?? []).filter((p) =>
-    isArtistDiscoverVisible({
-      id: p.id,
-      userId: '',
-      slug: p.slug,
-      displayName: p.display_name,
-      genres: (p.genres as string[]) ?? [],
-      influenceTags: [],
-      social: {},
-      monthlyListenersDisplay: '',
-      accentColor: '#d40000',
-      themePreset: 'metal',
-      heroLayout: DEFAULT_HERO_LAYOUT,
-      socialLinkOrder: [],
-      published: p.published,
-      pageStatus: 'live',
-      pageRefreshedAt: p.page_refreshed_at ?? '',
-      lastActivityAt: p.last_activity_at ?? p.page_refreshed_at ?? '',
-      createdAt: '',
-      updatedAt: '',
-    }),
-  )
-  if (!liveProfiles.length) return []
-
-  const profileIds = liveProfiles.map((p) => p.id)
-  const profileById = new Map(
-    liveProfiles.map((p) => [
-      p.id,
-      {
-        id: p.id,
-        slug: p.slug,
-        displayName: p.display_name,
-        genres: (p.genres as string[]) ?? [],
-        avatarUrl: p.avatar_url ?? undefined,
-      },
-    ])
-  )
-
-  const [trackRows, albumRows, pickResult, releaseRows] = await Promise.all([
-    paginate<TrackRow>(async (from, to) =>
-      supabase.from('artist_tracks').select('*').in('profile_id', profileIds).range(from, to)
-    ),
-    paginate<AlbumRow>(async (from, to) =>
-      supabase.from('artist_albums').select('*').in('profile_id', profileIds).range(from, to)
-    ),
-    supabase.from('discover_premiere_picks').select('track_id, badge').eq('active', true),
-    paginate<ReleaseRow>(async (from, to) =>
-      supabase
-        .from('artist_releases')
-        .select('*')
-        .in('profile_id', profileIds)
-        .in('status', ['live', 'scheduled'])
-        .range(from, to)
-    ),
-  ])
-
-  const picks = new Map<string, PremiereBadge>()
-  for (const row of pickResult.data ?? []) {
-    const b = row.badge as PremiereBadge
-    if (b === 'wire_pick' || b === 'hot' || b === 'new') picks.set(row.track_id, b)
-  }
-
-  const albumsById = new Map(
-    (albumRows ?? []).map((a) => [
-      a.id,
-      {
-        id: a.id,
-        profileId: a.profile_id,
-        title: a.title,
-        coverUrl: a.cover_url ?? undefined,
-        releaseType: a.release_type as ArtistAlbum['releaseType'],
-        createdAt: a.created_at,
-      },
-    ])
-  )
-
-  const tracksByAlbum = new Map<string, number>()
-  const cards: DiscoverPremiereCard[] = []
-
-  for (const row of trackRows ?? []) {
-    const profile = profileById.get(row.profile_id)
-    if (!profile) continue
-    const album = row.album_id ? albumsById.get(row.album_id) : undefined
-    if (row.album_id) {
-      tracksByAlbum.set(row.album_id, (tracksByAlbum.get(row.album_id) ?? 0) + 1)
-    }
-    const track: ArtistTrack = {
-      id: row.id,
-      profileId: row.profile_id,
-      albumId: row.album_id ?? undefined,
-      title: row.title,
-      streamUrl: row.stream_url,
-      coverUrl: row.cover_url ?? undefined,
-      playCount: row.play_count ?? 0,
-      sortOrder: row.sort_order ?? 0,
-      createdAt: row.created_at,
-    }
-    const fullProfile = stubProfile(profile)
-    cards.push(
-      trackCard(
-        fullProfile,
-        track,
-        album
-          ? {
-              id: album.id,
-              profileId: album.profileId,
-              title: album.title,
-              coverUrl: album.coverUrl,
-              releaseType: album.releaseType,
-              sortOrder: 0,
-              createdAt: album.createdAt,
-            }
-          : undefined,
-        picks.get(row.id),
-        bucket
-      )
-    )
-  }
-
-  for (const album of albumsById.values()) {
-    const count = tracksByAlbum.get(album.id) ?? 0
-    const profile = profileById.get(album.profileId)
-    if (!profile) continue
-    cards.push(
-      albumCard(
-        stubProfile(profile),
-        {
-          id: album.id,
-          profileId: album.profileId,
-          title: album.title,
-          coverUrl: album.coverUrl,
-          releaseType: album.releaseType,
-          sortOrder: 0,
-          createdAt: album.createdAt,
-        },
-        count,
-        bucket
-      )
-    )
-  }
-
-  for (const row of releaseRows) {
-    const profile = profileById.get(row.profile_id)
-    if (!profile) continue
-    const tracks = Array.isArray(row.tracks) ? (row.tracks as ReleaseTrack[]) : []
-    cards.push(
-      ...releaseToCards(
-        stubProfile(profile),
-        {
-          id: row.id,
-          slug: row.slug,
-          title: row.title,
-          coverUrl: row.cover_url ?? undefined,
-          releaseType: row.release_type as 'single' | 'ep' | 'album',
-          liveAt: row.live_at,
-          spotifyUrl: row.spotify_url ?? undefined,
-          youtubeUrl: row.youtube_url ?? undefined,
-          soundcloudUrl: row.soundcloud_url ?? undefined,
-          tracks,
-        },
-        bucket
-      )
-    )
-  }
-
-  return dedupeCatalog(sortCatalog(cards))
 }
 
 /** Public /releases grid — full published artist studio catalog. */

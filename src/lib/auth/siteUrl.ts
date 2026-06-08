@@ -1,4 +1,4 @@
-/** Production site URL for auth emails — NOT localhost when deployed */
+/** Production canonical URL (SEO, OG, share meta). */
 
 const PRODUCTION_FALLBACK = 'https://instituteofsound.in'
 
@@ -13,7 +13,26 @@ export function getSiteUrl(): string {
   return PRODUCTION_FALLBACK
 }
 
-/** Where Supabase email confirm / magic links send the user */
+/**
+ * Google OAuth + email links must return to the same origin that started sign-in.
+ * Never use VITE_SITE_URL here — that caused localhost → instituteofsound.in redirects
+ * when Supabase rejected an unknown redirect URL and fell back to dashboard Site URL.
+ */
 export function getAuthEmailRedirectUrl(): string {
-  return `${getSiteUrl()}/auth/callback`
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return `${window.location.origin}/auth/callback`
+  }
+
+  const fromEnv = import.meta.env.VITE_SITE_URL?.trim()
+  if (fromEnv) return `${fromEnv.replace(/\/$/, '')}/auth/callback`
+
+  return `${PRODUCTION_FALLBACK}/auth/callback`
+}
+
+/** Dev hint when OAuth may bounce to production (Supabase redirect allow list). */
+export function getAuthRedirectSetupHint(): string | null {
+  if (!import.meta.env.DEV || typeof window === 'undefined') return null
+  const origin = window.location.origin
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) return null
+  return `You opened ${origin}. For Google login, use http://localhost:5173 and add that URL in Supabase → Authentication → Redirect URLs.`
 }

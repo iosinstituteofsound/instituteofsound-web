@@ -1,5 +1,5 @@
 {
-  "name": "instituteofsound",
+  "name": "instituteofsound-web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,14 +10,12 @@
     "preview:magazine": "vite build --config experiments/monthly-magazine/vite.config.ts && vite preview --config experiments/monthly-magazine/vite.config.ts",
     "sitemap": "node scripts/generate-sitemap.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
-    "build": "npm run sitemap && npm run pwa:icons && npm run bundle:api && tsc -p api/tsconfig.json && tsc -b && vite build",
-    "bundle:api": "node scripts/bundle-api-v1.mjs",
-    "ci": "npm run bundle:api && tsc -p api/tsconfig.json && tsc -b && node scripts/smoke-v1-bundle.mjs",
+    "build": "npm run sitemap && npm run pwa:icons && tsc -b && vite build",
+    "ci": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.106.1",
     "@tiptap/extension-color": "^3.23.6",
     "@tiptap/extension-highlight": "^3.23.6",
     "@tiptap/extension-link": "^3.23.6",

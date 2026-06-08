@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1EvaluateWeeklyChallenges, v1GetWeeklyChallenges } from '@/api/v1Phase5Client'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
 import { COMMUNITY_BADGE_EVENT } from '@/lib/community/grantBadge'

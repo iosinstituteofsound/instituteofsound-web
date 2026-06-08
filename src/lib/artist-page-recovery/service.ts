@@ -5,7 +5,7 @@ import {
   v1ReviewArtistPageRecoveryRequest,
   v1SubmitArtistPageRecoveryRequest,
 } from '@/api/v1Client'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { restoreArtistProfileArchive } from '@/lib/artist-profile/archive'
 import type {
   ArtistPageRecoveryRequest,

@@ -1,4 +1,5 @@
 import type { ArtistCatalogImportResult } from './types'
+import { apiUtilityUrl } from '@/services/api/client'
 
 async function readApiJson<T>(res: Response): Promise<T & { error?: string }> {
   const text = await res.text()
@@ -21,7 +22,7 @@ export async function fetchArtistCatalogFromUrl(
   const url = profileUrl.trim()
   if (!url) throw new Error('Profile URL is required')
 
-  const res = await fetch(`/api/import-catalog?url=${encodeURIComponent(url)}`)
+  const res = await fetch(`${apiUtilityUrl('/api/import-catalog')}?url=${encodeURIComponent(url)}`)
   const data = await readApiJson<ArtistCatalogImportResult>(res)
 
   if (!res.ok) {

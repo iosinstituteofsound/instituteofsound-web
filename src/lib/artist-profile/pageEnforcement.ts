@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1TouchArtistPageActivity } from '@/api/v1Client'
 import { evaluateArtistLifecycle } from '@/lib/artist-profile/pageLifecycle'
 import type { ArtistProfile } from '@/lib/artist-profile/types'

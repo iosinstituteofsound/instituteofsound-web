@@ -8,7 +8,7 @@ import {
   v1ReviewVerificationRequest,
   v1SubmitRoleVerification,
 } from '@/api/v1Client'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import {
   notifyDeskStaffOfVerificationRequest,
   notifyMemberVerificationDecision,

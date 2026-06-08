@@ -1,45 +1,42 @@
-import { getSupabaseConfigError, isSupabaseConfigured } from '@/lib/supabase/client'
+import { getLiveApiConfigHint, isLiveApiMode } from '@/lib/api/liveMode'
 import type { User } from './types'
-import * as supabase from './supabaseAuth'
+import * as apiAuth from './apiAuth'
 
-export { isSupabaseConfigured }
+export { isLiveApiMode, isLiveApiMode as isSupabaseConfigured } from '@/lib/api/liveMode'
 
-export function authMode(): 'supabase' | 'local' {
-  return isSupabaseConfigured() ? 'supabase' : 'local'
+export function authMode(): 'api' | 'local' {
+  return isLiveApiMode() ? 'api' : 'local'
 }
 
 export function getAuthConfigHint(): string | null {
-  if (import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_ANON_KEY) {
-    return getSupabaseConfigError()
-  }
-  return null
+  return getLiveApiConfigHint()
 }
 
-export type SignInIntent = 'member' | 'artist' | 'desk' | 'editor_apply'
+export type SignInIntent = apiAuth.GoogleOAuthIntent
 
 export async function signInWithGoogle(intent: SignInIntent = 'member'): Promise<void> {
-  if (!isSupabaseConfigured()) {
+  if (!isLiveApiMode()) {
     throw new Error(
-      'Google sign-in needs Supabase in .env. See SUPABASE_SETUP.md — enable Google provider in dashboard.'
+      'Google sign-in requires VITE_USE_V1_API=true and instituteofsound-api running. See repo README.',
     )
   }
-  return supabase.supabaseSignInWithGoogle(intent)
+  apiAuth.startGoogleSignIn(intent)
 }
 
 export async function completeAuthCallback() {
-  return supabase.supabaseHandleAuthCallback()
+  return apiAuth.completeApiAuthCallback()
 }
 
 export async function logout(): Promise<void> {
-  if (isSupabaseConfigured()) {
-    await supabase.supabaseLogout()
+  if (isLiveApiMode()) {
+    await apiAuth.apiLogout()
     return
   }
 }
 
 export async function getCurrentUser(): Promise<User | null> {
-  if (isSupabaseConfigured()) {
-    return supabase.supabaseGetCurrentUser()
+  if (isLiveApiMode()) {
+    return apiAuth.apiGetCurrentUser()
   }
   return null
 }
@@ -48,8 +45,8 @@ export { updateUserProfile, fetchUserProfile } from './profile'
 export type { UpdateProfileInput } from './profile'
 
 export function subscribeAuth(callback: (user: User | null) => void): () => void {
-  if (isSupabaseConfigured()) {
-    return supabase.supabaseOnAuthChange(callback)
+  if (isLiveApiMode()) {
+    return apiAuth.subscribeApiAuth(callback)
   }
   return () => {}
 }

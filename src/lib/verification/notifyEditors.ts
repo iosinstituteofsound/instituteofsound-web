@@ -51,7 +51,7 @@ export function notifyDeskStaffOfVerificationRequest(
 export async function syncVerificationDeskNotifications(): Promise<void> {
   if (typeof window === 'undefined') return
 
-  const { isSupabaseConfigured } = await import('@/lib/supabase/client')
+  const { isSupabaseConfigured } = await import('@/lib/api/liveMode')
   const { v1SyncVerificationDeskNotifications } = await import('@/api/v1Client')
 
   if (isSupabaseConfigured()) {
@@ -118,7 +118,7 @@ export function notifyMemberVerificationDecision(
 export async function syncMemberVerificationNotifications(userId: string): Promise<void> {
   if (typeof window === 'undefined' || !userId) return
 
-  const { isSupabaseConfigured } = await import('@/lib/supabase/client')
+  const { isSupabaseConfigured } = await import('@/lib/api/liveMode')
   const { v1SyncMemberVerificationNotifications } = await import('@/api/v1Client')
 
   if (isSupabaseConfigured()) {

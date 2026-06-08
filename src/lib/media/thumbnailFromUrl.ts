@@ -1,4 +1,5 @@
 import { resolveThumbnailFromUrl, youtubeThumbnailFromUrl } from './resolveThumbnail'
+import { apiUtilityUrl } from '@/services/api/client'
 
 const cache = new Map<string, string>()
 
@@ -28,7 +29,7 @@ export async function fetchThumbnailFromUrl(url: string): Promise<string | null>
   }
 
   try {
-    const res = await fetch(`/api/thumbnail?url=${encodeURIComponent(key)}`)
+    const res = await fetch(`${apiUtilityUrl('/api/thumbnail')}?url=${encodeURIComponent(key)}`)
     if (res.ok) {
       const data = (await res.json()) as { thumbnailUrl?: string | null }
       const thumb = data.thumbnailUrl?.trim()

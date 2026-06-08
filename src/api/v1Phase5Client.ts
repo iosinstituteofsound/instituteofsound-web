@@ -11,7 +11,7 @@ import type {
   EditorApplicationWithProfile,
   SubmitEditorApplicationInput,
 } from '@/lib/editor-applications/types'
-import type { AwardDbInput } from '@/lib/community/awardRepository'
+import type { AwardDbInput } from '@/lib/community/awardTypes'
 import type { WeeklyChallenge } from '@/lib/community/challengeService'
 import type { SuperAdminAnalytics } from '@/lib/analytics/types'
 import type { CommunityFeedPost } from '@/lib/community/feedTypes'

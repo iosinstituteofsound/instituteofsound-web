@@ -7,7 +7,7 @@ import {
   v1FetchSupporterMilestones,
   v1SendFandomRecognition,
 } from '@/api/v1FandomClient'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import type {
   FandomDiscoverArtistRow,
   FandomMilestoneRow,

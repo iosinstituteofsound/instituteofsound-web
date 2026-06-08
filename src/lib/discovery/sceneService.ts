@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GetSceneHub } from '@/api/v1Phase4Client'
 import { fetchGenreWeeklyLeaderboard } from '@/lib/community/service'
 import { fetchCrewWarsV2 } from '@/lib/community/wireEvents'

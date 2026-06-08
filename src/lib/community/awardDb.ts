@@ -1,9 +1,9 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1AwardDb } from '@/api/v1Phase5Client'
 import { localAwardDb } from '@/lib/community/localDb'
 import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
 import { COMMUNITY_DB_EVENT } from '@/lib/community/events'
-import type { AwardDbInput } from '@/lib/community/awardRepository'
+import type { AwardDbInput } from '@/lib/community/awardTypes'
 
 export type { AwardDbInput }
 

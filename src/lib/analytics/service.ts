@@ -1,6 +1,6 @@
 import { getDrafts, getSubmissions, getUsers } from '@/lib/auth/storage'
 import { localGetProfiles } from '@/lib/artist-profile/storage'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GetSuperAdminAnalytics } from '@/api/v1Phase5Client'
 import { getDraftsForEditor } from '@/lib/submissions/service'
 import { computeSuperAdminAnalytics } from './compute'

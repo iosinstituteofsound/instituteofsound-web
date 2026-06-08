@@ -67,7 +67,7 @@ export function RoleDeskLayout<T extends string>({
           <div className="editor-dashboard-header-main">
             <p className="editor-dashboard-kicker">
               {kicker}
-              {mode === 'supabase' && (
+              {mode === 'api' && (
                 <span className="editor-dashboard-kicker-live">· live cloud</span>
               )}
             </p>

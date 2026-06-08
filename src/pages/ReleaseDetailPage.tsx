@@ -29,15 +29,21 @@ export default function ReleaseDetailPage() {
       return
     }
     setLoading(true)
-    const data = await fetchPublicRelease(slug)
-    if (!data) {
+    try {
+      const data = await fetchPublicRelease(slug)
+      if (!data) {
+        setNotFound(true)
+        setRelease(null)
+      } else {
+        setRelease(data)
+        setNotFound(false)
+      }
+    } catch {
       setNotFound(true)
       setRelease(null)
-    } else {
-      setRelease(data)
-      setNotFound(false)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [slug])
 
   useEffect(() => {

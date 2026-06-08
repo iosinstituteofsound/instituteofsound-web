@@ -541,7 +541,7 @@ export default function EditorDashboardPage() {
                 <p className="text-sm text-muted border-l-2 border-rs-red pl-4">
                   Write band profiles, album reviews, or long-form features. Use the toolbar for
                   headings, emphasis, links, alignment, and color. Saved to{' '}
-                  {mode === 'supabase' ? 'Supabase' : 'local storage'}.
+                  {mode === 'api' ? 'the API' : 'local storage'}.
                 </p>
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">

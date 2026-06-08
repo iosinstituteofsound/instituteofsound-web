@@ -14,7 +14,8 @@ experiments/monthly-magazine/dist
 .env.local
 .env.*.local
 dist-ssr
-api/_lib/v1.bundle.js
+
+# Legacy Vercel API bundle (removed — API lives in instituteofsound-api repo)
 *.local
 
 # Editor directories and files

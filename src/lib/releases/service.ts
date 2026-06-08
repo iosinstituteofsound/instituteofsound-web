@@ -1,5 +1,5 @@
 import { touchArtistPageActivityByProfileId } from '@/lib/artist-profile/pageEnforcement'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import {
   v1AddReleaseMilestone,
   v1ListReleaseMilestones,

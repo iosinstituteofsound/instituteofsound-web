@@ -1,9 +1,0 @@
--- OPTIONAL: only if an email is stuck from a broken signup (e.g. vivaanfilm@gmail.com)
--- Run in Supabase SQL Editor, then register again on the site.
---
--- 1) Check if user exists:
--- select id, email from auth.users where lower(email) = 'vivaanfilm@gmail.com';
---
--- 2) Remove profile + auth user (replace id from step 1):
--- delete from public.profiles where lower(email) = 'vivaanfilm@gmail.com';
--- delete from auth.users where lower(email) = 'vivaanfilm@gmail.com';

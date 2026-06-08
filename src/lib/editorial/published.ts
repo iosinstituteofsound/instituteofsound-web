@@ -1,4 +1,5 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isV1ApiEnabled } from '@/api/v1Client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import {
   v1ListPublishedEditorials,
   v1GetEditorProfiles,
@@ -175,12 +176,19 @@ function localListPublished(): PublishedEditorial[] {
 }
 
 export async function listPublishedEditorials(): Promise<PublishedEditorial[]> {
-  if (!isSupabaseConfigured()) {
+  if (!isSupabaseConfigured() || !isV1ApiEnabled()) {
     return enrichPublishedList(localListPublished())
   }
 
-  const { editorials } = await v1ListPublishedEditorials()
-  return enrichPublishedList(editorials)
+  try {
+    const { editorials } = await v1ListPublishedEditorials()
+    return enrichPublishedList(editorials)
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn('[editorial] API unavailable — using static/local content:', err)
+    }
+    return enrichPublishedList(localListPublished())
+  }
 }
 
 export async function listHomepageFeatures(): Promise<Feature[]> {

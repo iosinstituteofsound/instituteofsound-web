@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { getAuthRedirectSetupHint } from '@/lib/auth/siteUrl'
 import clsx from 'clsx'
 
 interface GoogleSignInButtonProps {
@@ -17,6 +18,7 @@ export function GoogleSignInButton({
   const { signInWithGoogle, mode, configHint } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const redirectHint = getAuthRedirectSetupHint()
 
   const handleClick = async () => {
     setError('')
@@ -32,8 +34,8 @@ export function GoogleSignInButton({
   if (mode === 'local') {
     return (
       <p className="text-sm text-muted border border-border px-4 py-3">
-        Add Supabase keys in <code className="text-mh-red">.env</code> and enable Google in
-        Supabase Auth. See SUPABASE_SETUP.md
+        Set <code className="text-mh-red">VITE_USE_V1_API=true</code> and run{' '}
+        <code className="text-mh-red">instituteofsound-api</code> to enable Google sign-in.
       </p>
     )
   }
@@ -42,6 +44,9 @@ export function GoogleSignInButton({
     <div className={clsx('space-y-3', className)}>
       {configHint && (
         <p className="text-xs px-3 py-2 border border-amber-500/50 text-amber-400">{configHint}</p>
+      )}
+      {redirectHint && (
+        <p className="text-xs px-3 py-2 border border-amber-500/50 text-amber-400">{redirectHint}</p>
       )}
       <button
         type="button"

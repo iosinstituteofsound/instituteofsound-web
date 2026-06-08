@@ -2,7 +2,7 @@
 
 ## Flow
 
-`UI → src/lib/*/service.ts → src/api/v1Client.ts → /api/v1 → api/_lib/handlers`
+`UI → src/lib/*/service.ts → src/services/api/client.ts → instituteofsound-api /api/v1`
 
 ## Where to look
 
@@ -13,9 +13,9 @@
 | Network | `connectionService.ts` or `presenceService.ts`, `v1Client.ts`, `v1Network.ts` |
 | Artist page | `artist-profile/service.ts`, `v1Client.ts`, `v1ArtistProfile.ts` |
 | Submissions/DM | `submissions/service.ts` or `dm/service.ts`, `v1Phase5Client.ts`, `v1Phase5.ts` |
-| New API route | `api/_lib/handlers/`, `v1Router.ts`, `v1Client.ts`, `service.ts` |
+| New API route | `instituteofsound-api/src/legacy/handlers/`, `v1Router.ts`, `client.ts`, `service.ts` |
 
-Router: `api/_lib/v1Router.ts`
+Router: `instituteofsound-api/src/legacy/v1Router.ts`
 
 ## Rules
 

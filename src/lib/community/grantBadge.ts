@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GrantBadge } from '@/api/v1Phase5Client'
 import { localGrantBadge } from '@/lib/community/localCommunity'
 import type { CommunityBadgeSlug } from '@/lib/community/badges'

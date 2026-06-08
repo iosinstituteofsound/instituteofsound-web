@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GetNetworkProfileArtist, v1GetNetworkProfileHandle } from '@/api/v1Client'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { networkProfilePath } from '@/lib/community/networkPaths'

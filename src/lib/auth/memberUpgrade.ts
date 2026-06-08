@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1UpgradeToArtist } from '@/api/v1Phase4Client'
 import type { User } from '@/lib/auth/types'
 import { getUsers, saveUsers } from '@/lib/auth/storage'

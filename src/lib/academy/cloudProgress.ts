@@ -2,7 +2,7 @@ import type { AcademyProgressSnapshot } from '@/lib/academy/typesProgress'
 import { EMPTY_ACADEMY_PROGRESS } from '@/lib/academy/typesProgress'
 import type { EarLabMode } from '@/lib/academy/earLab'
 import { readLocalSnapshot, writeLocalSnapshot } from '@/lib/academy/progressStore'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GetAcademyProgress, v1PutAcademyProgress } from '@/api/v1Phase5Client'
 
 let syncTimer: ReturnType<typeof setTimeout> | null = null

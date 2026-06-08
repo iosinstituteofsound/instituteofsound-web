@@ -59,8 +59,9 @@ export async function fetchLinkPreview(url: string): Promise<LinkPreview> {
   const trimmed = url.trim()
   const stub = linkPreviewStub(trimmed)
   try {
+    const { apiUtilityUrl } = await import('@/services/api/client')
     const target = encodeURIComponent(trimmed)
-    const res = await fetch(`/api/link-preview?url=${target}`)
+    const res = await fetch(`${apiUtilityUrl('/api/link-preview')}?url=${target}`)
     if (!res.ok) {
       return stub
     }

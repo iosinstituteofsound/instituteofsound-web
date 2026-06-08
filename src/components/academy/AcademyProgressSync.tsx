@@ -6,7 +6,7 @@ import { setCommunityUserId } from '@/lib/community/academyHooks'
 import { setCommunityGenreId } from '@/lib/community/genreContext'
 import { evaluateWeeklyChallenges } from '@/lib/community/challengeService'
 import { syncCommunityGenreFromProfile } from '@/lib/community/service'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isLiveApiMode } from '@/lib/api/liveMode'
 
 export function AcademyProgressSync() {
   const { user, loading } = useAuth()
@@ -14,7 +14,7 @@ export function AcademyProgressSync() {
   useEffect(() => {
     if (loading) return
 
-    if (!user?.id || !isSupabaseConfigured()) {
+    if (!user?.id || !isLiveApiMode()) {
       setAcademySyncUserId(null)
       setCommunityUserId(null)
       setCommunityGenreId(null)

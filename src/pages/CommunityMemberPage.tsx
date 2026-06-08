@@ -131,11 +131,33 @@ export default function CommunityMemberPage() {
     setLoading(true)
     setNotFound(false)
 
-    const [p, postList, act] = await Promise.all([
-      fetchPublicMemberProfile(handle),
-      fetchMemberPosts(handle, 50),
-      fetchMemberActivity(handle, 40),
-    ])
+    let p: PublicMemberProfile | null = null
+    let postList: CommunityFeedPost[] = []
+    let act: MemberActivityItem[] = []
+
+    try {
+      ;[p, postList, act] = await Promise.all([
+        fetchPublicMemberProfile(handle),
+        fetchMemberPosts(handle, 50),
+        fetchMemberActivity(handle, 40),
+      ])
+    } catch (err) {
+      if (import.meta.env.DEV) console.warn('[network] profile load failed:', err)
+      setNotFound(true)
+      setProfile(null)
+      setPosts([])
+      setActivity([])
+      setArtistSlug(null)
+      setArtistProfileId(null)
+      setManagedArtists([])
+      setFandomBadges([])
+      setFandomRecognitions([])
+      setPendingRequestId(null)
+      setMutuals([])
+      setSuggested([])
+      setLoading(false)
+      return
+    }
 
     if (!p) {
       setNotFound(true)
@@ -151,17 +173,21 @@ export default function CommunityMemberPage() {
       setProfile(p)
       setPosts(postList)
       setActivity(act)
-      const [artistMeta, supporterBadges, recognitions, managed] = await Promise.all([
-        fetchPublishedArtistMetaForUserId(p.userId),
-        fetchPublicSupporterBadgesForUser(p.userId),
-        fetchPublicRecognitionsForUser(p.userId),
-        listManagedArtistsByHandle(p.handle),
-      ])
-      setArtistSlug(artistMeta?.slug ?? null)
-      setArtistProfileId(artistMeta?.id ?? null)
-      setFandomBadges(supporterBadges)
-      setFandomRecognitions(recognitions)
-      setManagedArtists(managed)
+      try {
+        const [artistMeta, supporterBadges, recognitions, managed] = await Promise.all([
+          fetchPublishedArtistMetaForUserId(p.userId),
+          fetchPublicSupporterBadgesForUser(p.userId),
+          fetchPublicRecognitionsForUser(p.userId),
+          listManagedArtistsByHandle(p.handle),
+        ])
+        setArtistSlug(artistMeta?.slug ?? null)
+        setArtistProfileId(artistMeta?.id ?? null)
+        setFandomBadges(supporterBadges)
+        setFandomRecognitions(recognitions)
+        setManagedArtists(managed)
+      } catch (err) {
+        if (import.meta.env.DEV) console.warn('[network] profile extras failed:', err)
+      }
     }
     setLoading(false)
 
@@ -281,7 +307,7 @@ export default function CommunityMemberPage() {
   if (loading) {
     return (
       <div className="np-page flex min-h-[50vh] items-center justify-center">
-        <LoadingTransmission />
+        <LoadingTransmission variant="compact" />
       </div>
     )
   }

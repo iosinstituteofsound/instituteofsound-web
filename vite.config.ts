@@ -1,125 +1,32 @@
-import { defineConfig, loadEnv, type Plugin } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
-import { buildArtistCatalogFromUrl } from './api/import-catalog'
-import { resolveLinkPreview } from './api/_lib/linkPreview'
-import { resolveThumbnailFromUrl } from './api/_lib/thumbnail'
 
-function thumbnailApiPlugin(): Plugin {
-  return {
-    name: 'ios-thumbnail-api',
-    configureServer(server) {
-      server.middlewares.use(async (req, res, next) => {
-        try {
-          const pathname = new URL(req.url ?? '/', 'http://localhost').pathname
-          if (!pathname.startsWith('/api/v1/')) {
-            next()
-            return
-          }
-          const { dispatchV1DevApi } = await import(
-            /* @vite-ignore */
-            path.join(__dirname, 'api/_lib/devV1Router.ts')
-          )
-          const handled = await dispatchV1DevApi(req, res, pathname)
-          if (handled) return
-        } catch (err) {
-          res.statusCode = 500
-          res.setHeader('Content-Type', 'application/json')
-          res.end(
-            JSON.stringify({
-              error: err instanceof Error ? err.message : 'API error',
-            }),
-          )
-          return
-        }
-        next()
-      })
-
-      server.middlewares.use('/api/import-catalog', async (req, res) => {
-        try {
-          const requestUrl = new URL(req.url ?? '', 'http://localhost')
-          const target = requestUrl.searchParams.get('url')?.trim()
-          if (!target) {
-            res.statusCode = 400
-            res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ error: 'Missing url' }))
-            return
-          }
-          const catalog = await buildArtistCatalogFromUrl(target)
-          res.statusCode = 200
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify(catalog))
-        } catch (err) {
-          res.statusCode = 502
-          res.setHeader('Content-Type', 'application/json')
-          res.end(
-            JSON.stringify({
-              error: err instanceof Error ? err.message : 'Catalog import failed',
-            })
-          )
-        }
-      })
-
-      server.middlewares.use('/api/link-preview', async (req, res) => {
-        try {
-          const requestUrl = new URL(req.url ?? '', 'http://localhost')
-          const target = requestUrl.searchParams.get('url')?.trim()
-          if (!target) {
-            res.statusCode = 400
-            res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ error: 'Missing url' }))
-            return
-          }
-          const preview = await resolveLinkPreview(
-            target.startsWith('http') ? target : `https://${target}`
-          )
-          res.statusCode = 200
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify(preview))
-        } catch {
-          res.statusCode = 502
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ error: 'Preview unavailable' }))
-        }
-      })
-
-      server.middlewares.use('/api/thumbnail', async (req, res) => {
-        try {
-          const requestUrl = new URL(req.url ?? '', 'http://localhost')
-          const target = requestUrl.searchParams.get('url')?.trim()
-          if (!target) {
-            res.statusCode = 400
-            res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ error: 'Missing url' }))
-            return
-          }
-          const thumbnailUrl = await resolveThumbnailFromUrl(target)
-          res.statusCode = 200
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ thumbnailUrl }))
-        } catch {
-          res.statusCode = 502
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ thumbnailUrl: null }))
-        }
-      })
-    },
-  }
-}
+const webRoot = path.resolve(__dirname, '.')
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
+  const env = loadEnv(mode, webRoot, '')
   for (const [key, value] of Object.entries(env)) {
     if (value !== undefined) process.env[key] = value
   }
 
+  const rawApiTarget = env.VITE_API_BASE_URL?.trim() || 'http://127.0.0.1:4000'
+  // Avoid Windows dev resolving localhost → ::1 while API listens on IPv4 only
+  const apiTarget = rawApiTarget.replace(/\/\/localhost\b/i, '//127.0.0.1')
+
+  /** Express-only paths — do not proxy /api/*.json (served from public/api/). */
+  const expressApiProxy = {
+    target: apiTarget,
+    changeOrigin: true,
+  }
+
   return {
+    envDir: webRoot,
     plugins: [
       react(),
       tailwindcss(),
-      thumbnailApiPlugin(),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: [
@@ -203,10 +110,26 @@ export default defineConfig(({ mode }) => {
       host: true,
       port: 5173,
       strictPort: false,
+      proxy: {
+        '/api/auth': expressApiProxy,
+        '/api/v1': expressApiProxy,
+        '/api/link-preview': expressApiProxy,
+        '/api/thumbnail': expressApiProxy,
+        '/api/import-catalog': expressApiProxy,
+        '/api/share': expressApiProxy,
+      },
     },
     preview: {
       host: true,
       port: 4173,
+      proxy: {
+        '/api/auth': expressApiProxy,
+        '/api/v1': expressApiProxy,
+        '/api/link-preview': expressApiProxy,
+        '/api/thumbnail': expressApiProxy,
+        '/api/import-catalog': expressApiProxy,
+        '/api/share': expressApiProxy,
+      },
     },
   }
 })

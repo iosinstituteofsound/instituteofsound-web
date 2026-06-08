@@ -4,7 +4,7 @@ import { useCommunityMemberStats } from '@/hooks/useCommunity'
 import { EVENT_KINDS, type EventKind } from '@/lib/events/constants'
 import { submitSceneEvent } from '@/lib/events/service'
 import { INDIA_SCENE_CITIES, SCENE_GENRE_SLUGS } from '@/lib/releases/constants'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isLiveApiMode } from '@/lib/api/liveMode'
 
 interface EventSubmitFormProps {
   onSubmitted?: () => void
@@ -58,7 +58,7 @@ export function EventSubmitForm({ onSubmitted }: EventSubmitFormProps) {
       setStartsAt('')
       setExternalUrl('')
       setSuccess(
-        isSupabaseConfigured()
+        isLiveApiMode()
           ? 'Submitted — IOS editors will review before it goes live.'
           : 'Listing saved locally for demo.'
       )

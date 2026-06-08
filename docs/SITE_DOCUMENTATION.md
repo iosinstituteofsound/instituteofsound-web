@@ -1,7 +1,7 @@
 # Institute of Sound — Site Documentation
 
 > **Local reference only.** Describes the full product: routes, roles, dashboards, components, and data flow.  
-> Last updated: May 2026 (API v1 on Vercel, artist page lifecycle/recovery, playlist curator, build notes) · Repo: `instituteofsound`
+> Last updated: May 2026 (API v1 on Vercel, artist page lifecycle/recovery, playlist curator, build notes) · Repo: `instituteofsound-web`
 
 ---
 
@@ -62,7 +62,7 @@ Design language: black/red editorial chrome, display typography, grain overlay, 
 ## 3. Repository layout
 
 ```
-instituteofsound/
+instituteofsound-web/
 ├── docs/                    ← This file
 ├── public/
 │   ├── api/                 ← Static JSON for homepage magazine sections + nav/footer
@@ -1214,3 +1214,5 @@ All desks sit inside global **AppShell** (sidebar + top bar / mobile tabs)
 ---
 
 *For setup steps, see root `README.md`, `SUPABASE_SETUP.md`, and `CLOUDINARY_SETUP.md`.*
+
+

@@ -17,13 +17,13 @@ import {
   fetchUserProfile,
 } from '@/lib/auth/provider'
 import { isEditorStaff, isSuperEditor } from '@/lib/auth/roles'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isLiveApiMode } from '@/lib/api/liveMode'
 import type { User, UserRole } from '@/lib/auth/types'
 
 interface AuthContextValue {
   user: User | null
   loading: boolean
-  mode: 'supabase' | 'local'
+  mode: 'api' | 'local'
   configHint: string | null
   signInWithGoogle: (intent?: 'member' | 'artist' | 'desk' | 'editor_apply') => Promise<void>
   logout: () => Promise<void>
@@ -44,11 +44,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false
 
+    const authTimeout = window.setTimeout(() => {
+      if (!cancelled) {
+        console.warn('[auth] Session check timed out — continuing without blocking the UI')
+        setLoading(false)
+      }
+    }, 12_000)
+
     getCurrentUser()
       .then((u) => {
         if (!cancelled) setUser(u)
       })
+      .catch((err) => {
+        if (import.meta.env.DEV) console.warn('[auth] getCurrentUser failed:', err)
+      })
       .finally(() => {
+        window.clearTimeout(authTimeout)
         if (!cancelled) setLoading(false)
       })
 
@@ -58,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       cancelled = true
+      window.clearTimeout(authTimeout)
       unsubscribe()
     }
   }, [])
@@ -75,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const refreshUser = useCallback(async () => {
-    if (!user?.id || !isSupabaseConfigured()) {
+    if (!user?.id || !isLiveApiMode()) {
       const u = await getCurrentUser()
       setUser(u)
       return

@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1PingNetworkPresence, v1FetchOnlineConnections } from '@/api/v1Client'
 
 export const ONLINE_WINDOW_MINUTES = 3

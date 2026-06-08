@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1IsFollowing, v1ToggleFollow } from '@/api/v1Phase4Client'
 import {
   localIsFollowing,

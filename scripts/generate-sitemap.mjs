@@ -1,17 +1,17 @@
-/**
+﻿/**
  * Generates public/sitemap.xml from static routes + public/api JSON catalogs.
- * When Supabase env is set, includes /network/:handle from community_sitemap_handles().
+ * Dynamic /network and /release paths come from instituteofsound-api (Supabase).
  * Run: npm run sitemap (also runs before build).
  */
+import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createClient } from '@supabase/supabase-js'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const webRoot = join(dirname(fileURLToPath(import.meta.url)), '..')
+const apiRoot = join(webRoot, '..', 'instituteofsound-api')
 
-function loadDotEnv() {
-  const envPath = join(root, '.env')
+function loadEnvFile(envPath) {
   if (!existsSync(envPath)) return
   for (const line of readFileSync(envPath, 'utf8').split('\n')) {
     const trimmed = line.trim()
@@ -30,42 +30,39 @@ function loadDotEnv() {
   }
 }
 
+function loadDotEnv() {
+  loadEnvFile(join(webRoot, '.env'))
+  loadEnvFile(join(webRoot, '.env.local'))
+}
+
 loadDotEnv()
 
-async function fetchReleaseSlugs() {
-  const url = process.env.VITE_SUPABASE_URL
-  const key = process.env.VITE_SUPABASE_ANON_KEY
-  if (!url || !key) return []
-
-  const supabase = createClient(url, key)
-  const { data, error } = await supabase.rpc('release_sitemap_slugs')
-  if (error) {
-    console.warn('[sitemap] release_sitemap_slugs:', error.message)
-    return []
+function fetchDynamicSlugs() {
+  const script = join(apiRoot, 'scripts', 'fetch-sitemap-slugs.mjs')
+  if (!existsSync(script)) {
+    return { releaseSlugs: [], networkHandles: [] }
   }
-  return (data ?? []).map((row) => row?.slug?.trim()).filter(Boolean)
+  try {
+    const out = execFileSync(process.execPath, [script], {
+      cwd: apiRoot,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    return JSON.parse(out.trim())
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.warn('[sitemap] dynamic slugs skipped:', message)
+    return { releaseSlugs: [], networkHandles: [] }
+  }
 }
 
-async function fetchNetworkHandles() {
-  const url = process.env.VITE_SUPABASE_URL
-  const key = process.env.VITE_SUPABASE_ANON_KEY
-  if (!url || !key) return []
+const { releaseSlugs, networkHandles } = fetchDynamicSlugs()
 
-  const supabase = createClient(url, key)
-  const { data, error } = await supabase.rpc('community_sitemap_handles')
-  if (error) {
-    console.warn('[sitemap] community_sitemap_handles:', error.message)
-    return []
-  }
-  return (data ?? [])
-    .map((row) => row?.handle?.trim())
-    .filter(Boolean)
-}
 const siteUrl = (process.env.VITE_SITE_URL || 'https://instituteofsound.in').replace(/\/$/, '')
 const today = new Date().toISOString().slice(0, 10)
 
 function readJson(name) {
-  return JSON.parse(readFileSync(join(root, 'public/api', name), 'utf8'))
+  return JSON.parse(readFileSync(join(webRoot, 'public/api', name), 'utf8'))
 }
 
 function slugifySceneCity(name) {
@@ -174,11 +171,11 @@ for (const f of features) paths.add(`/feature/${f.slug}`)
 for (const a of artists) paths.add(`/artist/${a.slug}`)
 for (const p of playlists) paths.add(`/playlist/${p.slug}`)
 
-for (const handle of await fetchNetworkHandles()) {
+for (const handle of networkHandles) {
   paths.add(`/network/${encodeURIComponent(handle)}`)
 }
 
-for (const slug of await fetchReleaseSlugs()) {
+for (const slug of releaseSlugs) {
   paths.add(`/release/${encodeURIComponent(slug)}`)
 }
 
@@ -203,7 +200,7 @@ const urls = [...paths]
     <lastmod>${today}</lastmod>
     <changefreq>${path === '/' ? 'daily' : 'weekly'}</changefreq>
     <priority>${path === '/' ? '1.0' : path.startsWith('/academy') || path.startsWith('/tools') ? '0.8' : '0.7'}</priority>
-  </url>`
+  </url>`,
   )
   .join('\n')
 
@@ -213,5 +210,5 @@ ${urls}
 </urlset>
 `
 
-writeFileSync(join(root, 'public/sitemap.xml'), xml)
-console.log(`Wrote sitemap with ${paths.size} URLs → public/sitemap.xml`)
+writeFileSync(join(webRoot, 'public/sitemap.xml'), xml)
+console.log(`Wrote sitemap with ${paths.size} URLs -> public/sitemap.xml`)

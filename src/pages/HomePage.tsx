@@ -47,8 +47,14 @@ export default function HomePage() {
     return buildEditorSideItems(features.data, reviews.data, signals.data)
   }, [features.data, reviews.data, signals.data])
 
-  if (loading && !cover.data) return <LoadingHome />
+  if (loading && !cover.data && !cover.error) return <LoadingHome />
   if (cover.error && !cover.data) return <HomeError />
+  if (
+    !loading &&
+    (!cover.data || !features.data?.length || !releases.data)
+  ) {
+    return <HomeError />
+  }
   if (!cover.data || !features.data?.length || !releases.data) return <LoadingHome />
 
   const leadFeature =

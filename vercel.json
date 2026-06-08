@@ -11,53 +11,9 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
       ]
-    },
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store" }
-      ]
-    }
-  ],
-  "functions": {
-    "api/og/site.tsx": {
-      "maxDuration": 15
-    },
-    "api/og/artist.tsx": {
-      "maxDuration": 15
-    },
-    "api/share/artist.ts": {
-      "maxDuration": 10
-    },
-    "api/share/feature.ts": {
-      "maxDuration": 10
-    },
-    "api/link-preview.ts": {
-      "maxDuration": 15
-    },
-    "api/thumbnail.ts": {
-      "maxDuration": 15
-    },
-    "api/v1.ts": {
-      "maxDuration": 15,
-      "includeFiles": "api/_lib/v1.bundle.js"
-    },
-    "api/import-catalog.ts": {
-      "maxDuration": 30
-    },
-    "api/cron/purge-artist-pages.ts": {
-      "maxDuration": 60
-    }
-  },
-  "crons": [
-    {
-      "path": "/api/cron/purge-artist-pages",
-      "schedule": "0 4 * * *"
     }
   ],
   "rewrites": [
-    { "source": "/api/v1/(.*)", "destination": "/api/v1?path=$1" },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

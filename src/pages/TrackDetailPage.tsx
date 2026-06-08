@@ -85,16 +85,22 @@ export default function TrackDetailPage() {
       return
     }
     setLoading(true)
-    const data = await fetchPublicTrackDetail(artistSlug, trackId)
-    if (!data) {
+    try {
+      const data = await fetchPublicTrackDetail(artistSlug, trackId)
+      if (!data) {
+        setNotFound(true)
+        setDetail(null)
+      } else {
+        setDetail(data)
+        setNotFound(false)
+        setSaved(readSaved().has(saveKey(artistSlug, trackId)))
+      }
+    } catch {
       setNotFound(true)
       setDetail(null)
-    } else {
-      setDetail(data)
-      setNotFound(false)
-      setSaved(readSaved().has(saveKey(artistSlug, trackId)))
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [artistSlug, trackId])
 
   useEffect(() => {

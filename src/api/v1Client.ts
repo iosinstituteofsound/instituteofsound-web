@@ -1,4 +1,4 @@
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { apiFetch } from '@/services/api/client'
 import type { ArtistProfile, UpsertArtistProfileInput } from '@/lib/artist-profile/types'
 import type {
   CommunityFeedPost,
@@ -35,37 +35,11 @@ export function isV1ApiEnabled(): boolean {
   return flag === '1' || flag === 'true' || flag === 'yes'
 }
 
-async function tryAccessToken(): Promise<string | null> {
-  if (!isSupabaseConfigured()) return null
-  const { data, error } = await getSupabase().auth.getSession()
-  if (error) throw error
-  return data.session?.access_token ?? null
-}
-
 export async function v1Fetch<T>(
   path: string,
   init?: RequestInit & { auth?: 'required' | 'optional' | 'none' },
 ): Promise<T> {
-  const mode = init?.auth ?? 'required'
-  const token = mode === 'none' ? null : await tryAccessToken()
-
-  if (mode === 'required' && !token) {
-    throw new Error('Sign in required')
-  }
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(init?.headers as Record<string, string> | undefined),
-  }
-  if (token) headers.Authorization = `Bearer ${token}`
-
-  const { auth: _auth, ...fetchInit } = init ?? {}
-  const res = await fetch(`/api/v1${path}`, { ...fetchInit, headers })
-  const body = (await res.json().catch(() => ({}))) as { error?: string }
-  if (!res.ok) {
-    throw new Error(body.error ?? `Request failed (${res.status})`)
-  }
-  return body as T
+  return apiFetch<T>(path, init)
 }
 
 export async function v1GetMe(): Promise<{ user: User }> {

@@ -24,7 +24,7 @@ import {
   v1UpdateArtistVideo,
 } from '@/api/v1ArtistStudioClient'
 import { v1ListDiscoverArtistProfiles, v1ListArtistProfilesForEditor } from '@/api/v1Phase5Client'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { getDrafts } from '@/lib/auth/storage'
 import type { Artist } from '@/types'
 import type { User } from '@/lib/auth/types'
@@ -195,8 +195,8 @@ async function finalizeArtistPage(page: NonNullable<Awaited<ReturnType<typeof v1
   })
   if (!profile) return null
   const [enrichedTracks, enrichedVideos] = await Promise.all([
-    enrichTracksWithThumbnails(page.tracks, true),
-    enrichVideosWithThumbnails(page.videos, true),
+    enrichTracksWithThumbnails(page.tracks),
+    enrichVideosWithThumbnails(page.videos),
   ])
   const pickTrack = profile.artistPickTrackId
     ? enrichedTracks.find((t) => t.id === profile.artistPickTrackId)

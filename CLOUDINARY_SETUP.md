@@ -46,7 +46,7 @@ npm run dev
 
 If you use Supabase, run in SQL Editor:
 
-`supabase/migrations/004-cloudinary-images.sql`
+`instituteofsound-api/supabase/migrations/004-cloudinary-images.sql`
 
 This adds `cover_image_url` on `track_submissions` and `editorial_drafts`.
 

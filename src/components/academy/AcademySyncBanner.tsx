@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isLiveApiMode } from '@/lib/api/liveMode'
 
 export function AcademySyncBanner() {
   const { user, loading, mode } = useAuth()
 
-  if (loading || !isSupabaseConfigured()) return null
+  if (loading || !isLiveApiMode()) return null
 
   if (user) {
     return (
@@ -22,7 +22,7 @@ export function AcademySyncBanner() {
         <p className="academy-sync-banner-k">Cloud progress</p>
         <p className="academy-sync-banner-t">
           Sign in to save lessons, quizzes, and Ear Lab scores across devices.
-          {mode === 'local' && ' (Supabase required for sync.)'}
+          {mode === 'local' && ' (API required for sync.)'}
         </p>
       </div>
       <div className="academy-sync-banner-actions">

@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GetEditorWirePicks, v1UpdateEditorialLinkedPost } from '@/api/v1Phase5Client'
 import { fetchCommunityPostById } from '@/lib/community/feedService'
 import { localApplyReactions, localListFeed } from '@/lib/community/localFeed'

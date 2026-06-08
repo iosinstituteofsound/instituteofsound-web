@@ -7,7 +7,6 @@ import {
   markNotificationsRead,
   type CommunityNotification,
 } from '@/lib/community/notificationService'
-import { isSupabaseConfigured, getSupabase } from '@/lib/supabase/client'
 import { COMMUNITY_FOLLOW_EVENT } from '@/lib/community/followService'
 import { COMMENT_EVENT } from '@/lib/community/commentService'
 import { COMMUNITY_FEED_EVENT } from '@/lib/community/feedService'
@@ -61,31 +60,6 @@ export function useCommunityNotifications() {
     document.addEventListener('visibilitychange', onVis)
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [refresh])
-
-  useEffect(() => {
-    if (!user?.id || !isSupabaseConfigured()) return
-
-    const supabase = getSupabase()
-    const channel = supabase
-      .channel(`community-notifications:${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'community_notifications',
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          void refresh()
-        }
-      )
-      .subscribe()
-
-    return () => {
-      void supabase.removeChannel(channel)
-    }
-  }, [user?.id, refresh])
 
   useEffect(() => {
     if (!user) return

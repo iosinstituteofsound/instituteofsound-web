@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1GlobalSearchRpc } from '@/api/v1Phase5Client'
 import { buildSearchItems, filterSearchItems } from '@/lib/nav/searchItems'
 import { listDiscoverArtists } from '@/lib/artist-profile/service'

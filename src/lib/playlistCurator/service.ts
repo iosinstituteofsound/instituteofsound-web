@@ -4,7 +4,7 @@ import {
   v1ReviewPlaylistCuratorApplication,
   v1SubmitPlaylistCuratorApplication,
 } from '@/api/v1Client'
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import {
   notifyMemberPlaylistCuratorDecision,
   notifySuperEditorsOfPlaylistCuratorApplication,

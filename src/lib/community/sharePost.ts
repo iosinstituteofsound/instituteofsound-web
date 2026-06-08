@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/api/liveMode'
 import { v1LogFandomShare } from '@/api/v1FandomClient'
 
 async function logSupportShare(postId: string) {
