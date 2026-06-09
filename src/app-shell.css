@@ -1431,7 +1431,6 @@ button.v2-topbar-profile {
 
 .v2-home-layout {
   display: flex;
-  min-height: 100%;
   align-items: flex-start;
 }
 

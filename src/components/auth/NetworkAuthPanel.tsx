@@ -13,7 +13,7 @@ export function NetworkAuthPanel({
     'One tap with Google. Start as a member — post on the feed, join scenes and collabs. Upgrade to an artist page or apply as an editor anytime from your dashboard.',
 }: NetworkAuthPanelProps) {
   return (
-    <div className="section-padding pt-32 min-h-screen">
+    <div className="auth-full-page section-padding">
       <div className="max-w-md mx-auto ios-panel ios-panel-accent">
         <p className="ios-kicker">Institute of Sound</p>
         <h1 className="font-serif text-4xl font-bold mt-3">{title}</h1>

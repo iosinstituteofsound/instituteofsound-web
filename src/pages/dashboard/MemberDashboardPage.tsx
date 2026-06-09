@@ -4,12 +4,15 @@ import clsx from 'clsx'
 import { useAuth } from '@/context/AuthContext'
 import { updateUserProfile } from '@/lib/auth/profile'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
-import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
 import { MyFandomPanel } from '@/components/dashboard/MyFandomPanel'
+import { MemberFeedActivity } from '@/components/dashboard/MemberFeedActivity'
+import { MemberUpgradePathsHome } from '@/components/dashboard/MemberUpgradePathsHome'
 import { MemberTrustPanel } from '@/components/dashboard/MemberTrustPanel'
 import { syncMemberVerificationNotifications } from '@/lib/verification/notifyEditors'
 import { syncApprovedVerificationPersona } from '@/lib/verification/service'
 import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
+import { MemberExploreHome } from '@/components/dashboard/MemberExploreHome'
+import { MemberWorkspaceHome } from '@/components/dashboard/MemberWorkspaceHome'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import type { DashboardPersona } from '@/lib/auth/types'
 import { VerificationRequirementsList } from '@/components/dashboard/VerificationRequirementsList'
@@ -410,100 +413,24 @@ export default function MemberDashboardPage() {
         }
         onLogout={() => logout()}
         rootClassName="member-desk"
+        shellless
+        compactHeader
       >
         {tab === 'workspace' && (
-          <>
-            {!persona && (
-              <section className="member-desk-panel">
-                <p className="member-desk-kicker">Workspace home</p>
-                <h2 className="member-desk-heading">Start from the network</h2>
-                <p className="member-desk-lede">
-                  Use Feed and Explore while you are a member. When you are ready to level up —
-                  artist page, manager, label, brand, promoter, playlist curator, or editor — open
-                  Upgrade paths.
-                </p>
-                <button
-                  type="button"
-                  className="ios-btn ios-btn-primary mt-6"
-                  onClick={openUpgradePaths}
-                >
-                  Open upgrade paths →
-                </button>
-              </section>
-            )}
-
-            {personaPanel && (
-          <section className="member-desk-panel member-dashboard-persona-active">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="member-desk-kicker">{personaPanel.badge}</p>
-              <span className="member-desk-meta">Workspace mode is active for this account.</span>
-            </div>
-            <h2 className="member-desk-heading">{personaPanel.heading}</h2>
-            <p className="member-desk-lede">{personaPanel.summary}</p>
-            <ul className="member-dashboard-persona-list mt-5">
-              {personaPanel.priorities.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <div className="member-dashboard-workbench mt-6">
-              <article className="member-dashboard-workbench-card">
-                <h3>Workflow board</h3>
-                <div className="member-dashboard-workflow-list mt-4">
-                  {personaPanel.workflow.map((step) => (
-                    <div key={step.stage} className="member-dashboard-workflow-item">
-                      <p className="member-dashboard-workflow-stage">{step.stage}</p>
-                      <p>{step.objective}</p>
-                    </div>
-                  ))}
-                </div>
-              </article>
-              <article className="member-dashboard-workbench-card">
-                <h3>Toolkit focus</h3>
-                <ul className="member-dashboard-toolkit-list mt-4">
-                  {personaPanel.toolkit.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </article>
-            </div>
-            <div className="member-desk-actions">
-              {personaPanel.actions.map((action) => (
-                <Link
-                  key={action.to + action.label}
-                  to={action.to}
-                  className={
-                    action.primary ? 'ios-btn ios-btn-primary' : 'ios-btn ios-btn-secondary'
-                  }
-                >
-                  {action.label} →
-                </Link>
-              ))}
-              <button
-                type="button"
-                className="ios-btn ios-btn-secondary"
-                onClick={openUpgradePaths}
-              >
-                More upgrade paths →
-              </button>
-              <button
-                type="button"
-                className="ios-btn ios-btn-ghost"
-                onClick={() => setShowResetConfirm(true)}
-                disabled={savingPersona}
-              >
-                Reset and start over
-              </button>
-            </div>
-            <p className="member-desk-footnote">
-              Reset clears your workspace mode. Pick a new path from Upgrade paths.
-            </p>
-            {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
-          </section>
-            )}
-          </>
+          <MemberWorkspaceHome
+            user={user}
+            persona={persona}
+            personaTitle={personaTitle}
+            personaPanel={personaPanel}
+            onOpenUpgradePaths={openUpgradePaths}
+            onResetPersona={() => setShowResetConfirm(true)}
+            savingPersona={savingPersona}
+            personaError={personaError}
+          />
         )}
 
         {tab === 'grow' && (
+          <MemberUpgradePathsHome persona={persona}>
           <div className="member-dashboard-paths">
             <section className="member-desk-panel member-dashboard-paths-intro">
               <p className="member-desk-kicker">Growth</p>
@@ -611,37 +538,12 @@ export default function MemberDashboardPage() {
               </section>
             )}
           </div>
+          </MemberUpgradePathsHome>
         )}
 
-        {tab === 'explore' && (
-        <section className="member-desk-panel member-dashboard-explore">
-          <h2 className="member-desk-heading">Explore</h2>
-          <div className="member-dashboard-explore-grid">
-            <Link to="/scenes" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
-              <span className="text-[10px] uppercase tracking-widest text-mh-red">Discovery</span>
-              <p className="font-display font-bold mt-1">Scenes</p>
-              <p className="text-xs text-muted mt-1">City × genre hubs</p>
-            </Link>
-            <Link to="/events" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
-              <span className="text-[10px] uppercase tracking-widest text-mh-red">Live</span>
-              <p className="font-display font-bold mt-1">Events</p>
-              <p className="text-xs text-muted mt-1">Gigs &amp; RSVP</p>
-            </Link>
-            <Link to="/collab" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
-              <span className="text-[10px] uppercase tracking-widest text-mh-red">Network</span>
-              <p className="font-display font-bold mt-1">Collab</p>
-              <p className="text-xs text-muted mt-1">Need / offer board</p>
-            </Link>
-            <Link to="/discover" className="ios-card p-5 hover:border-mh-red/40 transition-colors">
-              <span className="text-[10px] uppercase tracking-widest text-mh-red">Magazine</span>
-              <p className="font-display font-bold mt-1">Discover</p>
-              <p className="text-xs text-muted mt-1">Artists &amp; releases</p>
-            </Link>
-          </div>
-        </section>
-        )}
+        {tab === 'explore' && <MemberExploreHome />}
 
-        {tab === 'network' && <DashboardCommunityHub />}
+        {tab === 'network' && <MemberFeedActivity />}
 
         {tab === 'fandom' && <MyFandomPanel />}
       </RoleDeskLayout>

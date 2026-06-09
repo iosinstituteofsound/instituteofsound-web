@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useCommunityMemberStats } from '@/hooks/useCommunity'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
-import { RankBadge } from '@/components/ui/RankBadge'
 import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { CollabSkillsEditor } from '@/components/collab/CollabSkillsEditor'
 
@@ -16,81 +15,114 @@ export function DashboardCommunityHub() {
   const profilePath = `/network/${handle}`
 
   return (
-    <div className="dashboard-community-hub space-y-8">
-      <div className="ios-card p-6 md:p-8">
-        <p className="text-[10px] tracking-[0.25em] uppercase text-mh-red font-bold mb-2">
-          The Network
-        </p>
-        <h2 className="font-display text-2xl md:text-3xl font-bold uppercase">
-          Community & feed
-        </h2>
-        <p className="text-sm text-muted mt-2 max-w-2xl">
+    <div className="member-feed-activity">
+      <header className="mfa-header">
+        <h2 className="mfa-title">Feed &amp; activity</h2>
+        <p className="mfa-subtitle">
           Post Spins and Drops on the live feed, earn dB, rank up, and show activity on your public
           member profile.
         </p>
+      </header>
 
-        {loading && !stats ? (
-          <div className="mt-6">
-            <LoadingTransmission variant="compact" />
-          </div>
-        ) : stats ? (
-          <div className="dashboard-community-hub-stats mt-6 flex flex-wrap items-center gap-4">
-            <RankBadge rank={stats.rank} size="md" />
+      {loading && !stats ? (
+        <LoadingTransmission variant="compact" />
+      ) : stats ? (
+        <div className="mfa-stats">
+          <article className="mfa-stat">
+            <span className="mfa-stat-icon" aria-hidden>
+              ◆
+            </span>
             <div>
-              <p className="font-display text-2xl font-bold">{stats.totalDb.toLocaleString()} dB</p>
-              <p className="text-xs text-muted">
-                {stats.weeklyDb.toLocaleString()} this week
-                {stats.primaryGenreSlug && ` · ${stats.primaryGenreSlug} tribe`}
-              </p>
+              <p className="mfa-stat-label">dB balance</p>
+              <p className="mfa-stat-value">{stats.totalDb.toLocaleString()}</p>
+              <p className="mfa-stat-meta">+{stats.weeklyDb.toLocaleString()} this week</p>
             </div>
-            <p className="text-sm text-muted">
-              Public handle: <span className="text-mh-red font-mono">@{handle}</span>
-            </p>
-          </div>
-        ) : (
-          <p className="text-sm text-muted mt-4">
-            Sign in with cloud auth to sync dB and posts across devices.
-          </p>
-        )}
-
-        <div className="flex flex-wrap gap-3 mt-8">
-          <Link to="/community#feed" className="ios-btn ios-btn-primary !text-xs">
-            Open network feed →
-          </Link>
-          <Link to={profilePath} className="ios-btn ios-btn-secondary !text-xs">
-            My public profile
-          </Link>
-          <Link to="/community" className="ios-btn ios-btn-ghost !text-xs">
-            Full community hub
-          </Link>
-          <Link to="/collab" className="ios-btn ios-btn-ghost !text-xs">
-            Collab board →
-          </Link>
-          <Link to="/events" className="ios-btn ios-btn-ghost !text-xs">
-            Events →
-          </Link>
+          </article>
+          <article className="mfa-stat">
+            <span className="mfa-stat-icon" aria-hidden>
+              ◆
+            </span>
+            <div>
+              <p className="mfa-stat-label">Rank</p>
+              <p className="mfa-stat-value">{stats.rank}</p>
+              <p className="mfa-stat-meta">@{handle}</p>
+            </div>
+          </article>
+          <article className="mfa-stat">
+            <span className="mfa-stat-icon" aria-hidden>
+              ◆
+            </span>
+            <div>
+              <p className="mfa-stat-label">Tribe</p>
+              <p className="mfa-stat-value">{stats.primaryGenreSlug ?? 'Open'}</p>
+              <p className="mfa-stat-meta">Primary scene</p>
+            </div>
+          </article>
         </div>
-      </div>
+      ) : (
+        <p className="text-sm text-muted">Sign in with cloud auth to sync dB and posts across devices.</p>
+      )}
 
-      <CollabSkillsEditor />
+      <div className="mfa-layout">
+        <div className="mfa-feed">
+          <article className="mfa-feed-card">
+            <div className="mfa-feed-head">
+              <div className="mfa-feed-head-copy">
+                <p className="mfa-feed-author">Your network desk</p>
+                <p className="mfa-feed-meta">Quick actions for feed, profile, collab, and events.</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3 mt-4">
+              <Link to="/community#feed" className="ios-btn ios-btn-primary !text-xs">
+                Open network feed →
+              </Link>
+              <Link to={profilePath} className="ios-btn ios-btn-secondary !text-xs">
+                My public profile
+              </Link>
+              <Link to="/community" className="ios-btn ios-btn-ghost !text-xs">
+                Full community hub
+              </Link>
+              <Link to="/collab" className="ios-btn ios-btn-ghost !text-xs">
+                Collab board →
+              </Link>
+              <Link to="/events" className="ios-btn ios-btn-ghost !text-xs">
+                Events →
+              </Link>
+            </div>
+          </article>
 
-      <div className="ios-card p-6 border-dashed border-border">
-        <h3 className="font-display text-lg font-bold uppercase">Quick guide</h3>
-        <ul className="mt-4 space-y-2 text-sm text-muted list-disc pl-5">
-          <li>
-            <strong className="text-signal">Feed</strong> — everyone&apos;s Spins & Drops at{' '}
-            <Link to="/community#feed" className="text-mh-red hover:underline">
-              /community
-            </Link>
-          </li>
-          <li>
-            <strong className="text-signal">Your profile</strong> — posts + activity at{' '}
-            <Link to={profilePath} className="text-mh-red hover:underline">
-              {profilePath}
-            </Link>
-          </li>
-          <li>Set your @username in profile settings so your link is easy to share.</li>
-        </ul>
+          <CollabSkillsEditor />
+        </div>
+
+        <aside className="mfa-sidebar">
+          <div className="mfa-widget">
+            <h3>Quick guide</h3>
+            <ul className="mfa-recent">
+              <li>
+                <span className="mfa-recent-icon" aria-hidden>
+                  ◆
+                </span>
+                <span className="mfa-recent-text">
+                  <strong>Feed</strong> — Spins &amp; Drops at /community
+                </span>
+              </li>
+              <li>
+                <span className="mfa-recent-icon" aria-hidden>
+                  ◆
+                </span>
+                <span className="mfa-recent-text">
+                  <strong>Profile</strong> — {profilePath}
+                </span>
+              </li>
+              <li>
+                <span className="mfa-recent-icon" aria-hidden>
+                  ◆
+                </span>
+                <span className="mfa-recent-text">Set @username in profile settings to share your link.</span>
+              </li>
+            </ul>
+          </div>
+        </aside>
       </div>
     </div>
   )

@@ -20,7 +20,8 @@ type LoginGateContextValue = {
 
 const LoginGateContext = createContext<LoginGateContextValue | null>(null)
 
-const DEFAULT_HINT = 'Sign in with Google to access the network, feed, and operator profiles.'
+const DEFAULT_HINT =
+  'Home, Academy, and Toolkit stay open. Everything else on the wire needs your operator account.'
 
 export function LoginGateProvider({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()

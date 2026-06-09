@@ -11,7 +11,7 @@ export function ArtistAuthPanel({
   subtitle = 'One tap with Google — no password, no confirmation email. New artists get My Studio to build a band page and submit tracks.',
 }: ArtistAuthPanelProps) {
   return (
-    <div className="section-padding pt-32 min-h-screen">
+    <div className="auth-full-page section-padding">
       <div className="max-w-md mx-auto ios-panel ios-panel-accent">
         <p className="ios-kicker">Artist Portal</p>
         <h1 className="font-serif text-4xl font-bold mt-3">{title}</h1>

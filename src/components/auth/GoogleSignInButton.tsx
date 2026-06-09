@@ -8,12 +8,15 @@ interface GoogleSignInButtonProps {
   /** member = default signup; artist = upgrade intent; desk = super editor; editor_apply = apply flow */
   intent?: 'member' | 'artist' | 'desk' | 'editor_apply'
   label?: string
+  /** Gate/modal: bare button only (no outer spacing wrapper) */
+  bare?: boolean
 }
 
 export function GoogleSignInButton({
   className,
   intent = 'member',
   label = 'Continue with Google',
+  bare = false,
 }: GoogleSignInButtonProps) {
   const { signInWithGoogle, mode, configHint } = useAuth()
   const [loading, setLoading] = useState(false)
@@ -40,6 +43,33 @@ export function GoogleSignInButton({
     )
   }
 
+  const button = (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={loading || Boolean(configHint)}
+      className={clsx('ios-google-btn w-full', bare && className)}
+    >
+      {!bare && <GoogleIcon />}
+      <span className="ios-google-btn__label">{loading ? 'Redirecting...' : label}</span>
+    </button>
+  )
+
+  if (bare) {
+    return (
+      <>
+        {configHint && (
+          <p className="text-xs px-3 py-2 border border-amber-500/50 text-amber-400">{configHint}</p>
+        )}
+        {redirectHint && (
+          <p className="text-xs px-3 py-2 border border-amber-500/50 text-amber-400">{redirectHint}</p>
+        )}
+        {button}
+        {error && <p className="text-mh-red text-sm">{error}</p>}
+      </>
+    )
+  }
+
   return (
     <div className={clsx('space-y-3', className)}>
       {configHint && (
@@ -48,15 +78,7 @@ export function GoogleSignInButton({
       {redirectHint && (
         <p className="text-xs px-3 py-2 border border-amber-500/50 text-amber-400">{redirectHint}</p>
       )}
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={loading || Boolean(configHint)}
-        className="ios-google-btn w-full"
-      >
-        <GoogleIcon />
-        <span>{loading ? 'Redirecting...' : label}</span>
-      </button>
+      {button}
       {error && <p className="text-mh-red text-sm">{error}</p>}
     </div>
   )

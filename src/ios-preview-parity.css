@@ -1,0 +1,74 @@
+/* IOS preview parity — production rules from ios_ui/preview/preview-overrides.css */
+
+.v2-main-inner {
+  min-height: min(100%, 800px);
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-mh-red) var(--color-void);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-mh-red) var(--color-surface);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-mh-red);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-rs-red);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--color-surface);
+}
+
+.v2-rail::-webkit-scrollbar {
+  width: 8px;
+}
+
+.v2-rail::-webkit-scrollbar-thumb {
+  background: var(--color-mh-red);
+  border-radius: 9999px;
+}
+
+.v2-shell .desk-nav-btn,
+.v2-shell .super-editor-nav-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.artist-desk .artist-dash-history-grid {
+  grid-template-columns: 1fr !important;
+  max-width: 36rem;
+}
+
+.artist-desk .desk-content {
+  min-width: 0;
+}
+
+.member-desk .member-desk-panel {
+  max-width: 52rem;
+}
+
+.v2-shell .v2-main .auth-full-page {
+  padding-top: 6rem !important;
+  padding-bottom: 4rem;
+  min-height: 60vh;
+}

@@ -41,6 +41,8 @@ type Props<T extends string> = {
   rootClassName?: string
   /** Tighter header — identity + actions only (artist / member desks). */
   compactHeader?: boolean
+  /** Member desk — hide in-desk header + quick strip (shell topbar only). */
+  shellless?: boolean
 }
 
 export function RoleDeskLayout<T extends string>({
@@ -59,9 +61,17 @@ export function RoleDeskLayout<T extends string>({
   children,
   rootClassName,
   compactHeader = false,
+  shellless = false,
 }: Props<T>) {
   return (
-    <div className={clsx('editor-dashboard role-desk', compactHeader && 'role-desk-compact', rootClassName)}>
+    <div
+      className={clsx(
+        'editor-dashboard role-desk',
+        compactHeader && 'role-desk-compact',
+        shellless && 'member-desk--shellless',
+        rootClassName,
+      )}
+    >
       <div className="editor-dashboard-inner">
         <header className={clsx('editor-dashboard-header', compactHeader && 'editor-dashboard-header-compact')}>
           <div className="editor-dashboard-header-main">

@@ -1566,12 +1566,13 @@ body.ios-app-shell {
 /* —— Links —— */
 .ios-link {
   color: var(--color-mh-red);
-  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   transition: color 0.2s ease;
 }
 
 .ios-link:hover {
-  color: var(--color-rs-red);
+  color: var(--color-signal);
 }
 
 .ios-link-arrow::after {
@@ -4856,6 +4857,7 @@ html[data-perf='lite'] .artist-site-hero-img {
   color: var(--color-signal);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
+  cursor: pointer;
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 
@@ -15508,4 +15510,10 @@ body.ios-app-shell .ios-pwa-install {
   width: 100%;
   max-width: 22rem;
   padding: 1.5rem;
+}
+
+.auth-full-page .ios-panel {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 2rem;
 }

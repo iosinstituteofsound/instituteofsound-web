@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
 import { useAuth } from '@/context/AuthContext'
+import { useLoginGate } from '@/context/LoginGateContext'
 import { homeDashboardPath, roleLabel } from '@/lib/auth/roles'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { networkProfilePath } from '@/lib/community/networkPaths'
@@ -23,6 +24,7 @@ type ManagedPage = {
 
 export function TopBarAccountMenu() {
   const { user, logout } = useAuth()
+  const { openLoginGate } = useLoginGate()
   const navigate = useNavigate()
   const menuId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
@@ -73,13 +75,17 @@ export function TopBarAccountMenu() {
 
   if (!user) {
     return (
-      <Link to="/login" className="v2-topbar-profile v2-topbar-profile--guest ml-0.5">
+      <button
+        type="button"
+        className="v2-topbar-profile v2-topbar-profile--guest ml-0.5"
+        onClick={() => openLoginGate()}
+      >
         <div className="v2-topbar-profile__avatar">?</div>
         <div className="v2-topbar-profile__copy hidden sm:block">
           <p className="v2-topbar-profile__name">Guest</p>
           <p className="v2-topbar-profile__sub">Sign in →</p>
         </div>
-      </Link>
+      </button>
     )
   }
 

@@ -17,8 +17,8 @@ export default function DeskLoginPage() {
   }
 
   return (
-    <div className="section-padding pt-32 min-h-screen">
-      <div className="max-w-md mx-auto ios-panel">
+    <div className="auth-full-page section-padding">
+      <div className="max-w-md mx-auto ios-panel ios-panel-accent">
         <p className="ios-kicker">Staff</p>
         <h1 className="font-serif text-3xl font-bold mt-3">IOS Support</h1>
         <p className="text-sm text-muted mt-3">

@@ -46,11 +46,13 @@ export default function AuthCallbackPage() {
 
   if (error) {
     return (
-      <div className="section-padding pt-32 min-h-screen text-center max-w-md mx-auto">
-        <p className="text-mh-red text-sm">{error}</p>
-        <Link to="/login" className="ios-link text-sm mt-6 inline-block">
-          Try again with Google →
-        </Link>
+      <div className="auth-full-page section-padding text-center">
+        <div className="max-w-md mx-auto ios-panel ios-panel-accent">
+          <p className="text-mh-red text-sm">{error}</p>
+          <Link to="/login" className="ios-link text-sm mt-6 inline-block">
+            Try again with Google →
+          </Link>
+        </div>
       </div>
     )
   }
