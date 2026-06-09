@@ -33,26 +33,34 @@ export function NetworkProfileLeftColumn({
         onSaved={onProfileSaved}
       />
 
-      {badges.length > 0 && (
-        <section className="np-card">
-          <div className="np-card__head">
-            <h2 className="np-card__title">Badges</h2>
-            {onViewAllBadges ? (
-              <button type="button" className="np-card__link" onClick={onViewAllBadges}>
-                View all
-              </button>
-            ) : null}
-          </div>
+      <section className="np-card np-badges-card">
+        <div className="np-card__head">
+          <h2 className="np-card__title">Badges</h2>
+          {badges.length > 0 && onViewAllBadges ? (
+            <button type="button" className="np-card__link" onClick={onViewAllBadges}>
+              View all
+            </button>
+          ) : null}
+        </div>
+        {badges.length > 0 ? (
           <ul className="np-badges-grid">
             {badges.slice(0, 8).map((b) => (
               <li key={b.slug} title={b.description ?? b.name}>
-                <MedalIllustration slug={b.slug} size={48} />
+                <span className="np-badges-grid__hex">
+                  <MedalIllustration slug={b.slug} size={40} />
+                </span>
                 <span>{badgeDefBySlug(b.slug)?.name ?? b.name}</span>
               </li>
             ))}
           </ul>
-        </section>
-      )}
+        ) : (
+          <p className="np-badges-empty">
+            {isYou
+              ? 'Earn badges by posting, reviewing, and connecting on the wire.'
+              : 'No badges earned yet.'}
+          </p>
+        )}
+      </section>
     </div>
   )
 }

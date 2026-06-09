@@ -1,7 +1,7 @@
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { PublicSupporterBadgeOnArtist } from '@/lib/fandom/types'
-import { roleLabel } from '@/lib/auth/roles'
 import { getSiteHost, getSiteUrl } from '@/lib/auth/siteUrl'
 import { formatNetworkCount } from '@/lib/network/noiseScore'
 import { IOSImage } from '@/components/ui/IOSImage'
@@ -10,9 +10,37 @@ import { FollowButton } from '@/components/community/FollowButton'
 import { MessageButton } from '@/components/community/MessageButton'
 import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
 import { FandomSupporterBadgesList } from '@/components/fandom/FandomSupporterBadges'
+import { ProfilePhotoPickerModal } from '@/components/network/profile/ProfilePhotoPickerModal'
+import { updateUserProfile } from '@/lib/auth/profile'
+import { useAuth } from '@/context/AuthContext'
+import {
+  addProfilePhotoHistory,
+  buildProfilePhotoSuggestions,
+  type ProfilePhotoKind,
+} from '@/lib/network/profilePhotoHistory'
 
-const COVER_IMAGE =
-  'linear-gradient(180deg, rgba(5,5,5,0.2) 0%, rgba(5,5,5,0.95) 100%), url(https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1600&q=85)'
+const DEFAULT_COVER =
+  'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1600&q=85'
+
+function EditCameraIcon({ compact = false }: { compact?: boolean }) {
+  return (
+    <svg
+      className={compact ? 'np-header__edit-icon np-header__edit-icon--sm' : 'np-header__edit-icon'}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 7h3l1.5-2h7L17 7h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"
+      />
+      <circle cx="12" cy="13" r="3.25" />
+    </svg>
+  )
+}
 
 function formatGenre(slug: string) {
   return slug
@@ -39,18 +67,17 @@ function rolePills(profile: PublicMemberProfile): string[] {
 }
 
 function subtitleLine(profile: PublicMemberProfile): string {
-  const parts: string[] = []
+  const roles: string[] = []
+  if (profile.rank === 'Operator' || profile.rank === 'Curator') roles.push(profile.rank)
+  if (profile.profileRole === 'editor' || profile.profileRole === 'super_editor') roles.push('Editor')
+  if (profile.profileRole === 'artist') roles.push('Artist')
+  if (profile.dashboardPersona) roles.push(personaLabel(profile.dashboardPersona))
+  if (roles.length) return roles.join(' · ')
   if (profile.bio) {
     const first = profile.bio.split('\n')[0]?.trim()
-    if (first) parts.push(first)
+    if (first) return first
   }
-  const roles: string[] = []
-  if (profile.rank !== 'Listener') {
-    roles.push(profile.rank)
-  }
-  if (profile.profileRole === 'editor' || profile.profileRole === 'super_editor') roles.push('Editor')
-  if (roles.length) parts.push(roles.join(' · '))
-  return parts.join(' · ') || 'On the Institute of Sound network'
+  return 'On the Institute of Sound network'
 }
 
 interface NetworkProfileCoverHeaderProps {
@@ -59,11 +86,13 @@ interface NetworkProfileCoverHeaderProps {
   artistSlug?: string | null
   fandomBadges?: PublicSupporterBadgeOnArtist[]
   pendingRequestId?: string | null
+  postImageUrls?: string[]
   onEditProfile?: () => void
   onOpenFollowers?: () => void
   onOpenFollowing?: () => void
   onOpenConnections?: () => void
   onConnectionChange?: () => void
+  onProfileUpdated?: () => void | Promise<void>
 }
 
 export function NetworkProfileCoverHeader({
@@ -72,14 +101,23 @@ export function NetworkProfileCoverHeader({
   artistSlug,
   fandomBadges = [],
   pendingRequestId,
+  postImageUrls = [],
   onEditProfile,
   onOpenFollowers,
   onOpenFollowing,
   onOpenConnections,
   onConnectionChange,
+  onProfileUpdated,
 }: NetworkProfileCoverHeaderProps) {
+  const { user, refreshUser } = useAuth()
+  const [pickerKind, setPickerKind] = useState<ProfilePhotoKind | null>(null)
+  const [saving, setSaving] = useState(false)
+
   const handle = profile.handle.replace(/^@/, '')
   const pills = rolePills(profile)
+  const subtitle = subtitleLine(profile)
+  const bioLead = profile.bio?.split('\n')[0]?.trim() ?? ''
+  const showBioTagline = Boolean(bioLead && bioLead !== subtitle)
   const memberBadge =
     profile.profileRole === 'editor' || profile.profileRole === 'super_editor'
       ? 'IOS Editor'
@@ -87,13 +125,67 @@ export function NetworkProfileCoverHeader({
         ? 'IOS Artist'
         : 'IOS Member'
 
+  const coverUrl = profile.coverUrl ?? DEFAULT_COVER
+  const coverStyle = { backgroundImage: `url(${coverUrl})` }
+
+  const avatarSuggestions = useMemo(
+    () =>
+      buildProfilePhotoSuggestions({
+        userId: profile.userId,
+        kind: 'avatar',
+        currentUrl: profile.avatarUrl,
+        postImageUrls,
+      }),
+    [profile.userId, profile.avatarUrl, postImageUrls],
+  )
+
+  const coverSuggestions = useMemo(
+    () =>
+      buildProfilePhotoSuggestions({
+        userId: profile.userId,
+        kind: 'cover',
+        currentUrl: profile.coverUrl,
+        postImageUrls,
+      }),
+    [profile.userId, profile.coverUrl, postImageUrls],
+  )
+
+  const savePhoto = async (kind: ProfilePhotoKind, url: string) => {
+    if (!user) return
+    setSaving(true)
+    try {
+      await updateUserProfile(user.id, kind === 'avatar' ? { avatarUrl: url } : { coverUrl: url })
+      addProfilePhotoHistory(user.id, kind, url)
+      await refreshUser()
+      await onProfileUpdated?.()
+      setPickerKind(null)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <header className="np-header">
-      <div className="np-header__cover" style={{ backgroundImage: COVER_IMAGE }} aria-hidden />
+      <div className={isYou ? 'np-header__cover np-header__cover--editable' : 'np-header__cover'} style={coverStyle}>
+        <div className="np-header__cover-vignette" aria-hidden />
+        {isYou && (
+          <>
+            <div className="np-header__media-shade np-header__media-shade--cover" aria-hidden />
+            <button
+              type="button"
+              className="np-header__edit-btn np-header__edit-btn--cover"
+              onClick={() => setPickerKind('cover')}
+            >
+              <EditCameraIcon />
+              <span>Edit cover</span>
+            </button>
+          </>
+        )}
+      </div>
 
       <div className="np-header__body">
         <div className="np-header__identity">
-          <div className="np-header__avatar-wrap">
+          <div className={isYou ? 'np-header__avatar-wrap np-header__avatar-wrap--editable' : 'np-header__avatar-wrap'}>
             {profile.avatarUrl ? (
               <IOSImage
                 src={profile.avatarUrl}
@@ -106,7 +198,21 @@ export function NetworkProfileCoverHeader({
                 {profile.displayName.charAt(0).toUpperCase()}
               </span>
             )}
-            <span className="np-header__online" title="On the network" aria-hidden />
+            {!isYou && <span className="np-header__online" title="On the network" aria-hidden />}
+            {isYou && (
+              <>
+                <div className="np-header__media-shade np-header__media-shade--avatar" aria-hidden />
+                <button
+                  type="button"
+                  className="np-header__edit-btn np-header__edit-btn--avatar"
+                  onClick={() => setPickerKind('avatar')}
+                  aria-label="Edit profile photo"
+                  title="Edit profile photo"
+                >
+                  <EditCameraIcon compact />
+                </button>
+              </>
+            )}
           </div>
 
           <div className="np-header__meta">
@@ -117,12 +223,8 @@ export function NetworkProfileCoverHeader({
               <span className="np-header__handle">@{handle}</span>
               <span className="np-header__member-badge">{memberBadge}</span>
             </p>
-            <p className="np-header__subtitle">{subtitleLine(profile)}</p>
-            {profile.bio && profile.bio.includes('\n') && (
-              <p className="np-header__subtitle np-header__subtitle--secondary">
-                {profile.bio.split('\n').slice(1).join(' · ')}
-              </p>
-            )}
+            <p className="np-header__subtitle">{subtitle}</p>
+            {showBioTagline && <p className="np-header__tagline">{bioLead}</p>}
             <p className="np-header__loc">
               <span>Institute of Sound</span>
               <span className="np-header__loc-dot">·</span>
@@ -185,19 +287,19 @@ export function NetworkProfileCoverHeader({
           </div>
 
           <ul className="np-header__stats">
-            <li>
+            <li className="np-header__stat-item">
               <button type="button" className="np-header__stat" onClick={onOpenConnections}>
                 <strong>{formatNetworkCount(profile.connectionCount)}</strong>
                 <span>Connections</span>
               </button>
             </li>
-            <li>
+            <li className="np-header__stat-item">
               <button type="button" className="np-header__stat" onClick={onOpenFollowers}>
                 <strong>{formatNetworkCount(profile.followerCount)}</strong>
                 <span>Followers</span>
               </button>
             </li>
-            <li>
+            <li className="np-header__stat-item">
               <button type="button" className="np-header__stat" onClick={onOpenFollowing}>
                 <strong>{formatNetworkCount(profile.followingCount)}</strong>
                 <span>Following</span>
@@ -221,9 +323,31 @@ export function NetworkProfileCoverHeader({
         <FandomSupporterBadgesList badges={fandomBadges} className="np-header__fandom" />
       )}
 
-      <p className="np-header__role-foot">
-        {roleLabel(profile.profileRole)} · {profile.totalDb.toLocaleString()} dB lifetime
-      </p>
+      {pickerKind === 'avatar' && (
+        <ProfilePhotoPickerModal
+          open
+          kind="avatar"
+          title="Profile photo"
+          currentUrl={profile.avatarUrl}
+          suggestions={avatarSuggestions}
+          saving={saving}
+          onClose={() => setPickerKind(null)}
+          onSelect={(url) => savePhoto('avatar', url)}
+        />
+      )}
+
+      {pickerKind === 'cover' && (
+        <ProfilePhotoPickerModal
+          open
+          kind="cover"
+          title="Cover photo"
+          currentUrl={profile.coverUrl}
+          suggestions={coverSuggestions}
+          saving={saving}
+          onClose={() => setPickerKind(null)}
+          onSelect={(url) => savePhoto('cover', url)}
+        />
+      )}
     </header>
   )
 }

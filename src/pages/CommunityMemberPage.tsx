@@ -335,11 +335,13 @@ export default function CommunityMemberPage() {
         artistSlug={artistSlug}
         fandomBadges={fandomBadges}
         pendingRequestId={pendingRequestId}
+        postImageUrls={posts.map((p) => p.imageUrl).filter((u): u is string => Boolean(u))}
         onEditProfile={openAboutEdit}
         onOpenFollowers={() => void openConnections('followers')}
         onOpenFollowing={() => void openConnections('following')}
         onOpenConnections={() => void openConnections('connections')}
         onConnectionChange={() => void loadProfile()}
+        onProfileUpdated={() => void loadProfile()}
       />
 
       {connectionsOpen && (

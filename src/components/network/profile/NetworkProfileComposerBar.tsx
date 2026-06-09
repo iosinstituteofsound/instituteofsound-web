@@ -9,6 +9,13 @@ interface NetworkProfileComposerBarProps {
   onPosted: () => void | Promise<void>
 }
 
+const QUICK_ACTIONS = [
+  { id: 'photo', label: 'Image', icon: '▣' },
+  { id: 'music', label: 'Music', icon: '♫' },
+  { id: 'spin', label: 'Spin', icon: '◎' },
+  { id: 'drop', label: 'Drop', icon: '✦' },
+] as const
+
 export function NetworkProfileComposerBar({ isYou, onPosted }: NetworkProfileComposerBarProps) {
   const { user } = useAuth()
   const [open, setOpen] = useState(false)
@@ -25,10 +32,14 @@ export function NetworkProfileComposerBar({ isYou, onPosted }: NetworkProfileCom
           </Link>
         </div>
         <div className="np-composer__quick" aria-hidden>
-          <span>Photo</span>
-          <span>Music</span>
-          <span>Spin</span>
-          <span>Drop</span>
+          {QUICK_ACTIONS.map((action) => (
+            <span key={action.id} className="np-composer__quick-item">
+              <span className="np-composer__quick-icon" aria-hidden>
+                {action.icon}
+              </span>
+              {action.label}
+            </span>
+          ))}
         </div>
       </section>
     )
@@ -49,18 +60,14 @@ export function NetworkProfileComposerBar({ isYou, onPosted }: NetworkProfileCom
             <span className="np-composer__fake-input">Share something…</span>
           </button>
           <div className="np-composer__quick">
-            <button type="button" onClick={() => setOpen(true)}>
-              Photo
-            </button>
-            <button type="button" onClick={() => setOpen(true)}>
-              Music
-            </button>
-            <button type="button" onClick={() => setOpen(true)}>
-              Spin
-            </button>
-            <button type="button" onClick={() => setOpen(true)}>
-              Drop
-            </button>
+            {QUICK_ACTIONS.map((action) => (
+              <button key={action.id} type="button" className="np-composer__quick-item" onClick={() => setOpen(true)}>
+                <span className="np-composer__quick-icon" aria-hidden>
+                  {action.icon}
+                </span>
+                {action.label}
+              </button>
+            ))}
           </div>
         </>
       ) : (

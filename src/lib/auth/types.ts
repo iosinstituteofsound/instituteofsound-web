@@ -10,6 +10,7 @@ export interface User {
   role: UserRole
   dashboardPersona?: DashboardPersona
   avatarUrl?: string
+  coverUrl?: string
   username?: string
   bio?: string
   createdAt: string

@@ -22,6 +22,7 @@ export interface PublicMemberProfile {
   displayName: string
   handle: string
   avatarUrl?: string
+  coverUrl?: string
   bio?: string
   totalDb: number
   weeklyDb: number
