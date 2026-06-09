@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom'
 import type { DashboardPersona } from '@/lib/auth/types'
+import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
+import { filterQuickActions } from '@/lib/dashboard/upgradePathDesk'
+import { useMemberUpgradePathDesk } from '@/hooks/useMemberUpgradePathDesk'
 
 type Props = {
   onPersonaSelect?: (persona: DashboardPersona) => void
@@ -29,34 +32,6 @@ const QUICK_ACTIONS: (
   { type: 'link', href: '/academy', icon: 'academy', label: 'View Academy' },
 ]
 
-const TIERS = [
-  {
-    id: 'member',
-    title: 'Member',
-    role: 'Listener',
-    lede: 'Join the movement. Explore. Connect. Engage.',
-    icon: 'user',
-    status: 'here' as const,
-  },
-  {
-    id: 'artist',
-    title: 'Artist',
-    role: 'Creator',
-    lede: 'Create your studio. Share your sound. Build your audience.',
-    icon: 'mic',
-    status: 'progress' as const,
-    progress: '0/4 steps done',
-  },
-  {
-    id: 'verified',
-    title: 'Verified Artist',
-    role: 'Established',
-    lede: 'Get verified. Gain trust & visibility. Unlock new features.',
-    icon: 'shield',
-    status: 'locked' as const,
-  },
-] as const
-
 const BENEFITS = [
   { icon: 'plus', title: 'Create Artist Studio', hint: 'Your own public profile' },
   { icon: 'tools', title: 'Upload & Release', hint: 'Share unlimited music' },
@@ -64,14 +39,6 @@ const BENEFITS = [
   { icon: 'doc', title: 'Editorial Submissions', hint: 'Get featured in IOS' },
   { icon: 'chart', title: 'Analytics Dashboard', hint: 'Track your growth' },
   { icon: 'eye', title: 'More Visibility', hint: 'Boost your reach' },
-] as const
-
-const ROADMAP = [
-  { label: 'Set up your Artist Studio', state: 'done' as const },
-  { label: 'Upload your first release', state: 'todo' as const },
-  { label: 'Build your network', state: 'todo' as const },
-  { label: 'Get featured or reviewed', state: 'todo' as const },
-  { label: 'Get Verified', state: 'goal' as const },
 ] as const
 
 const WHY_UPGRADE = [
@@ -198,6 +165,12 @@ function PathIcon({ name }: { name: string }) {
           <path d="M6 12v5c0 1 2 3 6 3s6-2 6-3v-5" />
         </svg>
       )
+    case 'crown':
+      return (
+        <svg {...common} aria-hidden>
+          <path d="M3 8l3 4 3-6 3 6 3-4 3 4v8H3V8z" />
+        </svg>
+      )
     case 'lock':
       return (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -251,6 +224,13 @@ function ProgressRing({ value }: { value: number }) {
 }
 
 export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
+  const desk = useMemberUpgradePathDesk()
+  const snapshot = desk.snapshot
+
+  const quickActions = snapshot && desk.user
+    ? filterQuickActions(QUICK_ACTIONS, snapshot, desk.user)
+    : QUICK_ACTIONS
+
   return (
     <div className="member-upgrade-path">
       <header className="mup-header">
@@ -260,8 +240,12 @@ export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
         <p className="mup-subtitle">From Listener to Leader. Your journey, your legacy.</p>
       </header>
 
+      {desk.loading || !snapshot ? (
+        <LoadingTransmission variant="compact" />
+      ) : (
+        <>
       <div className="mup-tier-strip" role="list" aria-label="Upgrade tiers">
-        {TIERS.map((tier, i) => (
+        {snapshot.tiers.map((tier, i) => (
           <div key={tier.id} className="mup-tier-wrap" role="listitem">
             <article
               className={`mup-tier-card${tier.status === 'here' ? ' mup-tier-card--active' : ''}${tier.status === 'locked' ? ' mup-tier-card--locked' : ''}`}
@@ -275,8 +259,11 @@ export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
               {tier.status === 'here' && (
                 <span className="mup-tier-pill mup-tier-pill--here">You are here</span>
               )}
-              {tier.status === 'progress' && (
+              {tier.status === 'progress' && tier.progress && (
                 <span className="mup-tier-pill">{tier.progress}</span>
+              )}
+              {tier.status === 'done' && (
+                <span className="mup-tier-pill mup-tier-pill--here">Complete</span>
               )}
               {tier.status === 'locked' && (
                 <span className="mup-tier-pill mup-tier-pill--locked">
@@ -284,7 +271,7 @@ export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
                 </span>
               )}
             </article>
-            {i < TIERS.length - 1 && (
+            {i < snapshot.tiers.length - 1 && (
               <span className="mup-tier-arrow" aria-hidden>
                 <PathIcon name="arrow" />
               </span>
@@ -298,18 +285,16 @@ export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
           <section className="mup-next-step" aria-labelledby="mup-next-step-title">
             <div className="mup-next-step-head">
               <span className="mup-next-step-icon">
-                <PathIcon name="mic" />
+                <PathIcon name={snapshot.nextStep.icon} />
               </span>
               <div>
                 <p className="mup-kicker">Next step</p>
                 <h3 id="mup-next-step-title" className="mup-next-step-title">
-                  Become an Artist
+                  {snapshot.nextStep.title}
                 </h3>
               </div>
             </div>
-            <p className="mup-next-step-lede">
-              Create your artist studio and start sharing your music with the world.
-            </p>
+            <p className="mup-next-step-lede">{snapshot.nextStep.lede}</p>
 
             <p className="mup-benefits-label">Benefits you unlock</p>
             <div className="mup-benefits-grid">
@@ -327,11 +312,11 @@ export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
             </div>
 
             <div className="mup-next-step-actions">
-              <Link to="/member/upgrade" className="ios-btn ios-btn-primary mup-launch-btn">
-                Launch Artist Studio →
+              <Link to={snapshot.nextStep.ctaHref} className="ios-btn ios-btn-primary mup-launch-btn">
+                {snapshot.nextStep.ctaLabel}
               </Link>
-              <Link to="/member/upgrade" className="mup-learn-link">
-                Learn more about Artist Path →
+              <Link to={snapshot.nextStep.learnHref} className="mup-learn-link">
+                {snapshot.nextStep.learnLabel}
               </Link>
             </div>
           </section>
@@ -341,9 +326,9 @@ export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
               Upgrade Roadmap
             </h3>
             <ol className="mup-roadmap-list">
-              {ROADMAP.map((step) => (
+              {snapshot.roadmap.map((step) => (
                 <li
-                  key={step.label}
+                  key={step.key}
                   className={`mup-roadmap-item mup-roadmap-item--${step.state}`}
                 >
                   <span className="mup-roadmap-marker" aria-hidden>
@@ -351,6 +336,8 @@ export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
                       <PathIcon name="check" />
                     ) : step.state === 'goal' ? (
                       <PathIcon name="shield" />
+                    ) : step.state === 'active' ? (
+                      '→'
                     ) : (
                       '?'
                     )}
@@ -383,12 +370,12 @@ export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
             <h3 id="mup-progress-title" className="mup-sidebar-title">
               Your Progress
             </h3>
-            <ProgressRing value={25} />
+            <ProgressRing value={snapshot.progressPct} />
             <p className="mup-progress-label">Overall Progress</p>
-            <p className="mup-progress-meta">2 of 8 steps completed</p>
-            <button type="button" className="ios-btn ios-btn-secondary mup-progress-btn">
+            <p className="mup-progress-meta">{snapshot.progressMeta}</p>
+            <Link to="/member/upgrade" className="ios-btn ios-btn-secondary mup-progress-btn">
               View Full Progress
-            </button>
+            </Link>
           </section>
 
           <section className="mup-quick" aria-labelledby="mup-quick-title">
@@ -396,7 +383,7 @@ export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
               Quick Actions
             </h3>
             <div className="mup-quick-list">
-              {QUICK_ACTIONS.map((action) =>
+              {quickActions.map((action) =>
                 action.type === 'link' ? (
                   <Link key={action.label} to={action.href} className="mup-quick-link">
                     <PathIcon name={action.icon} />
@@ -420,6 +407,8 @@ export function MemberUpgradePathHome({ onPersonaSelect }: Props) {
           </section>
         </aside>
       </div>
+        </>
+      )}
     </div>
   )
 }

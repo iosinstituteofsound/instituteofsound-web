@@ -2619,6 +2619,16 @@
   color: #d4af37;
 }
 
+.mup-roadmap-item--active .mup-roadmap-marker {
+  border-color: rgba(212, 0, 0, 0.55);
+  background: rgba(212, 0, 0, 0.12);
+  color: var(--color-mh-red);
+}
+
+.mup-roadmap-item--active .mup-roadmap-label {
+  color: var(--color-signal);
+}
+
 .mup-roadmap-label {
   font-size: 0.8125rem;
   color: var(--color-muted);

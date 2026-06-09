@@ -1,7 +1,11 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
+import { LoadingTransmission } from '@/components/ui/LoadingTransmission'
 import { MfaWaveBars } from '@/components/dashboard/memberDeskUi'
+import { cardRecentEntry } from '@/lib/dashboard/exploreDesk'
+import { pushExploreRecent } from '@/lib/dashboard/exploreRecentStorage'
+import { useMemberExploreDesk } from '@/hooks/useMemberExploreDesk'
 
 const FILTERS = [
   { id: 'all', label: 'All surfaces' },
@@ -20,6 +24,7 @@ const EXPLORE_CARDS = [
     lede: 'Artists, releases & magazine wire',
     cta: 'Open discover →',
     groups: ['all', 'magazine', 'live'] as FilterId[],
+    tone: 1,
   },
   {
     to: '/scenes',
@@ -28,6 +33,7 @@ const EXPLORE_CARDS = [
     lede: 'City × genre hubs',
     cta: 'Browse scenes →',
     groups: ['all', 'live'] as FilterId[],
+    tone: 2,
   },
   {
     to: '/events',
@@ -36,6 +42,7 @@ const EXPLORE_CARDS = [
     lede: 'Gigs & RSVP',
     cta: 'See events →',
     groups: ['all', 'live'] as FilterId[],
+    tone: 3,
   },
   {
     to: '/collab',
@@ -44,6 +51,7 @@ const EXPLORE_CARDS = [
     lede: 'Need / offer board',
     cta: 'Open collab →',
     groups: ['all', 'live'] as FilterId[],
+    tone: 4,
   },
   {
     to: '/releases',
@@ -52,6 +60,7 @@ const EXPLORE_CARDS = [
     lede: 'Premieres & catalog',
     cta: 'View releases →',
     groups: ['all', 'magazine'] as FilterId[],
+    tone: 1,
   },
   {
     to: '/signals',
@@ -60,6 +69,7 @@ const EXPLORE_CARDS = [
     lede: 'Transmission feed',
     cta: 'Read signals →',
     groups: ['all', 'magazine'] as FilterId[],
+    tone: 2,
   },
   {
     to: '/academy',
@@ -68,6 +78,7 @@ const EXPLORE_CARDS = [
     lede: 'Learn & ear lab',
     cta: 'Start learning →',
     groups: ['all', 'tools'] as FilterId[],
+    tone: 3,
   },
   {
     to: '/tools',
@@ -76,33 +87,31 @@ const EXPLORE_CARDS = [
     lede: '16 studio tools',
     cta: 'Open toolkit →',
     groups: ['all', 'tools'] as FilterId[],
+    tone: 4,
   },
-] as const
-
-const RECENT = [
-  { title: 'Vault sequence', meta: 'Transmission · demo', art: 'me-recent-art--1' },
-  { title: 'Berlin modular', meta: 'Scene hub', art: 'me-recent-art--2' },
-  { title: 'Night drive', meta: 'Release wire', art: 'me-recent-art--3' },
-  { title: 'Ear lab 04', meta: 'Academy', art: 'me-recent-art--4' },
-] as const
-
-const TRENDING = [
-  { title: 'Midnight wire', artist: 'Echo Guild', plays: '12.4k', art: 'me-trend-art--1' },
-  { title: 'Redline', artist: 'Mira Volkov', plays: '9.8k', art: 'me-trend-art--2' },
-  { title: 'Static bloom', artist: 'Luna Wire', plays: '7.2k', art: 'me-trend-art--3' },
-  { title: 'Phase shift', artist: 'Null Sector', plays: '5.1k', art: 'me-trend-art--4' },
-] as const
-
-const GENRES = [
-  { name: 'Electronic', pct: 42 },
-  { name: 'Hip-hop', pct: 28 },
-  { name: 'Indie', pct: 18 },
-  { name: 'Experimental', pct: 12 },
 ] as const
 
 export function MemberExploreHome() {
   const [filter, setFilter] = useState<FilterId>('all')
-  const cards = EXPLORE_CARDS.filter((c) => filter === 'all' || c.groups.includes(filter))
+  const desk = useMemberExploreDesk()
+
+  const cards = useMemo(
+    () => EXPLORE_CARDS.filter((c) => filter === 'all' || c.groups.includes(filter)),
+    [filter],
+  )
+
+  const recordOpen = (card: (typeof EXPLORE_CARDS)[number]) => {
+    pushExploreRecent(
+      cardRecentEntry({
+        to: card.to,
+        title: card.title,
+        lede: card.lede,
+        tone: card.tone,
+      }),
+      desk.user?.id,
+    )
+    desk.reloadRecent()
+  }
 
   return (
     <div className="member-explore-home">
@@ -130,109 +139,140 @@ export function MemberExploreHome() {
         ))}
       </div>
 
-      <div className="me-layout">
-        <div className="me-main">
-          <div className="me-grid">
-            {cards.map((card) => (
-              <Link key={card.to} to={card.to} className={clsx('me-card', card.modifier)}>
-                <div className="me-card-art" aria-hidden />
-                <div className="me-card-top">
-                  <span className="me-card-icon" aria-hidden>
-                    ◆
-                  </span>
-                  <div>
-                    <h3 className="me-card-title">{card.title}</h3>
-                    <p className="me-card-lede">{card.lede}</p>
+      {desk.loading ? (
+        <LoadingTransmission variant="compact" />
+      ) : (
+        <div className="me-layout">
+          <div className="me-main">
+            <div className="me-grid">
+              {cards.map((card) => (
+                <Link
+                  key={card.to}
+                  to={card.to}
+                  className={clsx('me-card', card.modifier)}
+                  onClick={() => recordOpen(card)}
+                >
+                  <div className="me-card-art" aria-hidden />
+                  <div className="me-card-top">
+                    <span className="me-card-icon" aria-hidden>
+                      ◆
+                    </span>
+                    <div>
+                      <h3 className="me-card-title">{card.title}</h3>
+                      <p className="me-card-lede">{card.lede}</p>
+                    </div>
+                  </div>
+                  <span className="me-card-cta">{card.cta}</span>
+                </Link>
+              ))}
+            </div>
+
+            <section className="me-recent">
+              <div className="me-section-head">
+                <h3>Recently opened</h3>
+                <Link to="/discover" className="me-section-link">
+                  Discover →
+                </Link>
+              </div>
+              {desk.recent.length === 0 ? (
+                <p className="mf-widget-note px-1">Open a surface above — your trail saves here.</p>
+              ) : (
+                <div className="me-recent-row">
+                  {desk.recent.map((item) => (
+                    <Link key={item.key} to={item.href} className="me-recent-card">
+                      <div className={clsx('me-recent-art', `me-recent-art--${item.tone}`)}>
+                        <span className="me-recent-play" aria-hidden>
+                          ▶
+                        </span>
+                      </div>
+                      <p className="me-recent-title">{item.title}</p>
+                      <p className="me-recent-meta">{item.meta}</p>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+
+          <aside className="me-sidebar">
+            <div className="me-widget">
+              <h3>Trending now</h3>
+              {desk.trending.length === 0 ? (
+                <p className="mf-widget-note">Premiere wire and leaderboard picks show up here.</p>
+              ) : (
+                <ul className="me-trend-list">
+                  {desk.trending.map((row, i) => (
+                    <li key={row.key}>
+                      <span className="me-rank">{i + 1}</span>
+                      <span className={clsx('me-trend-art', row.art)} aria-hidden />
+                      <div className="min-w-0">
+                        <Link to={row.href} className="me-trend-title block truncate">
+                          {row.title}
+                        </Link>
+                        <p className="me-trend-artist">{row.artist}</p>
+                      </div>
+                      <span className="me-trend-plays">{row.plays}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {desk.editorial && (
+              <div className="me-widget me-widget--editorial">
+                <h3>Editorial pick</h3>
+                {desk.editorial.image ? (
+                  <img
+                    src={desk.editorial.image}
+                    alt=""
+                    className="me-editorial-art object-cover w-full"
+                  />
+                ) : (
+                  <div className="me-editorial-art" aria-hidden />
+                )}
+                <p className="me-editorial-title">{desk.editorial.title}</p>
+                <p className="me-editorial-lede">{desk.editorial.lede}</p>
+                <Link to={desk.editorial.href} className="me-editorial-btn">
+                  Read feature →
+                </Link>
+              </div>
+            )}
+
+            <div className="me-widget">
+              <h3>Scene genres</h3>
+              <ul className="me-genre-list">
+                {desk.genres.map((g) => (
+                  <li key={g.name}>
+                    <div className="me-genre-head">
+                      <span>{g.name}</span>
+                      <span>{g.pct}%</span>
+                    </div>
+                    <span className="me-genre-bar">
+                      <span className="me-genre-fill" style={{ width: `${g.pct}%` }} />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {desk.nowPlaying && (
+              <div className="me-player">
+                <div className="me-player-art me-player-art--2" aria-hidden />
+                <div className="me-player-copy">
+                  <p className="me-player-title">Now playing</p>
+                  <Link to={desk.nowPlaying.href} className="me-player-artist block truncate">
+                    {desk.nowPlaying.title} · {desk.nowPlaying.artist}
+                  </Link>
+                  <div className="me-player-bar">
+                    <span className="me-player-fill" style={{ width: '38%' }} />
                   </div>
                 </div>
-                <span className="me-card-cta">{card.cta}</span>
-              </Link>
-            ))}
-          </div>
-
-          <section className="me-recent">
-            <div className="me-section-head">
-              <h3>Recently opened</h3>
-              <Link to="/discover" className="me-section-link">
-                Discover →
-              </Link>
-            </div>
-            <div className="me-recent-row">
-              {RECENT.map((item) => (
-                <article key={item.title} className="me-recent-card">
-                  <div className={clsx('me-recent-art', item.art)}>
-                    <button type="button" className="me-recent-play" aria-label={`Play ${item.title}`}>
-                      ▶
-                    </button>
-                  </div>
-                  <p className="me-recent-title">{item.title}</p>
-                  <p className="me-recent-meta">{item.meta}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-        </div>
-
-        <aside className="me-sidebar">
-          <div className="me-widget">
-            <h3>Trending now</h3>
-            <ul className="me-trend-list">
-              {TRENDING.map((row, i) => (
-                <li key={row.title}>
-                  <span className="me-rank">{i + 1}</span>
-                  <span className={clsx('me-trend-art', row.art)} aria-hidden />
-                  <div className="min-w-0">
-                    <p className="me-trend-title">{row.title}</p>
-                    <p className="me-trend-artist">{row.artist}</p>
-                  </div>
-                  <span className="me-trend-plays">{row.plays}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="me-widget me-widget--editorial">
-            <h3>Editorial pick</h3>
-            <div className="me-editorial-art" aria-hidden />
-            <p className="me-editorial-title">The transmission issue — scene report</p>
-            <p className="me-editorial-lede">
-              Long-form features, artist profiles, and release reviews from the magazine desk.
-            </p>
-            <Link to="/discover" className="me-editorial-btn">
-              Read feature →
-            </Link>
-          </div>
-
-          <div className="me-widget">
-            <h3>Scene genres</h3>
-            <ul className="me-genre-list">
-              {GENRES.map((g) => (
-                <li key={g.name}>
-                  <div className="me-genre-head">
-                    <span>{g.name}</span>
-                    <span>{g.pct}%</span>
-                  </div>
-                  <span className="me-genre-bar">
-                    <span className="me-genre-fill" style={{ width: `${g.pct}%` }} />
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="me-player">
-            <div className="me-player-art me-player-art--2" aria-hidden />
-            <div className="me-player-copy">
-              <p className="me-player-title">Now playing</p>
-              <p className="me-player-artist">Vault sequence · demo</p>
-              <div className="me-player-bar">
-                <span className="me-player-fill" style={{ width: '38%' }} />
+                <MfaWaveBars heights={[4, 7, 5, 9, 6, 8, 5, 10, 6, 7]} />
               </div>
-            </div>
-            <MfaWaveBars heights={[4, 7, 5, 9, 6, 8, 5, 10, 6, 7]} />
-          </div>
-        </aside>
-      </div>
+            )}
+          </aside>
+        </div>
+      )}
     </div>
   )
 }
