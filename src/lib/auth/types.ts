@@ -11,6 +11,8 @@ export interface User {
   dashboardPersona?: DashboardPersona
   avatarUrl?: string
   coverUrl?: string
+  orgLabel?: string
+  linkUrl?: string
   username?: string
   bio?: string
   createdAt: string

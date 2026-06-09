@@ -23,6 +23,8 @@ export interface PublicMemberProfile {
   handle: string
   avatarUrl?: string
   coverUrl?: string
+  orgLabel?: string
+  linkUrl?: string
   bio?: string
   totalDb: number
   weeklyDb: number

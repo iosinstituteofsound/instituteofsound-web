@@ -292,6 +292,53 @@
   margin: 0.5rem 0 0;
 }
 
+.np-header__loc-wrap {
+  margin-top: 0.5rem;
+}
+
+.np-header__loc-edit {
+  margin-left: 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-mh-red);
+  background: none;
+  border: 1px solid rgba(212, 0, 0, 0.45);
+  border-radius: 4px;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+}
+
+.np-header__loc-edit:hover {
+  background: rgba(212, 0, 0, 0.12);
+}
+
+.np-header__loc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  max-width: 22rem;
+}
+
+.np-header__loc-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.np-header__loc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.np-header__loc-error {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-mh-red);
+}
+
 .np-header__loc a {
   color: var(--color-mh-red);
   text-decoration: none;
@@ -374,6 +421,11 @@
   border-color: var(--color-border);
   color: var(--color-muted);
   min-width: 2.5rem;
+}
+
+.np-btn--sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.625rem;
 }
 
 .np-header__stats {

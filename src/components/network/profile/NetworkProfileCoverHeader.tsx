@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { PublicMemberProfile } from '@/lib/community/memberProfileService'
 import type { PublicSupporterBadgeOnArtist } from '@/lib/fandom/types'
@@ -11,6 +11,7 @@ import { MessageButton } from '@/components/community/MessageButton'
 import { IdentityCrossLinks } from '@/components/community/IdentityCrossLinks'
 import { FandomSupporterBadgesList } from '@/components/fandom/FandomSupporterBadges'
 import { ProfilePhotoPickerModal } from '@/components/network/profile/ProfilePhotoPickerModal'
+import { Input } from '@/components/ui/Input'
 import { updateUserProfile } from '@/lib/auth/profile'
 import { useAuth } from '@/context/AuthContext'
 import {
@@ -21,6 +22,29 @@ import {
 
 const DEFAULT_COVER =
   'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1600&q=85'
+
+const DEFAULT_ORG = 'Institute of Sound'
+
+function profileOrgLabel(profile: PublicMemberProfile): string {
+  return profile.orgLabel?.trim() || DEFAULT_ORG
+}
+
+function profileLinkHref(profile: PublicMemberProfile): string {
+  const raw = profile.linkUrl?.trim()
+  if (!raw) return getSiteUrl()
+  return raw.startsWith('http') ? raw : `https://${raw}`
+}
+
+function profileLinkHost(profile: PublicMemberProfile): string {
+  const raw = profile.linkUrl?.trim()
+  if (!raw) return getSiteHost()
+  try {
+    const href = raw.startsWith('http') ? raw : `https://${raw}`
+    return new URL(href).host.replace(/^www\./, '')
+  } catch {
+    return raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
+  }
+}
 
 function EditCameraIcon({ compact = false }: { compact?: boolean }) {
   return (
@@ -112,6 +136,11 @@ export function NetworkProfileCoverHeader({
   const { user, refreshUser } = useAuth()
   const [pickerKind, setPickerKind] = useState<ProfilePhotoKind | null>(null)
   const [saving, setSaving] = useState(false)
+  const [editingLoc, setEditingLoc] = useState(false)
+  const [orgDraft, setOrgDraft] = useState(profile.orgLabel ?? '')
+  const [linkDraft, setLinkDraft] = useState(profile.linkUrl ?? '')
+  const [locSaving, setLocSaving] = useState(false)
+  const [locError, setLocError] = useState('')
 
   const handle = profile.handle.replace(/^@/, '')
   const pills = rolePills(profile)
@@ -149,6 +178,37 @@ export function NetworkProfileCoverHeader({
       }),
     [profile.userId, profile.coverUrl, postImageUrls],
   )
+
+  useEffect(() => {
+    setOrgDraft(profile.orgLabel ?? '')
+    setLinkDraft(profile.linkUrl ?? '')
+  }, [profile.orgLabel, profile.linkUrl])
+
+  const resetLocDraft = () => {
+    setOrgDraft(profile.orgLabel ?? '')
+    setLinkDraft(profile.linkUrl ?? '')
+    setLocError('')
+  }
+
+  const saveLoc = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user) return
+    setLocSaving(true)
+    setLocError('')
+    try {
+      await updateUserProfile(user.id, {
+        orgLabel: orgDraft.trim(),
+        linkUrl: linkDraft.trim(),
+      })
+      await refreshUser()
+      await onProfileUpdated?.()
+      setEditingLoc(false)
+    } catch (err) {
+      setLocError(err instanceof Error ? err.message : 'Could not save.')
+    } finally {
+      setLocSaving(false)
+    }
+  }
 
   const savePhoto = async (kind: ProfilePhotoKind, url: string) => {
     if (!user) return
@@ -225,20 +285,75 @@ export function NetworkProfileCoverHeader({
             </p>
             <p className="np-header__subtitle">{subtitle}</p>
             {showBioTagline && <p className="np-header__tagline">{bioLead}</p>}
-            <p className="np-header__loc">
-              <span>Institute of Sound</span>
-              <span className="np-header__loc-dot">·</span>
-              <a href={getSiteUrl()} target="_blank" rel="noopener noreferrer">
-                {getSiteHost()}
-              </a>
-            </p>
+            <div className="np-header__loc-wrap">
+              {editingLoc && isYou ? (
+                <form className="np-header__loc-form" onSubmit={saveLoc}>
+                  <div className="np-header__loc-fields">
+                    <Input
+                      id="np-header-org"
+                      value={orgDraft}
+                      onChange={(e) => setOrgDraft(e.target.value)}
+                      placeholder={DEFAULT_ORG}
+                      maxLength={80}
+                      aria-label="Organization or affiliation"
+                    />
+                    <Input
+                      id="np-header-link"
+                      value={linkDraft}
+                      onChange={(e) => setLinkDraft(e.target.value)}
+                      placeholder={getSiteHost()}
+                      aria-label="Profile link URL"
+                    />
+                  </div>
+                  {locError && <p className="np-header__loc-error">{locError}</p>}
+                  <div className="np-header__loc-actions">
+                    <button type="submit" className="np-btn np-btn--primary np-btn--sm" disabled={locSaving}>
+                      {locSaving ? 'Saving…' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      className="np-btn np-btn--outline np-btn--sm"
+                      disabled={locSaving}
+                      onClick={() => {
+                        resetLocDraft()
+                        setEditingLoc(false)
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <p className="np-header__loc">
+                  <span>{profileOrgLabel(profile)}</span>
+                  <span className="np-header__loc-dot">·</span>
+                  <a
+                    href={profileLinkHref(profile)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {profileLinkHost(profile)}
+                  </a>
+                  {isYou && (
+                    <button
+                      type="button"
+                      className="np-header__loc-edit"
+                      onClick={() => setEditingLoc(true)}
+                    >
+                      Edit
+                    </button>
+                  )}
+                </p>
+              )}
+            </div>
 
-            <IdentityCrossLinks
-              artistSlug={artistSlug}
-              networkHandle={profile.handle}
-              className="np-header__crosslinks"
-              compact
-            />
+            {artistSlug && (
+              <IdentityCrossLinks
+                artistSlug={artistSlug}
+                className="np-header__crosslinks"
+                compact
+              />
+            )}
           </div>
         </div>
 

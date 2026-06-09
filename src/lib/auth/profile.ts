@@ -4,13 +4,15 @@ import { v1GetUserProfile } from '@/api/v1Phase5Client'
 import type { User } from './types'
 
 export const PROFILE_COLUMNS =
-  'id, email, name, role, dashboard_persona, avatar_url, cover_url, username, bio, created_at'
+  'id, email, name, role, dashboard_persona, avatar_url, cover_url, org_label, link_url, username, bio, created_at'
 
 export interface UpdateProfileInput {
   name?: string
   username?: string
   avatarUrl?: string
   coverUrl?: string
+  orgLabel?: string
+  linkUrl?: string
   bio?: string
   dashboardPersona?: User['dashboardPersona'] | null
 }
