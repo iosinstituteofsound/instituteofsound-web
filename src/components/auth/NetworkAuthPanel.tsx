@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
+import { IosBrandLockup } from '@/components/layout/IosBrandLockup'
 
 interface NetworkAuthPanelProps {
   title?: string
@@ -15,6 +16,7 @@ export function NetworkAuthPanel({
   return (
     <div className="auth-full-page section-padding">
       <div className="max-w-md mx-auto ios-panel ios-panel-accent">
+        <IosBrandLockup to="/" size="sm" className="mb-6" />
         <p className="ios-kicker">Institute of Sound</p>
         <h1 className="font-serif text-4xl font-bold mt-3">{title}</h1>
         <p className="text-muted mt-2 text-sm leading-relaxed">{subtitle}</p>

@@ -40,7 +40,7 @@ export function Sidebar({ className, onNavigate }: Props) {
       )}
     >
       <div className="v2-sidebar-brand border-b border-border/80">
-        <IosBrandLockup to="/" onClick={onNavigate} variant="frame" size="md" />
+        <IosBrandLockup to="/" onClick={onNavigate} size="md" />
       </div>
 
       <nav className="v2-sidebar-nav" aria-label="Site navigation">

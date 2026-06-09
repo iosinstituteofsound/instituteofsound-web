@@ -692,22 +692,9 @@ textarea.ios-input {
   }
 }
 
-.ios-brand-lockup {
-  position: relative;
-  padding-left: 0.75rem;
-  border-left: 3px solid var(--color-mh-red);
+.ios-nav-inner > .ios-brand-mark {
   flex-shrink: 0;
   min-width: 0;
-  text-decoration: none;
-}
-
-.ios-brand-title {
-  color: var(--color-signal);
-  transition: color 0.2s ease;
-}
-
-.ios-brand-lockup:hover .ios-brand-title {
-  color: var(--color-rs-red);
 }
 
 .ios-nav-mega {
@@ -1053,20 +1040,10 @@ textarea.ios-input {
     padding: 0.45rem 0.55rem;
   }
 
-  .ios-brand-lockup {
+  .ios-brand-mark {
     min-width: 0;
     max-width: 100%;
     grid-column: 1;
-  }
-
-  .ios-brand-title {
-    font-size: 1rem;
-    line-height: 1.1;
-  }
-
-  .ios-brand-sub {
-    font-size: 0.5rem;
-    letter-spacing: 0.22em;
   }
 }
 
@@ -1179,6 +1156,18 @@ textarea.ios-input {
   text-align: center;
 }
 
+.ios-nav-app-brand {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 0.2rem;
+}
+
+.ios-nav-app-brand .ios-brand-mark__img,
+.ios-nav-app-brand .ios-brand-mark__svg,
+.ios-nav-app-brand .ios-brand-mark__burn {
+  height: 1.85rem;
+}
+
 .ios-nav-app-kicker {
   font-size: 0.5rem;
   letter-spacing: 0.18em;
@@ -1220,8 +1209,10 @@ textarea.ios-input {
 }
 
 @media (max-width: 380px) {
-  .ios-nav-app-kicker {
-    display: none;
+  .ios-nav-app-brand .ios-brand-mark__img,
+  .ios-nav-app-brand .ios-brand-mark__svg,
+  .ios-nav-app-brand .ios-brand-mark__burn {
+    height: 1.55rem;
   }
 
   .ios-nav-app-label {

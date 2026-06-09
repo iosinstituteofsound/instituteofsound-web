@@ -361,6 +361,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>http://localhost:5173/network/motionbyte</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>http://localhost:5173/network/thelostsymbols</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>http://localhost:5173/playlist/dark-signal</loc>
     <lastmod>2026-06-09</lastmod>
     <changefreq>weekly</changefreq>

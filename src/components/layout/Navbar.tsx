@@ -13,6 +13,7 @@ import { NetworkNotificationsPanel } from '@/components/community/NetworkNotific
 import { IOSImage } from '@/components/ui/IOSImage'
 import type { NavGroupId, NavLink } from '@/types'
 import clsx from 'clsx'
+import { IosBrandLockup } from '@/components/layout/IosBrandLockup'
 import { isStandalonePwa } from '@/lib/pwa/standalone'
 
 interface NavbarProps {
@@ -156,7 +157,7 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
               <span className="ios-nav-app-menu-line" />
             </button>
             <div className="ios-nav-app-title">
-              <p className="ios-nav-app-kicker">Institute of Sound</p>
+              <IosBrandLockup to="/" size="xs" className="ios-nav-app-brand" onClick={() => setOpen(false)} />
               <p className="ios-nav-app-label">{appLabel}</p>
             </div>
             <div className="ios-nav-app-actions">
@@ -184,14 +185,7 @@ export function Navbar({ links, appMode = false }: NavbarProps) {
           </div>
         ) : (
           <>
-            <Link to="/" className="ios-brand-lockup group flex flex-col leading-none">
-              <span className="ios-brand-title font-display text-lg md:text-xl font-extrabold tracking-tight">
-                INSTITUTE
-              </span>
-              <span className="ios-brand-sub text-[10px] tracking-[0.35em] text-muted uppercase mt-0.5">
-                of Sound
-              </span>
-            </Link>
+            <IosBrandLockup to="/" size="xs" onClick={() => setOpen(false)} />
 
             <ul
               className="ios-nav-mega hidden lg:flex"

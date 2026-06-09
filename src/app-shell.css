@@ -75,124 +75,683 @@ body.v2-app-shell {
   pointer-events: none;
 }
 
-/* —— Brand lockup — same language as Releases / Discover § headers —— */
-.ios-brand-frame {
+/* —— Brand mark — metal wordmark, fills slot (no plate box) —— */
+.ios-brand-mark {
   display: block;
+  flex-shrink: 0;
+  min-width: 0;
   text-decoration: none;
+  line-height: 0;
 }
 
-.ios-brand-frame:focus-visible {
+.ios-brand-mark:focus-visible {
   outline: 2px solid rgba(212, 0, 0, 0.9);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
-.ios-brand-plate {
+.ios-brand-mark__img,
+.ios-brand-mark__svg,
+.ios-brand-mark__burn {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1442 / 745;
+  object-fit: contain;
+}
+
+.ios-brand-mark__burn {
+  --ios-brand-mask: url('/brand/logo.svg');
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.35rem 1.15rem 1.28rem;
-  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-  border-radius: 4px;
-  background: linear-gradient(180deg, #0e0e0e 0%, #060606 100%);
+  flex-shrink: 0;
   overflow: hidden;
-  transition:
-    border-color 0.22s ease,
-    background 0.22s ease,
-    box-shadow 0.22s ease;
+  -webkit-mask-image: var(--ios-brand-mask);
+  mask-image: var(--ios-brand-mask);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
-.ios-brand-plate::before {
-  content: '';
+.ios-brand-mark__burn-layer {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ios-brand-mark__burn-base {
+  background: linear-gradient(180deg, #6a0000 0%, #8b0000 35%, #5a0000 70%, #3a0000 100%);
+}
+
+.ios-brand-mark__burn-smolder {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(40, 0, 0, 0.4) 45%,
+    rgba(90, 0, 0, 0.75) 72%,
+    rgba(120, 0, 0, 0.9) 100%
+  );
+  background-size: 100% 200%;
+  mix-blend-mode: multiply;
+  animation: ios-brand-inner-smolder 13s ease-in-out infinite alternate;
+}
+
+.ios-brand-mark__burn-coal-core {
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 58%,
+    rgba(180, 20, 0, 0.85) 0%,
+    rgba(100, 0, 0, 0.55) 45%,
+    transparent 72%
+  );
+  background-size: 100% 100%;
+  mix-blend-mode: multiply;
+  animation: ios-brand-inner-coal-core 17s ease-in-out infinite alternate;
+}
+
+.ios-brand-mark__burn-magma-vein {
+  background: repeating-linear-gradient(
+    125deg,
+    transparent 0%,
+    transparent 6%,
+    rgba(60, 0, 0, 0.55) 8%,
+    rgba(120, 0, 0, 0.35) 10%,
+    transparent 12%,
+    transparent 18%
+  );
+  background-size: 200% 200%;
+  mix-blend-mode: overlay;
+  opacity: 0.65;
+  animation: ios-brand-inner-magma-vein 19s linear infinite;
+}
+
+.ios-brand-mark__burn-molten-pool {
+  background: linear-gradient(
+    180deg,
+    transparent 55%,
+    rgba(255, 80, 0, 0.15) 68%,
+    rgba(255, 120, 30, 0.45) 78%,
+    rgba(255, 60, 0, 0.35) 88%,
+    rgba(180, 0, 0, 0.25) 100%
+  );
+  background-size: 220% 100%;
+  mix-blend-mode: soft-light;
+  animation: ios-brand-inner-molten-pool 11s linear infinite;
+}
+
+.ios-brand-mark__burn-lava {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    #ff2200 8%,
+    #ff6600 14%,
+    transparent 20%,
+    #d40000 32%,
+    #ff4400 38%,
+    transparent 44%,
+    #ff8800 56%,
+    #ffcc00 62%,
+    transparent 68%,
+    #ff1100 78%,
+    #ff5500 84%,
+    transparent 92%,
+    #ff7700 96%,
+    transparent 100%
+  );
+  background-size: 100% 300%;
+  mix-blend-mode: soft-light;
+  opacity: 0.72;
+  animation: ios-brand-inner-lava 9s linear infinite;
+}
+
+.ios-brand-mark__burn-plasma-thread {
+  background:
+    repeating-linear-gradient(
+      72deg,
+      transparent 0%,
+      transparent 4%,
+      rgba(255, 200, 80, 0.55) 4.5%,
+      transparent 5%
+    ),
+    repeating-linear-gradient(
+      -58deg,
+      transparent 0%,
+      transparent 5%,
+      rgba(255, 140, 40, 0.4) 5.5%,
+      transparent 6%
+    );
+  background-size: 250% 250%;
+  mix-blend-mode: screen;
+  opacity: 0.4;
+  animation: ios-brand-inner-plasma-thread 23s linear infinite;
+}
+
+.ios-brand-mark__burn-ember {
+  background:
+    radial-gradient(ellipse 28% 18% at 22% 55%, rgba(255, 210, 60, 0.85) 0%, transparent 70%),
+    radial-gradient(ellipse 22% 16% at 68% 38%, rgba(255, 160, 30, 0.75) 0%, transparent 68%),
+    radial-gradient(ellipse 26% 20% at 48% 72%, rgba(255, 100, 0, 0.7) 0%, transparent 72%),
+    radial-gradient(ellipse 18% 14% at 82% 62%, rgba(255, 230, 100, 0.65) 0%, transparent 65%),
+    radial-gradient(ellipse 20% 15% at 35% 28%, rgba(255, 180, 50, 0.6) 0%, transparent 60%);
+  background-size: 200% 200%;
+  mix-blend-mode: screen;
+  opacity: 0.58;
+  animation: ios-brand-inner-ember 7s ease-in-out infinite alternate;
+}
+
+.ios-brand-mark__burn-heat-shimmer {
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 2%,
+    rgba(255, 180, 60, 0.18) 2.5%,
+    rgba(255, 100, 0, 0.12) 3%,
+    transparent 3.5%,
+    transparent 6%
+  );
+  background-size: 100% 200%;
+  mix-blend-mode: overlay;
+  opacity: 0.25;
+  animation: ios-brand-inner-heat-shimmer 15s linear infinite;
+}
+
+.ios-brand-mark__burn-spark-rise {
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 7%,
+    rgba(255, 220, 100, 0.5) 7.3%,
+    rgba(255, 160, 40, 0.35) 7.6%,
+    transparent 8%,
+    transparent 14%
+  );
+  background-size: 100% 200%;
+  mix-blend-mode: screen;
+  opacity: 0.35;
+  animation: ios-brand-inner-spark-rise 8s linear infinite;
+}
+
+.ios-brand-mark__burn-crackle {
+  background: linear-gradient(
+    168deg,
+    transparent 0%,
+    transparent 42%,
+    rgba(255, 230, 140, 0.55) 48%,
+    rgba(255, 180, 60, 0.35) 52%,
+    transparent 58%,
+    transparent 100%
+  );
+  background-size: 100% 250%;
+  mix-blend-mode: soft-light;
+  opacity: 0.5;
+  animation: ios-brand-inner-crackle 21s linear infinite;
+}
+
+.ios-brand-mark__burn-flare {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 230, 0.85) 0%,
+    rgba(255, 220, 80, 0.6) 12%,
+    rgba(255, 140, 0, 0.28) 28%,
+    transparent 42%
+  );
+  background-size: 100% 220%;
+  mix-blend-mode: screen;
+  opacity: 0.52;
+  animation: ios-brand-inner-flare 5.5s ease-in-out infinite alternate;
+}
+
+.ios-brand-mark__burn-fusion-pulse {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 120, 40, 0.12) 0%,
+    rgba(212, 0, 0, 0.18) 50%,
+    rgba(255, 80, 0, 0.14) 100%
+  );
+  mix-blend-mode: soft-light;
+  animation: ios-brand-inner-fusion-pulse 29s ease-in-out infinite;
+}
+
+.ios-brand-mark__burn-chroma {
+  background: linear-gradient(
+    125deg,
+    #d40000 0%,
+    #ff5500 14%,
+    #ffee00 28%,
+    #00ffaa 42%,
+    #0099ff 56%,
+    #cc00ff 70%,
+    #ff0066 84%,
+    #d40000 100%
+  );
+  background-size: 500% 500%;
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: ios-brand-chroma-drift 37s ease-in-out infinite;
+}
+
+.ios-brand-mark__burn-rainbow {
   background: linear-gradient(
     90deg,
-    var(--color-mh-red),
-    color-mix(in srgb, var(--color-mh-red) 40%, transparent) 55%,
-    transparent
+    #ff0000 0%,
+    #ff7a00 14%,
+    #ffee00 28%,
+    #00e676 42%,
+    #00b0ff 57%,
+    #7c4dff 71%,
+    #e040fb 85%,
+    #ff0000 100%
   );
-  opacity: 0.85;
+  background-size: 400% 100%;
+  mix-blend-mode: screen;
+  opacity: 0.3;
+  animation: ios-brand-rainbow-flow 14s linear infinite;
 }
 
-.ios-brand-plate::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--color-mh-red);
-  box-shadow: 0 0 16px rgba(212, 0, 0, 0.55);
+.ios-brand-mark__burn-prism {
+  background: conic-gradient(
+    from 0deg at 50% 55%,
+    #d40000 0deg,
+    #ff4400 50deg,
+    #ff0099 110deg,
+    #7700ff 170deg,
+    #00ccff 230deg,
+    #00ff88 290deg,
+    #ff6600 340deg,
+    #d40000 360deg
+  );
+  background-size: 220% 220%;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  animation: ios-brand-prism-trip 43s ease-in-out infinite;
 }
 
-.ios-brand-frame:hover .ios-brand-plate {
-  border-color: color-mix(in srgb, var(--color-mh-red) 38%, var(--color-border));
-  background: linear-gradient(180deg, #121212 0%, #080808 100%);
-  box-shadow: 0 0 28px -16px rgba(212, 0, 0, 0.45);
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-smolder {
+  animation-duration: 9.75s;
 }
 
-.ios-brand-frame:hover .ios-brand-plate__line {
-  color: #fff;
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-coal-core {
+  animation-duration: 12.75s;
 }
 
-.ios-brand-frame:hover .ios-brand-plate__of {
-  color: var(--color-mh-red);
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-magma-vein {
+  animation-duration: 14.25s;
 }
 
-.ios-brand-plate__title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.12rem;
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-molten-pool {
+  animation-duration: 8.25s;
 }
 
-.ios-brand-plate__line {
-  display: block;
-  font-family: var(--font-display);
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-signal);
-  transition: color 0.22s ease;
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-lava {
+  animation-duration: 6.75s;
 }
 
-.ios-brand-plate__line:first-child {
-  font-size: 0.98rem;
-  letter-spacing: 0.32em;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-plasma-thread {
+  animation-duration: 17.25s;
 }
 
-.ios-brand-plate__line:last-child {
-  font-size: 1.42rem;
-  letter-spacing: 0.08em;
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-ember {
+  animation-duration: 5.25s;
 }
 
-.ios-brand-plate__of {
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: var(--color-mh-red);
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-heat-shimmer {
+  animation-duration: 11.25s;
 }
 
-/* Footer / compact */
-.ios-brand-plate--sm {
-  padding: 0.85rem 0.75rem 0.8rem;
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-spark-rise {
+  animation-duration: 6s;
 }
 
-.ios-brand-plate--sm .ios-brand-plate__line:first-child {
-  font-size: 0.78rem;
-  letter-spacing: 0.24em;
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-crackle {
+  animation-duration: 15.75s;
 }
 
-.ios-brand-plate--sm .ios-brand-plate__line:last-child {
-  font-size: 1.05rem;
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-flare {
+  animation-duration: 4.125s;
+}
+
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-fusion-pulse {
+  animation-duration: 21.75s;
+}
+
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-chroma {
+  animation-duration: 27.75s;
+}
+
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-rainbow {
+  animation-duration: 10.5s;
+}
+
+.ios-brand-mark__burn--intense .ios-brand-mark__burn-prism {
+  animation-duration: 32.25s;
+}
+
+.ios-brand-mark:hover .ios-brand-mark__burn-flare {
+  opacity: 0.65;
+}
+
+@keyframes ios-brand-inner-smolder {
+  0% {
+    background-position: 50% 0%;
+    opacity: 0.55;
+  }
+  100% {
+    background-position: 50% 35%;
+    opacity: 0.85;
+  }
+}
+
+@keyframes ios-brand-inner-coal-core {
+  0% {
+    background-size: 90% 85%;
+    opacity: 0.6;
+  }
+  100% {
+    background-size: 115% 110%;
+    opacity: 0.9;
+  }
+}
+
+@keyframes ios-brand-inner-magma-vein {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+@keyframes ios-brand-inner-molten-pool {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes ios-brand-inner-lava {
+  0% {
+    background-position: 50% 100%;
+    opacity: 0.68;
+  }
+  100% {
+    background-position: 50% 0%;
+    opacity: 0.82;
+  }
+}
+
+@keyframes ios-brand-inner-plasma-thread {
+  0% {
+    background-position: 0% 0%, 100% 100%;
+    filter: hue-rotate(0deg);
+  }
+  33% {
+    background-position: 40% 30%, 60% 70%;
+    filter: hue-rotate(50deg);
+  }
+  66% {
+    background-position: 70% 60%, 30% 40%;
+    filter: hue-rotate(120deg);
+  }
+  100% {
+    background-position: 100% 100%, 0% 0%;
+    filter: hue-rotate(0deg);
+  }
+}
+
+@keyframes ios-brand-inner-ember {
+  0% {
+    background-position: 35% 65%;
+    opacity: 0.42;
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    background-position: 48% 48%;
+    opacity: 0.55;
+    filter: hue-rotate(35deg);
+  }
+  100% {
+    background-position: 62% 30%;
+    opacity: 0.68;
+    filter: hue-rotate(70deg);
+  }
+}
+
+@keyframes ios-brand-inner-heat-shimmer {
+  0% {
+    background-position: 50% 0%;
+  }
+  100% {
+    background-position: 50% 100%;
+  }
+}
+
+@keyframes ios-brand-inner-spark-rise {
+  0% {
+    background-position: 50% 100%;
+  }
+  100% {
+    background-position: 50% 0%;
+  }
+}
+
+@keyframes ios-brand-inner-crackle {
+  0% {
+    background-position: 50% 100%;
+  }
+  100% {
+    background-position: 50% 0%;
+  }
+}
+
+@keyframes ios-brand-inner-flare {
+  0% {
+    background-position: 50% 0%;
+    opacity: 0.38;
+  }
+  100% {
+    background-position: 50% 22%;
+    opacity: 0.62;
+  }
+}
+
+@keyframes ios-brand-inner-fusion-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    opacity: 0.48;
+    filter: hue-rotate(25deg);
+  }
+  40% {
+    opacity: 0.62;
+    filter: hue-rotate(90deg);
+  }
+  60% {
+    opacity: 0.55;
+    filter: hue-rotate(180deg);
+  }
+  80% {
+    opacity: 0.42;
+    filter: hue-rotate(280deg);
+  }
+}
+
+@keyframes ios-brand-chroma-drift {
+  0%,
+  16%,
+  74%,
+  100% {
+    opacity: 0;
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg) saturate(1);
+  }
+  26% {
+    opacity: 0.38;
+    background-position: 50% 0%;
+    filter: hue-rotate(40deg) saturate(1.4);
+  }
+  36% {
+    opacity: 0.58;
+    background-position: 100% 50%;
+    filter: hue-rotate(90deg) saturate(1.7);
+  }
+  46% {
+    opacity: 0.45;
+    background-position: 50% 100%;
+    filter: hue-rotate(160deg) saturate(1.5);
+  }
+  56% {
+    opacity: 0.32;
+    background-position: 0% 50%;
+    filter: hue-rotate(240deg) saturate(1.3);
+  }
+  66% {
+    opacity: 0.15;
+    background-position: 100% 100%;
+    filter: hue-rotate(300deg) saturate(1.1);
+  }
+}
+
+@keyframes ios-brand-rainbow-flow {
+  0% {
+    background-position: 0% 50%;
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.48;
+  }
+  100% {
+    background-position: 100% 50%;
+    opacity: 0.22;
+  }
+}
+
+@keyframes ios-brand-prism-trip {
+  0%,
+  12%,
+  82%,
+  100% {
+    opacity: 0;
+    background-position: 50% 50%;
+    transform: rotate(0deg) scale(1);
+  }
+  32% {
+    opacity: 0.28;
+    background-position: 30% 40%;
+    transform: rotate(60deg) scale(1.04);
+  }
+  42% {
+    opacity: 0.42;
+    background-position: 70% 60%;
+    transform: rotate(140deg) scale(1.02);
+  }
+  52% {
+    opacity: 0.55;
+    background-position: 40% 70%;
+    transform: rotate(220deg) scale(1.05);
+  }
+  62% {
+    opacity: 0.35;
+    background-position: 60% 30%;
+    transform: rotate(300deg) scale(1.01);
+  }
+  72% {
+    opacity: 0.12;
+    background-position: 50% 50%;
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+/* perf-lite: 5-layer subset — base, lava, ember, coal-core, fusion-pulse */
+html[data-perf='lite'] .ios-brand-mark__burn-smolder,
+html[data-perf='lite'] .ios-brand-mark__burn-magma-vein,
+html[data-perf='lite'] .ios-brand-mark__burn-molten-pool,
+html[data-perf='lite'] .ios-brand-mark__burn-plasma-thread,
+html[data-perf='lite'] .ios-brand-mark__burn-heat-shimmer,
+html[data-perf='lite'] .ios-brand-mark__burn-spark-rise,
+html[data-perf='lite'] .ios-brand-mark__burn-crackle,
+html[data-perf='lite'] .ios-brand-mark__burn-flare,
+html[data-perf='lite'] .ios-brand-mark__burn-chroma,
+html[data-perf='lite'] .ios-brand-mark__burn-rainbow,
+html[data-perf='lite'] .ios-brand-mark__burn-prism {
+  animation: none;
+  opacity: 0;
+}
+
+html[data-perf='lite'] .ios-brand-mark__burn-lava {
+  animation-duration: 12s;
+}
+
+html[data-perf='lite'] .ios-brand-mark__burn-ember {
+  animation-duration: 9s;
+}
+
+html[data-perf='lite'] .ios-brand-mark__burn-coal-core {
+  animation-duration: 14s;
+}
+
+html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
+  animation-duration: 18s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ios-brand-mark__burn-smolder,
+  .ios-brand-mark__burn-coal-core,
+  .ios-brand-mark__burn-magma-vein,
+  .ios-brand-mark__burn-molten-pool,
+  .ios-brand-mark__burn-lava,
+  .ios-brand-mark__burn-plasma-thread,
+  .ios-brand-mark__burn-ember,
+  .ios-brand-mark__burn-heat-shimmer,
+  .ios-brand-mark__burn-spark-rise,
+  .ios-brand-mark__burn-crackle,
+  .ios-brand-mark__burn-flare,
+  .ios-brand-mark__burn-chroma,
+  .ios-brand-mark__burn-rainbow,
+  .ios-brand-mark__burn-prism,
+  .ios-brand-mark__burn-fusion-pulse {
+    animation: none;
+    opacity: 0;
+  }
+
+  .ios-brand-mark__burn-base {
+    background: linear-gradient(180deg, #ff4400 0%, #d40000 50%, #8b0000 100%);
+  }
+}
+
+.ios-brand-mark--xs {
+  width: auto;
+  max-width: 9.5rem;
+}
+
+.ios-brand-mark--xs .ios-brand-mark__img,
+.ios-brand-mark--xs .ios-brand-mark__svg,
+.ios-brand-mark--xs .ios-brand-mark__burn {
+  width: auto;
+  height: 2.65rem;
+  max-width: 100%;
+}
+
+.ios-brand-mark--sm {
+  width: 100%;
+  max-width: 14rem;
+}
+
+.ios-brand-mark--md {
+  width: 100%;
+}
+
+.ios-brand-mark--lg {
+  width: 100%;
+  max-width: 22rem;
+  margin-inline: auto;
 }
 
 .v2-sidebar-brand {

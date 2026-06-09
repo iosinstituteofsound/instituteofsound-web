@@ -1,6 +1,7 @@
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
+import { IosBrandLockup } from '@/components/layout/IosBrandLockup'
 import { isEditorStaff } from '@/lib/auth/roles'
 
 export default function EditorJoinPage() {
@@ -17,6 +18,7 @@ export default function EditorJoinPage() {
   return (
     <div className="auth-full-page section-padding">
       <div className="max-w-md mx-auto ios-panel ios-panel-accent">
+        <IosBrandLockup to="/" size="sm" className="mb-6" />
         <p className="ios-kicker">Editorial desk</p>
         <h1 className="font-serif text-3xl md:text-4xl font-bold mt-2">Join as an editor</h1>
         <p className="text-muted text-sm mt-4 leading-relaxed">

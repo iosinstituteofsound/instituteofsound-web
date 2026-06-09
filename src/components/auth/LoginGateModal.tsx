@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useLoginGate } from '@/context/LoginGateContext'
 import { useAuth } from '@/context/AuthContext'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
+import { IosBrandLockup } from '@/components/layout/IosBrandLockup'
 
 export function LoginGateModal() {
   const { open, closeLoginGate, hint } = useLoginGate()
@@ -40,6 +41,7 @@ export function LoginGateModal() {
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             transition={{ duration: 0.22 }}
           >
+            <IosBrandLockup size="sm" className="mb-4" to={false} />
             <p className="ios-kicker">Network access</p>
             <h2 id="login-gate-title" className="font-display text-2xl font-bold mt-2">
               Login to continue

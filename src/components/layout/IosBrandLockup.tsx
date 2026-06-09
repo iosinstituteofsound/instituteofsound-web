@@ -1,69 +1,36 @@
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
+import { IosBrandMarkSvg } from '@/components/brand/IosBrandMarkSvg'
 
 type Props = {
-  to?: string
+  /** Set to false for display-only (no home link). */
+  to?: string | false
   onClick?: () => void
   className?: string
-  /** Sidebar / footer plate. `bar` = compact top nav. */
-  variant?: 'frame' | 'bar'
-  size?: 'sm' | 'md'
-  showSub?: boolean
+  /** xs = top nav · sm = footer/auth · md = sidebar · lg = loader/hero */
+  size?: 'xs' | 'sm' | 'md' | 'lg'
+  /** Pulse glow — loader / hero moments */
+  animated?: boolean
 }
 
 export function IosBrandLockup({
   to = '/',
   onClick,
   className,
-  variant = 'frame',
   size = 'md',
-  showSub = true,
+  animated = false,
 }: Props) {
-  const content =
-    variant === 'frame' ? (
-      <span
-        className={clsx('ios-brand-plate', size === 'sm' && 'ios-brand-plate--sm')}
-      >
-        <span className="ios-brand-plate__title">
-          <span className="ios-brand-plate__line">Institute</span>
-          <span className="ios-brand-plate__line">
-            <span className="ios-brand-plate__of">of</span> Sound
-          </span>
-        </span>
-      </span>
-    ) : (
-      <>
-        <span
-          className={clsx(
-            'ios-brand-title font-display font-extrabold tracking-tight uppercase',
-            size === 'md' && 'text-lg md:text-xl',
-            size === 'sm' && 'text-base',
-          )}
-        >
-          Institute
-          <span className="text-mh-red"> of Sound</span>
-        </span>
-        {showSub && (
-          <span className="ios-brand-sub text-[10px] text-muted mt-1 tracking-[0.28em] uppercase">
-            Underground HQ
-          </span>
-        )}
-      </>
-    )
+  const mark = <IosBrandMarkSvg animated={animated} />
 
-  const classes = clsx(
-    variant === 'frame' && 'ios-brand-frame',
-    variant === 'bar' && 'ios-brand-lockup group flex flex-col leading-none',
-    className,
-  )
+  const classes = clsx('ios-brand-mark', `ios-brand-mark--${size}`, className)
 
-  if (to) {
+  if (to !== false) {
     return (
       <Link to={to} onClick={onClick} className={classes} aria-label="Institute of Sound — home">
-        {content}
+        {mark}
       </Link>
     )
   }
 
-  return <div className={classes}>{content}</div>
+  return <div className={classes}>{mark}</div>
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Button } from '@/components/ui/Button'
+import { IosBrandLockup } from '@/components/layout/IosBrandLockup'
 
 const STORAGE_KEY = 'ios_manifesto_ack'
 
@@ -123,6 +124,7 @@ export function ManifestoGateModal() {
             <div className="ios-manifesto-accent-bar" aria-hidden />
 
             <header className="ios-manifesto-header">
+              <IosBrandLockup to="/" size="sm" className="mb-5" onClick={dismiss} />
               <p className="ios-manifesto-kicker">{MANIFESTO.kicker}</p>
               <h2 id="manifesto-title" className="ios-manifesto-headline">
                 {MANIFESTO.headline}

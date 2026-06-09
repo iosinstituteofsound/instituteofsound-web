@@ -93,6 +93,8 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webmanifest}'],
+          /** Large traced wordmark — loaded on demand via <img>, not offline precache. */
+          globIgnores: ['**/brand/logo.svg'],
           navigateFallback: '/index.html',
           navigateFallbackDenylist: [/^\/api\//],
         },

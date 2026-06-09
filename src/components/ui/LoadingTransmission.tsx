@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { IosBrandMarkSvg } from '@/components/brand/IosBrandMarkSvg'
 
 interface LoadingTransmissionProps {
   variant?: 'hell' | 'compact'
@@ -76,11 +77,9 @@ export function LoadingTransmission({ variant = 'hell' }: LoadingTransmissionPro
 
       {isHell && (
         <>
-          <div className="absolute top-6 left-6 z-10 border-l-2 border-mh-red pl-3">
-            <p className="text-[9px] tracking-[0.45em] text-mh-red uppercase font-bold">
-              Institute of Sound
-            </p>
-            <p className="text-[8px] tracking-[0.3em] text-muted/80 uppercase mt-1">
+          <div className="absolute top-6 left-6 z-10">
+            <IosBrandMarkSvg className="metal-loader-brand-mark h-8 w-auto max-w-[10rem]" animated />
+            <p className="text-[8px] tracking-[0.3em] text-muted/80 uppercase mt-2 border-l-2 border-mh-red pl-2">
               Molten Channel // Live
             </p>
           </div>
@@ -117,9 +116,10 @@ export function LoadingTransmission({ variant = 'hell' }: LoadingTransmissionPro
         <div className="relative w-36 h-36 md:w-48 md:h-48 metal-loader-core metal-loader-core-beat flex items-center justify-center">
           <div className="absolute inset-0 metal-loader-core-ring" />
           <div className="absolute inset-3 border border-mh-red/50 metal-loader-core-inner" />
-          <span className="font-display text-3xl md:text-5xl font-black text-signal z-10 tracking-tighter metal-loader-logo">
-            IOS
-          </span>
+          <IosBrandMarkSvg
+            className="relative z-10 w-[78%] max-w-[8.5rem] h-auto metal-loader-brand-mark"
+            animated
+          />
         </div>
 
         <div className="flex items-end justify-center gap-0.5 md:gap-1 mt-12 h-20 px-2 metal-loader-eq">
