@@ -728,20 +728,20 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
 
 .ios-brand-mark--xs {
   width: auto;
-  max-width: 9.5rem;
+  max-width: 9rem;
 }
 
 .ios-brand-mark--xs .ios-brand-mark__img,
 .ios-brand-mark--xs .ios-brand-mark__svg,
 .ios-brand-mark--xs .ios-brand-mark__burn {
   width: auto;
-  height: 2.65rem;
+  height: 2.5rem;
   max-width: 100%;
 }
 
 .ios-brand-mark--sm {
   width: 100%;
-  max-width: 14rem;
+  max-width: 13rem;
 }
 
 .ios-brand-mark--md {
@@ -750,7 +750,7 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
 
 .ios-brand-mark--lg {
   width: 100%;
-  max-width: 22rem;
+  max-width: 20.5rem;
   margin-inline: auto;
 }
 
