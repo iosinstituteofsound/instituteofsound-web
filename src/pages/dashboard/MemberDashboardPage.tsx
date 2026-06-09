@@ -1,18 +1,12 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import clsx from 'clsx'
 import { useAuth } from '@/context/AuthContext'
 import { updateUserProfile } from '@/lib/auth/profile'
-import { memberHandleFromUser } from '@/lib/community/memberProfileService'
-import { MyFandomPanel } from '@/components/dashboard/MyFandomPanel'
-import { MemberFeedActivity } from '@/components/dashboard/MemberFeedActivity'
-import { MemberUpgradePathsHome } from '@/components/dashboard/MemberUpgradePathsHome'
-import { MemberTrustPanel } from '@/components/dashboard/MemberTrustPanel'
+import { ListenerDeskPanels } from '@/components/dashboard/ListenerDeskPanels'
+import { MemberWorkspaceHome } from '@/components/dashboard/MemberWorkspaceHome'
 import { syncMemberVerificationNotifications } from '@/lib/verification/notifyEditors'
 import { syncApprovedVerificationPersona } from '@/lib/verification/service'
 import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
-import { MemberExploreHome } from '@/components/dashboard/MemberExploreHome'
-import { MemberWorkspaceHome } from '@/components/dashboard/MemberWorkspaceHome'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import type { DashboardPersona } from '@/lib/auth/types'
 import { VerificationRequirementsList } from '@/components/dashboard/VerificationRequirementsList'
@@ -23,8 +17,13 @@ import {
   PLAYLIST_CURATOR_REQUIREMENTS,
   type PathVerificationInfo,
 } from '@/lib/verification/requirements'
+import {
+  listenerDeskNavGroups,
+  listenerTabFromSearchParam,
+  type ListenerDeskTab,
+} from '@/lib/dashboard/listenerDeskNav'
 
-type MemberTab = 'workspace' | 'explore' | 'network' | 'fandom' | 'grow'
+type MemberTab = ListenerDeskTab
 
 const PERSONA_OPTIONS: {
   id: DashboardPersona
@@ -303,6 +302,7 @@ const GROW_PATHS: GrowPathCard[] = [
 
 export default function MemberDashboardPage() {
   const { user, logout, mode, refreshUser } = useAuth()
+  const [searchParams] = useSearchParams()
   const [savingPersona, setSavingPersona] = useState(false)
   const [personaError, setPersonaError] = useState('')
   const [personaModal, setPersonaModal] = useState<DashboardPersona | null>(null)
@@ -310,6 +310,11 @@ export default function MemberDashboardPage() {
   const [tab, setTab] = useState<MemberTab>('workspace')
 
   const openUpgradePaths = () => setTab('grow')
+
+  useEffect(() => {
+    const fromUrl = listenerTabFromSearchParam(searchParams.get('tab'))
+    if (fromUrl) setTab(fromUrl)
+  }, [searchParams])
 
   useEffect(() => {
     if (!user?.id) return
@@ -324,8 +329,6 @@ export default function MemberDashboardPage() {
 
   if (!user) return null
 
-  const handle = memberHandleFromUser(user)
-  const profilePath = `/network/${handle}`
   const persona = user.dashboardPersona
   const personaPanel = persona ? PERSONA_CONTENT[persona] : null
 
@@ -365,187 +368,94 @@ export default function MemberDashboardPage() {
           </MetalBadge>
         }
         tab={tab}
-        onTabChange={setTab}
-        navGroups={[
-          {
-            title: 'Your workspace',
-            items: [
-              { id: 'workspace', label: 'Workspace home' },
-              { id: 'grow', label: 'Upgrade paths', badge: persona ? 0 : GROW_PATHS.length },
-            ],
-          },
-          {
-            title: 'Network',
-            items: [
-              { id: 'network', label: 'Feed & activity' },
-              { id: 'fandom', label: 'My Fandom' },
-              { id: 'explore', label: 'Explore IOS' },
-            ],
-          },
-        ]}
-        quickTiles={[
-          {
-            label: 'Workspace',
-            value: persona ? 'Live' : 'Setup',
-            accent: Boolean(persona),
-            onClick: () => setTab('workspace'),
-          },
-          {
-            label: 'Role',
-            value: persona ? personaTitle : 'Upgrade paths',
-            onClick: () => (persona ? setTab('workspace') : openUpgradePaths()),
-          },
-          {
-            label: 'Explore',
-            value: 'IOS',
-            onClick: () => setTab('explore'),
-          },
-          {
-            label: 'Feed',
-            value: 'Open',
-            onClick: () => setTab('network'),
-          },
-        ]}
-        headerExtra={
-          <Link to={profilePath} className="ios-btn ios-btn-ghost !text-xs !py-2">
-            Public profile
-          </Link>
-        }
+        onTabChange={(next) => setTab(next as MemberTab)}
+        navGroups={listenerDeskNavGroups(persona ? 0 : GROW_PATHS.length)}
         onLogout={() => logout()}
-        rootClassName="member-desk"
-        shellless
-        compactHeader
+        rootClassName="member-desk member-desk--shellless"
       >
         {tab === 'workspace' && (
-          <MemberWorkspaceHome
+          <>
+            <MemberWorkspaceHome user={user} onOpenGrow={openUpgradePaths} />
+
+            {personaPanel && (
+          <section className="member-desk-panel member-dashboard-persona-active">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="member-desk-kicker">{personaPanel.badge}</p>
+              <span className="member-desk-meta">Workspace mode is active for this account.</span>
+            </div>
+            <h2 className="member-desk-heading">{personaPanel.heading}</h2>
+            <p className="member-desk-lede">{personaPanel.summary}</p>
+            <ul className="member-dashboard-persona-list mt-5">
+              {personaPanel.priorities.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <div className="member-dashboard-workbench mt-6">
+              <article className="member-dashboard-workbench-card">
+                <h3>Workflow board</h3>
+                <div className="member-dashboard-workflow-list mt-4">
+                  {personaPanel.workflow.map((step) => (
+                    <div key={step.stage} className="member-dashboard-workflow-item">
+                      <p className="member-dashboard-workflow-stage">{step.stage}</p>
+                      <p>{step.objective}</p>
+                    </div>
+                  ))}
+                </div>
+              </article>
+              <article className="member-dashboard-workbench-card">
+                <h3>Toolkit focus</h3>
+                <ul className="member-dashboard-toolkit-list mt-4">
+                  {personaPanel.toolkit.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+            </div>
+            <div className="member-desk-actions">
+              {personaPanel.actions.map((action) => (
+                <Link
+                  key={action.to + action.label}
+                  to={action.to}
+                  className={
+                    action.primary ? 'ios-btn ios-btn-primary' : 'ios-btn ios-btn-secondary'
+                  }
+                >
+                  {action.label} →
+                </Link>
+              ))}
+              <button
+                type="button"
+                className="ios-btn ios-btn-secondary"
+                onClick={openUpgradePaths}
+              >
+                More upgrade paths →
+              </button>
+              <button
+                type="button"
+                className="ios-btn ios-btn-ghost"
+                onClick={() => setShowResetConfirm(true)}
+                disabled={savingPersona}
+              >
+                Reset and start over
+              </button>
+            </div>
+            <p className="member-desk-footnote">
+              Reset clears your workspace mode. Pick a new path from Upgrade paths.
+            </p>
+            {personaError && <p className="text-mh-red text-sm mt-4">{personaError}</p>}
+          </section>
+            )}
+          </>
+        )}
+
+        {tab !== 'workspace' && (
+          <ListenerDeskPanels
+            tab={tab}
             user={user}
-            persona={persona}
-            personaTitle={personaTitle}
-            personaPanel={personaPanel}
-            onOpenUpgradePaths={openUpgradePaths}
-            onResetPersona={() => setShowResetConfirm(true)}
-            savingPersona={savingPersona}
-            personaError={personaError}
+            onOpenGrow={openUpgradePaths}
+            onPersonaSelect={setPersonaModal}
           />
         )}
-
-        {tab === 'grow' && (
-          <MemberUpgradePathsHome persona={persona}>
-          <div className="member-dashboard-paths">
-            <section className="member-desk-panel member-dashboard-paths-intro">
-              <p className="member-desk-kicker">Growth</p>
-              <h2 className="member-desk-heading">Upgrade &amp; apply</h2>
-              <p className="member-desk-lede">
-                Pick a path below — artist, editor, manager, label, brand, promoter, and playlist
-                curator. Manager, label, brand, and promoter unlock your workspace after desk review.
-              </p>
-            </section>
-
-            {GROW_PATHS.map((path) => {
-              if (path.variant === 'persona') {
-                const active = persona === path.persona
-                return (
-                  <article
-                    key={path.id}
-                    className={clsx(
-                      'member-desk-panel member-dashboard-path-card member-dashboard-path-card--persona',
-                      active && 'member-dashboard-path-card--active',
-                    )}
-                  >
-                    <p className="member-desk-kicker">{path.kicker}</p>
-                    <h2 className="member-desk-heading">{path.heading}</h2>
-                    <p className="member-desk-lede">{path.lede}</p>
-                    <VerificationRequirementsList
-                      info={getRoleVerificationRequirements(path.persona)}
-                      className="mt-4"
-                    />
-                    <div className="member-desk-actions">
-                      {active ? (
-                        <button
-                          type="button"
-                          className="ios-btn ios-btn-primary"
-                          onClick={() => setTab('workspace')}
-                        >
-                          Open workspace →
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="ios-btn ios-btn-primary"
-                          onClick={() => setPersonaModal(path.persona)}
-                        >
-                          {path.primaryLabel} →
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="ios-btn ios-btn-ghost"
-                        onClick={() => {
-                          document
-                            .querySelector('.member-desk-trust-wrap')
-                            ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                        }}
-                      >
-                        Verification proofs
-                      </button>
-                    </div>
-                  </article>
-                )
-              }
-
-              const cardClass =
-                path.variant === 'artist'
-                  ? 'member-dashboard-path-card--artist'
-                  : path.variant === 'curator'
-                    ? 'member-dashboard-path-card--curator'
-                    : 'member-dashboard-path-card--editor'
-
-              return (
-                <article
-                  key={path.id}
-                  className={clsx(
-                    'member-desk-panel member-dashboard-path-card',
-                    cardClass,
-                  )}
-                >
-                  <p className="member-desk-kicker">{path.kicker}</p>
-                  <h2 className="member-desk-heading">{path.heading}</h2>
-                  <p className="member-desk-lede">{path.lede}</p>
-                  <VerificationRequirementsList info={path.verification} className="mt-4" />
-                  {path.secondary?.length ? (
-                    <div className="member-desk-actions">
-                      <Link to={path.primary.to} className="ios-btn ios-btn-secondary">
-                        {path.primary.label} →
-                      </Link>
-                      {path.secondary.map((link) => (
-                        <Link key={link.to} to={link.to} className="ios-btn ios-btn-ghost">
-                          {link.label}
-                        </Link>
-                      ))}
-                    </div>
-                  ) : (
-                    <Link to={path.primary.to} className="ios-btn ios-btn-primary mt-6 inline-flex">
-                      {path.primary.label} →
-                    </Link>
-                  )}
-                </article>
-              )
-            })}
-
-            {persona && (
-              <section className="member-desk-panel member-desk-trust-wrap">
-                <MemberTrustPanel user={user} persona={persona} className="member-desk-trust" />
-              </section>
-            )}
-          </div>
-          </MemberUpgradePathsHome>
-        )}
-
-        {tab === 'explore' && <MemberExploreHome />}
-
-        {tab === 'network' && <MemberFeedActivity />}
-
-        {tab === 'fandom' && <MyFandomPanel />}
       </RoleDeskLayout>
 
       {personaModal && (

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { RoleDeskLayout } from '@/components/dashboard/RoleDeskLayout'
 import { MetalBadge } from '@/components/ui/MetalBadge'
@@ -16,30 +16,49 @@ import { DismissibleBanner } from '@/components/ui/DismissibleBanner'
 import { Input, FieldLabel } from '@/components/ui/Input'
 import { ArtistProfileEditor } from '@/components/dashboard/ArtistProfileEditor'
 import { DashboardCommunityHub } from '@/components/dashboard/DashboardCommunityHub'
-import { ArtistFandomPanel } from '@/components/dashboard/ArtistFandomPanel'
+import { ArtistFandomNetworkHome } from '@/components/dashboard/ArtistFandomNetworkHome'
 import { DashboardSection } from '@/components/dashboard/DashboardSection'
 import { SubmissionLifecycleTimeline } from '@/components/dashboard/SubmissionLifecycleTimeline'
 import { ReleaseEditor } from '@/components/dashboard/ReleaseEditor'
 import { getProfileForUser } from '@/lib/artist-profile/service'
 import { getLatestDeletedArchiveForUser } from '@/lib/artist-page-recovery/service'
 import type { TrackSubmission } from '@/lib/auth/types'
+import {
+  LISTENER_UPGRADE_PATH_BADGE,
+  listenerDeskNavGroups,
+  listenerTabFromSearchParam,
+} from '@/lib/dashboard/listenerDeskNav'
+import { ListenerDeskPanels } from '@/components/dashboard/ListenerDeskPanels'
 
-const TABS = [
-  { id: 'network' as const, label: 'Network', hint: 'Feed, profile, dB' },
-  { id: 'fandom' as const, label: 'Fandom', hint: 'Who supports you' },
+/** Listener desk + artist studio in one nav (artists keep member network tools). */
+type ArtistDeskTab =
+  | 'workspace'
+  | 'grow'
+  | 'feed'
+  | 'listener-fandom'
+  | 'explore'
+  | 'my-fandom'
+  | 'profile'
+  | 'releases'
+  | 'submit'
+  | 'history'
+  | 'studio-network'
+
+const STUDIO_NAV = [
+  { id: 'my-fandom' as const, label: 'My Fandom', hint: 'Tribes, supporters, cult' },
   { id: 'profile' as const, label: 'Your page', hint: 'Profile, music, merch' },
   { id: 'releases' as const, label: 'Releases', hint: 'Schedule premieres' },
   { id: 'submit' as const, label: 'Submit to editors', hint: 'New track review' },
   { id: 'history' as const, label: 'Submissions', hint: 'Editor feedback' },
+  { id: 'studio-network' as const, label: 'Network hub', hint: 'Feed, profile, dB' },
 ]
 
 export default function ArtistDashboardPage() {
   const { user, logout, mode } = useAuth()
   const [submissions, setSubmissions] = useState<TrackSubmission[]>([])
   const [loadingList, setLoadingList] = useState(true)
-  const [tab, setTab] = useState<
-    'network' | 'fandom' | 'profile' | 'releases' | 'submit' | 'history'
-  >('profile')
+  const [searchParams] = useSearchParams()
+  const [tab, setTab] = useState<ArtistDeskTab>('workspace')
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -86,6 +105,11 @@ export default function ArtistDashboardPage() {
       setLoadingList(false)
     }
   }, [user])
+
+  useEffect(() => {
+    const fromUrl = listenerTabFromSearchParam(searchParams.get('tab'))
+    if (fromUrl) setTab(fromUrl)
+  }, [searchParams])
 
   useEffect(() => {
     if (user) {
@@ -139,18 +163,19 @@ export default function ArtistDashboardPage() {
       compactHeader
       kicker="Artist studio"
       title="Artist desk"
-      summary="Build your public artist page, schedule releases, and submit tracks to Institute of Sound editors."
+      summary="Listener home + network — plus Studio for your page, releases, and editor submissions."
       badge={
         <MetalBadge variant="live" className="shrink-0">
           Artist
         </MetalBadge>
       }
       tab={tab}
-      onTabChange={setTab}
+      onTabChange={(next) => setTab(next as ArtistDeskTab)}
       navGroups={[
+        ...listenerDeskNavGroups(LISTENER_UPGRADE_PATH_BADGE),
         {
           title: 'Studio',
-          items: TABS.map((t) => ({
+          items: STUDIO_NAV.map((t) => ({
             id: t.id,
             label: t.label,
             hint: t.hint,
@@ -194,8 +219,12 @@ export default function ArtistDashboardPage() {
         ) : undefined
       }
       onLogout={() => logout()}
-      rootClassName="artist-desk"
+      rootClassName="artist-desk member-desk member-desk--shellless"
     >
+        <ListenerDeskPanels tab={tab} user={user} onOpenGrow={() => setTab('grow')} />
+
+        {tab === 'my-fandom' && <ArtistFandomNetworkHome />}
+
         {deletedPageSlug && (
           <DismissibleBanner variant="info" onDismiss={() => setDeletedPageSlug(null)}>
             Your artist page <strong className="text-foreground">/artist/{deletedPageSlug}</strong> was removed.
@@ -207,9 +236,8 @@ export default function ArtistDashboardPage() {
           </DismissibleBanner>
         )}
 
-        {tab === 'network' && <DashboardCommunityHub />}
+        {tab === 'studio-network' && <DashboardCommunityHub />}
 
-        {tab === 'fandom' && <ArtistFandomPanel />}
 
         {tab === 'profile' && <ArtistProfileEditor user={user} />}
 

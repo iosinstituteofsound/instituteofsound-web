@@ -2,8 +2,14 @@ import type { ReactNode } from 'react'
 import { MetalBadge } from '@/components/ui/MetalBadge'
 import type { User } from '@/lib/auth/types'
 import { RoleDeskLayout, type DeskNavGroup } from '@/components/dashboard/RoleDeskLayout'
+import {
+  LISTENER_UPGRADE_PATH_BADGE,
+  listenerDeskNavGroups,
+  type ListenerDeskTab,
+} from '@/lib/dashboard/listenerDeskNav'
 
 export type SuperEditorTab =
+  | ListenerDeskTab
   | 'analytics'
   | 'preview'
   | 'verification'
@@ -15,10 +21,10 @@ export type SuperEditorTab =
   | 'events'
   | 'write'
   | 'drafts'
-  | 'network'
+  | 'community-hub'
   | 'profile'
 
-const NAV_GROUPS: DeskNavGroup<SuperEditorTab>[] = [
+const ROLE_NAV_GROUPS: DeskNavGroup<SuperEditorTab>[] = [
   {
     title: 'Command',
     items: [
@@ -43,7 +49,7 @@ const NAV_GROUPS: DeskNavGroup<SuperEditorTab>[] = [
   {
     title: 'Your account',
     items: [
-      { id: 'network', label: 'Network & feed' },
+      { id: 'community-hub', label: 'Community hub' },
       { id: 'profile', label: 'Editor profile' },
     ],
   },
@@ -76,10 +82,14 @@ export function SuperEditorDeskLayout({
   onLogout,
   children,
 }: Props) {
-  const navGroups = NAV_GROUPS.map((group) => ({
+  const navGroups: DeskNavGroup<SuperEditorTab>[] = [
+    ...listenerDeskNavGroups(LISTENER_UPGRADE_PATH_BADGE),
+    ...ROLE_NAV_GROUPS,
+  ].map((group) => ({
     ...group,
     items: group.items.map((item) => ({
       ...item,
+      id: item.id as SuperEditorTab,
       badge:
         item.id === 'queue'
           ? counts.pending
@@ -128,7 +138,7 @@ export function SuperEditorDeskLayout({
         },
       ]}
       onLogout={onLogout}
-      rootClassName="super-editor-dashboard"
+      rootClassName="super-editor-dashboard member-desk member-desk--shellless"
     >
       {children}
     </RoleDeskLayout>

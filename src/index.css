@@ -365,6 +365,208 @@ textarea.ios-input {
   }
 }
 
+/* —— Rank emblems (tier medals — crave-worthy) —— */
+.rank-emblem {
+  --emblem-size: 3.25rem;
+  position: relative;
+  display: inline-flex;
+  width: var(--emblem-size);
+  height: var(--emblem-size);
+  flex-shrink: 0;
+}
+
+.rank-emblem--sm {
+  --emblem-size: 2.5rem;
+}
+
+.rank-emblem--lg {
+  --emblem-size: 3.75rem;
+}
+
+.rank-emblem__aura {
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--emblem-glow) 0%, transparent 68%);
+  opacity: 0.85;
+  animation: rank-emblem-aura 3.5s ease-in-out infinite;
+}
+
+.rank-emblem__body {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  background: var(--emblem-core);
+  border: 1.5px solid var(--emblem-border);
+  box-shadow:
+    inset 0 1px 0 var(--emblem-highlight),
+    inset 0 -3px 10px rgba(0, 0, 0, 0.55),
+    0 0 22px var(--emblem-glow),
+    0 6px 16px rgba(0, 0, 0, 0.5);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rank-emblem:hover .rank-emblem__body {
+  transform: translateY(-2px) scale(1.03);
+}
+
+.rank-emblem__rim {
+  position: absolute;
+  inset: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--emblem-rim);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.rank-emblem__shine {
+  position: absolute;
+  inset: -40% -60%;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 58%
+  );
+  animation: rank-emblem-shine 4.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.rank-emblem__glyph {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-size: calc(var(--emblem-size) * 0.42);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: var(--emblem-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 24px var(--emblem-glow);
+}
+
+.rank-emblem__sigil {
+  position: absolute;
+  right: 4px;
+  bottom: 3px;
+  z-index: 1;
+  width: calc(var(--emblem-size) * 0.28);
+  height: calc(var(--emblem-size) * 0.28);
+  color: var(--emblem-accent);
+  opacity: 0.85;
+}
+
+.rank-emblem__sigil-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 0 4px var(--emblem-glow));
+}
+
+.rank-emblem--iron {
+  --emblem-core: linear-gradient(145deg, #4a5568 0%, #2d3748 38%, #1a202c 100%);
+  --emblem-border: rgba(148, 163, 184, 0.45);
+  --emblem-rim: rgba(203, 213, 225, 0.25);
+  --emblem-highlight: rgba(226, 232, 240, 0.2);
+  --emblem-accent: #94a3b8;
+  --emblem-glow: rgba(148, 163, 184, 0.35);
+  --emblem-text: linear-gradient(180deg, #f8fafc 0%, #94a3b8 100%);
+}
+
+.rank-emblem--bronze {
+  --emblem-core: linear-gradient(145deg, #b45309 0%, #78350f 42%, #451a03 100%);
+  --emblem-border: rgba(251, 191, 36, 0.35);
+  --emblem-rim: rgba(253, 224, 71, 0.2);
+  --emblem-highlight: rgba(254, 243, 199, 0.15);
+  --emblem-accent: #fbbf24;
+  --emblem-glow: rgba(251, 191, 36, 0.4);
+  --emblem-text: linear-gradient(180deg, #fef3c7 0%, #d97706 100%);
+}
+
+.rank-emblem--silver {
+  --emblem-core: linear-gradient(145deg, #64748b 0%, #475569 40%, #334155 100%);
+  --emblem-border: rgba(226, 232, 240, 0.4);
+  --emblem-rim: rgba(248, 250, 252, 0.2);
+  --emblem-highlight: rgba(255, 255, 255, 0.25);
+  --emblem-accent: #e2e8f0;
+  --emblem-glow: rgba(226, 232, 240, 0.35);
+  --emblem-text: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%);
+}
+
+.rank-emblem--gold {
+  --emblem-core: linear-gradient(145deg, #ca8a04 0%, #a16207 38%, #713f12 100%);
+  --emblem-border: rgba(250, 204, 21, 0.45);
+  --emblem-rim: rgba(254, 240, 138, 0.25);
+  --emblem-highlight: rgba(254, 249, 195, 0.2);
+  --emblem-accent: #facc15;
+  --emblem-glow: rgba(250, 204, 21, 0.45);
+  --emblem-text: linear-gradient(180deg, #fef9c3 0%, #eab308 100%);
+}
+
+.rank-emblem--platinum {
+  --emblem-core: linear-gradient(145deg, #e5e7eb 0%, #9ca3af 35%, #6b7280 100%);
+  --emblem-border: rgba(255, 255, 255, 0.5);
+  --emblem-rim: rgba(255, 255, 255, 0.35);
+  --emblem-highlight: rgba(255, 255, 255, 0.4);
+  --emblem-accent: #f3f4f6;
+  --emblem-glow: rgba(255, 255, 255, 0.35);
+  --emblem-text: linear-gradient(180deg, #ffffff 0%, #d1d5db 100%);
+}
+
+.rank-emblem--diamond {
+  --emblem-core: linear-gradient(145deg, #67e8f9 0%, #0891b2 40%, #164e63 100%);
+  --emblem-border: rgba(103, 232, 249, 0.45);
+  --emblem-rim: rgba(165, 243, 252, 0.25);
+  --emblem-highlight: rgba(207, 250, 254, 0.2);
+  --emblem-accent: #22d3ee;
+  --emblem-glow: rgba(34, 211, 238, 0.45);
+  --emblem-text: linear-gradient(180deg, #ecfeff 0%, #06b6d4 100%);
+}
+
+.rank-emblem--signal {
+  --emblem-core: linear-gradient(145deg, #dc2626 0%, #991b1b 42%, #450a0a 100%);
+  --emblem-border: rgba(212, 0, 0, 0.55);
+  --emblem-rim: rgba(248, 113, 113, 0.25);
+  --emblem-highlight: rgba(254, 202, 202, 0.15);
+  --emblem-accent: #d40000;
+  --emblem-glow: rgba(212, 0, 0, 0.55);
+  --emblem-text: linear-gradient(180deg, #fecaca 0%, #d40000 100%);
+}
+
+@keyframes rank-emblem-aura {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes rank-emblem-shine {
+  0%,
+  100% {
+    transform: translateX(-120%) rotate(12deg);
+    opacity: 0;
+  }
+  45%,
+  55% {
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(120%) rotate(12deg);
+  }
+}
+
 /* —— Nav (metal editorial chrome) —— */
 .ios-nav {
   border-bottom: 1px solid rgba(42, 42, 42, 0.9);

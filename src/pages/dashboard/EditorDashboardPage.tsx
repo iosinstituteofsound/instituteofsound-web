@@ -51,8 +51,17 @@ import { SuperEditorPlaylistCuratorPanel } from '@/components/dashboard/SuperEdi
 import { SuperEditorDeletedPagesPanel } from '@/components/dashboard/SuperEditorDeletedPagesPanel'
 import { syncPlaylistCuratorDeskNotifications } from '@/lib/playlistCurator/notify'
 import { syncVerificationDeskNotifications } from '@/lib/verification/notifyEditors'
+import { ListenerDeskPanels } from '@/components/dashboard/ListenerDeskPanels'
+import {
+  isListenerDeskTab,
+  listenerDeskNavGroups,
+  listenerTabFromSearchParam,
+  LISTENER_UPGRADE_PATH_BADGE,
+  type ListenerDeskTab,
+} from '@/lib/dashboard/listenerDeskNav'
 
 type EditorTab =
+  | ListenerDeskTab
   | 'analytics'
   | 'preview'
   | 'verification'
@@ -64,7 +73,7 @@ type EditorTab =
   | 'events'
   | 'write'
   | 'drafts'
-  | 'network'
+  | 'community-hub'
   | 'profile'
 type FilterStatus = 'all' | SubmissionStatus
 
@@ -133,6 +142,11 @@ export default function EditorDashboardPage() {
   }, [isSuperEditor])
 
   useEffect(() => {
+    const fromTab = listenerTabFromSearchParam(searchParams.get('tab'))
+    if (fromTab) {
+      setTab(fromTab)
+      return
+    }
     const desk = searchParams.get('desk')
     if (desk === 'verification' && isSuperEditor) {
       setTab('verification')
@@ -319,7 +333,15 @@ export default function EditorDashboardPage() {
           </DismissibleBanner>
         )}
 
-        {tab === 'network' && <DashboardCommunityHub />}
+        {user && (
+          <ListenerDeskPanels
+            tab={tab}
+            user={user}
+            onOpenGrow={() => setTab('grow')}
+          />
+        )}
+
+        {tab === 'community-hub' && <DashboardCommunityHub />}
 
         {tab === 'wire' && user && (
           <div className="space-y-8">
@@ -353,7 +375,8 @@ export default function EditorDashboardPage() {
           tab !== 'write' &&
           tab !== 'analytics' &&
           tab !== 'profile' &&
-          tab !== 'network' &&
+          !isListenerDeskTab(tab) &&
+          tab !== 'community-hub' &&
           tab !== 'wire' &&
           tab !== 'events' &&
           tab !== 'preview' &&
@@ -541,7 +564,7 @@ export default function EditorDashboardPage() {
                 <p className="text-sm text-muted border-l-2 border-rs-red pl-4">
                   Write band profiles, album reviews, or long-form features. Use the toolbar for
                   headings, emphasis, links, alignment, and color. Saved to{' '}
-                  {mode === 'api' ? 'the API' : 'local storage'}.
+                  {mode === 'api' ? 'cloud' : 'local storage'}.
                 </p>
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-muted block mb-2">
@@ -880,8 +903,9 @@ export default function EditorDashboardPage() {
         </MetalBadge>
       }
       tab={tab}
-      onTabChange={setTab}
+      onTabChange={(next) => setTab(next as EditorTab)}
       navGroups={[
+        ...listenerDeskNavGroups(LISTENER_UPGRADE_PATH_BADGE),
         {
           title: 'Editorial desk',
           items: [
@@ -890,14 +914,12 @@ export default function EditorDashboardPage() {
             { id: 'write', label: 'Write editorial' },
             { id: 'drafts', label: 'My drafts', badge: drafts.length },
             { id: 'events', label: 'Events board' },
+            { id: 'community-hub', label: 'Community hub' },
           ],
         },
         {
           title: 'Your account',
-          items: [
-            { id: 'network', label: 'Network & feed' },
-            { id: 'profile', label: 'Editor profile' },
-          ],
+          items: [{ id: 'profile', label: 'Editor profile' }],
         },
       ]}
       quickTiles={[
@@ -929,7 +951,7 @@ export default function EditorDashboardPage() {
         </Link>
       }
       onLogout={() => logout()}
-      rootClassName="editor-desk"
+      rootClassName="editor-desk member-desk member-desk--shellless"
     >
       {deskBody}
     </RoleDeskLayout>

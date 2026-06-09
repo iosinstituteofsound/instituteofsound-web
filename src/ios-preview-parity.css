@@ -72,3 +72,7 @@ html {
   padding-bottom: 4rem;
   min-height: 60vh;
 }
+
+.member-desk .community-feed-card--desk.community-feed-card {
+  margin-bottom: 0;
+}
