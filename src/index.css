@@ -1,3 +1,5 @@
+@import './theme-tokens.css';
+@import './theme-bright-fixes.css';
 @import 'tailwindcss';
 @import './styles/discover.css';
 @import './styles/editorial-desk.css';
@@ -11,23 +13,82 @@
 @import './styles/community-wire.css';
 @import './styles/roster-pro.css';
 
+/* Tailwind bridge — values live in theme-tokens.css + design-tokens.ts */
 @theme {
-  --color-void: #050505;
-  --color-signal: #f5f5f5;
-  --color-muted: #9a9a9a;
-  --color-surface: #0c0c0c;
-  --color-paper: #101010;
-  --color-elevated: #161616;
-  --color-border: #2a2a2a;
-  --color-edge: #3d3d3d;
-  --color-rs-red: #e31b23;
-  --color-mh-red: #d40000;
-  --color-mh-black: #0b0b0b;
-  --color-neon: var(--color-mh-red);
-  --color-crimson: #8b1538;
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Space Grotesk', system-ui, sans-serif;
-  --font-display: 'Syne', system-ui, sans-serif;
+  /* Colors */
+  --color-void: var(--ios-color-void);
+  --color-signal: var(--ios-color-signal);
+  --color-muted: var(--ios-color-muted);
+  --color-surface: var(--ios-color-surface);
+  --color-paper: var(--ios-color-paper);
+  --color-elevated: var(--ios-color-elevated);
+  --color-border: var(--ios-color-border);
+  --color-edge: var(--ios-color-edge);
+  --color-accent: var(--ios-color-accent);
+  --color-accent-bright: var(--ios-color-accent-bright);
+  --color-accent-deep: var(--ios-color-accent-deep);
+  --color-rs-red: var(--ios-color-accent-bright);
+  --color-mh-red: var(--ios-color-accent);
+  --color-mh-black: var(--ios-color-mh-black);
+  --color-neon: var(--ios-color-neon);
+  --color-crimson: var(--ios-color-crimson);
+  --color-gold: var(--ios-color-gold);
+  --color-foreground: var(--ios-color-foreground);
+  --color-muted-foreground: var(--ios-color-muted-foreground);
+  --color-background: var(--ios-color-background);
+  /* Fonts */
+  --font-serif: var(--ios-font-serif);
+  --font-sans: var(--ios-font-sans);
+  --font-display: var(--ios-font-display);
+  --font-mono: var(--ios-font-mono);
+  /* Font sizes */
+  --text-ios-2xs: var(--ios-text-2xs);
+  --text-ios-xs: var(--ios-text-xs);
+  --text-ios-sm: var(--ios-text-sm);
+  --text-ios-md: var(--ios-text-md);
+  --text-ios-base: var(--ios-text-base);
+  --text-ios-lg: var(--ios-text-lg);
+  --text-ios-xl: var(--ios-text-xl);
+  --text-ios-2xl: var(--ios-text-2xl);
+  --text-ios-3xl: var(--ios-text-3xl);
+  --text-ios-4xl: var(--ios-text-4xl);
+  --text-ios-5xl: var(--ios-text-5xl);
+  /* Spacing */
+  --spacing-ios-0: var(--ios-space-0);
+  --spacing-ios-px: var(--ios-space-px);
+  --spacing-ios-0_5: var(--ios-space-0_5);
+  --spacing-ios-1: var(--ios-space-1);
+  --spacing-ios-1_5: var(--ios-space-1_5);
+  --spacing-ios-2: var(--ios-space-2);
+  --spacing-ios-2_5: var(--ios-space-2_5);
+  --spacing-ios-3: var(--ios-space-3);
+  --spacing-ios-3_5: var(--ios-space-3_5);
+  --spacing-ios-4: var(--ios-space-4);
+  --spacing-ios-5: var(--ios-space-5);
+  --spacing-ios-6: var(--ios-space-6);
+  --spacing-ios-7: var(--ios-space-7);
+  --spacing-ios-8: var(--ios-space-8);
+  --spacing-ios-10: var(--ios-space-10);
+  --spacing-ios-12: var(--ios-space-12);
+  --spacing-ios-14: var(--ios-space-14);
+  --spacing-ios-16: var(--ios-space-16);
+  --spacing-ios-20: var(--ios-space-20);
+  --spacing-ios-24: var(--ios-space-24);
+  /* Radii */
+  --radius-ios-sm: var(--ios-radius-sm);
+  --radius-ios-md: var(--ios-radius-md);
+  --radius-ios-lg: var(--ios-radius-lg);
+  --radius-ios-xl: var(--ios-radius-xl);
+  --radius-ios-2xl: var(--ios-radius-2xl);
+  --radius-ios-full: var(--ios-radius-full);
+  /* Letter spacing */
+  --tracking-ios-tight: var(--ios-tracking-tight);
+  --tracking-ios-normal: var(--ios-tracking-normal);
+  --tracking-ios-wide: var(--ios-tracking-wide);
+  --tracking-ios-wider: var(--ios-tracking-wider);
+  --tracking-ios-label: var(--ios-tracking-label);
+  --tracking-ios-kicker: var(--ios-tracking-kicker);
+  --tracking-ios-display: var(--ios-tracking-display);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -37,7 +98,7 @@
 
 .ios-page-bg {
   background:
-    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(212, 0, 0, 0.07), transparent 50%),
+    radial-gradient(ellipse 120% 80% at 50% -20%, color-mix(in srgb, var(--ios-color-accent) 7%, transparent), transparent 50%),
     var(--color-void);
 }
 
@@ -70,19 +131,19 @@
 }
 
 .ios-btn-primary {
-  background: linear-gradient(135deg, var(--color-mh-red) 0%, #a80000 100%);
-  color: #fff;
+  background: var(--ios-gradient-btn);
+  color: var(--ios-text-on-accent);
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.12) inset,
-    0 8px 24px -8px rgba(212, 0, 0, 0.55);
+    var(--ios-shadow-red);
 }
 
 .ios-btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--color-rs-red) 0%, var(--color-mh-red) 100%);
+  background: var(--ios-gradient-btn-hover);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.15) inset,
-    0 12px 32px -8px rgba(227, 27, 35, 0.5);
+    0 12px 32px -8px color-mix(in srgb, var(--ios-color-accent-bright) 50%, transparent);
   transform: translateY(-1px);
 }
 
@@ -95,7 +156,7 @@
 .ios-btn-secondary:hover:not(:disabled) {
   border-color: var(--color-mh-red);
   color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.06);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
 }
 
 .ios-btn-ghost {
@@ -113,12 +174,12 @@
 .ios-btn-metal {
   background: var(--color-elevated);
   color: var(--color-mh-red);
-  border-color: rgba(212, 0, 0, 0.45);
-  box-shadow: inset 0 0 0 1px rgba(212, 0, 0, 0.08);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .ios-btn-metal:hover:not(:disabled) {
-  background: rgba(212, 0, 0, 0.12);
+  background: color-mix(in srgb, var(--ios-color-accent) 12%, transparent);
   color: #fff;
   border-color: var(--color-mh-red);
 }
@@ -152,7 +213,7 @@
 .ios-input:focus {
   outline: none;
   border-color: var(--color-mh-red);
-  box-shadow: 0 0 0 1px rgba(212, 0, 0, 0.35);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
 }
 
 textarea.ios-input {
@@ -189,8 +250,8 @@ textarea.ios-input {
 
 .ios-card:hover,
 .card-hover:hover {
-  border-color: rgba(212, 0, 0, 0.35);
-  box-shadow: 0 20px 50px -24px rgba(212, 0, 0, 0.45);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+  box-shadow: 0 20px 50px -24px color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
 }
 
 .ios-card:hover::before,
@@ -216,8 +277,8 @@ textarea.ios-input {
 }
 
 .ios-panel-accent {
-  border-color: rgba(212, 0, 0, 0.35);
-  box-shadow: inset 0 0 60px -30px rgba(212, 0, 0, 0.15);
+  border-color: var(--ios-accent-strong);
+  box-shadow: inset 0 0 60px -30px color-mix(in srgb, var(--color-mh-red) 15%, transparent);
 }
 
 /* —— Dismissible status banners —— */
@@ -256,8 +317,8 @@ textarea.ios-input {
 
 .ios-banner-error {
   color: var(--color-mh-red);
-  border-color: rgb(212 0 0 / 0.4);
-  background: rgb(212 0 0 / 0.06);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 0.4%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 0.06%, transparent);
 }
 
 .ios-banner-success {
@@ -302,7 +363,7 @@ textarea.ios-input {
 .transmission-line {
   height: 2px;
   max-width: 12rem;
-  background: linear-gradient(90deg, var(--color-mh-red), rgba(212, 0, 0, 0.2), transparent);
+  background: linear-gradient(90deg, var(--color-mh-red), color-mix(in srgb, var(--ios-color-accent) 20%, transparent), transparent);
   position: relative;
 }
 
@@ -327,8 +388,8 @@ textarea.ios-input {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   padding: 0.2rem 0.55rem;
-  border: 1px solid rgba(212, 0, 0, 0.45);
-  background: rgba(212, 0, 0, 0.08);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
   color: var(--color-mh-red);
   clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 0 100%);
 }
@@ -346,8 +407,8 @@ textarea.ios-input {
 }
 
 .metal-badge-live {
-  border-color: rgba(212, 0, 0, 0.6);
-  background: rgba(212, 0, 0, 0.15);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 60%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 15%, transparent);
 }
 
 .metal-badge-dot {
@@ -532,11 +593,11 @@ textarea.ios-input {
 
 .rank-emblem--signal {
   --emblem-core: linear-gradient(145deg, #dc2626 0%, #991b1b 42%, #450a0a 100%);
-  --emblem-border: rgba(212, 0, 0, 0.55);
+  --emblem-border: color-mix(in srgb, var(--ios-color-accent) 55%, transparent);
   --emblem-rim: rgba(248, 113, 113, 0.25);
   --emblem-highlight: rgba(254, 202, 202, 0.15);
-  --emblem-accent: #d40000;
-  --emblem-glow: rgba(212, 0, 0, 0.55);
+  --emblem-accent: var(--ios-color-accent);
+  --emblem-glow: color-mix(in srgb, var(--ios-color-accent) 55%, transparent);
   --emblem-text: linear-gradient(180deg, #fecaca 0%, #d40000 100%);
 }
 
@@ -569,7 +630,7 @@ textarea.ios-input {
 
 /* —— Nav (metal editorial chrome) —— */
 .ios-nav {
-  border-bottom: 1px solid rgba(42, 42, 42, 0.9);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
   transition:
     background-color 0.35s ease,
     border-color 0.35s ease,
@@ -582,26 +643,26 @@ textarea.ios-input {
 }
 
 .ios-nav-home {
-  background: linear-gradient(180deg, rgba(5, 5, 5, 0.72) 0%, rgba(5, 5, 5, 0.35) 100%);
+  background: var(--ios-gradient-nav-home);
   backdrop-filter: blur(14px);
 }
 
 .ios-nav-solid,
 .ios-nav-scrolled {
-  background: rgba(5, 5, 5, 0.94);
+  background: var(--ios-gradient-nav-solid);
   backdrop-filter: blur(16px);
-  box-shadow: 0 12px 40px -20px rgba(0, 0, 0, 0.85);
+  box-shadow: var(--ios-shadow-chrome);
 }
 
 .ios-nav-scrolled {
-  border-bottom-color: rgba(212, 0, 0, 0.22);
+  border-bottom-color: color-mix(in srgb, var(--color-mh-red) 22%, transparent);
 }
 
 .ios-nav-app {
-  background: rgba(5, 5, 5, 0.96);
+  background: color-mix(in srgb, var(--color-void) 96%, transparent);
   backdrop-filter: blur(14px);
-  border-bottom-color: rgba(212, 0, 0, 0.25);
-  box-shadow: 0 12px 40px -20px rgba(0, 0, 0, 0.85);
+  border-bottom-color: color-mix(in srgb, var(--color-mh-red) 25%, transparent);
+  box-shadow: var(--ios-shadow-chrome);
 }
 
 .ios-nav::after {
@@ -631,10 +692,10 @@ textarea.ios-input {
       90deg,
       transparent,
       transparent 79px,
-      rgba(255, 255, 255, 0.015) 79px,
-      rgba(255, 255, 255, 0.015) 80px
+      color-mix(in srgb, var(--color-signal) 1.5%, transparent) 79px,
+      color-mix(in srgb, var(--color-signal) 1.5%, transparent) 80px
     ),
-    linear-gradient(180deg, rgba(212, 0, 0, 0.04), transparent 55%);
+    linear-gradient(180deg, color-mix(in srgb, var(--color-mh-red) 4%, transparent), transparent 55%);
   opacity: 0.65;
 }
 
@@ -735,8 +796,8 @@ textarea.ios-input {
 .ios-nav-dropdown-open .ios-nav-dropdown-trigger,
 .ios-nav-dropdown-trigger-active {
   color: var(--color-signal);
-  border-color: rgba(212, 0, 0, 0.35);
-  background: rgba(212, 0, 0, 0.08);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .ios-nav-dropdown-chevron {
@@ -797,7 +858,7 @@ textarea.ios-input {
   min-width: 13.5rem;
   padding: 0.65rem 0;
   background: linear-gradient(165deg, #141414 0%, #080808 100%);
-  border: 1px solid rgba(212, 0, 0, 0.28);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 28%, transparent);
   box-shadow:
     0 16px 48px -12px rgba(0, 0, 0, 0.85),
     0 0 0 1px rgba(255, 255, 255, 0.04) inset;
@@ -850,13 +911,13 @@ textarea.ios-input {
 
 .ios-nav-dropdown-link:hover {
   color: var(--color-signal);
-  background: rgba(212, 0, 0, 0.1);
+  background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
   padding-left: 1.15rem;
 }
 
 .ios-nav-dropdown-link-active {
   color: var(--color-rs-red);
-  background: rgba(212, 0, 0, 0.06);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
   box-shadow: inset 3px 0 0 var(--color-mh-red);
 }
 
@@ -868,7 +929,7 @@ textarea.ios-input {
   font-size: 0.4375rem;
   letter-spacing: 0.1em;
   padding: 0.1rem 0.35rem;
-  border: 1px solid rgba(212, 0, 0, 0.5);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
   color: var(--color-mh-red);
 }
 
@@ -938,7 +999,7 @@ textarea.ios-input {
   position: absolute;
   inset: 0;
   opacity: 0;
-  background: rgba(212, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
   clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
   transition: opacity 0.2s ease;
   pointer-events: none;
@@ -964,7 +1025,7 @@ textarea.ios-input {
   bottom: 0.15rem;
   height: 2px;
   background: linear-gradient(90deg, var(--color-mh-red), var(--color-rs-red));
-  box-shadow: 0 0 8px rgba(212, 0, 0, 0.45);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
 }
 
 .ios-nav-link-highlight {
@@ -976,9 +1037,9 @@ textarea.ios-input {
   font-size: 0.4375rem;
   letter-spacing: 0.12em;
   padding: 0.1rem 0.35rem;
-  border: 1px solid rgba(212, 0, 0, 0.55);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 55%, transparent);
   color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.1);
+  background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
 }
 
 .ios-nav-actions {
@@ -1069,8 +1130,8 @@ textarea.ios-input {
 }
 
 .ios-nav-toggle:hover {
-  border-color: rgba(212, 0, 0, 0.5);
-  background: rgba(212, 0, 0, 0.08);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 @media (min-width: 1280px) {
@@ -1141,7 +1202,7 @@ textarea.ios-input {
 }
 
 .ios-nav-app-menu-btn:hover {
-  border-color: rgba(212, 0, 0, 0.45);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
 }
 
 .ios-nav-app-menu-line {
@@ -1268,7 +1329,7 @@ textarea.ios-input {
   position: fixed;
   inset: 0;
   z-index: 59;
-  background: rgba(0, 0, 0, 0.72);
+  background: var(--ios-scrim-heavy);
   backdrop-filter: blur(4px);
   border: none;
   cursor: pointer;
@@ -1283,11 +1344,9 @@ textarea.ios-input {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background:
-    linear-gradient(165deg, rgba(22, 22, 22, 0.98) 0%, rgba(5, 5, 5, 0.99) 45%),
-    var(--color-void);
-  border-left: 1px solid rgba(212, 0, 0, 0.25);
-  box-shadow: -24px 0 60px rgba(0, 0, 0, 0.65);
+  background: var(--ios-gradient-panel);
+  border-left: 1px solid color-mix(in srgb, var(--color-mh-red) 25%, transparent);
+  box-shadow: var(--ios-shadow-panel);
   overflow: hidden;
 }
 
@@ -1296,8 +1355,8 @@ textarea.ios-input {
   right: auto;
   width: min(100%, 24rem);
   border-left: none;
-  border-right: 1px solid rgba(212, 0, 0, 0.25);
-  box-shadow: 24px 0 60px rgba(0, 0, 0, 0.65);
+  border-right: 1px solid color-mix(in srgb, var(--color-mh-red) 25%, transparent);
+  box-shadow: var(--ios-shadow-panel);
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -1497,10 +1556,10 @@ body.ios-app-shell {
 }
 
 .ios-nav-user-chip:hover {
-  border-color: rgba(212, 0, 0, 0.45);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
   box-shadow:
-    0 0 0 1px rgba(212, 0, 0, 0.12) inset,
-    0 0 28px rgba(212, 0, 0, 0.12),
+    0 0 0 1px color-mix(in srgb, var(--ios-color-accent) 12%, transparent) inset,
+    0 0 28px color-mix(in srgb, var(--ios-color-accent) 12%, transparent),
     0 10px 28px rgba(0, 0, 0, 0.45);
 }
 
@@ -1527,7 +1586,7 @@ body.ios-app-shell {
 }
 
 .ios-nav-user-avatar-link:hover .ios-nav-user-avatar-ring {
-  box-shadow: 0 0 0 1px rgba(212, 0, 0, 0.5), 0 0 16px rgba(212, 0, 0, 0.25);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ios-color-accent) 50%, transparent), 0 0 16px color-mix(in srgb, var(--ios-color-accent) 25%, transparent);
 }
 
 .ios-nav-user-copy {
@@ -1594,7 +1653,7 @@ body.ios-app-shell {
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: rgba(212, 0, 0, 0.55);
+  background: color-mix(in srgb, var(--ios-color-accent) 55%, transparent);
   flex-shrink: 0;
 }
 
@@ -1633,7 +1692,7 @@ body.ios-app-shell {
   position: relative;
   flex-shrink: 0;
   padding: 2px;
-  background: linear-gradient(145deg, rgba(212, 0, 0, 0.7), rgba(40, 40, 40, 0.9));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ios-color-accent) 70%, transparent), rgba(40, 40, 40, 0.9));
   clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
   transition: box-shadow 0.25s ease;
 }
@@ -1661,7 +1720,7 @@ body.ios-app-shell {
   border-radius: 50%;
   background: var(--color-mh-red);
   border: 1.5px solid #0a0a0a;
-  box-shadow: 0 0 8px rgba(212, 0, 0, 0.8);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ios-color-accent) 80%, transparent);
   animation: nav-user-pulse 2s ease-in-out infinite;
 }
 
@@ -1743,7 +1802,7 @@ body.ios-app-shell {
 /* —— Magazine rules (enhanced) —— */
 .magazine-rule {
   height: 4px;
-  background: linear-gradient(90deg, var(--color-rs-red), rgba(227, 27, 35, 0.2));
+  background: linear-gradient(90deg, var(--color-rs-red), color-mix(in srgb, var(--ios-color-accent-bright) 20%, transparent));
 }
 
 .mh-rule {
@@ -1825,13 +1884,13 @@ body.ios-app-shell {
 }
 
 .artist-dashboard-tab:hover {
-  border-color: rgba(212, 0, 0, 0.4);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 40%, transparent);
   color: var(--color-signal);
 }
 
 .artist-dashboard-tab-active {
   border-color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
   color: var(--color-mh-red);
 }
 
@@ -1877,7 +1936,7 @@ body.ios-app-shell {
   grid-column: 1 / -1;
   padding: 1.5rem 1.75rem;
   border: 1px solid var(--color-border);
-  background: linear-gradient(145deg, rgba(212, 0, 0, 0.04), transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ios-color-accent) 4%, transparent), transparent);
 }
 
 @media (min-width: 768px) {
@@ -1906,8 +1965,8 @@ body.ios-app-shell {
 }
 
 .member-dashboard-path-card--artist {
-  border-color: rgba(212, 0, 0, 0.35);
-  background: linear-gradient(145deg, rgba(212, 0, 0, 0.06), transparent);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ios-color-accent) 6%, transparent), transparent);
 }
 
 .member-dashboard-path-card--editor {
@@ -1915,12 +1974,12 @@ body.ios-app-shell {
 }
 
 .member-dashboard-path-card--persona {
-  border-color: rgba(212, 0, 0, 0.2);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 20%, transparent);
 }
 
 .member-dashboard-path-card--persona.member-dashboard-path-card--active {
-  border-color: rgba(212, 0, 0, 0.45);
-  background: linear-gradient(145deg, rgba(212, 0, 0, 0.08), transparent);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ios-color-accent) 8%, transparent), transparent);
 }
 
 .member-dashboard-path-card--curator {
@@ -1959,19 +2018,19 @@ body.ios-app-shell {
 }
 
 .member-dashboard-persona-option:hover:not(:disabled) {
-  border-color: rgba(212, 0, 0, 0.5);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
   transform: translateY(-1px);
 }
 
 .member-dashboard-persona-option-active {
   border-color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .member-role-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at 15% 20%, rgba(212, 0, 0, 0.22), rgba(0, 0, 0, 0.86) 42%);
+  background: radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--ios-color-accent) 22%, transparent), rgba(0, 0, 0, 0.86) 42%);
   display: grid;
   place-items: center;
   z-index: 120;
@@ -1984,9 +2043,9 @@ body.ios-app-shell {
   width: min(680px, 100%);
   max-height: 90vh;
   overflow: auto;
-  border: 1px solid rgba(212, 0, 0, 0.34);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 34%, transparent);
   background:
-    linear-gradient(145deg, rgba(212, 0, 0, 0.08), rgba(8, 8, 8, 0)) border-box,
+    linear-gradient(145deg, color-mix(in srgb, var(--ios-color-accent) 8%, transparent), rgba(8, 8, 8, 0)) border-box,
     rgba(8, 8, 8, 0.96);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.03) inset,
@@ -2032,9 +2091,9 @@ body.ios-app-shell {
 }
 
 .member-role-modal-close:hover:not(:disabled) {
-  border-color: rgba(212, 0, 0, 0.45);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
   color: var(--color-text);
-  background: rgba(212, 0, 0, 0.12);
+  background: color-mix(in srgb, var(--ios-color-accent) 12%, transparent);
 }
 
 .member-role-modal-summary {
@@ -2084,7 +2143,7 @@ body.ios-app-shell {
   flex-shrink: 0;
   border-radius: 999px;
   background: var(--color-mh-red);
-  box-shadow: 0 0 12px rgba(212, 0, 0, 0.45);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
 }
 
 .member-role-modal-actions {
@@ -2137,7 +2196,7 @@ body.ios-app-shell {
 }
 
 .member-dashboard-workflow-item {
-  border-left: 2px solid rgba(212, 0, 0, 0.42);
+  border-left: 2px solid color-mix(in srgb, var(--ios-color-accent) 42%, transparent);
   padding-left: 0.65rem;
 }
 
@@ -2226,8 +2285,8 @@ body.ios-app-shell {
 }
 
 .artist-dash-chrome-btn-ghost:hover {
-  border-color: rgba(212, 0, 0, 0.4) !important;
-  background: rgba(212, 0, 0, 0.06) !important;
+  border-color: color-mix(in srgb, var(--ios-color-accent) 40%, transparent) !important;
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent) !important;
 }
 
 .artist-dash-chrome-btn-primary {
@@ -2487,7 +2546,7 @@ body.ios-app-shell {
 .artist-dash-section-pill-active {
   color: var(--color-mh-red);
   border-bottom-color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.06);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
   box-shadow: none;
 }
 
@@ -2625,8 +2684,8 @@ body.ios-app-shell {
 
 .artist-dash-nav-item-active {
   color: var(--color-mh-red);
-  border-color: rgba(212, 0, 0, 0.45);
-  background: rgba(212, 0, 0, 0.1);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
   box-shadow: inset 2px 0 0 var(--color-mh-red);
 }
 
@@ -2749,8 +2808,8 @@ body.ios-app-shell {
 
 .artist-dash-intro {
   padding: 1.25rem 1.5rem;
-  border: 1px solid rgba(212, 0, 0, 0.25);
-  background: rgba(212, 0, 0, 0.05);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 25%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 5%, transparent);
   font-size: 0.9rem;
   line-height: 1.6;
   color: var(--color-muted-foreground);
@@ -2799,7 +2858,7 @@ body.ios-app-shell {
   right: -10%;
   width: 45%;
   height: 140%;
-  background: radial-gradient(ellipse at center, rgba(212, 0, 0, 0.12), transparent 70%);
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--ios-color-accent) 12%, transparent), transparent 70%);
   pointer-events: none;
 }
 
@@ -2824,13 +2883,13 @@ body.ios-app-shell {
 }
 
 .ios-analytics-stat-btn:hover {
-  border-color: rgba(212, 0, 0, 0.45);
-  background: rgba(212, 0, 0, 0.06);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
 }
 
 .ios-analytics-stat-active {
   border-color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.1);
+  background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
 }
 
 .ios-analytics-stat-hint {
@@ -2884,8 +2943,8 @@ body.ios-app-shell {
 }
 
 .ios-analytics-pipeline-tile:hover {
-  border-color: rgba(212, 0, 0, 0.5);
-  background: rgba(212, 0, 0, 0.06);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
 }
 
 .ios-analytics-bar-track {
@@ -2898,7 +2957,7 @@ body.ios-app-shell {
   height: 100%;
   min-width: 2px;
   background: linear-gradient(90deg, var(--color-mh-red), var(--color-rs-red));
-  box-shadow: 0 0 12px rgba(212, 0, 0, 0.45);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
   transition: width 0.5s ease;
 }
 
@@ -2924,7 +2983,7 @@ body.ios-app-shell {
   height: 5rem;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(212, 0, 0, 0.4);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 40%, transparent);
   color: var(--color-mh-red);
   font-size: 1.5rem;
 }
@@ -2949,8 +3008,8 @@ body.ios-app-shell {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   padding: 0.35rem 0.75rem;
-  border: 1px solid rgba(212, 0, 0, 0.45);
-  background: rgba(212, 0, 0, 0.08);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
   color: var(--color-mh-red);
 }
 
@@ -2978,7 +3037,7 @@ body.ios-app-shell {
 .ios-artist-social:hover {
   border-color: var(--color-mh-red);
   color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .ios-artist-cover-placeholder {
@@ -2986,14 +3045,14 @@ body.ios-app-shell {
   align-items: center;
   justify-content: center;
   background: linear-gradient(145deg, var(--color-elevated), var(--color-surface));
-  border: 1px dashed rgba(212, 0, 0, 0.35);
+  border: 1px dashed color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
 }
 
 .ios-artist-cover-placeholder-mark {
   font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.35em;
-  color: rgba(212, 0, 0, 0.5);
+  color: color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
 }
 
 .ios-artist-editorial-card {
@@ -3004,7 +3063,7 @@ body.ios-app-shell {
 }
 
 .ios-artist-editorial-card:hover {
-  border-color: rgba(212, 0, 0, 0.45);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
 }
 
 .ios-artist-track-row {
@@ -3069,11 +3128,11 @@ body.ios-app-shell {
 
 .artist-site {
   --artist-site-max: 76rem;
-  --artist-accent: #d40000;
+  --artist-accent: var(--ios-color-accent);
   --artist-accent-rgb: 212 0 0;
-  --artist-accent-soft: rgba(212, 0, 0, 0.14);
-  --artist-accent-border: rgba(212, 0, 0, 0.45);
-  --artist-accent-glow: rgba(212, 0, 0, 0.35);
+  --artist-accent-soft: color-mix(in srgb, var(--ios-color-accent) 14%, transparent);
+  --artist-accent-border: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
+  --artist-accent-glow: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
   --artist-accent-dark: #8b0000;
   --artist-accent-text: #ff6b6b;
   background: var(--color-void);
@@ -3828,7 +3887,7 @@ body.ios-app-shell {
 }
 
 .artist-site-video:hover {
-  border-color: rgba(212, 0, 0, 0.5);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
   transform: translateY(-2px);
   box-shadow: 0 14px 32px -24px rgba(0, 0, 0, 0.8);
 }
@@ -3860,7 +3919,7 @@ body.ios-app-shell {
   font-size: 0.58rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  background: rgba(212, 0, 0, 0.9);
+  background: color-mix(in srgb, var(--ios-color-accent) 90%, transparent);
   color: #fff;
   padding: 0.25rem 0.45rem;
 }
@@ -4986,7 +5045,7 @@ html[data-perf='lite'] .artist-site-hero-img {
 
 /* In-page stream player */
 .artist-site-player {
-  border: 1px solid var(--artist-accent-border, rgba(212, 0, 0, 0.45));
+  border: 1px solid var(--artist-accent-border, color-mix(in srgb, var(--ios-color-accent) 45%, transparent));
   background: linear-gradient(
     165deg,
     rgb(var(--artist-accent-rgb, 212 0 0) / 0.08),
@@ -5055,9 +5114,9 @@ html[data-perf='lite'] .artist-site-hero-img {
 }
 
 .ios-google-btn:hover:not(:disabled) {
-  border-color: rgba(212, 0, 0, 0.5);
-  background: rgba(212, 0, 0, 0.06);
-  box-shadow: 0 0 24px -8px rgba(212, 0, 0, 0.35);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
+  box-shadow: 0 0 24px -8px color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
 }
 
 .ios-google-btn:disabled {
@@ -5211,11 +5270,11 @@ html[data-perf='lite'] .css-waveform-bar {
 
 .magazine-card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 40px -12px rgba(212, 0, 0, 0.25);
+  box-shadow: 0 12px 40px -12px color-mix(in srgb, var(--ios-color-accent) 25%, transparent);
 }
 
 .mh-card-hover:hover {
-  box-shadow: 0 12px 40px -12px rgba(212, 0, 0, 0.35);
+  box-shadow: 0 12px 40px -12px color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
 }
 
 .hide-scrollbar {
@@ -5245,8 +5304,8 @@ html[data-perf='lite'] .css-waveform-bar {
 
 .hero-grid {
   background-image:
-    linear-gradient(rgba(212, 0, 0, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(212, 0, 0, 0.06) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--ios-color-accent) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ios-color-accent) 6%, transparent) 1px, transparent 1px);
   background-size: 48px 48px;
 }
 
@@ -5324,7 +5383,7 @@ html[data-perf='lite'] .hero-marquee {
 /* Metal loader — brutal, no neon pop */
 .metal-loader-smoke {
   background:
-    radial-gradient(ellipse at 50% 45%, rgba(212, 0, 0, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--ios-color-accent) 22%, transparent) 0%, transparent 50%),
     radial-gradient(ellipse at 20% 80%, rgba(20, 20, 20, 0.9) 0%, transparent 55%),
     radial-gradient(ellipse at 80% 20%, rgba(139, 21, 56, 0.12) 0%, transparent 40%);
 }
@@ -5355,8 +5414,8 @@ html[data-perf='lite'] .hero-marquee {
     105deg,
     transparent,
     transparent 48px,
-    rgba(212, 0, 0, 0.04) 48px,
-    rgba(212, 0, 0, 0.04) 49px
+    color-mix(in srgb, var(--ios-color-accent) 4%, transparent) 48px,
+    color-mix(in srgb, var(--ios-color-accent) 4%, transparent) 49px
   );
 }
 
@@ -5374,7 +5433,7 @@ html[data-perf='lite'] .hero-marquee {
 }
 
 .metal-loader-pentagram {
-  filter: drop-shadow(0 0 24px rgba(212, 0, 0, 0.25));
+  filter: drop-shadow(0 0 24px color-mix(in srgb, var(--ios-color-accent) 25%, transparent));
 }
 
 .metal-loader-pentagram-spin {
@@ -5438,14 +5497,14 @@ html[data-perf='lite'] .metal-loader-core-beat {
   clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
   background: radial-gradient(circle at 40% 35%, #2a2a2a 0%, #0a0a0a 55%, #000 100%);
   box-shadow:
-    0 0 0 2px rgba(212, 0, 0, 0.5),
-    0 0 80px rgba(212, 0, 0, 0.35),
+    0 0 0 2px color-mix(in srgb, var(--ios-color-accent) 50%, transparent),
+    0 0 80px color-mix(in srgb, var(--ios-color-accent) 35%, transparent),
     inset 0 0 50px rgba(0, 0, 0, 0.95);
 }
 
 .metal-loader-core-ring {
   clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
-  border: 1px solid rgba(212, 0, 0, 0.3);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 30%, transparent);
   animation: metal-core-pulse 0.2s steps(2) infinite;
 }
 
@@ -5455,19 +5514,19 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 @keyframes metal-core-pulse {
   50% {
-    box-shadow: inset 0 0 30px rgba(212, 0, 0, 0.4);
+    box-shadow: inset 0 0 30px color-mix(in srgb, var(--ios-color-accent) 40%, transparent);
   }
 }
 
 .metal-loader-logo {
   text-shadow:
-    0 0 20px rgba(212, 0, 0, 0.8),
+    0 0 20px color-mix(in srgb, var(--ios-color-accent) 80%, transparent),
     2px 2px 0 #000,
     -1px -1px 0 #d40000;
 }
 
 .metal-loader-bar {
-  box-shadow: 0 0 6px rgba(212, 0, 0, 0.4);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--ios-color-accent) 40%, transparent);
 }
 
 .metal-loader-title {
@@ -5525,12 +5584,12 @@ html[data-perf='lite'] .metal-loader-core-beat {
   padding: 2rem 1.75rem 1.75rem;
   background:
     linear-gradient(165deg, rgba(22, 22, 22, 0.98) 0%, rgba(8, 8, 8, 0.99) 55%),
-    radial-gradient(ellipse 80% 50% at 100% 0%, rgba(212, 0, 0, 0.12), transparent 55%);
-  border: 1px solid rgba(212, 0, 0, 0.35);
+    radial-gradient(ellipse 80% 50% at 100% 0%, color-mix(in srgb, var(--ios-color-accent) 12%, transparent), transparent 55%);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.04) inset,
     0 32px 80px -20px rgba(0, 0, 0, 0.9),
-    0 0 120px -40px rgba(212, 0, 0, 0.25);
+    0 0 120px -40px color-mix(in srgb, var(--ios-color-accent) 25%, transparent);
   clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
 }
 
@@ -5558,8 +5617,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .ios-manifesto-close:hover {
   color: var(--color-mh-red);
-  border-color: rgba(212, 0, 0, 0.55);
-  background: rgba(212, 0, 0, 0.12);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 12%, transparent);
 }
 
 .ios-manifesto-close-icon {
@@ -5612,7 +5671,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   color: rgba(245, 245, 245, 0.92);
   margin-top: 1rem;
   padding-left: 0.75rem;
-  border-left: 2px solid rgba(212, 0, 0, 0.5);
+  border-left: 2px solid color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
 }
 
 .ios-manifesto-body {
@@ -5633,7 +5692,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   color: var(--color-signal);
   font-weight: 500;
   padding: 1rem 1rem 1rem 1.1rem;
-  background: rgba(212, 0, 0, 0.06);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
   border-left: 2px solid var(--color-mh-red);
 }
 
@@ -5699,7 +5758,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .metal-loader-progress {
   background: linear-gradient(90deg, #1a1a1a, #d40000 40%, #8b1538 70%, #d40000);
-  box-shadow: 0 0 12px rgba(212, 0, 0, 0.6);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ios-color-accent) 60%, transparent);
 }
 
 /* —— Rich text editor (editorial desk) —— */
@@ -5741,8 +5800,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .ios-rte-btn-active {
   color: var(--color-mh-red);
-  border-color: rgba(212, 0, 0, 0.45);
-  background: rgba(212, 0, 0, 0.1);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
 }
 
 .ios-rte-btn:disabled {
@@ -5839,7 +5898,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .ios-rte-editor-inner mark {
-  background: rgba(212, 0, 0, 0.35);
+  background: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
   color: inherit;
   padding: 0 0.15em;
 }
@@ -5902,7 +5961,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .ios-prose mark {
-  background: rgba(212, 0, 0, 0.35);
+  background: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
   padding: 0 0.1em;
 }
 
@@ -6096,7 +6155,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .editorial-share-btn:hover {
   border-color: var(--color-rs-red);
   color: #fff;
-  background: rgba(212, 0, 0, 0.12);
+  background: color-mix(in srgb, var(--ios-color-accent) 12%, transparent);
 }
 
 .editorial-share-btn--copy {
@@ -6647,7 +6706,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .community-rank-chip--active {
   border-color: var(--color-rs-red);
   color: var(--color-rs-red);
-  background: rgba(227, 27, 35, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 8%, transparent);
 }
 
 .community-progress-head {
@@ -6814,8 +6873,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .community-badge-item-unlocked {
   opacity: 1;
-  border-color: rgba(227, 27, 35, 0.35);
-  background: rgba(227, 27, 35, 0.04);
+  border-color: color-mix(in srgb, var(--ios-color-accent-bright) 35%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 4%, transparent);
 }
 
 .community-badge-icon {
@@ -6884,7 +6943,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .community-genre-chip-active {
   border-color: var(--color-rs-red);
-  background: rgba(227, 27, 35, 0.12);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 12%, transparent);
   color: var(--color-rs-red);
 }
 
@@ -6950,7 +7009,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .community-leaderboard-row-you,
 .community-leaderboard-row--you {
-  background: rgba(227, 27, 35, 0.06);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 6%, transparent);
 }
 
 .community-leaderboard-row {
@@ -7159,7 +7218,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .editor-wire-pick-linked {
-  border-color: rgba(227, 27, 35, 0.45);
+  border-color: color-mix(in srgb, var(--ios-color-accent-bright) 45%, transparent);
 }
 
 .editor-wire-pick-head {
@@ -7380,7 +7439,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .network-notifications-item-unread {
-  background: rgba(212, 0, 0, 0.06);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
 }
 
 .network-notifications-item strong {
@@ -7591,7 +7650,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .tribe-war-row-lead {
-  background: rgba(212, 0, 0, 0.05);
+  background: color-mix(in srgb, var(--ios-color-accent) 5%, transparent);
 }
 
 .tribe-war-rank {
@@ -7724,7 +7783,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   margin: 1.5rem 0;
   padding: 1.25rem 1.35rem;
   border: 1px solid var(--color-border);
-  background: rgba(212, 0, 0, 0.04);
+  background: color-mix(in srgb, var(--ios-color-accent) 4%, transparent);
 }
 
 .release-countdown-live {
@@ -7831,8 +7890,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .ios-role-card:hover {
-  border-color: rgba(212, 0, 0, 0.55);
-  background: rgba(212, 0, 0, 0.06);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
   transform: translateY(-1px);
 }
 
@@ -7865,7 +7924,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .hub-quick-link-active {
   border-color: var(--color-rs-red);
   color: var(--color-rs-red);
-  background: rgba(212, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .hub-page-footer {
@@ -7939,11 +7998,11 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .discovery-path-row:hover {
   border-color: var(--color-rs-red);
-  background: rgba(212, 0, 0, 0.04);
+  background: color-mix(in srgb, var(--ios-color-accent) 4%, transparent);
 }
 
 .discovery-path-row-accent {
-  border-color: rgba(212, 0, 0, 0.35);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
 }
 
 .discovery-path-label {
@@ -8428,7 +8487,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .tribe-spotlight-winner:hover {
-  border-color: rgba(227, 27, 35, 0.35);
+  border-color: color-mix(in srgb, var(--ios-color-accent-bright) 35%, transparent);
 }
 
 .tribe-spotlight-winner-empty {
@@ -8530,7 +8589,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .community-feed-filter-active {
   color: var(--color-text);
   border-color: var(--color-rs-red);
-  background: rgba(227, 27, 35, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 8%, transparent);
 }
 
 .community-feed-filter-disabled {
@@ -8928,8 +8987,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .community-composer-action-drop-active {
   color: var(--color-rs-red, #e23744);
-  background: rgba(227, 27, 35, 0.1);
-  border: 1px solid rgba(227, 27, 35, 0.35);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent-bright) 35%, transparent);
 }
 
 .community-composer-action:disabled {
@@ -8980,7 +9039,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .community-feed-tab-active {
   border-color: var(--color-rs-red);
   color: var(--color-rs-red);
-  background: rgba(227, 27, 35, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 8%, transparent);
 }
 
 .community-feed-tab-hint {
@@ -9135,7 +9194,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .community-feed-card-you {
-  border-color: rgba(227, 27, 35, 0.35);
+  border-color: color-mix(in srgb, var(--ios-color-accent-bright) 35%, transparent);
 }
 
 .community-feed-card-head {
@@ -9221,8 +9280,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
   gap: 0.35rem;
   padding: 0.2rem 0.55rem 0.2rem 0.25rem;
   border-radius: 999px;
-  border: 1px solid rgba(227, 27, 35, 0.35);
-  background: rgba(227, 27, 35, 0.08);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent-bright) 35%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 8%, transparent);
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--color-foreground);
@@ -9231,8 +9290,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .community-feed-artist-tag:hover {
-  border-color: rgba(227, 27, 35, 0.65);
-  background: rgba(227, 27, 35, 0.14);
+  border-color: color-mix(in srgb, var(--ios-color-accent-bright) 65%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 14%, transparent);
   color: var(--color-rs-red);
 }
 
@@ -9283,7 +9342,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .community-feed-kind-drop {
-  border-color: rgba(227, 27, 35, 0.4);
+  border-color: color-mix(in srgb, var(--ios-color-accent-bright) 40%, transparent);
   color: var(--color-rs-red);
 }
 
@@ -9460,11 +9519,11 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .community-genre-board-tab-active {
   border-color: var(--color-rs-red);
   color: var(--color-rs-red);
-  background: rgba(227, 27, 35, 0.1);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 10%, transparent);
 }
 
 .community-genre-board-tab-yours:not(.community-genre-board-tab-active) {
-  border-color: rgba(227, 27, 35, 0.25);
+  border-color: color-mix(in srgb, var(--ios-color-accent-bright) 25%, transparent);
 }
 
 .community-genre-board-tab-dot {
@@ -9694,7 +9753,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .community-crew-mode-tab-active {
   border-color: var(--color-rs-red);
   color: var(--color-rs-red);
-  background: rgba(227, 27, 35, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 8%, transparent);
 }
 
 .community-crew-form {
@@ -9721,7 +9780,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .community-crew-board-row-yours {
-  border-color: rgba(227, 27, 35, 0.35);
+  border-color: color-mix(in srgb, var(--ios-color-accent-bright) 35%, transparent);
 }
 
 .community-crew-board-rank {
@@ -9790,8 +9849,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .community-challenge-item-done {
-  border-color: rgba(227, 27, 35, 0.35);
-  background: rgba(227, 27, 35, 0.05);
+  border-color: color-mix(in srgb, var(--ios-color-accent-bright) 35%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 5%, transparent);
 }
 
 .community-challenge-head {
@@ -9982,7 +10041,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .community-feed-react-picker-btn-active {
-  background: rgba(227, 27, 35, 0.12);
+  background: color-mix(in srgb, var(--ios-color-accent-bright) 12%, transparent);
 }
 
 .community-feed-actionbar-react-emoji {
@@ -10253,7 +10312,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   position: absolute;
   inset: -20% -10% auto;
   height: 280px;
-  background: radial-gradient(ellipse 70% 100% at 20% 0%, rgba(212, 0, 0, 0.14), transparent 70%);
+  background: radial-gradient(ellipse 70% 100% at 20% 0%, color-mix(in srgb, var(--ios-color-accent) 14%, transparent), transparent 70%);
   pointer-events: none;
 }
 
@@ -10365,9 +10424,9 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .ios-tools-bento-card:hover {
-  border-color: rgba(212, 0, 0, 0.45);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px -20px rgba(212, 0, 0, 0.35);
+  box-shadow: 0 12px 40px -20px color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
 }
 
 .ios-tools-bento-card-top {
@@ -10382,8 +10441,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
   height: 3rem;
   padding: 0.5rem;
   color: var(--color-mh-red);
-  border: 1px solid rgba(212, 0, 0, 0.25);
-  background: rgba(212, 0, 0, 0.06);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 25%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
 }
 
 .ios-tools-bento-code {
@@ -10722,7 +10781,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   font-weight: 700;
   color: var(--color-signal);
   background: linear-gradient(180deg, var(--color-mh-red), #9a0000);
-  border: 1px solid rgba(212, 0, 0, 0.5);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
   cursor: pointer;
   transition: filter 0.15s, transform 0.15s;
 }
@@ -10744,7 +10803,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   line-height: 1.55;
   padding: 0.875rem 1rem;
   border-left: 3px solid var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.05);
+  background: color-mix(in srgb, var(--ios-color-accent) 5%, transparent);
   margin-bottom: 1rem;
 }
 
@@ -10816,7 +10875,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .ios-tools-tag-accent {
-  border-color: rgba(212, 0, 0, 0.4);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 40%, transparent);
   color: var(--color-mh-red);
 }
 
@@ -10858,7 +10917,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   font-size: 0.875rem;
   color: var(--color-signal);
   border: 2px solid var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.12);
+  background: color-mix(in srgb, var(--ios-color-accent) 12%, transparent);
   z-index: 1;
 }
 
@@ -10956,7 +11015,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .ios-tools-name-card:hover {
-  border-color: rgba(212, 0, 0, 0.45);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
 }
 
 .ios-tools-name-card-num {
@@ -11077,7 +11136,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   gap: 0.5rem;
   padding: 2rem 1.5rem;
   border: 1px dashed var(--color-border);
-  background: rgba(212, 0, 0, 0.03);
+  background: color-mix(in srgb, var(--ios-color-accent) 3%, transparent);
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
   text-align: center;
@@ -11085,8 +11144,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .ios-tools-upload:hover,
 .ios-tools-upload-drag {
-  border-color: rgba(212, 0, 0, 0.5);
-  background: rgba(212, 0, 0, 0.08);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .ios-tools-upload-icon {
@@ -11110,7 +11169,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   text-align: center;
   padding: 2rem 1rem;
   border: 1px solid var(--color-border);
-  background: radial-gradient(circle at 50% 0%, rgba(212, 0, 0, 0.12), transparent 55%);
+  background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--ios-color-accent) 12%, transparent), transparent 55%);
   margin-bottom: 1rem;
 }
 
@@ -11161,8 +11220,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2px solid rgba(212, 0, 0, 0.4);
-  background: radial-gradient(circle, rgba(212, 0, 0, 0.15), transparent 70%);
+  border: 2px solid color-mix(in srgb, var(--ios-color-accent) 40%, transparent);
+  background: radial-gradient(circle, color-mix(in srgb, var(--ios-color-accent) 15%, transparent), transparent 70%);
   cursor: pointer;
   transition: transform 0.1s, border-color 0.15s;
 }
@@ -11175,7 +11234,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .ios-tools-tap-pad-ring {
   position: absolute;
   inset: 12%;
-  border: 1px solid rgba(212, 0, 0, 0.25);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 25%, transparent);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -11300,8 +11359,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .ios-tools-verdict-hot {
-  border-color: rgba(212, 0, 0, 0.5);
-  background: rgba(212, 0, 0, 0.1);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
   color: #fca5a5;
 }
 
@@ -11329,13 +11388,13 @@ html[data-perf='lite'] .metal-loader-core-beat {
   height: 4rem;
   border-radius: 50%;
   border: 2px solid var(--color-border);
-  background: rgba(212, 0, 0, 0.1);
+  background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
 }
 
 .ios-tools-metronome-visual[data-playing] .ios-tools-metronome-pulse {
   animation: ios-metronome-beat 0.6s ease-in-out infinite;
   border-color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.25);
+  background: color-mix(in srgb, var(--ios-color-accent) 25%, transparent);
 }
 
 @keyframes ios-metronome-beat {
@@ -11465,8 +11524,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .ios-tools-setlist-total-card-main {
-  border-color: rgba(212, 0, 0, 0.45);
-  background: rgba(212, 0, 0, 0.06);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
 }
 
 .ios-tools-setlist-total-k {
@@ -11544,13 +11603,13 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .ios-tools-tag-pick:hover {
-  border-color: rgba(212, 0, 0, 0.4);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 40%, transparent);
   color: var(--color-signal);
 }
 
 .ios-tools-tag-pick-on {
   border-color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.12);
+  background: color-mix(in srgb, var(--ios-color-accent) 12%, transparent);
   color: var(--color-signal);
 }
 
@@ -11651,7 +11710,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .academy-track-card {
   border: 1px solid var(--color-border);
-  background: linear-gradient(180deg, rgba(212, 0, 0, 0.08), rgba(0, 0, 0, 0.15));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ios-color-accent) 8%, transparent), rgba(0, 0, 0, 0.15));
   padding: 1rem;
 }
 
@@ -11830,8 +11889,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-stat-card-accent {
-  border-color: rgba(212, 0, 0, 0.4);
-  background: rgba(212, 0, 0, 0.08);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .academy-stat-value {
@@ -11898,7 +11957,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .academy-lesson-hero {
   border: 1px solid var(--color-border);
-  background: linear-gradient(165deg, rgba(212, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
+  background: linear-gradient(165deg, color-mix(in srgb, var(--ios-color-accent) 10%, transparent), rgba(0, 0, 0, 0.2));
   padding: 1.25rem;
   margin-bottom: 1.5rem;
 }
@@ -11991,9 +12050,9 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-flow-node span:first-child {
-  border: 1px solid rgba(212, 0, 0, 0.45);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
   padding: 0.35rem 0.55rem;
-  background: rgba(212, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .academy-flow-arrow {
@@ -12075,7 +12134,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   align-items: flex-end;
   justify-content: center;
   padding-bottom: 0.25rem;
-  background: linear-gradient(180deg, rgba(212, 0, 0, 0.05), rgba(212, 0, 0, 0.35));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ios-color-accent) 5%, transparent), color-mix(in srgb, var(--ios-color-accent) 35%, transparent));
   border: 1px solid var(--color-border);
   font-size: 0.5rem;
   letter-spacing: 0.06em;
@@ -12105,7 +12164,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-loud-peak {
-  background: linear-gradient(180deg, rgba(212, 0, 0, 0.2), rgba(212, 0, 0, 0.6));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ios-color-accent) 20%, transparent), color-mix(in srgb, var(--ios-color-accent) 60%, transparent));
 }
 
 .academy-loud-rms {
@@ -12195,8 +12254,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-dodont-dont {
-  border-color: rgba(212, 0, 0, 0.35);
-  background: rgba(212, 0, 0, 0.06);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
 }
 
 .academy-dodont h3 {
@@ -12232,7 +12291,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .academy-practice {
   border: 1px solid var(--color-border);
   padding: 1.25rem;
-  background: rgba(212, 0, 0, 0.04);
+  background: color-mix(in srgb, var(--ios-color-accent) 4%, transparent);
 }
 
 .academy-practice h2 {
@@ -12334,7 +12393,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-complete-btn:hover {
-  border-color: rgba(212, 0, 0, 0.45);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
   color: var(--color-signal);
 }
 
@@ -12424,8 +12483,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
   gap: 1rem;
   margin: 2rem 0 0.5rem;
   padding: 1.25rem;
-  border: 1px solid rgba(212, 0, 0, 0.35);
-  background: linear-gradient(135deg, rgba(212, 0, 0, 0.12), rgba(0, 0, 0, 0.35));
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ios-color-accent) 12%, transparent), rgba(0, 0, 0, 0.35));
 }
 
 .academy-phase-banner-k {
@@ -12542,7 +12601,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-quiz-option:hover:not(:disabled) {
-  border-color: rgba(212, 0, 0, 0.45);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
 }
 
 .academy-quiz-option:disabled {
@@ -12555,15 +12614,15 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-quiz-option-wrong {
-  border-color: rgba(212, 0, 0, 0.55);
-  background: rgba(212, 0, 0, 0.08);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .academy-quiz-explain {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
   border-left: 3px solid var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.06);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
   font-size: 0.875rem;
   line-height: 1.55;
   color: var(--color-muted);
@@ -12695,7 +12754,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   border: 1px solid var(--color-border);
   padding: 0.75rem 0.5rem;
   text-align: center;
-  background: rgba(212, 0, 0, 0.05);
+  background: color-mix(in srgb, var(--ios-color-accent) 5%, transparent);
 }
 
 .academy-mic-zone-label {
@@ -12736,7 +12795,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .academy-room-corner {
   grid-column: 1;
-  background: rgba(212, 0, 0, 0.15);
+  background: color-mix(in srgb, var(--ios-color-accent) 15%, transparent);
 }
 
 .academy-room-reflect {
@@ -12745,7 +12804,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .academy-room-listen {
   grid-column: 1 / -1;
-  background: rgba(212, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .academy-double-pan {
@@ -12766,9 +12825,9 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-double-c {
-  border: 1px solid rgba(212, 0, 0, 0.45);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
   padding: 1rem 0.35rem;
-  background: rgba(212, 0, 0, 0.1);
+  background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
   color: var(--color-signal);
 }
 
@@ -12817,7 +12876,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-phase-banner-accent {
-  border-color: rgba(212, 0, 0, 0.5);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
 }
 
 .academy-phase-banner-btns {
@@ -12834,8 +12893,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
   gap: 0.75rem;
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(212, 0, 0, 0.35);
-  background: rgba(212, 0, 0, 0.08);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
   font-size: 0.8125rem;
 }
 
@@ -12886,7 +12945,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   gap: 1rem;
   padding: 1rem;
   border: 1px solid var(--color-border);
-  background: linear-gradient(165deg, rgba(212, 0, 0, 0.06), rgba(0, 0, 0, 0.35));
+  background: linear-gradient(165deg, color-mix(in srgb, var(--ios-color-accent) 6%, transparent), rgba(0, 0, 0, 0.35));
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -12902,7 +12961,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
     min-height: 0;
     padding-right: 0.15rem;
     scrollbar-width: thin;
-    scrollbar-color: rgba(212, 0, 0, 0.45) transparent;
+    scrollbar-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent) transparent;
   }
 }
 
@@ -12981,7 +13040,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   }
 
   .academy-lesson-media.is-expanded .academy-lesson-media-dock-inner {
-    border-top-color: rgba(212, 0, 0, 0.45);
+    border-top-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
   }
 
   .academy-lesson-media-dock-sheet {
@@ -13040,8 +13099,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
     min-width: 0;
     padding: 0.45rem 0.6rem;
     text-align: left;
-    border: 1px solid rgba(212, 0, 0, 0.35);
-    background: rgba(212, 0, 0, 0.1);
+    border: 1px solid color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+    background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
     cursor: pointer;
   }
 
@@ -13101,7 +13160,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   }
 
   .academy-lesson-media-dock-step:hover {
-    background: rgba(212, 0, 0, 0.15);
+    background: color-mix(in srgb, var(--ios-color-accent) 15%, transparent);
     border-color: var(--color-mh-red);
   }
 
@@ -13113,7 +13172,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
     overflow-y: hidden;
     padding-bottom: 0.15rem;
     scrollbar-width: thin;
-    scrollbar-color: rgba(212, 0, 0, 0.45) transparent;
+    scrollbar-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent) transparent;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -13270,8 +13329,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .academy-lesson-media-badge-video {
   color: var(--color-mh-red);
-  border-color: rgba(212, 0, 0, 0.4);
-  background: rgba(212, 0, 0, 0.1);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
 }
 
 .academy-lesson-media-badge-playlist {
@@ -13313,13 +13372,13 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-lesson-media-item:hover {
-  border-color: rgba(212, 0, 0, 0.35);
-  background: rgba(212, 0, 0, 0.06);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
 }
 
 .academy-lesson-media-item.is-active {
   border-color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.12);
+  background: color-mix(in srgb, var(--ios-color-accent) 12%, transparent);
   box-shadow: inset 3px 0 0 var(--color-mh-red);
 }
 
@@ -13377,8 +13436,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
   flex-direction: column;
   gap: 1rem;
   padding: 1.1rem 1.25rem;
-  border: 1px solid rgba(212, 0, 0, 0.4);
-  background: linear-gradient(135deg, rgba(212, 0, 0, 0.12), rgba(0, 0, 0, 0.35));
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 40%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ios-color-accent) 12%, transparent), rgba(0, 0, 0, 0.35));
 }
 
 @media (min-width: 640px) {
@@ -13390,7 +13449,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-hub-continue-start {
-  border-color: rgba(212, 0, 0, 0.35);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
 }
 
 .academy-hub-continue-done {
@@ -13475,7 +13534,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-hub-search-hit:hover {
-  background: rgba(212, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .academy-hub-search-hit-id {
@@ -13523,8 +13582,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .legal-block-accent {
-  border-color: rgba(212, 0, 0, 0.35);
-  background: linear-gradient(165deg, rgba(212, 0, 0, 0.08), rgba(0, 0, 0, 0.3));
+  border-color: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--ios-color-accent) 8%, transparent), rgba(0, 0, 0, 0.3));
 }
 
 .legal-block h2 {
@@ -13740,7 +13799,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   border: 1px solid var(--color-border);
   text-align: center;
   color: var(--color-signal);
-  background: rgba(212, 0, 0, 0.06);
+  background: color-mix(in srgb, var(--ios-color-accent) 6%, transparent);
 }
 
 .academy-ear-lab {
@@ -13825,8 +13884,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
 }
 
 .academy-ear-guess-wrong {
-  border-color: rgba(212, 0, 0, 0.55);
-  background: rgba(212, 0, 0, 0.08);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .academy-ear-feedback {
@@ -13934,7 +13993,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   border: 2px solid var(--color-border);
   padding: 2.5rem 2rem;
   text-align: center;
-  background: linear-gradient(165deg, rgba(212, 0, 0, 0.08), rgba(0, 0, 0, 0.4));
+  background: linear-gradient(165deg, color-mix(in srgb, var(--ios-color-accent) 8%, transparent), rgba(0, 0, 0, 0.4));
 }
 
 .academy-cert-document-rule {
@@ -14600,8 +14659,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 0, 0, 0.22), transparent 55%),
-    radial-gradient(ellipse 40% 30% at 100% 20%, rgba(227, 27, 35, 0.08), transparent),
+    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in srgb, var(--ios-color-accent) 22%, transparent), transparent 55%),
+    radial-gradient(ellipse 40% 30% at 100% 20%, color-mix(in srgb, var(--ios-color-accent-bright) 8%, transparent), transparent),
     var(--color-void);
   z-index: 0;
 }
@@ -14612,7 +14671,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   top: 6rem;
   bottom: 2rem;
   width: 1px;
-  background: linear-gradient(180deg, transparent, rgba(212, 0, 0, 0.35), transparent);
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--ios-color-accent) 35%, transparent), transparent);
   z-index: 0;
 }
 
@@ -14668,7 +14727,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   right: -20%;
   width: 70%;
   height: 80%;
-  background: radial-gradient(circle, rgba(212, 0, 0, 0.15), transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--ios-color-accent) 15%, transparent), transparent 70%);
   pointer-events: none;
 }
 
@@ -14865,8 +14924,8 @@ html[data-perf='lite'] .metal-loader-core-beat {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 0.2rem 0.5rem 0.2rem 0.25rem;
-  border: 1px solid rgba(212, 0, 0, 0.35);
-  background: rgba(212, 0, 0, 0.08);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
   color: var(--color-signal);
 }
 
@@ -15016,7 +15075,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
   width: 33.333%;
   background: linear-gradient(90deg, var(--color-mh-red), var(--color-rs-red));
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 0 12px rgba(212, 0, 0, 0.6);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ios-color-accent) 60%, transparent);
 }
 
 .member-profile-panels {
@@ -15097,7 +15156,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .community-feed-card-profile {
   border-left: 3px solid var(--color-mh-red);
   padding: 1rem 1rem 0.85rem;
-  background: linear-gradient(90deg, rgba(212, 0, 0, 0.06), transparent 40%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ios-color-accent) 6%, transparent), transparent 40%);
 }
 
 .community-feed-card-head-profile {
@@ -15172,7 +15231,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .member-profile-signal-node-post {
   background: var(--color-rs-red);
-  box-shadow: 0 0 8px rgba(227, 27, 35, 0.5);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ios-color-accent-bright) 50%, transparent);
 }
 
 .member-profile-signal-line {
@@ -15296,10 +15355,10 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .community-medal-card--unlocked:hover {
   transform: translateY(-3px);
-  border-color: rgba(212, 0, 0, 0.5);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 50%, transparent);
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.5),
-    0 0 24px rgba(212, 0, 0, 0.15);
+    0 0 24px color-mix(in srgb, var(--ios-color-accent) 15%, transparent);
 }
 
 .community-medal-card--locked {
@@ -15610,7 +15669,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 
 .ios-pwa-install-inner {
   position: relative;
-  border: 1px solid rgba(212, 0, 0, 0.45);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
   background: linear-gradient(165deg, rgba(18, 18, 18, 0.98), rgba(5, 5, 5, 0.99));
   padding: 1rem 1.1rem 1.1rem;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
@@ -15620,7 +15679,7 @@ html[data-perf='lite'] .metal-loader-core-beat {
 .ios-pwa-install-glow {
   position: absolute;
   inset: -1px;
-  background: radial-gradient(circle at 20% 0%, rgba(212, 0, 0, 0.35), transparent 55%);
+  background: radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--ios-color-accent) 35%, transparent), transparent 55%);
   pointer-events: none;
   opacity: 0.8;
 }

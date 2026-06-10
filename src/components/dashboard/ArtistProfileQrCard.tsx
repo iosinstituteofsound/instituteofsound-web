@@ -4,6 +4,7 @@ import { resolveAccentColor } from '@/lib/artist-profile/branding'
 import { FieldLabel } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { DismissibleBanner } from '@/components/ui/DismissibleBanner'
+import { themeColors } from '@/lib/theme/tokens'
 
 interface ArtistProfileQrCardProps {
   slug: string
@@ -40,12 +41,12 @@ export function ArtistProfileQrCard({
         const h = 1100
         canvas.width = w
         canvas.height = h
-        ctx.fillStyle = '#050505'
+        ctx.fillStyle = themeColors.void
         ctx.fillRect(0, 0, w, h)
         ctx.fillStyle = accent
         ctx.fillRect(0, 0, w, 8)
 
-        ctx.fillStyle = '#f5f5f5'
+        ctx.fillStyle = themeColors.signal
         ctx.font = 'bold 42px system-ui, sans-serif'
         ctx.textAlign = 'center'
         const name = displayName.toUpperCase().slice(0, 40)
@@ -59,7 +60,7 @@ export function ArtistProfileQrCard({
         await QRCode.toCanvas(qrCanvas, profileUrl, {
           width: POSTER_QR,
           margin: 2,
-          color: { dark: '#f5f5f5', light: '#050505' },
+          color: { dark: themeColors.signal, light: themeColors.void },
           errorCorrectionLevel: 'H',
         })
         const x = (w - POSTER_QR) / 2
@@ -70,11 +71,11 @@ export function ArtistProfileQrCard({
         ctx.lineWidth = 4
         ctx.strokeRect(x - 12, y - 12, POSTER_QR + 24, POSTER_QR + 24)
 
-        ctx.fillStyle = 'rgba(245,245,245,0.65)'
+        ctx.fillStyle = `${themeColors.signal}a6`
         ctx.font = '18px system-ui, sans-serif'
         ctx.fillText('Scan to listen', w / 2, y + POSTER_QR + 56)
         ctx.font = '14px monospace'
-        ctx.fillStyle = 'rgba(245,245,245,0.45)'
+        ctx.fillStyle = `${themeColors.signal}73`
         const urlLine = profileUrl.replace(/^https?:\/\//, '')
         ctx.fillText(urlLine, w / 2, y + POSTER_QR + 88)
       } else {
@@ -83,7 +84,7 @@ export function ArtistProfileQrCard({
         await QRCode.toCanvas(canvas, profileUrl, {
           width: size,
           margin: 2,
-          color: { dark: accent, light: '#0c0c0c' },
+          color: { dark: accent, light: themeColors.surface },
           errorCorrectionLevel: 'H',
         })
       }

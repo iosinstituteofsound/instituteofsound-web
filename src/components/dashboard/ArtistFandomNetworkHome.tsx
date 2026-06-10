@@ -111,21 +111,22 @@ function FandomMap({
   return (
     <div className="afn-map" role="img" aria-label="Fandom network visualization">
       <svg className="afn-map-lines" viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" aria-hidden>
-        <line x1="200" y1="140" x2="90" y2="48" stroke="rgba(212,0,0,0.35)" strokeWidth="1" />
-        <line x1="200" y1="140" x2="310" y2="72" stroke="rgba(212,0,0,0.28)" strokeWidth="1" />
-        <line x1="200" y1="140" x2="120" y2="220" stroke="rgba(212,0,0,0.22)" strokeWidth="1" />
-        <line x1="200" y1="140" x2="300" y2="210" stroke="rgba(212,0,0,0.32)" strokeWidth="1" />
-        <circle cx="90" cy="48" r="28" fill="rgba(212,0,0,0.18)" />
-        <circle cx="310" cy="72" r="18" fill="rgba(255,255,255,0.06)" />
-        <circle cx="120" cy="220" r="22" fill="rgba(255,255,255,0.04)" />
-        <circle cx="300" cy="210" r="26" fill="rgba(212,0,0,0.14)" />
+        <line x1="200" y1="140" x2="90" y2="48" stroke="var(--color-mh-red)" strokeOpacity="0.35" strokeWidth="1" />
+        <line x1="200" y1="140" x2="310" y2="72" stroke="var(--color-mh-red)" strokeOpacity="0.28" strokeWidth="1" />
+        <line x1="200" y1="140" x2="120" y2="220" stroke="var(--color-mh-red)" strokeOpacity="0.22" strokeWidth="1" />
+        <line x1="200" y1="140" x2="300" y2="210" stroke="var(--color-mh-red)" strokeOpacity="0.32" strokeWidth="1" />
+        <circle cx="90" cy="48" r="28" fill="var(--color-mh-red)" fillOpacity="0.18" />
+        <circle cx="310" cy="72" r="18" fill="var(--color-signal)" fillOpacity="0.06" />
+        <circle cx="120" cy="220" r="22" fill="var(--color-signal)" fillOpacity="0.04" />
+        <circle cx="300" cy="210" r="26" fill="var(--color-mh-red)" fillOpacity="0.14" />
         {[...Array(18)].map((_, i) => (
           <circle
             key={i}
             cx={40 + (i * 19) % 320}
             cy={30 + (i * 13) % 220}
             r={i % 3 === 0 ? 2.5 : 1.5}
-            fill={i % 4 === 0 ? 'rgba(212,0,0,0.55)' : 'rgba(255,255,255,0.2)'}
+            fill={i % 4 === 0 ? 'var(--color-mh-red)' : 'var(--color-signal)'}
+            fillOpacity={i % 4 === 0 ? 0.55 : 0.2}
           />
         ))}
       </svg>

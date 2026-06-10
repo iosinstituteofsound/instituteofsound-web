@@ -33,7 +33,7 @@ export function CoverHeroSection({ story }: CoverHeroSectionProps) {
         className="absolute top-0 right-0 w-1/2 h-full opacity-40 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse at 70% 40%, rgba(212,0,0,0.22), transparent 55%), radial-gradient(ellipse at 90% 80%, rgba(139,21,56,0.25), transparent 50%)',
+            'radial-gradient(ellipse at 70% 40%, color-mix(in srgb, var(--color-mh-red) 22%, transparent), transparent 55%), radial-gradient(ellipse at 90% 80%, color-mix(in srgb, var(--color-crimson) 25%, transparent), transparent 50%)',
         }}
       />
 

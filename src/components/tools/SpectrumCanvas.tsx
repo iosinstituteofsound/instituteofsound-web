@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { SpectrumBand } from '@/lib/tools/audio/spectrum'
+import { resolveThemeColor } from '@/lib/theme/tokens'
 
 interface SpectrumCanvasProps {
   analyser?: AnalyserNode | null
@@ -29,7 +30,7 @@ export function SpectrumCanvas({ analyser, bands, active = true }: SpectrumCanva
       if (canvas.width !== w) canvas.width = w
       if (canvas.height !== h) canvas.height = h
 
-      ctx.fillStyle = '#080808'
+      ctx.fillStyle = resolveThemeColor('surface')
       ctx.fillRect(0, 0, w, h)
 
       const staticBands = bandsRef.current
@@ -39,11 +40,11 @@ export function SpectrumCanvas({ analyser, bands, active = true }: SpectrumCanva
           const barH = band.energy * h * 0.92
           const x = i * (barW + 4) + 2
           const grad = ctx.createLinearGradient(0, h, 0, h - barH)
-          grad.addColorStop(0, '#d40000')
-          grad.addColorStop(1, '#f5f5f5')
+          grad.addColorStop(0, resolveThemeColor('mhRed'))
+          grad.addColorStop(1, resolveThemeColor('signal'))
           ctx.fillStyle = grad
           ctx.fillRect(x, h - barH, barW, barH)
-          ctx.fillStyle = '#666'
+          ctx.fillStyle = resolveThemeColor('edge')
           ctx.font = '9px monospace'
           ctx.fillText(band.label, x, h - 4)
         })
@@ -61,8 +62,8 @@ export function SpectrumCanvas({ analyser, bands, active = true }: SpectrumCanva
         const barH = v * h * 0.95
         const x = i * (w / barCount)
         const grad = ctx.createLinearGradient(0, h, 0, h - barH)
-        grad.addColorStop(0, '#8b1538')
-        grad.addColorStop(1, '#d40000')
+        grad.addColorStop(0, resolveThemeColor('crimson'))
+        grad.addColorStop(1, resolveThemeColor('mhRed'))
         ctx.fillStyle = grad
         ctx.fillRect(x + 1, h - barH, barW, barH)
       }

@@ -28,7 +28,7 @@ export function HomeHero({ cover }: { cover: CoverStory }) {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse at 85% 50%, rgba(212,0,0,0.18), transparent 55%), radial-gradient(ellipse at 10% 80%, rgba(139,21,56,0.12), transparent 50%)',
+            'radial-gradient(ellipse at 85% 50%, color-mix(in srgb, var(--color-mh-red) 18%, transparent), transparent 55%), radial-gradient(ellipse at 10% 80%, color-mix(in srgb, var(--color-crimson) 12%, transparent), transparent 50%)',
         }}
       />
 

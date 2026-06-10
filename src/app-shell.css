@@ -1,6 +1,6 @@
 .ios-page-bg {
   background:
-    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(212, 0, 0, 0.07), transparent 50%),
+    radial-gradient(ellipse 120% 80% at 50% -20%, color-mix(in srgb, var(--color-mh-red) 7%, transparent), transparent 50%),
     var(--color-void);
 }
 
@@ -17,9 +17,9 @@ body.v2-app-shell {
 }
 
 .v2-shell {
-  --v2-sidebar-w: 19rem;
-  --v2-rail-w: 20.5rem;
-  --v2-topbar-h: 3.625rem;
+  --v2-sidebar-w: var(--ios-shell-sidebar-w);
+  --v2-rail-w: var(--ios-shell-rail-w);
+  --v2-topbar-h: var(--ios-shell-topbar-h);
   height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
@@ -45,7 +45,7 @@ body.v2-app-shell {
 
 .v2-shell a:focus-visible,
 .v2-shell button:focus-visible {
-  outline: 2px solid rgba(212, 0, 0, 0.85);
+  outline: 2px solid color-mix(in srgb, var(--ios-color-accent) 85%, transparent);
   outline-offset: 2px;
 }
 
@@ -58,9 +58,9 @@ body.v2-app-shell {
   width: var(--v2-sidebar-w);
   height: 100%;
   max-height: 100dvh;
-  background: linear-gradient(180deg, #080808 0%, var(--color-surface) 100%);
+  background: var(--ios-gradient-sidebar);
   border-right: 1px solid var(--color-border);
-  box-shadow: 4px 0 24px -12px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--ios-shadow-ambient);
 }
 
 .v2-sidebar::after {
@@ -70,7 +70,7 @@ body.v2-app-shell {
   right: 0;
   width: 1px;
   height: 100%;
-  background: linear-gradient(180deg, var(--color-mh-red), transparent 40%, transparent 60%, var(--color-crimson));
+  background: linear-gradient(180deg, var(--color-accent), transparent 40%, transparent 60%, var(--color-crimson));
   opacity: 0.35;
   pointer-events: none;
 }
@@ -85,7 +85,7 @@ body.v2-app-shell {
 }
 
 .ios-brand-mark:focus-visible {
-  outline: 2px solid rgba(212, 0, 0, 0.9);
+  outline: 2px solid color-mix(in srgb, var(--ios-color-accent) 90%, transparent);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -124,7 +124,13 @@ body.v2-app-shell {
 }
 
 .ios-brand-mark__burn-base {
-  background: linear-gradient(180deg, #6a0000 0%, #8b0000 35%, #5a0000 70%, #3a0000 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ios-color-accent-deep) 75%, black) 0%,
+    color-mix(in srgb, var(--ios-color-accent) 80%, black) 35%,
+    color-mix(in srgb, var(--ios-color-accent-deep) 65%, black) 70%,
+    color-mix(in srgb, var(--ios-color-mh-black) 85%, var(--ios-color-accent-deep)) 100%
+  );
 }
 
 .ios-brand-mark__burn-smolder {
@@ -186,19 +192,13 @@ body.v2-app-shell {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    #ff2200 8%,
-    #ff6600 14%,
+    color-mix(in srgb, var(--ios-color-accent-bright) 85%, transparent) 14%,
     transparent 20%,
-    #d40000 32%,
-    #ff4400 38%,
+    var(--ios-color-accent) 38%,
     transparent 44%,
-    #ff8800 56%,
-    #ffcc00 62%,
+    color-mix(in srgb, var(--ios-color-accent-bright) 80%, transparent) 62%,
     transparent 68%,
-    #ff1100 78%,
-    #ff5500 84%,
-    transparent 92%,
-    #ff7700 96%,
+    color-mix(in srgb, var(--ios-color-accent-bright) 70%, transparent) 84%,
     transparent 100%
   );
   background-size: 100% 300%;
@@ -308,7 +308,7 @@ body.v2-app-shell {
   background: linear-gradient(
     180deg,
     rgba(255, 120, 40, 0.12) 0%,
-    rgba(212, 0, 0, 0.18) 50%,
+    color-mix(in srgb, var(--ios-color-accent) 18%, transparent) 50%,
     rgba(255, 80, 0, 0.14) 100%
   );
   mix-blend-mode: soft-light;
@@ -318,14 +318,14 @@ body.v2-app-shell {
 .ios-brand-mark__burn-chroma {
   background: linear-gradient(
     125deg,
-    #d40000 0%,
-    #ff5500 14%,
+    var(--ios-color-accent) 0%,
+    color-mix(in srgb, var(--ios-color-accent-bright) 55%, #ff5500) 14%,
     #ffee00 28%,
     #00ffaa 42%,
     #0099ff 56%,
     #cc00ff 70%,
     #ff0066 84%,
-    #d40000 100%
+    var(--ios-color-accent) 100%
   );
   background-size: 500% 500%;
   mix-blend-mode: screen;
@@ -354,14 +354,14 @@ body.v2-app-shell {
 .ios-brand-mark__burn-prism {
   background: conic-gradient(
     from 0deg at 50% 55%,
-    #d40000 0deg,
-    #ff4400 50deg,
+    var(--ios-color-accent) 0deg,
+    color-mix(in srgb, var(--ios-color-accent-bright) 50%, #ff4400) 50deg,
     #ff0099 110deg,
     #7700ff 170deg,
     #00ccff 230deg,
     #00ff88 290deg,
-    #ff6600 340deg,
-    #d40000 360deg
+    color-mix(in srgb, var(--ios-color-accent-bright) 40%, #ff6600) 340deg,
+    var(--ios-color-accent) 360deg
   );
   background-size: 220% 220%;
   mix-blend-mode: overlay;
@@ -722,7 +722,12 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
   }
 
   .ios-brand-mark__burn-base {
-    background: linear-gradient(180deg, #ff4400 0%, #d40000 50%, #8b0000 100%);
+    background: linear-gradient(
+      180deg,
+      var(--ios-color-accent-bright) 0%,
+      var(--ios-color-accent) 50%,
+      var(--ios-color-accent-deep) 100%
+    );
   }
 }
 
@@ -769,7 +774,7 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--color-border);
-  background: #080808;
+  background: var(--ios-color-paper);
 }
 
 .v2-sidebar-promo::before {
@@ -844,7 +849,7 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
 .v2-nav-group + .v2-nav-group {
   margin-top: 1.75rem;
   padding-top: 1.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--ios-overlay-subtle);
 }
 
 .v2-nav-group-title {
@@ -879,7 +884,7 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
   font-weight: 500;
   line-height: 1.35;
   letter-spacing: -0.01em;
-  color: rgba(210, 210, 210, 0.88);
+  color: color-mix(in srgb, var(--color-signal) 88%, var(--color-muted));
   border: 1px solid transparent;
   border-radius: 3px;
   transition:
@@ -889,16 +894,16 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
 }
 
 .v2-nav-link:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.06);
+  color: var(--color-signal);
+  background: var(--ios-overlay-hover);
+  border-color: var(--ios-overlay-subtle);
 }
 
 .v2-nav-link-active {
-  color: #fff;
+  color: var(--color-signal);
   font-weight: 600;
-  background: rgba(212, 0, 0, 0.12);
-  border-color: rgba(212, 0, 0, 0.35);
+  background: var(--ios-accent-medium);
+  border-color: var(--ios-accent-strong);
 }
 
 .v2-nav-link-active::before {
@@ -919,16 +924,16 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--ios-text-on-accent);
   background: var(--color-mh-red);
 }
 
 .v2-topbar {
-  background: linear-gradient(180deg, rgba(8, 8, 8, 0.97) 0%, rgba(5, 5, 5, 0.94) 100%);
+  background: var(--ios-gradient-chrome);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: var(--ios-shadow-chrome);
 }
 
 .v2-topbar::after {
@@ -949,7 +954,7 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
 }
 
 .v2-search {
-  background: linear-gradient(180deg, #0c0c0c 0%, var(--color-surface) 100%);
+  background: var(--ios-gradient-search);
   border: 1px solid color-mix(in srgb, var(--color-border) 92%, transparent);
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
   transition:
@@ -963,8 +968,8 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
 }
 
 .v2-search:focus-visible {
-  border-color: rgba(212, 0, 0, 0.45);
-  box-shadow: 0 0 0 1px rgba(212, 0, 0, 0.2);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ios-color-accent) 20%, transparent);
 }
 
 .v2-topbar-kicker {
@@ -1046,7 +1051,7 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
   max-width: 11rem;
   padding: 0.35rem 0.85rem 0.35rem 0.35rem;
   border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-  background: linear-gradient(180deg, #0e0e0e 0%, var(--color-surface) 100%);
+  background: var(--ios-gradient-profile-btn);
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
   overflow: hidden;
   transition:
@@ -1075,13 +1080,13 @@ html[data-perf='lite'] .ios-brand-mark__burn-fusion-pulse {
   bottom: 0;
   width: 2px;
   background: var(--color-mh-red);
-  box-shadow: 0 0 12px rgba(212, 0, 0, 0.45);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ios-color-accent) 45%, transparent);
   opacity: 0.85;
 }
 
 .v2-topbar-profile:hover {
   border-color: color-mix(in srgb, var(--color-mh-red) 35%, var(--color-border));
-  box-shadow: 0 0 24px -14px rgba(212, 0, 0, 0.55);
+  box-shadow: 0 0 24px -14px color-mix(in srgb, var(--ios-color-accent) 55%, transparent);
 }
 
 .v2-topbar-profile__avatar {
@@ -1142,8 +1147,8 @@ button.v2-topbar-profile {
 .v2-topbar-profile--open {
   border-color: color-mix(in srgb, var(--color-mh-red) 55%, var(--color-border));
   box-shadow:
-    0 0 28px -12px rgba(212, 0, 0, 0.65),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    0 0 28px -12px color-mix(in srgb, var(--ios-color-accent) 65%, transparent),
+    inset 0 1px 0 var(--ios-inset-highlight);
 }
 
 .v2-topbar-profile__chev {
@@ -1175,11 +1180,8 @@ button.v2-topbar-profile {
   width: min(22.5rem, calc(100vw - 1.5rem));
   border: 1px solid color-mix(in srgb, var(--color-border) 88%, var(--color-mh-red) 12%);
   border-radius: 14px;
-  background: linear-gradient(165deg, #141414 0%, #0a0a0a 48%, #050505 100%);
-  box-shadow:
-    0 28px 80px -24px rgba(0, 0, 0, 0.95),
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 0 40px -20px rgba(212, 0, 0, 0.35);
+  background: var(--ios-gradient-panel);
+  box-shadow: var(--ios-shadow-panel);
   overflow: hidden;
   animation: v2-account-menu-in 0.2s ease;
 }
@@ -1198,7 +1200,7 @@ button.v2-topbar-profile {
 .v2-account-menu__hero {
   padding: 0.85rem 0.85rem 0.65rem;
   border-bottom: 1px solid var(--color-border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+  background: linear-gradient(180deg, var(--ios-overlay-faint) 0%, transparent 100%);
 }
 
 .v2-account-menu__kicker {
@@ -1223,12 +1225,12 @@ button.v2-topbar-profile {
 }
 
 .v2-account-menu__identity:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ios-overlay-hover);
 }
 
 .v2-account-menu__identity--active {
-  background: rgba(212, 0, 0, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(212, 0, 0, 0.35);
+  background: var(--ios-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--ios-accent-strong);
 }
 
 .v2-account-menu__active-ring {
@@ -1265,7 +1267,7 @@ button.v2-topbar-profile {
   width: 1.1rem;
   height: 1.1rem;
   border-radius: 50%;
-  background: #1a1a1a;
+  background: var(--ios-color-elevated);
   border: 1px solid var(--color-border);
   color: var(--color-muted);
 }
@@ -1314,15 +1316,15 @@ button.v2-topbar-profile {
   font-weight: 600;
   text-align: center;
   color: var(--color-signal);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--ios-overlay-hover);
   border: 1px solid var(--color-border);
   text-decoration: none;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .v2-account-menu__all-pages:hover {
-  background: rgba(212, 0, 0, 0.1);
-  border-color: rgba(212, 0, 0, 0.35);
+  background: color-mix(in srgb, var(--ios-color-accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
 }
 
 .v2-account-menu__list {
@@ -1351,7 +1353,7 @@ button.v2-topbar-profile {
 
 .v2-account-menu__item:hover,
 .v2-account-menu__logout:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--ios-overlay-hover);
 }
 
 .v2-account-menu__item-icon {
@@ -1361,7 +1363,7 @@ button.v2-topbar-profile {
   height: 2.25rem;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #1c1c1c;
+  background: var(--ios-color-elevated);
   border: 1px solid var(--color-border);
   color: var(--color-signal);
 }
@@ -1373,8 +1375,8 @@ button.v2-topbar-profile {
 
 .v2-account-menu__item-icon--logout {
   color: var(--color-mh-red);
-  border-color: rgba(212, 0, 0, 0.35);
-  background: rgba(212, 0, 0, 0.08);
+  border-color: color-mix(in srgb, var(--ios-color-accent) 35%, transparent);
+  background: color-mix(in srgb, var(--ios-color-accent) 8%, transparent);
 }
 
 .v2-account-menu__item-copy {
@@ -1429,6 +1431,61 @@ button.v2-topbar-profile {
   opacity: 0.45;
 }
 
+.v2-account-menu__theme {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+}
+
+.v2-account-menu__theme-field {
+  position: relative;
+  margin-left: auto;
+  flex-shrink: 0;
+  min-width: 7.5rem;
+}
+
+.v2-account-menu__theme-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0.45rem 1.75rem 0.45rem 0.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--ios-radius-md);
+  background: color-mix(in srgb, var(--color-elevated) 92%, transparent);
+  color: var(--color-signal);
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.v2-account-menu__theme-select:hover,
+.v2-account-menu__theme-select:focus-visible {
+  border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
+  outline: none;
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-elevated));
+}
+
+.v2-account-menu__theme-chev {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--color-muted);
+  width: 12px;
+  height: 12px;
+}
+
 /* Right rail */
 .v2-rail {
   display: none;
@@ -1458,7 +1515,7 @@ button.v2-topbar-profile {
 }
 
 .v2-rail::-webkit-scrollbar-thumb {
-  background: rgba(212, 0, 0, 0.25);
+  background: color-mix(in srgb, var(--ios-color-accent) 25%, transparent);
   border-radius: 2px;
 }
 
@@ -1496,8 +1553,8 @@ button.v2-topbar-profile {
   position: relative;
   min-width: 0;
   padding: 1rem 1rem 1.05rem 1.15rem;
-  border: 1px solid rgba(42, 42, 42, 0.95);
-  background: linear-gradient(165deg, #0e0e0e 0%, #080808 100%);
+  border: 1px solid var(--ios-color-border);
+  background: var(--ios-gradient-widget);
   overflow: hidden;
 }
 
@@ -1521,8 +1578,8 @@ button.v2-topbar-profile {
   height: 1px;
   background: linear-gradient(
     90deg,
-    rgba(212, 0, 0, 0.45),
-    rgba(212, 0, 0, 0.08) 45%,
+    color-mix(in srgb, var(--ios-color-accent) 45%, transparent),
+    color-mix(in srgb, var(--ios-color-accent) 8%, transparent) 45%,
     transparent
   );
   pointer-events: none;
@@ -1534,7 +1591,7 @@ button.v2-topbar-profile {
   gap: 0.35rem;
   margin-bottom: 0.85rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--ios-overlay-subtle);
 }
 
 .v2-rail-tab {
@@ -1557,14 +1614,14 @@ button.v2-topbar-profile {
 
 .v2-rail-tab:hover {
   color: var(--color-signal);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--ios-overlay-faint);
 }
 
 .v2-rail-tab--active {
   color: var(--color-mh-red);
-  background: rgba(212, 0, 0, 0.08);
-  border-color: rgba(212, 0, 0, 0.28);
-  box-shadow: inset 0 0 20px -12px rgba(212, 0, 0, 0.5);
+  background: var(--ios-accent-soft);
+  border-color: var(--ios-accent-border);
+  box-shadow: inset 0 0 20px -12px color-mix(in srgb, var(--ios-color-mh-red) 50%, transparent);
 }
 
 /* Activity */
@@ -1584,7 +1641,7 @@ button.v2-topbar-profile {
 }
 
 .v2-rail-activity-item:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--ios-overlay-faint);
 }
 
 .v2-rail-activity-avatar {
@@ -1594,8 +1651,8 @@ button.v2-topbar-profile {
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(212, 0, 0, 0.22);
-  background: linear-gradient(145deg, rgba(212, 0, 0, 0.14) 0%, rgba(212, 0, 0, 0.04) 100%);
+  border: 1px solid color-mix(in srgb, var(--ios-color-accent) 22%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ios-color-accent) 14%, transparent) 0%, color-mix(in srgb, var(--ios-color-accent) 4%, transparent) 100%);
   font-family: var(--font-display);
   font-size: 0.6875rem;
   font-weight: 800;
@@ -1619,7 +1676,7 @@ button.v2-topbar-profile {
 }
 
 .v2-rail-activity-action {
-  color: rgba(255, 255, 255, 0.55);
+  color: color-mix(in srgb, var(--color-signal) 55%, transparent);
 }
 
 .v2-rail-activity-time {
@@ -1628,7 +1685,7 @@ button.v2-topbar-profile {
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.32);
+  color: color-mix(in srgb, var(--color-signal) 32%, transparent);
 }
 
 /* Signal feed tab */
@@ -1647,7 +1704,7 @@ button.v2-topbar-profile {
 }
 
 .v2-rail-signal-feed-link:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--ios-overlay-faint);
 }
 
 .v2-rail-signal-feed-title {
@@ -1709,7 +1766,7 @@ button.v2-topbar-profile {
 }
 
 .v2-rail-wire-item--border {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--ios-overlay-subtle);
 }
 
 .v2-rail-wire-link {
@@ -1720,7 +1777,7 @@ button.v2-topbar-profile {
 }
 
 .v2-rail-wire-link:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--ios-overlay-faint);
 }
 
 .v2-rail-wire-title {
@@ -1745,7 +1802,7 @@ button.v2-topbar-profile {
   top: 0.85rem;
   right: 0;
   font-size: 0.75rem;
-  color: rgba(212, 0, 0, 0);
+  color: color-mix(in srgb, var(--ios-color-accent) 0%, transparent);
   transition:
     color 0.2s ease,
     transform 0.2s ease;
@@ -1773,7 +1830,7 @@ button.v2-topbar-profile {
 }
 
 .v2-rail-calendar-item:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--ios-overlay-faint);
 }
 
 .v2-rail-calendar-date {
@@ -1785,8 +1842,8 @@ button.v2-topbar-profile {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(165deg, #121212 0%, #080808 100%);
+  border: 1px solid var(--ios-overlay-subtle);
+  background: var(--ios-gradient-card);
   clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 0 100%);
   overflow: hidden;
 }
@@ -1847,7 +1904,7 @@ button.v2-topbar-profile {
   display: inline-block;
   margin-top: 0.85rem;
   padding-top: 0.65rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--ios-overlay-subtle);
   width: 100%;
   font-family: var(--font-display);
   font-size: 0.625rem;
@@ -1865,8 +1922,8 @@ button.v2-topbar-profile {
 /* Promo card */
 .v2-rail-promo {
   overflow: hidden;
-  border: 1px solid rgba(42, 42, 42, 0.95);
-  background: #080808;
+  border: 1px solid var(--ios-color-border);
+  background: var(--ios-color-paper);
 }
 
 .v2-rail-promo-visual {
@@ -1877,8 +1934,8 @@ button.v2-topbar-profile {
   justify-content: flex-end;
   padding: 1rem;
   background:
-    linear-gradient(to top, #0c0c0c 18%, rgba(12, 12, 12, 0.55) 50%, transparent 78%),
-    linear-gradient(135deg, rgba(212, 0, 0, 0.22) 0%, transparent 55%),
+    linear-gradient(to top, color-mix(in srgb, var(--color-surface) 82%, transparent) 18%, color-mix(in srgb, var(--color-surface) 55%, transparent) 50%, transparent 78%),
+    linear-gradient(135deg, color-mix(in srgb, var(--color-mh-red) 22%, transparent) 0%, transparent 55%),
     url(https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80) center / cover no-repeat;
 }
 
@@ -1933,7 +1990,7 @@ button.v2-topbar-profile {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(212, 0, 0, 0.12);
+  background: color-mix(in srgb, var(--ios-color-accent) 12%, transparent);
   color: var(--color-mh-red);
   font-family: var(--font-display);
   font-size: 0.625rem;
@@ -2086,11 +2143,8 @@ button.v2-topbar-profile {
   max-height: min(28rem, calc(100dvh - 6rem));
   border: 1px solid color-mix(in srgb, var(--color-border) 85%, var(--color-mh-red) 15%);
   border-radius: 14px 14px 0 0;
-  background: linear-gradient(180deg, #121212 0%, #080808 100%);
-  box-shadow:
-    0 -8px 40px -12px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 0 32px -16px rgba(212, 0, 0, 0.4);
+  background: var(--ios-gradient-messenger);
+  box-shadow: var(--ios-shadow-messenger);
   overflow: hidden;
   animation: v2-messenger-in 0.22s ease;
 }
@@ -2119,7 +2173,7 @@ button.v2-topbar-profile {
   gap: 0.5rem;
   padding: 0.55rem 0.65rem;
   border-bottom: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--ios-overlay-faint);
 }
 
 .v2-messenger-window__who {
@@ -2181,7 +2235,7 @@ button.v2-topbar-profile {
 }
 
 .v2-messenger-window__icon:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--ios-overlay-subtle);
   color: var(--color-signal);
 }
 
@@ -2231,13 +2285,13 @@ button.v2-topbar-profile {
   font-size: 0.875rem;
   line-height: 1.4;
   word-break: break-word;
-  background: #1c1c1c;
+  background: var(--ios-color-elevated);
   color: var(--color-signal);
 }
 
 .v2-messenger-window__bubble.is-mine {
   background: linear-gradient(135deg, #c40000 0%, #a30000 100%);
-  color: #fff;
+  color: var(--ios-text-on-accent);
   border-bottom-right-radius: 0.35rem;
 }
 
@@ -2282,14 +2336,14 @@ button.v2-topbar-profile {
 .v2-messenger-window__request-actions button.is-primary {
   border-color: var(--color-mh-red);
   background: var(--color-mh-red);
-  color: #fff;
+  color: var(--ios-text-on-accent);
 }
 
 .v2-messenger-window__composer {
   flex-shrink: 0;
   padding: 0.55rem 0.65rem 0.65rem;
   border-top: 1px solid var(--color-border);
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--ios-scrim);
 }
 
 .v2-messenger-window__hint {
@@ -2305,7 +2359,7 @@ button.v2-topbar-profile {
   gap: 0.45rem;
   padding: 0.35rem 0.45rem;
   border-radius: 999px;
-  background: #1a1a1a;
+  background: var(--ios-color-elevated);
   border: 1px solid var(--color-border);
 }
 
@@ -2342,5 +2396,5 @@ button.v2-topbar-profile {
 }
 
 .v2-messenger-window__send:not(:disabled):hover {
-  background: rgba(212, 0, 0, 0.12);
+  background: color-mix(in srgb, var(--ios-color-accent) 12%, transparent);
 }

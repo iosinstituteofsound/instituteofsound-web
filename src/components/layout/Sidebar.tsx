@@ -111,7 +111,7 @@ export function Sidebar({ className, onNavigate }: Props) {
             className="v2-sidebar-promo-visual"
             style={{
               backgroundImage:
-                'linear-gradient(165deg, rgba(212,0,0,0.35) 0%, transparent 45%), linear-gradient(to top, #0a0a0a 0%, transparent 55%), url(https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=500&q=80)',
+                'linear-gradient(165deg, color-mix(in srgb, var(--color-mh-red) 35%, transparent) 0%, transparent 45%), linear-gradient(to top, var(--color-mh-black) 0%, transparent 55%), url(https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=500&q=80)',
             }}
           />
           <div className="v2-sidebar-promo-body">

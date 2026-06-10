@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react'
+import { themeColors } from '@/lib/theme/tokens'
 
 export type ArtistThemePreset = 'metal' | 'cinematic' | 'minimal' | 'raw'
 
-export const DEFAULT_ACCENT_COLOR = '#d40000'
+export const DEFAULT_ACCENT_COLOR = themeColors.mhRed
 export const DEFAULT_THEME_PRESET: ArtistThemePreset = 'metal'
 
 export const ARTIST_THEME_PRESETS: {
@@ -15,37 +16,37 @@ export const ARTIST_THEME_PRESETS: {
     id: 'metal',
     label: 'Brutalist Metal',
     description: 'Sharp IOS energy — red heat, display type, industrial edges.',
-    suggestedAccent: '#d40000',
+    suggestedAccent: themeColors.mhRed,
   },
   {
     id: 'cinematic',
     label: 'Cinematic Dark',
     description: 'Soft gradients, serif story moments, film-poster mood.',
-    suggestedAccent: '#8b1538',
+    suggestedAccent: themeColors.crimson,
   },
   {
     id: 'minimal',
     label: 'Minimal Monochrome',
     description: 'Clean lines, quiet background — your accent does the talking.',
-    suggestedAccent: '#f5f5f5',
+    suggestedAccent: themeColors.signal,
   },
   {
     id: 'raw',
     label: 'Raw Underground',
     description: 'Heavy grain, harsh contrast, zine / basement-show feel.',
-    suggestedAccent: '#e31b23',
+    suggestedAccent: themeColors.rsRed,
   },
 ]
 
 export const ACCENT_SWATCHES = [
-  '#d40000',
-  '#e31b23',
-  '#8b1538',
+  themeColors.mhRed,
+  themeColors.rsRed,
+  themeColors.crimson,
   '#6b21a8',
   '#2563eb',
   '#0d9488',
-  '#ca8a04',
-  '#f5f5f5',
+  themeColors.gold,
+  themeColors.signal,
 ] as const
 
 const HEX_RE = /^#?([0-9a-f]{6})$/i

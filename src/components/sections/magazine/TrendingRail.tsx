@@ -10,8 +10,8 @@ export function TrendingRail({ items }: TrendingRailProps) {
     <section className="border-y border-border bg-paper relative">
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-mh-red via-rs-red to-transparent" />
       <div className="flex items-stretch">
-        <div className="shrink-0 flex items-center gap-3 px-6 md:px-10 py-5 border-r border-border bg-gradient-to-br from-mh-red to-[#8b0000]">
-          <span className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase font-extrabold text-white whitespace-nowrap">
+        <div className="shrink-0 flex items-center gap-3 px-6 md:px-10 py-5 border-r border-border bg-gradient-to-br from-mh-red to-crimson">
+          <span className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase font-extrabold text-signal whitespace-nowrap">
             ◆ Trending
           </span>
         </div>

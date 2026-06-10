@@ -49,6 +49,21 @@
     <title>Institute of Sound</title>
   </head>
   <body>
+    <script>
+      (function () {
+        try {
+          var key = 'ios-theme-mode';
+          var mode = localStorage.getItem(key);
+          var themes = { dark: 1, bright: 1, metallic: 1, obsidian: 1, inferno: 1 };
+          if (!themes[mode]) mode = 'dark';
+          document.documentElement.setAttribute('data-theme', mode);
+          document.documentElement.style.colorScheme = mode === 'bright' ? 'light' : 'dark';
+          var meta = document.querySelector('meta[name="theme-color"]');
+          var metaColors = { dark: '#050505', bright: '#f4f3f0', metallic: '#0a0c10', obsidian: '#07080f', inferno: '#0a0504' };
+          if (meta) meta.setAttribute('content', metaColors[mode] || metaColors.dark);
+        } catch (e) {}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

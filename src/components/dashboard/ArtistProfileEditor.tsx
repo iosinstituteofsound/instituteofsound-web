@@ -136,7 +136,7 @@ export function ArtistProfileEditor({ user }: ArtistProfileEditorProps) {
   const [facebook, setFacebook] = useState('')
   const [bandcamp, setBandcamp] = useState('')
   const [website, setWebsite] = useState('')
-  const [accentColor, setAccentColor] = useState(DEFAULT_ACCENT_COLOR)
+  const [accentColor, setAccentColor] = useState<string>(DEFAULT_ACCENT_COLOR)
   const [themePreset, setThemePreset] = useState<ArtistThemePreset>(DEFAULT_THEME_PRESET)
   const [heroVideoUrl, setHeroVideoUrl] = useState('')
   const [heroLayout, setHeroLayout] = useState<HeroLayout>(DEFAULT_HERO_LAYOUT)

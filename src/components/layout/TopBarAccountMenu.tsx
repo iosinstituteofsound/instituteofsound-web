@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
 import { useAuth } from '@/context/AuthContext'
 import { useLoginGate } from '@/context/LoginGateContext'
+import { useTheme } from '@/context/ThemeContext'
+import { themeModes, type ThemeMode } from '@/lib/theme/palettes'
 import { homeDashboardPath, roleLabel } from '@/lib/auth/roles'
 import { memberHandleFromUser } from '@/lib/community/memberProfileService'
 import { networkProfilePath } from '@/lib/community/networkPaths'
@@ -25,6 +27,7 @@ type ManagedPage = {
 export function TopBarAccountMenu() {
   const { user, logout } = useAuth()
   const { openLoginGate } = useLoginGate()
+  const { mode: themeMode, setMode: setThemeMode, labels: themeLabels, hints: themeHints } = useTheme()
   const navigate = useNavigate()
   const menuId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
@@ -253,6 +256,33 @@ export function TopBarAccountMenu() {
                 </Link>
               </li>
             ))}
+            <li>
+              <label className="v2-account-menu__theme" htmlFor="ios-theme-select">
+                <span className="v2-account-menu__item-icon">
+                  <IconTheme />
+                </span>
+                <span className="v2-account-menu__item-copy">
+                  <strong>Appearance</strong>
+                  <span>{themeHints[themeMode]}</span>
+                </span>
+                <span className="v2-account-menu__theme-field">
+                  <select
+                    id="ios-theme-select"
+                    className="v2-account-menu__theme-select"
+                    value={themeMode}
+                    onChange={(e) => setThemeMode(e.target.value as ThemeMode)}
+                    aria-label="Select appearance theme"
+                  >
+                    {themeModes.map((option) => (
+                      <option key={option} value={option}>
+                        {themeLabels[option]}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronIcon className="v2-account-menu__theme-chev" />
+                </span>
+              </label>
+            </li>
           </ul>
 
           <div className="v2-account-menu__foot">
@@ -356,6 +386,18 @@ function IconSwitch() {
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
       <path d="M12 2a4 4 0 100 8 4 4 0 000-8zm-7 18c0-3.3 3.1-6 7-6s7 2.7 7 6H5z" opacity={0.35} />
       <path d="M16 10h5v2h-5v3l-4-4 4-4v3z" />
+    </svg>
+  )
+}
+
+function IconTheme() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden>
+      <circle cx="12" cy="12" r="4" />
+      <path
+        strokeLinecap="round"
+        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+      />
     </svg>
   )
 }

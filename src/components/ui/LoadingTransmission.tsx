@@ -47,8 +47,8 @@ export function LoadingTransmission({ variant = 'hell' }: LoadingTransmissionPro
     <div
       className={
         isHell
-          ? 'fixed inset-0 z-[10001] flex items-center justify-center overflow-hidden bg-[#030303]'
-          : 'relative flex items-center justify-center min-h-[50vh] w-full overflow-hidden bg-[#030303]/98 py-20'
+          ? 'fixed inset-0 z-[10001] flex items-center justify-center overflow-hidden bg-void'
+          : 'relative flex items-center justify-center min-h-[50vh] w-full overflow-hidden bg-void/98 py-20'
       }
       role="status"
       aria-label="Loading metal transmission"
@@ -98,7 +98,8 @@ export function LoadingTransmission({ variant = 'hell' }: LoadingTransmissionPro
             <polygon
               points="100,18 118,75 178,75 130,112 148,170 100,138 52,170 70,112 22,75 82,75"
               fill="none"
-              stroke="rgba(212,0,0,0.35)"
+              stroke="var(--color-mh-red)"
+              strokeOpacity="0.35"
               strokeWidth="1.2"
             />
             <circle
@@ -126,7 +127,7 @@ export function LoadingTransmission({ variant = 'hell' }: LoadingTransmissionPro
           {Array.from({ length: EQ_BARS }).map((_, i) => (
             <div
               key={i}
-              className="metal-loader-eq-bar w-1 md:w-1.5 bg-gradient-to-t from-[#1a1a1a] via-mh-red to-[#ff2a2a] origin-bottom"
+              className="metal-loader-eq-bar w-1 md:w-1.5 bg-gradient-to-t from-elevated via-mh-red to-rs-red origin-bottom"
               style={{
                 animationDelay: `${(i % 8) * 0.06}s`,
                 animationDuration: `${0.22 + (i % 4) * 0.05}s`,
@@ -151,7 +152,7 @@ export function LoadingTransmission({ variant = 'hell' }: LoadingTransmissionPro
           {`† ${METAL_LINES[lineIndex]}`}
         </p>
 
-        <div className="mt-10 w-72 md:w-96 h-2 bg-[#1a1a1a] border border-mh-red/30 overflow-hidden">
+        <div className="mt-10 w-72 md:w-96 h-2 bg-elevated border border-mh-red/30 overflow-hidden">
           <div className="h-full metal-loader-progress transition-[width] duration-150 ease-linear" style={{ width: `${progress}%` }} />
         </div>
         <p className="mt-3 text-[9px] tracking-[0.4em] text-mh-red tabular-nums uppercase font-bold">

@@ -10,13 +10,14 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import clsx from 'clsx'
 import { normalizeEditorHtml } from '@/lib/editorial/richText'
+import { themeColors } from '@/lib/theme/tokens'
 
 const ACCENT_COLORS = [
-  { label: 'Signal', value: '#f5f5f5' },
-  { label: 'Red', value: '#d40000' },
-  { label: 'Crimson', value: '#8b1538' },
-  { label: 'Muted', value: '#a3a3a3' },
-  { label: 'Gold', value: '#ca8a04' },
+  { label: 'Signal', value: themeColors.signal },
+  { label: 'Red', value: themeColors.mhRed },
+  { label: 'Crimson', value: themeColors.crimson },
+  { label: 'Muted', value: themeColors.muted },
+  { label: 'Gold', value: themeColors.gold },
 ]
 
 interface RichTextEditorProps {

@@ -13,6 +13,7 @@ import {
   artistSiteThemeClass,
   normalizeAccentColor,
 } from '@/lib/artist-profile/branding'
+import { themeColors } from '@/lib/theme/tokens'
 import { extractAccentFromImageUrl } from '@/lib/artist-profile/extractAccentFromImage'
 import { FieldLabel } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -110,7 +111,7 @@ export function ArtistBrandingPanel({
               if (n) onAccentChange(n)
             }}
             className="ios-input w-28 font-mono text-xs uppercase"
-            placeholder="#d40000"
+            placeholder={themeColors.mhRed}
             spellCheck={false}
           />
           <Button

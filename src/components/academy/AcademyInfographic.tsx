@@ -21,11 +21,11 @@ export function AcademyInfographic({ type, title }: AcademyInfographicProps) {
       return (
         <Frame title={title}>
           <svg viewBox="0 0 400 120" className="academy-info-svg">
-            <path d="M20 60 Q60 20 100 60 T180 60 T260 40 T340 70" stroke="#d40000" strokeWidth="2" fill="none" />
-            <line x1="20" y1="95" x2="380" y2="95" stroke="#3d3d3d" />
-            <text x="20" y="112" fill="#9a9a9a" fontSize="9">−∞</text>
-            <text x="350" y="112" fill="#e31b23" fontSize="9">0 dBFS</text>
-            <text x="200" y="30" fill="#f5f5f5" fontSize="10" textAnchor="middle">
+            <path d="M20 60 Q60 20 100 60 T180 60 T260 40 T340 70" stroke="var(--color-mh-red)" strokeWidth="2" fill="none" />
+            <line x1="20" y1="95" x2="380" y2="95" stroke="var(--color-edge)" />
+            <text x="20" y="112" fill="var(--color-muted)" fontSize="9">−∞</text>
+            <text x="350" y="112" fill="var(--color-rs-red)" fontSize="9">0 dBFS</text>
+            <text x="200" y="30" fill="var(--color-signal)" fontSize="10" textAnchor="middle">
               Peak vs average
             </text>
           </svg>
@@ -108,12 +108,12 @@ export function AcademyInfographic({ type, title }: AcademyInfographicProps) {
       return (
         <Frame title={title}>
           <svg viewBox="0 0 400 140" className="academy-info-svg">
-            <path d="M40 100 L120 100 L200 55 L280 55 L360 55" stroke="#d40000" strokeWidth="2" fill="none" />
-            <text x="40" y="120" fill="#9a9a9a" fontSize="8">Input</text>
-            <text x="115" y="120" fill="#9a9a9a" fontSize="8">Threshold</text>
-            <text x="195" y="120" fill="#9a9a9a" fontSize="8">GR</text>
-            <text x="275" y="120" fill="#9a9a9a" fontSize="8">Output</text>
-            <text x="200" y="40" fill="#f5f5f5" fontSize="10" textAnchor="middle">
+            <path d="M40 100 L120 100 L200 55 L280 55 L360 55" stroke="var(--color-mh-red)" strokeWidth="2" fill="none" />
+            <text x="40" y="120" fill="var(--color-muted)" fontSize="8">Input</text>
+            <text x="115" y="120" fill="var(--color-muted)" fontSize="8">Threshold</text>
+            <text x="195" y="120" fill="var(--color-muted)" fontSize="8">GR</text>
+            <text x="275" y="120" fill="var(--color-muted)" fontSize="8">Output</text>
+            <text x="200" y="40" fill="var(--color-signal)" fontSize="10" textAnchor="middle">
               Attack → Release
             </text>
           </svg>

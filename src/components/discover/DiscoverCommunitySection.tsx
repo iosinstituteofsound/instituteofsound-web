@@ -201,11 +201,11 @@ export function DiscoverCommunitySection() {
 function VinylDisc() {
   return (
     <svg viewBox="0 0 80 80" className="com-vinyl" aria-hidden>
-      <circle cx="40" cy="40" r="38" fill="#0a0a0a" stroke="#2a2a2a" strokeWidth="1" />
-      <circle cx="40" cy="40" r="32" fill="none" stroke="#1a1a1a" strokeWidth="0.5" />
-      <circle cx="40" cy="40" r="24" fill="none" stroke="#1a1a1a" strokeWidth="0.5" />
+      <circle cx="40" cy="40" r="38" fill="var(--color-mh-black)" stroke="var(--color-border)" strokeWidth="1" />
+      <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-elevated)" strokeWidth="0.5" />
+      <circle cx="40" cy="40" r="24" fill="none" stroke="var(--color-elevated)" strokeWidth="0.5" />
       <circle cx="40" cy="40" r="10" fill="var(--color-mh-red)" />
-      <circle cx="40" cy="40" r="3" fill="#050505" />
+      <circle cx="40" cy="40" r="3" fill="var(--color-void)" />
     </svg>
   )
 }

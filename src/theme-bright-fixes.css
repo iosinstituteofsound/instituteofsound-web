@@ -1,0 +1,120 @@
+/**
+ * Bright-theme fixes for legacy hardcoded dark surfaces in feature CSS.
+ * Prefer migrating each rule to var(--ios-*) in the source file over time.
+ */
+
+html[data-theme='bright'] .ios-panel,
+html[data-theme='bright'] .ios-card,
+html[data-theme='bright'] .ios-modal,
+html[data-theme='bright'] .ios-nav-drawer,
+html[data-theme='bright'] .ios-nav-backdrop {
+  background: var(--ios-color-surface);
+  border-color: var(--ios-color-border);
+  color: var(--ios-color-signal);
+}
+
+html[data-theme='bright'] .ios-nav-backdrop {
+  background: var(--ios-scrim-heavy);
+}
+
+html[data-theme='bright'] .ios-nav-drawer {
+  background: var(--ios-gradient-panel);
+  box-shadow: var(--ios-shadow-panel);
+}
+
+html[data-theme='bright'] .member-dashboard,
+html[data-theme='bright'] .artist-dashboard,
+html[data-theme='bright'] .editor-dashboard,
+html[data-theme='bright'] .v2-main,
+html[data-theme='bright'] .v2-content-scroll {
+  background: var(--ios-color-void);
+  color: var(--ios-color-signal);
+}
+
+/* dashboard-studio.css legacy dark panels */
+html[data-theme='bright'] .desk-nav,
+html[data-theme='bright'] .super-editor-nav,
+html[data-theme='bright'] .desk-quick-tile,
+html[data-theme='bright'] .super-editor-quick-tile,
+html[data-theme='bright'] .desk-nav-btn,
+html[data-theme='bright'] .mws-hero,
+html[data-theme='bright'] .mws-stat-card,
+html[data-theme='bright'] .mws-card,
+html[data-theme='bright'] .mws-panel,
+html[data-theme='bright'] .mf-card,
+html[data-theme='bright'] .mf-panel,
+html[data-theme='bright'] .me-card,
+html[data-theme='bright'] .afn-card,
+html[data-theme='bright'] .mfa-widget,
+html[data-theme='bright'] .desk-panel,
+html[data-theme='bright'] .studio-panel,
+html[data-theme='bright'] .artist-dashboard-tab,
+html[data-theme='bright'] .member-dashboard-tab {
+  background: var(--ios-gradient-widget) !important;
+  border-color: var(--ios-color-border) !important;
+  color: var(--ios-color-signal);
+}
+
+html[data-theme='bright'] .artist-dashboard-tab-active,
+html[data-theme='bright'] .member-dashboard-tab-active,
+html[data-theme='bright'] .desk-nav-btn-active,
+html[data-theme='bright'] .super-editor-nav-btn-active {
+  background: var(--ios-accent-soft) !important;
+  border-color: var(--ios-accent-strong) !important;
+  color: var(--ios-color-accent) !important;
+  box-shadow: inset 2px 0 0 var(--ios-color-accent) !important;
+}
+
+html[data-theme='bright'] .desk-nav-group-title,
+html[data-theme='bright'] .super-editor-nav-group-title {
+  color: var(--ios-color-accent);
+}
+
+/* network profile legacy surfaces */
+html[data-theme='bright'] .np-rail,
+html[data-theme='bright'] .np-rail-widget,
+html[data-theme='bright'] .np-broadcast-deck,
+html[data-theme='bright'] .np-wire-col,
+html[data-theme='bright'] .np-profile-hero,
+html[data-theme='bright'] .np-profile-card {
+  background: var(--ios-gradient-widget) !important;
+  border-color: var(--ios-color-border) !important;
+}
+
+html[data-theme='bright'] .np-rail-reputation__track {
+  stroke: var(--ios-color-border);
+}
+
+/* discover / community panels */
+html[data-theme='bright'] .com-panel,
+html[data-theme='bright'] .com-hero,
+html[data-theme='bright'] .spin-of-week,
+html[data-theme='bright'] .friday-wire,
+html[data-theme='bright'] .community-wire-card {
+  background: var(--ios-gradient-widget);
+  border-color: var(--ios-color-border);
+}
+
+/* tools terminal aesthetic stays dark intentionally — skip */
+
+/* Generic override: elements with explicit near-black inline-ish utility backgrounds */
+html[data-theme='bright'] [class*='bg-void'],
+html[data-theme='bright'] [class*='bg-surface'],
+html[data-theme='bright'] [class*='bg-paper'],
+html[data-theme='bright'] [class*='bg-elevated'] {
+  /* Tailwind bridge already uses theme vars — no override needed */
+}
+
+/* Scrollbars */
+html[data-theme='bright'] ::-webkit-scrollbar-track {
+  background: var(--ios-color-paper);
+}
+
+html[data-theme='bright'] ::-webkit-scrollbar-thumb {
+  background: var(--ios-color-edge);
+}
+
+html[data-theme='bright'] ::selection {
+  background: color-mix(in srgb, var(--ios-color-mh-red) 28%, transparent);
+  color: var(--ios-color-signal);
+}
