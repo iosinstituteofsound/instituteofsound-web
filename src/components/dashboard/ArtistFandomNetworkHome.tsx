@@ -1,56 +1,73 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
-import { fetchArtistFandom } from '@/lib/fandom/service'
-import type { FandomWindow } from '@/lib/fandom/types'
+import { Link } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
+import { fetchArtistFandom, fetchArtistSentRecognitions } from '@/lib/fandom/service'
+import type {
+  ArtistContentChampionRow,
+  ArtistDiscoveryDriverRow,
+  ArtistRecentSupportRow,
+  ArtistSupporterRow,
+  FandomSentRecognitionRow,
+  FandomWindow,
+} from '@/lib/fandom/types'
+import { formatRelativeTime } from '@/lib/community/relativeTime'
+import { networkProfilePath } from '@/lib/community/networkPaths'
 import { IOSImage } from '@/components/ui/IOSImage'
+import { FandomThankSupporterModal } from '@/components/fandom/FandomThankSupporterModal'
+import { getLiveApiConfigHint } from '@/lib/api/liveMode'
 
-const KPIS = [
-  { label: 'Total Followers', value: '24.8K', delta: '+12.6%', icon: '◎' },
-  { label: 'Monthly Growth', value: '+3.2K', delta: '+18.4%', icon: '↗' },
-  { label: 'Fan Engagement', value: '78%', delta: '+8.7%', icon: '◆' },
-  { label: 'Fan Loyalty Score', value: '9.1/10', delta: '+6.3%', icon: '★' },
-  { label: 'Viral Reach Index', value: '6.7K', delta: '+22.1%', icon: '⚡' },
-] as const
-
-const TRIBES = [
-  { rank: 1, name: 'VOID SOCIETY', members: '6.2K', activity: 72, emblem: 'void' },
-  { rank: 2, name: 'RIFT WALKERS', members: '4.8K', activity: 65, emblem: 'rift' },
-  { rank: 3, name: 'BASS CULT', members: '3.9K', activity: 58, emblem: 'bass' },
-  { rank: 4, name: 'NEON DRIFT', members: '2.7K', activity: 51, emblem: 'neon' },
-] as const
-
-const TRIBE_WARS = [
-  { rank: 1, name: 'VOID SOCIETY', score: '12.4K', pct: 100 },
-  { rank: 2, name: 'RIFT WALKERS', score: '9.8K', pct: 79 },
-  { rank: 3, name: 'BASS CULT', score: '7.2K', pct: 58 },
-  { rank: 4, name: 'NEON DRIFT', score: '5.1K', pct: 41 },
-  { rank: 5, name: 'STATIC CREW', score: '3.9K', pct: 31 },
-] as const
-
-type SupporterRow = {
-  rank: number
-  name: string
-  meta: string
-  score: string
-  avatarUrl?: string
-  userId?: string
+const ACTION_LABEL: Record<string, string> = {
+  review: 'left a review',
+  editorial: 'wrote editorial about you',
+  tagged_spin: 'spinned your track',
+  tagged_drop: 'dropped your track',
+  comment: 'commented on your work',
+  reaction: 'reacted to your post',
+  share: 'shared your work',
 }
 
-const MOCK_SUPPORTERS: SupporterRow[] = [
-  { rank: 1, name: 'RIFT_MASTER', meta: 'LVL 8 · ARCHON', score: '4,820' },
-  { rank: 2, name: 'VOID_ECHO', meta: 'LVL 7 · SENTINEL', score: '4,210' },
-  { rank: 3, name: 'NEON_DRIFT', meta: 'LVL 6 · VANGUARD', score: '3,980' },
-  { rank: 4, name: 'BASSLINE_X', meta: 'LVL 6 · WARDEN', score: '3,540' },
-  { rank: 5, name: 'STATIC_KID', meta: 'LVL 5 · SCOUT', score: '3,120' },
-]
+const ACTION_ICON: Record<string, string> = {
+  review: '★',
+  editorial: '✎',
+  tagged_spin: '♪',
+  tagged_drop: '↓',
+  comment: '💬',
+  reaction: '♥',
+  share: '↗',
+}
 
-const ACTIVITY = [
-  { icon: '♪', user: 'RIFT_MASTER', text: 'added your track "Dissolve" to their playlist', time: '3m ago' },
-  { icon: '💬', user: 'VOID_ECHO', text: 'commented on your latest post', time: '12m ago' },
-  { icon: '↻', user: 'NEON_DRIFT', text: 'reposted your release announcement', time: '28m ago' },
-  { icon: '↗', user: 'BASSLINE_X', text: 'shared your artist page', time: '1h ago' },
-  { icon: '♥', user: 'STATIC_KID', text: 'saved your track to favorites', time: '2h ago' },
-] as const
+function aggregateSupporterTotals(supporters: ArtistSupporterRow[]) {
+  return supporters.reduce(
+    (acc, s) => ({
+      spins: acc.spins + s.spins,
+      drops: acc.drops + s.drops,
+      reactions: acc.reactions + s.reactions,
+      comments: acc.comments + s.comments,
+      shares: acc.shares + s.shares,
+      reviews: acc.reviews + s.reviews,
+      editorials: acc.editorials + s.editorials,
+      support: acc.support + s.supportScore,
+    }),
+    {
+      spins: 0,
+      drops: 0,
+      reactions: 0,
+      comments: 0,
+      shares: 0,
+      reviews: 0,
+      editorials: 0,
+      support: 0,
+    },
+  )
+}
+
+function artistInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+}
 
 function Sparkline({ variant = 'default' }: { variant?: 'default' | 'soft' }) {
   return (
@@ -67,7 +84,30 @@ function Sparkline({ variant = 'default' }: { variant?: 'default' | 'soft' }) {
   )
 }
 
-function FandomMap() {
+function FandomMap({
+  centerLabel,
+  supporters,
+  drivers,
+}: {
+  centerLabel: string
+  supporters: ArtistSupporterRow[]
+  drivers: ArtistDiscoveryDriverRow[]
+}) {
+  const nodes = [
+    ...supporters.slice(0, 2).map((s) => ({
+      key: s.supporterUserId,
+      label: `${s.displayName.split(/\s+/)[0]?.toUpperCase() ?? 'FAN'} · #${s.supporterRank}`,
+      className: 'afn-map-node--super' as const,
+      style: { top: '10%', left: '14%' },
+    })),
+    ...drivers.slice(0, 2).map((d, i) => ({
+      key: d.supporterUserId,
+      label: `${d.displayName.split(/\s+/)[0]?.toUpperCase() ?? 'FAN'} · ${d.shares} shares`,
+      className: 'afn-map-node--tribe' as const,
+      style: i === 0 ? { bottom: '16%', left: '18%' } : { bottom: '12%', right: '14%' },
+    })),
+  ]
+
   return (
     <div className="afn-map" role="img" aria-label="Fandom network visualization">
       <svg className="afn-map-lines" viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" aria-hidden>
@@ -91,46 +131,63 @@ function FandomMap() {
       </svg>
       <span className="afn-map-center">
         <span className="afn-map-center-ring" aria-hidden />
-        MV
+        {centerLabel}
       </span>
-      <span className="afn-map-node afn-map-node--tribe" style={{ top: '10%', left: '14%' }}>
-        VOID SOCIETY · 4.8K
-      </span>
-      <span className="afn-map-node afn-map-node--super" style={{ top: '20%', right: '12%' }}>
-        Super fans
-      </span>
-      <span className="afn-map-node afn-map-node--active" style={{ bottom: '16%', left: '18%' }}>
-        Active fans
-      </span>
-      <span className="afn-map-node afn-map-node--tribe" style={{ bottom: '12%', right: '14%' }}>
-        RIFT WALKERS · 3.2K
-      </span>
+      {nodes.length === 0 ? (
+        <span className="afn-map-node afn-map-node--active" style={{ top: '42%', left: '50%', transform: 'translateX(-50%)' }}>
+          No supporter signals yet
+        </span>
+      ) : (
+        nodes.map((node) => (
+          <span
+            key={node.key}
+            className={clsx('afn-map-node', node.className)}
+            style={node.style}
+          >
+            {node.label}
+          </span>
+        ))
+      )}
     </div>
   )
 }
 
+function EmptyPanel({ message }: { message: string }) {
+  return <p className="text-sm text-muted p-4">{message}</p>
+}
+
 export function ArtistFandomNetworkHome() {
+  const { user } = useAuth()
   const [window, setWindow] = useState<FandomWindow>('90d')
   const [loading, setLoading] = useState(true)
-  const [supporters, setSupporters] = useState(MOCK_SUPPORTERS)
+  const [error, setError] = useState('')
+  const [supporters, setSupporters] = useState<ArtistSupporterRow[]>([])
+  const [recent, setRecent] = useState<ArtistRecentSupportRow[]>([])
+  const [champions, setChampions] = useState<ArtistContentChampionRow[]>([])
+  const [drivers, setDrivers] = useState<ArtistDiscoveryDriverRow[]>([])
+  const [sentRecognitions, setSentRecognitions] = useState<FandomSentRecognitionRow[]>([])
+  const [thankTarget, setThankTarget] = useState<{ id: string; name: string } | null>(null)
+
   const load = useCallback(async () => {
     setLoading(true)
+    setError('')
     try {
-      const data = await fetchArtistFandom(window)
-      if (data.supporters?.length) {
-        setSupporters(
-          data.supporters.slice(0, 5).map((s, i) => ({
-            rank: i + 1,
-            name: s.displayName.replace(/\s/g, '_').toUpperCase(),
-            meta: s.badgeLabel ? s.badgeLabel.toUpperCase() : `RANK #${s.supporterRank}`,
-            score: `${Math.round(4800 - i * 320)}`,
-            avatarUrl: s.avatarUrl,
-            userId: s.supporterUserId,
-          })),
-        )
-      }
-    } catch {
-      setSupporters(MOCK_SUPPORTERS)
+      const [data, sent] = await Promise.all([
+        fetchArtistFandom(window),
+        fetchArtistSentRecognitions(),
+      ])
+      setSupporters(data.supporters ?? [])
+      setRecent(data.recent ?? [])
+      setChampions(data.champions ?? [])
+      setDrivers(data.drivers ?? [])
+      setSentRecognitions(sent ?? [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load fandom')
+      setSupporters([])
+      setRecent([])
+      setChampions([])
+      setDrivers([])
+      setSentRecognitions([])
     } finally {
       setLoading(false)
     }
@@ -140,8 +197,46 @@ export function ArtistFandomNetworkHome() {
     void load()
   }, [load])
 
+  const totals = useMemo(() => aggregateSupporterTotals(supporters), [supporters])
+  const wiredReach = useMemo(
+    () => drivers.reduce((sum, d) => sum + d.wiredReach, 0),
+    [drivers],
+  )
+  const engagementEvents =
+    totals.spins +
+    totals.drops +
+    totals.comments +
+    totals.reactions +
+    totals.shares +
+    totals.reviews +
+    totals.editorials
+
+  const kpis = useMemo(
+    () => [
+      { label: 'Supporters', value: supporters.length.toLocaleString(), icon: '◎' },
+      { label: 'Engagement', value: engagementEvents.toLocaleString(), icon: '↗' },
+      { label: 'Reviews', value: (totals.reviews + totals.editorials).toLocaleString(), icon: '◆' },
+      { label: 'Support score', value: totals.support.toLocaleString(), icon: '★' },
+      { label: 'Wired reach', value: wiredReach.toLocaleString(), icon: '⚡' },
+    ],
+    [supporters.length, engagementEvents, totals.reviews, totals.editorials, totals.support, wiredReach],
+  )
+
+  const topDrivers = drivers.slice(0, 4)
+  const topChampions = champions.slice(0, 5)
+  const maxChampionScore = topChampions[0]?.contentScore ?? 1
+  const liveHint = getLiveApiConfigHint()
+
   return (
     <div className="afn-home">
+      <FandomThankSupporterModal
+        supporterUserId={thankTarget?.id ?? ''}
+        supporterName={thankTarget?.name ?? ''}
+        open={thankTarget != null}
+        onClose={() => setThankTarget(null)}
+        onSent={() => void load()}
+      />
+
       <header className="afn-hero">
         <div>
           <h2 className="afn-title">My Fandom</h2>
@@ -154,24 +249,26 @@ export function ArtistFandomNetworkHome() {
             onChange={(e) => setWindow(e.target.value as FandomWindow)}
             aria-label="Time range"
           >
-            <option value="90d">Last 30 Days</option>
+            <option value="90d">Last 90 days</option>
             <option value="all">All time</option>
           </select>
-          <button type="button" className="afn-export-btn">
-            <span aria-hidden>↓</span> Export Report
-          </button>
         </div>
       </header>
 
+      {liveHint && (
+        <p className="text-xs text-muted mb-4">{liveHint}</p>
+      )}
+
+      {error && <p className="text-sm text-mh-red mb-4">{error}</p>}
+
       <div className="afn-kpis">
-        {KPIS.map((k) => (
+        {kpis.map((k) => (
           <article key={k.label} className="afn-kpi">
             <span className="afn-kpi-icon" aria-hidden>
               {k.icon}
             </span>
             <p className="afn-kpi-label">{k.label}</p>
-            <p className="afn-kpi-value">{k.value}</p>
-            <p className="afn-kpi-delta">↑ {k.delta}</p>
+            <p className="afn-kpi-value">{loading ? '…' : k.value}</p>
             <Sparkline />
           </article>
         ))}
@@ -179,59 +276,76 @@ export function ArtistFandomNetworkHome() {
 
       <div className="afn-mid">
         <section className="afn-panel afn-tribes">
-          <h3 className="afn-panel-title">Top Tribes</h3>
-          <div className="afn-tribe-grid">
-            {TRIBES.map((t) => (
-              <article key={t.name} className="afn-tribe-card">
-                <span className="afn-tribe-rank">{t.rank}</span>
-                <span className={clsx('afn-tribe-emblem', `afn-tribe-emblem--${t.emblem}`)} aria-hidden />
-                <p className="afn-tribe-name">{t.name}</p>
-                <p className="afn-tribe-meta">{t.members} MEMBERS</p>
-                <div className="afn-tribe-bar">
-                  <span style={{ width: `${t.activity}%` }} />
-                </div>
-                <p className="afn-tribe-pct">{t.activity}% Activity</p>
-              </article>
-            ))}
-          </div>
+          <h3 className="afn-panel-title">Discovery drivers</h3>
+          {loading ? (
+            <EmptyPanel message="Loading…" />
+          ) : topDrivers.length === 0 ? (
+            <EmptyPanel message="No amplification signals yet — supporters who share your work will appear here." />
+          ) : (
+            <div className="afn-tribe-grid">
+              {topDrivers.map((d, i) => {
+                const pct = Math.max(12, Math.round((d.wiredReach / (topDrivers[0]?.wiredReach || 1)) * 100))
+                return (
+                  <article key={d.supporterUserId} className="afn-tribe-card">
+                    <span className="afn-tribe-rank">{i + 1}</span>
+                    <span className={clsx('afn-tribe-emblem', `afn-tribe-emblem--${['void', 'rift', 'bass', 'neon'][i % 4]}`)} aria-hidden />
+                    <p className="afn-tribe-name">{d.displayName.toUpperCase()}</p>
+                    <p className="afn-tribe-meta">{d.shares} SHARES · {d.wiredReach} REACH</p>
+                    <div className="afn-tribe-bar">
+                      <span style={{ width: `${pct}%` }} />
+                    </div>
+                    <p className="afn-tribe-pct">#{d.driverRank} driver</p>
+                  </article>
+                )
+              })}
+            </div>
+          )}
         </section>
 
         <section className="afn-panel">
-          <h3 className="afn-panel-title">Tribe Wars Leaderboard</h3>
-          <ol className="afn-wars-list">
-            {TRIBE_WARS.map((t) => (
-              <li key={t.name} className="afn-wars-row">
-                <span className="afn-wars-rank">{t.rank}</span>
-                <span className="afn-wars-name">{t.name}</span>
-                <span className="afn-wars-bar">
-                  <span style={{ width: `${t.pct}%` }} />
-                </span>
-                <span className="afn-wars-score">{t.score}</span>
-              </li>
-            ))}
-          </ol>
-          <button type="button" className="afn-link-btn">
-            View All Tribes →
-          </button>
+          <h3 className="afn-panel-title">Content champions</h3>
+          {loading ? (
+            <EmptyPanel message="Loading…" />
+          ) : topChampions.length === 0 ? (
+            <EmptyPanel message="No champion content yet — spins, drops, reviews, and editorial will rank here." />
+          ) : (
+            <ol className="afn-wars-list">
+              {topChampions.map((c, i) => {
+                const pct = Math.max(8, Math.round((c.contentScore / maxChampionScore) * 100))
+                return (
+                  <li key={c.supporterUserId} className="afn-wars-row">
+                    <span className="afn-wars-rank">{i + 1}</span>
+                    <span className="afn-wars-name">{c.displayName.toUpperCase()}</span>
+                    <span className="afn-wars-bar">
+                      <span style={{ width: `${pct}%` }} />
+                    </span>
+                    <span className="afn-wars-score">{c.contentScore.toLocaleString()}</span>
+                  </li>
+                )
+              })}
+            </ol>
+          )}
         </section>
 
         <section className="afn-panel">
           <h3 className="afn-panel-title">Top Supporters</h3>
           {loading ? (
-            <p className="text-sm text-muted p-4">Loading…</p>
+            <EmptyPanel message="Loading…" />
+          ) : supporters.length === 0 ? (
+            <EmptyPanel message="No supporter activity in this window yet." />
           ) : (
             <ol className="afn-supporters-list">
-              {supporters.map((s) => (
-                <li key={s.rank} className="afn-supporter-row">
+              {supporters.slice(0, 5).map((s) => (
+                <li key={s.supporterUserId} className="afn-supporter-row">
                   <span
                     className={clsx(
                       'afn-supporter-rank',
-                      s.rank === 1 && 'afn-supporter-rank--gold',
-                      s.rank === 2 && 'afn-supporter-rank--silver',
-                      s.rank === 3 && 'afn-supporter-rank--bronze',
+                      s.supporterRank === 1 && 'afn-supporter-rank--gold',
+                      s.supporterRank === 2 && 'afn-supporter-rank--silver',
+                      s.supporterRank === 3 && 'afn-supporter-rank--bronze',
                     )}
                   >
-                    {s.rank}
+                    {s.supporterRank}
                   </span>
                   {s.avatarUrl ? (
                     <IOSImage src={s.avatarUrl} alt="" width={36} height={36} className="afn-supporter-av" />
@@ -239,84 +353,122 @@ export function ArtistFandomNetworkHome() {
                     <span className="afn-supporter-av afn-supporter-av--ph" />
                   )}
                   <div className="afn-supporter-copy">
-                    <p className="afn-supporter-name">{s.name}</p>
-                    <p className="afn-supporter-meta">{s.meta}</p>
+                    <p className="afn-supporter-name">{s.displayName}</p>
+                    <p className="afn-supporter-meta">
+                      {s.badgeLabel ? s.badgeLabel.toUpperCase() : `RANK #${s.supporterRank}`}
+                    </p>
                   </div>
                   <div className="afn-supporter-score">
                     <span className="afn-supporter-score-label">Support Score</span>
-                    <strong>{s.score}</strong>
+                    <strong>{s.supportScore.toLocaleString()}</strong>
+                  </div>
+                  <div className="flex flex-col gap-1 shrink-0 ml-2">
+                    <button
+                      type="button"
+                      className="ios-btn ios-btn-primary !text-[10px] !py-1"
+                      onClick={() => setThankTarget({ id: s.supporterUserId, name: s.displayName })}
+                    >
+                      Thank
+                    </button>
+                    <Link
+                      to={networkProfilePath(s.handle)}
+                      className="ios-btn ios-btn-ghost !text-[10px] !py-1"
+                    >
+                      Profile
+                    </Link>
                   </div>
                 </li>
               ))}
             </ol>
           )}
-          <button type="button" className="afn-link-btn">
-            View All Supporters →
-          </button>
         </section>
       </div>
 
       <div className="afn-bottom">
         <section className="afn-panel afn-feed">
           <h3 className="afn-panel-title">Fan Activity Feed</h3>
-          <ul className="afn-activity-list">
-            {ACTIVITY.map((a) => (
-              <li key={a.time + a.user} className="afn-activity-row">
-                <span className="afn-activity-icon">{a.icon}</span>
-                <p className="afn-activity-text">
-                  <strong>@{a.user}</strong> {a.text}
-                </p>
-                <time className="afn-activity-time">{a.time}</time>
-              </li>
-            ))}
-          </ul>
+          {loading ? (
+            <EmptyPanel message="Loading…" />
+          ) : recent.length === 0 ? (
+            <EmptyPanel message="Nothing recent — supporter actions on the network will show here." />
+          ) : (
+            <ul className="afn-activity-list">
+              {recent.slice(0, 8).map((a, i) => (
+                <li key={`${a.supporterUserId}-${a.createdAt}-${i}`} className="afn-activity-row">
+                  <span className="afn-activity-icon">{ACTION_ICON[a.actionType] ?? '•'}</span>
+                  <p className="afn-activity-text">
+                    <strong>@{a.handle || a.displayName.replace(/\s/g, '_')}</strong>{' '}
+                    {ACTION_LABEL[a.actionType] ?? a.actionType}
+                  </p>
+                  <time className="afn-activity-time">{formatRelativeTime(a.createdAt)}</time>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="afn-panel afn-map-panel">
           <h3 className="afn-panel-title">Fandom Network</h3>
-          <FandomMap />
+          <FandomMap
+            centerLabel={artistInitials(user?.name ?? 'You')}
+            supporters={supporters}
+            drivers={drivers}
+          />
           <ul className="afn-map-legend">
-            <li><span className="afn-legend-dot afn-legend-dot--tribe" /> Tribes</li>
-            <li><span className="afn-legend-dot afn-legend-dot--super" /> Super Fans</li>
-            <li><span className="afn-legend-dot afn-legend-dot--active" /> Active Fans</li>
+            <li><span className="afn-legend-dot afn-legend-dot--tribe" /> Amplifiers</li>
+            <li><span className="afn-legend-dot afn-legend-dot--super" /> Top supporters</li>
+            <li><span className="afn-legend-dot afn-legend-dot--active" /> You</li>
           </ul>
         </section>
 
         <section className="afn-panel afn-insights">
           <h3 className="afn-panel-title">Insights</h3>
-          <article className="afn-insight-card afn-insight-card--release">
-            <div className="afn-release-art" aria-hidden />
-            <div>
-              <p className="afn-insight-kicker">Trending Release</p>
-              <p className="afn-insight-title">DISSOLVE</p>
-              <p className="afn-insight-meta">2.4K saves · 1.1K shares</p>
-              <Sparkline variant="soft" />
-            </div>
-          </article>
-          <article className="afn-insight-card afn-insight-card--event">
-            <div className="afn-event-date" aria-hidden>
-              <span className="afn-event-month">JUN</span>
-              <span className="afn-event-day">15</span>
-            </div>
-            <div>
-              <p className="afn-insight-kicker">Upcoming Event</p>
-              <p className="afn-insight-title">VOIDRIFT LIVE</p>
-              <p className="afn-insight-meta">The Bunker, London · 142 going</p>
-            </div>
-          </article>
-          <article className="afn-insight-card afn-insight-card--row">
-            <div>
-              <p className="afn-insight-kicker">Editorial</p>
-              <p className="afn-insight-title">3 New</p>
-            </div>
-            <div>
-              <p className="afn-insight-kicker">Playlists</p>
-              <p className="afn-insight-title">18 · +4</p>
-            </div>
-          </article>
-          <button type="button" className="afn-link-btn">
-            View All Insights →
-          </button>
+          {loading ? (
+            <EmptyPanel message="Loading…" />
+          ) : (
+            <>
+              <article className="afn-insight-card afn-insight-card--release">
+                <div className="afn-release-art" aria-hidden />
+                <div>
+                  <p className="afn-insight-kicker">Engagement mix</p>
+                  <p className="afn-insight-title">
+                    {totals.spins} spins · {totals.drops} drops
+                  </p>
+                  <p className="afn-insight-meta">
+                    {totals.reactions} reactions · {totals.comments} comments · {totals.shares} shares
+                  </p>
+                  <Sparkline variant="soft" />
+                </div>
+              </article>
+              <article className="afn-insight-card afn-insight-card--event">
+                <div className="afn-event-date" aria-hidden>
+                  <span className="afn-event-month">{supporters.length > 0 ? 'TOP' : '—'}</span>
+                  <span className="afn-event-day">{supporters[0]?.supporterRank ?? '—'}</span>
+                </div>
+                <div>
+                  <p className="afn-insight-kicker">Leading supporter</p>
+                  <p className="afn-insight-title">
+                    {supporters[0]?.displayName ?? 'No supporters yet'}
+                  </p>
+                  <p className="afn-insight-meta">
+                    {supporters[0]
+                      ? `${supporters[0].supportScore.toLocaleString()} support score`
+                      : 'Share your page on the network feed'}
+                  </p>
+                </div>
+              </article>
+              <article className="afn-insight-card afn-insight-card--row">
+                <div>
+                  <p className="afn-insight-kicker">Recognition sent</p>
+                  <p className="afn-insight-title">{sentRecognitions.length}</p>
+                </div>
+                <div>
+                  <p className="afn-insight-kicker">Champions</p>
+                  <p className="afn-insight-title">{champions.length}</p>
+                </div>
+              </article>
+            </>
+          )}
         </section>
       </div>
     </div>
