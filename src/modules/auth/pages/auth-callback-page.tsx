@@ -18,14 +18,16 @@ export function AuthCallbackPage() {
     if (handled.current) return
     handled.current = true
 
-    const finishLogin = () =>
-      queryClient.removeQueries({ queryKey: meQueryKey })
-        .then(() => refetch())
-        .then((result) => navigate(getLayoutHomeRoute(result.data?.authorization), { replace: true }))
-        .catch(() => {
-          toast.error('Failed to load session')
-          navigate('/auth/login', { replace: true })
-        })
+    const finishLogin = async () => {
+      try {
+        queryClient.removeQueries({ queryKey: meQueryKey })
+        const result = await refetch()
+        navigate(getLayoutHomeRoute(result.data?.authorization), { replace: true })
+      } catch {
+        toast.error('Failed to load session')
+        navigate('/auth/login', { replace: true })
+      }
+    }
 
     // StrictMode re-mount: tokens may already be stored from first pass
     if (tokenStorage.hasSession()) {
