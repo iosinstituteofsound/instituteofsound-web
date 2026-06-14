@@ -3,64 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/pwa/icon-master.svg" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/pwa/icon-192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/pwa/icon-512.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#050505" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="IOS" />
-    <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png" sizes="180x180" />
-    <link rel="apple-touch-icon" href="/pwa/apple-touch-icon-167.png" sizes="167x167" />
-    <link rel="apple-touch-icon" href="/pwa/apple-touch-icon-152.png" sizes="152x152" />
-    <link rel="apple-touch-icon" href="/pwa/apple-touch-icon-120.png" sizes="120x120" />
-    <meta
-      name="description"
-      content="Institute of Sound — underground music magazine. Reviews, features, bands, and culture."
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Institute of Sound" />
-    <meta property="og:title" content="Institute of Sound" />
-    <meta
-      property="og:description"
-      content="Underground music magazine — reviews, features, bands, and culture. Not a blog. A transmission."
-    />
-    <meta property="og:url" content="https://instituteofsound.in/" />
-    <meta property="og:image" content="https://instituteofsound.in/og/site-og.jpg" />
-    <link rel="canonical" href="https://instituteofsound.in/" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Institute of Sound" />
-    <meta
-      name="twitter:description"
-      content="Underground music magazine — reviews, features, bands, and culture."
-    />
-    <meta name="twitter:image" content="https://instituteofsound.in/og/site-og.jpg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
-    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap"
-      rel="stylesheet"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Institute of Sound — underground music magazine and platform." />
     <title>Institute of Sound</title>
   </head>
   <body>
     <script>
       (function () {
         try {
-          var key = 'ios-theme-mode';
-          var mode = localStorage.getItem(key);
-          var themes = { dark: 1, bright: 1, metallic: 1, obsidian: 1, inferno: 1 };
-          if (!themes[mode]) mode = 'dark';
-          document.documentElement.setAttribute('data-theme', mode);
-          document.documentElement.style.colorScheme = mode === 'bright' ? 'light' : 'dark';
-          var meta = document.querySelector('meta[name="theme-color"]');
-          var metaColors = { dark: '#050505', bright: '#f4f3f0', metallic: '#0a0c10', obsidian: '#07080f', inferno: '#0a0504' };
-          if (meta) meta.setAttribute('content', metaColors[mode] || metaColors.dark);
+          var theme = localStorage.getItem('ios-theme');
+          var isDark =
+            theme === 'dark' ||
+            (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (isDark) document.documentElement.classList.add('dark');
         } catch (e) {}
       })();
     </script>

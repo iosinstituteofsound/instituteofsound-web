@@ -3,7 +3,7 @@ const BOT_UA =
 
 /** Edge-only — share cards are served by the Express API (Railway). */
 export const config = {
-  matcher: ['/artist/:slug', '/feature/:slug'],
+  matcher: ['/artist/:slug', '/feature/:slug', '/feed/:id'],
 }
 
 function apiOrigin(request: Request): string {
@@ -18,6 +18,13 @@ export default function middleware(request: Request) {
 
   const { pathname } = new URL(request.url)
   const origin = apiOrigin(request)
+
+  if (pathname.startsWith('/feed/')) {
+    const id = pathname.replace(/^\/feed\/?/, '').split('/')[0]?.trim()
+    if (!id) return
+    const shareUrl = `${origin}/api/share/feed/${encodeURIComponent(id)}`
+    return Response.redirect(shareUrl, 307)
+  }
 
   if (pathname.startsWith('/feature/')) {
     const slug = pathname.replace(/^\/feature\/?/, '').split('/')[0]?.trim()

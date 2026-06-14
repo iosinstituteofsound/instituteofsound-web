@@ -1,0 +1,33 @@
+.theme-color-picker .react-colorful {
+  width: 240px;
+  height: 180px;
+}
+
+.theme-color-picker .react-colorful__saturation {
+  border-radius: 8px 8px 0 0;
+}
+
+.theme-color-picker .react-colorful__hue,
+.theme-color-picker .react-colorful__alpha {
+  height: 14px;
+  border-radius: 9999px;
+  margin-top: 12px;
+}
+
+.theme-color-picker .react-colorful__alpha {
+  margin-top: 10px;
+}
+
+.theme-color-picker .react-colorful__pointer {
+  width: 18px;
+  height: 18px;
+}
+
+.theme-color-picker-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+}
