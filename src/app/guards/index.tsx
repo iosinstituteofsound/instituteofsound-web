@@ -21,23 +21,23 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const hydrated = usePermissionStore((s) => s.hydrated)
   const hasSession = tokenStorage.hasSession()
 
-  const { isLoading, isFetching, isError } = useMe(hasSession)
+  const { isLoading, isFetching, isError, isFetched } = useMe(hasSession)
 
   useEffect(() => {
-    if (isError) {
+    if (isError && isFetched && !isFetching && !isLoading) {
       clearSession()
     }
-  }, [isError, clearSession])
+  }, [isError, isFetched, isFetching, isLoading, clearSession])
 
   if (!isAuthenticated && !hasSession) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />
   }
 
-  if (hasSession && !hydrated && (isLoading || isFetching)) {
+  if (hasSession && !hydrated && (isLoading || isFetching || !isFetched)) {
     return <PageLoader />
   }
 
-  if (hasSession && (isError || !hydrated)) {
+  if (hasSession && isFetched && (isError || !hydrated)) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />
   }
 
