@@ -17,6 +17,7 @@ import {
 import {
   MediaAttachPanel,
   type MediaAttachment,
+  type MediaAttachPanelHandle,
 } from '@/modules/feed/components/media-attach-panel'
 import {
   LinkPreviewCard,
@@ -93,7 +94,9 @@ export function CreatePostDialog({
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [emojiAnchor, setEmojiAnchor] = useState<HTMLElement | null>(null)
   const [linkPreviewDismissed, setLinkPreviewDismissed] = useState(false)
+  const [mediaUploadState, setMediaUploadState] = useState({ uploading: false, hasPreview: false })
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const mediaPanelRef = useRef<MediaAttachPanelHandle>(null)
 
   const linkPreviewEnabled = !mediaAttachment && !showArticleFields && !linkPreviewDismissed
   const { detectedUrl, preview: linkPreview, isLoading: linkPreviewLoading } = useLinkPreview(
@@ -136,6 +139,8 @@ export function CreatePostDialog({
     setEmojiOpen(false)
     setEmojiAnchor(null)
     setLinkPreviewDismissed(false)
+    setMediaUploadState({ uploading: false, hasPreview: false })
+    mediaPanelRef.current?.clearPendingPreview()
   }
 
   const handleClose = (next: boolean) => {
@@ -166,16 +171,17 @@ export function CreatePostDialog({
       : null
 
   const canPost = useMemo(() => {
+    if (mediaUploadState.uploading) return false
     if (showArticleFields && articleUrl.trim()) return true
-    if (mediaAttachment) return true
+    if (mediaAttachment || mediaUploadState.hasPreview) return true
     if (activeLinkPreview) return true
     if (body.trim()) return true
     return false
-  }, [body, mediaAttachment, showArticleFields, articleUrl, activeLinkPreview])
+  }, [body, mediaAttachment, showArticleFields, articleUrl, activeLinkPreview, mediaUploadState])
 
-  const inferPostType = (): FeedItemType => {
+  const inferPostType = (attachment: MediaAttachment | null): FeedItemType => {
     if (showArticleFields && articleUrl.trim()) return 'article'
-    if (mediaAttachment) {
+    if (attachment || mediaUploadState.hasPreview) {
       if (resolvedMediaKind === 'video') return 'video'
       if (resolvedMediaKind === 'audio') return 'music'
       return 'image'
@@ -202,7 +208,19 @@ export function CreatePostDialog({
   }
 
   const handleSubmit = async () => {
-    const type = inferPostType()
+    if (mediaUploadState.uploading) {
+      toast.error('Wait for your media upload to finish')
+      return
+    }
+
+    let attachment = mediaAttachment
+
+    if (!attachment && mediaUploadState.hasPreview) {
+      attachment = (await mediaPanelRef.current?.uploadPendingPreview()) ?? null
+      if (!attachment) return
+    }
+
+    const type = inferPostType(attachment)
     const payload: Record<string, unknown> = {}
 
     if (type === 'text') {
@@ -237,14 +255,14 @@ export function CreatePostDialog({
       if (articleExcerpt.trim()) payload.excerpt = articleExcerpt.trim()
     }
 
-    if (mediaAttachment) {
-      if (type === 'image') payload.imageUrl = mediaAttachment.url
+    if (attachment) {
+      if (type === 'image') payload.imageUrl = attachment.url
       if (type === 'video') {
-        payload.videoUrl = mediaAttachment.url
-        if (mediaAttachment.posterUrl) payload.posterUrl = mediaAttachment.posterUrl
-        if (mediaAttachment.durationSec) payload.durationSec = mediaAttachment.durationSec
+        payload.videoUrl = attachment.url
+        if (attachment.posterUrl) payload.posterUrl = attachment.posterUrl
+        if (attachment.durationSec) payload.durationSec = attachment.durationSec
       }
-      if (type === 'music') payload.audioUrl = mediaAttachment.url
+      if (type === 'music') payload.audioUrl = attachment.url
     }
 
     try {
@@ -354,14 +372,16 @@ export function CreatePostDialog({
             </div>
           ) : showMediaPanel && mediaMode ? (
             <MediaAttachPanel
+              ref={mediaPanelRef}
               kind={mediaMode}
               attachment={null}
-              onAttachmentChange={(attachment) => {
-                setMediaAttachment(attachment)
-                if (attachment) setActiveAction(null)
+              onAttachmentChange={(nextAttachment) => {
+                setMediaAttachment(nextAttachment)
+                if (nextAttachment) setActiveAction(null)
               }}
               onResolvedKind={setResolvedMediaKind}
-              disabled={createFeed.isPending}
+              onUploadStateChange={setMediaUploadState}
+              disabled={createFeed.isPending || mediaUploadState.uploading}
               embedded
               initialTab={initialTabForAction(activeAction)}
               showClipEditor={showClipEditor}
@@ -389,8 +409,8 @@ export function CreatePostDialog({
             onAction={handleAddAction}
             onEmojiClick={toggleEmojiPicker}
             emojiActive={emojiOpen}
-            hasMedia={Boolean(mediaAttachment)}
-            disabled={createFeed.isPending}
+            hasMedia={Boolean(mediaAttachment) || mediaUploadState.hasPreview}
+            disabled={createFeed.isPending || mediaUploadState.uploading}
           />
         </div>
 
@@ -408,10 +428,10 @@ export function CreatePostDialog({
               'h-11 w-full rounded-lg text-[15px] font-semibold',
               !canPost && 'opacity-50',
             )}
-            disabled={createFeed.isPending || !canPost}
+            disabled={createFeed.isPending || !canPost || mediaUploadState.uploading}
             onClick={handleSubmit}
           >
-            {createFeed.isPending ? 'Posting…' : 'Post'}
+            {createFeed.isPending ? 'Posting…' : mediaUploadState.uploading ? 'Uploading…' : 'Post'}
           </Button>
         </div>
       </DialogContent>

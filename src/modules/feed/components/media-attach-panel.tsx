@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import {
   Camera,
   Film,
@@ -34,11 +34,17 @@ export type MediaAttachment = {
   durationSec?: number
 }
 
+export type MediaAttachPanelHandle = {
+  uploadPendingPreview: () => Promise<MediaAttachment | null>
+  clearPendingPreview: () => void
+}
+
 interface MediaAttachPanelProps {
   kind: MediaAttachMode
   attachment: MediaAttachment | null
   onAttachmentChange: (attachment: MediaAttachment | null) => void
   onResolvedKind?: (kind: MediaAttachKind) => void
+  onUploadStateChange?: (state: { uploading: boolean; hasPreview: boolean }) => void
   disabled?: boolean
   embedded?: boolean
   initialTab?: PanelTab
@@ -47,16 +53,20 @@ interface MediaAttachPanelProps {
 
 type PanelTab = 'upload' | 'record'
 
-export function MediaAttachPanel({
+export const MediaAttachPanel = forwardRef<MediaAttachPanelHandle, MediaAttachPanelProps>(function MediaAttachPanel(
+  {
   kind,
   attachment,
   onAttachmentChange,
   onResolvedKind,
+  onUploadStateChange,
   disabled = false,
   embedded = false,
   initialTab = 'upload',
   showClipEditor = false,
-}: MediaAttachPanelProps) {
+},
+  ref,
+) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [tab, setTab] = useState<PanelTab>(initialTab)
   const [resolvedKind, setResolvedKind] = useState<MediaAttachKind | null>(
@@ -88,7 +98,22 @@ export function MediaAttachPanel({
     }
   }, [kind])
 
+  useEffect(() => {
+    onUploadStateChange?.({ uploading: busy, hasPreview: Boolean(previewUrl) })
+  }, [busy, previewUrl, onUploadStateChange])
+
   const activeKind = resolvedKind ?? (kind === 'photo-video' ? 'image' : kind)
+
+  const extensionForBlob = (blob: Blob, blobKind: MediaAttachKind) => {
+    if (blobKind === 'image') {
+      if (blob.type.includes('png')) return '.png'
+      if (blob.type.includes('webp')) return '.webp'
+      if (blob.type.includes('gif')) return '.gif'
+      return '.jpg'
+    }
+    if (blobKind === 'video') return '.webm'
+    return '.wav'
+  }
 
   const clearPreview = useCallback(() => {
     if (previewUrl) URL.revokeObjectURL(previewUrl)
@@ -223,58 +248,80 @@ export function MediaAttachPanel({
     }
   }
 
-  const uploadPreview = async () => {
-    if (!previewBlob || busy) return
+  const uploadBlobToServer = async (
+    blob: Blob,
+    blobKind: MediaAttachKind,
+  ): Promise<MediaAttachment | null> => {
+    if (busy) return null
 
     setBusy(true)
     setUploadProgress(0)
+    setResolvedKind(blobKind)
+    onResolvedKind?.(blobKind)
 
     try {
-      const processed = await getProcessedBlob()
-      if (!processed) {
-        setBusy(false)
-        setUploadProgress(null)
-        return
-      }
-
-      const ext = activeKind === 'image' ? '.jpg' : activeKind === 'video' ? '.webm' : '.wav'
-      const filename = `feed-${Date.now()}${ext}`
-
-      const uploaded = await uploadMediaFile(processed, filename, setUploadProgress)
+      const filename = `feed-${Date.now()}${extensionForBlob(blob, blobKind)}`
+      const uploaded = await uploadMediaFile(blob, filename, setUploadProgress)
 
       let posterUrl: string | undefined
       let durationSec: number | undefined
 
-      if (activeKind === 'video') {
-        const poster = await captureVideoPoster(processed)
+      if (blobKind === 'video') {
+        const poster = await captureVideoPoster(blob)
         if (poster) {
           const posterUpload = await uploadMediaFile(poster, `poster-${Date.now()}.jpg`)
           posterUrl = posterUpload.absoluteUrl ?? posterUpload.url
         }
-        durationSec = await loadMediaDuration(processed, 'video').catch(() => undefined)
+        durationSec = await loadMediaDuration(blob, 'video').catch(() => undefined)
       }
 
-      if (activeKind === 'audio') {
-        durationSec = await loadMediaDuration(processed, 'audio').catch(() => undefined)
+      if (blobKind === 'audio') {
+        durationSec = await loadMediaDuration(blob, 'audio').catch(() => undefined)
       }
 
-      onAttachmentChange({
+      return {
         url: uploaded.absoluteUrl ?? uploaded.url,
         posterUrl,
         durationSec,
-      })
-      clearPreview()
-      toast.success('Media ready to post')
+      }
     } catch (err) {
       const message =
         err && typeof err === 'object' && 'message' in err
           ? String((err as { message: string }).message)
           : 'Upload failed'
       toast.error(message)
+      return null
     } finally {
       setBusy(false)
       setUploadProgress(null)
     }
+  }
+
+  const uploadPendingPreview = useCallback(async (): Promise<MediaAttachment | null> => {
+    if (!previewBlob) return null
+
+    const processed = await getProcessedBlob()
+    if (!processed) return null
+
+    const uploaded = await uploadBlobToServer(processed, activeKind)
+    if (uploaded) clearPreview()
+    return uploaded
+  }, [activeKind, previewBlob, busy, duration, trimStart, trimEnd])
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      uploadPendingPreview,
+      clearPendingPreview: clearPreview,
+    }),
+    [uploadPendingPreview, clearPreview],
+  )
+
+  const uploadPreview = async () => {
+    const uploaded = await uploadPendingPreview()
+    if (!uploaded) return
+    onAttachmentChange(uploaded)
+    toast.success('Media ready to post')
   }
 
   const removeAttachment = () => {
@@ -345,7 +392,7 @@ export function MediaAttachPanel({
             </div>
           ) : null}
 
-          {tab !== 'record' ? (
+          {tab !== 'record' && !previewUrl ? (
             <div
               onDragOver={(event) => {
                 event.preventDefault()
@@ -486,26 +533,30 @@ export function MediaAttachPanel({
                 </div>
               ) : null}
 
-              <Button type="button" className="w-full" onClick={uploadPreview} disabled={disabled || busy}>
-                {busy ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {uploadProgress !== null ? `Uploading ${uploadProgress}%` : 'Processing…'}
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Use this {activeKind}
-                  </>
-                )}
-              </Button>
+              {embedded ? (
+                <p className="text-xs text-muted-foreground">Uploads when you post</p>
+              ) : (
+                <Button type="button" className="w-full" onClick={uploadPreview} disabled={disabled || busy}>
+                  {busy ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {uploadProgress !== null ? `Uploading ${uploadProgress}%` : 'Processing…'}
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Use this {activeKind}
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           ) : null}
         </>
       )}
     </div>
   )
-}
+})
 
 export function mediaKindForFeedType(type: string): MediaAttachKind | null {
   if (type === 'image') return 'image'

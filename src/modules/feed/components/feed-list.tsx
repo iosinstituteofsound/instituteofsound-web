@@ -1,9 +1,10 @@
+import { useCallback, useEffect } from 'react'
 import { FeedItemCard } from '@/modules/feed/lib/feed-type-registry'
 import { useFeedList } from '@/modules/feed/hooks/use-feed'
-import { Button } from '@/shared/components/ui/button'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import { Skeleton } from '@/shared/components/ui/skeleton'
+import { useInfiniteScroll } from '@/shared/hooks/use-infinite-scroll'
 
 export function useFeedListItems() {
   const query = useFeedList()
@@ -19,6 +20,26 @@ export function FeedList({ compactLoader }: FeedListProps) {
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeedList()
 
   const items = data?.pages.flatMap((page) => page.items) ?? []
+
+  const loadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage()
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+
+  const sentinelRef = useInfiniteScroll(loadMore, { enabled: Boolean(hasNextPage) })
+
+  // Keep loading if the first page does not fill the scroll area.
+  useEffect(() => {
+    if (isFetchingNextPage || !hasNextPage) return
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const rect = sentinel.getBoundingClientRect()
+    if (rect.top <= window.innerHeight + 240) {
+      loadMore()
+    }
+  }, [hasNextPage, isFetchingNextPage, items.length, loadMore, sentinelRef])
 
   if (isLoading) {
     if (compactLoader) {
@@ -58,13 +79,25 @@ export function FeedList({ compactLoader }: FeedListProps) {
       {items.map((item) => (
         <FeedItemCard key={item.id} item={item} />
       ))}
-      {hasNextPage ? (
-        <div className="flex justify-center pt-1">
-          <Button variant="outline" className="rounded-lg" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-            {isFetchingNextPage ? 'Loading…' : 'See more posts'}
-          </Button>
+
+      {isFetchingNextPage ? (
+        <div className="space-y-3 pt-1">
+          {[1, 2].map((key) => (
+            <div key={key} className="rounded-xl border bg-card p-4 shadow-sm">
+              <div className="mb-3 flex gap-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              </div>
+              <Skeleton className="h-24 w-full rounded-lg" />
+            </div>
+          ))}
         </div>
       ) : null}
+
+      {hasNextPage ? <div ref={sentinelRef} className="h-px w-full" aria-hidden /> : null}
     </div>
   )
 }
