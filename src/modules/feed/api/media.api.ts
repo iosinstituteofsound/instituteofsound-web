@@ -6,6 +6,8 @@ import type { MediaAttachKind } from '@/modules/feed/lib/media-utils'
 export type MediaUploadResult = {
   url: string
   absoluteUrl?: string
+  publicId?: string
+  storage?: 'local' | 'cloudinary'
   kind: MediaAttachKind
   mimeType: string
   sizeBytes: number

@@ -249,7 +249,7 @@ export function MediaAttachPanel({
         const poster = await captureVideoPoster(processed)
         if (poster) {
           const posterUpload = await uploadMediaFile(poster, `poster-${Date.now()}.jpg`)
-          posterUrl = posterUpload.url
+          posterUrl = posterUpload.absoluteUrl ?? posterUpload.url
         }
         durationSec = await loadMediaDuration(processed, 'video').catch(() => undefined)
       }
@@ -259,7 +259,7 @@ export function MediaAttachPanel({
       }
 
       onAttachmentChange({
-        url: uploaded.url,
+        url: uploaded.absoluteUrl ?? uploaded.url,
         posterUrl,
         durationSec,
       })

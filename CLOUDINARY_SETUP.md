@@ -1,69 +1,65 @@
 # Cloudinary setup — Institute of Sound
 
-All **uploaded** images (track artwork, editorial covers) go to **Cloudinary** and load from their global CDN (`f_auto`, `q_auto`, responsive widths) for fast delivery.
+Uploaded **images, video, and audio** (feed posts, artwork, etc.) go to **Cloudinary** and load from their global CDN.
+
+## Current architecture
+
+| Flow | How it works |
+|------|----------------|
+| **Feed upload (active app)** | Browser → `POST /api/v1/media/upload` → API uploads to Cloudinary → returns `secure_url` |
+| **Direct browser upload (legacy / future)** | Browser → `POST /api/v1/media/sign` → upload to `api.cloudinary.com` |
+
+When Cloudinary env vars are **not** set, the API falls back to local disk (`uploads/feed/`) for development.
 
 ## 1. Create a Cloudinary account
 
 1. Go to [https://cloudinary.com](https://cloudinary.com) and sign up (free tier is fine).
-2. Open the **Dashboard** and copy your **Cloud name**.
+2. Open the **Dashboard** and copy your **Cloud name**, **API Key**, and **API Secret**.
 
-## 2. Signed upload preset (required)
+## 2. Upload preset (optional — for `/media/sign` only)
 
-1. **Settings** → **Upload** → **Upload presets** → **Add upload preset** (or edit existing)
+1. **Settings** → **Upload** → **Upload presets** → **Add upload preset**
 2. Name: e.g. `ios_signed`
-3. **Signing Mode**: **Signed** (not Unsigned — blocks random uploads without server signature)
-4. **Folder**: optional default `instituteofsound` (app sends `ios/...` subfolders via signed params)
-5. **Allowed formats**: jpg, png, webp, gif, avif (+ raw for PDFs on same or separate preset)
-6. **Max file size**: 10 MB images / 15 MB PDFs
-7. Save
+3. **Signing Mode**: **Signed**
+4. **Allowed formats**: jpg, png, webp, gif, mp4, webm, mov, mp3, wav, ogg, m4a
+5. **Max file size**: match `MAX_UPLOAD_MB` (default 50 MB)
 
-## 3. API key (server only)
-
-1. **Settings** → **API Keys** → use a **non-Root** key pair
-2. Add to `.env` / Vercel (never `VITE_`):
+## 3. API env (Render / `.env`)
 
 ```env
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 CLOUDINARY_UPLOAD_PRESET=ios_signed
+CLOUDINARY_UPLOAD_FOLDER=ios/feed
 ```
 
-## 4. Add to `.env` (browser + server)
+Never expose `CLOUDINARY_API_SECRET` in `VITE_*` vars.
+
+## 4. Browser env (optional)
 
 ```env
 VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
-VITE_CLOUDINARY_UPLOAD_PRESET=ios_signed
 ```
 
-Restart dev server after saving:
-
-```bash
-npm run dev
-```
-
-## 5. Supabase (optional)
-
-If you use Supabase, run in SQL Editor:
-
-`instituteofsound-api/supabase/migrations/004-cloudinary-images.sql`
-
-This adds `cover_image_url` on `track_submissions` and `editorial_drafts`.
+Only needed if you add client-side direct uploads later.
 
 ## Upload folders
 
 | Folder | Use |
 |--------|-----|
+| `ios/feed` | Feed images, video, audio (default server upload folder) |
 | `ios/submissions` | Artist track artwork |
 | `ios/editorial` | Editor draft / feature images |
-| `ios/artists` | Band profiles (future) |
-| `ios/features` | Magazine features (future) |
-| `ios/press-kits` | Artist EPK / press kit PDFs (raw upload) |
+| `ios/community` | Community posts |
+| `ios/press-kits` | PDF / raw files |
 
-## Display
+## Verify
 
-The app uses `IOSImage` — Cloudinary URLs get `f_auto,q_auto,w_*` transforms. External demo URLs (Unsplash in JSON) still work; enable **Fetched URL** in Cloudinary if you want those optimized too.
+After deploy, check:
 
-## Security note
+```bash
+curl -s https://your-api.onrender.com/health
+```
 
-Uploads are **signed server-side** via `POST /api/v1/media/sign` (login required). Only whitelisted `ios/*` folders are allowed. Never put `CLOUDINARY_API_SECRET` in `VITE_*` env vars.
+`data.cloudinary` should be `true` when configured.
