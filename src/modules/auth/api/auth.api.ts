@@ -1,4 +1,4 @@
-import { env } from '@/shared/config/env'
+import { env, apiUrl } from '@/shared/config/env'
 import { apiClient } from '@/shared/services/api/api-client'
 import type { ApiSuccessResponse } from '@/shared/types/api.types'
 
@@ -21,7 +21,7 @@ export function buildGoogleAuthUrl(): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : env.siteUrl
   const returnTo = `${origin}/auth/callback`
   const params = new URLSearchParams({ return_to: returnTo })
-  return `/api/auth/google?${params.toString()}`
+  return apiUrl(`/api/auth/google?${params.toString()}`)
 }
 
 export function redirectToGoogleAuth(): void {

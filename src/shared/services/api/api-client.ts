@@ -1,5 +1,5 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
-import { env } from '@/shared/config/env'
+import { apiUrl, env } from '@/shared/config/env'
 import type {
   ApiErrorResponse,
   LegacyAuthError,
@@ -44,7 +44,7 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refreshToken) return null
 
   try {
-    const { data } = await axios.post<RefreshTokenResponse>('/api/auth/refresh', {
+    const { data } = await axios.post<RefreshTokenResponse>(apiUrl('/api/auth/refresh'), {
       refresh_token: refreshToken,
     })
     tokenStorage.setTokens(data.access_token, data.refresh_token)

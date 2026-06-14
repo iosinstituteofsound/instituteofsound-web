@@ -6,3 +6,10 @@ export const env = {
 } as const
 
 export const API_V1 = '/api/v1'
+
+/** Absolute API URL in production; relative in dev (Vite proxy). */
+export function apiUrl(path: string): string {
+  const normalized = path.startsWith('/') ? path : `/${path}`
+  const base = env.apiBaseUrl.replace(/\/+$/, '')
+  return base ? `${base}${normalized}` : normalized
+}

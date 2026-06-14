@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/shared/components/ui/input'
 import { useLayoutStore } from '@/app/stores/layout-store'
 import { getLayoutHomeRouteFromLayout } from '@/shared/lib/layout-home-route'
-import { env } from '@/shared/config/env'
+import { apiUrl, env } from '@/shared/config/env'
 import { toast } from '@/shared/components/ui/sonner'
 
 export function LoginPage() {
@@ -22,7 +22,7 @@ export function LoginPage() {
   useEffect(() => {
     if (!env.isDev) return
     const returnTo = `${window.location.origin}/auth/callback`
-    fetch(`/api/auth/oauth-setup?return_to=${encodeURIComponent(returnTo)}`)
+    fetch(apiUrl(`/api/auth/oauth-setup?return_to=${encodeURIComponent(returnTo)}`))
       .then((r) => r.json())
       .then((data: { redirectUri?: string }) => {
         if (data.redirectUri) setOauthRedirectUri(data.redirectUri)
