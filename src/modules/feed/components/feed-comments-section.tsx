@@ -52,7 +52,8 @@ export function FeedCommentsSection({
 }: FeedCommentsSectionProps) {
   const userId = useAuthStore((s) => s.userId)
   const { data: me } = useMe(Boolean(userId))
-  const { data: comments = [], isLoading } = useFeedComments(feedItemId, true)
+  const { data: commentsData, isLoading } = useFeedComments(feedItemId, true)
+  const comments = Array.isArray(commentsData) ? commentsData : []
   const addComment = useAddFeedComment()
   const deleteComment = useDeleteFeedComment()
   const [draft, setDraft] = useState('')

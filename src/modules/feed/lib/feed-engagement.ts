@@ -29,7 +29,7 @@ export function patchFeedItemInCache(
   feedItemId: string,
   patch: (item: FeedItemDto) => FeedItemDto,
 ): InfiniteData<FeedListResponse> | undefined {
-  if (!data) return data
+  if (!data || !Array.isArray(data.pages)) return data
 
   return {
     ...data,
