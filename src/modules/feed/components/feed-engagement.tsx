@@ -3,10 +3,13 @@ import { Link } from 'react-router-dom'
 import { MessageCircle, Share2, ThumbsUp } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { FeedCommentsSection } from '@/modules/feed/components/feed-comments-section'
+import { ReactionPickerIcon } from '@/modules/feed/components/feed-reaction-icons'
+import { FeedReactionPicker } from '@/modules/feed/components/feed-reaction-picker'
 import { useSetFeedReaction } from '@/modules/feed/hooks/use-feed-engagement'
 import { getEngagement } from '@/modules/feed/lib/feed-engagement'
 import { buildFeedPostPageMeta } from '@/modules/feed/lib/feed-post-meta'
 import { FEED_REACTION_OPTIONS, feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
+import { unlockReactionSounds } from '@/modules/feed/lib/feed-reaction-sounds'
 import type { FeedItemDto, FeedReactionKind } from '@/modules/feed/types/feed.types'
 import { env } from '@/shared/config/env'
 import { toast } from '@/shared/components/ui/sonner'
@@ -23,6 +26,7 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
   const [commentsExpanded, setCommentsExpanded] = useState(defaultCommentsOpen)
   const [pickerOpen, setPickerOpen] = useState(false)
   const reactRef = useRef<HTMLDivElement>(null)
+  const likeButtonRef = useRef<HTMLButtonElement>(null)
   const commentInputRef = useRef<HTMLTextAreaElement>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
@@ -39,12 +43,13 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
 
   const openPicker = () => {
     clearCloseTimer()
+    unlockReactionSounds()
     setPickerOpen(true)
   }
 
   const scheduleClosePicker = () => {
     clearCloseTimer()
-    closeTimer.current = setTimeout(() => setPickerOpen(false), 200)
+    closeTimer.current = setTimeout(() => setPickerOpen(false), 280)
   }
 
   const react = (kind: FeedReactionKind) => {
@@ -98,34 +103,23 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
           {userId ? (
             <div
               ref={reactRef}
-              className="relative"
+              className="relative overflow-visible"
               onMouseEnter={openPicker}
               onMouseLeave={scheduleClosePicker}
             >
               {pickerOpen ? (
-                <div
-                  className="absolute bottom-full left-0 z-20 mb-2 flex gap-1 rounded-full border bg-card px-2 py-1.5 shadow-lg"
+                <FeedReactionPicker
+                  open={pickerOpen}
+                  anchorRef={likeButtonRef}
+                  myReaction={engagement.myReaction}
+                  disabled={setReaction.isPending}
+                  onSelect={react}
                   onMouseEnter={openPicker}
                   onMouseLeave={scheduleClosePicker}
-                >
-                  {FEED_REACTION_OPTIONS.map((r) => (
-                    <button
-                      key={r.kind}
-                      type="button"
-                      className={cn(
-                        'flex h-9 w-9 items-center justify-center rounded-full text-xl transition-transform hover:scale-125',
-                        engagement.myReaction === r.kind && 'bg-muted',
-                      )}
-                      title={r.label}
-                      disabled={setReaction.isPending}
-                      onClick={() => react(r.kind)}
-                    >
-                      {r.emoji}
-                    </button>
-                  ))}
-                </div>
+                />
               ) : null}
               <button
+                ref={likeButtonRef}
                 type="button"
                 className={cn(
                   'flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted/70',
@@ -136,9 +130,11 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
                 onClick={onQuickLike}
               >
                 {myReaction ? (
-                  <span className="text-lg" aria-hidden>
-                    {myReaction.emoji}
-                  </span>
+                  <ReactionPickerIcon
+                    kind={myReaction.kind}
+                    label={myReaction.label}
+                    size="inline"
+                  />
                 ) : (
                   <ThumbsUp className="h-5 w-5" />
                 )}
@@ -185,13 +181,10 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
               {activeKinds.slice(0, 3).map((r) => (
                 <span
                   key={r.kind}
-                  className={cn(
-                    'inline-flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-card text-[10px] leading-none',
-                    r.bubbleClass,
-                  )}
+                  className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full border-2 border-card bg-card"
                   aria-hidden
                 >
-                  {r.emoji}
+                  <ReactionPickerIcon kind={r.kind} label={r.label} size="inline" />
                 </span>
               ))}
             </span>

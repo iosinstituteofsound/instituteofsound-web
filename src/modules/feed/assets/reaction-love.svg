@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="loveGradient" x1="24" y1="0" x2="24" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF6B81"/>
+      <stop offset="100%" stop-color="#F02849"/>
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="24" r="24" fill="url(#loveGradient)"/>
+  <path fill="#FFFFFF" d="M24 35.2c-.28 0-.56-.09-.78-.28-5.52-5.04-9.1-9.32-9.1-13.47 0-3.58 2.92-6.5 6.5-6.5 2.02 0 3.92.94 5.13 2.42 1.21-1.48 3.11-2.42 5.13-2.42 3.58 0 6.5 2.92 6.5 6.5 0 4.15-3.58 8.43-9.1 13.47-.22.19-.5.28-.78.28z"/>
+</svg>

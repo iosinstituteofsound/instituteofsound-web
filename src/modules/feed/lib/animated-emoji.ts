@@ -1,13 +1,18 @@
 import { catalogSlugForEmoji } from '@/modules/feed/lib/emoji-catalog'
 
 const NOTO_ANIMATED_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest'
+const NOTO_ANIMATED_SIZE = 512
 const RECENT_STORAGE_KEY = 'ios-feed-recent-emojis'
 const MAX_RECENT = 24
 
 const EMOJI_PATTERN = /\p{Extended_Pictographic}(\uFE0F|\u200D\p{Extended_Pictographic})*/gu
 
-export function animatedEmojiUrl(slug: string, size = 512): string {
+export function animatedEmojiUrl(slug: string, size = NOTO_ANIMATED_SIZE): string {
   return `${NOTO_ANIMATED_BASE}/${slug}/${size}.webp`
+}
+
+export function staticEmojiUrl(slug: string, size = NOTO_ANIMATED_SIZE): string {
+  return `${NOTO_ANIMATED_BASE}/${slug}/${size}.png`
 }
 
 export function graphemeSegments(text: string): string[] {
