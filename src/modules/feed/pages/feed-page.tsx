@@ -1,22 +1,37 @@
 import { useRef, useState } from 'react'
 import { useMe } from '@/modules/auth/hooks/use-auth'
-import { CreatePostDialog } from '@/modules/feed/components/create-post-dialog'
+import { CreateMediaStoryDialog } from '@/modules/feed/components/create-media-story-dialog'
+import { CreateStoryDialog } from '@/modules/feed/components/create-story-dialog'
+import { CreateTextStoryDialog } from '@/modules/feed/components/create-text-story-dialog'
 import { FeedComposer } from '@/modules/feed/components/feed-composer'
 import { FeedList, useFeedListItems } from '@/modules/feed/components/feed-list'
 import { FeedStoriesRow } from '@/modules/feed/components/feed-stories-row'
+import { StoryViewer } from '@/modules/feed/components/story-viewer'
 import { useScrollCollapse } from '@/modules/feed/hooks/use-scroll-collapse'
+import { getStoryItems } from '@/modules/feed/lib/story-content'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 
 export function FeedPage() {
   const { data: me } = useMe()
   const { items, isLoading } = useFeedListItems()
-  const [storyOpen, setStoryOpen] = useState(false)
+  const [storyPickerOpen, setStoryPickerOpen] = useState(false)
+  const [mediaStoryOpen, setMediaStoryOpen] = useState(false)
+  const [textStoryOpen, setTextStoryOpen] = useState(false)
+  const [storyViewerOpen, setStoryViewerOpen] = useState(false)
+  const [activeStoryId, setActiveStoryId] = useState<string | null>(null)
   const composerAnchorRef = useRef<HTMLDivElement>(null)
   const collapseProgress = useScrollCollapse(composerAnchorRef)
 
   const userName = me?.user.name ?? 'You'
   const avatarUrl = me?.user.avatarUrl
+  const storyItems = getStoryItems(items)
+
+  const handleStorySelect = (type: 'image' | 'text') => {
+    setStoryPickerOpen(false)
+    if (type === 'image') setMediaStoryOpen(true)
+    else setTextStoryOpen(true)
+  }
 
   return (
     <div className="mx-auto w-full max-w-[680px] pb-8">
@@ -40,19 +55,50 @@ export function FeedPage() {
             items={items}
             userName={userName}
             avatarUrl={avatarUrl}
-            onCreateStory={() => setStoryOpen(true)}
+            onCreateStory={() => setStoryPickerOpen(true)}
+            onStoryClick={(storyId) => {
+              setActiveStoryId(storyId)
+              setStoryViewerOpen(true)
+            }}
           />
         )}
 
         <FeedList compactLoader />
       </div>
 
-      <CreatePostDialog
-        open={storyOpen}
-        onOpenChange={setStoryOpen}
-        initialType="image"
+      <CreateStoryDialog
+        open={storyPickerOpen}
+        onOpenChange={setStoryPickerOpen}
         userName={userName}
         avatarUrl={avatarUrl}
+        onSelect={handleStorySelect}
+      />
+
+      <CreateMediaStoryDialog
+        open={mediaStoryOpen}
+        onOpenChange={setMediaStoryOpen}
+        userName={userName}
+        avatarUrl={avatarUrl}
+      />
+
+      <CreateTextStoryDialog
+        open={textStoryOpen}
+        onOpenChange={setTextStoryOpen}
+        userName={userName}
+        avatarUrl={avatarUrl}
+      />
+
+      <StoryViewer
+        open={storyViewerOpen}
+        onOpenChange={setStoryViewerOpen}
+        stories={storyItems}
+        initialStoryId={activeStoryId}
+        userName={userName}
+        avatarUrl={avatarUrl}
+        onCreateStory={() => {
+          setStoryViewerOpen(false)
+          setStoryPickerOpen(true)
+        }}
       />
     </div>
   )

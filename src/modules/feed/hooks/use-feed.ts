@@ -22,13 +22,22 @@ export function useCreateFeedItem() {
       queryClient.setQueriesData<InfiniteData<FeedListResponse>>(
         { queryKey: feedQueryKey },
         (current) => {
-          if (!current?.pages.length) return current
-          const [firstPage, ...rest] = current.pages
-          const alreadyListed = firstPage.items.some((entry) => entry.id === item.id)
+          const pages = current?.pages
+          if (!pages?.length) {
+            return {
+              pages: [{ items: [item], nextCursor: null }],
+              pageParams: current?.pageParams ?? [undefined],
+            }
+          }
+
+          const [firstPage, ...rest] = pages
+          const existingItems = firstPage?.items ?? []
+          const alreadyListed = existingItems.some((entry) => entry.id === item.id)
           if (alreadyListed) return current
+
           return {
             ...current,
-            pages: [{ ...firstPage, items: [item, ...firstPage.items] }, ...rest],
+            pages: [{ ...firstPage, items: [item, ...existingItems] }, ...rest],
           }
         },
       )

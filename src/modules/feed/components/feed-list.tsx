@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react'
 import { FeedItemCard } from '@/modules/feed/lib/feed-type-registry'
 import { useFeedList } from '@/modules/feed/hooks/use-feed'
+import { isStoryItem } from '@/modules/feed/lib/story-utils'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -19,7 +20,7 @@ interface FeedListProps {
 export function FeedList({ compactLoader }: FeedListProps) {
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeedList()
 
-  const items = data?.pages.flatMap((page) => page.items) ?? []
+  const items = (data?.pages.flatMap((page) => page.items) ?? []).filter((item) => !isStoryItem(item))
 
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
