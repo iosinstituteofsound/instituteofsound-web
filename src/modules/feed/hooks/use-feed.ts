@@ -26,30 +26,18 @@ export function useCreateFeedItem() {
           if (!pages?.length) {
             return {
               pages: [{ items: [item], nextCursor: null }],
-<<<<<<< Updated upstream
-              pageParams: current?.pageParams ?? [undefined],
-=======
               pageParams: [undefined],
->>>>>>> Stashed changes
             }
           }
 
           const [firstPage, ...rest] = pages
           const existingItems = firstPage?.items ?? []
           const alreadyListed = existingItems.some((entry) => entry.id === item.id)
-<<<<<<< Updated upstream
-          if (alreadyListed) return current
-
-          return {
-            ...current,
-            pages: [{ ...firstPage, items: [item, ...existingItems] }, ...rest],
-=======
           if (alreadyListed || !current) return current
 
           return {
             pages: [{ ...firstPage, items: [item, ...existingItems] }, ...rest],
             pageParams: current.pageParams,
->>>>>>> Stashed changes
           }
         },
       )
