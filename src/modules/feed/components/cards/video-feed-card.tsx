@@ -12,11 +12,7 @@ export function VideoFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
       media={
         videoUrl ? (
           <FeedMediaFrame>
-            <video
-              controls
-              className="max-h-[min(72vh,680px)] w-full object-contain"
-              poster={posterUrl}
-            >
+            <video controls poster={posterUrl}>
               <source src={videoUrl} />
             </video>
           </FeedMediaFrame>

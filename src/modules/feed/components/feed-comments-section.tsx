@@ -1,16 +1,13 @@
-import { useMemo, useState, type RefObject } from 'react'
+import { useMemo, useState } from 'react'
 import { useAuthStore } from '@/app/stores/auth-store'
-import { useMe } from '@/modules/auth/hooks/use-auth'
+import { FeedCommentComposer } from '@/modules/feed/components/feed-comment-composer'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import {
-  useAddFeedComment,
   useDeleteFeedComment,
   useFeedComments,
 } from '@/modules/feed/hooks/use-feed-engagement'
 import { formatCommentTimestamp } from '@/modules/feed/lib/feed-time'
 import type { FeedCommentDto } from '@/modules/feed/types/feed.types'
-import { Button } from '@/shared/components/ui/button'
-import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/cn'
 
 const PREVIEW_COMMENT_LIMIT = 2
@@ -41,7 +38,10 @@ interface FeedCommentsSectionProps {
   feedItemId: string
   expanded?: boolean
   onExpand?: () => void
-  inputRef?: RefObject<HTMLTextAreaElement | null>
+  inputRef?: React.RefObject<HTMLTextAreaElement | null>
+  showComposer?: boolean
+  variant?: 'inline' | 'modal'
+  onReply?: (comment: FeedCommentDto) => void
 }
 
 export function FeedCommentsSection({
@@ -49,45 +49,40 @@ export function FeedCommentsSection({
   expanded = false,
   onExpand,
   inputRef,
+  showComposer = true,
+  variant = 'inline',
+  onReply,
 }: FeedCommentsSectionProps) {
   const userId = useAuthStore((s) => s.userId)
-  const { data: me } = useMe(Boolean(userId))
   const { data: commentsData, isLoading } = useFeedComments(feedItemId, true)
   const comments = Array.isArray(commentsData) ? commentsData : []
-  const addComment = useAddFeedComment()
   const deleteComment = useDeleteFeedComment()
-  const [draft, setDraft] = useState('')
-  const [replyTo, setReplyTo] = useState<FeedCommentDto | null>(null)
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({})
 
   const thread = useMemo(() => buildCommentThread(comments), [comments])
   const hiddenCount = Math.max(0, thread.length - PREVIEW_COMMENT_LIMIT)
   const visibleRoots = expanded ? thread : thread.slice(0, PREVIEW_COMMENT_LIMIT)
+  const isModal = variant === 'modal'
 
-  const submit = async () => {
-    const body = draft.trim()
-    if (!body || !userId || addComment.isPending) return
-
-    await addComment.mutateAsync({
-      feedItemId,
-      body,
-      parentId: replyTo?.id,
-    })
-    setDraft('')
-    setReplyTo(null)
+  const handleReply = (comment: FeedCommentDto) => {
+    if (onReply) {
+      onReply(comment)
+      return
+    }
     onExpand?.()
+    window.setTimeout(() => inputRef?.current?.focus(), 0)
   }
 
   if (isLoading) {
     return (
-      <div className="border-t px-3 py-2 sm:px-4">
+      <div className={cn(isModal && 'feed-comments--modal')}>
         <p className="text-sm text-muted-foreground">Loading comments…</p>
       </div>
     )
   }
 
   return (
-    <div className="border-t px-3 py-2 sm:px-4">
+    <div className={cn(isModal && 'feed-comments--modal')}>
       {!expanded && hiddenCount > 0 ? (
         <button
           type="button"
@@ -108,69 +103,21 @@ export function FeedCommentsSection({
               userId={userId}
               expanded={expanded}
               expandedReplies={expandedReplies}
+              variant={variant}
               onToggleReplies={(commentId) =>
                 setExpandedReplies((current) => ({ ...current, [commentId]: !current[commentId] }))
               }
-              onReply={(comment) => {
-                setReplyTo(comment)
-                onExpand?.()
-                window.setTimeout(() => inputRef?.current?.focus(), 0)
-              }}
+              onReply={handleReply}
               onDelete={(comment) => deleteComment.mutate({ feedItemId, commentId: comment.id })}
             />
           ))}
         </ul>
+      ) : isModal ? (
+        <p className="py-4 text-center text-sm text-muted-foreground">No comments yet. Be the first.</p>
       ) : null}
 
-      {userId ? (
-        <div className="flex gap-2 border-t border-border/50 pt-3">
-          <FeedUserAvatar
-            name={me?.user.name ?? 'You'}
-            avatarUrl={me?.user.avatarUrl}
-            className="h-8 w-8 shrink-0"
-          />
-          <div className="min-w-0 flex-1 space-y-2">
-            {replyTo ? (
-              <p className="text-xs text-muted-foreground">
-                Replying to <span className="font-medium text-foreground">{replyTo.author.name}</span>
-                <button
-                  type="button"
-                  className="ml-2 font-semibold text-primary hover:underline"
-                  onClick={() => setReplyTo(null)}
-                >
-                  Cancel
-                </button>
-              </p>
-            ) : null}
-            <Textarea
-              ref={inputRef}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder={`Comment as ${me?.user.name?.split(' ')[0] ?? 'you'}`}
-              rows={1}
-              className="min-h-9 resize-none rounded-full border-muted-foreground/20 bg-muted/40 px-4 py-2 text-sm"
-              onFocus={onExpand}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  void submit()
-                }
-              }}
-            />
-            {draft.trim() ? (
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  className="rounded-lg"
-                  disabled={addComment.isPending}
-                  onClick={() => void submit()}
-                >
-                  {addComment.isPending ? 'Posting…' : 'Post'}
-                </Button>
-              </div>
-            ) : null}
-          </div>
-        </div>
+      {showComposer && variant === 'inline' ? (
+        <FeedCommentComposer feedItemId={feedItemId} inputRef={inputRef} variant="inline" />
       ) : null}
     </div>
   )
@@ -182,6 +129,7 @@ function CommentItem({
   userId,
   expanded,
   expandedReplies,
+  variant,
   onToggleReplies,
   onReply,
   onDelete,
@@ -191,6 +139,7 @@ function CommentItem({
   userId: string | null
   expanded: boolean
   expandedReplies: Record<string, boolean>
+  variant: 'inline' | 'modal'
   onToggleReplies: (commentId: string) => void
   onReply: (comment: FeedCommentDto) => void
   onDelete: (comment: FeedCommentDto) => void
@@ -200,6 +149,7 @@ function CommentItem({
   const repliesExpanded = expanded || expandedReplies[comment.id]
   const hiddenReplies = Math.max(0, replies.length - PREVIEW_REPLY_LIMIT)
   const visibleReplies = repliesExpanded ? replies : replies.slice(0, PREVIEW_REPLY_LIMIT)
+  const isModal = variant === 'modal'
 
   return (
     <li>
@@ -216,7 +166,7 @@ function CommentItem({
           className={cn('shrink-0', depth > 0 ? 'h-7 w-7' : 'h-8 w-8')}
         />
         <div className="min-w-0 flex-1">
-          <div className="inline-block max-w-full rounded-2xl bg-muted/70 px-3 py-2">
+          <div className={cn('inline-block max-w-full rounded-2xl px-3 py-2 feed-comment-bubble', isModal ? 'bg-muted/50' : 'bg-muted/70')}>
             <p className="text-[13px] font-semibold leading-tight">{comment.author.name}</p>
             <p className="whitespace-pre-wrap text-[15px] leading-snug">{comment.body}</p>
           </div>
@@ -249,7 +199,7 @@ function CommentItem({
               className="ml-11 text-xs font-semibold text-muted-foreground hover:underline"
               onClick={() => onToggleReplies(comment.id)}
             >
-              View {hiddenReplies} more {hiddenReplies === 1 ? 'reply' : 'replies'}
+              View all {replies.length} replies
             </button>
           ) : null}
           <ul className="space-y-2">
@@ -261,6 +211,7 @@ function CommentItem({
                 userId={userId}
                 expanded={expanded}
                 expandedReplies={expandedReplies}
+                variant={variant}
                 onToggleReplies={onToggleReplies}
                 onReply={onReply}
                 onDelete={onDelete}

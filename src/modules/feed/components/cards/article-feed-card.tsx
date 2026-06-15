@@ -15,8 +15,8 @@ export function ArticleFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
       defaultCommentsOpen={defaultCommentsOpen}
       media={
         coverUrl ? (
-          <FeedMediaFrame className="max-h-[320px]">
-            <img src={coverUrl} alt={item.title ?? 'Article'} className="max-h-[320px] w-full object-contain" />
+          <FeedMediaFrame>
+            <img src={coverUrl} alt={item.title ?? 'Article'} />
           </FeedMediaFrame>
         ) : null
       }

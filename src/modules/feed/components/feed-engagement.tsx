@@ -2,11 +2,12 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MessageCircle, Share2, ThumbsUp } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
-import { FeedCommentsSection } from '@/modules/feed/components/feed-comments-section'
+import { FeedCommentDialog } from '@/modules/feed/components/feed-comment-dialog'
 import { ReactionPickerIcon } from '@/modules/feed/components/feed-reaction-icons'
 import { FeedReactionPicker } from '@/modules/feed/components/feed-reaction-picker'
 import { useSetFeedReaction } from '@/modules/feed/hooks/use-feed-engagement'
 import { getEngagement } from '@/modules/feed/lib/feed-engagement'
+import { formatEngagementCount } from '@/modules/feed/lib/format-engagement-count'
 import { buildFeedPostPageMeta } from '@/modules/feed/lib/feed-post-meta'
 import { FEED_REACTION_OPTIONS, feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
 import { unlockReactionSounds } from '@/modules/feed/lib/feed-reaction-sounds'
@@ -18,16 +19,25 @@ import { cn } from '@/shared/lib/cn'
 interface FeedEngagementProps {
   item: FeedItemDto
   defaultCommentsOpen?: boolean
+  variant?: 'default' | 'social'
 }
 
-export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngagementProps) {
+const REACTION_STATE_CLASS: Record<FeedReactionKind, string> = {
+  like: 'is-active',
+  love: 'is-loved',
+  haha: 'is-haha',
+  wow: 'is-wow',
+  sad: 'is-sad',
+  angry: 'is-angry',
+}
+
+export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'default' }: FeedEngagementProps) {
   const userId = useAuthStore((s) => s.userId)
   const engagement = getEngagement(item)
-  const [commentsExpanded, setCommentsExpanded] = useState(defaultCommentsOpen)
+  const [commentDialogOpen, setCommentDialogOpen] = useState(defaultCommentsOpen)
   const [pickerOpen, setPickerOpen] = useState(false)
   const reactRef = useRef<HTMLDivElement>(null)
   const likeButtonRef = useRef<HTMLButtonElement>(null)
-  const commentInputRef = useRef<HTMLTextAreaElement>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const setReaction = useSetFeedReaction()
@@ -36,6 +46,7 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
     (a, b) => engagement.reactions[b.kind] - engagement.reactions[a.kind],
   )
   const myReaction = engagement.myReaction ? feedReactionMeta(engagement.myReaction) : null
+  const showStats = engagement.reactionTotal > 0 || engagement.commentCount > 0
 
   const clearCloseTimer = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
@@ -63,9 +74,8 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
     react(engagement.myReaction ?? 'like')
   }
 
-  const focusComments = () => {
-    setCommentsExpanded(true)
-    window.setTimeout(() => commentInputRef.current?.focus(), 0)
+  const openComments = () => {
+    setCommentDialogOpen(true)
   }
 
   const sharePost = async () => {
@@ -96,14 +106,76 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
     }
   }
 
-  return (
-    <div>
-      <div className="flex items-center justify-between px-2 py-1 sm:px-3">
-        <div className="flex items-center">
-          {userId ? (
+  const likeButtonInner = myReaction ? (
+    <ReactionPickerIcon kind={myReaction.kind} label={myReaction.label} size="inline" />
+  ) : (
+    <ThumbsUp className="h-5 w-5" />
+  )
+
+  const likeButton = userId ? (
+    <button
+      ref={likeButtonRef}
+      type="button"
+      className={cn(
+        'feed-social-card__action-btn',
+        engagement.myReaction && REACTION_STATE_CLASS[engagement.myReaction],
+      )}
+      aria-label={myReaction ? myReaction.label : 'Like'}
+      disabled={setReaction.isPending}
+      onClick={onQuickLike}
+    >
+      {likeButtonInner}
+      <span>Like</span>
+    </button>
+  ) : (
+    <Link to="/auth/login" className="feed-social-card__action-btn" aria-label="Like">
+      <ThumbsUp className="h-5 w-5" />
+      <span>Like</span>
+    </Link>
+  )
+
+  if (variant === 'social') {
+    return (
+      <>
+        <div className="feed-social-card__engagement">
+          {showStats ? (
+            <div className="feed-social-card__stats">
+              <div className="feed-social-card__stats-left">
+                {engagement.reactionTotal > 0 ? (
+                  <>
+                    <span className="feed-social-card__reaction-stack" aria-hidden>
+                      {activeKinds.slice(0, 3).map((reaction) => (
+                        <span key={reaction.kind} className="feed-social-card__reaction-bubble">
+                          <ReactionPickerIcon kind={reaction.kind} label={reaction.label} size="inline" />
+                        </span>
+                      ))}
+                    </span>
+                    <span className="feed-social-card__stats-count">
+                      {formatEngagementCount(engagement.reactionTotal)}
+                    </span>
+                  </>
+                ) : null}
+              </div>
+              <div className="feed-social-card__stats-right">
+                {engagement.commentCount > 0 ? (
+                  <button
+                    type="button"
+                    className="feed-social-card__stats-link"
+                    onClick={openComments}
+                  >
+                    {formatEngagementCount(engagement.commentCount)} comments
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="feed-social-card__divider" />
+
+          <div className="feed-social-card__action-bar">
             <div
               ref={reactRef}
-              className="relative overflow-visible"
+              className="feed-social-card__action-slot"
               onMouseEnter={openPicker}
               onMouseLeave={scheduleClosePicker}
             >
@@ -118,87 +190,61 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
                   onMouseLeave={scheduleClosePicker}
                 />
               ) : null}
+              {likeButton}
+            </div>
+
+            <div className="feed-social-card__action-slot">
               <button
-                ref={likeButtonRef}
                 type="button"
-                className={cn(
-                  'flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted/70',
-                  myReaction?.activeClass,
-                )}
-                aria-label={myReaction ? myReaction.label : 'Like'}
-                disabled={setReaction.isPending}
-                onClick={onQuickLike}
+                className="feed-social-card__action-btn"
+                aria-label="Comment"
+                onClick={openComments}
               >
-                {myReaction ? (
-                  <ReactionPickerIcon
-                    kind={myReaction.kind}
-                    label={myReaction.label}
-                    size="inline"
-                  />
-                ) : (
-                  <ThumbsUp className="h-5 w-5" />
-                )}
+                <MessageCircle className="h-5 w-5" />
+                <span>Comment</span>
               </button>
             </div>
-          ) : (
-            <Link
-              to="/auth/login"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70"
-              aria-label="Like"
-            >
-              <ThumbsUp className="h-5 w-5" />
-            </Link>
-          )}
 
-          <button
-            type="button"
-            className="flex h-9 items-center justify-center gap-1 rounded-full px-2 text-muted-foreground transition-colors hover:bg-muted/70"
-            aria-label="Comment"
-            onClick={focusComments}
-          >
-            <MessageCircle className="h-5 w-5" />
-            {engagement.commentCount > 0 ? (
-              <span className="min-w-[1ch] text-sm font-medium text-foreground">{engagement.commentCount}</span>
-            ) : null}
-          </button>
-
-          <button
-            type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70"
-            aria-label="Share"
-            onClick={() => void sharePost()}
-          >
-            <Share2 className="h-5 w-5" />
-          </button>
+            <div className="feed-social-card__action-slot">
+              <button
+                type="button"
+                className="feed-social-card__action-btn"
+                aria-label="Share"
+                onClick={() => void sharePost()}
+              >
+                <Share2 className="h-5 w-5" />
+                <span>Share</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        {engagement.reactionTotal > 0 ? (
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-muted/50"
-          >
-            <span className="inline-flex -space-x-1">
-              {activeKinds.slice(0, 3).map((r) => (
-                <span
-                  key={r.kind}
-                  className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full border-2 border-card bg-card"
-                  aria-hidden
-                >
-                  <ReactionPickerIcon kind={r.kind} label={r.label} size="inline" />
-                </span>
-              ))}
-            </span>
-            <span>{engagement.reactionTotal}</span>
-          </button>
-        ) : null}
+        <FeedCommentDialog item={item} open={commentDialogOpen} onOpenChange={setCommentDialogOpen} />
+      </>
+    )
+  }
+
+  return (
+    <>
+      <div>
+        <div className="feed-social-card__action-bar">
+          <div className="feed-social-card__action-slot">{likeButton}</div>
+          <div className="feed-social-card__action-slot">
+            <button type="button" className="feed-social-card__action-btn" onClick={openComments}>
+              <MessageCircle className="h-5 w-5" />
+              <span>Comment</span>
+            </button>
+          </div>
+          <div className="feed-social-card__action-slot">
+            <button type="button" className="feed-social-card__action-btn" onClick={() => void sharePost()}>
+              <Share2 className="h-5 w-5" />
+              <span>Share</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <FeedCommentsSection
-        feedItemId={item.id}
-        expanded={commentsExpanded}
-        onExpand={() => setCommentsExpanded(true)}
-        inputRef={commentInputRef}
-      />
-    </div>
+      <FeedCommentDialog item={item} open={commentDialogOpen} onOpenChange={setCommentDialogOpen} />
+    </>
   )
 }

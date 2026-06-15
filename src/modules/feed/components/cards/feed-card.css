@@ -1,0 +1,302 @@
+.feed-social-card {
+  --feed-card-pad-x: 12px;
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklch, var(--foreground) 7%, transparent);
+  background: color-mix(in oklch, var(--card) 92%, black);
+  color: var(--card-foreground);
+}
+
+.dark .feed-social-card {
+  border-color: color-mix(in oklch, var(--foreground) 9%, transparent);
+  background: color-mix(in oklch, var(--card) 86%, black);
+}
+
+/* ── Header ── */
+.feed-social-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px var(--feed-card-pad-x) 8px;
+}
+
+.feed-social-card__avatar {
+  flex-shrink: 0;
+}
+
+.feed-social-card__meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.feed-social-card__name-line {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  color: var(--foreground);
+}
+
+.feed-social-card__name {
+  font-weight: 700;
+}
+
+.feed-social-card__name-extra {
+  font-weight: 400;
+  color: color-mix(in oklch, var(--foreground) 78%, transparent);
+}
+
+.feed-social-card__meta-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 1px;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--muted-foreground);
+}
+
+.feed-social-card__meta-dot {
+  color: var(--muted-foreground);
+}
+
+.feed-social-card__globe {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.feed-social-card__context-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  min-width: 0;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--muted-foreground);
+}
+
+.feed-social-card__context-line svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.feed-social-card__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: -2px -4px 0 0;
+  flex-shrink: 0;
+}
+
+.feed-social-card__header-btn {
+  color: var(--muted-foreground);
+}
+
+.feed-social-card__header-btn:hover {
+  color: var(--foreground);
+  background: color-mix(in oklch, var(--foreground) 6%, transparent);
+}
+
+/* ── Caption ── */
+.feed-social-card__caption {
+  padding: 0 var(--feed-card-pad-x) 10px;
+}
+
+.feed-social-card__caption-text {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.feed-social-card__caption-link {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.feed-social-card__caption-link:hover {
+  text-decoration: underline;
+}
+
+.feed-social-card__see-more {
+  margin-left: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: inherit;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.feed-social-card__see-more:hover {
+  text-decoration: underline;
+}
+
+/* ── Media ── */
+.feed-social-card__media {
+  width: 100%;
+}
+
+.feed-social-card__media-frame {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0a;
+}
+
+.feed-social-card__media-frame img,
+.feed-social-card__media-frame video {
+  width: 100%;
+  max-height: min(72vh, 680px);
+  object-fit: cover;
+}
+
+.feed-social-card__body {
+  padding: 8px var(--feed-card-pad-x) 4px;
+}
+
+/* ── Engagement ── */
+.feed-social-card__engagement {
+  padding: 0 var(--feed-card-pad-x) 8px;
+}
+
+.feed-social-card__stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+  padding: 4px 0;
+}
+
+.feed-social-card__stats-left,
+.feed-social-card__stats-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.feed-social-card__stats-right {
+  margin-left: auto;
+}
+
+.feed-social-card__reaction-stack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.feed-social-card__reaction-bubble {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: -4px;
+  border-radius: 9999px;
+  border: 2px solid color-mix(in oklch, var(--card) 92%, black);
+  background: color-mix(in oklch, var(--card) 92%, black);
+  overflow: hidden;
+}
+
+.feed-social-card__reaction-stack .feed-social-card__reaction-bubble:first-child {
+  margin-left: 0;
+}
+
+.feed-social-card__stats-count {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.feed-social-card__stats-link {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.feed-social-card__stats-link:hover {
+  text-decoration: underline;
+}
+
+.feed-social-card__divider {
+  height: 1px;
+  margin: 0 0 2px;
+  background: color-mix(in oklch, var(--foreground) 8%, transparent);
+}
+
+.feed-social-card__action-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.feed-social-card__action-slot {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: visible;
+}
+
+.feed-social-card__action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.feed-social-card__action-btn:hover {
+  background: color-mix(in oklch, var(--foreground) 6%, transparent);
+  color: var(--foreground);
+}
+
+.feed-social-card__action-btn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.feed-social-card__action-btn.is-active {
+  color: var(--primary);
+}
+
+.feed-social-card__action-btn.is-loved {
+  color: oklch(0.62 0.24 25);
+}
+
+.feed-social-card__action-btn.is-haha,
+.feed-social-card__action-btn.is-wow {
+  color: oklch(0.78 0.16 95);
+}
+
+.feed-social-card__action-btn.is-sad {
+  color: oklch(0.72 0.14 95);
+}
+
+.feed-social-card__action-btn.is-angry {
+  color: oklch(0.62 0.2 35);
+}
+
+.feed-social-card__comments {
+  border-top: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+  margin-top: 4px;
+  padding-top: 8px;
+}

@@ -1,12 +1,12 @@
-import { Globe, MoreHorizontal } from 'lucide-react'
+import { Globe, MoreHorizontal, X } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
-import { AnimatedEmojiText } from '@/modules/feed/components/animated-emoji-text'
 import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
+import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { formatFeedTimestamp } from '@/modules/feed/lib/feed-time'
 import { Button } from '@/shared/components/ui/button'
-import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
+import './feed-card.css'
 
 export function FeedCardShell({
   item,
@@ -14,63 +14,65 @@ export function FeedCardShell({
   media,
   className,
   defaultCommentsOpen = false,
-  subtitle,
+  headerContext,
 }: {
   item: FeedItemDto
   children?: React.ReactNode
   media?: React.ReactNode
   className?: string
   defaultCommentsOpen?: boolean
-  subtitle?: React.ReactNode
+  headerContext?: React.ReactNode
 }) {
-  const caption = item.body || item.title
+  const captionText = buildPostCaptionText(item.title, item.body)
 
   return (
-    <article className={cn(premiumSurfaceClass, 'overflow-hidden', className)}>
-      <header className="flex items-start gap-3 px-4 pb-2.5 pt-4 sm:px-5">
-        <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10 shrink-0" />
-        <div className="min-w-0 flex-1 pt-0.5">
-          <p className="truncate text-sm font-semibold leading-tight hover:underline">
-            {item.author.name}
-          </p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-            <span>{formatFeedTimestamp(item.createdAt)}</span>
-            <span aria-hidden>·</span>
-            <Globe className="h-3 w-3" aria-label="Public" />
-          </div>
-          {subtitle ? <div className="mt-1 text-xs text-muted-foreground">{subtitle}</div> : null}
+    <article className={cn('feed-social-card', className)}>
+      <header className="feed-social-card__header">
+        <div className="feed-social-card__avatar">
+          <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 shrink-0 rounded-full text-muted-foreground"
-          aria-label="Post options"
-        >
-          <MoreHorizontal className="h-5 w-5" />
-        </Button>
+
+        <div className="feed-social-card__meta">
+          <p className="feed-social-card__name-line">
+            <span className="feed-social-card__name">{item.author.name}</span>
+          </p>
+          <p className="feed-social-card__meta-line">
+            <span>{formatFeedTimestamp(item.createdAt)}</span>
+            <span className="feed-social-card__meta-dot" aria-hidden> · </span>
+            <Globe className="feed-social-card__globe" aria-label="Public" />
+          </p>
+          {headerContext ? <div className="feed-social-card__context-line">{headerContext}</div> : null}
+        </div>
+
+        <div className="feed-social-card__header-actions">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="feed-social-card__header-btn h-8 w-8 rounded-full"
+            aria-label="Post options"
+          >
+            <MoreHorizontal className="h-5 w-5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="feed-social-card__header-btn h-8 w-8 rounded-full"
+            aria-label="Hide post"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
       </header>
 
-      {caption ? (
-        <div className="space-y-1.5 px-4 pb-2.5 sm:px-5">
-          {item.title && item.body ? (
-            <h3 className="text-sm font-semibold leading-snug">{item.title}</h3>
-          ) : null}
-          {item.body ? (
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">
-              <AnimatedEmojiText text={item.body} emojiSize="sm" />
-            </p>
-          ) : item.title && !item.body ? (
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">{item.title}</p>
-          ) : null}
-        </div>
-      ) : null}
+      {captionText ? <FeedPostCaption text={captionText} /> : null}
 
-      {media}
+      {media ? <div className="feed-social-card__media">{media}</div> : null}
 
-      {children ? <div className="px-4 pb-2.5 pt-1 sm:px-5">{children}</div> : null}
+      {children ? <div className="feed-social-card__body">{children}</div> : null}
 
-      <FeedEngagement item={item} defaultCommentsOpen={defaultCommentsOpen} />
+      <FeedEngagement item={item} defaultCommentsOpen={defaultCommentsOpen} variant="social" />
     </article>
   )
 }
@@ -85,10 +87,12 @@ export function payloadNumber(payload: Record<string, unknown>, key: string) {
   return typeof value === 'number' ? value : undefined
 }
 
+export function musicTrackContextLine(payload: Record<string, unknown>) {
+  const trackTitle = payloadString(payload, 'trackTitle')
+  const artistName = payloadString(payload, 'artistName')
+  return [trackTitle, artistName].filter(Boolean).join(' · ')
+}
+
 export function FeedMediaFrame({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={cn('flex w-full items-center justify-center bg-black', className)}>
-      {children}
-    </div>
-  )
+  return <div className={cn('feed-social-card__media-frame', className)}>{children}</div>
 }

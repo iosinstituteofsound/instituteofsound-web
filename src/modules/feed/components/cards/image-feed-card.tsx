@@ -12,7 +12,7 @@ export function ImageFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
       media={
         imageUrl ? (
           <FeedMediaFrame>
-            <img src={imageUrl} alt={alt} className="max-h-[min(72vh,680px)] w-full object-contain" />
+            <img src={imageUrl} alt={alt} />
           </FeedMediaFrame>
         ) : null
       }

@@ -5,8 +5,6 @@ import { isStoryItem } from '@/modules/feed/lib/story-utils'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import { Skeleton } from '@/shared/components/ui/skeleton'
-import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
-import { cn } from '@/shared/lib/cn'
 import { useInfiniteScroll } from '@/shared/hooks/use-infinite-scroll'
 
 export function useFeedListItems() {
@@ -49,7 +47,7 @@ export function FeedList({ compactLoader }: FeedListProps) {
       return (
         <div className="space-y-4">
           {[1, 2].map((key) => (
-            <div key={key} className={cn(premiumSurfaceClass, 'p-4')}>
+            <div key={key} className="feed-social-card overflow-hidden p-4">
               <div className="mb-3 flex gap-3">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1 space-y-2">
@@ -86,7 +84,7 @@ export function FeedList({ compactLoader }: FeedListProps) {
       {isFetchingNextPage ? (
         <div className="space-y-3 pt-1">
           {[1, 2].map((key) => (
-            <div key={key} className={cn(premiumSurfaceClass, 'p-4')}>
+            <div key={key} className="feed-social-card overflow-hidden p-4">
               <div className="mb-3 flex gap-3">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1 space-y-2">

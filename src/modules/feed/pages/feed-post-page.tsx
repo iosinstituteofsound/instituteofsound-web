@@ -18,7 +18,7 @@ export function FeedPostPage() {
     return (
       <div className="mx-auto w-full max-w-[680px] space-y-3 pb-8">
         <Skeleton className="h-9 w-24" />
-        <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <div className="feed-social-card overflow-hidden p-4">
           <div className="mb-3 flex gap-3">
             <Skeleton className="h-10 w-10 rounded-full" />
             <div className="flex-1 space-y-2">

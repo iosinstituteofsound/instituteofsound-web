@@ -3,6 +3,18 @@ import type { FeedCardProps } from '@/modules/feed/lib/feed-type-registry'
 import { FeedCardShell, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { Button } from '@/shared/components/ui/button'
 
+function musicHeaderContext(trackTitle?: string, artistName?: string) {
+  const trackLine = [trackTitle, artistName].filter(Boolean).join(' · ')
+  if (!trackLine) return null
+
+  return (
+    <>
+      <Music2 aria-hidden />
+      <span className="truncate">{trackLine}</span>
+    </>
+  )
+}
+
 export function MusicFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
   const trackTitle = payloadString(item.payload, 'trackTitle')
   const artistName = payloadString(item.payload, 'artistName')
@@ -10,20 +22,12 @@ export function MusicFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
   const spotifyUrl = payloadString(item.payload, 'spotifyUrl')
   const audioUrl = payloadString(item.payload, 'audioUrl')
   const link = spotifyUrl ?? youtubeUrl
-  const trackLine = [trackTitle, artistName].filter(Boolean).join(' · ')
 
   return (
     <FeedCardShell
       item={item}
       defaultCommentsOpen={defaultCommentsOpen}
-      subtitle={
-        trackLine ? (
-          <span className="inline-flex items-center gap-1.5">
-            <Music2 className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">{trackLine}</span>
-          </span>
-        ) : null
-      }
+      headerContext={musicHeaderContext(trackTitle, artistName)}
     >
       <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
