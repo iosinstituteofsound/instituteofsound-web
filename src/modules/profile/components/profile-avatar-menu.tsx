@@ -4,6 +4,7 @@ import { ChooseProfilePictureDialog } from '@/modules/profile/components/choose-
 import { CroppedAvatarFrame } from '@/modules/profile/components/cropped-avatar'
 import { ProfilePictureViewer } from '@/modules/profile/components/profile-picture-viewer'
 import { useUpdateProfile } from '@/modules/profile/hooks/use-profile'
+import { addStoredUpload } from '@/modules/profile/lib/profile-photo-library'
 import type { ProfileAvatarSelection } from '@/modules/profile/types/profile.types'
 import {
   DropdownMenu,
@@ -44,6 +45,7 @@ export function ProfileAvatarMenu({
 
   const handleSelect = async ({ avatarUrl, avatarCrop }: ProfileAvatarSelection) => {
     await updateProfile.mutateAsync({ avatarUrl, avatarCrop })
+    addStoredUpload(user.id, avatarUrl)
     setRecentUrls((prev) => [avatarUrl, ...prev.filter((u) => u !== avatarUrl)].slice(0, 12))
   }
 

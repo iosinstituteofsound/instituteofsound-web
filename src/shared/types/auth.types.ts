@@ -9,6 +9,12 @@ export interface PrivacySettings {
   allowDirectMessages: boolean
 }
 
+export interface CoverCrop {
+  x: number
+  y: number
+  z: number
+}
+
 export interface AvatarCrop {
   x: number
   y: number
@@ -79,6 +85,7 @@ export interface UserDto {
   avatarUrl?: string
   avatarCrop?: AvatarCrop
   coverUrl?: string
+  coverCrop?: CoverCrop
   orgLabel?: string
   linkUrl?: string
   username?: string
