@@ -14,6 +14,10 @@ export function useFeedList(limit = FEED_PAGE_SIZE) {
   })
 }
 
+function isFeedListCache(data: unknown): data is InfiniteData<FeedListResponse, string | undefined> {
+  return Boolean(data && typeof data === 'object' && 'pages' in data && Array.isArray(data.pages))
+}
+
 export function useCreateFeedItem() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -22,18 +26,20 @@ export function useCreateFeedItem() {
       queryClient.setQueriesData<InfiniteData<FeedListResponse, string | undefined>>(
         { queryKey: feedQueryKey },
         (current) => {
-          const pages = current?.pages
-          if (!pages?.length) {
+          if (!isFeedListCache(current)) return current
+
+          const pages = current.pages
+          if (!pages.length) {
             return {
               pages: [{ items: [item], nextCursor: null }],
-              pageParams: [undefined],
+              pageParams: current.pageParams.length ? current.pageParams : [undefined],
             }
           }
 
           const [firstPage, ...rest] = pages
           const existingItems = firstPage?.items ?? []
           const alreadyListed = existingItems.some((entry) => entry.id === item.id)
-          if (alreadyListed || !current) return current
+          if (alreadyListed) return current
 
           return {
             pages: [{ ...firstPage, items: [item, ...existingItems] }, ...rest],
