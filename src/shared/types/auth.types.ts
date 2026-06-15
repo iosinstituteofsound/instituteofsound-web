@@ -2,6 +2,19 @@ export type DashboardPersona = 'event_promoter' | 'artist_manager' | 'label' | '
 
 export type ScopeType = 'global' | 'organization' | 'region' | 'tribe' | 'resource'
 
+export interface PrivacySettings {
+  showEmail: boolean
+  showBio: boolean
+  showListeningActivity: boolean
+  allowDirectMessages: boolean
+}
+
+export interface AvatarCrop {
+  x: number
+  y: number
+  r: number
+}
+
 export interface AuthzRoleInfo {
   id: string
   slug: string
@@ -64,11 +77,14 @@ export interface UserDto {
   name: string
   dashboardPersona?: DashboardPersona
   avatarUrl?: string
+  avatarCrop?: AvatarCrop
   coverUrl?: string
   orgLabel?: string
   linkUrl?: string
   username?: string
   bio?: string
+  isVerified?: boolean
+  privacySettings?: PrivacySettings
   createdAt: string
   authorization?: UserAuthorization
 }

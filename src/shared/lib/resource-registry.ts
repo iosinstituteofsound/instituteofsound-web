@@ -16,6 +16,8 @@ export const REGISTERED_PAGES = [
   'SidebarMenuItemsPage',
   'LayoutsPage',
   'FeedPage',
+  'ProfilePage',
+  'RegisterPage',
 ] as const
 
 export const REGISTERED_COMPONENTS = [] as const

@@ -69,6 +69,26 @@ const FeedPostPage = lazy(() =>
     default: m.FeedPostPage,
   })),
 )
+const ProfilePage = lazy(() =>
+  import('@/modules/profile/pages/profile-page').then((m) => ({
+    default: m.ProfilePage,
+  })),
+)
+const ProfileEditPage = lazy(() =>
+  import('@/modules/profile/pages/profile-edit-page').then((m) => ({
+    default: m.ProfileEditPage,
+  })),
+)
+const ProfileSettingsPage = lazy(() =>
+  import('@/modules/profile/pages/profile-settings-page').then((m) => ({
+    default: m.ProfileSettingsPage,
+  })),
+)
+const RegisterPage = lazy(() =>
+  import('@/modules/profile/pages/register-page').then((m) => ({
+    default: m.RegisterPage,
+  })),
+)
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>
@@ -102,6 +122,16 @@ export const router = createBrowserRouter([
           <GuestGuard>
             <Lazy>
               <LoginPage />
+            </Lazy>
+          </GuestGuard>
+        ),
+      },
+      {
+        path: 'register',
+        element: (
+          <GuestGuard>
+            <Lazy>
+              <RegisterPage />
             </Lazy>
           </GuestGuard>
         ),
@@ -156,6 +186,30 @@ export const router = createBrowserRouter([
               </Lazy>
             </PermissionGuard>
           </ResourceGuard>
+        ),
+      },
+      {
+        path: 'profile',
+        element: (
+          <Lazy>
+            <ProfilePage />
+          </Lazy>
+        ),
+      },
+      {
+        path: 'profile/edit',
+        element: (
+          <Lazy>
+            <ProfileEditPage />
+          </Lazy>
+        ),
+      },
+      {
+        path: 'profile/settings',
+        element: (
+          <Lazy>
+            <ProfileSettingsPage />
+          </Lazy>
         ),
       },
       {

@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
-import { LayoutDashboard, LogOut, Monitor, Moon, Sun } from 'lucide-react'
+import { LayoutDashboard, LogOut, Monitor, Moon, Sun, UserRound } from 'lucide-react'
 import { UserIdentityBadges } from '@/app/components/user-header-identity'
 import { useLogout, useMe } from '@/modules/auth/hooks/use-auth'
+import { CroppedAvatar } from '@/modules/profile/components/cropped-avatar'
+import { getProfilePath } from '@/modules/profile/config/profile-menu'
 import { useTheme } from '@/shared/hooks/use-theme'
 import type { ThemeMode } from '@/app/stores/theme-store'
-import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
@@ -38,15 +39,22 @@ export function UserProfileMenu() {
   const { mode, setMode } = useTheme()
 
   const user = me?.user
+  const activeRoleId = me?.authorization.activeRoleId
+  const activeRole = me?.authorization.roles.find((role) => role.id === activeRoleId)
+  const profilePath = getProfilePath(activeRole?.slug)
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full px-0">
-          <Avatar className="h-8 w-8">
-            {user?.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={user.name} /> : null}
-            <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
-          </Avatar>
+          <CroppedAvatar
+            src={user?.avatarUrl}
+            alt={user?.name ?? 'User'}
+            crop={user?.avatarCrop}
+            fallback={getInitials(user?.name)}
+            className="h-8 w-8"
+            size={32}
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
@@ -59,6 +67,13 @@ export function UserProfileMenu() {
             <UserIdentityBadges />
           </div>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to={profilePath}>
+            <UserRound className="h-4 w-4" />
+            Profile
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/dashboard">
