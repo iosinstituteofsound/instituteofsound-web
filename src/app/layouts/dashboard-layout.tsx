@@ -46,14 +46,15 @@ export function DashboardLayout() {
             </div>
           </header>
         ) : null}
-        <main
-          className={cn(
-            'min-h-0 flex-1 overflow-y-auto overflow-x-hidden',
-            MAIN_PADDING_CLASS[dashboardConfig.main.padding],
-            MAIN_MAX_WIDTH_CLASS[dashboardConfig.main.maxWidth],
-          )}
-        >
-          <Outlet />
+        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div
+            className={cn(
+              MAIN_PADDING_CLASS[dashboardConfig.main.padding],
+              MAIN_MAX_WIDTH_CLASS[dashboardConfig.main.maxWidth],
+            )}
+          >
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

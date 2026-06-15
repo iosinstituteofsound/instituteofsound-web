@@ -21,12 +21,12 @@ export function FeedPage() {
   return (
     <div className="mx-auto w-full max-w-[680px] pb-8">
       <PermissionGate resource="feed" action="create">
-        <div ref={composerAnchorRef} className="relative sticky top-0 z-30">
+        <div ref={composerAnchorRef} className="sticky top-0 z-50 bg-background">
           <FeedComposer collapseProgress={collapseProgress} />
         </div>
       </PermissionGate>
 
-      <div className="relative z-0 space-y-3 pt-3">
+      <div className="relative z-0 mt-3 space-y-3">
         {isLoading ? (
           <div className="overflow-hidden rounded-lg border bg-card p-3 shadow-sm">
             <div className="flex gap-2">

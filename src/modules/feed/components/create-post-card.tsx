@@ -15,6 +15,9 @@ export const QUICK_POST_ACTIONS: {
   { type: 'music', label: 'Audio', icon: Music2, iconClass: 'text-red-500' },
 ]
 
+const INLINE_ACTIONS_WIDTH = QUICK_POST_ACTIONS.length * 36 + (QUICK_POST_ACTIONS.length - 1) * 4
+const BOTTOM_ACTIONS_HEIGHT = 56
+
 interface CreatePostCardProps {
   userName: string
   avatarUrl?: string | null
@@ -30,14 +33,13 @@ export function CreatePostCard({
   collapseProgress = 0,
 }: CreatePostCardProps) {
   const firstName = userName.split(' ')[0] ?? userName
-  const compact = collapseProgress > 0.55
-  const actionsHeight = 64
+  const compact = collapseProgress > 0.5
 
   return (
     <div
       className={cn(
-        'relative z-30 overflow-hidden border bg-card shadow-sm transition-[border-radius,box-shadow] duration-300 ease-out',
-        compact ? 'rounded-full shadow-none' : 'rounded-xl',
+        'relative w-full overflow-hidden rounded-xl border bg-card transition-[box-shadow] duration-300 ease-out',
+        compact ? 'shadow-none' : 'shadow-sm',
       )}
     >
       <div
@@ -56,6 +58,7 @@ export function CreatePostCard({
             height: `${40 - collapseProgress * 8}px`,
           }}
         />
+
         <button
           type="button"
           onClick={() => onOpen('text')}
@@ -68,23 +71,52 @@ export function CreatePostCard({
         >
           {compact ? "What's on your mind?" : `What's on your mind, ${firstName}?`}
         </button>
+
+        <div
+          className="flex shrink-0 items-center gap-1 overflow-hidden transition-[max-width,opacity,transform] duration-300 ease-out"
+          style={{
+            maxWidth: `${collapseProgress * INLINE_ACTIONS_WIDTH}px`,
+            opacity: collapseProgress,
+            transform: `translateY(${(1 - collapseProgress) * 12}px)`,
+          }}
+        >
+          {QUICK_POST_ACTIONS.map((action) => {
+            const Icon = action.icon
+            return (
+              <Button
+                key={`inline-${action.type}`}
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0 rounded-full text-muted-foreground hover:bg-muted/60"
+                onClick={() => onOpen(action.type)}
+                aria-label={action.label}
+              >
+                <Icon className={cn('h-5 w-5', action.iconClass)} />
+              </Button>
+            )
+          })}
+        </div>
       </div>
 
       <div
         className="overflow-hidden transition-[max-height,opacity] duration-300 ease-out"
         style={{
-          maxHeight: `${(1 - collapseProgress) * actionsHeight}px`,
+          maxHeight: `${(1 - collapseProgress) * BOTTOM_ACTIONS_HEIGHT}px`,
           opacity: 1 - collapseProgress,
         }}
       >
         <div className="mx-3 border-t sm:mx-4" />
 
-        <div className="flex items-stretch gap-1 p-2 sm:gap-2 sm:p-3">
+        <div
+          className="flex items-stretch gap-1 p-2 transition-transform duration-300 ease-out sm:gap-2 sm:p-3"
+          style={{ transform: `translateY(${collapseProgress * -8}px)` }}
+        >
           {QUICK_POST_ACTIONS.map((action) => {
             const Icon = action.icon
             return (
               <Button
-                key={action.type}
+                key={`bottom-${action.type}`}
                 type="button"
                 variant="ghost"
                 className="h-10 min-w-0 flex-1 gap-1.5 rounded-lg px-1 text-xs font-semibold text-muted-foreground hover:bg-muted/60 sm:gap-2 sm:px-2 sm:text-sm"
