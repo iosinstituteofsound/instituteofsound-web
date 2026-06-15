@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { ExternalLink, Grid3x3, Info, PenLine } from 'lucide-react'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { ProfileCoverSection } from '@/modules/profile/components/profile-cover-section'
+import { usePublicProfile } from '@/modules/profile/hooks/use-public-profile'
+import type { PublicProfileDto } from '@/modules/search/api/search.api'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
+import type { UserDto } from '@/shared/types/auth.types'
 import { cn } from '@/shared/lib/cn'
 
 type ProfileViewTab = 'posts' | 'about' | 'photos'
@@ -17,19 +20,55 @@ const TABS: { id: ProfileViewTab; label: string }[] = [
   { id: 'photos', label: 'Photos' },
 ]
 
+function mapPublicProfileToUser(profile: PublicProfileDto): UserDto {
+  return {
+    id: profile.id,
+    email: profile.email ?? '',
+    name: profile.name,
+    username: profile.username,
+    avatarUrl: profile.avatarUrl,
+    avatarCrop: profile.avatarCrop,
+    coverUrl: profile.coverUrl,
+    coverCrop: profile.coverCrop,
+    bio: profile.bio,
+    orgLabel: profile.orgLabel,
+    linkUrl: profile.linkUrl,
+    isVerified: profile.isVerified,
+    privacySettings: profile.privacySettings,
+    createdAt: new Date().toISOString(),
+  }
+}
+
 export function ProfilePage() {
+  const { userId: routeUserId } = useParams()
   const [activeTab, setActiveTab] = useState<ProfileViewTab>('posts')
-  const { data, isLoading, isError, refetch } = useMe()
-  const user = data?.user
+  const { data: meData, isLoading: meLoading, isError: meError, refetch: refetchMe } = useMe()
+  const isOwnProfile = !routeUserId || routeUserId === meData?.user.id
+  const {
+    data: publicProfile,
+    isLoading: publicLoading,
+    isError: publicError,
+    refetch: refetchPublic,
+  } = usePublicProfile(isOwnProfile ? undefined : routeUserId)
+
+  const isLoading = isOwnProfile ? meLoading : meLoading || publicLoading
+  const isError = isOwnProfile ? meError || !meData?.user : meError || publicError || !publicProfile
+  const user = isOwnProfile
+    ? meData?.user
+    : publicProfile
+      ? mapPublicProfileToUser(publicProfile)
+      : undefined
 
   if (isLoading) return <PageLoader />
-  if (isError || !user) return <ErrorState onRetry={() => refetch()} />
+  if (isError || !user) {
+    return <ErrorState onRetry={() => (isOwnProfile ? refetchMe() : refetchPublic())} />
+  }
 
   const showEmail = user.privacySettings?.showEmail ?? false
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-0">
-      <ProfileCoverSection user={user} />
+      <ProfileCoverSection user={user} editable={isOwnProfile} />
 
       <div className="mt-1 border-b">
         <nav className="-mb-px flex gap-1 overflow-x-auto px-1">
@@ -60,12 +99,16 @@ export function ProfilePage() {
                 <div className="space-y-1">
                   <p className="font-semibold">No posts yet</p>
                   <p className="text-sm text-muted-foreground">
-                    When you share on the feed, your posts will show up here.
+                    {isOwnProfile
+                      ? 'When you share on the feed, your posts will show up here.'
+                      : 'Posts from this profile will show up here.'}
                   </p>
                 </div>
-                <Button asChild variant="secondary" size="sm">
-                  <Link to="/home">Go to feed</Link>
-                </Button>
+                {isOwnProfile ? (
+                  <Button asChild variant="secondary" size="sm">
+                    <Link to="/home">Go to feed</Link>
+                  </Button>
+                ) : null}
               </CardContent>
             </Card>
           ) : null}
@@ -93,7 +136,7 @@ export function ProfilePage() {
                     ) : null}
                     {!user.avatarUrl && !user.coverUrl ? (
                       <p className="col-span-full py-8 text-center text-sm text-muted-foreground">
-                        No photos yet. Add a profile or cover photo from your profile header.
+                        No photos yet.
                       </p>
                     ) : null}
                   </div>
@@ -133,21 +176,23 @@ export function ProfilePage() {
                     </a>
                   </div>
                 ) : null}
-                {showEmail ? (
+                {showEmail && user.email ? (
                   <div>
                     <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Email</p>
                     <p>{user.email}</p>
                   </div>
                 ) : null}
-                <div>
-                  <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Joined</p>
-                  <p>
-                    {new Date(user.createdAt).toLocaleDateString(undefined, {
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </p>
-                </div>
+                {isOwnProfile ? (
+                  <div>
+                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Joined</p>
+                    <p>
+                      {new Date(user.createdAt).toLocaleDateString(undefined, {
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           ) : null}
@@ -162,9 +207,9 @@ export function ProfilePage() {
               {user.bio ? <p className="leading-relaxed">{user.bio}</p> : null}
               {user.username ? (
                 <p className="text-muted-foreground">@{user.username}</p>
-              ) : (
+              ) : isOwnProfile ? (
                 <p className="text-muted-foreground">Add a username in Edit profile</p>
-              )}
+              ) : null}
               {user.linkUrl ? (
                 <a
                   href={user.linkUrl}
@@ -176,9 +221,11 @@ export function ProfilePage() {
                   <ExternalLink className="h-3.5 w-3.5" />
                 </a>
               ) : null}
-              <Button asChild variant="secondary" size="sm" className="w-full">
-                <Link to="/profile/edit">Edit details</Link>
-              </Button>
+              {isOwnProfile ? (
+                <Button asChild variant="secondary" size="sm" className="w-full">
+                  <Link to="/profile/edit">Edit details</Link>
+                </Button>
+              ) : null}
             </CardContent>
           </Card>
         </aside>

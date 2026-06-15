@@ -61,6 +61,10 @@ function profileSubtitle(profile: SearchProfileDto) {
   return 'Profile'
 }
 
+function profileHref(profile: SearchProfileDto) {
+  return profile.clickPath ?? null
+}
+
 function RoleRow({ role }: { role: DiscoverableRoleDto }) {
   return (
     <button type="button" className="global-search-role-row w-full text-left">
@@ -77,12 +81,9 @@ function RoleRow({ role }: { role: DiscoverableRoleDto }) {
 }
 
 function ProfileRow({ profile, onNavigate }: { profile: SearchProfileDto; onNavigate: () => void }) {
-  return (
-    <Link
-      to={`/users/${profile.id}`}
-      onClick={onNavigate}
-      className="global-search-role-row w-full text-left"
-    >
+  const href = profileHref(profile)
+  const content = (
+    <>
       {profile.avatarUrl ? (
         <img
           src={profile.avatarUrl}
@@ -96,6 +97,16 @@ function ProfileRow({ profile, onNavigate }: { profile: SearchProfileDto; onNavi
         <span className="block truncate text-sm font-medium">{profile.name}</span>
         <span className="block truncate text-xs text-muted-foreground">{profileSubtitle(profile)}</span>
       </span>
+    </>
+  )
+
+  if (!href) {
+    return <div className="global-search-role-row w-full text-left opacity-70">{content}</div>
+  }
+
+  return (
+    <Link to={href} onClick={onNavigate} className="global-search-role-row w-full text-left">
+      {content}
     </Link>
   )
 }
@@ -113,8 +124,9 @@ function CategoryCard({ role }: { role: DiscoverableRoleDto }) {
 }
 
 function ProfileCard({ profile, onNavigate }: { profile: SearchProfileDto; onNavigate: () => void }) {
-  return (
-    <Link to={`/users/${profile.id}`} onClick={onNavigate} className="global-search-category-card">
+  const href = profileHref(profile)
+  const content = (
+    <>
       {profile.avatarUrl ? (
         <img
           src={profile.avatarUrl}
@@ -126,6 +138,16 @@ function ProfileCard({ profile, onNavigate }: { profile: SearchProfileDto; onNav
       )}
       <span className="block w-full truncate text-sm font-semibold">{profile.name}</span>
       <span className="block text-xs text-muted-foreground">Profile</span>
+    </>
+  )
+
+  if (!href) {
+    return <div className="global-search-category-card opacity-70">{content}</div>
+  }
+
+  return (
+    <Link to={href} onClick={onNavigate} className="global-search-category-card">
+      {content}
     </Link>
   )
 }
@@ -210,13 +232,19 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="global-search-modal border-0 p-0 shadow-2xl sm:max-w-none">
+      <DialogContent
+        hideCloseButton
+        className="global-search-modal border-0 p-0 shadow-2xl sm:max-w-none"
+      >
         <div className="global-search-modal-toolbar">
           <div className="global-search-modal-input-wrap">
             <Search className="global-search-modal-input-icon" />
             <input
               ref={inputRef}
-              type="search"
+              type="text"
+              inputMode="search"
+              enterKeyHint="search"
+              autoComplete="off"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search artists, tribes, curators, editors and more"
@@ -275,29 +303,43 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
               <section>
                 <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Top result</h3>
                 {topResultIsProfile && topProfile ? (
-                  <Link
-                    to={`/users/${topProfile.id}`}
-                    onClick={closeModal}
-                    className="global-search-top-result flex w-full items-center gap-4 text-left"
-                  >
-                    {topProfile.avatarUrl ? (
-                      <img
-                        src={topProfile.avatarUrl}
-                        alt=""
-                        className="global-search-top-result-art h-[5.5rem] w-[5.5rem] rounded-md object-cover"
-                      />
-                    ) : (
+                  profileHref(topProfile) ? (
+                    <Link
+                      to={profileHref(topProfile)!}
+                      onClick={closeModal}
+                      className="global-search-top-result flex w-full items-center gap-4 text-left"
+                    >
+                      {topProfile.avatarUrl ? (
+                        <img
+                          src={topProfile.avatarUrl}
+                          alt=""
+                          className="global-search-top-result-art h-[5.5rem] w-[5.5rem] rounded-md object-cover"
+                        />
+                      ) : (
+                        <span className="global-search-top-result-art rounded-full">
+                          {initials(topProfile.name)}
+                        </span>
+                      )}
+                      <span className="min-w-0">
+                        <span className="block truncate text-2xl font-bold">{topProfile.name}</span>
+                        <span className="mt-1 block truncate text-sm text-muted-foreground">
+                          Profile · {profileSubtitle(topProfile)}
+                        </span>
+                      </span>
+                    </Link>
+                  ) : (
+                    <div className="global-search-top-result flex w-full items-center gap-4 text-left opacity-70">
                       <span className="global-search-top-result-art rounded-full">
                         {initials(topProfile.name)}
                       </span>
-                    )}
-                    <span className="min-w-0">
-                      <span className="block truncate text-2xl font-bold">{topProfile.name}</span>
-                      <span className="mt-1 block truncate text-sm text-muted-foreground">
-                        Profile · {profileSubtitle(topProfile)}
+                      <span className="min-w-0">
+                        <span className="block truncate text-2xl font-bold">{topProfile.name}</span>
+                        <span className="mt-1 block truncate text-sm text-muted-foreground">
+                          Profile · {profileSubtitle(topProfile)}
+                        </span>
                       </span>
-                    </span>
-                  </Link>
+                    </div>
+                  )
                 ) : topRole ? (
                   <button type="button" className="global-search-top-result flex w-full items-center gap-4 text-left">
                     <span className="global-search-top-result-art">{initials(topRole.name)}</span>

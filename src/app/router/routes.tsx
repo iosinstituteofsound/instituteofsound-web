@@ -193,6 +193,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'profile/:userId',
+        element: (
+          <Lazy>
+            <ProfilePage />
+          </Lazy>
+        ),
+      },
+      {
         path: 'profile',
         element: (
           <Lazy>

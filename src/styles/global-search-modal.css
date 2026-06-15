@@ -11,10 +11,10 @@
   padding: 0;
 }
 
-.global-search-modal > button.absolute {
-  top: 1rem;
-  right: 1rem;
-  z-index: 2;
+.global-search-modal-input::-webkit-search-cancel-button,
+.global-search-modal-input::-webkit-search-decoration,
+.global-search-modal-input::-webkit-search-results-button {
+  display: none;
 }
 
 .global-search-modal-toolbar {

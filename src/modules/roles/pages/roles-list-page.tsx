@@ -20,6 +20,11 @@ import { Input } from '@/shared/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { Switch } from '@/shared/components/ui/switch'
 import { ROLE_DISCOVER_CATEGORIES } from '@/shared/data/role-discover-categories'
+import {
+  DISCOVER_CLICK_ROUTE_NONE,
+  ROLE_DISCOVER_CLICK_ROUTES,
+  discoverClickRouteToFormValue,
+} from '@/shared/data/role-discover-click-routes'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import {
@@ -47,6 +52,7 @@ const defaultRoleFormValues = (layoutId = ''): RoleFormValues => ({
   layoutId,
   discoverable: false,
   discoverCategory: 'other',
+  discoverClickRoute: DISCOVER_CLICK_ROUTE_NONE,
   ...emptyAssignments,
 })
 
@@ -119,6 +125,7 @@ export function RolesListPage() {
       extraResourceIds: role.extraResourceIds,
       discoverable: role.discoverable,
       discoverCategory: role.discoverCategory as RoleFormValues['discoverCategory'],
+      discoverClickRoute: discoverClickRouteToFormValue(role.discoverClickRoute),
     })
     setOpen(true)
   }
@@ -147,6 +154,7 @@ export function RolesListPage() {
               extraResourceIds: values.extraResourceIds,
               discoverable: values.discoverable,
               discoverCategory: values.discoverCategory,
+              discoverClickRoute: values.discoverClickRoute,
             }
           : values
         await updateRole.mutateAsync({ id: editing.id, input })
@@ -316,30 +324,64 @@ export function RolesListPage() {
               />
 
               {form.watch('discoverable') ? (
-                <FormField
-                  control={form.control}
-                  name="discoverCategory"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Search category</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value ?? 'other'}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select search category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {ROLE_DISCOVER_CATEGORIES.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <>
+                  <FormField
+                    control={form.control}
+                    name="discoverCategory"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Search category</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value ?? 'other'}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select search category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ROLE_DISCOVER_CATEGORIES.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                {category.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="discoverClickRoute"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Search click destination</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value ?? DISCOVER_CLICK_ROUTE_NONE}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choose where search results open" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ROLE_DISCOVER_CLICK_ROUTES.map((route) => (
+                              <SelectItem key={route.value} value={route.value}>
+                                {route.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          When someone clicks a user with this role in search, open this page.
+                          Use Public profile for listeners.
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
               ) : null}
 
               <AssignmentPicker

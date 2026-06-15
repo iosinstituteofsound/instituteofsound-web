@@ -43,7 +43,19 @@
   position: relative;
   width: 100%;
   min-width: 0;
-  max-width: 100%;
+  max-width: 17.5rem;
+}
+
+@media (min-width: 640px) {
+  .dashboard-header-search-wrap {
+    max-width: 20rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-header-search-wrap {
+    max-width: 22rem;
+  }
 }
 
 .dashboard-header-tabs {

@@ -30,6 +30,7 @@ export interface SearchProfileDto {
   email?: string
   avatarUrl?: string
   roles: string[]
+  clickPath?: string | null
 }
 
 export interface SearchUsersResult {
@@ -54,4 +55,32 @@ export async function searchProfiles(q: string, limit = 24) {
     { params: { q, limit } },
   )
   return data.data
+}
+
+export interface PublicProfileDto {
+  id: string
+  name: string
+  username?: string
+  email?: string
+  avatarUrl?: string
+  avatarCrop?: { x: number; y: number; r: number }
+  coverUrl?: string
+  coverCrop?: { x: number; y: number; z: number }
+  bio?: string
+  orgLabel?: string
+  linkUrl?: string
+  isVerified?: boolean
+  privacySettings?: {
+    showEmail: boolean
+    showBio: boolean
+    showListeningActivity: boolean
+    allowDirectMessages: boolean
+  }
+}
+
+export async function getPublicProfile(userId: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<{ profile: PublicProfileDto }>>(
+    `${API_V1}/search/profile/${userId}`,
+  )
+  return data.data.profile
 }
