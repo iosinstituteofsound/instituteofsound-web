@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useDevLogin, useGoogleLogin } from '@/modules/auth/hooks/use-auth'
 import { devLoginSchema, type DevLoginFormValues } from '@/modules/auth/schemas/dev-login.schema'
@@ -97,6 +97,13 @@ export function LoginPage() {
           <GoogleIcon className="h-5 w-5" />
           Continue with Google
         </Button>
+
+        <p className="text-center text-sm text-muted-foreground">
+          New here?{' '}
+          <Link to="/auth/register" className="font-medium text-primary underline-offset-4 hover:underline">
+            Create an account
+          </Link>
+        </p>
 
         {env.isDev ? (
           <>
