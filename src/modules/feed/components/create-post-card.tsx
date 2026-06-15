@@ -16,7 +16,17 @@ export const QUICK_POST_ACTIONS: {
 ]
 
 const INLINE_ACTIONS_WIDTH = QUICK_POST_ACTIONS.length * 36 + (QUICK_POST_ACTIONS.length - 1) * 4
-const BOTTOM_ACTIONS_HEIGHT = 56
+const BOTTOM_ACTIONS_HEIGHT = 68
+
+function stagedCollapse(progress: number) {
+  const bottomOpacity = Math.max(0, 1 - progress * 2)
+  const bottomHeight =
+    progress < 0.5 ? BOTTOM_ACTIONS_HEIGHT : BOTTOM_ACTIONS_HEIGHT * Math.max(0, 1 - (progress - 0.5) * 2)
+  const inlineOpacity = Math.min(1, Math.max(0, (progress - 0.15) / 0.55))
+  const inlineWidth = inlineOpacity * INLINE_ACTIONS_WIDTH
+
+  return { bottomOpacity, bottomHeight, inlineOpacity, inlineWidth }
+}
 
 interface CreatePostCardProps {
   userName: string
@@ -34,11 +44,12 @@ export function CreatePostCard({
 }: CreatePostCardProps) {
   const firstName = userName.split(' ')[0] ?? userName
   const compact = collapseProgress > 0.5
+  const { bottomOpacity, bottomHeight, inlineOpacity, inlineWidth } = stagedCollapse(collapseProgress)
 
   return (
     <div
       className={cn(
-        'relative w-full overflow-hidden rounded-xl border bg-card transition-[box-shadow] duration-300 ease-out',
+        'relative w-full rounded-xl border bg-card transition-[box-shadow] duration-300 ease-out',
         compact ? 'shadow-none' : 'shadow-sm',
       )}
     >
@@ -73,11 +84,10 @@ export function CreatePostCard({
         </button>
 
         <div
-          className="flex shrink-0 items-center gap-1 overflow-hidden transition-[max-width,opacity,transform] duration-300 ease-out"
+          className="flex shrink-0 items-center gap-1 overflow-hidden transition-[max-width,opacity] duration-300 ease-out"
           style={{
-            maxWidth: `${collapseProgress * INLINE_ACTIONS_WIDTH}px`,
-            opacity: collapseProgress,
-            transform: `translateY(${(1 - collapseProgress) * 12}px)`,
+            maxWidth: `${inlineWidth}px`,
+            opacity: inlineOpacity,
           }}
         >
           {QUICK_POST_ACTIONS.map((action) => {
@@ -102,16 +112,13 @@ export function CreatePostCard({
       <div
         className="overflow-hidden transition-[max-height,opacity] duration-300 ease-out"
         style={{
-          maxHeight: `${(1 - collapseProgress) * BOTTOM_ACTIONS_HEIGHT}px`,
-          opacity: 1 - collapseProgress,
+          maxHeight: `${bottomHeight}px`,
+          opacity: bottomOpacity,
         }}
       >
         <div className="mx-3 border-t sm:mx-4" />
 
-        <div
-          className="flex items-stretch gap-1 p-2 transition-transform duration-300 ease-out sm:gap-2 sm:p-3"
-          style={{ transform: `translateY(${collapseProgress * -8}px)` }}
-        >
+        <div className="flex items-stretch gap-1 p-2 sm:gap-2 sm:p-3">
           {QUICK_POST_ACTIONS.map((action) => {
             const Icon = action.icon
             return (
