@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type RefObject } from 'react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
@@ -7,23 +7,14 @@ import {
   useDeleteFeedComment,
   useFeedComments,
 } from '@/modules/feed/hooks/use-feed-engagement'
+import { formatCommentTimestamp } from '@/modules/feed/lib/feed-time'
 import type { FeedCommentDto } from '@/modules/feed/types/feed.types'
 import { Button } from '@/shared/components/ui/button'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/cn'
 
-function formatRelativeTime(value: string) {
-  const date = new Date(value)
-  const diffMs = Date.now() - date.getTime()
-  const minutes = Math.floor(diffMs / 60000)
-  if (minutes < 1) return 'Just now'
-  if (minutes < 60) return `${minutes}m`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d`
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
+const PREVIEW_COMMENT_LIMIT = 2
+const PREVIEW_REPLY_LIMIT = 1
 
 interface CommentNode {
   comment: FeedCommentDto
@@ -48,9 +39,17 @@ function buildCommentThread(comments: FeedCommentDto[]): CommentNode[] {
 
 interface FeedCommentsSectionProps {
   feedItemId: string
+  expanded?: boolean
+  onExpand?: () => void
+  inputRef?: RefObject<HTMLTextAreaElement | null>
 }
 
-export function FeedCommentsSection({ feedItemId }: FeedCommentsSectionProps) {
+export function FeedCommentsSection({
+  feedItemId,
+  expanded = false,
+  onExpand,
+  inputRef,
+}: FeedCommentsSectionProps) {
   const userId = useAuthStore((s) => s.userId)
   const { data: me } = useMe(Boolean(userId))
   const { data: comments = [], isLoading } = useFeedComments(feedItemId, true)
@@ -58,8 +57,11 @@ export function FeedCommentsSection({ feedItemId }: FeedCommentsSectionProps) {
   const deleteComment = useDeleteFeedComment()
   const [draft, setDraft] = useState('')
   const [replyTo, setReplyTo] = useState<FeedCommentDto | null>(null)
+  const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({})
 
   const thread = useMemo(() => buildCommentThread(comments), [comments])
+  const hiddenCount = Math.max(0, thread.length - PREVIEW_COMMENT_LIMIT)
+  const visibleRoots = expanded ? thread : thread.slice(0, PREVIEW_COMMENT_LIMIT)
 
   const submit = async () => {
     const body = draft.trim()
@@ -72,16 +74,59 @@ export function FeedCommentsSection({ feedItemId }: FeedCommentsSectionProps) {
     })
     setDraft('')
     setReplyTo(null)
+    onExpand?.()
+  }
+
+  if (isLoading) {
+    return (
+      <div className="border-t px-3 py-2 sm:px-4">
+        <p className="text-sm text-muted-foreground">Loading comments…</p>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-3 border-t bg-muted/20 px-4 py-3">
+    <div className="border-t px-3 py-2 sm:px-4">
+      {!expanded && hiddenCount > 0 ? (
+        <button
+          type="button"
+          className="mb-2 text-sm font-semibold text-muted-foreground hover:underline"
+          onClick={onExpand}
+        >
+          View more comments
+        </button>
+      ) : null}
+
+      {thread.length > 0 ? (
+        <ul className="space-y-3 pb-2">
+          {visibleRoots.map((node) => (
+            <CommentItem
+              key={node.comment.id}
+              node={node}
+              depth={0}
+              userId={userId}
+              expanded={expanded}
+              expandedReplies={expandedReplies}
+              onToggleReplies={(commentId) =>
+                setExpandedReplies((current) => ({ ...current, [commentId]: !current[commentId] }))
+              }
+              onReply={(comment) => {
+                setReplyTo(comment)
+                onExpand?.()
+                window.setTimeout(() => inputRef?.current?.focus(), 0)
+              }}
+              onDelete={(comment) => deleteComment.mutate({ feedItemId, commentId: comment.id })}
+            />
+          ))}
+        </ul>
+      ) : null}
+
       {userId ? (
-        <div className="flex gap-2">
+        <div className="flex gap-2 border-t border-border/50 pt-3">
           <FeedUserAvatar
             name={me?.user.name ?? 'You'}
             avatarUrl={me?.user.avatarUrl}
-            className="mt-1 h-8 w-8 shrink-0"
+            className="h-8 w-8 shrink-0"
           />
           <div className="min-w-0 flex-1 space-y-2">
             {replyTo ? (
@@ -89,7 +134,7 @@ export function FeedCommentsSection({ feedItemId }: FeedCommentsSectionProps) {
                 Replying to <span className="font-medium text-foreground">{replyTo.author.name}</span>
                 <button
                   type="button"
-                  className="ml-2 text-primary hover:underline"
+                  className="ml-2 font-semibold text-primary hover:underline"
                   onClick={() => setReplyTo(null)}
                 >
                   Cancel
@@ -97,11 +142,13 @@ export function FeedCommentsSection({ feedItemId }: FeedCommentsSectionProps) {
               </p>
             ) : null}
             <Textarea
+              ref={inputRef}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Write a comment…"
-              rows={2}
-              className="min-h-[44px] resize-none rounded-xl bg-background text-sm"
+              placeholder={`Comment as ${me?.user.name?.split(' ')[0] ?? 'you'}`}
+              rows={1}
+              className="min-h-9 resize-none rounded-full border-muted-foreground/20 bg-muted/40 px-4 py-2 text-sm"
+              onFocus={onExpand}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
@@ -109,40 +156,21 @@ export function FeedCommentsSection({ feedItemId }: FeedCommentsSectionProps) {
                 }
               }}
             />
-            <div className="flex justify-end">
-              <Button
-                size="sm"
-                className="rounded-lg"
-                disabled={!draft.trim() || addComment.isPending}
-                onClick={() => void submit()}
-              >
-                {addComment.isPending ? 'Posting…' : 'Post'}
-              </Button>
-            </div>
+            {draft.trim() ? (
+              <div className="flex justify-end">
+                <Button
+                  size="sm"
+                  className="rounded-lg"
+                  disabled={addComment.isPending}
+                  onClick={() => void submit()}
+                >
+                  {addComment.isPending ? 'Posting…' : 'Post'}
+                </Button>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}
-
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading comments…</p>
-      ) : thread.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No comments yet. Start the conversation.</p>
-      ) : (
-        <ul className="space-y-3">
-          {thread.map((node) => (
-            <CommentItem
-              key={node.comment.id}
-              node={node}
-              depth={0}
-              userId={userId}
-              onReply={setReplyTo}
-              onDelete={(comment) =>
-                deleteComment.mutate({ feedItemId, commentId: comment.id })
-              }
-            />
-          ))}
-        </ul>
-      )}
     </div>
   )
 }
@@ -151,59 +179,94 @@ function CommentItem({
   node,
   depth,
   userId,
+  expanded,
+  expandedReplies,
+  onToggleReplies,
   onReply,
   onDelete,
 }: {
   node: CommentNode
   depth: number
   userId: string | null
+  expanded: boolean
+  expandedReplies: Record<string, boolean>
+  onToggleReplies: (commentId: string) => void
   onReply: (comment: FeedCommentDto) => void
   onDelete: (comment: FeedCommentDto) => void
 }) {
   const { comment, replies } = node
   const isOwner = userId === comment.author.id
+  const repliesExpanded = expanded || expandedReplies[comment.id]
+  const hiddenReplies = Math.max(0, replies.length - PREVIEW_REPLY_LIMIT)
+  const visibleReplies = repliesExpanded ? replies : replies.slice(0, PREVIEW_REPLY_LIMIT)
 
   return (
-    <li className={cn(depth > 0 && 'ml-8 border-l border-border pl-3')}>
-      <div className="flex gap-2">
-        <FeedUserAvatar name={comment.author.name} avatarUrl={comment.author.avatarUrl} className="h-8 w-8 shrink-0" />
+    <li>
+      <div className={cn('flex gap-2', depth > 0 && 'relative ml-9')}>
+        {depth > 0 ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -left-5 top-0 h-4 w-5 rounded-bl-lg border-b-2 border-l-2 border-muted-foreground/25"
+          />
+        ) : null}
+        <FeedUserAvatar
+          name={comment.author.name}
+          avatarUrl={comment.author.avatarUrl}
+          className={cn('shrink-0', depth > 0 ? 'h-7 w-7' : 'h-8 w-8')}
+        />
         <div className="min-w-0 flex-1">
-          <div className="inline-block max-w-full rounded-2xl bg-muted px-3 py-2">
-            <p className="text-sm font-semibold leading-tight">{comment.author.name}</p>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">{comment.body}</p>
+          <div className="inline-block max-w-full rounded-2xl bg-muted/70 px-3 py-2">
+            <p className="text-[13px] font-semibold leading-tight">{comment.author.name}</p>
+            <p className="whitespace-pre-wrap text-[15px] leading-snug">{comment.body}</p>
           </div>
-          <div className="mt-1 flex items-center gap-3 px-1 text-xs font-semibold text-muted-foreground">
-            <span>{formatRelativeTime(comment.createdAt)}</span>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 px-2 text-xs font-semibold text-muted-foreground">
+            <span>{formatCommentTimestamp(comment.createdAt)}</span>
             {userId ? (
-              <button type="button" className="hover:text-foreground" onClick={() => onReply(comment)}>
+              <button type="button" className="hover:underline">
+                Like
+              </button>
+            ) : null}
+            {userId ? (
+              <button type="button" className="hover:underline" onClick={() => onReply(comment)}>
                 Reply
               </button>
             ) : null}
             {isOwner ? (
-              <button
-                type="button"
-                className="hover:text-destructive"
-                onClick={() => onDelete(comment)}
-              >
+              <button type="button" className="hover:text-destructive" onClick={() => onDelete(comment)}>
                 Delete
               </button>
             ) : null}
           </div>
         </div>
       </div>
+
       {replies.length > 0 ? (
-        <ul className="mt-3 space-y-3">
-          {replies.map((child) => (
-            <CommentItem
-              key={child.comment.id}
-              node={child}
-              depth={depth + 1}
-              userId={userId}
-              onReply={onReply}
-              onDelete={onDelete}
-            />
-          ))}
-        </ul>
+        <div className="mt-2 space-y-2">
+          {!repliesExpanded && hiddenReplies > 0 ? (
+            <button
+              type="button"
+              className="ml-11 text-xs font-semibold text-muted-foreground hover:underline"
+              onClick={() => onToggleReplies(comment.id)}
+            >
+              View {hiddenReplies} more {hiddenReplies === 1 ? 'reply' : 'replies'}
+            </button>
+          ) : null}
+          <ul className="space-y-2">
+            {visibleReplies.map((child) => (
+              <CommentItem
+                key={child.comment.id}
+                node={child}
+                depth={depth + 1}
+                userId={userId}
+                expanded={expanded}
+                expandedReplies={expandedReplies}
+                onToggleReplies={onToggleReplies}
+                onReply={onReply}
+                onDelete={onDelete}
+              />
+            ))}
+          </ul>
+        </div>
       ) : null}
     </li>
   )

@@ -6,27 +6,11 @@ import { FeedCommentsSection } from '@/modules/feed/components/feed-comments-sec
 import { useSetFeedReaction } from '@/modules/feed/hooks/use-feed-engagement'
 import { getEngagement } from '@/modules/feed/lib/feed-engagement'
 import { buildFeedPostPageMeta } from '@/modules/feed/lib/feed-post-meta'
+import { FEED_REACTION_OPTIONS, feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
 import type { FeedItemDto, FeedReactionKind } from '@/modules/feed/types/feed.types'
 import { env } from '@/shared/config/env'
+import { toast } from '@/shared/components/ui/sonner'
 import { cn } from '@/shared/lib/cn'
-
-const REACTIONS: {
-  kind: FeedReactionKind
-  label: string
-  emoji: string
-  activeClass: string
-}[] = [
-  { kind: 'like', label: 'Like', emoji: '👍', activeClass: 'text-blue-600' },
-  { kind: 'love', label: 'Love', emoji: '❤️', activeClass: 'text-red-500' },
-  { kind: 'haha', label: 'Haha', emoji: '😂', activeClass: 'text-yellow-500' },
-  { kind: 'wow', label: 'Wow', emoji: '😮', activeClass: 'text-yellow-600' },
-  { kind: 'sad', label: 'Sad', emoji: '😢', activeClass: 'text-yellow-600' },
-  { kind: 'angry', label: 'Angry', emoji: '😡', activeClass: 'text-orange-600' },
-]
-
-function reactionMeta(kind: FeedReactionKind) {
-  return REACTIONS.find((r) => r.kind === kind) ?? REACTIONS[0]!
-}
 
 interface FeedEngagementProps {
   item: FeedItemDto
@@ -36,19 +20,18 @@ interface FeedEngagementProps {
 export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngagementProps) {
   const userId = useAuthStore((s) => s.userId)
   const engagement = getEngagement(item)
-  const [commentsOpen, setCommentsOpen] = useState(defaultCommentsOpen)
+  const [commentsExpanded, setCommentsExpanded] = useState(defaultCommentsOpen)
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [shareLabel, setShareLabel] = useState('Share')
   const reactRef = useRef<HTMLDivElement>(null)
+  const commentInputRef = useRef<HTMLTextAreaElement>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const setReaction = useSetFeedReaction()
 
-  const activeKinds = REACTIONS.filter((r) => engagement.reactions[r.kind] > 0).sort(
+  const activeKinds = FEED_REACTION_OPTIONS.filter((r) => engagement.reactions[r.kind] > 0).sort(
     (a, b) => engagement.reactions[b.kind] - engagement.reactions[a.kind],
   )
-  const myReaction = engagement.myReaction ? reactionMeta(engagement.myReaction) : null
-  const showStats = engagement.reactionTotal > 0 || engagement.commentCount > 0
+  const myReaction = engagement.myReaction ? feedReactionMeta(engagement.myReaction) : null
 
   const clearCloseTimer = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
@@ -75,6 +58,11 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
     react(engagement.myReaction ?? 'like')
   }
 
+  const focusComments = () => {
+    setCommentsExpanded(true)
+    window.setTimeout(() => commentInputRef.current?.focus(), 0)
+  }
+
   const sharePost = async () => {
     const origin = (typeof window !== 'undefined' ? window.location.origin : env.siteUrl).replace(/\/+$/, '')
     const url = `${origin}/feed/${item.id}`
@@ -88,136 +76,136 @@ export function FeedEngagement({ item, defaultCommentsOpen = false }: FeedEngage
           title: shareTitle,
           text: meta.description,
         })
-        setShareLabel('Shared')
+        toast.success('Post shared')
       } else {
         await navigator.clipboard.writeText(url)
-        setShareLabel('Link copied')
+        toast.success('Link copied')
       }
     } catch {
       try {
         await navigator.clipboard.writeText(url)
-        setShareLabel('Link copied')
+        toast.success('Link copied')
       } catch {
-        setShareLabel('Share failed')
+        toast.error('Could not share post')
       }
     }
-    window.setTimeout(() => setShareLabel('Share'), 2000)
   }
 
   return (
-    <div className="border-t">
-      {showStats ? (
-        <div className="flex items-center justify-between px-4 py-2 text-sm text-muted-foreground">
-          {engagement.reactionTotal > 0 ? (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="inline-flex -space-x-1">
-                {activeKinds.slice(0, 3).map((r) => (
-                  <span
-                    key={r.kind}
-                    className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-muted text-xs"
-                    aria-hidden
-                  >
-                    {r.emoji}
-                  </span>
-                ))}
-              </span>
-              <span>{engagement.reactionTotal}</span>
-            </span>
-          ) : (
-            <span />
-          )}
-          {engagement.commentCount > 0 ? (
-            <button
-              type="button"
-              className="hover:underline"
-              onClick={() => setCommentsOpen(true)}
+    <div>
+      <div className="flex items-center justify-between px-2 py-1 sm:px-3">
+        <div className="flex items-center">
+          {userId ? (
+            <div
+              ref={reactRef}
+              className="relative"
+              onMouseEnter={openPicker}
+              onMouseLeave={scheduleClosePicker}
             >
-              {engagement.commentCount} comment{engagement.commentCount === 1 ? '' : 's'}
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-
-      <div className="grid grid-cols-3 border-t">
-        {userId ? (
-          <div
-            ref={reactRef}
-            className="relative"
-            onMouseEnter={openPicker}
-            onMouseLeave={scheduleClosePicker}
-          >
-            {pickerOpen ? (
-              <div
-                className="absolute bottom-full left-1/2 z-20 mb-2 flex -translate-x-1/2 gap-1 rounded-full border bg-card px-2 py-1.5 shadow-lg"
-                onMouseEnter={openPicker}
-                onMouseLeave={scheduleClosePicker}
+              {pickerOpen ? (
+                <div
+                  className="absolute bottom-full left-0 z-20 mb-2 flex gap-1 rounded-full border bg-card px-2 py-1.5 shadow-lg"
+                  onMouseEnter={openPicker}
+                  onMouseLeave={scheduleClosePicker}
+                >
+                  {FEED_REACTION_OPTIONS.map((r) => (
+                    <button
+                      key={r.kind}
+                      type="button"
+                      className={cn(
+                        'flex h-9 w-9 items-center justify-center rounded-full text-xl transition-transform hover:scale-125',
+                        engagement.myReaction === r.kind && 'bg-muted',
+                      )}
+                      title={r.label}
+                      disabled={setReaction.isPending}
+                      onClick={() => react(r.kind)}
+                    >
+                      {r.emoji}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <button
+                type="button"
+                className={cn(
+                  'flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted/70',
+                  myReaction?.activeClass,
+                )}
+                aria-label={myReaction ? myReaction.label : 'Like'}
+                disabled={setReaction.isPending}
+                onClick={onQuickLike}
               >
-                {REACTIONS.map((r) => (
-                  <button
-                    key={r.kind}
-                    type="button"
-                    className={cn(
-                      'flex h-9 w-9 items-center justify-center rounded-full text-xl transition-transform hover:scale-125',
-                      engagement.myReaction === r.kind && 'bg-muted',
-                    )}
-                    title={r.label}
-                    disabled={setReaction.isPending}
-                    onClick={() => react(r.kind)}
-                  >
-                    {r.emoji}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-            <button
-              type="button"
-              className={cn(
-                'flex w-full items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors hover:bg-muted/60',
-                myReaction?.activeClass,
-              )}
-              disabled={setReaction.isPending}
-              onClick={onQuickLike}
+                {myReaction ? (
+                  <span className="text-lg" aria-hidden>
+                    {myReaction.emoji}
+                  </span>
+                ) : (
+                  <ThumbsUp className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/auth/login"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70"
+              aria-label="Like"
             >
-              {myReaction ? (
-                <span className="text-base" aria-hidden>
-                  {myReaction.emoji}
-                </span>
-              ) : (
-                <ThumbsUp className="h-[18px] w-[18px]" />
-              )}
-              {myReaction ? myReaction.label : 'Like'}
-            </button>
-          </div>
-        ) : (
-          <Link
-            to="/auth/login"
-            className="flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/60"
+              <ThumbsUp className="h-5 w-5" />
+            </Link>
+          )}
+
+          <button
+            type="button"
+            className="flex h-9 items-center justify-center gap-1 rounded-full px-2 text-muted-foreground transition-colors hover:bg-muted/70"
+            aria-label="Comment"
+            onClick={focusComments}
           >
-            <ThumbsUp className="h-[18px] w-[18px]" />
-            Like
-          </Link>
-        )}
+            <MessageCircle className="h-5 w-5" />
+            {engagement.commentCount > 0 ? (
+              <span className="min-w-[1ch] text-sm font-medium text-foreground">{engagement.commentCount}</span>
+            ) : null}
+          </button>
 
-        <button
-          type="button"
-          className="flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/60"
-          onClick={() => setCommentsOpen((open) => !open)}
-        >
-          <MessageCircle className="h-[18px] w-[18px]" />
-          Comment
-        </button>
+          <button
+            type="button"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70"
+            aria-label="Share"
+            onClick={() => void sharePost()}
+          >
+            <Share2 className="h-5 w-5" />
+          </button>
+        </div>
 
-        <button
-          type="button"
-          className="flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/60"
-          onClick={() => void sharePost()}
-        >
-          <Share2 className="h-[18px] w-[18px]" />
-          {shareLabel}
-        </button>
+        {engagement.reactionTotal > 0 ? (
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-muted/50"
+          >
+            <span className="inline-flex -space-x-1">
+              {activeKinds.slice(0, 3).map((r) => (
+                <span
+                  key={r.kind}
+                  className={cn(
+                    'inline-flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-card text-[10px] leading-none',
+                    r.bubbleClass,
+                  )}
+                  aria-hidden
+                >
+                  {r.emoji}
+                </span>
+              ))}
+            </span>
+            <span>{engagement.reactionTotal}</span>
+          </button>
+        ) : null}
       </div>
 
-      {commentsOpen ? <FeedCommentsSection feedItemId={item.id} /> : null}
+      <FeedCommentsSection
+        feedItemId={item.id}
+        expanded={commentsExpanded}
+        onExpand={() => setCommentsExpanded(true)}
+        inputRef={commentInputRef}
+      />
     </div>
   )
 }

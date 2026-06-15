@@ -83,9 +83,11 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <Lazy>
-            <HomePage />
-          </Lazy>
+          <GuestGuard>
+            <Lazy>
+              <HomePage />
+            </Lazy>
+          </GuestGuard>
         ),
       },
     ],

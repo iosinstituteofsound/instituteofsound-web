@@ -10,10 +10,22 @@ export function MusicFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
   const spotifyUrl = payloadString(item.payload, 'spotifyUrl')
   const audioUrl = payloadString(item.payload, 'audioUrl')
   const link = spotifyUrl ?? youtubeUrl
+  const trackLine = [trackTitle, artistName].filter(Boolean).join(' · ')
 
   return (
-    <FeedCardShell item={item} defaultCommentsOpen={defaultCommentsOpen}>
-      <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-3">
+    <FeedCardShell
+      item={item}
+      defaultCommentsOpen={defaultCommentsOpen}
+      subtitle={
+        trackLine ? (
+          <span className="inline-flex items-center gap-1.5">
+            <Music2 className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{trackLine}</span>
+          </span>
+        ) : null
+      }
+    >
+      <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Music2 className="h-7 w-7" />
         </div>

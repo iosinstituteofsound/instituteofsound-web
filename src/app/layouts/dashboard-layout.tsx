@@ -13,7 +13,6 @@ import { MAIN_MAX_WIDTH_CLASS, MAIN_PADDING_CLASS } from '@/shared/lib/layout-co
 export function DashboardLayout() {
   const dashboardConfig = useLayoutStore((state) => state.dashboardConfig)
   const { toggleCollapsed, mobileOpen, setMobileOpen, setCollapsed } = useSidebarStore()
-
   useEffect(() => {
     setCollapsed(dashboardConfig.sidebar.defaultCollapsed)
   }, [dashboardConfig.sidebar.defaultCollapsed, setCollapsed])
@@ -49,7 +48,7 @@ export function DashboardLayout() {
         ) : null}
         <main
           className={cn(
-            'min-h-0 flex-1 overflow-auto',
+            'min-h-0 flex-1 overflow-y-auto overflow-x-hidden',
             MAIN_PADDING_CLASS[dashboardConfig.main.padding],
             MAIN_MAX_WIDTH_CLASS[dashboardConfig.main.maxWidth],
           )}

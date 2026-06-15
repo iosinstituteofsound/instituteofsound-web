@@ -44,9 +44,9 @@ export function FeedList({ compactLoader }: FeedListProps) {
   if (isLoading) {
     if (compactLoader) {
       return (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {[1, 2].map((key) => (
-            <div key={key} className="rounded-xl border bg-card p-4 shadow-sm">
+            <div key={key} className="rounded-lg border bg-card p-4 shadow-sm">
               <div className="mb-3 flex gap-3">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1 space-y-2">
@@ -67,7 +67,7 @@ export function FeedList({ compactLoader }: FeedListProps) {
 
   if (!items.length) {
     return (
-      <div className="rounded-xl border border-dashed bg-card p-10 text-center shadow-sm">
+      <div className="rounded-lg border border-dashed bg-card p-10 text-center shadow-sm">
         <p className="font-medium">No posts yet</p>
         <p className="mt-1 text-sm text-muted-foreground">Be the first to share something with the community.</p>
       </div>
@@ -83,7 +83,7 @@ export function FeedList({ compactLoader }: FeedListProps) {
       {isFetchingNextPage ? (
         <div className="space-y-3 pt-1">
           {[1, 2].map((key) => (
-            <div key={key} className="rounded-xl border bg-card p-4 shadow-sm">
+            <div key={key} className="rounded-lg border bg-card p-4 shadow-sm">
               <div className="mb-3 flex gap-3">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1 space-y-2">

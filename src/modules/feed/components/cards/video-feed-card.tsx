@@ -1,5 +1,5 @@
 import type { FeedCardProps } from '@/modules/feed/lib/feed-type-registry'
-import { FeedCardShell, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
+import { FeedCardShell, FeedMediaFrame, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 
 export function VideoFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
   const videoUrl = payloadString(item.payload, 'videoUrl')
@@ -11,9 +11,15 @@ export function VideoFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
       defaultCommentsOpen={defaultCommentsOpen}
       media={
         videoUrl ? (
-          <video controls className="max-h-[520px] w-full bg-black" poster={posterUrl}>
-            <source src={videoUrl} />
-          </video>
+          <FeedMediaFrame>
+            <video
+              controls
+              className="max-h-[min(72vh,680px)] w-full object-contain"
+              poster={posterUrl}
+            >
+              <source src={videoUrl} />
+            </video>
+          </FeedMediaFrame>
         ) : null
       }
     />

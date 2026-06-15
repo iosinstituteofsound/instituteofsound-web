@@ -19,42 +19,83 @@ interface CreatePostCardProps {
   userName: string
   avatarUrl?: string | null
   onOpen: (type?: FeedItemType) => void
+  /** 0 = expanded, 1 = fully collapsed (scroll-driven) */
+  collapseProgress?: number
 }
 
-export function CreatePostCard({ userName, avatarUrl, onOpen }: CreatePostCardProps) {
+export function CreatePostCard({
+  userName,
+  avatarUrl,
+  onOpen,
+  collapseProgress = 0,
+}: CreatePostCardProps) {
   const firstName = userName.split(' ')[0] ?? userName
+  const compact = collapseProgress > 0.55
+  const actionsHeight = 64
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-      <div className="flex items-center gap-3 p-3 sm:p-4">
-        <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10 shrink-0" />
+    <div
+      className={cn(
+        'relative z-30 overflow-hidden border bg-card shadow-sm transition-[border-radius,box-shadow] duration-300 ease-out',
+        compact ? 'rounded-full shadow-none' : 'rounded-xl',
+      )}
+    >
+      <div
+        className="flex min-w-0 items-center transition-[gap,padding] duration-300 ease-out"
+        style={{
+          gap: `${12 - collapseProgress * 4}px`,
+          padding: `${12 - collapseProgress * 4}px ${16 - collapseProgress * 4}px`,
+        }}
+      >
+        <FeedUserAvatar
+          name={userName}
+          avatarUrl={avatarUrl}
+          className="shrink-0 transition-[width,height] duration-300 ease-out"
+          style={{
+            width: `${40 - collapseProgress * 8}px`,
+            height: `${40 - collapseProgress * 8}px`,
+          }}
+        />
         <button
           type="button"
           onClick={() => onOpen('text')}
-          className="flex-1 rounded-full bg-muted/70 px-4 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted"
+          className="min-w-0 flex-1 truncate rounded-full bg-muted/70 px-4 text-left text-sm text-muted-foreground transition-[padding,font-size] duration-300 ease-out hover:bg-muted"
+          style={{
+            paddingTop: `${10 - collapseProgress * 3}px`,
+            paddingBottom: `${10 - collapseProgress * 3}px`,
+            fontSize: `${14 - collapseProgress * 1}px`,
+          }}
         >
-          What&apos;s on your mind, {firstName}?
+          {compact ? "What's on your mind?" : `What's on your mind, ${firstName}?`}
         </button>
       </div>
 
-      <div className="mx-3 border-t sm:mx-4" />
+      <div
+        className="overflow-hidden transition-[max-height,opacity] duration-300 ease-out"
+        style={{
+          maxHeight: `${(1 - collapseProgress) * actionsHeight}px`,
+          opacity: 1 - collapseProgress,
+        }}
+      >
+        <div className="mx-3 border-t sm:mx-4" />
 
-      <div className="grid grid-cols-3 gap-1 p-2 sm:p-3">
-        {QUICK_POST_ACTIONS.map((action) => {
-          const Icon = action.icon
-          return (
-            <Button
-              key={action.type}
-              type="button"
-              variant="ghost"
-              className="h-10 gap-2 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/60 sm:text-sm"
-              onClick={() => onOpen(action.type)}
-            >
-              <Icon className={cn('h-5 w-5', action.iconClass)} />
-              <span>{action.label}</span>
-            </Button>
-          )
-        })}
+        <div className="flex items-stretch gap-1 p-2 sm:gap-2 sm:p-3">
+          {QUICK_POST_ACTIONS.map((action) => {
+            const Icon = action.icon
+            return (
+              <Button
+                key={action.type}
+                type="button"
+                variant="ghost"
+                className="h-10 min-w-0 flex-1 gap-1.5 rounded-lg px-1 text-xs font-semibold text-muted-foreground hover:bg-muted/60 sm:gap-2 sm:px-2 sm:text-sm"
+                onClick={() => onOpen(action.type)}
+              >
+                <Icon className={cn('h-5 w-5 shrink-0', action.iconClass)} />
+                <span className="truncate">{action.label}</span>
+              </Button>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

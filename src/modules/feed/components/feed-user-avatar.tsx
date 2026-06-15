@@ -13,11 +13,12 @@ interface FeedUserAvatarProps {
   name: string
   avatarUrl?: string | null
   className?: string
+  style?: React.CSSProperties
 }
 
-export function FeedUserAvatar({ name, avatarUrl, className }: FeedUserAvatarProps) {
+export function FeedUserAvatar({ name, avatarUrl, className, style }: FeedUserAvatarProps) {
   return (
-    <Avatar className={className}>
+    <Avatar className={className} style={style}>
       {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
       <AvatarFallback className="bg-muted text-sm font-medium">{authorInitials(name)}</AvatarFallback>
     </Avatar>

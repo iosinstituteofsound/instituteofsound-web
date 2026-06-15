@@ -1,6 +1,6 @@
 import { ExternalLink } from 'lucide-react'
 import type { FeedCardProps } from '@/modules/feed/lib/feed-type-registry'
-import { FeedCardShell, payloadNumber, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
+import { FeedCardShell, FeedMediaFrame, payloadNumber, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { Button } from '@/shared/components/ui/button'
 
 export function ArticleFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
@@ -15,7 +15,9 @@ export function ArticleFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
       defaultCommentsOpen={defaultCommentsOpen}
       media={
         coverUrl ? (
-          <img src={coverUrl} alt={item.title ?? 'Article'} className="max-h-[320px] w-full bg-muted object-cover" />
+          <FeedMediaFrame className="max-h-[320px]">
+            <img src={coverUrl} alt={item.title ?? 'Article'} className="max-h-[320px] w-full object-contain" />
+          </FeedMediaFrame>
         ) : null
       }
     >

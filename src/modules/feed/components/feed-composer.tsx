@@ -4,7 +4,11 @@ import { CreatePostCard } from '@/modules/feed/components/create-post-card'
 import { CreatePostDialog } from '@/modules/feed/components/create-post-dialog'
 import type { FeedItemType } from '@/modules/feed/types/feed.types'
 
-export function FeedComposer() {
+interface FeedComposerProps {
+  collapseProgress?: number
+}
+
+export function FeedComposer({ collapseProgress = 0 }: FeedComposerProps) {
   const { data: me } = useMe()
   const [open, setOpen] = useState(false)
   const [initialType, setInitialType] = useState<FeedItemType>('text')
@@ -19,7 +23,12 @@ export function FeedComposer() {
 
   return (
     <>
-      <CreatePostCard userName={userName} avatarUrl={avatarUrl} onOpen={openComposer} />
+      <CreatePostCard
+        userName={userName}
+        avatarUrl={avatarUrl}
+        onOpen={openComposer}
+        collapseProgress={collapseProgress}
+      />
       <CreatePostDialog
         open={open}
         onOpenChange={setOpen}
