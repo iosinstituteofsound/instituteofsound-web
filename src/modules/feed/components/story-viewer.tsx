@@ -18,12 +18,14 @@ import {
   findStoryLocation,
   groupStoriesByAuthor,
   storyBackground,
+  storyMentions,
   storyPreviewText,
   storyTextStyle,
   storyVideoUrl,
 } from '@/modules/feed/lib/story-content'
 import { FEED_REACTION_OPTIONS } from '@/modules/feed/lib/feed-reactions'
 import { formatFeedTimestamp } from '@/modules/feed/lib/feed-time'
+import { useStoryGestures } from '@/modules/feed/hooks/use-story-gestures'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent } from '@/shared/components/ui/dialog'
 import { Input } from '@/shared/components/ui/input'
@@ -57,6 +59,7 @@ export function StoryViewer({
   const [progress, setProgress] = useState(0)
   const [paused, setPaused] = useState(false)
   const [muted, setMuted] = useState(true)
+  const [mentionsOpen, setMentionsOpen] = useState(false)
 
   const groups = useMemo(() => groupStoriesByAuthor(stories), [stories])
   const activeGroup = groups[groupIndex]
@@ -68,6 +71,7 @@ export function StoryViewer({
     setPosition({ groupIndex: location.groupIndex, storyIndex: location.storyIndex })
     setProgress(0)
     setPaused(false)
+    setMentionsOpen(false)
   }, [open, initialStoryId, stories])
 
   const goNext = useCallback(() => {
@@ -79,12 +83,14 @@ export function StoryViewer({
     if (storyIndex < currentGroup.stories.length - 1) {
       setPosition({ groupIndex, storyIndex: storyIndex + 1 })
       setProgress(0)
+      setMentionsOpen(false)
       return
     }
 
     if (groupIndex < groups.length - 1) {
       setPosition({ groupIndex: groupIndex + 1, storyIndex: 0 })
       setProgress(0)
+      setMentionsOpen(false)
       return
     }
 
@@ -97,6 +103,7 @@ export function StoryViewer({
     if (storyIndex > 0) {
       setPosition({ groupIndex, storyIndex: storyIndex - 1 })
       setProgress(0)
+      setMentionsOpen(false)
       return
     }
 
@@ -104,6 +111,7 @@ export function StoryViewer({
       const prevGroup = groups[groupIndex - 1]!
       setPosition({ groupIndex: groupIndex - 1, storyIndex: prevGroup.stories.length - 1 })
       setProgress(0)
+      setMentionsOpen(false)
     }
   }, [groupIndex, groups, storyIndex])
 
@@ -124,7 +132,37 @@ export function StoryViewer({
   const jumpToStory = (nextGroupIndex: number, nextStoryIndex = 0) => {
     setPosition({ groupIndex: nextGroupIndex, storyIndex: nextStoryIndex })
     setProgress(0)
+    setMentionsOpen(false)
   }
+
+  const canGoPrev = groupIndex > 0 || storyIndex > 0
+  const canGoNext =
+    groupIndex < groups.length - 1 || storyIndex < (activeGroup?.stories.length ?? 0) - 1
+
+  const mentions = activeStory ? storyMentions(activeStory) : []
+
+  const { gestureProps } = useStoryGestures({
+    onNext: goNext,
+    onPrevious: goPrev,
+    onTap: () => {
+      if (mentions.length > 0) setMentionsOpen(true)
+    },
+    onDragStart: () => setPaused(true),
+    onDragEnd: () => setPaused(false),
+  })
+
+  useEffect(() => {
+    if (!open) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowRight') goNext()
+      if (event.key === 'ArrowLeft') goPrev()
+      if (event.key === 'Escape') setMentionsOpen(false)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [goNext, goPrev, open])
 
   if (!groups.length || !activeStory || !activeGroup) return null
 
@@ -225,12 +263,12 @@ export function StoryViewer({
               <X className="h-5 w-5" />
             </Button>
 
-            {groupIndex > 0 || storyIndex > 0 ? (
+            {canGoPrev ? (
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute left-2 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 rounded-full bg-black/50 text-white hover:bg-black/70 sm:inline-flex"
+                className="absolute left-2 top-1/2 z-20 inline-flex h-11 w-11 -translate-y-1/2 rounded-full bg-black/50 text-white hover:bg-black/70"
                 onClick={goPrev}
                 aria-label="Previous story"
               >
@@ -238,7 +276,10 @@ export function StoryViewer({
               </Button>
             ) : null}
 
-            <div className="relative h-[min(88vh,760px)] w-full max-w-[420px] overflow-hidden rounded-2xl bg-black shadow-2xl">
+            <div
+              className="relative h-[min(88vh,760px)] w-full max-w-[420px] touch-none overflow-hidden rounded-2xl bg-black shadow-2xl"
+              {...gestureProps}
+            >
               <div className="absolute inset-x-0 top-0 z-20 flex gap-1 px-3 pt-3">
                 {activeGroup.stories.map((story, index) => (
                   <div key={story.id} className="h-0.5 flex-1 overflow-hidden rounded-full bg-white/30">
@@ -257,7 +298,10 @@ export function StoryViewer({
                 ))}
               </div>
 
-              <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 pb-3 pt-8">
+              <div
+                className="pointer-events-auto absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 pb-3 pt-8"
+                onPointerDown={(event) => event.stopPropagation()}
+              >
                 <div className="flex min-w-0 items-center gap-2">
                   <FeedUserAvatar
                     name={activeGroup.author.name}
@@ -316,7 +360,39 @@ export function StoryViewer({
                 paused={paused}
               />
 
-              <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-4 pb-4 pt-10">
+              {mentionsOpen && mentions.length > 0 ? (
+                <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 p-6">
+                  <div className="w-full max-w-xs rounded-2xl border border-white/10 bg-[#242526] p-4 shadow-2xl">
+                    <p className="mb-3 text-sm font-semibold text-white/80">Mentioned in this story</p>
+                    <div className="space-y-2">
+                      {mentions.map((mention) => (
+                        <div
+                          key={mention}
+                          className="flex items-center gap-3 rounded-xl bg-white/5 px-3 py-2"
+                        >
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
+                            {mention.slice(0, 1).toUpperCase()}
+                          </div>
+                          <p className="font-semibold text-white">@{mention}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="mt-4 w-full rounded-xl"
+                      onClick={() => setMentionsOpen(false)}
+                    >
+                      Close
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+
+              <div
+                className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-4 pb-4 pt-10"
+                onPointerDown={(event) => event.stopPropagation()}
+              >
                 <div className="flex items-center gap-2">
                   <Input
                     placeholder="Send message..."
@@ -338,12 +414,12 @@ export function StoryViewer({
               </div>
             </div>
 
-            {groupIndex < groups.length - 1 || storyIndex < activeGroup.stories.length - 1 ? (
+            {canGoNext ? (
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-2 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 rounded-full bg-black/50 text-white hover:bg-black/70 sm:inline-flex"
+                className="absolute right-2 top-1/2 z-20 inline-flex h-11 w-11 -translate-y-1/2 rounded-full bg-black/50 text-white hover:bg-black/70"
                 onClick={goNext}
                 aria-label="Next story"
               >

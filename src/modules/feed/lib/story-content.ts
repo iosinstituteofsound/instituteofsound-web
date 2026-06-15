@@ -78,3 +78,23 @@ export function storyTextStyle(item: FeedItemDto) {
 export function storyVideoUrl(item: FeedItemDto) {
   return payloadString(item.payload, 'videoUrl')
 }
+
+export function storyMentions(item: FeedItemDto): string[] {
+  const raw = item.payload?.mentions
+  if (Array.isArray(raw)) {
+    return raw
+      .map((entry) => {
+        if (typeof entry === 'string') return entry.replace(/^@/, '')
+        if (entry && typeof entry === 'object' && 'username' in entry) {
+          const username = (entry as { username?: unknown }).username
+          return typeof username === 'string' ? username.replace(/^@/, '') : null
+        }
+        return null
+      })
+      .filter((entry): entry is string => Boolean(entry))
+  }
+
+  const text = [storyPreviewText(item), item.body, item.title].filter(Boolean).join(' ')
+  const matches = text.match(/@([a-zA-Z0-9_.]+)/g) ?? []
+  return [...new Set(matches.map((mention) => mention.slice(1)))]
+}
