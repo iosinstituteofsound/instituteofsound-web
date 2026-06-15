@@ -348,6 +348,17 @@
   color: var(--foreground);
 }
 
+.feed-comment-composer__tool--emoji {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.feed-comment-composer__tool--emoji svg {
+  width: 20px;
+  height: 20px;
+}
+
 .feed-comment-composer__send {
   display: flex;
   align-items: center;

@@ -1,10 +1,11 @@
-import { useRef, useState, useEffect, type RefObject } from 'react'
+import { useState, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
-import { Camera, ImageIcon, Send, Smile } from 'lucide-react'
+import { Camera, ImageIcon, Send } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import {
   AnimatedEmojiPicker,
+  EmojiTriggerButton,
 } from '@/modules/feed/components/animated-emoji-picker'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { useAddFeedComment } from '@/modules/feed/hooks/use-feed-engagement'
@@ -34,12 +35,16 @@ export function FeedCommentComposer({
   const addComment = useAddFeedComment()
   const [draft, setDraft] = useState('')
   const [emojiOpen, setEmojiOpen] = useState(false)
-  const emojiAnchorRef = useRef<HTMLButtonElement>(null)
   const [emojiAnchor, setEmojiAnchor] = useState<HTMLElement | null>(null)
 
-  useEffect(() => {
-    if (emojiOpen) setEmojiAnchor(emojiAnchorRef.current)
-  }, [emojiOpen])
+  const handleEmojiTrigger = (anchor: HTMLElement) => {
+    if (emojiOpen && emojiAnchor === anchor) {
+      setEmojiOpen(false)
+      return
+    }
+    setEmojiAnchor(anchor)
+    setEmojiOpen(true)
+  }
 
   if (!userId) {
     return (
@@ -66,6 +71,18 @@ export function FeedCommentComposer({
     onClearReply?.()
     onPosted?.()
   }
+
+  const emojiPicker = (
+    <AnimatedEmojiPicker
+      open={emojiOpen}
+      onOpenChange={setEmojiOpen}
+      onSelect={(emoji) => {
+        setDraft((current) => current + emoji)
+        setEmojiOpen(false)
+      }}
+      anchorEl={emojiAnchor}
+    />
+  )
 
   if (variant === 'modal') {
     return (
@@ -98,15 +115,12 @@ export function FeedCommentComposer({
           />
           <div className="feed-comment-composer__tools">
             <div className="feed-comment-composer__tool-group">
-              <button
-                ref={emojiAnchorRef}
-                type="button"
-                className="feed-comment-composer__tool"
-                aria-label="Emoji"
-                onClick={() => setEmojiOpen((v) => !v)}
-              >
-                <Smile className="h-5 w-5" />
-              </button>
+              <EmojiTriggerButton
+                active={emojiOpen}
+                size="sm"
+                className="feed-comment-composer__tool feed-comment-composer__tool--emoji"
+                onClick={handleEmojiTrigger}
+              />
               <button type="button" className="feed-comment-composer__tool" aria-label="Photo">
                 <Camera className="h-5 w-5" />
               </button>
@@ -128,18 +142,7 @@ export function FeedCommentComposer({
             </button>
           </div>
         </div>
-
-        {emojiOpen ? (
-          <AnimatedEmojiPicker
-            open={emojiOpen}
-            onOpenChange={setEmojiOpen}
-            onSelect={(emoji) => {
-              setDraft((current) => current + emoji)
-              setEmojiOpen(false)
-            }}
-            anchorEl={emojiAnchor}
-          />
-        ) : null}
+        {emojiPicker}
       </div>
     )
   }
@@ -164,20 +167,27 @@ export function FeedCommentComposer({
             </button>
           </p>
         ) : null}
-        <Textarea
-          ref={inputRef}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder={`Comment as ${firstName}`}
-          rows={1}
-          className="min-h-9 resize-none rounded-full border-muted-foreground/20 bg-muted/40 px-4 py-2 text-sm"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault()
-              void submit()
-            }
-          }}
-        />
+        <div className="flex items-end gap-1">
+          <Textarea
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={`Comment as ${firstName}`}
+            rows={1}
+            className="min-h-9 flex-1 resize-none rounded-full border-muted-foreground/20 bg-muted/40 px-4 py-2 text-sm"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                void submit()
+              }
+            }}
+          />
+          <EmojiTriggerButton
+            active={emojiOpen}
+            size="sm"
+            onClick={handleEmojiTrigger}
+          />
+        </div>
         {draft.trim() ? (
           <div className="flex justify-end">
             <button
@@ -191,6 +201,7 @@ export function FeedCommentComposer({
           </div>
         ) : null}
       </div>
+      {emojiPicker}
     </div>
   )
 }

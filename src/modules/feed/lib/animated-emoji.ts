@@ -2,6 +2,7 @@ import { catalogSlugForEmoji } from '@/modules/feed/lib/emoji-catalog'
 
 const NOTO_ANIMATED_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest'
 const NOTO_ANIMATED_SIZE = 512
+const NOTO_STATIC_PICKER_SIZE = 128
 const RECENT_STORAGE_KEY = 'ios-feed-recent-emojis'
 const MAX_RECENT = 24
 
@@ -13,6 +14,15 @@ export function animatedEmojiUrl(slug: string, size = NOTO_ANIMATED_SIZE): strin
 
 export function staticEmojiUrl(slug: string, size = NOTO_ANIMATED_SIZE): string {
   return `${NOTO_ANIMATED_BASE}/${slug}/${size}.png`
+}
+
+/** Grid preview size — PNG exists at 128; animated WebP is only at 512. */
+export function pickerStaticEmojiUrl(slug: string): string {
+  return staticEmojiUrl(slug, NOTO_STATIC_PICKER_SIZE)
+}
+
+export function pickerAnimatedEmojiUrl(slug: string): string {
+  return animatedEmojiUrl(slug, NOTO_ANIMATED_SIZE)
 }
 
 export function graphemeSegments(text: string): string[] {

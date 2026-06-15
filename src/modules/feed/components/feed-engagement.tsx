@@ -3,17 +3,15 @@ import { Link } from 'react-router-dom'
 import { MessageCircle, Share2, ThumbsUp } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { FeedCommentDialog } from '@/modules/feed/components/feed-comment-dialog'
+import { FeedShareDialog } from '@/modules/feed/components/feed-share-dialog'
 import { ReactionPickerIcon } from '@/modules/feed/components/feed-reaction-icons'
 import { FeedReactionPicker } from '@/modules/feed/components/feed-reaction-picker'
 import { useSetFeedReaction } from '@/modules/feed/hooks/use-feed-engagement'
 import { getEngagement } from '@/modules/feed/lib/feed-engagement'
 import { formatEngagementCount } from '@/modules/feed/lib/format-engagement-count'
-import { buildFeedPostPageMeta } from '@/modules/feed/lib/feed-post-meta'
 import { FEED_REACTION_OPTIONS, feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
 import { unlockReactionSounds } from '@/modules/feed/lib/feed-reaction-sounds'
 import type { FeedItemDto, FeedReactionKind } from '@/modules/feed/types/feed.types'
-import { env } from '@/shared/config/env'
-import { toast } from '@/shared/components/ui/sonner'
 import { cn } from '@/shared/lib/cn'
 
 interface FeedEngagementProps {
@@ -35,6 +33,7 @@ export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'd
   const userId = useAuthStore((s) => s.userId)
   const engagement = getEngagement(item)
   const [commentDialogOpen, setCommentDialogOpen] = useState(defaultCommentsOpen)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const reactRef = useRef<HTMLDivElement>(null)
   const likeButtonRef = useRef<HTMLButtonElement>(null)
@@ -78,32 +77,8 @@ export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'd
     setCommentDialogOpen(true)
   }
 
-  const sharePost = async () => {
-    const origin = (typeof window !== 'undefined' ? window.location.origin : env.siteUrl).replace(/\/+$/, '')
-    const url = `${origin}/feed/${item.id}`
-    const meta = buildFeedPostPageMeta(item)
-    const shareTitle = meta.title.replace(/ · Institute of Sound$/, '')
-
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          url,
-          title: shareTitle,
-          text: meta.description,
-        })
-        toast.success('Post shared')
-      } else {
-        await navigator.clipboard.writeText(url)
-        toast.success('Link copied')
-      }
-    } catch {
-      try {
-        await navigator.clipboard.writeText(url)
-        toast.success('Link copied')
-      } catch {
-        toast.error('Could not share post')
-      }
-    }
+  const openShare = () => {
+    setShareDialogOpen(true)
   }
 
   const likeButtonInner = myReaction ? (
@@ -210,7 +185,7 @@ export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'd
                 type="button"
                 className="feed-social-card__action-btn"
                 aria-label="Share"
-                onClick={() => void sharePost()}
+                onClick={openShare}
               >
                 <Share2 className="h-5 w-5" />
                 <span>Share</span>
@@ -220,6 +195,7 @@ export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'd
         </div>
 
         <FeedCommentDialog item={item} open={commentDialogOpen} onOpenChange={setCommentDialogOpen} />
+        <FeedShareDialog item={item} open={shareDialogOpen} onOpenChange={setShareDialogOpen} />
       </>
     )
   }
@@ -236,7 +212,7 @@ export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'd
             </button>
           </div>
           <div className="feed-social-card__action-slot">
-            <button type="button" className="feed-social-card__action-btn" onClick={() => void sharePost()}>
+            <button type="button" className="feed-social-card__action-btn" onClick={openShare}>
               <Share2 className="h-5 w-5" />
               <span>Share</span>
             </button>
@@ -245,6 +221,7 @@ export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'd
       </div>
 
       <FeedCommentDialog item={item} open={commentDialogOpen} onOpenChange={setCommentDialogOpen} />
+      <FeedShareDialog item={item} open={shareDialogOpen} onOpenChange={setShareDialogOpen} />
     </>
   )
 }

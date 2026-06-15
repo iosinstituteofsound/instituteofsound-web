@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { animatedEmojiUrl, splitTextWithEmojis } from '@/modules/feed/lib/animated-emoji'
 import { cn } from '@/shared/lib/cn'
 
@@ -23,6 +24,16 @@ export function AnimatedEmoji({
   imageSize = 512,
   className,
 }: AnimatedEmojiProps) {
+  const [failed, setFailed] = useState(false)
+
+  if (failed) {
+    return (
+      <span className={cn('inline-block text-center leading-none', SIZE_CLASS[size], className)} aria-hidden>
+        {emoji}
+      </span>
+    )
+  }
+
   return (
     <img
       src={animatedEmojiUrl(slug, imageSize)}
@@ -33,10 +44,7 @@ export function AnimatedEmoji({
       draggable={false}
       fetchPriority="low"
       className={cn('inline-block object-contain', SIZE_CLASS[size], className)}
-      onError={(event) => {
-        const target = event.currentTarget
-        target.replaceWith(document.createTextNode(emoji))
-      }}
+      onError={() => setFailed(true)}
     />
   )
 }

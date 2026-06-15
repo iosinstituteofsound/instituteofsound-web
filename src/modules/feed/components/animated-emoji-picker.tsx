@@ -13,8 +13,12 @@ import {
   Trophy,
   X,
 } from 'lucide-react'
-import { AnimatedEmoji } from '@/modules/feed/components/animated-emoji-text'
-import { loadRecentEmojis, saveRecentEmoji } from '@/modules/feed/lib/animated-emoji'
+import {
+  loadRecentEmojis,
+  pickerAnimatedEmojiUrl,
+  pickerStaticEmojiUrl,
+  saveRecentEmoji,
+} from '@/modules/feed/lib/animated-emoji'
 import {
   catalogEntryForEmoji,
   EMOJI_CATALOG,
@@ -27,7 +31,6 @@ import { cn } from '@/shared/lib/cn'
 const PICKER_WIDTH = 340
 const PICKER_ESTIMATED_HEIGHT = 380
 const VIEWPORT_PADDING = 12
-const PICKER_EMOJI_IMAGE_SIZE = 128
 
 export const EMOJI_PICKER_ROOT_SELECTOR = '[data-emoji-picker-root]'
 export const EMOJI_TRIGGER_SELECTOR = '[data-emoji-trigger]'
@@ -93,17 +96,22 @@ function resolveRecentEntries(recent: string[]): EmojiEntry[] {
 
 interface PickerEmojiCellProps {
   entry: EmojiEntry
-  scrollRoot: HTMLElement | null
   onPick: (entry: EmojiEntry) => void
 }
 
 const PickerEmojiCell = memo(function PickerEmojiCell({
   entry,
-  scrollRoot,
   onPick,
 }: PickerEmojiCellProps) {
   const cellRef = useRef<HTMLButtonElement>(null)
-  const [animate, setAnimate] = useState(false)
+  const [hovered, setHovered] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const [staticFailed, setStaticFailed] = useState(false)
+  const [animatedFailed, setAnimatedFailed] = useState(false)
+  const [playKey, setPlayKey] = useState(0)
+
+  const staticSrc = pickerStaticEmojiUrl(entry.slug)
+  const animatedSrc = pickerAnimatedEmojiUrl(entry.slug)
 
   useEffect(() => {
     const node = cellRef.current
@@ -112,16 +120,22 @@ const PickerEmojiCell = memo(function PickerEmojiCell({
     const observer = new IntersectionObserver(
       ([observed]) => {
         if (observed?.isIntersecting) {
-          setAnimate(true)
+          setVisible(true)
           observer.disconnect()
         }
       },
-      { root: scrollRoot, rootMargin: '48px' },
+      { rootMargin: '64px' },
     )
 
     observer.observe(node)
     return () => observer.disconnect()
-  }, [scrollRoot, entry.slug])
+  }, [entry.slug])
+
+  useEffect(() => {
+    if (!visible || animatedFailed) return
+    const preload = new Image()
+    preload.src = animatedSrc
+  }, [visible, animatedSrc, animatedFailed])
 
   const handlePointerDown = (event: React.PointerEvent) => {
     event.preventDefault()
@@ -129,24 +143,53 @@ const PickerEmojiCell = memo(function PickerEmojiCell({
     onPick(entry)
   }
 
+  const handleMouseEnter = () => {
+    setHovered(true)
+    if (!animatedFailed) setPlayKey((key) => key + 1)
+  }
+
+  const showAnimated = hovered && !animatedFailed
+
   return (
     <button
       ref={cellRef}
       type="button"
-      title={entry.emoji}
-      className="flex h-10 w-10 items-center justify-center rounded-lg text-xl transition-transform hover:scale-110 hover:bg-muted"
+      aria-label={entry.emoji}
+      className={cn(
+        'flex h-10 w-10 items-center justify-center rounded-lg transition-colors duration-150',
+        hovered && 'bg-muted',
+      )}
       onPointerDown={handlePointerDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={handleMouseEnter}
+      onBlur={() => setHovered(false)}
     >
-      {animate ? (
-        <AnimatedEmoji
-          slug={entry.slug}
-          emoji={entry.emoji}
-          size="md"
-          imageSize={PICKER_EMOJI_IMAGE_SIZE}
-          className="pointer-events-none"
+      {!visible ? (
+        <span className="pointer-events-none text-[26px] leading-none opacity-50">{entry.emoji}</span>
+      ) : showAnimated ? (
+        <img
+          key={playKey}
+          src={animatedSrc}
+          alt=""
+          aria-hidden
+          decoding="async"
+          draggable={false}
+          className="pointer-events-none h-9 w-9 object-contain scale-110"
+          onError={() => setAnimatedFailed(true)}
+        />
+      ) : !staticFailed ? (
+        <img
+          src={staticSrc}
+          alt=""
+          aria-hidden
+          decoding="async"
+          draggable={false}
+          className="pointer-events-none h-9 w-9 object-contain"
+          onError={() => setStaticFailed(true)}
         />
       ) : (
-        <span className="pointer-events-none select-none leading-none">{entry.emoji}</span>
+        <span className="pointer-events-none text-[26px] leading-none">{entry.emoji}</span>
       )}
     </button>
   )
@@ -168,7 +211,6 @@ export function AnimatedEmojiPicker({
   className,
 }: AnimatedEmojiPickerProps) {
   const panelRef = useRef<HTMLDivElement>(null)
-  const [scrollRoot, setScrollRoot] = useState<HTMLElement | null>(null)
   const [category, setCategory] = useState<EmojiCategoryId>('smileys')
   const [recent, setRecent] = useState<string[]>([])
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
@@ -259,7 +301,7 @@ export function AnimatedEmojiPicker({
       style={{ top: panelPosition.top, left: panelPosition.left }}
       onPointerDown={(event) => event.stopPropagation()}
       className={cn(
-        'pointer-events-auto fixed z-[9999] flex w-[min(calc(100vw-24px),340px)] flex-col overflow-hidden rounded-xl border bg-popover shadow-2xl',
+        'pointer-events-auto fixed z-[9999] flex w-[min(calc(100vw-24px),340px)] flex-col overflow-hidden rounded-2xl border border-border/60 bg-popover shadow-[0_20px_50px_rgba(0,0,0,0.45)]',
         className,
       )}
     >
@@ -278,7 +320,7 @@ export function AnimatedEmojiPicker({
         </button>
       </div>
 
-      <div ref={setScrollRoot} className="max-h-[min(280px,40vh)] overflow-y-auto px-2 py-2">
+      <div className="max-h-[min(280px,40vh)] overflow-y-auto px-2 py-2">
         <p className="mb-2 px-1 text-xs font-semibold text-muted-foreground">
           {EMOJI_CATEGORY_LABELS[category]}
         </p>
@@ -290,12 +332,7 @@ export function AnimatedEmojiPicker({
         ) : (
           <div className="grid grid-cols-8 gap-0.5">
             {entries.map((entry) => (
-              <PickerEmojiCell
-                key={`${category}-${entry.slug}`}
-                entry={entry}
-                scrollRoot={scrollRoot}
-                onPick={handlePick}
-              />
+              <PickerEmojiCell key={`${category}-${entry.slug}`} entry={entry} onPick={handlePick} />
             ))}
           </div>
         )}
