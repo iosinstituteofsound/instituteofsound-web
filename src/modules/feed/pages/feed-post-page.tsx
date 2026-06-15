@@ -43,7 +43,7 @@ export function FeedPostPage() {
   return (
     <div className="mx-auto w-full max-w-[680px] space-y-3 pb-8">
       <Button variant="ghost" size="sm" className="rounded-lg px-2" asChild>
-        <Link to="/feed">
+        <Link to="/home">
           <ArrowLeft className="mr-1 h-4 w-4" />
           Back to feed
         </Link>

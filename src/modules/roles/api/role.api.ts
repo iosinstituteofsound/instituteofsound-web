@@ -13,6 +13,8 @@ export interface RoleDto {
   extraResourceIds: string[]
   sidebarItemIds: string[]
   isSystem?: boolean
+  discoverable: boolean
+  discoverCategory: string
 }
 
 export interface CreateRoleInput {
@@ -24,6 +26,8 @@ export interface CreateRoleInput {
   extraScopeIds?: string[]
   extraResourceIds?: string[]
   sidebarItemIds?: string[]
+  discoverable?: boolean
+  discoverCategory?: string
 }
 
 export interface UpdateRoleInput {
@@ -35,6 +39,8 @@ export interface UpdateRoleInput {
   extraResourceIds?: string[]
   sidebarItemIds?: string[]
   permissionSlugs?: string[]
+  discoverable?: boolean
+  discoverCategory?: string
 }
 
 export async function getRoles() {

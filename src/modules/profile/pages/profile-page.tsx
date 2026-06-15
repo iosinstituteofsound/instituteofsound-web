@@ -64,7 +64,7 @@ export function ProfilePage() {
                   </p>
                 </div>
                 <Button asChild variant="secondary" size="sm">
-                  <Link to="/feed">Go to feed</Link>
+                  <Link to="/home">Go to feed</Link>
                 </Button>
               </CardContent>
             </Card>

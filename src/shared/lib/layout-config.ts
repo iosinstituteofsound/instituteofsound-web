@@ -47,3 +47,8 @@ export const SIDEBAR_WIDTH_CLASS: Record<LayoutConfig['dashboard']['sidebar']['w
   compact: { expanded: 'w-56', collapsed: 'w-14' },
   default: { expanded: 'w-64', collapsed: 'w-16' },
 }
+
+/** Matches centered feed / home column width */
+export const FEED_COLUMN_MAX_WIDTH_PX = 680
+
+export const FEED_COLUMN_CLASS = 'mx-auto w-full max-w-[680px]'

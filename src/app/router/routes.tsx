@@ -155,6 +155,18 @@ export const router = createBrowserRouter([
     ),
     children: [
       {
+        path: 'home',
+        element: (
+          <ResourceGuard name="FeedPage">
+            <PermissionGuard resource="feed" action="read">
+              <Lazy>
+                <FeedPage />
+              </Lazy>
+            </PermissionGuard>
+          </ResourceGuard>
+        ),
+      },
+      {
         path: 'dashboard',
         element: (
           <ResourceGuard name="DashboardPage">
@@ -166,15 +178,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'feed',
-        element: (
-          <ResourceGuard name="FeedPage">
-            <PermissionGuard resource="feed" action="read">
-              <Lazy>
-                <FeedPage />
-              </Lazy>
-            </PermissionGuard>
-          </ResourceGuard>
-        ),
+        element: <Navigate to="/home" replace />,
       },
       {
         path: 'feed/:id',

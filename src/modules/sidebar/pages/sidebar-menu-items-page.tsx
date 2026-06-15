@@ -12,7 +12,10 @@ import {
   createSidebarItemSchema,
   type CreateSidebarItemFormValues,
 } from '@/modules/sidebar/schemas/sidebar.schema'
+import { SidebarIconPicker } from '@/modules/sidebar/components/sidebar-icon-picker'
+import { SidebarNavIcon } from '@/modules/sidebar/components/sidebar-nav-icon'
 import type { SidebarMenuItemDto } from '@/shared/types/sidebar.types'
+import { isLucideIconName } from '@/shared/lib/lucide-icon-map'
 import { DataTable } from '@/shared/components/data-table/data-table'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Button } from '@/shared/components/ui/button'
@@ -50,6 +53,15 @@ export function SidebarMenuItemsPage() {
   })
 
   const columns: ColumnDef<SidebarMenuItemDto>[] = [
+    {
+      accessorKey: 'icon',
+      header: 'Icon',
+      cell: ({ row }) => (
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted/40">
+          <SidebarNavIcon icon={row.original.icon} size="sm" className="text-primary" />
+        </div>
+      ),
+    },
     { accessorKey: 'label', header: 'Label' },
     { accessorKey: 'path', header: 'Path' },
     { accessorKey: 'resourceName', header: 'Resource' },
@@ -80,6 +92,10 @@ export function SidebarMenuItemsPage() {
                   permissionAction: row.original.permissionAction,
                   groupTitle: row.original.groupTitle,
                   sortOrder: row.original.sortOrder,
+                  icon:
+                    row.original.icon && isLucideIconName(row.original.icon)
+                      ? row.original.icon
+                      : undefined,
                 })
                 setOpen(true)
               }}
@@ -115,7 +131,10 @@ export function SidebarMenuItemsPage() {
   const onSubmit = form.handleSubmit(async (values) => {
     try {
       if (editing) {
-        await updateItem.mutateAsync({ id: editing.id, input: values })
+        await updateItem.mutateAsync({
+          id: editing.id,
+          input: { ...values, icon: values.icon ?? null },
+        })
         toast.success('Sidebar item updated')
       } else {
         await createItem.mutateAsync(values)
@@ -160,7 +179,7 @@ export function SidebarMenuItemsPage() {
       <DataTable columns={columns} data={data ?? []} />
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? 'Edit Sidebar Item' : 'Create Sidebar Item'}</DialogTitle>
           </DialogHeader>
@@ -200,6 +219,22 @@ export function SidebarMenuItemsPage() {
                     <FormLabel>Resource name (optional)</FormLabel>
                     <FormControl>
                       <Input placeholder="DashboardPage" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="icon"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Icon (optional)</FormLabel>
+                    <FormControl>
+                      <SidebarIconPicker
+                        value={field.value}
+                        onChange={(icon) => field.onChange(icon)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

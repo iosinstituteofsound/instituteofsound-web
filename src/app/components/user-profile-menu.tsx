@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { LayoutDashboard, LogOut, Monitor, Moon, Sun, UserRound } from 'lucide-react'
+import { LogOut, Monitor, Moon, Sun, UserRound } from 'lucide-react'
 import { UserIdentityBadges } from '@/app/components/user-header-identity'
 import { useLogout, useMe } from '@/modules/auth/hooks/use-auth'
 import { CroppedAvatar } from '@/modules/profile/components/cropped-avatar'
@@ -75,12 +75,6 @@ export function UserProfileMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link to="/dashboard">
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Sun className="h-4 w-4" />

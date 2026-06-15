@@ -11,6 +11,7 @@ import { useScrollCollapse } from '@/modules/feed/hooks/use-scroll-collapse'
 import { getStoryItems } from '@/modules/feed/lib/story-content'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Skeleton } from '@/shared/components/ui/skeleton'
+import { FEED_COLUMN_CLASS } from '@/shared/lib/layout-config'
 import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
 
@@ -36,7 +37,7 @@ export function FeedPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[680px] pb-8">
+    <div className={cn(FEED_COLUMN_CLASS, 'pb-8')}>
       <PermissionGate resource="feed" action="create">
         <div ref={composerAnchorRef} className="sticky top-0 z-50 bg-background">
           <FeedComposer collapseProgress={collapseProgress} />

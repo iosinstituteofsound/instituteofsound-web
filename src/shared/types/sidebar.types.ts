@@ -9,6 +9,7 @@ export interface SidebarMenuItemDto {
   groupTitle?: string
   sortOrder: number
   isActive?: boolean
+  icon?: string
 }
 
 export interface CreateSidebarItemInput {
@@ -20,6 +21,7 @@ export interface CreateSidebarItemInput {
   permissionAction?: 'read' | 'create' | 'update' | 'delete' | 'manage'
   groupTitle?: string
   sortOrder?: number
+  icon?: string
 }
 
 export interface UpdateSidebarItemInput {
@@ -32,4 +34,5 @@ export interface UpdateSidebarItemInput {
   groupTitle?: string | null
   sortOrder?: number
   isActive?: boolean
+  icon?: string | null
 }

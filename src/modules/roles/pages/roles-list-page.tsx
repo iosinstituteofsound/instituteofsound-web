@@ -18,6 +18,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/compo
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
+import { Switch } from '@/shared/components/ui/switch'
+import { ROLE_DISCOVER_CATEGORIES } from '@/shared/data/role-discover-categories'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import {
@@ -40,6 +42,14 @@ const emptyAssignments = {
   extraResourceIds: [] as string[],
 }
 
+const defaultRoleFormValues = (layoutId = ''): RoleFormValues => ({
+  name: '',
+  layoutId,
+  discoverable: false,
+  discoverCategory: 'other',
+  ...emptyAssignments,
+})
+
 export function RolesListPage() {
   const { data, isLoading, isError, refetch } = useRoles()
   const { data: catalog } = useCatalog()
@@ -50,14 +60,20 @@ export function RolesListPage() {
   const [editing, setEditing] = useState<RoleDto | null>(null)
 
   const roleFormResolver = useMemo(
-    (): Resolver<RoleFormValues> =>
-      zodResolver((editing ? updateRoleSchema : createRoleSchema) as typeof createRoleSchema),
+    () =>
+      zodResolver((editing ? updateRoleSchema : createRoleSchema) as typeof createRoleSchema) as Resolver<RoleFormValues>,
     [editing],
   )
 
   const form = useForm<RoleFormValues>({
     resolver: roleFormResolver,
-    defaultValues: { name: '', layoutId: '', ...emptyAssignments },
+    defaultValues: {
+      name: '',
+      layoutId: '',
+      discoverable: false,
+      discoverCategory: 'other',
+      ...emptyAssignments,
+    },
   })
 
   const scopeOptions = useMemo(
@@ -101,6 +117,8 @@ export function RolesListPage() {
       featureIds: role.featureIds,
       extraScopeIds: role.extraScopeIds,
       extraResourceIds: role.extraResourceIds,
+      discoverable: role.discoverable,
+      discoverCategory: role.discoverCategory as RoleFormValues['discoverCategory'],
     })
     setOpen(true)
   }
@@ -127,6 +145,8 @@ export function RolesListPage() {
               featureIds: values.featureIds,
               extraScopeIds: values.extraScopeIds,
               extraResourceIds: values.extraResourceIds,
+              discoverable: values.discoverable,
+              discoverCategory: values.discoverCategory,
             }
           : values
         await updateRole.mutateAsync({ id: editing.id, input })
@@ -137,7 +157,7 @@ export function RolesListPage() {
       }
       setOpen(false)
       setEditing(null)
-      form.reset({ name: '', layoutId: catalog?.layouts[0]?.id ?? '', ...emptyAssignments })
+      form.reset(defaultRoleFormValues(catalog?.layouts[0]?.id ?? ''))
     } catch (err) {
       const message =
         err && typeof err === 'object' && 'message' in err
@@ -164,7 +184,7 @@ export function RolesListPage() {
           <Button
             onClick={() => {
               setEditing(null)
-              form.reset({ name: '', layoutId: catalog?.layouts[0]?.id ?? '', ...emptyAssignments })
+              form.reset(defaultRoleFormValues(catalog?.layouts[0]?.id ?? ''))
               setOpen(true)
             }}
           >
@@ -276,6 +296,51 @@ export function RolesListPage() {
                   System role name and slug cannot be changed. You can still assign a different layout.
                 </p>
               )}
+
+              <FormField
+                control={form.control}
+                name="discoverable"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-md border px-3 py-3">
+                    <div className="space-y-0.5">
+                      <FormLabel>Discoverable in search</FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        When enabled, this role appears in the global search modal.
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch('discoverable') ? (
+                <FormField
+                  control={form.control}
+                  name="discoverCategory"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Search category</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value ?? 'other'}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select search category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {ROLE_DISCOVER_CATEGORIES.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : null}
 
               <AssignmentPicker
                 title="Features"

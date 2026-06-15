@@ -1,6 +1,14 @@
 import { z } from 'zod'
+import { ROLE_DISCOVER_CATEGORIES } from '@/shared/data/role-discover-categories'
 
 const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid id')
+
+const discoverCategorySchema = z.enum(
+  ROLE_DISCOVER_CATEGORIES.map((category) => category.id) as [
+    (typeof ROLE_DISCOVER_CATEGORIES)[number]['id'],
+    ...(typeof ROLE_DISCOVER_CATEGORIES)[number]['id'][],
+  ],
+)
 
 export const createRoleSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
@@ -10,6 +18,8 @@ export const createRoleSchema = z.object({
   featureIds: z.array(objectId).optional(),
   extraScopeIds: z.array(objectId).optional(),
   extraResourceIds: z.array(objectId).optional(),
+  discoverable: z.boolean().optional().default(false),
+  discoverCategory: discoverCategorySchema.optional().default('other'),
 })
 
 export const updateRoleSchema = z.object({
@@ -20,6 +30,8 @@ export const updateRoleSchema = z.object({
   extraScopeIds: z.array(objectId).optional(),
   extraResourceIds: z.array(objectId).optional(),
   permissionSlugs: z.array(z.string().trim().min(1)).optional(),
+  discoverable: z.boolean().optional(),
+  discoverCategory: discoverCategorySchema.optional(),
 })
 
 export type CreateRoleFormValues = z.infer<typeof createRoleSchema>

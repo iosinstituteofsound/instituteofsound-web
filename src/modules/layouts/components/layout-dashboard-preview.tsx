@@ -4,6 +4,7 @@ import { cn } from '@/shared/lib/cn'
 import { SIDEBAR_WIDTH_CLASS } from '@/shared/lib/layout-config'
 import type { LayoutConfig } from '@/shared/types/layout.types'
 import type { SidebarMenuItemDto } from '@/shared/types/sidebar.types'
+import { SidebarNavIcon } from '@/modules/sidebar/components/sidebar-nav-icon'
 import '@/styles/dashboard-sidebar.css'
 
 interface LayoutDashboardPreviewProps {
@@ -60,11 +61,12 @@ export function LayoutDashboardPreview({
                       <li key={item.id}>
                         <span
                           className={cn(
-                            'dashboard-sidebar-link block px-2.5 py-1.5 text-[9px] font-medium leading-snug',
+                            'dashboard-sidebar-link flex items-center gap-1.5 px-2.5 py-1.5 text-[9px] font-medium leading-snug',
                             index === 0 && group === groups[0] ? 'dashboard-sidebar-link-active' : 'text-foreground/80',
                           )}
                         >
-                          {item.label}
+                          <SidebarNavIcon icon={item.icon} size="sm" className="shrink-0" />
+                          <span className="truncate">{item.label}</span>
                         </span>
                       </li>
                     ))}
