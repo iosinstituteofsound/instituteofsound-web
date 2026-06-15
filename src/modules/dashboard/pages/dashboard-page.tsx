@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Badge } from '@/shared/components/ui/badge'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
+import { Page, PageDescription, PageHeader, PageHeaderMain, PageTitle } from '@/shared/components/layout/page-shell'
 
 export function DashboardPage() {
   const { data, isLoading, isError, refetch } = useMe()
@@ -15,30 +16,35 @@ export function DashboardPage() {
   const { user, authorization } = data
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {user.name}</p>
-      </div>
+    <Page>
+      <PageHeader>
+        <PageHeaderMain>
+          <PageTitle>Dashboard</PageTitle>
+          <PageDescription>Welcome back, {user.name}</PageDescription>
+        </PageHeaderMain>
+      </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="ios-page-grid md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Roles</CardTitle>
+            <p className="ios-surface-eyebrow">Roles</p>
+            <CardTitle className="sr-only">Roles</CardTitle>
             <CardDescription>Assigned roles</CardDescription>
           </CardHeader>
-          <CardContent className="text-3xl font-bold">{authorization.roles.length}</CardContent>
+          <CardContent className="ios-surface-stat">{authorization.roles.length}</CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Permissions</CardTitle>
+            <p className="ios-surface-eyebrow">Permissions</p>
+            <CardTitle className="sr-only">Permissions</CardTitle>
             <CardDescription>Effective permissions</CardDescription>
           </CardHeader>
-          <CardContent className="text-3xl font-bold">{authorization.permissions.length}</CardContent>
+          <CardContent className="ios-surface-stat">{authorization.permissions.length}</CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Access Level</CardTitle>
+            <p className="ios-surface-eyebrow">Access Level</p>
+            <CardTitle className="sr-only">Access Level</CardTitle>
             <CardDescription>Your access tier</CardDescription>
           </CardHeader>
           <CardContent>
@@ -63,6 +69,6 @@ export function DashboardPage() {
           ))}
         </CardContent>
       </Card>
-    </div>
+    </Page>
   )
 }

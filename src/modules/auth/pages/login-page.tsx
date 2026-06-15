@@ -13,6 +13,7 @@ import { useLayoutStore } from '@/app/stores/layout-store'
 import { getLayoutHomeRouteFromLayout } from '@/shared/lib/layout-home-route'
 import { apiUrl, env } from '@/shared/config/env'
 import { toast } from '@/shared/components/ui/sonner'
+import { premiumSurfaceSoftClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -78,10 +79,10 @@ export function LoginPage() {
   })
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-xl shadow-black/10 backdrop-blur-sm sm:p-8">
-      <div className="space-y-6">
+    <div className={cn(premiumSurfaceSoftClass, 'p-6 shadow-xl shadow-black/10 sm:p-8')}>
+      <div className="space-y-7">
         <div className="space-y-1 text-center sm:text-left">
-          <h2 className="text-lg font-semibold tracking-tight">Welcome back</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Welcome back</h2>
           <p className="text-sm text-muted-foreground">Continue with your Google account.</p>
         </div>
 

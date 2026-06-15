@@ -22,6 +22,13 @@ import { Input } from '@/shared/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
+import {
+  Page,
+  PageDescription,
+  PageHeader,
+  PageHeaderMain,
+  PageTitle,
+} from '@/shared/components/layout/page-shell'
 import { toast } from '@/shared/components/ui/sonner'
 
 export function SidebarMenuItemsPage() {
@@ -130,14 +137,14 @@ export function SidebarMenuItemsPage() {
   if (isError) return <ErrorState onRetry={() => refetch()} />
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Sidebar Menu</h1>
-          <p className="text-sm text-muted-foreground">
+    <Page>
+      <PageHeader>
+        <PageHeaderMain>
+          <PageTitle>Sidebar Menu</PageTitle>
+          <PageDescription>
             Sidebar items are loaded from the API. Only active items assigned to the user appear in the sidebar.
-          </p>
-        </div>
+          </PageDescription>
+        </PageHeaderMain>
         <PermissionGate resource="roles" action="create">
           <Button
             onClick={() => {
@@ -149,7 +156,7 @@ export function SidebarMenuItemsPage() {
             Add Item
           </Button>
         </PermissionGate>
-      </div>
+      </PageHeader>
       <DataTable columns={columns} data={data ?? []} />
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -268,6 +275,6 @@ export function SidebarMenuItemsPage() {
           </Form>
         </DialogContent>
       </Dialog>
-    </div>
+    </Page>
   )
 }

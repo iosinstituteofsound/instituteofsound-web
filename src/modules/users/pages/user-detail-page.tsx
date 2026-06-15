@@ -1,12 +1,13 @@
 import { useParams } from 'react-router-dom'
 import { UserDetailPanel } from '@/modules/users/components/user-detail-panel'
 import { Breadcrumb } from '@/shared/components/ui/breadcrumb'
+import { Page, PageTitle } from '@/shared/components/layout/page-shell'
 
 export function UserDetailPage() {
   const { id = '' } = useParams()
 
   return (
-    <div className="space-y-6">
+    <Page>
       <Breadcrumb
         items={[
           { label: 'Dashboard', href: '/dashboard' },
@@ -14,8 +15,8 @@ export function UserDetailPage() {
           { label: 'Details' },
         ]}
       />
-      <h1 className="text-2xl font-bold">User Details</h1>
+      <PageTitle>User Details</PageTitle>
       <UserDetailPanel userId={id} />
-    </div>
+    </Page>
   )
 }

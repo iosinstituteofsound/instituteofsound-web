@@ -4,6 +4,7 @@ import type { FeatureDto } from '@/modules/permissions/api/permission.api'
 import { DataTable } from '@/shared/components/data-table/data-table'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
+import { Page, PageTitle } from '@/shared/components/layout/page-shell'
 
 const columns: ColumnDef<FeatureDto>[] = [
   { accessorKey: 'slug', header: 'Slug' },
@@ -21,9 +22,9 @@ export function FeaturesPage() {
   if (isLoading) return <PageLoader />
   if (isError) return <ErrorState onRetry={() => refetch()} />
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Features</h1>
+    <Page>
+      <PageTitle>Features</PageTitle>
       <DataTable columns={columns} data={data?.features ?? []} />
-    </div>
+    </Page>
   )
 }

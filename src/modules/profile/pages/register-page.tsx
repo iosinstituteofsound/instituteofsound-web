@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useGoogleLogin } from '@/modules/auth/hooks/use-auth'
 import { Button } from '@/shared/components/ui/button'
+import { premiumSurfaceSoftClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -30,7 +31,7 @@ export function RegisterPage() {
   const { login: googleLogin } = useGoogleLogin()
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-xl shadow-black/10 backdrop-blur-sm sm:p-8">
+    <div className={cn(premiumSurfaceSoftClass, 'p-6 shadow-xl shadow-black/10 sm:p-8')}>
       <div className="space-y-6">
         <div className="space-y-1 text-center sm:text-left">
           <h2 className="text-lg font-semibold tracking-tight">Create your account</h2>

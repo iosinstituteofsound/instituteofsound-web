@@ -59,7 +59,7 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
     .toUpperCase()
 
   return (
-    <div className="space-y-6">
+    <div className="ios-page">
       <div className="flex items-start gap-4">
         <Avatar className="h-16 w-16">
           <AvatarImage src={user.avatarUrl} alt={user.name} />

@@ -32,9 +32,9 @@ export function normalizeLayoutConfig(raw: unknown): LayoutConfig {
 
 export const MAIN_PADDING_CLASS: Record<LayoutConfig['dashboard']['main']['padding'], string> = {
   none: 'p-0',
-  sm: 'p-3',
-  md: 'p-6',
-  lg: 'p-8',
+  sm: 'px-5 py-4',
+  md: 'px-6 py-7 sm:px-8',
+  lg: 'px-8 py-9 sm:px-10',
 }
 
 export const MAIN_MAX_WIDTH_CLASS: Record<LayoutConfig['dashboard']['main']['maxWidth'], string> = {

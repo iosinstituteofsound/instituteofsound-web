@@ -5,7 +5,7 @@ export function AuthLayout() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-10">
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.18),transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent)]"
         aria-hidden
       />
       <div
@@ -21,7 +21,7 @@ export function AuthLayout() {
             className="h-14 w-14 rounded-2xl shadow-lg ring-1 ring-border/60"
           />
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">{env.appName}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{env.appName}</h1>
             <p className="text-sm text-muted-foreground">Underground music culture, one login away.</p>
           </div>
         </div>

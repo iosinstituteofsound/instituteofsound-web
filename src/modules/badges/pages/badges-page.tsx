@@ -20,6 +20,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/shared/components/ui/badge'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
+import {
+  Page,
+  PageDescription,
+  PageHeader,
+  PageHeaderMain,
+  PageTitle,
+} from '@/shared/components/layout/page-shell'
 import { toast } from '@/shared/components/ui/sonner'
 
 type BadgeFormValues = {
@@ -134,12 +141,12 @@ export function BadgesPage() {
   if (isError) return <ErrorState onRetry={() => refetch()} />
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Badges</h1>
-          <p className="text-sm text-muted-foreground">Each badge links to exactly one theme.</p>
-        </div>
+    <Page>
+      <PageHeader>
+        <PageHeaderMain>
+          <PageTitle>Badges</PageTitle>
+          <PageDescription>Each badge links to exactly one theme.</PageDescription>
+        </PageHeaderMain>
         <PermissionGate resource="roles" action="update">
           <Button
             onClick={() => {
@@ -151,7 +158,7 @@ export function BadgesPage() {
             Create Badge
           </Button>
         </PermissionGate>
-      </div>
+      </PageHeader>
       <DataTable columns={columns} data={rows} />
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -233,6 +240,6 @@ export function BadgesPage() {
           </Form>
         </DialogContent>
       </Dialog>
-    </div>
+    </Page>
   )
 }

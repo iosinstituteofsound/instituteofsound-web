@@ -4,6 +4,7 @@ import type { ScopeSummary } from '@/shared/types/auth.types'
 import { DataTable } from '@/shared/components/data-table/data-table'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
+import { Page, PageTitle } from '@/shared/components/layout/page-shell'
 
 const columns: ColumnDef<ScopeSummary>[] = [
   { accessorKey: 'slug', header: 'Slug' },
@@ -17,9 +18,9 @@ export function ScopesPage() {
   if (isLoading) return <PageLoader />
   if (isError) return <ErrorState onRetry={() => refetch()} />
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Scopes</h1>
+    <Page>
+      <PageTitle>Scopes</PageTitle>
       <DataTable columns={columns} data={data?.scopes ?? []} />
-    </div>
+    </Page>
   )
 }

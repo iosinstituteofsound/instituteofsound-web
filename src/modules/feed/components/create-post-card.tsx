@@ -2,6 +2,7 @@ import { Film, ImageIcon, Music2, Plus } from 'lucide-react'
 import type { FeedItemType } from '@/modules/feed/types/feed.types'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { Button } from '@/shared/components/ui/button'
+import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
 
 export const QUICK_POST_ACTIONS: {
@@ -49,7 +50,8 @@ export function CreatePostCard({
   return (
     <div
       className={cn(
-        'relative w-full rounded-xl border bg-card transition-[box-shadow] duration-300 ease-out',
+        premiumSurfaceClass,
+        'relative w-full transition-[box-shadow] duration-300 ease-out',
         compact ? 'shadow-none' : 'shadow-sm',
       )}
     >

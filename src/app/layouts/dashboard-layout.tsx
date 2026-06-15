@@ -27,7 +27,7 @@ export function DashboardLayout() {
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {dashboardConfig.header.visible ? (
-          <header className="flex h-14 shrink-0 items-center justify-between border-b px-4">
+          <header className="flex h-16 shrink-0 items-center justify-between border-b px-5 sm:px-6">
             <div className="flex items-center gap-2">
               {dashboardConfig.header.showMenuToggle ? (
                 <>

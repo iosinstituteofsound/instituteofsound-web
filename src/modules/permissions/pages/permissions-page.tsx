@@ -7,6 +7,7 @@ import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
+import { Page, PageTitle } from '@/shared/components/layout/page-shell'
 
 interface PermissionRow {
   slug: string
@@ -40,8 +41,8 @@ export function PermissionsPage() {
   ]
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Permissions</h1>
+    <Page>
+      <PageTitle>Permissions</PageTitle>
       <Tabs defaultValue="permissions">
         <TabsList>
           <TabsTrigger value="permissions">Permission Catalog</TabsTrigger>
@@ -75,6 +76,6 @@ export function PermissionsPage() {
           )}
         </TabsContent>
       </Tabs>
-    </div>
+    </Page>
   )
 }

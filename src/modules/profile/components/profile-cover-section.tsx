@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
 import type { CoverCrop, UserDto } from '@/shared/types/auth.types'
+import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
 import { toast } from '@/shared/components/ui/sonner'
 
@@ -123,7 +124,7 @@ export function ProfileCoverSection({ user, editable = true, className }: Profil
   }
 
   return (
-    <div className={cn('overflow-hidden rounded-lg border bg-card shadow-sm', className)}>
+    <div className={cn(premiumSurfaceClass, 'overflow-hidden', className)}>
       <div className="relative">
         <CroppedCover src={user.coverUrl} crop={user.coverCrop} />
 

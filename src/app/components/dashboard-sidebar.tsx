@@ -68,12 +68,12 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
         className,
       )}
     >
-      <div className="flex h-14 shrink-0 items-center border-b border-border/80 px-4 font-semibold tracking-tight text-foreground">
+      <div className="flex h-16 shrink-0 items-center border-b border-border/80 px-4 text-base font-bold tracking-tight text-foreground">
         {!collapsed && brandTitle}
       </div>
 
       <nav
-        className="dashboard-sidebar-nav min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-5"
+        className="dashboard-sidebar-nav min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-5 pb-6"
         aria-label="Dashboard navigation"
       >
         {sidebarLoading ? (
@@ -87,7 +87,7 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
                 </p>
               )}
 
-              <ul className="flex flex-col gap-0.5">
+              <ul className="flex flex-col gap-1">
                 {group.items.map((item) => {
                   const active = isSidebarItemActive(location.pathname, item.path)
 

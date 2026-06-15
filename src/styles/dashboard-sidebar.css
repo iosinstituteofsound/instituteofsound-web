@@ -7,7 +7,7 @@
 .dashboard-sidebar-link {
   position: relative;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: 0.625rem;
   transition:
     color 0.2s ease,
     background 0.2s ease,
@@ -31,8 +31,8 @@
   content: '';
   position: absolute;
   left: 0;
-  top: 0.35rem;
-  bottom: 0.35rem;
+  top: 0.45rem;
+  bottom: 0.45rem;
   width: 3px;
   border-radius: 9999px;
   background: var(--primary);

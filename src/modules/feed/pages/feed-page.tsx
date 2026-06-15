@@ -11,6 +11,8 @@ import { useScrollCollapse } from '@/modules/feed/hooks/use-scroll-collapse'
 import { getStoryItems } from '@/modules/feed/lib/story-content'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Skeleton } from '@/shared/components/ui/skeleton'
+import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
+import { cn } from '@/shared/lib/cn'
 
 export function FeedPage() {
   const { data: me } = useMe()
@@ -43,7 +45,7 @@ export function FeedPage() {
 
       <div className="relative z-0 mt-3 space-y-3">
         {isLoading ? (
-          <div className="overflow-hidden rounded-lg border bg-card p-3 shadow-sm">
+          <div className={cn(premiumSurfaceClass, 'overflow-hidden p-3')}>
             <div className="flex gap-2">
               {[1, 2, 3, 4].map((key) => (
                 <Skeleton key={key} className="h-[200px] w-[112px] shrink-0 rounded-xl" />

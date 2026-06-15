@@ -20,6 +20,13 @@ import { Input } from '@/shared/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
+import {
+  Page,
+  PageDescription,
+  PageHeader,
+  PageHeaderMain,
+  PageTitle,
+} from '@/shared/components/layout/page-shell'
 import { toast } from '@/shared/components/ui/sonner'
 
 type RoleFormValues = CreateRoleFormValues & {
@@ -144,15 +151,15 @@ export function RolesListPage() {
   if (isError) return <ErrorState onRetry={() => refetch()} />
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">Roles</h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">
+    <Page>
+      <PageHeader>
+        <PageHeaderMain>
+          <PageTitle>Roles</PageTitle>
+          <PageDescription>
             Each role controls what a user can see and do. Assign a layout for the dashboard shell and
             navigation, then bundle features, scopes, and resources.
-          </p>
-        </div>
+          </PageDescription>
+        </PageHeaderMain>
         <PermissionGate resource="roles" action="create">
           <Button
             onClick={() => {
@@ -164,14 +171,14 @@ export function RolesListPage() {
             Create Role
           </Button>
         </PermissionGate>
-      </div>
+      </PageHeader>
 
       {(data ?? []).length === 0 ? (
         <div className="rounded-xl border border-dashed p-10 text-center">
           <p className="text-muted-foreground">No roles yet. Create one to get started.</p>
         </div>
       ) : (
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="ios-page-grid xl:grid-cols-2">
           {(data ?? []).map((role) => (
             <RoleCard
               key={role.id}
@@ -298,6 +305,6 @@ export function RolesListPage() {
           </Form>
         </DialogContent>
       </Dialog>
-    </div>
+    </Page>
   )
 }

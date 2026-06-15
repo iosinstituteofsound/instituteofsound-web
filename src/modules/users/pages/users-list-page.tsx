@@ -10,6 +10,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import { Breadcrumb } from '@/shared/components/ui/breadcrumb'
+import { Page, PageTitle } from '@/shared/components/layout/page-shell'
 
 export function UsersListPage() {
   const [query, setQuery] = useState('')
@@ -63,11 +64,9 @@ export function UsersListPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <Page>
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Users' }]} />
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Users</h1>
-      </div>
+      <PageTitle>Users</PageTitle>
       <div className="flex gap-2">
         <Input
           placeholder="Search by name, email, or username..."
@@ -101,6 +100,6 @@ export function UsersListPage() {
           if (!open) setSelectedUser(null)
         }}
       />
-    </div>
+    </Page>
   )
 }

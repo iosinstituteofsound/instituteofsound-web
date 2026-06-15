@@ -3,6 +3,7 @@ import {
   normalizeLinkPreviewForDisplay,
   type LinkPreview,
 } from '@/modules/feed/lib/link-preview'
+import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
 
 interface LinkPreviewCardProps {
@@ -70,7 +71,8 @@ export function LinkPreviewCard({ preview, className, compact = false, onRemove 
   )
 
   const shellClass = cn(
-    'relative overflow-hidden rounded-lg border bg-card text-left transition-colors',
+    premiumSurfaceClass,
+    'relative overflow-hidden text-left transition-colors',
     compact ? 'flex' : 'block',
     !inComposer && 'hover:bg-muted/30',
     className,
@@ -109,7 +111,8 @@ export function LinkPreviewCardSkeleton({ compact = false }: { compact?: boolean
   return (
     <div
       className={cn(
-        'animate-pulse overflow-hidden rounded-lg border bg-card',
+        premiumSurfaceClass,
+        'animate-pulse overflow-hidden',
         compact ? 'flex' : 'block',
       )}
     >

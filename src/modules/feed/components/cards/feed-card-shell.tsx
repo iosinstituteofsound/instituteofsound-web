@@ -5,6 +5,7 @@ import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { formatFeedTimestamp } from '@/modules/feed/lib/feed-time'
 import { Button } from '@/shared/components/ui/button'
+import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
 
 export function FeedCardShell({
@@ -25,11 +26,11 @@ export function FeedCardShell({
   const caption = item.body || item.title
 
   return (
-    <article className={cn('overflow-hidden rounded-lg border bg-card shadow-sm', className)}>
-      <header className="flex items-start gap-2 px-3 pb-2 pt-3 sm:px-4">
+    <article className={cn(premiumSurfaceClass, 'overflow-hidden', className)}>
+      <header className="flex items-start gap-3 px-4 pb-2.5 pt-4 sm:px-5">
         <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10 shrink-0" />
         <div className="min-w-0 flex-1 pt-0.5">
-          <p className="truncate text-[15px] font-semibold leading-tight hover:underline">
+          <p className="truncate text-sm font-semibold leading-tight hover:underline">
             {item.author.name}
           </p>
           <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
@@ -51,23 +52,23 @@ export function FeedCardShell({
       </header>
 
       {caption ? (
-        <div className="space-y-1 px-3 pb-2 sm:px-4">
+        <div className="space-y-1.5 px-4 pb-2.5 sm:px-5">
           {item.title && item.body ? (
-            <h3 className="text-[15px] font-semibold leading-snug">{item.title}</h3>
+            <h3 className="text-sm font-semibold leading-snug">{item.title}</h3>
           ) : null}
           {item.body ? (
-            <p className="whitespace-pre-wrap text-[15px] leading-relaxed">
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">
               <AnimatedEmojiText text={item.body} emojiSize="sm" />
             </p>
           ) : item.title && !item.body ? (
-            <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{item.title}</p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">{item.title}</p>
           ) : null}
         </div>
       ) : null}
 
       {media}
 
-      {children ? <div className="px-3 pb-2 pt-1 sm:px-4">{children}</div> : null}
+      {children ? <div className="px-4 pb-2.5 pt-1 sm:px-5">{children}</div> : null}
 
       <FeedEngagement item={item} defaultCommentsOpen={defaultCommentsOpen} />
     </article>

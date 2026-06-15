@@ -5,6 +5,7 @@ import { DataTable } from '@/shared/components/data-table/data-table'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Page, PageTitle } from '@/shared/components/layout/page-shell'
 
 const columns: ColumnDef<AchievementDto>[] = [
   { accessorKey: 'slug', header: 'Slug' },
@@ -20,8 +21,8 @@ export function AchievementsPage() {
   if (isError) return <ErrorState onRetry={() => refetch()} />
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Achievements</h1>
+    <Page>
+      <PageTitle>Achievements</PageTitle>
       {progress && (
         <Card>
           <CardHeader>
@@ -33,6 +34,6 @@ export function AchievementsPage() {
         </Card>
       )}
       <DataTable columns={columns} data={data?.achievements ?? []} />
-    </div>
+    </Page>
   )
 }

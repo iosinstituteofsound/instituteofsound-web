@@ -23,6 +23,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/shared/components/ui/badge'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
+import {
+  Page,
+  PageDescription,
+  PageHeader,
+  PageHeaderMain,
+  PageTitle,
+} from '@/shared/components/layout/page-shell'
 import { toast } from '@/shared/components/ui/sonner'
 import { isRegisteredResource } from '@/shared/lib/resource-registry'
 
@@ -134,14 +141,14 @@ export function ResourcesPage() {
   if (isError) return <ErrorState onRetry={() => refetch()} />
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Resources</h1>
-          <p className="text-sm text-muted-foreground">
+    <Page>
+      <PageHeader>
+        <PageHeaderMain>
+          <PageTitle>Resources</PageTitle>
+          <PageDescription>
             Resource name must match a web component name to be accessible in the UI.
-          </p>
-        </div>
+          </PageDescription>
+        </PageHeaderMain>
         <PermissionGate resource="roles" action="create">
           <Button
             onClick={() => {
@@ -153,7 +160,7 @@ export function ResourcesPage() {
             Create Resource
           </Button>
         </PermissionGate>
-      </div>
+      </PageHeader>
       <DataTable columns={columns} data={data ?? []} />
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -217,6 +224,6 @@ export function ResourcesPage() {
           </Form>
         </DialogContent>
       </Dialog>
-    </div>
+    </Page>
   )
 }

@@ -29,6 +29,15 @@ import { Input } from '@/shared/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
+import {
+  Page,
+  PageDescription,
+  PageHeader,
+  PageHeaderMain,
+  PageTitle,
+} from '@/shared/components/layout/page-shell'
+import { premiumSurfaceGhostClass } from '@/shared/lib/surface-classes'
+import { cn } from '@/shared/lib/cn'
 import { toast } from '@/shared/components/ui/sonner'
 import type { LayoutDto } from '@/shared/types/layout.types'
 import { normalizeLayoutConfig } from '@/shared/lib/layout-config'
@@ -154,25 +163,25 @@ export function LayoutsPage() {
   if (isError) return <ErrorState onRetry={() => refetch()} />
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Layouts</h1>
-          <p className="text-sm text-muted-foreground">
+    <Page>
+      <PageHeader>
+        <PageHeaderMain>
+          <PageTitle>Layouts</PageTitle>
+          <PageDescription>
             CMS-style shell control for dashboard and public surfaces. Each role uses one layout.
-          </p>
-        </div>
+          </PageDescription>
+        </PageHeaderMain>
         <PermissionGate resource="roles" action="update">
           <Button onClick={() => openDialog()}>Create Layout</Button>
         </PermissionGate>
-      </div>
+      </PageHeader>
 
       {!layouts?.length ? (
-        <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
+        <div className={cn(premiumSurfaceGhostClass, 'border-dashed p-10 text-center text-sm text-muted-foreground')}>
           No layouts yet.
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="ios-page-grid sm:grid-cols-2 xl:grid-cols-3">
           {layouts.map((layout) => (
             <LayoutCard
               key={layout.id}
@@ -555,6 +564,6 @@ export function LayoutsPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </Page>
   )
 }
