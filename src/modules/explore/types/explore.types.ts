@@ -13,6 +13,7 @@ export interface ArticleDto {
   bodyHtml: string
   puckData?: Record<string, unknown>
   coverUrl?: string
+  galleryUrls?: string[]
   status: string
   isCoverStory: boolean
   publishedAt?: string

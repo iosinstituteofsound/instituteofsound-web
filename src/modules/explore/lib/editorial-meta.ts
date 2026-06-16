@@ -1,7 +1,7 @@
 import type { ArticleDto } from '@/modules/explore/types/explore.types'
 
 const TYPE_LABELS: Record<string, string> = {
-  feature: 'Feature',
+  feature: 'Music Production',
   review: 'Review',
   single: 'Single',
   ep: 'EP',
