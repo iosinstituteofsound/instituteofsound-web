@@ -3,7 +3,8 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PublicLayout } from '@/app/layouts/public-layout'
 import { AuthLayout } from '@/app/layouts/auth-layout'
 import { DashboardLayout } from '@/app/layouts/dashboard-layout'
-import { AuthGuard, GuestGuard, PermissionGuard, ResourceGuard } from '@/app/guards'
+import { ExploreLayoutRoute } from '@/app/layouts/explore-layout-route'
+import { AuthGuard, ExplorePageGuard, GuestGuard, PermissionGuard, ResourceGuard } from '@/app/guards'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorPage, ForbiddenPage, NotFoundPage } from '@/shared/pages/fallback-pages'
 
@@ -131,20 +132,31 @@ export const router = createBrowserRouter([
           </GuestGuard>
         ),
       },
+    ],
+  },
+  {
+    path: '/',
+    element: <ExploreLayoutRoute />,
+    errorElement: <ErrorPage />,
+    children: [
       {
         path: 'explore',
         element: (
-          <Lazy>
-            <ExplorePage />
-          </Lazy>
+          <ExplorePageGuard>
+            <Lazy>
+              <ExplorePage />
+            </Lazy>
+          </ExplorePageGuard>
         ),
       },
       {
         path: 'explore/articles/:slug',
         element: (
-          <Lazy>
-            <ArticlePage />
-          </Lazy>
+          <ExplorePageGuard>
+            <Lazy>
+              <ArticlePage />
+            </Lazy>
+          </ExplorePageGuard>
         ),
       },
     ],

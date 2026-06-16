@@ -5,6 +5,9 @@ import type { ExploreFilter } from '@/modules/explore/types/explore.types'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { Button } from '@/shared/components/ui/button'
 import { Loader } from '@/shared/components/feedback/loader'
+import { ExploreEditorialSection } from '@/modules/explore/components/explore-editorial-section'
+import { ExploreArtistsSection } from '@/modules/explore/components/explore-artists-section'
+import { ExploreReleasesSection } from '@/modules/explore/components/explore-releases-section'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/explore/styles/explore.css'
 
@@ -47,7 +50,6 @@ function FilterTabs({
 export function ExplorePage() {
   const { data, isLoading, isError } = useExplore()
   const playTrack = usePlayerStore((s) => s.playTrack)
-  const [artistFilter, setArtistFilter] = useState<ExploreFilter>('all')
   const [labelFilter, setLabelFilter] = useState<ExploreFilter>('all')
 
   if (isLoading) return <Loader className="min-h-screen bg-background" />
@@ -58,13 +60,6 @@ export function ExplorePage() {
       </div>
     )
   }
-
-  const filteredArtists =
-    artistFilter === 'top'
-      ? data.artists.filter((a) => a.genres.length > 0).slice(0, 12)
-      : artistFilter === 'new'
-        ? [...data.artists].reverse()
-        : data.artists
 
   const filteredLabels =
     labelFilter === 'top' || labelFilter === 'vibe'
@@ -82,99 +77,14 @@ export function ExplorePage() {
         <h1 className="explore-section-title">EXPLORE</h1>
       </header>
 
-      {/* 01 Editorial */}
-      <section className="explore-section">
-        <SectionHeader num="01" title="Editorial" />
-        <div className="explore-editorial-grid">
-          {data.editorial.coverStory ? (
-            <Link
-              to={`/explore/articles/${data.editorial.coverStory.slug}`}
-              className="explore-card block overflow-hidden"
-            >
-              {data.editorial.coverStory.coverUrl ? (
-                <img
-                  src={data.editorial.coverStory.coverUrl}
-                  alt=""
-                  className="aspect-[16/10] w-full object-cover"
-                />
-              ) : null}
-              <div className="p-6">
-                <h3 className="text-2xl font-black uppercase">{data.editorial.coverStory.title}</h3>
-                {data.editorial.coverStory.excerpt ? (
-                  <p className="mt-2 text-sm text-muted-foreground">{data.editorial.coverStory.excerpt}</p>
-                ) : null}
-              </div>
-            </Link>
-          ) : null}
-          <div className="flex flex-col gap-3">
-            {data.editorial.sidebar.map((article, i) => (
-              <Link
-                key={article.id}
-                to={`/explore/articles/${article.slug}`}
-                className="explore-card flex gap-3 p-3"
-              >
-                <span className="explore-accent-text text-xs font-bold">0{i + 2}</span>
-                {article.coverUrl ? (
-                  <img src={article.coverUrl} alt="" className="h-16 w-16 shrink-0 object-cover" />
-                ) : null}
-                <div>
-                  <p className="text-sm font-bold uppercase">{article.title}</p>
-                  {article.excerpt ? (
-                    <p className="line-clamp-2 text-xs text-muted-foreground">{article.excerpt}</p>
-                  ) : null}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ExploreEditorialSection
+        coverStory={data.editorial.coverStory}
+        sidebar={data.editorial.sidebar}
+      />
 
-      {/* 02 Artists */}
-      <section className="explore-section">
-        <SectionHeader num="02" title="Artists" />
-        <FilterTabs filters={['all', 'top', 'new']} active={artistFilter} onChange={setArtistFilter} />
-        <div className="explore-carousel">
-          {filteredArtists.map((artist) => (
-            <Link
-              key={artist.id}
-              to={`/profile/${artist.userId}`}
-              className="explore-card w-48 overflow-hidden"
-            >
-              <img
-                src={artist.avatarUrl ?? artist.coverUrl ?? 'https://picsum.photos/seed/artist/400/400'}
-                alt=""
-                className="aspect-square w-full object-cover"
-              />
-              <div className="p-3">
-                <p className="font-black">{artist.displayName}</p>
-                <Button variant="outline" size="sm" className="mt-2 w-full text-xs">
-                  View Profile
-                </Button>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <ExploreArtistsSection artists={data.artists} />
 
-      {/* 03 Releases */}
-      <section className="explore-section">
-        <SectionHeader num="03" title="Releases" />
-        <div className="explore-carousel">
-          {data.releases.map((release) => (
-            <div key={release.id} className="explore-card w-44 overflow-hidden">
-              <img
-                src={release.coverUrl ?? 'https://picsum.photos/seed/release/400/400'}
-                alt=""
-                className="aspect-square w-full object-cover"
-              />
-              <div className="p-3">
-                <p className="text-sm font-bold">{release.title}</p>
-                <p className="text-xs text-muted-foreground">{release.artistName}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <ExploreReleasesSection releases={data.releases} />
 
       {/* 04 Labels */}
       <section className="explore-section">

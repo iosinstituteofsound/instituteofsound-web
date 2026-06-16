@@ -2,16 +2,20 @@ import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 
 export type ExploreFilter = 'all' | 'top' | 'new' | 'vibe'
 
+export type ArticleType = 'review' | 'single' | 'ep' | 'feature' | 'band_profile'
+
 export interface ArticleDto {
   id: string
   title: string
   slug: string
+  type?: ArticleType
   excerpt?: string
   bodyHtml: string
   puckData?: Record<string, unknown>
   coverUrl?: string
   status: string
   isCoverStory: boolean
+  publishedAt?: string
 }
 
 export interface ArtistProfileDto {
@@ -37,6 +41,9 @@ export interface LabelProfileDto {
   genres: string[]
 }
 
+export type ReleaseType = 'single' | 'ep' | 'album'
+export type ReleaseFilter = 'all' | 'album' | 'ep' | 'single' | 'archive'
+
 export interface ReleaseDto {
   id: string
   title: string
@@ -44,6 +51,9 @@ export interface ReleaseDto {
   artistName?: string
   labelName?: string
   streamUrl?: string
+  type?: ReleaseType
+  releaseDate?: string
+  isFeatured?: boolean
 }
 
 export interface PlaylistTrack {

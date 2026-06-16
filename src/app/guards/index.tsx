@@ -107,3 +107,18 @@ export function PermissionGuard({ children, resource, action }: PermissionGuardP
 
   return <>{children}</>
 }
+
+interface ExplorePageGuardProps {
+  children: ReactNode
+}
+
+export function ExplorePageGuard({ children }: ExplorePageGuardProps) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const hasSession = tokenStorage.hasSession()
+
+  if (isAuthenticated || hasSession) {
+    return <ResourceGuard name="ExplorePage">{children}</ResourceGuard>
+  }
+
+  return <>{children}</>
+}
