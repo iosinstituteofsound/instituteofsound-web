@@ -46,7 +46,17 @@ export function CommentPhotoMenu({
       cameraInputRef.current?.click()
       return
     }
+
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+      cameraInputRef.current?.click()
+      return
+    }
+
     setCaptureOpen(true)
+  }
+
+  const openCameraFallback = () => {
+    window.setTimeout(() => cameraInputRef.current?.click(), 0)
   }
 
   return (
@@ -96,7 +106,7 @@ export function CommentPhotoMenu({
         ref={cameraInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
+        capture="user"
         className="hidden"
         aria-label="Take photo"
         onChange={(event) => {
@@ -109,6 +119,7 @@ export function CommentPhotoMenu({
         open={captureOpen}
         onOpenChange={setCaptureOpen}
         onCapture={handleFile}
+        onAccessDenied={openCameraFallback}
       />
     </>
   )

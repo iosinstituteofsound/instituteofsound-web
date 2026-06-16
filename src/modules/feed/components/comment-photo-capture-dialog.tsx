@@ -8,12 +8,33 @@ interface CommentPhotoCaptureDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCapture: (file: File) => void
+  onAccessDenied?: () => void
+}
+
+async function requestCameraStream(): Promise<MediaStream> {
+  const attempts: MediaStreamConstraints[] = [
+    { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+    { video: { facingMode: { ideal: 'user' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+    { video: true, audio: false },
+  ]
+
+  let lastError: unknown
+  for (const constraints of attempts) {
+    try {
+      return await navigator.mediaDevices.getUserMedia(constraints)
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  throw lastError ?? new Error('Could not access camera')
 }
 
 export function CommentPhotoCaptureDialog({
   open,
   onOpenChange,
   onCapture,
+  onAccessDenied,
 }: CommentPhotoCaptureDialogProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -29,11 +50,7 @@ export function CommentPhotoCaptureDialog({
 
     let cancelled = false
 
-    navigator.mediaDevices
-      .getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false,
-      })
+    void requestCameraStream()
       .then((stream) => {
         if (cancelled) {
           stream.getTracks().forEach((track) => track.stop())
@@ -49,8 +66,9 @@ export function CommentPhotoCaptureDialog({
         setReady(true)
       })
       .catch(() => {
-        toast.error('Could not access camera')
+        toast.error('Could not access camera. Choose a photo from your device instead.')
         onOpenChange(false)
+        onAccessDenied?.()
       })
 
     return () => {
@@ -58,7 +76,7 @@ export function CommentPhotoCaptureDialog({
       streamRef.current?.getTracks().forEach((track) => track.stop())
       streamRef.current = null
     }
-  }, [open, onOpenChange])
+  }, [open, onAccessDenied, onOpenChange])
 
   const handleCapture = () => {
     const video = videoRef.current
