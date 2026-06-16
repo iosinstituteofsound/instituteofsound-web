@@ -18,6 +18,10 @@ export const REGISTERED_PAGES = [
   'FeedPage',
   'ProfilePage',
   'RegisterPage',
+  'ExplorePage',
+  'EditorDashboardPage',
+  'ArtistDashboardPage',
+  'LabelDashboardPage',
 ] as const
 
 export const REGISTERED_COMPONENTS = [] as const

@@ -1,0 +1,154 @@
+.explore-page {
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+}
+
+.explore-section {
+  padding: 3rem 1.25rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.explore-section-num {
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.explore-section-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 0.95;
+  color: var(--foreground);
+}
+
+.explore-carousel {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scroll-snap-type: x mandatory;
+}
+
+.explore-carousel > * {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}
+
+.explore-card {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.explore-card:hover {
+  border-color: var(--primary);
+}
+
+.explore-filter-btn {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  background: transparent;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.explore-filter-btn.is-active {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.explore-filter-btn:hover {
+  border-color: var(--ring);
+  color: var(--foreground);
+}
+
+.explore-editorial-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .explore-editorial-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.explore-hub-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 768px) {
+  .explore-hub-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.explore-hub-primary {
+  grid-column: span 1;
+}
+
+@media (min-width: 768px) {
+  .explore-hub-primary {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+
+.explore-hub-overlay {
+  background: linear-gradient(to top, color-mix(in oklch, var(--background) 88%, transparent), transparent);
+}
+
+.explore-community-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .explore-community-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.explore-tracklist {
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.explore-tracklist-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.explore-tracklist-item:hover {
+  background: var(--muted);
+}
+
+.explore-stat-label {
+  color: var(--muted-foreground);
+}
+
+.explore-accent-text {
+  color: var(--primary);
+}
+
+.explore-article-body {
+  color: var(--foreground);
+}
+
+.explore-article-body :where(p, li, h2, h3, a) {
+  color: inherit;
+}
+
+.explore-article-body a {
+  color: var(--primary);
+}

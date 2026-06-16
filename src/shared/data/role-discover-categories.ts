@@ -1,5 +1,6 @@
 export const ROLE_DISCOVER_CATEGORIES = [
   { id: 'artists', label: 'Artists' },
+  { id: 'labels', label: 'Labels' },
   { id: 'tribes', label: 'Tribes' },
   { id: 'curators', label: 'Curators' },
   { id: 'editors', label: 'Editors' },

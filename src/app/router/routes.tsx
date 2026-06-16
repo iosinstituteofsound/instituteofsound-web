@@ -89,6 +89,27 @@ const RegisterPage = lazy(() =>
     default: m.RegisterPage,
   })),
 )
+const ExplorePage = lazy(() =>
+  import('@/modules/explore/pages/explore-page').then((m) => ({ default: m.ExplorePage })),
+)
+const ArticlePage = lazy(() =>
+  import('@/modules/explore/pages/article-page').then((m) => ({ default: m.ArticlePage })),
+)
+const EditorDashboardPage = lazy(() =>
+  import('@/modules/editor/pages/editor-dashboard-page').then((m) => ({
+    default: m.EditorDashboardPage,
+  })),
+)
+const ArtistDashboardPage = lazy(() =>
+  import('@/modules/artist/pages/artist-dashboard-page').then((m) => ({
+    default: m.ArtistDashboardPage,
+  })),
+)
+const LabelDashboardPage = lazy(() =>
+  import('@/modules/label/pages/label-dashboard-page').then((m) => ({
+    default: m.LabelDashboardPage,
+  })),
+)
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>
@@ -108,6 +129,22 @@ export const router = createBrowserRouter([
               <HomePage />
             </Lazy>
           </GuestGuard>
+        ),
+      },
+      {
+        path: 'explore',
+        element: (
+          <Lazy>
+            <ExplorePage />
+          </Lazy>
+        ),
+      },
+      {
+        path: 'explore/articles/:slug',
+        element: (
+          <Lazy>
+            <ArticlePage />
+          </Lazy>
         ),
       },
     ],
@@ -358,6 +395,116 @@ export const router = createBrowserRouter([
           <ResourceGuard name="AchievementsPage">
             <Lazy>
               <AchievementsPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'editor',
+        element: (
+          <ResourceGuard name="EditorDashboardPage">
+            <Lazy>
+              <EditorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'editor/drafts',
+        element: (
+          <ResourceGuard name="EditorDashboardPage">
+            <Lazy>
+              <EditorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'editor/wire',
+        element: (
+          <ResourceGuard name="EditorDashboardPage">
+            <Lazy>
+              <EditorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'editor/submissions',
+        element: (
+          <ResourceGuard name="EditorDashboardPage">
+            <Lazy>
+              <EditorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'editor/events',
+        element: (
+          <ResourceGuard name="EditorDashboardPage">
+            <Lazy>
+              <EditorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'artist',
+        element: (
+          <ResourceGuard name="ArtistDashboardPage">
+            <Lazy>
+              <ArtistDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'artist/submit',
+        element: (
+          <ResourceGuard name="ArtistDashboardPage">
+            <Lazy>
+              <ArtistDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'artist/submissions',
+        element: (
+          <ResourceGuard name="ArtistDashboardPage">
+            <Lazy>
+              <ArtistDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'label',
+        element: (
+          <ResourceGuard name="LabelDashboardPage">
+            <Lazy>
+              <LabelDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'label/roster',
+        element: (
+          <ResourceGuard name="LabelDashboardPage">
+            <Lazy>
+              <LabelDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'label/releases',
+        element: (
+          <ResourceGuard name="LabelDashboardPage">
+            <Lazy>
+              <LabelDashboardPage />
             </Lazy>
           </ResourceGuard>
         ),
