@@ -49,7 +49,7 @@ export function ProfileAvatarMenu({
     setRecentUrls((prev) => [avatarUrl, ...prev.filter((u) => u !== avatarUrl)].slice(0, 12))
   }
 
-  const avatarSize = 128
+  const avatarSize = 144
 
   const avatar = (
     <CroppedAvatarFrame
@@ -58,7 +58,7 @@ export function ProfileAvatarMenu({
       crop={user.avatarCrop}
       size={avatarSize}
       className={cn(
-        'border-4 border-card shadow-lg sm:h-32 sm:w-32',
+        'h-36 w-36 border-4 border-card shadow-lg',
         editable &&
           'cursor-pointer ring-offset-2 transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         avatarClassName,

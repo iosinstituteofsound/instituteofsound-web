@@ -13,7 +13,7 @@ export function PublicLayout() {
   if (!publicConfig.enabled) {
     return (
       <div className="min-h-screen bg-background">
-        <main>
+        <main className="ios-public-main">
           <Outlet />
         </main>
       </div>
@@ -48,7 +48,7 @@ export function PublicLayout() {
           </div>
         </div>
       </header>
-      <main>
+      <main className="ios-public-main">
         <Outlet />
       </main>
       {publicConfig.footer.enabled ? (

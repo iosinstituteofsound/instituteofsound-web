@@ -7,6 +7,7 @@ import { Toaster } from '@/shared/components/ui/sonner'
 import { TooltipProvider } from '@/shared/components/ui/tooltip'
 import { useTheme } from '@/shared/hooks/use-theme'
 import { useBadgeThemeApplier } from '@/shared/hooks/use-badge-theme'
+import { UniversalPlayer } from '@/modules/player/components/universal-player'
 
 function ThemeInitializer() {
   useTheme()
@@ -21,6 +22,7 @@ export function AppProviders() {
         <TooltipProvider>
           <ThemeInitializer />
           <RouterProvider router={router} />
+          <UniversalPlayer />
           <Toaster richColors position="top-right" />
         </TooltipProvider>
       </QueryClientProvider>

@@ -53,7 +53,7 @@ export function DashboardLayout() {
           </Button>
         ) : null}
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="ios-dashboard-main min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div
             className={cn(
               MAIN_PADDING_CLASS[dashboardConfig.main.padding],

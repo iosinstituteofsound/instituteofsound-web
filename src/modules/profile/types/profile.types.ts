@@ -1,4 +1,4 @@
-export type ProfileViewTab = 'posts' | 'about' | 'photos'
+export type ProfileViewTab = 'all' | 'posts' | 'about' | 'photos'
 
 export type UpdateProfileInput = {
   name?: string
@@ -9,6 +9,7 @@ export type UpdateProfileInput = {
   coverUrl?: string | null
   coverCrop?: import('@/shared/types/auth.types').CoverCrop | null
   linkUrl?: string | null
+  aboutProfile?: import('@/modules/profile/types/about-profile.types').AboutProfile
   privacySettings?: Partial<import('@/shared/types/auth.types').PrivacySettings>
 }
 

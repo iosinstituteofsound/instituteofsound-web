@@ -124,19 +124,35 @@ export function ProfileCoverSection({ user, editable = true, className }: Profil
   }
 
   return (
-    <div className={cn(premiumSurfaceClass, 'overflow-hidden', className)}>
-      <div className="relative">
-        <CroppedCover src={user.coverUrl} crop={user.coverCrop} />
+    <div
+      className={cn(
+        premiumSurfaceClass,
+        'relative overflow-hidden shadow-[0_24px_64px_-28px_rgba(0,0,0,0.85)] ring-1 ring-white/[0.07]',
+        className,
+      )}
+    >
+      <div className="relative min-h-[18rem] sm:min-h-[22rem] md:min-h-[26rem]">
+        <CroppedCover
+          src={user.coverUrl}
+          crop={user.coverCrop}
+          className="absolute inset-0 h-full w-full"
+          heightClass="h-full"
+        />
+
+        <div
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.55)_38%,rgba(0,0,0,0.15)_68%,transparent_100%),radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.28)_100%)]"
+          aria-hidden
+        />
 
         {editable ? (
-          <div className="absolute bottom-3 right-3 z-20">
+          <div className="absolute right-3 top-3 z-20 sm:right-5 sm:top-5">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
                   size="sm"
                   variant="secondary"
-                  className="h-8 gap-1.5 bg-background/90 px-3 text-xs shadow-md hover:bg-background"
+                  className="h-8 gap-1.5 border border-white/15 bg-black/45 px-3 text-xs font-medium text-white/95 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all hover:border-white/25 hover:bg-black/60"
                   disabled={saving || updateProfile.isPending}
                 >
                   {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
@@ -197,41 +213,61 @@ export function ProfileCoverSection({ user, editable = true, className }: Profil
             e.target.value = ''
           }}
         />
-      </div>
 
-      <div className="relative z-10 px-4 pb-4 sm:px-6">
-        <div className="-mt-14 flex flex-col gap-4 pointer-events-none sm:-mt-16 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
-            <div className="pointer-events-auto">
-              <ProfileAvatarMenu user={user} editable={editable} />
-            </div>
-
-            <div className="min-w-0 space-y-1 pb-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{user.name}</h1>
-                {user.isVerified ? <BadgeCheck className="h-5 w-5 text-primary" /> : null}
+        <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-5 pt-10 sm:px-7 sm:pb-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-5">
+              <div className="shrink-0">
+                <ProfileAvatarMenu
+                  user={user}
+                  editable={editable}
+                  avatarClassName="border-[3px] border-white shadow-[0_10px_40px_rgba(0,0,0,0.55)] ring-2 ring-black/30 transition-transform hover:scale-[1.02]"
+                />
               </div>
-              {user.username ? (
-                <p className="text-sm text-muted-foreground">@{user.username}</p>
-              ) : null}
-              {user.bio ? (
-                <p className="max-w-xl pt-1 text-sm leading-relaxed text-foreground/90">{user.bio}</p>
-              ) : null}
-            </div>
-          </div>
 
-          {editable ? (
-            <div className="pointer-events-auto flex flex-wrap gap-2 sm:pb-1">
-              <Button asChild variant="secondary" size="sm" className="font-semibold">
-                <Link to="/profile/edit">Edit profile</Link>
-              </Button>
-              <Button asChild variant="outline" size="icon" className="h-9 w-9 shrink-0">
-                <Link to="/profile/settings" aria-label="Settings">
-                  <Settings className="h-4 w-4" />
-                </Link>
-              </Button>
+              <div className="min-w-0 space-y-1.5 pb-0.5">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h1 className="text-[1.65rem] font-bold tracking-[-0.02em] text-white antialiased drop-shadow-[0_2px_16px_rgba(0,0,0,0.85)] sm:text-[2rem]">
+                    {user.name}
+                  </h1>
+                  {user.isVerified ? (
+                    <BadgeCheck className="h-5 w-5 text-sky-400 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" />
+                  ) : null}
+                </div>
+                {user.username ? (
+                  <p className="text-[13px] font-medium tracking-wide text-white/65">@{user.username}</p>
+                ) : null}
+                {user.bio ? (
+                  <p className="max-w-xl pt-0.5 text-[15px] leading-relaxed text-white/85 drop-shadow-[0_1px_10px_rgba(0,0,0,0.7)]">
+                    {user.bio}
+                  </p>
+                ) : null}
+              </div>
             </div>
-          ) : null}
+
+            {editable ? (
+              <div className="flex flex-wrap gap-2.5 sm:pb-0.5">
+                <Button
+                  asChild
+                  variant="secondary"
+                  size="sm"
+                  className="h-9 rounded-lg border border-white/20 bg-white/12 px-4 text-[13px] font-semibold text-white shadow-[0_8px_28px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all hover:border-white/30 hover:bg-white/20"
+                >
+                  <Link to="/profile/edit">Edit profile</Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 shrink-0 rounded-lg border border-white/20 bg-white/10 text-white shadow-[0_8px_28px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all hover:border-white/30 hover:bg-white/18"
+                >
+                  <Link to="/profile/settings" aria-label="Settings">
+                    <Settings className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 

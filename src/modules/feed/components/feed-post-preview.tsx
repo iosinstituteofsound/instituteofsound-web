@@ -1,4 +1,4 @@
-import { Globe, MoreHorizontal, Music2, ExternalLink } from 'lucide-react'
+import { Globe, MoreHorizontal, Music2, ExternalLink, Pause, Play } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
 import { LinkPreviewCard } from '@/modules/feed/components/link-preview-card'
@@ -6,6 +6,8 @@ import { FeedMediaFrame, musicTrackContextLine, payloadString } from '@/modules/
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { formatFeedTimestamp } from '@/modules/feed/lib/feed-time'
 import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'
+import { feedItemToPlayerTrack } from '@/modules/player/lib/feed-track'
+import { usePlayer } from '@/modules/player/hooks/use-player'
 import { Button } from '@/shared/components/ui/button'
 
 function FeedPostMedia({ item }: { item: FeedItemDto }) {
@@ -48,6 +50,71 @@ function FeedPostMedia({ item }: { item: FeedItemDto }) {
   }
 }
 
+function MusicFeedPreviewBlock({ item }: { item: FeedItemDto }) {
+  const payload = item.payload
+  const trackTitle = payloadString(payload, 'trackTitle')
+  const artistName = payloadString(payload, 'artistName')
+  const youtubeUrl = payloadString(payload, 'youtubeUrl')
+  const spotifyUrl = payloadString(payload, 'spotifyUrl')
+  const audioUrl = payloadString(payload, 'audioUrl')
+  const link = spotifyUrl ?? youtubeUrl
+  const playerTrack = feedItemToPlayerTrack(item)
+  const { isCurrentTrack, isPlaying, play, togglePlay } = usePlayer()
+  const isActive = playerTrack ? isCurrentTrack(playerTrack.id) : false
+  const showPause = isActive && isPlaying
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+      <button
+        type="button"
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-primary/10 text-primary"
+        disabled={!playerTrack}
+        aria-label={showPause ? 'Pause track' : 'Play track'}
+        onClick={() => {
+          if (!playerTrack) return
+          if (isActive) {
+            togglePlay()
+            return
+          }
+          play(playerTrack)
+        }}
+      >
+        {showPause ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
+      </button>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-semibold text-sm">{trackTitle ?? 'Shared track'}</p>
+        {artistName ? <p className="truncate text-xs text-muted-foreground">{artistName}</p> : null}
+        {!audioUrl && link ? (
+          <p className="mt-1 truncate text-xs text-muted-foreground">Stream link only — no in-app audio</p>
+        ) : null}
+      </div>
+      {link ? (
+        <Button variant="outline" size="sm" className="shrink-0 rounded-lg" asChild>
+          <a href={link} target="_blank" rel="noreferrer">
+            <ExternalLink className="mr-1 h-3.5 w-3.5" />
+            Listen
+          </a>
+        </Button>
+      ) : playerTrack ? (
+        <Button
+          variant={isActive ? 'default' : 'outline'}
+          size="sm"
+          className="shrink-0 rounded-lg"
+          onClick={() => {
+            if (isActive) {
+              togglePlay()
+              return
+            }
+            play(playerTrack)
+          }}
+        >
+          {showPause ? 'Pause' : 'Play'}
+        </Button>
+      ) : null}
+    </div>
+  )
+}
+
 function FeedPostExtra({ item }: { item: FeedItemDto }) {
   const payload = item.payload
 
@@ -62,37 +129,9 @@ function FeedPostExtra({ item }: { item: FeedItemDto }) {
   }
 
   if (item.type === 'music') {
-    const trackTitle = payloadString(payload, 'trackTitle')
-    const artistName = payloadString(payload, 'artistName')
-    const youtubeUrl = payloadString(payload, 'youtubeUrl')
-    const spotifyUrl = payloadString(payload, 'spotifyUrl')
-    const audioUrl = payloadString(payload, 'audioUrl')
-    const link = spotifyUrl ?? youtubeUrl
-
     return (
       <div className="feed-post-preview__extra">
-        <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Music2 className="h-6 w-6" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-sm">{trackTitle ?? 'Shared track'}</p>
-            {artistName ? <p className="truncate text-xs text-muted-foreground">{artistName}</p> : null}
-          </div>
-          {link ? (
-            <Button variant="outline" size="sm" className="shrink-0 rounded-lg" asChild>
-              <a href={link} target="_blank" rel="noreferrer">
-                <ExternalLink className="mr-1 h-3.5 w-3.5" />
-                Listen
-              </a>
-            </Button>
-          ) : null}
-        </div>
-        {audioUrl ? (
-          <audio controls className="mt-2 w-full">
-            <source src={audioUrl} />
-          </audio>
-        ) : null}
+        <MusicFeedPreviewBlock item={item} />
       </div>
     )
   }

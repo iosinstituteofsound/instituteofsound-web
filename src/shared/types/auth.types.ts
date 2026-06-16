@@ -77,6 +77,8 @@ export interface UserAuthorization {
   activeLayout?: LayoutSummary
 }
 
+import type { AboutProfile } from '@/modules/profile/types/about-profile.types'
+
 export interface UserDto {
   id: string
   email: string
@@ -90,6 +92,7 @@ export interface UserDto {
   linkUrl?: string
   username?: string
   bio?: string
+  aboutProfile?: AboutProfile
   isVerified?: boolean
   privacySettings?: PrivacySettings
   createdAt: string

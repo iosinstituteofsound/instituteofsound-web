@@ -57,6 +57,8 @@ export async function searchProfiles(q: string, limit = 24) {
   return data.data
 }
 
+import type { AboutProfile } from '@/modules/profile/types/about-profile.types'
+
 export interface PublicProfileDto {
   id: string
   name: string
@@ -67,6 +69,7 @@ export interface PublicProfileDto {
   coverUrl?: string
   coverCrop?: { x: number; y: number; z: number }
   bio?: string
+  aboutProfile?: AboutProfile
   orgLabel?: string
   linkUrl?: string
   isVerified?: boolean
