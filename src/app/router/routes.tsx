@@ -96,6 +96,9 @@ const ExplorePage = lazy(() =>
 const ArticlePage = lazy(() =>
   import('@/modules/explore/pages/article-page').then((m) => ({ default: m.ArticlePage })),
 )
+const ReleasePage = lazy(() =>
+  import('@/modules/explore/pages/release-page').then((m) => ({ default: m.ReleasePage })),
+)
 const EditorDashboardPage = lazy(() =>
   import('@/modules/editor/pages/editor-dashboard-page').then((m) => ({
     default: m.EditorDashboardPage,
@@ -155,6 +158,16 @@ export const router = createBrowserRouter([
           <ExplorePageGuard>
             <Lazy>
               <ArticlePage />
+            </Lazy>
+          </ExplorePageGuard>
+        ),
+      },
+      {
+        path: 'explore/releases/:id',
+        element: (
+          <ExplorePageGuard>
+            <Lazy>
+              <ReleasePage />
             </Lazy>
           </ExplorePageGuard>
         ),
