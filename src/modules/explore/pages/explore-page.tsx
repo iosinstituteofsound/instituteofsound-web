@@ -1,5 +1,4 @@
 import { Compass, Home } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import { useExplore } from '@/modules/explore/hooks/use-explore'
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
 import { Loader } from '@/shared/components/feedback/loader'
