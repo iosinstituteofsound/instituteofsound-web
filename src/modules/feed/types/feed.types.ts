@@ -20,6 +20,18 @@ export interface FeedEngagementSummary {
   myReaction: FeedReactionKind | null
 }
 
+export interface FeedCommentEngagementSummary {
+  reactions: FeedReactionCounts
+  reactionTotal: number
+  myReaction: FeedReactionKind | null
+}
+
+export interface FeedCommentReactionUserDto {
+  user: FeedAuthorDto
+  kind: FeedReactionKind
+  createdAt: string
+}
+
 export interface FeedCommentDto {
   id: string
   feedItemId: string
@@ -30,6 +42,7 @@ export interface FeedCommentDto {
   parentId?: string
   createdAt: string
   updatedAt: string
+  engagement?: FeedCommentEngagementSummary
 }
 
 export interface FeedAuthorDto {

@@ -1,0 +1,172 @@
+.feed-comment-reactions-dialog__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: color-mix(in oklch, black 55%, transparent);
+  animation: feed-comment-reactions-overlay-in 0.18s ease-out;
+}
+
+@keyframes feed-comment-reactions-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.feed-comment-reactions-dialog {
+  position: fixed;
+  z-index: 111;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  width: min(calc(100vw - 32px), 320px);
+  max-height: min(72vh, 380px);
+  transform: translate(-50%, -50%);
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklch, var(--foreground) 10%, transparent);
+  background: color-mix(in oklch, var(--card) 92%, black);
+  color: var(--card-foreground);
+  box-shadow: 0 16px 40px color-mix(in oklch, black 42%, transparent);
+  overflow: hidden;
+  animation: feed-comment-reactions-dialog-in 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes feed-comment-reactions-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.feed-comment-reactions-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  padding: 12px 40px;
+  border-bottom: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+}
+
+.feed-comment-reactions-dialog__title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.feed-comment-reactions-dialog__close {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--foreground) 8%, transparent);
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.feed-comment-reactions-dialog__close:hover {
+  background: color-mix(in oklch, var(--foreground) 14%, transparent);
+}
+
+.feed-comment-reactions-dialog__tabs {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 8px 10px;
+  overflow-x: auto;
+  border-bottom: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+  scrollbar-width: none;
+}
+
+.feed-comment-reactions-dialog__tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.feed-comment-reactions-dialog__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.feed-comment-reactions-dialog__tab:hover {
+  background: color-mix(in oklch, var(--foreground) 8%, transparent);
+  color: var(--foreground);
+}
+
+.feed-comment-reactions-dialog__tab.is-active {
+  background: color-mix(in oklch, var(--primary) 16%, transparent);
+  color: var(--foreground);
+}
+
+.feed-comment-reactions-dialog__tab-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+.feed-comment-reactions-dialog__tab.is-active .feed-comment-reactions-dialog__tab-count {
+  color: inherit;
+}
+
+.feed-comment-reactions-dialog__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px 0;
+}
+
+.feed-comment-reactions-dialog__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+}
+
+.feed-comment-reactions-dialog__item-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-comment-reactions-dialog__item-reaction {
+  flex-shrink: 0;
+}
+
+.feed-comment-reactions-dialog__empty,
+.feed-comment-reactions-dialog__loading {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}

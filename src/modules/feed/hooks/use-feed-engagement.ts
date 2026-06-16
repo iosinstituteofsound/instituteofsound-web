@@ -3,10 +3,12 @@ import * as engagementApi from '@/modules/feed/api/feed-engagement.api'
 import { feedQueryKey } from '@/modules/feed/hooks/use-feed'
 import {
   feedCommentsQueryKey,
+  feedCommentReactionsQueryKey,
   feedItemQueryKey,
   patchFeedItemInCache,
 } from '@/modules/feed/lib/feed-engagement'
 import type {
+  FeedCommentDto,
   FeedEngagementSummary,
   FeedItemDto,
   FeedListResponse,
@@ -26,6 +28,18 @@ export function useFeedComments(feedItemId: string, enabled = true) {
     queryKey: feedCommentsQueryKey(feedItemId),
     queryFn: () => engagementApi.listFeedComments(feedItemId),
     enabled: enabled && Boolean(feedItemId),
+  })
+}
+
+export function useFeedCommentReactions(
+  feedItemId: string,
+  commentId: string,
+  enabled = false,
+) {
+  return useQuery({
+    queryKey: feedCommentReactionsQueryKey(feedItemId, commentId),
+    queryFn: () => engagementApi.listFeedCommentReactions(feedItemId, commentId),
+    enabled: enabled && Boolean(feedItemId) && Boolean(commentId),
   })
 }
 
@@ -56,6 +70,32 @@ export function useSetFeedReaction() {
       engagementApi.setFeedReaction(feedItemId, kind),
     onSuccess: (engagement, { feedItemId }) => {
       updateEngagementInFeedCaches(queryClient, feedItemId, engagement)
+    },
+  })
+}
+
+export function useSetFeedCommentReaction() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      feedItemId,
+      commentId,
+      kind,
+    }: {
+      feedItemId: string
+      commentId: string
+      kind: FeedReactionKind
+    }) => engagementApi.setFeedCommentReaction(feedItemId, commentId, kind),
+    onSuccess: (engagement, { feedItemId, commentId }) => {
+      queryClient.setQueryData(feedCommentsQueryKey(feedItemId), (old: FeedCommentDto[] | undefined) =>
+        old?.map((comment) =>
+          comment.id === commentId ? { ...comment, engagement } : comment,
+        ),
+      )
+      void queryClient.invalidateQueries({
+        queryKey: feedCommentReactionsQueryKey(feedItemId, commentId),
+      })
     },
   })
 }

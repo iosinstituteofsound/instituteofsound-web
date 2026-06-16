@@ -1,6 +1,6 @@
 import { useState, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
-import { Camera, ImageIcon, Send, X } from 'lucide-react'
+import { Camera, Send, X } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import {
@@ -9,6 +9,7 @@ import {
 } from '@/modules/feed/components/animated-emoji-picker'
 import {
   GiphyPicker,
+  GiphyStickerTriggerButton,
   GiphyTriggerButton,
 } from '@/modules/feed/components/giphy-picker'
 import type { GiphyGif } from '@/modules/feed/api/giphy.api'
@@ -17,6 +18,11 @@ import { useAddFeedComment } from '@/modules/feed/hooks/use-feed-engagement'
 import type { FeedCommentDto } from '@/modules/feed/types/feed.types'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/cn'
+
+type CommentAttachment = {
+  item: GiphyGif
+  kind: 'gif' | 'sticker'
+}
 
 interface FeedCommentComposerProps {
   feedItemId: string
@@ -41,18 +47,25 @@ export function FeedCommentComposer({
   const { data: me } = useMe(Boolean(userId))
   const addComment = useAddFeedComment()
   const [draft, setDraft] = useState('')
-  const [selectedGif, setSelectedGif] = useState<GiphyGif | null>(null)
+  const [selectedAttachment, setSelectedAttachment] = useState<CommentAttachment | null>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [emojiAnchor, setEmojiAnchor] = useState<HTMLElement | null>(null)
   const [giphyOpen, setGiphyOpen] = useState(false)
   const [giphyAnchor, setGiphyAnchor] = useState<HTMLElement | null>(null)
+  const [stickerOpen, setStickerOpen] = useState(false)
+  const [stickerAnchor, setStickerAnchor] = useState<HTMLElement | null>(null)
+
+  const closeMediaPickers = () => {
+    setGiphyOpen(false)
+    setStickerOpen(false)
+  }
 
   const handleEmojiTrigger = (anchor: HTMLElement) => {
     if (emojiOpen && emojiAnchor === anchor) {
       setEmojiOpen(false)
       return
     }
-    setGiphyOpen(false)
+    closeMediaPickers()
     setEmojiAnchor(anchor)
     setEmojiOpen(true)
   }
@@ -63,8 +76,20 @@ export function FeedCommentComposer({
       return
     }
     setEmojiOpen(false)
+    setStickerOpen(false)
     setGiphyAnchor(anchor)
     setGiphyOpen(true)
+  }
+
+  const handleStickerTrigger = (anchor: HTMLElement) => {
+    if (stickerOpen && stickerAnchor === anchor) {
+      setStickerOpen(false)
+      return
+    }
+    setEmojiOpen(false)
+    setGiphyOpen(false)
+    setStickerAnchor(anchor)
+    setStickerOpen(true)
   }
 
   if (!userId) {
@@ -78,21 +103,21 @@ export function FeedCommentComposer({
   }
 
   const firstName = me?.user.name?.split(' ')[0] ?? 'you'
-  const canSubmit = Boolean(draft.trim() || selectedGif)
+  const canSubmit = Boolean(draft.trim() || selectedAttachment)
 
   const submit = async () => {
     const body = draft.trim()
-    if ((!body && !selectedGif) || addComment.isPending) return
+    if ((!body && !selectedAttachment) || addComment.isPending) return
 
     await addComment.mutateAsync({
       feedItemId,
       body: body || undefined,
-      gifUrl: selectedGif?.url,
-      giphyId: selectedGif?.id,
+      gifUrl: selectedAttachment?.item.url,
+      giphyId: selectedAttachment?.item.id,
       parentId: replyTo?.id,
     })
     setDraft('')
-    setSelectedGif(null)
+    setSelectedAttachment(null)
     onClearReply?.()
     onPosted?.()
   }
@@ -112,9 +137,10 @@ export function FeedCommentComposer({
   const giphyPicker = (
     <GiphyPicker
       open={giphyOpen}
+      mode="gif"
       onOpenChange={setGiphyOpen}
-      onSelect={(gif) => {
-        setSelectedGif(gif)
+      onSelect={(item) => {
+        setSelectedAttachment({ item, kind: 'gif' })
         setGiphyOpen(false)
       }}
       anchorEl={giphyAnchor}
@@ -122,14 +148,37 @@ export function FeedCommentComposer({
     />
   )
 
-  const gifPreview = selectedGif ? (
-    <div className="feed-comment-composer__gif-preview">
-      <img src={selectedGif.previewUrl} alt={selectedGif.title} />
+  const stickerPicker = (
+    <GiphyPicker
+      open={stickerOpen}
+      mode="sticker"
+      onOpenChange={setStickerOpen}
+      onSelect={(item) => {
+        setSelectedAttachment({ item, kind: 'sticker' })
+        setStickerOpen(false)
+      }}
+      anchorEl={stickerAnchor}
+      portalContainer={pickerPortalContainer}
+    />
+  )
+
+  const attachmentPreview = selectedAttachment ? (
+    <div
+      className={cn(
+        'feed-comment-composer__gif-preview',
+        selectedAttachment.kind === 'sticker' && 'feed-comment-composer__sticker-preview',
+      )}
+    >
+      <img
+        src={selectedAttachment.item.previewUrl}
+        alt={selectedAttachment.item.title}
+        className={selectedAttachment.kind === 'sticker' ? 'object-contain' : undefined}
+      />
       <button
         type="button"
-        aria-label="Remove GIF"
+        aria-label={selectedAttachment.kind === 'sticker' ? 'Remove sticker' : 'Remove GIF'}
         className="feed-comment-composer__gif-remove"
-        onClick={() => setSelectedGif(null)}
+        onClick={() => setSelectedAttachment(null)}
       >
         <X className="h-3.5 w-3.5" />
       </button>
@@ -151,7 +200,7 @@ export function FeedCommentComposer({
               <button type="button" onClick={onClearReply}>Cancel</button>
             </p>
           ) : null}
-          {gifPreview}
+          {attachmentPreview}
           <Textarea
             ref={inputRef}
             value={draft}
@@ -182,9 +231,11 @@ export function FeedCommentComposer({
                 className="feed-comment-composer__tool"
                 onClick={handleGiphyTrigger}
               />
-              <button type="button" className="feed-comment-composer__tool" aria-label="Sticker">
-                <ImageIcon className="h-5 w-5" />
-              </button>
+              <GiphyStickerTriggerButton
+                active={stickerOpen}
+                className="feed-comment-composer__tool"
+                onClick={handleStickerTrigger}
+              />
             </div>
             <button
               type="button"
@@ -199,6 +250,7 @@ export function FeedCommentComposer({
         </div>
         {emojiPicker}
         {giphyPicker}
+        {stickerPicker}
       </div>
     )
   }
@@ -223,7 +275,7 @@ export function FeedCommentComposer({
             </button>
           </p>
         ) : null}
-        {gifPreview}
+        {attachmentPreview}
         <div className="flex items-end gap-1">
           <Textarea
             ref={inputRef}
@@ -260,6 +312,7 @@ export function FeedCommentComposer({
       </div>
       {emojiPicker}
       {giphyPicker}
+      {stickerPicker}
     </div>
   )
 }

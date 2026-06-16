@@ -1,15 +1,24 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Loader2, Search, X } from 'lucide-react'
-import { searchGifs, trendingGifs, type GiphyGif } from '@/modules/feed/api/giphy.api'
+import { ImageIcon, Loader2, Search, X } from 'lucide-react'
+import {
+  searchGifs,
+  searchStickers,
+  trendingGifs,
+  trendingStickers,
+  type GiphyGif,
+} from '@/modules/feed/api/giphy.api'
 import { cn } from '@/shared/lib/cn'
 
 const PICKER_WIDTH = 340
 const PICKER_HEIGHT = 420
 const VIEWPORT_PADDING = 12
 
+export type GiphyPickerMode = 'gif' | 'sticker'
+
 export const GIPHY_PICKER_ROOT_SELECTOR = '[data-giphy-picker-root]'
 export const GIPHY_TRIGGER_SELECTOR = '[data-giphy-trigger]'
+export const GIPHY_STICKER_TRIGGER_SELECTOR = '[data-giphy-sticker-trigger]'
 
 export function isGiphyPickerTarget(target: EventTarget | null) {
   return target instanceof HTMLElement && Boolean(target.closest(GIPHY_PICKER_ROOT_SELECTOR))
@@ -17,6 +26,14 @@ export function isGiphyPickerTarget(target: EventTarget | null) {
 
 export function isGiphyTriggerTarget(target: EventTarget | null) {
   return target instanceof HTMLElement && Boolean(target.closest(GIPHY_TRIGGER_SELECTOR))
+}
+
+export function isGiphyStickerTriggerTarget(target: EventTarget | null) {
+  return target instanceof HTMLElement && Boolean(target.closest(GIPHY_STICKER_TRIGGER_SELECTOR))
+}
+
+export function isAnyGiphyTriggerTarget(target: EventTarget | null) {
+  return isGiphyTriggerTarget(target) || isGiphyStickerTriggerTarget(target)
 }
 
 function computePickerPosition(
@@ -58,12 +75,41 @@ function computePickerPosition(
   return { top, left, strategy: container ? ('absolute' as const) : ('fixed' as const) }
 }
 
+const MODE_COPY: Record<
+  GiphyPickerMode,
+  {
+    searchPlaceholder: string
+    emptyLabel: string
+    errorLabel: string
+    closeLabel: string
+    loadTrending: (limit: number) => Promise<GiphyGif[]>
+    loadSearch: (query: string, limit: number) => Promise<GiphyGif[]>
+  }
+> = {
+  gif: {
+    searchPlaceholder: 'Search GIPHY',
+    emptyLabel: 'No GIFs found',
+    errorLabel: 'Could not load GIFs',
+    closeLabel: 'Close GIF picker',
+    loadTrending: trendingGifs,
+    loadSearch: searchGifs,
+  },
+  sticker: {
+    searchPlaceholder: 'Search stickers',
+    emptyLabel: 'No stickers found',
+    errorLabel: 'Could not load stickers',
+    closeLabel: 'Close sticker picker',
+    loadTrending: trendingStickers,
+    loadSearch: searchStickers,
+  },
+}
+
 interface GiphyPickerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelect: (gif: GiphyGif) => void
+  onSelect: (item: GiphyGif) => void
   anchorEl: HTMLElement | null
-  /** Portal inside a modal so Radix focus/pointer traps do not block interaction. */
+  mode?: GiphyPickerMode
   portalContainer?: HTMLElement | null
 }
 
@@ -72,8 +118,10 @@ export function GiphyPicker({
   onOpenChange,
   onSelect,
   anchorEl,
+  mode = 'gif',
   portalContainer = null,
 }: GiphyPickerProps) {
+  const copy = MODE_COPY[mode]
   const panelRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
   const [query, setQuery] = useState('')
@@ -136,7 +184,7 @@ export function GiphyPicker({
       if (!(target instanceof Node)) return
       if (panelRef.current?.contains(target)) return
       if (anchorEl?.contains(target)) return
-      if (isGiphyTriggerTarget(target)) return
+      if (isAnyGiphyTriggerTarget(target)) return
       onOpenChange(false)
     }
 
@@ -162,13 +210,14 @@ export function GiphyPicker({
 
     const timer = window.setTimeout(() => searchRef.current?.focus(), 50)
     return () => window.clearTimeout(timer)
-  }, [open])
+  }, [open, mode])
 
   useEffect(() => {
     if (!open) return
 
     const trimmed = query.trim()
     const currentRequest = ++requestId.current
+    const { loadTrending, loadSearch, errorLabel } = MODE_COPY[mode]
     setLoading(true)
     setError(null)
 
@@ -180,7 +229,7 @@ export function GiphyPicker({
         })
         .catch(() => {
           if (requestId.current !== currentRequest) return
-          setError('Could not load GIFs')
+          setError(errorLabel)
           setItems([])
         })
         .finally(() => {
@@ -189,27 +238,29 @@ export function GiphyPicker({
     }
 
     if (!trimmed) {
-      load(trendingGifs(20))
+      load(loadTrending(20))
       return
     }
 
     const timer = window.setTimeout(() => {
-      load(searchGifs(trimmed, 20))
+      load(loadSearch(trimmed, 20))
     }, 300)
 
     return () => window.clearTimeout(timer)
-  }, [open, query])
+  }, [open, query, mode])
 
   if (!open || !anchorEl) return null
 
   const panelPosition =
     position ?? computePickerPosition(anchorEl, PICKER_HEIGHT, portalContainer)
   const portalTarget = portalContainer ?? document.body
+  const isSticker = mode === 'sticker'
 
   return createPortal(
     <div
       ref={panelRef}
       data-giphy-picker-root
+      data-giphy-picker-mode={mode}
       style={{
         top: panelPosition.top,
         left: panelPosition.left,
@@ -233,12 +284,12 @@ export function GiphyPicker({
           spellCheck={false}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search GIPHY"
+          placeholder={copy.searchPlaceholder}
           className="pointer-events-auto min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
         <button
           type="button"
-          aria-label="Close GIF picker"
+          aria-label={copy.closeLabel}
           className="inline-flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted"
           onClick={() => onOpenChange(false)}
         >
@@ -254,27 +305,35 @@ export function GiphyPicker({
         ) : error && items.length === 0 ? (
           <p className="px-2 py-8 text-center text-sm text-muted-foreground">{error}</p>
         ) : items.length === 0 ? (
-          <p className="px-2 py-8 text-center text-sm text-muted-foreground">No GIFs found</p>
+          <p className="px-2 py-8 text-center text-sm text-muted-foreground">{copy.emptyLabel}</p>
         ) : (
           <div className="grid grid-cols-2 gap-1.5">
-            {items.map((gif) => (
+            {items.map((item) => (
               <button
-                key={gif.id}
+                key={item.id}
                 type="button"
-                aria-label={gif.title}
-                className="overflow-hidden rounded-lg bg-muted/40 transition hover:ring-2 hover:ring-primary/40"
+                aria-label={item.title}
+                className={cn(
+                  'overflow-hidden rounded-lg transition hover:ring-2 hover:ring-primary/40',
+                  isSticker
+                    ? 'bg-[linear-gradient(45deg,color-mix(in_oklch,var(--foreground)_8%,transparent)_25%,transparent_25%,transparent_75%,color-mix(in_oklch,var(--foreground)_8%,transparent)_75%),linear-gradient(45deg,color-mix(in_oklch,var(--foreground)_8%,transparent)_25%,transparent_25%,transparent_75%,color-mix(in_oklch,var(--foreground)_8%,transparent)_75%)] bg-[length:12px_12px] bg-[position:0_0,6px_6px]'
+                    : 'bg-muted/40',
+                )}
                 onClick={() => {
-                  onSelect(gif)
+                  onSelect(item)
                   onOpenChange(false)
                 }}
               >
                 <img
-                  src={gif.previewUrl}
-                  alt={gif.title}
+                  src={item.previewUrl}
+                  alt={item.title}
                   loading="lazy"
                   decoding="async"
                   draggable={false}
-                  className="aspect-square w-full object-cover"
+                  className={cn(
+                    'aspect-square w-full',
+                    isSticker ? 'object-contain p-2' : 'object-cover',
+                  )}
                 />
               </button>
             ))}
@@ -306,6 +365,30 @@ export function GiphyTriggerButton({ active = false, className, onClick }: Giphy
       onClick={(event) => onClick(event.currentTarget)}
     >
       <span className="text-xs font-bold">GIF</span>
+    </button>
+  )
+}
+
+interface GiphyStickerTriggerButtonProps {
+  active?: boolean
+  className?: string
+  onClick: (anchor: HTMLElement) => void
+}
+
+export function GiphyStickerTriggerButton({
+  active = false,
+  className,
+  onClick,
+}: GiphyStickerTriggerButtonProps) {
+  return (
+    <button
+      type="button"
+      data-giphy-sticker-trigger
+      aria-label="Sticker"
+      className={cn(className, active && 'bg-primary/10 text-foreground')}
+      onClick={(event) => onClick(event.currentTarget)}
+    >
+      <ImageIcon className="h-5 w-5" />
     </button>
   )
 }

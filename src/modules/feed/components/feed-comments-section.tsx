@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { FeedCommentComposer } from '@/modules/feed/components/feed-comment-composer'
+import { FeedCommentLikeAction } from '@/modules/feed/components/feed-comment-like-action'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import {
   useDeleteFeedComment,
@@ -100,6 +101,7 @@ export function FeedCommentsSection({
               key={node.comment.id}
               node={node}
               depth={0}
+              feedItemId={feedItemId}
               userId={userId}
               expanded={expanded}
               expandedReplies={expandedReplies}
@@ -126,6 +128,7 @@ export function FeedCommentsSection({
 function CommentItem({
   node,
   depth,
+  feedItemId,
   userId,
   expanded,
   expandedReplies,
@@ -136,6 +139,7 @@ function CommentItem({
 }: {
   node: CommentNode
   depth: number
+  feedItemId: string
   userId: string | null
   expanded: boolean
   expandedReplies: Record<string, boolean>
@@ -187,11 +191,7 @@ function CommentItem({
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 px-2 text-xs font-semibold text-muted-foreground">
             <span>{formatCommentTimestamp(comment.createdAt)}</span>
-            {userId ? (
-              <button type="button" className="hover:underline">
-                Like
-              </button>
-            ) : null}
+            {userId ? <FeedCommentLikeAction feedItemId={feedItemId} comment={comment} /> : null}
             {userId ? (
               <button type="button" className="hover:underline" onClick={() => onReply(comment)}>
                 Reply
@@ -223,6 +223,7 @@ function CommentItem({
                 key={child.comment.id}
                 node={child}
                 depth={depth + 1}
+                feedItemId={feedItemId}
                 userId={userId}
                 expanded={expanded}
                 expandedReplies={expandedReplies}

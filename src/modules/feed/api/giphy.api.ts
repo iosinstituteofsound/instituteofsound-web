@@ -30,3 +30,19 @@ export async function trendingGifs(limit = 20) {
   )
   return data.data.items
 }
+
+export async function searchStickers(query: string, limit = 20) {
+  const { data } = await apiClient.get<ApiSuccessResponse<GiphyListResponse>>(
+    `${API_V1}/giphy/stickers/search`,
+    { params: { q: query.trim(), limit } },
+  )
+  return data.data.items
+}
+
+export async function trendingStickers(limit = 20) {
+  const { data } = await apiClient.get<ApiSuccessResponse<GiphyListResponse>>(
+    `${API_V1}/giphy/stickers/trending`,
+    { params: { limit } },
+  )
+  return data.data.items
+}

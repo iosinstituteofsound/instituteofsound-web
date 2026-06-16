@@ -47,3 +47,7 @@ export function feedItemQueryKey(id: string) {
 export function feedCommentsQueryKey(feedItemId: string) {
   return [...feedQueryKey, 'comments', feedItemId] as const
 }
+
+export function feedCommentReactionsQueryKey(feedItemId: string, commentId: string) {
+  return [...feedQueryKey, 'comment-reactions', feedItemId, commentId] as const
+}

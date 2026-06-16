@@ -6,11 +6,12 @@ import type { FeedReactionKind } from '@/modules/feed/types/feed.types'
 import { cn } from '@/shared/lib/cn'
 import './feed-reaction-icons.css'
 
-export type ReactionIconSize = 'picker' | 'inline'
+export type ReactionIconSize = 'picker' | 'inline' | 'compact'
 
 const ICON_PX: Record<ReactionIconSize, number> = {
   picker: 48,
   inline: 20,
+  compact: 32,
 }
 
 interface ReactionIconProps {
@@ -42,6 +43,7 @@ function ReactionIconFrame({
     <span
       className={cn(
         'feed-reaction-picker-icon',
+        size === 'compact' && 'feed-reaction-picker-icon--compact',
         `feed-reaction-picker-icon--${kind}`,
         hovered && 'feed-reaction-picker-icon--live',
         className,
@@ -120,7 +122,7 @@ export function ReactionPickerIcon({
 
   return (
     <ReactionIconFrame kind={kind} size={size} hovered={hovered} className={className}>
-      {size === 'picker' ? (
+      {size === 'picker' || size === 'compact' ? (
         <PickerReactionStack kind={kind} hovered={hovered} px={px} />
       ) : (
         <img

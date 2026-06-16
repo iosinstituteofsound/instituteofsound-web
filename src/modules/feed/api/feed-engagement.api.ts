@@ -3,6 +3,8 @@ import { apiClient } from '@/shared/services/api/api-client'
 import type { ApiSuccessResponse } from '@/shared/types/api.types'
 import type {
   FeedCommentDto,
+  FeedCommentEngagementSummary,
+  FeedCommentReactionUserDto,
   FeedEngagementSummary,
   FeedItemDto,
   FeedReactionKind,
@@ -43,4 +45,22 @@ export async function addFeedComment(
 
 export async function deleteFeedComment(feedItemId: string, commentId: string) {
   await apiClient.delete(`${API_V1}/feed/${feedItemId}/comments/${commentId}`)
+}
+
+export async function setFeedCommentReaction(
+  feedItemId: string,
+  commentId: string,
+  kind: FeedReactionKind,
+) {
+  const { data } = await apiClient.put<
+    ApiSuccessResponse<{ engagement: FeedCommentEngagementSummary }>
+  >(`${API_V1}/feed/${feedItemId}/comments/${commentId}/reaction`, { kind })
+  return data.data.engagement
+}
+
+export async function listFeedCommentReactions(feedItemId: string, commentId: string) {
+  const { data } = await apiClient.get<
+    ApiSuccessResponse<{ reactions: FeedCommentReactionUserDto[] }>
+  >(`${API_V1}/feed/${feedItemId}/comments/${commentId}/reactions`)
+  return data.data.reactions
 }

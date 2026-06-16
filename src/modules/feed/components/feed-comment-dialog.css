@@ -400,6 +400,18 @@
   border-radius: 10px;
 }
 
+.feed-comment-composer__sticker-preview {
+  max-width: 120px;
+  background: color-mix(in oklch, var(--foreground) 6%, transparent);
+}
+
+.feed-comment-composer__sticker-preview img {
+  max-height: 120px;
+  width: auto;
+  margin: 0 auto;
+  padding: 6px;
+}
+
 .feed-comment-composer__gif-remove {
   position: absolute;
   top: 6px;

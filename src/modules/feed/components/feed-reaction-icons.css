@@ -34,6 +34,24 @@
   will-change: transform, filter;
 }
 
+.feed-reaction-picker-icon--compact {
+  width: 32px;
+  height: 32px;
+  filter:
+    drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3))
+    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.18));
+}
+
+.feed-reaction-picker-icon--compact .feed-reaction-asset-stack {
+  width: 32px;
+  height: 32px;
+}
+
+.feed-reaction-picker-icon--compact .feed-reaction-asset-stack .feed-reaction-asset-img {
+  width: 32px;
+  height: 32px;
+}
+
 .feed-reaction-picker-icon::before {
   content: '';
   position: absolute;
