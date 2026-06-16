@@ -1,4 +1,5 @@
-import { Globe, MoreHorizontal, Music2, ExternalLink, Pause, Play } from 'lucide-react'
+import { Globe, Music2, ExternalLink, Pause, Play } from 'lucide-react'
+import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options-menu'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
 import { LinkPreviewCard } from '@/modules/feed/components/link-preview-card'
@@ -151,9 +152,10 @@ function FeedPostExtra({ item }: { item: FeedItemDto }) {
 
 interface FeedPostPreviewProps {
   item: FeedItemDto
+  menuPortalContainer?: HTMLElement | null
 }
 
-export function FeedPostPreview({ item }: FeedPostPreviewProps) {
+export function FeedPostPreview({ item, menuPortalContainer }: FeedPostPreviewProps) {
   const captionText =
     item.type === 'text'
       ? buildPostCaptionText(undefined, payloadString(item.payload, 'text') ?? item.body)
@@ -184,9 +186,12 @@ export function FeedPostPreview({ item }: FeedPostPreviewProps) {
             </p>
           ) : null}
         </div>
-        <button type="button" className="feed-post-preview__menu" aria-label="Post options">
-          <MoreHorizontal className="h-5 w-5" />
-        </button>
+        <FeedPostOptionsMenu
+          author={item.author}
+          postId={item.id}
+          portalContainer={menuPortalContainer}
+          triggerClassName="feed-post-preview__menu h-auto w-auto min-h-0 rounded-none hover:bg-transparent"
+        />
       </header>
 
       {captionText ? <FeedPostCaption text={captionText} className="feed-post-preview__caption" /> : null}

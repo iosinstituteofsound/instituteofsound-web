@@ -36,7 +36,8 @@
   animation: feed-comment-dialog-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.feed-comment-dialog:has([data-giphy-picker-root]) {
+.feed-comment-dialog:has([data-giphy-picker-root]),
+.feed-comment-dialog:has([data-radix-popper-content-wrapper]) {
   overflow: visible;
 }
 

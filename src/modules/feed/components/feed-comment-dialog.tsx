@@ -19,6 +19,23 @@ interface FeedCommentDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
+function isDropdownMenuTarget(target: EventTarget | null) {
+  return target instanceof Element && Boolean(target.closest('[data-radix-menu-content]'))
+}
+
+function isCommentPhotoCaptureTarget(target: EventTarget | null) {
+  return target instanceof Element && Boolean(target.closest('[data-comment-photo-capture]'))
+}
+
+function shouldIgnoreOutsideEvent(target: EventTarget | null) {
+  return (
+    isEmojiPickerTarget(target) ||
+    isGiphyPickerTarget(target) ||
+    isDropdownMenuTarget(target) ||
+    isCommentPhotoCaptureTarget(target)
+  )
+}
+
 export function FeedCommentDialog({ item, open, onOpenChange }: FeedCommentDialogProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [replyTo, setReplyTo] = useState<FeedCommentDto | null>(null)
@@ -52,19 +69,19 @@ export function FeedCommentDialog({ item, open, onOpenChange }: FeedCommentDialo
           aria-describedby={undefined}
           onPointerDownOutside={(event) => {
             const target = getRadixOutsideEventTarget(event)
-            if (isEmojiPickerTarget(target) || isGiphyPickerTarget(target)) {
+            if (shouldIgnoreOutsideEvent(target)) {
               event.preventDefault()
             }
           }}
           onInteractOutside={(event) => {
             const target = getRadixOutsideEventTarget(event)
-            if (isEmojiPickerTarget(target) || isGiphyPickerTarget(target)) {
+            if (shouldIgnoreOutsideEvent(target)) {
               event.preventDefault()
             }
           }}
           onFocusOutside={(event) => {
             const target = getRadixOutsideEventTarget(event)
-            if (isEmojiPickerTarget(target) || isGiphyPickerTarget(target)) {
+            if (shouldIgnoreOutsideEvent(target)) {
               event.preventDefault()
             }
           }}
@@ -79,7 +96,7 @@ export function FeedCommentDialog({ item, open, onOpenChange }: FeedCommentDialo
           </header>
 
           <div className="feed-comment-dialog__scroll">
-            <FeedPostPreview item={item} />
+            <FeedPostPreview item={item} menuPortalContainer={portalContainer} />
             <FeedEngagementStatsBar item={item} />
             <div className="feed-comment-dialog__filter">
               <button type="button" className="feed-comment-dialog__filter-btn">

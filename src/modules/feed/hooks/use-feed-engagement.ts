@@ -109,14 +109,16 @@ export function useAddFeedComment() {
       body,
       gifUrl,
       giphyId,
+      imageUrl,
       parentId,
     }: {
       feedItemId: string
       body?: string
       gifUrl?: string
       giphyId?: string
+      imageUrl?: string
       parentId?: string
-    }) => engagementApi.addFeedComment(feedItemId, { body, gifUrl, giphyId, parentId }),
+    }) => engagementApi.addFeedComment(feedItemId, { body, gifUrl, giphyId, imageUrl, parentId }),
     onSuccess: (comment, { feedItemId }) => {
       queryClient.setQueryData(feedCommentsQueryKey(feedItemId), (old: typeof comment[] | undefined) =>
         old ? [...old, comment] : [comment],

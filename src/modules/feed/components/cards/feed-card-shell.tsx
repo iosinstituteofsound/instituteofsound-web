@@ -1,6 +1,7 @@
-import { Globe, MoreHorizontal, X } from 'lucide-react'
+import { Globe, X } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
+import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options-menu'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
@@ -45,15 +46,7 @@ export function FeedCardShell({
         </div>
 
         <div className="feed-social-card__header-actions">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="feed-social-card__header-btn h-8 w-8 rounded-full"
-            aria-label="Post options"
-          >
-            <MoreHorizontal className="h-5 w-5" />
-          </Button>
+          <FeedPostOptionsMenu author={item.author} postId={item.id} />
           <Button
             type="button"
             variant="ghost"

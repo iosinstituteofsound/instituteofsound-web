@@ -39,6 +39,7 @@ export interface FeedCommentDto {
   body: string
   gifUrl?: string
   giphyId?: string
+  imageUrl?: string
   parentId?: string
   createdAt: string
   updatedAt: string

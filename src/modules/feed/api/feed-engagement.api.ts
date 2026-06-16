@@ -34,7 +34,7 @@ export async function listFeedComments(feedItemId: string) {
 
 export async function addFeedComment(
   feedItemId: string,
-  input: { body?: string; gifUrl?: string; giphyId?: string; parentId?: string },
+  input: { body?: string; gifUrl?: string; giphyId?: string; imageUrl?: string; parentId?: string },
 ) {
   const { data } = await apiClient.post<ApiSuccessResponse<{ comment: FeedCommentDto }>>(
     `${API_V1}/feed/${feedItemId}/comments`,

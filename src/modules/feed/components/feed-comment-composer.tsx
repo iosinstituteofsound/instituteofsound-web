@@ -1,12 +1,14 @@
-import { useState, type RefObject } from 'react'
+import { useEffect, useState, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
-import { Camera, Send, X } from 'lucide-react'
+import { Send, X } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { useMe } from '@/modules/auth/hooks/use-auth'
+import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import {
   AnimatedEmojiPicker,
   EmojiTriggerButton,
 } from '@/modules/feed/components/animated-emoji-picker'
+import { CommentPhotoMenu } from '@/modules/feed/components/comment-photo-menu'
 import {
   GiphyPicker,
   GiphyStickerTriggerButton,
@@ -17,11 +19,17 @@ import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { useAddFeedComment } from '@/modules/feed/hooks/use-feed-engagement'
 import type { FeedCommentDto } from '@/modules/feed/types/feed.types'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { toast } from '@/shared/components/ui/sonner'
 import { cn } from '@/shared/lib/cn'
 
 type CommentAttachment = {
   item: GiphyGif
   kind: 'gif' | 'sticker'
+}
+
+type CommentPhoto = {
+  file: File
+  previewUrl: string
 }
 
 interface FeedCommentComposerProps {
@@ -48,6 +56,8 @@ export function FeedCommentComposer({
   const addComment = useAddFeedComment()
   const [draft, setDraft] = useState('')
   const [selectedAttachment, setSelectedAttachment] = useState<CommentAttachment | null>(null)
+  const [selectedPhoto, setSelectedPhoto] = useState<CommentPhoto | null>(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [emojiAnchor, setEmojiAnchor] = useState<HTMLElement | null>(null)
   const [giphyOpen, setGiphyOpen] = useState(false)
@@ -55,9 +65,35 @@ export function FeedCommentComposer({
   const [stickerOpen, setStickerOpen] = useState(false)
   const [stickerAnchor, setStickerAnchor] = useState<HTMLElement | null>(null)
 
+  useEffect(() => {
+    return () => {
+      if (selectedPhoto?.previewUrl) {
+        URL.revokeObjectURL(selectedPhoto.previewUrl)
+      }
+    }
+  }, [selectedPhoto?.previewUrl])
+
   const closeMediaPickers = () => {
     setGiphyOpen(false)
     setStickerOpen(false)
+  }
+
+  const clearSelectedPhoto = () => {
+    setSelectedPhoto((current) => {
+      if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl)
+      return null
+    })
+  }
+
+  const handlePhotoSelected = (file: File) => {
+    setSelectedAttachment(null)
+    setSelectedPhoto((current) => {
+      if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl)
+      return {
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }
+    })
   }
 
   const handleEmojiTrigger = (anchor: HTMLElement) => {
@@ -103,23 +139,47 @@ export function FeedCommentComposer({
   }
 
   const firstName = me?.user.name?.split(' ')[0] ?? 'you'
-  const canSubmit = Boolean(draft.trim() || selectedAttachment)
+  const canSubmit = Boolean(draft.trim() || selectedAttachment || selectedPhoto)
+  const isSubmitting = addComment.isPending || uploadingPhoto
 
   const submit = async () => {
     const body = draft.trim()
-    if ((!body && !selectedAttachment) || addComment.isPending) return
+    if ((!body && !selectedAttachment && !selectedPhoto) || isSubmitting) return
 
-    await addComment.mutateAsync({
-      feedItemId,
-      body: body || undefined,
-      gifUrl: selectedAttachment?.item.url,
-      giphyId: selectedAttachment?.item.id,
-      parentId: replyTo?.id,
-    })
-    setDraft('')
-    setSelectedAttachment(null)
-    onClearReply?.()
-    onPosted?.()
+    setUploadingPhoto(true)
+    try {
+      let imageUrl: string | undefined
+      if (selectedPhoto) {
+        const extension = selectedPhoto.file.name.includes('.') ? '' : '.jpg'
+        const uploaded = await uploadMediaFile(
+          selectedPhoto.file,
+          selectedPhoto.file.name || `comment-photo-${Date.now()}${extension}`,
+        )
+        imageUrl = uploaded.absoluteUrl ?? uploaded.url
+      }
+
+      await addComment.mutateAsync({
+        feedItemId,
+        body: body || undefined,
+        gifUrl: selectedAttachment?.item.url,
+        giphyId: selectedAttachment?.item.id,
+        imageUrl,
+        parentId: replyTo?.id,
+      })
+      setDraft('')
+      setSelectedAttachment(null)
+      clearSelectedPhoto()
+      onClearReply?.()
+      onPosted?.()
+    } catch (err) {
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String(err.message)
+          : 'Could not post comment'
+      toast.error(message)
+    } finally {
+      setUploadingPhoto(false)
+    }
   }
 
   const emojiPicker = (
@@ -140,6 +200,7 @@ export function FeedCommentComposer({
       mode="gif"
       onOpenChange={setGiphyOpen}
       onSelect={(item) => {
+        clearSelectedPhoto()
         setSelectedAttachment({ item, kind: 'gif' })
         setGiphyOpen(false)
       }}
@@ -154,6 +215,7 @@ export function FeedCommentComposer({
       mode="sticker"
       onOpenChange={setStickerOpen}
       onSelect={(item) => {
+        clearSelectedPhoto()
         setSelectedAttachment({ item, kind: 'sticker' })
         setStickerOpen(false)
       }}
@@ -162,7 +224,19 @@ export function FeedCommentComposer({
     />
   )
 
-  const attachmentPreview = selectedAttachment ? (
+  const attachmentPreview = selectedPhoto ? (
+    <div className="feed-comment-composer__gif-preview">
+      <img src={selectedPhoto.previewUrl} alt="Selected photo" className="object-cover" />
+      <button
+        type="button"
+        aria-label="Remove photo"
+        className="feed-comment-composer__gif-remove"
+        onClick={clearSelectedPhoto}
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  ) : selectedAttachment ? (
     <div
       className={cn(
         'feed-comment-composer__gif-preview',
@@ -223,9 +297,11 @@ export function FeedCommentComposer({
                 className="feed-comment-composer__tool feed-comment-composer__tool--emoji"
                 onClick={handleEmojiTrigger}
               />
-              <button type="button" className="feed-comment-composer__tool" aria-label="Photo">
-                <Camera className="h-5 w-5" />
-              </button>
+              <CommentPhotoMenu
+                disabled={isSubmitting}
+                portalContainer={pickerPortalContainer}
+                onPhotoSelected={handlePhotoSelected}
+              />
               <GiphyTriggerButton
                 active={giphyOpen}
                 className="feed-comment-composer__tool"
@@ -241,7 +317,7 @@ export function FeedCommentComposer({
               type="button"
               className={cn('feed-comment-composer__send', canSubmit && 'is-ready')}
               aria-label="Post comment"
-              disabled={!canSubmit || addComment.isPending}
+              disabled={!canSubmit || isSubmitting}
               onClick={() => void submit()}
             >
               <Send className="h-4 w-4" />
@@ -302,10 +378,10 @@ export function FeedCommentComposer({
             <button
               type="button"
               className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-              disabled={addComment.isPending}
+              disabled={!canSubmit || isSubmitting}
               onClick={() => void submit()}
             >
-              {addComment.isPending ? 'Posting…' : 'Post'}
+              {isSubmitting ? 'Posting…' : 'Post'}
             </button>
           </div>
         ) : null}

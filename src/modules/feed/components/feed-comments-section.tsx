@@ -175,6 +175,19 @@ function CommentItem({
             {comment.body ? (
               <p className="whitespace-pre-wrap text-[15px] leading-snug">{comment.body}</p>
             ) : null}
+            {comment.imageUrl ? (
+              <img
+                src={comment.imageUrl}
+                alt={comment.body || 'Photo'}
+                loading="lazy"
+                decoding="async"
+                className={cn(
+                  'max-w-full rounded-lg object-cover',
+                  comment.body ? 'mt-2' : 'mt-1',
+                )}
+                style={{ maxHeight: 240 }}
+              />
+            ) : null}
             {comment.gifUrl ? (
               <img
                 src={comment.gifUrl}
@@ -183,7 +196,7 @@ function CommentItem({
                 decoding="async"
                 className={cn(
                   'max-w-full rounded-lg',
-                  comment.body ? 'mt-2' : 'mt-1',
+                  comment.body || comment.imageUrl ? 'mt-2' : 'mt-1',
                 )}
                 style={{ maxHeight: 240 }}
               />
