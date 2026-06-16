@@ -2,12 +2,77 @@
   background: var(--background);
   color: var(--foreground);
   min-height: 100vh;
+  --explore-scroll-margin: 0.75rem;
+}
+
+.ios-dashboard-main .explore-page {
+  --explore-scroll-margin: 0.75rem;
+}
+
+.ios-public-main .explore-page {
+  --explore-scroll-margin: 1rem;
+}
+
+.explore-page__frame {
+  --explore-content-max: 1400px;
+  --explore-rail-width: 11.25rem;
+  width: min(100%, calc(var(--explore-content-max) + var(--explore-rail-width) + 1.5rem));
+  max-width: 100%;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.explore-page__main {
+  min-width: 0;
+}
+
+.explore-page__aside {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .explore-page__frame {
+    grid-template-columns: minmax(0, var(--explore-content-max)) var(--explore-rail-width);
+    column-gap: 1.25rem;
+  }
+
+  .explore-page__aside {
+    display: flex;
+    justify-content: center;
+    min-height: 100%;
+  }
+
+  .explore-page__main .explore-section,
+  .explore-page__main .explore-div {
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+
+@media (min-width: 1536px) {
+  .explore-page__frame {
+    --explore-rail-width: 12rem;
+    column-gap: 1.5rem;
+  }
 }
 
 .explore-section {
   padding: 2.5rem 1.25rem;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+.explore-section[id] {
+  scroll-margin-top: var(--explore-scroll-margin);
+  box-sizing: border-box;
+}
+
+.explore-page__main .explore-section[id] {
+  padding-block: 2.25rem 1.75rem;
 }
 
 /* ── Section dividers — mystical / universe ──────────────────────── */

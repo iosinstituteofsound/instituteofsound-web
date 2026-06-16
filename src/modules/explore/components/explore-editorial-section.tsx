@@ -113,7 +113,7 @@ export function ExploreEditorialSection({
   if (!coverStory && sidebar.length === 0) return null
 
   return (
-    <section className="explore-section explore-ed-section">
+    <section id="explore-editorial" className="explore-section explore-ed-section">
       <header className="explore-ed-head">
         <div className="explore-ed-head__brand">
           <span className="explore-ed-head__num" aria-hidden>
