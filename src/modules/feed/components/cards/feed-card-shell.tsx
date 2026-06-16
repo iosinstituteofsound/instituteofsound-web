@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { Globe, X } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
+import { FeedPostHiddenState } from '@/modules/feed/components/feed-post-hidden-state'
 import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options-menu'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
@@ -24,48 +26,68 @@ export function FeedCardShell({
   defaultCommentsOpen?: boolean
   headerContext?: React.ReactNode
 }) {
+  const [isHidden, setIsHidden] = useState(false)
   const captionText = buildPostCaptionText(item.title, item.body)
 
   return (
-    <article className={cn('feed-social-card', className)}>
-      <header className="feed-social-card__header">
-        <div className="feed-social-card__avatar">
-          <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
+    <article className={cn('feed-social-card', isHidden && 'feed-social-card--hidden', className)}>
+      <div className="feed-social-card__layers">
+        <div
+          className="feed-social-card__layer feed-social-card__layer--post"
+          aria-hidden={isHidden}
+        >
+          <div className="feed-social-card__layer-inner">
+            <header className="feed-social-card__header">
+              <div className="feed-social-card__avatar">
+                <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
+              </div>
+
+              <div className="feed-social-card__meta">
+                <p className="feed-social-card__name-line">
+                  <span className="feed-social-card__name">{item.author.name}</span>
+                </p>
+                <p className="feed-social-card__meta-line">
+                  <FeedPostTimestamp value={item.createdAt} />
+                  <span className="feed-social-card__meta-dot" aria-hidden> · </span>
+                  <Globe className="feed-social-card__globe" aria-label="Public" />
+                </p>
+                {headerContext ? <div className="feed-social-card__context-line">{headerContext}</div> : null}
+              </div>
+
+              <div className="feed-social-card__header-actions">
+                <FeedPostOptionsMenu author={item.author} postId={item.id} />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="feed-social-card__header-btn h-8 w-8 rounded-full"
+                  aria-label="Hide post"
+                  onClick={() => setIsHidden(true)}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+            </header>
+
+            {captionText ? <FeedPostCaption text={captionText} /> : null}
+
+            {media ? <div className="feed-social-card__media">{media}</div> : null}
+
+            {children ? <div className="feed-social-card__body">{children}</div> : null}
+
+            <FeedEngagement item={item} defaultCommentsOpen={defaultCommentsOpen} variant="social" />
+          </div>
         </div>
 
-        <div className="feed-social-card__meta">
-          <p className="feed-social-card__name-line">
-            <span className="feed-social-card__name">{item.author.name}</span>
-          </p>
-          <p className="feed-social-card__meta-line">
-            <FeedPostTimestamp value={item.createdAt} />
-            <span className="feed-social-card__meta-dot" aria-hidden> · </span>
-            <Globe className="feed-social-card__globe" aria-label="Public" />
-          </p>
-          {headerContext ? <div className="feed-social-card__context-line">{headerContext}</div> : null}
+        <div
+          className="feed-social-card__layer feed-social-card__layer--hidden-state"
+          aria-hidden={!isHidden}
+        >
+          <div className="feed-social-card__layer-inner">
+            <FeedPostHiddenState author={item.author} onUndo={() => setIsHidden(false)} />
+          </div>
         </div>
-
-        <div className="feed-social-card__header-actions">
-          <FeedPostOptionsMenu author={item.author} postId={item.id} />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="feed-social-card__header-btn h-8 w-8 rounded-full"
-            aria-label="Hide post"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-      </header>
-
-      {captionText ? <FeedPostCaption text={captionText} /> : null}
-
-      {media ? <div className="feed-social-card__media">{media}</div> : null}
-
-      {children ? <div className="feed-social-card__body">{children}</div> : null}
-
-      <FeedEngagement item={item} defaultCommentsOpen={defaultCommentsOpen} variant="social" />
+      </div>
     </article>
   )
 }
