@@ -5,6 +5,7 @@ import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
 import { FeedPostHiddenState } from '@/modules/feed/components/feed-post-hidden-state'
 import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options-menu'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
+import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { Button } from '@/shared/components/ui/button'
@@ -38,13 +39,15 @@ export function FeedCardShell({
         >
           <div className="feed-social-card__layer-inner">
             <header className="feed-social-card__header">
-              <div className="feed-social-card__avatar">
+              <FeedAuthorProfileLink author={item.author} variant="avatar" className="feed-social-card__avatar">
                 <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
-              </div>
+              </FeedAuthorProfileLink>
 
               <div className="feed-social-card__meta">
                 <p className="feed-social-card__name-line">
-                  <span className="feed-social-card__name">{item.author.name}</span>
+                  <FeedAuthorProfileLink author={item.author} variant="name">
+                    <span className="feed-social-card__name">{item.author.name}</span>
+                  </FeedAuthorProfileLink>
                 </p>
                 <p className="feed-social-card__meta-line">
                   <FeedPostTimestamp value={item.createdAt} />

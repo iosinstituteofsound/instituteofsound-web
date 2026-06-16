@@ -2,6 +2,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { ReactionPickerIcon } from '@/modules/feed/components/feed-reaction-icons'
+import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { useFeedCommentReactions } from '@/modules/feed/hooks/use-feed-engagement'
 import { formatEngagementCount } from '@/modules/feed/lib/format-engagement-count'
@@ -108,12 +109,16 @@ export function FeedCommentReactionsDialog({
                 const meta = feedReactionMeta(entry.kind)
                 return (
                   <div key={`${entry.user.id}-${entry.kind}-${entry.createdAt}`} className="feed-comment-reactions-dialog__item">
-                    <FeedUserAvatar
-                      name={entry.user.name}
-                      avatarUrl={entry.user.avatarUrl}
-                      className="h-8 w-8 shrink-0"
-                    />
-                    <span className="feed-comment-reactions-dialog__item-name">{entry.user.name}</span>
+                    <FeedAuthorProfileLink author={entry.user} variant="avatar" className="shrink-0">
+                      <FeedUserAvatar
+                        name={entry.user.name}
+                        avatarUrl={entry.user.avatarUrl}
+                        className="h-8 w-8"
+                      />
+                    </FeedAuthorProfileLink>
+                    <FeedAuthorProfileLink author={entry.user} variant="name" className="min-w-0 flex-1">
+                      <span className="feed-comment-reactions-dialog__item-name">{entry.user.name}</span>
+                    </FeedAuthorProfileLink>
                     <span className="feed-comment-reactions-dialog__item-reaction">
                       <ReactionPickerIcon kind={meta.kind} label={meta.label} size="inline" />
                     </span>

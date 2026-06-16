@@ -1,0 +1,30 @@
+.feed-author-profile-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    opacity 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.feed-author-profile-link--avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: 9999px;
+}
+
+.feed-author-profile-link--avatar:hover {
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 45%, transparent);
+  transform: scale(1.04);
+}
+
+.feed-author-profile-link--name:hover .feed-social-card__name,
+.feed-author-profile-link--name:hover .feed-post-preview__name,
+.feed-author-profile-link--name:hover .feed-comment-reactions-dialog__item-name,
+.feed-author-profile-link--name:hover p {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

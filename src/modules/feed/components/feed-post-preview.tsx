@@ -4,6 +4,7 @@ import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
 import { LinkPreviewCard } from '@/modules/feed/components/link-preview-card'
 import { FeedMediaFrame, musicTrackContextLine, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
+import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'
@@ -169,10 +170,14 @@ export function FeedPostPreview({ item, menuPortalContainer }: FeedPostPreviewPr
   return (
     <div className="feed-post-preview">
       <header className="feed-post-preview__header">
-        <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10 shrink-0" />
+        <FeedAuthorProfileLink author={item.author} variant="avatar" className="shrink-0">
+          <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
+        </FeedAuthorProfileLink>
         <div className="feed-post-preview__meta">
           <p className="feed-post-preview__name-line">
-            <span className="feed-post-preview__name">{item.author.name}</span>
+            <FeedAuthorProfileLink author={item.author} variant="name">
+              <span className="feed-post-preview__name">{item.author.name}</span>
+            </FeedAuthorProfileLink>
           </p>
           <p className="feed-post-preview__meta-line">
             <FeedPostTimestamp value={item.createdAt} />
