@@ -4,7 +4,7 @@ import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components
 import { LinkPreviewCard } from '@/modules/feed/components/link-preview-card'
 import { FeedMediaFrame, musicTrackContextLine, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
-import { formatFeedTimestamp } from '@/modules/feed/lib/feed-time'
+import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'
 import { feedItemToPlayerTrack } from '@/modules/player/lib/feed-track'
 import { usePlayer } from '@/modules/player/hooks/use-player'
@@ -173,7 +173,7 @@ export function FeedPostPreview({ item }: FeedPostPreviewProps) {
             <span className="feed-post-preview__name">{item.author.name}</span>
           </p>
           <p className="feed-post-preview__meta-line">
-            <span>{formatFeedTimestamp(item.createdAt)}</span>
+            <FeedPostTimestamp value={item.createdAt} />
             <span aria-hidden> · </span>
             <Globe className="feed-post-preview__globe" aria-label="Public" />
           </p>

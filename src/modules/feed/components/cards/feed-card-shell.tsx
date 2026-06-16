@@ -3,7 +3,7 @@ import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
-import { formatFeedTimestamp } from '@/modules/feed/lib/feed-time'
+import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 import './feed-card.css'
@@ -37,7 +37,7 @@ export function FeedCardShell({
             <span className="feed-social-card__name">{item.author.name}</span>
           </p>
           <p className="feed-social-card__meta-line">
-            <span>{formatFeedTimestamp(item.createdAt)}</span>
+            <FeedPostTimestamp value={item.createdAt} />
             <span className="feed-social-card__meta-dot" aria-hidden> · </span>
             <Globe className="feed-social-card__globe" aria-label="Public" />
           </p>
