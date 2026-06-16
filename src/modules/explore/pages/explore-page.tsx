@@ -12,6 +12,7 @@ import { ExploreSceneHubsSection } from '@/modules/explore/components/explore-sc
 import { ExploreEventsSection } from '@/modules/explore/components/explore-events-section'
 import { ExploreListenersSection } from '@/modules/explore/components/explore-listeners-section'
 import { ExploreCommunitySection } from '@/modules/explore/components/explore-community-section'
+import { ExploreSectionDivider } from '@/modules/explore/components/explore-section-divider'
 import '@/modules/explore/styles/explore.css'
 
 export function ExplorePage() {
@@ -45,9 +46,15 @@ export function ExplorePage() {
         sidebar={data.editorial.sidebar}
       />
 
+      <ExploreSectionDivider variant="gateway" />
+
       <ExploreArtistsSection artists={data.artists} />
 
+      <ExploreSectionDivider variant="saturn" />
+
       <ExploreReleasesSection releases={data.releases} />
+
+      <ExploreSectionDivider variant="seal" />
 
       <ExploreLabelsSection
         labels={data.labels}
@@ -55,10 +62,14 @@ export function ExplorePage() {
         releaseCount={data.releases.length}
       />
 
+      <ExploreSectionDivider variant="lunar" />
+
       <ExplorePlaylistsSection
         featured={data.playlists.featured}
         items={data.playlists.items}
       />
+
+      <ExploreSectionDivider variant="aurora" />
 
       <ExploreSceneHubsSection
         hubs={data.sceneHubs}
@@ -67,7 +78,11 @@ export function ExplorePage() {
         eventCount={data.events.length}
       />
 
+      <ExploreSectionDivider variant="nova" />
+
       <ExploreEventsSection events={data.events} />
+
+      <ExploreSectionDivider variant="eclipse" />
 
       <ExploreListenersSection
         topListener={data.listeners.topListener}
@@ -75,6 +90,8 @@ export function ExplorePage() {
         totalListeners={data.listeners.totalListeners}
         totalPlays={data.listeners.totalPlays}
       />
+
+      <ExploreSectionDivider variant="nexus" />
 
       <ExploreCommunitySection community={data.community} />
     </div>

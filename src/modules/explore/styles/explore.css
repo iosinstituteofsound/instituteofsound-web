@@ -5,9 +5,757 @@
 }
 
 .explore-section {
-  padding: 3rem 1.25rem;
+  padding: 2.5rem 1.25rem;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+/* ── Section dividers — mystical / universe ──────────────────────── */
+
+.explore-div {
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.5rem 1.25rem;
+  pointer-events: none;
+  user-select: none;
+  isolation: isolate;
+}
+
+/* Shared horizontal bloom — same glow/blur as gateway divider */
+.explore-div::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: min(540px, 74%);
+  height: 3.25rem;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse 100% 42% at 50% 50%,
+    color-mix(in oklch, var(--primary) 22%, transparent),
+    transparent 72%
+  );
+  filter: blur(11px);
+  opacity: 0.88;
+  pointer-events: none;
+  animation: explore-div-bloom 5s ease-in-out infinite;
+}
+
+.explore-div__cosmos {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.7;
+  background:
+    radial-gradient(ellipse 55% 85% at 50% 55%, color-mix(in oklch, var(--primary) 14%, transparent), transparent 52%),
+    radial-gradient(circle at 12% 50%, color-mix(in oklch, var(--accent, var(--primary)) 6%, transparent), transparent 38%),
+    radial-gradient(circle at 88% 50%, color-mix(in oklch, var(--accent, var(--primary)) 6%, transparent), transparent 38%);
+}
+
+.explore-div__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 3.5rem;
+}
+
+.explore-div__line {
+  position: relative;
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    var(--explore-div-line-dir, 90deg),
+    transparent,
+    color-mix(in oklch, var(--primary) 18%, transparent) 28%,
+    color-mix(in oklch, var(--primary) 50%, transparent) 50%,
+    color-mix(in oklch, var(--primary) 18%, transparent) 72%,
+    transparent
+  );
+}
+
+.explore-div__line::after {
+  content: '';
+  position: absolute;
+  inset: -3px 0;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklch, var(--primary) 45%, transparent) 0.5px,
+    transparent 0.6px
+  );
+  background-size: 14px 6px;
+  background-repeat: repeat-x;
+  background-position: center;
+  opacity: 0.35;
+  mask-image: linear-gradient(var(--explore-div-line-dir, 90deg), transparent, black 25%, black 75%, transparent);
+}
+
+.explore-div__line--left {
+  --explore-div-line-dir: 90deg;
+}
+
+.explore-div__line--right {
+  --explore-div-line-dir: 270deg;
+}
+
+.explore-div__core {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 4.75rem;
+  min-height: 2.35rem;
+}
+
+.explore-div__core::before {
+  content: '';
+  position: absolute;
+  inset: -0.75rem -0.5rem;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse 100% 72% at 50% 50%,
+    color-mix(in oklch, var(--primary) 26%, transparent),
+    transparent 72%
+  );
+  filter: blur(7px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+@keyframes explore-div-bloom {
+  0%,
+  100% {
+    opacity: 0.76;
+    transform: translate(-50%, -50%) scaleX(0.96);
+  }
+  50% {
+    opacity: 0.94;
+    transform: translate(-50%, -50%) scaleX(1.04);
+  }
+}
+
+/* Shared SVG motif base */
+.explore-div__svg {
+  overflow: visible;
+  color: var(--primary);
+  display: block;
+}
+
+/* ── 1. Cosmic gateway (editorial → artists) ── */
+.explore-div__svg--gateway {
+  width: 2.85rem;
+  height: 2.5rem;
+}
+
+.explore-div__gateway-glow {
+  fill: color-mix(in oklch, var(--primary) 18%, transparent);
+  filter: blur(1px);
+  animation: explore-div-gateway-glow 4s ease-in-out infinite;
+}
+
+.explore-div__gateway-arch {
+  stroke-linecap: round;
+}
+
+.explore-div__gateway-arch--outer {
+  stroke: color-mix(in oklch, var(--primary) 70%, transparent);
+  stroke-width: 1.15;
+  filter: drop-shadow(0 0 6px color-mix(in oklch, var(--primary) 35%, transparent));
+}
+
+.explore-div__gateway-arch--inner {
+  stroke: color-mix(in oklch, var(--primary) 40%, transparent);
+  stroke-width: 0.75;
+  stroke-dasharray: 3 4;
+  animation: explore-div-gateway-dash 6s linear infinite;
+}
+
+.explore-div__gateway-keystone {
+  fill: color-mix(in oklch, var(--primary) 75%, white);
+  filter: drop-shadow(0 0 5px color-mix(in oklch, var(--primary) 55%, transparent));
+  animation: explore-div-gateway-keystone 3s ease-in-out infinite;
+}
+
+.explore-div__gateway-pillar {
+  stroke: color-mix(in oklch, var(--primary) 55%, transparent);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+.explore-div__gateway-sill {
+  stroke: color-mix(in oklch, var(--primary) 45%, transparent);
+  stroke-width: 0.85;
+  stroke-linecap: round;
+}
+
+.explore-div__gateway-star {
+  fill: color-mix(in oklch, var(--foreground) 88%, var(--primary));
+  filter: drop-shadow(0 0 3px color-mix(in oklch, var(--primary) 60%, transparent));
+  animation: explore-div-gateway-twinkle 2.8s ease-in-out infinite;
+}
+
+.explore-div__gateway-star--b {
+  animation-delay: 0.5s;
+}
+
+.explore-div__gateway-star--c {
+  animation-delay: 1s;
+}
+
+.explore-div__gateway-star--d {
+  animation-delay: 1.6s;
+}
+
+.explore-div__gateway-core {
+  fill: color-mix(in oklch, var(--primary) 92%, white);
+  filter: drop-shadow(0 0 8px color-mix(in oklch, var(--primary) 65%, transparent));
+  animation: explore-div-gateway-core 3.5s ease-in-out infinite;
+}
+
+@keyframes explore-div-gateway-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes explore-div-gateway-dash {
+  from {
+    stroke-dashoffset: 14;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes explore-div-gateway-keystone {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes explore-div-gateway-twinkle {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes explore-div-gateway-core {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* ── 2. Saturn ── */
+.explore-div__svg--saturn {
+  width: 2.85rem;
+  height: 2.35rem;
+}
+
+.explore-div__saturn-body {
+  fill: color-mix(in oklch, var(--primary) 55%, var(--background));
+  stroke: color-mix(in oklch, var(--primary) 70%, transparent);
+  stroke-width: 0.75;
+}
+
+.explore-div__saturn-shade {
+  fill: color-mix(in oklch, var(--background) 55%, var(--primary));
+  opacity: 0.55;
+}
+
+.explore-div__saturn-ring {
+  fill: none;
+  stroke: color-mix(in oklch, var(--primary) 60%, transparent);
+  stroke-width: 1;
+  transform: rotate(-18deg);
+  transform-origin: 22px 20px;
+}
+
+.explore-div__saturn-ring-back {
+  fill: none;
+  stroke: color-mix(in oklch, var(--primary) 25%, transparent);
+  stroke-width: 0.75;
+  transform: rotate(-18deg);
+  transform-origin: 22px 20px;
+  stroke-dasharray: 28 28;
+}
+
+.explore-div--saturn .explore-div__svg {
+  animation: explore-div-saturn-tilt 12s ease-in-out infinite;
+}
+
+@keyframes explore-div-saturn-tilt {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+/* ── 3. Cosmic seal (releases → labels) ── */
+.explore-div__svg--seal {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.explore-div__seal-aura {
+  stroke: color-mix(in oklch, var(--primary) 18%, transparent);
+  stroke-width: 0.65;
+  stroke-dasharray: 2 5;
+  transform-origin: 22px 20px;
+  animation: explore-div-seal-aura 10s linear infinite;
+}
+
+.explore-div__seal-ring {
+  stroke: color-mix(in oklch, var(--primary) 55%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.explore-div__seal-body {
+  fill: color-mix(in oklch, var(--primary) 22%, var(--background));
+  stroke: color-mix(in oklch, var(--primary) 65%, transparent);
+  stroke-width: 0.85;
+}
+
+.explore-div__seal-groove {
+  stroke: color-mix(in oklch, var(--primary) 45%, transparent);
+  stroke-width: 0.65;
+  transform-origin: 22px 20px;
+  animation: explore-div-seal-groove 8s linear infinite;
+}
+
+.explore-div__seal-groove--inner {
+  stroke-width: 0.5;
+  opacity: 0.65;
+  animation-direction: reverse;
+  animation-duration: 6s;
+}
+
+.explore-div__seal-core {
+  fill: color-mix(in oklch, var(--primary) 90%, white);
+  filter: drop-shadow(0 0 6px color-mix(in oklch, var(--primary) 55%, transparent));
+  animation: explore-div-seal-core 3s ease-in-out infinite;
+}
+
+.explore-div__seal-ribbon {
+  fill: color-mix(in oklch, var(--primary) 30%, var(--background));
+  stroke: color-mix(in oklch, var(--primary) 55%, transparent);
+  stroke-width: 0.75;
+  stroke-linejoin: round;
+}
+
+.explore-div__seal-ribbon-fold {
+  fill: none;
+  stroke: color-mix(in oklch, var(--primary) 35%, transparent);
+  stroke-width: 0.65;
+  stroke-linecap: round;
+}
+
+@keyframes explore-div-seal-aura {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes explore-div-seal-groove {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes explore-div-seal-core {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* ── 4. Lunar phases ── */
+.explore-div__svg--lunar {
+  width: 4rem;
+  height: 1.5rem;
+}
+
+.explore-div__lunar-orbit {
+  stroke: color-mix(in oklch, var(--primary) 18%, transparent);
+  stroke-width: 0.5;
+  stroke-dasharray: 2 4;
+}
+
+.explore-div__lunar-moon {
+  fill: color-mix(in oklch, var(--primary) 35%, var(--background));
+  stroke: color-mix(in oklch, var(--primary) 55%, transparent);
+  stroke-width: 0.6;
+}
+
+.explore-div__lunar-moon--half {
+  fill: color-mix(in oklch, var(--primary) 50%, var(--background));
+}
+
+.explore-div__lunar-moon--full {
+  fill: color-mix(in oklch, var(--primary) 65%, white);
+  filter: drop-shadow(0 0 4px color-mix(in oklch, var(--primary) 40%, transparent));
+}
+
+/* ── 5. Aurora ── */
+.explore-div__svg--aurora {
+  width: 3.25rem;
+  height: 2rem;
+}
+
+.explore-div__aurora {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 1.5;
+}
+
+.explore-div__aurora--a {
+  stroke: color-mix(in oklch, var(--primary) 55%, transparent);
+  opacity: 0.85;
+}
+
+.explore-div__aurora--b {
+  stroke: color-mix(in oklch, var(--accent, var(--primary)) 45%, transparent);
+  stroke-width: 1.1;
+  opacity: 0.6;
+}
+
+.explore-div__aurora--c {
+  stroke: color-mix(in oklch, var(--primary) 35%, transparent);
+  stroke-width: 0.85;
+  opacity: 0.45;
+}
+
+.explore-div--aurora .explore-div__svg {
+  animation: explore-div-aurora-shift 5s ease-in-out infinite alternate;
+}
+
+@keyframes explore-div-aurora-shift {
+  from {
+    transform: skewX(-3deg) translateY(1px);
+    opacity: 0.75;
+  }
+  to {
+    transform: skewX(3deg) translateY(-1px);
+    opacity: 1;
+  }
+}
+
+/* ── 6. Supernova burst (scene hubs → events) ── */
+.explore-div__svg--nova {
+  width: 2.65rem;
+  height: 2.65rem;
+}
+
+.explore-div__nova-rays line {
+  stroke: color-mix(in oklch, var(--primary) 55%, transparent);
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 0.55;
+  animation: explore-div-nova-ray 3.2s ease-in-out infinite;
+}
+
+.explore-div__nova-rays line:nth-child(odd) {
+  animation-delay: 0.4s;
+}
+
+.explore-div__nova-rays line:nth-child(2),
+.explore-div__nova-rays line:nth-child(6) {
+  stroke-width: 1.25;
+  opacity: 0.75;
+}
+
+.explore-div__nova-ring {
+  stroke: color-mix(in oklch, var(--primary) 50%, transparent);
+  stroke-width: 0.85;
+  transform-origin: 22px 22px;
+  animation: explore-div-nova-ring 3.6s ease-out infinite;
+}
+
+.explore-div__nova-ring--2 {
+  animation-delay: 0.8s;
+}
+
+.explore-div__nova-ring--3 {
+  animation-delay: 1.6s;
+}
+
+.explore-div__nova-flare {
+  fill: color-mix(in oklch, var(--primary) 28%, transparent);
+  filter: blur(0.5px);
+}
+
+.explore-div__nova-core {
+  fill: color-mix(in oklch, var(--primary) 90%, white);
+  filter: drop-shadow(0 0 8px color-mix(in oklch, var(--primary) 60%, transparent));
+  animation: explore-div-nova-core 2.4s ease-in-out infinite;
+}
+
+@keyframes explore-div-nova-ring {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.85;
+  }
+  70% {
+    opacity: 0.15;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes explore-div-nova-ray {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes explore-div-nova-core {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+/* ── 7. Eclipse (chand / suraj grahan) ── */
+.explore-div__eclipse {
+  position: relative;
+  width: 2.35rem;
+  height: 2.35rem;
+}
+
+.explore-div__eclipse-sun {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    color-mix(in oklch, var(--primary) 85%, white),
+    var(--primary)
+  );
+  box-shadow: 0 0 20px color-mix(in oklch, var(--primary) 40%, transparent);
+}
+
+.explore-div__eclipse-moon {
+  position: absolute;
+  top: -8%;
+  right: -6%;
+  width: 88%;
+  height: 88%;
+  border-radius: 50%;
+  background: var(--background);
+  box-shadow: inset 4px 0 8px color-mix(in oklch, var(--primary) 15%, transparent);
+}
+
+.explore-div__eclipse-corona {
+  position: absolute;
+  inset: -18%;
+  border: 1px solid color-mix(in oklch, var(--primary) 25%, transparent);
+  border-radius: 50%;
+  opacity: 0.65;
+}
+
+/* ── 8. Cosmic nexus (listeners → community) ── */
+.explore-div__svg--nexus {
+  width: 3.35rem;
+  height: 2.25rem;
+}
+
+.explore-div__nexus-orbit {
+  stroke: color-mix(in oklch, var(--primary) 22%, transparent);
+  stroke-width: 0.65;
+  stroke-dasharray: 3 5;
+}
+
+.explore-div__nexus-links line {
+  stroke: color-mix(in oklch, var(--primary) 45%, transparent);
+  stroke-width: 0.85;
+  stroke-linecap: round;
+  stroke-dasharray: 22;
+  animation: explore-div-nexus-pulse 4.5s ease-in-out infinite;
+}
+
+.explore-div__nexus-links line:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.explore-div__nexus-links line:nth-child(3) {
+  animation-delay: 0.9s;
+}
+
+.explore-div__nexus-links line:nth-child(4) {
+  animation-delay: 1.3s;
+}
+
+.explore-div__nexus-links line:nth-child(5) {
+  animation-delay: 1.8s;
+}
+
+.explore-div__nexus-hub {
+  fill: color-mix(in oklch, var(--primary) 35%, var(--background));
+  stroke: color-mix(in oklch, var(--primary) 70%, transparent);
+  stroke-width: 0.75;
+  filter: drop-shadow(0 0 8px color-mix(in oklch, var(--primary) 45%, transparent));
+}
+
+.explore-div__nexus-core {
+  fill: var(--primary);
+}
+
+.explore-div__nexus-node {
+  fill: color-mix(in oklch, var(--foreground) 80%, var(--primary));
+  filter: drop-shadow(0 0 3px color-mix(in oklch, var(--primary) 50%, transparent));
+  animation: explore-div-nexus-twinkle 3s ease-in-out infinite;
+}
+
+.explore-div__nexus-node--b {
+  animation-delay: 0.5s;
+}
+
+.explore-div__nexus-node--c {
+  animation-delay: 1s;
+}
+
+.explore-div__nexus-node--d {
+  animation-delay: 1.5s;
+}
+
+.explore-div__nexus-node--e {
+  animation-delay: 2s;
+}
+
+.explore-div--nexus .explore-div__svg {
+  animation: explore-div-nexus-breathe 6s ease-in-out infinite;
+}
+
+@keyframes explore-div-nexus-pulse {
+  0%,
+  100% {
+    stroke-dashoffset: 22;
+    opacity: 0.35;
+  }
+  45% {
+    stroke-dashoffset: 0;
+    opacity: 0.95;
+  }
+}
+
+@keyframes explore-div-nexus-twinkle {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes explore-div-nexus-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@media (max-width: 640px) {
+  .explore-div {
+    padding-inline: 1rem;
+  }
+
+  .explore-div__inner {
+    gap: 0.55rem;
+    min-height: 3rem;
+  }
+
+  .explore-div__core {
+    min-width: 3.5rem;
+  }
+
+  .explore-div__svg--lunar {
+    width: 3.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explore-div::before {
+    animation: none;
+    opacity: 0.82;
+  }
+
+  .explore-div__svg,
+  .explore-div__gateway-glow,
+  .explore-div__gateway-arch--inner,
+  .explore-div__gateway-star,
+  .explore-div__gateway-core,
+  .explore-div__nova-ring,
+  .explore-div__nova-rays line,
+  .explore-div__nova-core,
+  .explore-div__seal-aura,
+  .explore-div__seal-groove,
+  .explore-div__seal-core,
+  .explore-div__nexus-links line,
+  .explore-div__nexus-node {
+    animation: none !important;
+  }
+
+  .explore-div__lunar-moon--full,
+  .explore-div__gateway-core,
+  .explore-div__gateway-keystone,
+  .explore-div__nova-core,
+  .explore-div__seal-core,
+  .explore-div__eclipse-sun {
+    filter: none;
+  }
 }
 
 .explore-section-num {
