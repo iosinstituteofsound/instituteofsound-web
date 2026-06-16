@@ -51,7 +51,6 @@ function PostMenuOption({
 
 export function FeedPostOptionsMenu({
   author,
-  postId,
   triggerClassName,
   portalContainer,
   contentClassName,
