@@ -3,7 +3,12 @@ import { apiClient } from '@/shared/services/api/api-client'
 import type { ApiSuccessResponse } from '@/shared/types/api.types'
 import type { CreateFeedItemInput, FeedItemDto, FeedListResponse } from '@/modules/feed/types/feed.types'
 
-export async function listFeed(params?: { limit?: number; cursor?: string }) {
+export async function listFeed(params?: {
+  limit?: number
+  cursor?: string
+  authorId?: string
+  type?: FeedItemDto['type']
+}) {
   const { data } = await apiClient.get<ApiSuccessResponse<FeedListResponse>>(`${API_V1}/feed`, {
     params,
   })

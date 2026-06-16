@@ -48,6 +48,7 @@ export function useCreateFeedItem() {
         },
       )
       void queryClient.invalidateQueries({ queryKey: feedQueryKey })
+      void queryClient.invalidateQueries({ queryKey: ['profile-posts'] })
     },
   })
 }

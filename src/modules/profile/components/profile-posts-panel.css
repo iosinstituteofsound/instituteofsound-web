@@ -1,0 +1,80 @@
+@keyframes profile-posts-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes profile-post-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.profile-posts-panel-content {
+  animation: profile-posts-panel-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.profile-post-item {
+  animation: profile-post-item-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.profile-posts-filter-indicator {
+  transition:
+    left 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    top 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease;
+}
+
+.profile-posts-view-indicator {
+  transition:
+    left 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease;
+}
+
+.profile-posts-filter-chip,
+.profile-posts-view-tab {
+  transition:
+    color 0.24s ease,
+    background-color 0.24s ease;
+}
+
+.profile-posts-content-shell {
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.profile-posts-content-shell[data-pending='true'] {
+  opacity: 0.55;
+  transform: translateY(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-posts-panel-content,
+  .profile-post-item {
+    animation: none;
+  }
+
+  .profile-posts-filter-indicator,
+  .profile-posts-view-indicator,
+  .profile-posts-filter-chip,
+  .profile-posts-view-tab,
+  .profile-posts-content-shell {
+    transition: none;
+  }
+}
