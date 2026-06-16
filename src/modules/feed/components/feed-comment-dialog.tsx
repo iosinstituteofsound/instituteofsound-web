@@ -1,6 +1,11 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { ChevronDown, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  getRadixOutsideEventTarget,
+  isEmojiPickerTarget,
+} from '@/modules/feed/components/animated-emoji-picker'
+import { isGiphyPickerTarget } from '@/modules/feed/components/giphy-picker'
 import type { FeedItemDto, FeedCommentDto } from '@/modules/feed/types/feed.types'
 import { FeedCommentComposer } from '@/modules/feed/components/feed-comment-composer'
 import { FeedCommentsSection } from '@/modules/feed/components/feed-comments-section'
@@ -17,6 +22,11 @@ interface FeedCommentDialogProps {
 export function FeedCommentDialog({ item, open, onOpenChange }: FeedCommentDialogProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [replyTo, setReplyTo] = useState<FeedCommentDto | null>(null)
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null)
+
+  const handleDialogContentRef = useCallback((node: HTMLDivElement | null) => {
+    setPortalContainer(node)
+  }, [])
 
   useEffect(() => {
     if (!open) {
@@ -36,7 +46,29 @@ export function FeedCommentDialog({ item, open, onOpenChange }: FeedCommentDialo
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="feed-comment-dialog__overlay" />
-        <DialogPrimitive.Content className="feed-comment-dialog" aria-describedby={undefined}>
+        <DialogPrimitive.Content
+          ref={handleDialogContentRef}
+          className="feed-comment-dialog"
+          aria-describedby={undefined}
+          onPointerDownOutside={(event) => {
+            const target = getRadixOutsideEventTarget(event)
+            if (isEmojiPickerTarget(target) || isGiphyPickerTarget(target)) {
+              event.preventDefault()
+            }
+          }}
+          onInteractOutside={(event) => {
+            const target = getRadixOutsideEventTarget(event)
+            if (isEmojiPickerTarget(target) || isGiphyPickerTarget(target)) {
+              event.preventDefault()
+            }
+          }}
+          onFocusOutside={(event) => {
+            const target = getRadixOutsideEventTarget(event)
+            if (isEmojiPickerTarget(target) || isGiphyPickerTarget(target)) {
+              event.preventDefault()
+            }
+          }}
+        >
           <header className="feed-comment-dialog__header">
             <DialogPrimitive.Title className="feed-comment-dialog__title">
               {item.author.name}&apos;s post
@@ -71,6 +103,7 @@ export function FeedCommentDialog({ item, open, onOpenChange }: FeedCommentDialo
               onClearReply={() => setReplyTo(null)}
               inputRef={inputRef}
               variant="modal"
+              pickerPortalContainer={portalContainer}
             />
           </footer>
         </DialogPrimitive.Content>

@@ -168,7 +168,22 @@ function CommentItem({
         <div className="min-w-0 flex-1">
           <div className={cn('inline-block max-w-full rounded-2xl px-3 py-2 feed-comment-bubble', isModal ? 'bg-muted/50' : 'bg-muted/70')}>
             <p className="text-[13px] font-semibold leading-tight">{comment.author.name}</p>
-            <p className="whitespace-pre-wrap text-[15px] leading-snug">{comment.body}</p>
+            {comment.body ? (
+              <p className="whitespace-pre-wrap text-[15px] leading-snug">{comment.body}</p>
+            ) : null}
+            {comment.gifUrl ? (
+              <img
+                src={comment.gifUrl}
+                alt={comment.body || 'GIF'}
+                loading="lazy"
+                decoding="async"
+                className={cn(
+                  'max-w-full rounded-lg',
+                  comment.body ? 'mt-2' : 'mt-1',
+                )}
+                style={{ maxHeight: 240 }}
+              />
+            ) : null}
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 px-2 text-xs font-semibold text-muted-foreground">
             <span>{formatCommentTimestamp(comment.createdAt)}</span>

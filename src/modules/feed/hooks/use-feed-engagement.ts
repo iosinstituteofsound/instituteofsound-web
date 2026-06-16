@@ -67,12 +67,16 @@ export function useAddFeedComment() {
     mutationFn: ({
       feedItemId,
       body,
+      gifUrl,
+      giphyId,
       parentId,
     }: {
       feedItemId: string
-      body: string
+      body?: string
+      gifUrl?: string
+      giphyId?: string
       parentId?: string
-    }) => engagementApi.addFeedComment(feedItemId, { body, parentId }),
+    }) => engagementApi.addFeedComment(feedItemId, { body, gifUrl, giphyId, parentId }),
     onSuccess: (comment, { feedItemId }) => {
       queryClient.setQueryData(feedCommentsQueryKey(feedItemId), (old: typeof comment[] | undefined) =>
         old ? [...old, comment] : [comment],

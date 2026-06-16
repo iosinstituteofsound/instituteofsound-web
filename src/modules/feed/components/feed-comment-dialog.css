@@ -36,6 +36,10 @@
   animation: feed-comment-dialog-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.feed-comment-dialog:has([data-giphy-picker-root]) {
+  overflow: visible;
+}
+
 @keyframes feed-comment-dialog-in {
   from {
     opacity: 0;
@@ -381,6 +385,35 @@
 .feed-comment-composer__send:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.feed-comment-composer__gif-preview {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 8px;
+  max-width: 160px;
+}
+
+.feed-comment-composer__gif-preview img {
+  display: block;
+  width: 100%;
+  border-radius: 10px;
+}
+
+.feed-comment-composer__gif-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 9999px;
+  background: color-mix(in oklch, black 55%, transparent);
+  color: white;
+  cursor: pointer;
 }
 
 /* Modal comment list */

@@ -25,6 +25,8 @@ export interface FeedCommentDto {
   feedItemId: string
   author: FeedAuthorDto
   body: string
+  gifUrl?: string
+  giphyId?: string
   parentId?: string
   createdAt: string
   updatedAt: string
