@@ -65,6 +65,7 @@ export interface PublicProfileDto {
   username?: string
   email?: string
   avatarUrl?: string
+  avatarThumbnailUrl?: string
   avatarCrop?: { x: number; y: number; r: number }
   coverUrl?: string
   coverCrop?: { x: number; y: number; z: number }

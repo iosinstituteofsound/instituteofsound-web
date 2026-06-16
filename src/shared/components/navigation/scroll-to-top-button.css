@@ -1,0 +1,172 @@
+.scroll-to-top-button {
+  --scroll-to-top-size: 3rem;
+  position: fixed;
+  right: max(1.25rem, env(safe-area-inset-right, 0px));
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--scroll-to-top-size);
+  height: var(--scroll-to-top-size);
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  color: var(--primary-foreground);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--primary) 92%, white 8%),
+    var(--primary)
+  );
+  box-shadow:
+    0 10px 28px color-mix(in oklch, var(--primary) 42%, transparent),
+    0 2px 8px color-mix(in oklch, black 28%, transparent),
+    inset 0 1px 0 color-mix(in oklch, white 28%, transparent);
+  transform: translate3d(0, 0, 0) scale(1);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.24s ease;
+  pointer-events: auto;
+  isolation: isolate;
+}
+
+body[data-player-active='true'] .scroll-to-top-button {
+  bottom: calc(
+    1.25rem + var(--ios-player-offset, var(--ios-player-height, 4.5rem)) +
+      env(safe-area-inset-bottom, 0px)
+  );
+}
+
+.scroll-to-top-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 6px color-mix(in oklch, var(--primary) 22%, transparent);
+  opacity: 0.85;
+  z-index: -1;
+  animation: scroll-to-top-glow 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.scroll-to-top-button::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklch, white 22%, transparent) 0%,
+    transparent 42%
+  );
+  pointer-events: none;
+}
+
+.scroll-to-top-button__icon {
+  display: block;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scroll-to-top-button:hover {
+  transform: translate3d(0, -3px, 0) scale(1.06);
+  box-shadow:
+    0 16px 36px color-mix(in oklch, var(--primary) 48%, transparent),
+    0 4px 12px color-mix(in oklch, black 30%, transparent),
+    inset 0 1px 0 color-mix(in oklch, white 32%, transparent);
+}
+
+.scroll-to-top-button:hover .scroll-to-top-button__icon {
+  transform: translateY(-1px);
+}
+
+.scroll-to-top-button:active {
+  transform: translate3d(0, 0, 0) scale(0.96);
+}
+
+.scroll-to-top-button--hidden {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0) scale(0.72);
+  pointer-events: none;
+}
+
+.scroll-to-top-button--visible {
+  animation: scroll-to-top-pop-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.scroll-to-top-button--launching .scroll-to-top-button__icon {
+  animation: scroll-to-top-launch 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scroll-to-top-button--launching {
+  animation: scroll-to-top-pulse 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes scroll-to-top-pop-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.65);
+  }
+  65% {
+    opacity: 1;
+    transform: translate3d(0, -4px, 0) scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes scroll-to-top-launch {
+  0% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-7px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes scroll-to-top-pulse {
+  0% {
+    box-shadow:
+      0 10px 28px color-mix(in oklch, var(--primary) 42%, transparent),
+      0 0 0 0 color-mix(in oklch, var(--primary) 55%, transparent);
+  }
+  100% {
+    box-shadow:
+      0 10px 28px color-mix(in oklch, var(--primary) 42%, transparent),
+      0 0 0 14px color-mix(in oklch, var(--primary) 0%, transparent);
+  }
+}
+
+@keyframes scroll-to-top-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-to-top-button,
+  .scroll-to-top-button__icon,
+  .scroll-to-top-button::before {
+    animation: none !important;
+    transition: opacity 0.2s ease;
+  }
+
+  .scroll-to-top-button--hidden {
+    transform: none;
+  }
+}

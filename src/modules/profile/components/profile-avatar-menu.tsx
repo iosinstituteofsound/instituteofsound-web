@@ -6,6 +6,7 @@ import { ProfilePictureViewer } from '@/modules/profile/components/profile-pictu
 import { useUpdateProfile } from '@/modules/profile/hooks/use-profile'
 import { addStoredUpload } from '@/modules/profile/lib/profile-photo-library'
 import type { ProfileAvatarSelection } from '@/modules/profile/types/profile.types'
+import { getUserAvatarDisplay, getUserAvatarFullUrl } from '@/shared/lib/user-avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,19 +44,21 @@ export function ProfileAvatarMenu({
   const [chooseOpen, setChooseOpen] = useState(false)
   const [recentUrls, setRecentUrls] = useState<string[]>([])
 
-  const handleSelect = async ({ avatarUrl, avatarCrop }: ProfileAvatarSelection) => {
-    await updateProfile.mutateAsync({ avatarUrl, avatarCrop })
+  const handleSelect = async ({ avatarUrl, avatarThumbnailUrl, avatarCrop }: ProfileAvatarSelection) => {
+    await updateProfile.mutateAsync({ avatarUrl, avatarThumbnailUrl, avatarCrop })
     addStoredUpload(user.id, avatarUrl)
     setRecentUrls((prev) => [avatarUrl, ...prev.filter((u) => u !== avatarUrl)].slice(0, 12))
   }
 
   const avatarSize = 144
+  const avatarDisplay = getUserAvatarDisplay(user)
+  const fullAvatarUrl = getUserAvatarFullUrl(user)
 
   const avatar = (
     <CroppedAvatarFrame
-      src={user.avatarUrl}
+      src={avatarDisplay.src}
       alt={user.name}
-      crop={user.avatarCrop}
+      crop={avatarDisplay.crop}
       size={avatarSize}
       className={cn(
         'h-36 w-36 border-4 border-card shadow-lg',
@@ -64,7 +67,7 @@ export function ProfileAvatarMenu({
         avatarClassName,
       )}
     >
-      {!user.avatarUrl ? (
+      {!avatarDisplay.src ? (
         <span className="flex h-full w-full items-center justify-center bg-muted text-2xl font-medium text-muted-foreground">
           {getInitials(user.name)}
         </span>
@@ -78,17 +81,17 @@ export function ProfileAvatarMenu({
         <button
           type="button"
           className="rounded-full"
-          disabled={!user.avatarUrl}
-          onClick={() => user.avatarUrl && setViewerOpen(true)}
+          disabled={!fullAvatarUrl}
+          onClick={() => fullAvatarUrl && setViewerOpen(true)}
         >
           {avatar}
         </button>
-        {user.avatarUrl ? (
+        {fullAvatarUrl ? (
           <ProfilePictureViewer
             open={viewerOpen}
             onOpenChange={setViewerOpen}
             user={user}
-            imageUrl={user.avatarUrl}
+            imageUrl={fullAvatarUrl}
             editable={false}
           />
         ) : null}
@@ -116,7 +119,7 @@ export function ProfileAvatarMenu({
         >
           <DropdownMenuItem
             className="gap-3 rounded-lg py-2.5 text-[15px] font-medium"
-            disabled={!user.avatarUrl}
+            disabled={!fullAvatarUrl}
             onClick={() => setViewerOpen(true)}
           >
             <UserRound className="h-5 w-5 text-muted-foreground" />
@@ -132,12 +135,12 @@ export function ProfileAvatarMenu({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {user.avatarUrl ? (
+      {fullAvatarUrl ? (
         <ProfilePictureViewer
           open={viewerOpen}
           onOpenChange={setViewerOpen}
           user={user}
-          imageUrl={user.avatarUrl}
+          imageUrl={fullAvatarUrl}
           editable={editable}
         />
       ) : null}

@@ -2,7 +2,9 @@ import { Link } from 'react-router-dom'
 import { LogOut, Monitor, Moon, Sun, UserRound } from 'lucide-react'
 import { UserIdentityBadges } from '@/app/components/user-header-identity'
 import { useLogout, useMe } from '@/modules/auth/hooks/use-auth'
+import { useEnsureAvatarThumbnail } from '@/modules/profile/hooks/use-ensure-avatar-thumbnail'
 import { CroppedAvatar } from '@/modules/profile/components/cropped-avatar'
+import { getUserAvatarDisplay } from '@/shared/lib/user-avatar'
 import { getProfilePath } from '@/modules/profile/config/profile-menu'
 import { useTheme } from '@/shared/hooks/use-theme'
 import type { ThemeMode } from '@/app/stores/theme-store'
@@ -35,6 +37,7 @@ const themeOptions: Array<{ value: ThemeMode; label: string; icon: typeof Sun }>
 
 export function UserProfileMenu() {
   const { data: me } = useMe()
+  useEnsureAvatarThumbnail(me?.user)
   const logout = useLogout()
   const { mode, setMode } = useTheme()
 
@@ -42,15 +45,16 @@ export function UserProfileMenu() {
   const activeRoleId = me?.authorization.activeRoleId
   const activeRole = me?.authorization.roles.find((role) => role.id === activeRoleId)
   const profilePath = getProfilePath(activeRole?.slug)
+  const avatarDisplay = getUserAvatarDisplay(user ?? {})
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full px-0">
           <CroppedAvatar
-            src={user?.avatarUrl}
+            src={avatarDisplay.src}
             alt={user?.name ?? 'User'}
-            crop={user?.avatarCrop}
+            crop={avatarDisplay.crop}
             fallback={getInitials(user?.name)}
             className="h-8 w-8"
             size={32}

@@ -3,6 +3,7 @@ import { ExternalLink, Mail, UserRound } from 'lucide-react'
 import { useAssignUserRole, useRevokeUserRole, useUser } from '@/modules/users/hooks/use-users'
 import { useRoles } from '@/modules/roles/hooks/use-roles'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
+import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
@@ -62,7 +63,7 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
     <div className="ios-page">
       <div className="flex items-start gap-4">
         <Avatar className="h-16 w-16">
-          <AvatarImage src={user.avatarUrl} alt={user.name} />
+          <AvatarImage src={getUserAvatarThumbnailUrl(user)} alt={user.name} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1 space-y-1">

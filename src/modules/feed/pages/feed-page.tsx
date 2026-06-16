@@ -11,6 +11,7 @@ import { useScrollCollapse } from '@/modules/feed/hooks/use-scroll-collapse'
 import { getStoryItems } from '@/modules/feed/lib/story-content'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Skeleton } from '@/shared/components/ui/skeleton'
+import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { FEED_COLUMN_CLASS } from '@/shared/lib/layout-config'
 import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
@@ -27,7 +28,7 @@ export function FeedPage() {
   const collapseProgress = useScrollCollapse(composerAnchorRef)
 
   const userName = me?.user.name ?? 'You'
-  const avatarUrl = me?.user.avatarUrl
+  const avatarUrl = me?.user ? getUserAvatarThumbnailUrl(me.user) : undefined
   const storyItems = getStoryItems(items)
 
   const handleStorySelect = (type: 'image' | 'text') => {

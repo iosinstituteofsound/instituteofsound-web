@@ -4,6 +4,11 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { ProfilePictureCropDialog } from '@/modules/profile/components/profile-picture-crop-dialog'
 import { useUpdateProfile } from '@/modules/profile/hooks/use-profile'
+import {
+  exportProfileCropBlob,
+  PROFILE_AVATAR_CROP_VIEWPORT,
+  type ProfileCropTransform,
+} from '@/modules/profile/lib/profile-crop-utils'
 import type { ProfileAvatarSelection } from '@/modules/profile/types/profile.types'
 import type { AvatarCrop } from '@/shared/types/auth.types'
 import { Button } from '@/shared/components/ui/button'
@@ -121,7 +126,11 @@ export function ChooseProfilePictureDialog({
     openCropEditor(objectUrl, { isObjectUrl: true, initialCrop: null })
   }
 
-  const handleCropSave = async (crop: AvatarCrop, _description: string) => {
+  const handleCropSave = async (
+    crop: AvatarCrop,
+    _description: string,
+    context: { image: HTMLImageElement; transform: ProfileCropTransform },
+  ) => {
     setSavingCrop(true)
     try {
       let avatarUrl = cropImageSrc ?? ''
@@ -131,7 +140,18 @@ export function ChooseProfilePictureDialog({
       } else if (!avatarUrl) {
         throw new Error('No image selected')
       }
-      await onSelect({ avatarUrl, avatarCrop: crop })
+
+      const thumbnailBlob = await exportProfileCropBlob(
+        context.image,
+        context.transform,
+        PROFILE_AVATAR_CROP_VIEWPORT,
+      )
+      const uploadedThumbnail = await uploadMediaFile(
+        thumbnailBlob,
+        `avatar-thumb-${Date.now()}.jpg`,
+      )
+      const avatarThumbnailUrl = uploadedThumbnail.absoluteUrl ?? uploadedThumbnail.url
+      await onSelect({ avatarUrl, avatarCrop: crop, avatarThumbnailUrl })
       toast.success('Profile picture updated')
       setCropOpen(false)
       onOpenChange(false)

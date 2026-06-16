@@ -85,6 +85,7 @@ export interface UserDto {
   name: string
   dashboardPersona?: DashboardPersona
   avatarUrl?: string
+  avatarThumbnailUrl?: string
   avatarCrop?: AvatarCrop
   coverUrl?: string
   coverCrop?: CoverCrop

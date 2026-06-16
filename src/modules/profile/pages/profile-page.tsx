@@ -31,6 +31,7 @@ function mapPublicProfileToUser(profile: PublicProfileDto): UserDto {
     name: profile.name,
     username: profile.username,
     avatarUrl: profile.avatarUrl,
+    avatarThumbnailUrl: profile.avatarThumbnailUrl,
     avatarCrop: profile.avatarCrop,
     coverUrl: profile.coverUrl,
     coverCrop: profile.coverCrop,

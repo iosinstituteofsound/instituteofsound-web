@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Outlet } from 'react-router-dom'
 import { PanelLeft } from 'lucide-react'
 import { DashboardHeader } from '@/app/components/dashboard-header'
 import { DashboardSidebar } from '@/app/components/dashboard-sidebar'
 import { useLayoutStore } from '@/app/stores/layout-store'
 import { useSidebarStore } from '@/app/stores/sidebar-store'
+import { ScrollToTopButton } from '@/shared/components/navigation/scroll-to-top-button'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 import { MAIN_MAX_WIDTH_CLASS, MAIN_PADDING_CLASS } from '@/shared/lib/layout-config'
@@ -12,6 +13,7 @@ import { MAIN_MAX_WIDTH_CLASS, MAIN_PADDING_CLASS } from '@/shared/lib/layout-co
 export function DashboardLayout() {
   const dashboardConfig = useLayoutStore((state) => state.dashboardConfig)
   const { mobileOpen, setMobileOpen, setCollapsed } = useSidebarStore()
+  const mainScrollRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     setCollapsed(dashboardConfig.sidebar.defaultCollapsed)
@@ -53,7 +55,10 @@ export function DashboardLayout() {
           </Button>
         ) : null}
 
-        <main className="ios-dashboard-main min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main
+          ref={mainScrollRef}
+          className="ios-dashboard-main min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+        >
           <div
             className={cn(
               MAIN_PADDING_CLASS[dashboardConfig.main.padding],
@@ -63,6 +68,7 @@ export function DashboardLayout() {
             <Outlet />
           </div>
         </main>
+        <ScrollToTopButton containerRef={mainScrollRef} />
       </div>
     </div>
   )

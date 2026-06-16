@@ -5,6 +5,7 @@ export type UpdateProfileInput = {
   username?: string | null
   bio?: string | null
   avatarUrl?: string | null
+  avatarThumbnailUrl?: string | null
   avatarCrop?: import('@/shared/types/auth.types').AvatarCrop | null
   coverUrl?: string | null
   coverCrop?: import('@/shared/types/auth.types').CoverCrop | null
@@ -15,6 +16,7 @@ export type UpdateProfileInput = {
 
 export type ProfileAvatarSelection = {
   avatarUrl: string
+  avatarThumbnailUrl: string
   avatarCrop: import('@/shared/types/auth.types').AvatarCrop
 }
 

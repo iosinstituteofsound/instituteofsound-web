@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import {
   ChevronLeft,
@@ -9,6 +10,7 @@ import {
   Search,
   X,
 } from 'lucide-react'
+import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
 import type { UserDto } from '@/shared/types/auth.types'
@@ -59,8 +61,8 @@ export function ProfilePictureViewer({
     year: 'numeric',
   })
 
-  return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-[#0a0a0a] text-white">
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex flex-col bg-[#0a0a0a] text-white">
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/10 px-3 sm:px-4">
         <div className="flex items-center gap-2">
           <Button
@@ -147,7 +149,9 @@ export function ProfilePictureViewer({
           <div className="border-b border-white/10 p-4">
             <div className="flex items-start gap-3">
               <Avatar className="h-10 w-10">
-                {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={user.name} /> : null}
+                {getUserAvatarThumbnailUrl(user) ? (
+                  <AvatarImage src={getUserAvatarThumbnailUrl(user)} alt={user.name} />
+                ) : null}
                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
@@ -174,6 +178,7 @@ export function ProfilePictureViewer({
           </div>
         </aside>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

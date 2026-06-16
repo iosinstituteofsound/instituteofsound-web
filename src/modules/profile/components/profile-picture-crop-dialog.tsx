@@ -5,11 +5,11 @@ import {
   clampCropTransform,
   getMinCropScale,
   loadImageElement,
+  PROFILE_AVATAR_CROP_VIEWPORT,
   renderProfileCropPreview,
   transformToAvatarCrop,
   avatarCropToTransform,
   type ProfileCropTransform,
-  type ProfileCropViewport,
 } from '@/modules/profile/lib/profile-crop-utils'
 import type { AvatarCrop } from '@/shared/types/auth.types'
 import { Button } from '@/shared/components/ui/button'
@@ -17,18 +17,18 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/cn'
 import { toast } from '@/shared/components/ui/sonner'
 
-const VIEWPORT: ProfileCropViewport = {
-  width: 480,
-  height: 340,
-  circleRadius: 130,
-}
+const VIEWPORT = PROFILE_AVATAR_CROP_VIEWPORT
 
 type ProfilePictureCropDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   imageSrc: string | null
   initialCrop?: AvatarCrop | null
-  onSave: (crop: AvatarCrop, description: string) => void | Promise<void>
+  onSave: (
+    crop: AvatarCrop,
+    description: string,
+    context: { image: HTMLImageElement; transform: ProfileCropTransform },
+  ) => void | Promise<void>
   saving?: boolean
 }
 
@@ -204,7 +204,7 @@ export function ProfilePictureCropDialog({
       VIEWPORT,
     )
     const crop = transformToAvatarCrop(clamped, image.naturalWidth, image.naturalHeight, VIEWPORT)
-    await onSave(crop, description.trim())
+    await onSave(crop, description.trim(), { image, transform: clamped })
   }
 
   const circleSize = VIEWPORT.circleRadius * 2

@@ -16,6 +16,7 @@ import {
 } from '@/modules/feed/components/giphy-picker'
 import type { GiphyGif } from '@/modules/feed/api/giphy.api'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { useAddFeedComment } from '@/modules/feed/hooks/use-feed-engagement'
 import type { FeedCommentDto } from '@/modules/feed/types/feed.types'
 import { Textarea } from '@/shared/components/ui/textarea'
@@ -53,6 +54,7 @@ export function FeedCommentComposer({
 }: FeedCommentComposerProps) {
   const userId = useAuthStore((s) => s.userId)
   const { data: me } = useMe(Boolean(userId))
+  const myAvatarUrl = me?.user ? getUserAvatarThumbnailUrl(me.user) : undefined
   const addComment = useAddFeedComment()
   const [draft, setDraft] = useState('')
   const [selectedAttachment, setSelectedAttachment] = useState<CommentAttachment | null>(null)
@@ -264,7 +266,7 @@ export function FeedCommentComposer({
       <div className="feed-comment-composer feed-comment-composer--modal">
         <FeedUserAvatar
           name={me?.user.name ?? 'You'}
-          avatarUrl={me?.user.avatarUrl}
+          avatarUrl={myAvatarUrl}
           className="h-9 w-9 shrink-0"
         />
         <div className="feed-comment-composer__box">
@@ -335,7 +337,7 @@ export function FeedCommentComposer({
     <div className="feed-comment-composer feed-comment-composer--inline">
       <FeedUserAvatar
         name={me?.user.name ?? 'You'}
-        avatarUrl={me?.user.avatarUrl}
+        avatarUrl={myAvatarUrl}
         className="h-8 w-8 shrink-0"
       />
       <div className="min-w-0 flex-1 space-y-2">

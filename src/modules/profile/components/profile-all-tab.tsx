@@ -17,7 +17,7 @@ export function ProfileAllTab({
 }: ProfileAllTabProps) {
   return (
     <div className="grid gap-4 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start">
-      <aside className="lg:sticky lg:top-0 lg:max-h-[calc(100dvh-1rem)] lg:overflow-y-auto lg:overscroll-y-contain lg:self-start lg:pr-1">
+      <aside className="lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:overscroll-y-contain lg:self-start lg:pr-1">
         <ProfileIntroSidebar
           user={user}
           editable={isOwnProfile}
@@ -26,7 +26,7 @@ export function ProfileAllTab({
           onSeeAllPhotos={onNavigateToPhotos}
         />
       </aside>
-      <div className="lg:sticky lg:top-0 lg:max-h-[calc(100dvh-1rem)] lg:overflow-y-auto lg:overscroll-y-contain lg:self-start lg:pl-1">
+      <div className="min-w-0 lg:pl-1">
         <ProfilePostsPanel user={user} isOwnProfile={isOwnProfile} />
       </div>
     </div>

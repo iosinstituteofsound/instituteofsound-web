@@ -3,6 +3,7 @@ import { useMe } from '@/modules/auth/hooks/use-auth'
 import { CreatePostCard } from '@/modules/feed/components/create-post-card'
 import { CreatePostDialog } from '@/modules/feed/components/create-post-dialog'
 import type { FeedItemType } from '@/modules/feed/types/feed.types'
+import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 
 interface FeedComposerProps {
   collapseProgress?: number
@@ -14,7 +15,7 @@ export function FeedComposer({ collapseProgress = 0 }: FeedComposerProps) {
   const [initialType, setInitialType] = useState<FeedItemType>('text')
 
   const userName = me?.user.name ?? 'You'
-  const avatarUrl = me?.user.avatarUrl
+  const avatarUrl = me?.user ? getUserAvatarThumbnailUrl(me.user) : undefined
 
   const openComposer = (type: FeedItemType = 'text') => {
     setInitialType(type)

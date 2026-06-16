@@ -1,5 +1,11 @@
 export const PROFILE_CROP_OUTPUT_SIZE = 512
 
+export const PROFILE_AVATAR_CROP_VIEWPORT: ProfileCropViewport = {
+  width: 480,
+  height: 340,
+  circleRadius: 130,
+}
+
 export type ProfileCropTransform = {
   scale: number
   offsetX: number
@@ -74,17 +80,21 @@ export function renderProfileCrop(
   const imgLeft = centerX + transform.offsetX - displayW / 2
   const imgTop = centerY + transform.offsetY - displayH / 2
 
+  // Map the circular crop region (centered in the viewport) onto the full output square.
+  const cropLeft = centerX - circleRadius
+  const cropTop = centerY - circleRadius
+  const map = outputSize / (circleRadius * 2)
+
   ctx.clearRect(0, 0, outputSize, outputSize)
   ctx.save()
   ctx.beginPath()
   ctx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, Math.PI * 2)
   ctx.clip()
 
-  const map = outputSize / (circleRadius * 2)
   ctx.drawImage(
     image,
-    imgLeft * map,
-    imgTop * map,
+    (imgLeft - cropLeft) * map,
+    (imgTop - cropTop) * map,
     displayW * map,
     displayH * map,
   )
@@ -152,6 +162,26 @@ export function transformToAvatarCrop(
   const radiusNatural = circleRadius / transform.scale
   const r = radiusNatural / Math.min(imageWidth, imageHeight)
   return { x: centerX, y: centerY, r }
+}
+
+export async function generateAvatarThumbnailBlobFromCrop(
+  imageSrc: string,
+  crop: AvatarCrop,
+): Promise<Blob> {
+  const image = await loadImageElement(imageSrc)
+  const transform = avatarCropToTransform(
+    crop,
+    image.naturalWidth,
+    image.naturalHeight,
+    PROFILE_AVATAR_CROP_VIEWPORT,
+  )
+  const clamped = clampCropTransform(
+    transform,
+    image.naturalWidth,
+    image.naturalHeight,
+    PROFILE_AVATAR_CROP_VIEWPORT,
+  )
+  return exportProfileCropBlob(image, clamped, PROFILE_AVATAR_CROP_VIEWPORT)
 }
 
 export function avatarCropToTransform(

@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { AnimatedEmojiPicker } from '@/modules/feed/components/animated-emoji-picker'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import {
   ShareCopyLinkIcon,
   ShareFriendProfileIcon,
@@ -59,7 +60,7 @@ export function FeedShareDialog({ item, open, onOpenChange }: FeedShareDialogPro
 
   const shareUrl = buildShareUrl(item)
   const userName = me?.user.name ?? 'You'
-  const avatarUrl = me?.user.avatarUrl
+  const avatarUrl = me?.user ? getUserAvatarThumbnailUrl(me.user) : undefined
 
   const copyLink = async () => {
     try {
