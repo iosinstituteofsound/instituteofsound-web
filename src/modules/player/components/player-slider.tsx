@@ -16,10 +16,11 @@ export const PlayerSlider = React.forwardRef<HTMLInputElement, PlayerSliderProps
       <div
         className={cn(
           'ios-player-slider',
+          variant === 'progress' && 'ios-player-slider--progress',
           variant === 'volume' && 'ios-player-slider--volume',
           className,
         )}
-        style={{ '--ios-player-fill': `${percent}%` } as React.CSSProperties}
+        style={{ '--ios-slider-progress': `${percent}%` } as React.CSSProperties}
       >
         <input
           ref={ref}

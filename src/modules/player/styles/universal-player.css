@@ -1,24 +1,22 @@
-/* Universal player — all colors from badge theme CSS vars (no hardcoded palette) */
+/* Universal player — theme-driven, sleek & restrained */
 
 :root {
-  --ios-player-height: 5.75rem;
-  --ios-player-height-expanded: 7.5rem;
+  --ios-player-height: 5.625rem;
+  --ios-player-height-expanded: 7.25rem;
 }
 
 .ios-universal-player {
   --ios-player-accent: var(--primary);
-  --ios-player-accent-foreground: var(--primary-foreground);
-  --ios-player-surface: var(--card);
-  --ios-player-surface-foreground: var(--card-foreground);
+  --ios-player-accent-fg: var(--primary-foreground);
   --ios-player-muted: var(--muted-foreground);
-  --ios-player-border: var(--border);
-  --ios-player-track: color-mix(in oklch, var(--foreground) 18%, transparent);
-  --ios-player-fill: var(--primary);
-  --ios-player-glow: color-mix(in oklch, var(--primary) 28%, transparent);
-}
-
-.ios-universal-player[data-playing='true'] {
-  --ios-player-glow: color-mix(in oklch, var(--primary) 42%, transparent);
+  --ios-player-surface: color-mix(in oklch, var(--card) 78%, transparent);
+  --ios-player-border: color-mix(in oklch, var(--border) 70%, var(--primary) 8%);
+  --ios-player-bar-fill: var(--primary);
+  --ios-player-bar-track: color-mix(in oklch, var(--primary) 14%, var(--muted));
+  --ios-player-glow: color-mix(in oklch, var(--primary) 22%, transparent);
+  --ios-player-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ios-slider-color: var(--ios-player-bar-fill);
+  --ios-slider-track: var(--ios-player-bar-track);
 }
 
 .ios-universal-player {
@@ -27,53 +25,99 @@
   bottom: 0;
   z-index: 50;
   height: var(--ios-player-height);
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--foreground);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--primary) 4%, var(--ios-player-surface)) 0%,
+      var(--ios-player-surface) 42%,
+      color-mix(in oklch, var(--background) 88%, var(--card)) 100%
+    );
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
   border-top: 1px solid var(--ios-player-border);
-  color: var(--ios-player-surface-foreground);
-  background-color: color-mix(in oklch, var(--ios-player-surface) 92%, transparent);
-  backdrop-filter: blur(18px) saturate(140%);
   box-shadow:
-    0 -1px 0 color-mix(in oklch, var(--foreground) 8%, transparent),
-    0 -16px 40px color-mix(in oklch, black 22%, transparent);
+    0 -1px 0 color-mix(in oklch, var(--primary) 18%, transparent) inset,
+    0 -12px 40px color-mix(in oklch, var(--background) 55%, transparent),
+    0 -4px 24px color-mix(in oklch, var(--primary) 6%, transparent);
+  animation: ios-player-enter 0.44s var(--ios-player-ease);
 }
 
 .ios-universal-player::before {
   content: '';
   position: absolute;
+  inset-inline: 8%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--primary) 62%, transparent) 50%,
+    transparent
+  );
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.ios-universal-player__ambient {
+  position: absolute;
   inset: 0;
   pointer-events: none;
   background:
     radial-gradient(
-      ellipse 55% 120% at 0% 100%,
-      color-mix(in oklch, var(--primary) 14%, transparent),
-      transparent 68%
+      ellipse 70% 140% at 50% 110%,
+      color-mix(in oklch, var(--primary) 16%, transparent),
+      transparent 62%
     ),
     radial-gradient(
-      ellipse 40% 90% at 100% 0%,
-      color-mix(in oklch, var(--accent) 12%, transparent),
-      transparent 70%
+      circle at 12% 50%,
+      color-mix(in oklch, var(--accent, var(--primary)) 5%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 88% 50%,
+      color-mix(in oklch, var(--accent, var(--primary)) 5%, transparent),
+      transparent 42%
     );
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.ios-universal-player[data-playing='true'] .ios-universal-player__ambient {
+  opacity: 0.5;
 }
 
 .ios-universal-player--expanded {
   height: var(--ios-player-height-expanded);
 }
 
+.ios-universal-player__mobile-progress {
+  display: none;
+}
+
+/* ── 30 / 40 / 30 grid ─────────────────────────────────────────── */
+
 .ios-universal-player__inner {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.7fr) minmax(0, 1.15fr);
+  grid-template-columns: minmax(0, 30%) minmax(0, 40%) minmax(0, 30%);
   align-items: center;
   gap: 1rem;
   height: 100%;
-  padding: 0.65rem 1rem 0.75rem;
+  padding: 0 1.15rem;
 }
+
+/* ── Left: track info ──────────────────────────────────────────── */
 
 .ios-universal-player__track {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.8rem;
+  justify-self: start;
 }
 
 .ios-universal-player__artwork {
@@ -82,16 +126,42 @@
   width: 3.5rem;
   height: 3.5rem;
   overflow: hidden;
-  border-radius: calc(var(--radius) - 2px);
-  border: 1px solid color-mix(in oklch, var(--foreground) 10%, transparent);
-  background: color-mix(in oklch, var(--muted) 70%, transparent);
-  box-shadow: 0 8px 24px color-mix(in oklch, black 18%, transparent);
+  border-radius: calc(var(--radius) - 4px);
+  border: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+  background: var(--muted);
+  box-shadow:
+    0 6px 20px color-mix(in oklch, var(--background) 40%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--primary) 8%, transparent) inset;
+  transition:
+    box-shadow 0.4s var(--ios-player-ease),
+    border-color 0.4s var(--ios-player-ease);
+}
+
+.ios-universal-player[data-playing='true'] .ios-universal-player__artwork {
+  border-color: color-mix(in oklch, var(--primary) 28%, transparent);
+  box-shadow:
+    0 8px 24px color-mix(in oklch, var(--background) 45%, transparent),
+    0 0 18px color-mix(in oklch, var(--primary) 14%, transparent);
+}
+
+.ios-universal-player__artwork::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--foreground) 12%, transparent);
+  pointer-events: none;
 }
 
 .ios-universal-player__artwork img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s var(--ios-player-ease);
+}
+
+.ios-universal-player[data-playing='true'] .ios-universal-player__artwork img {
+  transform: scale(1.03);
 }
 
 .ios-universal-player__artwork-fallback {
@@ -102,11 +172,10 @@
   color: var(--ios-player-accent);
   background:
     radial-gradient(
-      circle at 30% 20%,
-      color-mix(in oklch, var(--primary) 22%, transparent),
-      transparent 55%
-    ),
-    color-mix(in oklch, var(--muted) 80%, transparent);
+      ellipse 80% 80% at 50% 20%,
+      color-mix(in oklch, var(--primary) 18%, var(--muted)),
+      var(--muted)
+    );
 }
 
 .ios-universal-player__meta {
@@ -119,40 +188,118 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.25;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease;
+}
+
+.ios-universal-player__title:hover {
+  color: color-mix(in oklch, var(--foreground) 92%, var(--primary));
+  cursor: default;
 }
 
 .ios-universal-player__artist {
-  margin: 0.125rem 0 0;
+  margin: 0.2rem 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--ios-player-muted);
+  transition: color 0.2s ease;
 }
 
-.ios-universal-player__track-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-left: 0.25rem;
+.ios-universal-player__artist:hover {
+  color: color-mix(in oklch, var(--primary) 55%, var(--foreground));
+  cursor: default;
 }
+
+.ios-universal-player__control--like {
+  flex-shrink: 0;
+  opacity: 0.45;
+}
+
+.ios-universal-player__control--like:hover:not(:disabled) {
+  opacity: 1;
+  color: var(--primary);
+}
+
+/* ── Center: controls + progress ─────────────────────────────────── */
 
 .ios-universal-player__center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
-  min-width: 0;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+  max-width: 42rem;
+  justify-self: center;
 }
 
 .ios-universal-player__controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 1rem;
 }
+
+.ios-universal-player__progress {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+}
+
+.ios-universal-player__time {
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ios-player-muted);
+  text-align: center;
+  user-select: none;
+  transition: color 0.25s ease;
+}
+
+.ios-universal-player[data-playing='true'] .ios-universal-player__time:first-child {
+  color: color-mix(in oklch, var(--primary) 45%, var(--foreground));
+}
+
+/* ── Right: utilities + volume ─────────────────────────────────── */
+
+.ios-universal-player__extras {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  min-width: 0;
+  justify-self: end;
+}
+
+.ios-universal-player__volume {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 7.25rem;
+  padding-inline: 0.15rem;
+  border-radius: 999px;
+  transition: background-color 0.25s ease;
+}
+
+.ios-universal-player__volume:hover {
+  background: color-mix(in oklch, var(--primary) 6%, var(--muted));
+}
+
+.ios-universal-player__control--close {
+  opacity: 0.42;
+}
+
+.ios-universal-player__control--close:hover:not(:disabled) {
+  opacity: 1;
+  color: color-mix(in oklch, var(--destructive, var(--foreground)) 75%, var(--foreground));
+}
+
+/* ── Buttons ───────────────────────────────────────────────────── */
 
 .ios-universal-player__control {
   display: inline-flex;
@@ -160,167 +307,204 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
+  padding: 0;
   border: 0;
   border-radius: 999px;
-  color: color-mix(in oklch, var(--foreground) 78%, transparent);
+  color: color-mix(in oklch, var(--foreground) 68%, transparent);
   background: transparent;
+  cursor: pointer;
   transition:
-    color 160ms ease,
-    background-color 160ms ease,
-    transform 160ms ease;
+    color 0.22s ease,
+    background-color 0.22s ease,
+    box-shadow 0.28s ease,
+    transform 0.22s var(--ios-player-ease);
 }
 
-.ios-universal-player__control:hover {
+.ios-universal-player__control:hover:not(:disabled) {
   color: var(--foreground);
-  background: color-mix(in oklch, var(--accent) 55%, transparent);
+  background: color-mix(in oklch, var(--primary) 9%, var(--muted));
 }
 
-.ios-universal-player__control:active {
-  transform: scale(0.94);
+.ios-universal-player__control:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.ios-universal-player__control:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
 }
 
 .ios-universal-player__control--active {
   color: var(--ios-player-accent);
 }
 
+.ios-universal-player__control--active:hover:not(:disabled) {
+  color: color-mix(in oklch, var(--ios-player-accent) 90%, white);
+  background: color-mix(in oklch, var(--primary) 14%, var(--muted));
+}
+
+.ios-universal-player__control--nav {
+  color: color-mix(in oklch, var(--foreground) 82%, transparent);
+}
+
+.ios-universal-player__control--nav:hover:not(:disabled) {
+  color: color-mix(in oklch, var(--primary) 35%, var(--foreground));
+  background: color-mix(in oklch, var(--primary) 8%, transparent);
+}
+
 .ios-universal-player__control--primary {
-  width: 2.35rem;
-  height: 2.35rem;
-  color: var(--ios-player-accent-foreground);
+  width: 2.15rem;
+  height: 2.15rem;
+  color: var(--ios-player-accent-fg);
   background: var(--ios-player-accent);
-  box-shadow: 0 8px 24px var(--ios-player-glow);
+  box-shadow:
+    0 4px 16px color-mix(in oklch, var(--primary) 34%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--primary-foreground) 12%, transparent) inset;
 }
 
-.ios-universal-player__control--primary:hover {
-  color: var(--ios-player-accent-foreground);
-  background: color-mix(in oklch, var(--ios-player-accent) 88%, white);
+.ios-universal-player__control--primary:hover:not(:disabled) {
+  color: var(--ios-player-accent-fg);
+  background: color-mix(in oklch, var(--ios-player-accent) 92%, white);
+  box-shadow:
+    0 6px 22px color-mix(in oklch, var(--primary) 42%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--primary-foreground) 18%, transparent) inset;
+  transform: scale(1.04);
 }
 
-.ios-universal-player__progress-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.65rem;
-  width: min(100%, 42rem);
+.ios-universal-player[data-playing='true'] .ios-universal-player__control--primary {
+  box-shadow:
+    0 4px 20px color-mix(in oklch, var(--primary) 38%, transparent),
+    0 0 28px color-mix(in oklch, var(--primary) 12%, transparent);
 }
 
-.ios-universal-player__time {
-  min-width: 2.25rem;
-  font-size: 0.6875rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--ios-player-muted);
-}
-
-.ios-universal-player__extras {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-.ios-universal-player__volume {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  width: min(100%, 7.5rem);
-}
+/* ── Sliders ───────────────────────────────────────────────────── */
 
 .ios-player-slider {
-  --ios-player-fill: 0%;
+  --ios-slider-progress: 0%;
   position: relative;
   width: 100%;
-  height: 1rem;
   display: flex;
   align-items: center;
+}
+
+.ios-player-slider--progress {
+  height: 1rem;
+}
+
+.ios-player-slider--progress .ios-player-slider__input {
+  height: 0.22rem;
+  transition: height 0.2s var(--ios-player-ease);
+}
+
+.ios-player-slider--progress:hover .ios-player-slider__input,
+.ios-player-slider--progress:focus-within .ios-player-slider__input {
+  height: 0.32rem;
+}
+
+.ios-player-slider--progress .ios-player-slider__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 0.72rem;
+  height: 0.72rem;
+  margin-top: -0.25rem;
+  border: 2px solid color-mix(in oklch, var(--card) 80%, var(--background));
+  border-radius: 999px;
+  background: var(--ios-slider-color);
+  box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 0%, transparent);
+  opacity: 0;
+  transition:
+    opacity 0.2s ease,
+    box-shadow 0.25s ease;
+}
+
+.ios-player-slider--progress:hover .ios-player-slider__input::-webkit-slider-thumb,
+.ios-player-slider--progress:focus-within .ios-player-slider__input::-webkit-slider-thumb {
+  opacity: 1;
+  box-shadow: 0 0 10px color-mix(in oklch, var(--primary) 45%, transparent);
+}
+
+.ios-player-slider--volume {
+  height: 1.25rem;
+  min-width: 4.25rem;
+}
+
+.ios-player-slider--volume .ios-player-slider__input {
+  height: 0.22rem;
 }
 
 .ios-player-slider__input {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 0.25rem;
   border-radius: 999px;
   cursor: pointer;
   background: linear-gradient(
     to right,
-    var(--ios-player-fill) 0%,
-    var(--ios-player-fill) var(--ios-player-fill),
-    var(--ios-player-track) var(--ios-player-fill),
-    var(--ios-player-track) 100%
+    var(--ios-slider-color) 0%,
+    var(--ios-slider-color) var(--ios-slider-progress),
+    var(--ios-slider-track) var(--ios-slider-progress),
+    var(--ios-slider-track) 100%
   );
   outline: none;
 }
 
 .ios-player-slider__input::-webkit-slider-runnable-track {
-  height: 0.25rem;
+  height: inherit;
   border-radius: 999px;
   background: transparent;
 }
 
-.ios-player-slider__input::-webkit-slider-thumb {
+.ios-player-slider--volume .ios-player-slider__input::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 0.75rem;
-  height: 0.75rem;
-  margin-top: -0.25rem;
+  width: 0.68rem;
+  height: 0.68rem;
+  margin-top: -0.23rem;
   border-radius: 999px;
-  border: 2px solid var(--background);
-  background: var(--ios-player-fill);
-  box-shadow: 0 0 0 1px color-mix(in oklch, var(--foreground) 12%, transparent);
+  border: 2px solid color-mix(in oklch, var(--card) 75%, var(--background));
+  background: var(--ios-slider-color);
   opacity: 0;
-  transition: opacity 160ms ease;
+  transition: opacity 0.2s ease;
 }
 
-.ios-player-slider:hover .ios-player-slider__input::-webkit-slider-thumb,
-.ios-player-slider__input:focus-visible::-webkit-slider-thumb {
+.ios-player-slider--volume:hover .ios-player-slider__input::-webkit-slider-thumb,
+.ios-player-slider--volume:focus-within .ios-player-slider__input::-webkit-slider-thumb {
   opacity: 1;
 }
 
 .ios-player-slider__input::-moz-range-track {
-  height: 0.25rem;
+  height: 0.22rem;
   border-radius: 999px;
-  background: var(--ios-player-track);
+  background: var(--ios-slider-track);
 }
 
 .ios-player-slider__input::-moz-range-progress {
-  height: 0.25rem;
+  height: 0.22rem;
   border-radius: 999px;
-  background: var(--ios-player-fill);
+  background: var(--ios-slider-color);
 }
 
 .ios-player-slider__input::-moz-range-thumb {
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 0.68rem;
+  height: 0.68rem;
   border-radius: 999px;
-  border: 2px solid var(--background);
-  background: var(--ios-player-fill);
+  border: 2px solid color-mix(in oklch, var(--card) 75%, var(--background));
+  background: var(--ios-slider-color);
 }
 
-.ios-player-slider--volume .ios-player-slider__input {
-  height: 0.2rem;
+/* ── Motion ────────────────────────────────────────────────────── */
+
+@keyframes ios-player-enter {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.ios-universal-player__wave {
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 2px;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.ios-universal-player__wave span {
-  display: block;
-  width: var(--ios-player-fill, 0%);
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    color-mix(in oklch, var(--primary) 70%, transparent),
-    var(--primary)
-  );
-  box-shadow: 0 0 16px var(--ios-player-glow);
-  transition: width 120ms linear;
-}
+/* ── Responsive ─────────────────────────────────────────────────── */
 
 @media (max-width: 1023px) {
   .ios-universal-player__inner {
@@ -329,7 +513,7 @@
       'track track'
       'center extras';
     gap: 0.35rem 0.75rem;
-    padding-inline: 0.75rem;
+    padding: 0.5rem 0.85rem 0.65rem;
   }
 
   .ios-universal-player__track {
@@ -338,6 +522,7 @@
 
   .ios-universal-player__center {
     grid-area: center;
+    max-width: none;
     align-items: flex-start;
   }
 
@@ -345,16 +530,34 @@
     grid-area: extras;
   }
 
-  .ios-universal-player__progress-row {
+  .ios-universal-player__progress {
     display: none;
   }
 
-  .ios-universal-player__volume {
+  .ios-universal-player__control--like,
+  .ios-universal-player__extras > .ios-universal-player__control:nth-child(-n + 3) {
     display: none;
   }
 
-  .ios-universal-player__track-actions {
-    display: none;
+  .ios-universal-player__mobile-progress {
+    display: block;
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 2;
+    height: 2px;
+    background: var(--ios-player-bar-track);
+    pointer-events: none;
+  }
+
+  .ios-universal-player__mobile-progress::after {
+    content: '';
+    display: block;
+    width: var(--ios-player-progress, 0%);
+    height: 100%;
+    background: var(--ios-player-bar-fill);
+    box-shadow: 0 0 10px color-mix(in oklch, var(--primary) 35%, transparent);
+    transition: width 0.15s linear;
   }
 }
 
@@ -364,16 +567,26 @@
   }
 
   .ios-universal-player__artwork {
-    width: 3rem;
-    height: 3rem;
-  }
-
-  .ios-universal-player__control:not(.ios-universal-player__control--primary) {
-    display: none;
+    width: 2.75rem;
+    height: 2.75rem;
   }
 
   .ios-universal-player__controls {
-    gap: 0.5rem;
+    gap: 0.65rem;
+  }
+
+  .ios-universal-player__control:not(.ios-universal-player__control--primary):not(
+      .ios-universal-player__control--nav
+    ) {
+    display: none;
+  }
+
+  .ios-universal-player__volume {
+    display: none;
+  }
+
+  .ios-universal-player__control--close {
+    display: none;
   }
 }
 
@@ -387,5 +600,19 @@ body[data-player-active='true'] .ios-universal-player--expanded {
 
 body[data-player-active='true'] .ios-dashboard-main,
 body[data-player-active='true'] .ios-public-main {
-  padding-bottom: calc(var(--ios-player-offset, var(--ios-player-height)) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--ios-player-offset) + env(safe-area-inset-bottom, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ios-universal-player {
+    animation: none;
+  }
+
+  .ios-universal-player__control,
+  .ios-universal-player__artwork img,
+  .ios-universal-player__ambient,
+  .ios-player-slider__input,
+  .ios-player-slider__input::-webkit-slider-thumb {
+    transition: none;
+  }
 }

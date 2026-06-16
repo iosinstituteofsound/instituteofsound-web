@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef } from 'react'
 import {
+  Heart,
   ListMusic,
   Maximize2,
   Mic2,
   MonitorSpeaker,
   Music2,
   Pause,
-  PictureInPicture2,
   Play,
   Repeat,
   Repeat1,
@@ -78,7 +78,8 @@ export function UniversalPlayer() {
   const setPlaybackState = usePlayerStore((s) => s.setPlaybackState)
 
   const visible = Boolean(currentTrack)
-  const progressPercent = duration > 0 ? `${Math.min(100, (currentTime / duration) * 100)}%` : '0%'
+  const progressPercent =
+    duration > 0 ? `${Math.min(100, (currentTime / duration) * 100)}%` : '0%'
 
   useEffect(() => {
     document.body.dataset.playerActive = visible ? 'true' : 'false'
@@ -103,7 +104,6 @@ export function UniversalPlayer() {
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
-
     audio.volume = muted ? 0 : volume
   }, [volume, muted])
 
@@ -243,11 +243,10 @@ export function UniversalPlayer() {
         className={cn('ios-universal-player', isExpanded && 'ios-universal-player--expanded')}
         data-playing={isPlaying ? 'true' : 'false'}
         aria-label="Now playing"
-        style={{ '--ios-player-fill': progressPercent } as React.CSSProperties}
+        style={{ '--ios-player-progress': progressPercent } as React.CSSProperties}
       >
-        <div className="ios-universal-player__wave" aria-hidden>
-          <span />
-        </div>
+        <div className="ios-universal-player__ambient" aria-hidden />
+        <div className="ios-universal-player__mobile-progress" aria-hidden />
 
         <div className="ios-universal-player__inner">
           <div className="ios-universal-player__track">
@@ -268,11 +267,13 @@ export function UniversalPlayer() {
               ) : null}
             </div>
 
-            <div className="ios-universal-player__track-actions">
-              <PlayerControlButton label="Close player" onClick={close}>
-                <X className="h-4 w-4" />
-              </PlayerControlButton>
-            </div>
+            <PlayerControlButton
+              label="Save to library"
+              disabled
+              className="ios-universal-player__control--like"
+            >
+              <Heart className="h-4 w-4" />
+            </PlayerControlButton>
           </div>
 
           <div className="ios-universal-player__center">
@@ -282,11 +283,15 @@ export function UniversalPlayer() {
                 active={shuffle}
                 onClick={toggleShuffle}
               >
-                <Shuffle className="h-4 w-4" />
+                <Shuffle className="h-4 w-4" strokeWidth={2.25} />
               </PlayerControlButton>
 
-              <PlayerControlButton label="Previous track" onClick={previous}>
-                <SkipBack className="h-4 w-4" />
+              <PlayerControlButton
+                label="Previous track"
+                className="ios-universal-player__control--nav"
+                onClick={previous}
+              >
+                <SkipBack className="h-5 w-5" fill="currentColor" />
               </PlayerControlButton>
 
               <PlayerControlButton
@@ -294,11 +299,19 @@ export function UniversalPlayer() {
                 primary
                 onClick={togglePlay}
               >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
+                {isPlaying ? (
+                  <Pause className="h-4 w-4" fill="currentColor" />
+                ) : (
+                  <Play className="h-4 w-4 ml-0.5" fill="currentColor" />
+                )}
               </PlayerControlButton>
 
-              <PlayerControlButton label="Next track" onClick={next}>
-                <SkipForward className="h-4 w-4" />
+              <PlayerControlButton
+                label="Next track"
+                className="ios-universal-player__control--nav"
+                onClick={next}
+              >
+                <SkipForward className="h-5 w-5" fill="currentColor" />
               </PlayerControlButton>
 
               <PlayerControlButton
@@ -312,14 +325,19 @@ export function UniversalPlayer() {
                 active={repeat !== 'off'}
                 onClick={cycleRepeat}
               >
-                {repeat === 'one' ? <Repeat1 className="h-4 w-4" /> : <Repeat className="h-4 w-4" />}
+                {repeat === 'one' ? (
+                  <Repeat1 className="h-4 w-4" strokeWidth={2.25} />
+                ) : (
+                  <Repeat className="h-4 w-4" strokeWidth={2.25} />
+                )}
               </PlayerControlButton>
             </div>
 
-            <div className="ios-universal-player__progress-row">
+            <div className="ios-universal-player__progress">
               <span className="ios-universal-player__time">{formatPlayerTime(currentTime)}</span>
               <PlayerSlider
                 aria-label="Seek"
+                variant="progress"
                 value={currentTime}
                 max={duration > 0 ? duration : 100}
                 onValueChange={handleSeek}
@@ -330,13 +348,13 @@ export function UniversalPlayer() {
 
           <div className="ios-universal-player__extras">
             <PlayerControlButton label="Lyrics" disabled>
-              <Mic2 className="h-4 w-4" />
+              <Mic2 className="h-4 w-4" strokeWidth={2.25} />
             </PlayerControlButton>
             <PlayerControlButton label="Queue" disabled={queue.length <= 1}>
-              <ListMusic className="h-4 w-4" />
+              <ListMusic className="h-4 w-4" strokeWidth={2.25} />
             </PlayerControlButton>
-            <PlayerControlButton label="Connect to device" disabled>
-              <MonitorSpeaker className="h-4 w-4" />
+            <PlayerControlButton label="Connect to a device" disabled>
+              <MonitorSpeaker className="h-4 w-4" strokeWidth={2.25} />
             </PlayerControlButton>
 
             <div className="ios-universal-player__volume">
@@ -345,9 +363,9 @@ export function UniversalPlayer() {
                 onClick={toggleMute}
               >
                 {muted || volume === 0 ? (
-                  <VolumeX className="h-4 w-4" />
+                  <VolumeX className="h-4 w-4" strokeWidth={2.25} />
                 ) : (
-                  <Volume2 className="h-4 w-4" />
+                  <Volume2 className="h-4 w-4" strokeWidth={2.25} />
                 )}
               </PlayerControlButton>
               <PlayerSlider
@@ -359,14 +377,19 @@ export function UniversalPlayer() {
               />
             </div>
 
-            <PlayerControlButton label="Picture in picture" disabled>
-              <PictureInPicture2 className="h-4 w-4" />
-            </PlayerControlButton>
             <PlayerControlButton
-              label={isExpanded ? 'Collapse player' : 'Expand player'}
+              label={isExpanded ? 'Collapse player' : 'Full screen'}
               onClick={() => setExpanded(!isExpanded)}
             >
-              <Maximize2 className="h-4 w-4" />
+              <Maximize2 className="h-4 w-4" strokeWidth={2.25} />
+            </PlayerControlButton>
+
+            <PlayerControlButton
+              label="Close player"
+              onClick={close}
+              className="ios-universal-player__control--close"
+            >
+              <X className="h-4 w-4" strokeWidth={2.25} />
             </PlayerControlButton>
           </div>
         </div>
