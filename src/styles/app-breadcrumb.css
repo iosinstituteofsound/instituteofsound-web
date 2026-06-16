@@ -1,0 +1,243 @@
+.app-breadcrumb {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+/* ── Default inline trail (dashboard pages) ── */
+
+.app-breadcrumb__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.app-breadcrumb__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.app-breadcrumb__sep {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in oklch, var(--muted-foreground) 55%, transparent);
+  flex-shrink: 0;
+}
+
+.app-breadcrumb__link,
+.app-breadcrumb__current,
+.app-breadcrumb__ancestor,
+.app-breadcrumb__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  transition: color 0.18s ease;
+}
+
+.app-breadcrumb__link {
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+
+.app-breadcrumb__link:hover {
+  color: var(--primary);
+}
+
+.app-breadcrumb__link:focus-visible {
+  outline: 2px solid color-mix(in oklch, var(--ring) 70%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.app-breadcrumb__current {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.app-breadcrumb__ancestor {
+  color: var(--muted-foreground);
+}
+
+.app-breadcrumb__icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.app-breadcrumb__ellipsis {
+  color: var(--muted-foreground);
+}
+
+.app-breadcrumb__desc {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.app-breadcrumb__actions {
+  display: flex;
+  shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Surface / editorial header (Explore-style) ── */
+
+.app-breadcrumb--surface {
+  gap: 0;
+}
+
+.app-breadcrumb--surface::after {
+  content: '';
+  display: block;
+  height: 1px;
+  margin-top: 1.15rem;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--primary) 55%, transparent),
+    color-mix(in oklch, var(--border) 80%, transparent) 38%,
+    transparent 100%
+  );
+}
+
+.app-breadcrumb__surface-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+}
+
+.app-breadcrumb__surface-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.app-breadcrumb__path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+}
+
+.app-breadcrumb__kicker {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.app-breadcrumb__list--path {
+  gap: 0.2rem 0.35rem;
+}
+
+.app-breadcrumb__list--path .app-breadcrumb__link,
+.app-breadcrumb__list--path .app-breadcrumb__ancestor {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.app-breadcrumb__list--path .app-breadcrumb__link {
+  color: color-mix(in oklch, var(--foreground) 58%, var(--muted-foreground));
+}
+
+.app-breadcrumb__list--path .app-breadcrumb__link:hover {
+  color: var(--primary);
+}
+
+.app-breadcrumb__hero {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.7rem;
+}
+
+.app-breadcrumb__hero-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex-shrink: 0;
+  color: var(--primary);
+  border: 1px solid color-mix(in oklch, var(--primary) 35%, var(--border));
+  border-radius: 8px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--primary) 10%, transparent),
+      color-mix(in oklch, var(--foreground) 2%, transparent)
+    );
+  box-shadow: 0 0 20px color-mix(in oklch, var(--primary) 14%, transparent);
+}
+
+.app-breadcrumb__hero-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.app-breadcrumb__title {
+  margin: 0;
+  font-size: clamp(2rem, 5.5vw, 3.15rem);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+.app-breadcrumb--surface .app-breadcrumb__desc {
+  margin-top: 0.55rem;
+  max-width: 36rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+
+@media (min-width: 640px) {
+  .app-breadcrumb__link,
+  .app-breadcrumb__current,
+  .app-breadcrumb__ancestor,
+  .app-breadcrumb__ellipsis {
+    font-size: 0.875rem;
+  }
+
+  .app-breadcrumb__list--path .app-breadcrumb__link,
+  .app-breadcrumb__list--path .app-breadcrumb__ancestor {
+    font-size: 0.74rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-breadcrumb__link,
+  .app-breadcrumb__current,
+  .app-breadcrumb__ancestor {
+    transition: none;
+  }
+}

@@ -77,7 +77,9 @@ export interface SceneHubDto {
   city: string
   slug: string
   coverUrl?: string
+  description?: string
   isPrimary: boolean
+  sortOrder?: number
 }
 
 export interface EventDto {
@@ -88,6 +90,8 @@ export interface EventDto {
   startsAt: string
   venue: string
   hubCity?: string
+  description?: string
+  ticketUrl?: string
 }
 
 export interface ListenerStatDto {
@@ -97,6 +101,7 @@ export interface ListenerStatDto {
   avatarUrl?: string
   dbScore: number
   totalPlays: number
+  rank?: number
 }
 
 export interface ExplorePayload {
