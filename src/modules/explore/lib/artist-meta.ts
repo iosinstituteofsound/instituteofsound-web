@@ -1,4 +1,4 @@
-import type { ArtistProfileDto } from '@/modules/explore/types/explore.types'
+import type { ArtistProfileDto, ExploreFilter } from '@/modules/explore/types/explore.types'
 
 export function artistFollowers(slug: string): string {
   let h = 0
@@ -26,8 +26,10 @@ export function artistInitials(name: string): string {
   return (parts[0]?.slice(0, 2) ?? 'AR').toUpperCase()
 }
 
-export function filterArtists(artists: ArtistProfileDto[], filter: 'all' | 'top' | 'new') {
-  if (filter === 'top') return artists.filter((a) => a.genres.length > 0).slice(0, 12)
+export function filterArtists(artists: ArtistProfileDto[], filter: ExploreFilter) {
+  if (filter === 'top' || filter === 'vibe') {
+    return artists.filter((a) => a.genres.length > 0).slice(0, 12)
+  }
   if (filter === 'new') return [...artists].reverse()
   return artists
 }
