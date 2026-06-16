@@ -47,6 +47,7 @@ export type ReleaseFilter = 'all' | 'album' | 'ep' | 'single' | 'archive'
 
 export interface ReleaseDto {
   id: string
+  artistProfileId?: string
   title: string
   coverUrl?: string
   artistName?: string

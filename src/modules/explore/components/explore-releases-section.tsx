@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ArrowUpRight, Calendar, ChevronLeft, ChevronRight, Play } from 'lucide-react'
 import type { ReleaseDto, ReleaseFilter } from '@/modules/explore/types/explore.types'
 import { ArtistWaveform } from '@/modules/explore/components/artist-waveform'
@@ -55,9 +56,11 @@ function ReleaseCard({ release, index }: { release: ReleaseDto; index: number })
   }
 
   return (
-    <article
+    <Link
+      to={`/explore/releases/${release.id}`}
       className="explore-rel-card explore-rel-glass"
       style={{ '--explore-rel-card-delay': `${70 + index * 50}ms` } as React.CSSProperties}
+      aria-label={`Open ${release.title}`}
     >
       <div className="explore-rel-card__cover">
         <ReleaseCover release={release} />
@@ -91,12 +94,12 @@ function ReleaseCard({ release, index }: { release: ReleaseDto; index: number })
             {releaseDateLabel(release)}
           </span>
           <ArtistWaveform slug={release.id} className="explore-rel-card__wave" />
-          <button type="button" className="explore-rel-card__arrow" aria-label={`Open ${release.title}`}>
-            <ArrowUpRight size={15} strokeWidth={2} aria-hidden />
-          </button>
+          <span className="explore-rel-card__arrow" aria-hidden>
+            <ArrowUpRight size={15} strokeWidth={2} />
+          </span>
         </div>
       </div>
-    </article>
+    </Link>
   )
 }
 
