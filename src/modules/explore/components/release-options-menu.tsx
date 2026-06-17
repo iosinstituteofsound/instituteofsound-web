@@ -124,7 +124,10 @@ export function ReleaseOptionsMenu({ release, artist, triggerClassName }: Releas
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className={cn('explore-release-hero__btn explore-release-hero__btn--icon', triggerClassName)}
+          className={cn(
+            'ios-mh-btn ios-mh-btn--line explore-release-hero__btn explore-release-hero__btn--icon',
+            triggerClassName,
+          )}
           aria-label="Release options"
         >
           <MoreHorizontal size={16} strokeWidth={2} aria-hidden />

@@ -1,9 +1,6 @@
-/* Release detail — artist aside panel (theme badge driven) */
+/* Release detail — artist aside as a unified futuristic device panel */
 
 .rel-aside {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
   position: sticky;
   top: 5.5rem;
   --rel-aside-accent: var(--primary);
@@ -14,12 +11,360 @@
   --rel-aside-surface: var(--card);
 }
 
-.rel-aside__card {
-  padding: 1.05rem 1rem 1rem;
-  border-radius: calc(var(--radius) + 2px);
-  border: 1px solid color-mix(in oklch, var(--rel-aside-line) 85%, transparent);
-  background: color-mix(in oklch, var(--rel-aside-surface) 88%, var(--background));
+/* ── Device chassis ── */
+
+.rel-aside--device {
+  perspective: 1200px;
 }
+
+.rel-aside__chassis {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 0.55rem;
+  border-radius: 3px;
+  border: 1px solid color-mix(in oklch, var(--rel-aside-accent) 28%, var(--rel-aside-line));
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in oklch, var(--rel-aside-surface) 92%, var(--rel-aside-accent) 8%) 0%,
+      color-mix(in oklch, var(--background) 94%, black) 48%,
+      color-mix(in oklch, var(--background) 88%, black) 100%
+    );
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--foreground) 8%, transparent) inset,
+    0 0 0 1px color-mix(in oklch, var(--background) 55%, transparent),
+    0 28px 64px color-mix(in oklch, var(--background) 58%, transparent),
+    0 0 48px color-mix(in oklch, var(--rel-aside-accent) 12%, transparent);
+  clip-path: polygon(
+    0 var(--ios-mh-cut),
+    var(--ios-mh-cut) 0,
+    calc(100% - var(--ios-mh-cut)) 0,
+    100% var(--ios-mh-cut),
+    100% calc(100% - var(--ios-mh-cut)),
+    calc(100% - var(--ios-mh-cut)) 100%,
+    var(--ios-mh-cut) 100%,
+    0 calc(100% - var(--ios-mh-cut))
+  );
+}
+
+.rel-aside__chassis::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--rel-aside-accent) 14%, transparent) 0%,
+      transparent 38%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      var(--ios-mh-scanline) 3px,
+      var(--ios-mh-scanline) 6px
+    );
+  opacity: 0.55;
+  z-index: 0;
+}
+
+.rel-aside__chassis-glow {
+  position: absolute;
+  inset: -20% -10%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 55% 45% at 18% 8%,
+      color-mix(in oklch, var(--rel-aside-accent) 22%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 40% 35% at 88% 92%,
+      color-mix(in oklch, var(--rel-aside-accent) 10%, transparent),
+      transparent 68%
+    );
+  z-index: 0;
+  animation: rel-aside-glow-drift 8s ease-in-out infinite alternate;
+}
+
+.rel-aside__chassis-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in oklch, var(--rel-aside-accent) 8%, transparent) 48%,
+    transparent 100%
+  );
+  opacity: 0;
+  z-index: 4;
+  animation: rel-aside-scan-sweep 6s linear infinite;
+}
+
+@keyframes rel-aside-glow-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.75;
+  }
+  to {
+    transform: translate3d(2%, 3%, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes rel-aside-scan-sweep {
+  0%,
+  72% {
+    opacity: 0;
+    transform: translateY(-110%);
+  }
+  78% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(110%);
+  }
+}
+
+/* Device header / footer chrome */
+
+.rel-aside__device-head,
+.rel-aside__device-foot {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.rel-aside__device-head {
+  padding: 0.35rem 0.45rem 0.65rem;
+  border-bottom: 1px solid color-mix(in oklch, var(--rel-aside-accent) 22%, var(--rel-aside-line));
+}
+
+.rel-aside__device-foot {
+  padding: 0.55rem 0.45rem 0.2rem;
+  border-top: 1px solid color-mix(in oklch, var(--rel-aside-line) 65%, transparent);
+}
+
+.rel-aside__device-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.rel-aside__device-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--rel-aside-accent);
+  box-shadow:
+    0 0 8px var(--rel-aside-accent),
+    0 0 18px color-mix(in oklch, var(--rel-aside-accent) 55%, transparent);
+  animation: rel-aside-led-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes rel-aside-led-pulse {
+  50% {
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
+}
+
+.rel-aside__device-label {
+  font-size: 0.48rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--foreground) 72%, var(--rel-aside-accent));
+}
+
+.rel-aside__device-id {
+  font-family: var(--font-display);
+  font-size: 0.46rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rel-aside-muted);
+  padding: 0.18rem 0.42rem;
+  border: 1px solid color-mix(in oklch, var(--rel-aside-line) 80%, transparent);
+  background: color-mix(in oklch, var(--background) 40%, transparent);
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 0 100%);
+}
+
+.rel-aside__device-foot-tag {
+  font-size: 0.42rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rel-aside-accent);
+}
+
+.rel-aside__device-foot-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 10px;
+}
+
+.rel-aside__device-foot-bars i {
+  display: block;
+  width: 3px;
+  background: color-mix(in oklch, var(--rel-aside-accent) 70%, var(--foreground));
+  clip-path: polygon(0 100%, 100% 100%, 100% 0, 0 20%);
+}
+
+.rel-aside__device-foot-bars i:nth-child(1) {
+  height: 35%;
+  opacity: 0.45;
+}
+
+.rel-aside__device-foot-bars i:nth-child(2) {
+  height: 55%;
+  opacity: 0.65;
+}
+
+.rel-aside__device-foot-bars i:nth-child(3) {
+  height: 78%;
+  opacity: 0.85;
+}
+
+.rel-aside__device-foot-bars i:nth-child(4) {
+  height: 100%;
+}
+
+/* ── Module stack inside chassis ── */
+
+.rel-aside__device-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.15rem 0.1rem;
+}
+
+.rel-aside__module {
+  padding: 1rem 0.85rem 0.9rem;
+}
+
+.rel-aside__module.ios-mh-surface {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--foreground) 6%, transparent) inset,
+    0 0 0 1px color-mix(in oklch, var(--background) 50%, transparent),
+    0 12px 32px color-mix(in oklch, var(--background) 52%, transparent),
+    inset 0 0 24px color-mix(in oklch, var(--rel-aside-accent) 4%, transparent);
+}
+
+.rel-aside__module.ios-mh-surface::before {
+  opacity: 0.72;
+}
+
+.rel-aside__module.ios-mh-surface::after {
+  box-shadow:
+    0 0 14px var(--ios-accent-glow),
+    0 1px 0 color-mix(in oklch, var(--foreground) 12%, transparent) inset;
+}
+
+/* Corner reticles */
+
+.rel-aside__module-corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0.7;
+}
+
+.rel-aside__module-corner::before,
+.rel-aside__module-corner::after {
+  content: '';
+  position: absolute;
+  background: color-mix(in oklch, var(--rel-aside-accent) 75%, var(--foreground));
+  box-shadow: 0 0 6px color-mix(in oklch, var(--rel-aside-accent) 45%, transparent);
+}
+
+.rel-aside__module-corner::before {
+  width: 100%;
+  height: 1px;
+}
+
+.rel-aside__module-corner::after {
+  width: 1px;
+  height: 100%;
+}
+
+.rel-aside__module-corner--tl {
+  top: 0.45rem;
+  left: 0.45rem;
+}
+
+.rel-aside__module-corner--tl::before {
+  top: 0;
+  left: 0;
+}
+
+.rel-aside__module-corner--tl::after {
+  top: 0;
+  left: 0;
+}
+
+.rel-aside__module-corner--tr {
+  top: 0.45rem;
+  right: 0.45rem;
+}
+
+.rel-aside__module-corner--tr::before {
+  top: 0;
+  right: 0;
+}
+
+.rel-aside__module-corner--tr::after {
+  top: 0;
+  right: 0;
+}
+
+.rel-aside__module-corner--bl {
+  bottom: 0.45rem;
+  left: 0.45rem;
+}
+
+.rel-aside__module-corner--bl::before {
+  bottom: 0;
+  left: 0;
+}
+
+.rel-aside__module-corner--bl::after {
+  bottom: 0;
+  left: 0;
+}
+
+.rel-aside__module-corner--br {
+  bottom: 0.45rem;
+  right: 0.45rem;
+}
+
+.rel-aside__module-corner--br::before {
+  bottom: 0;
+  right: 0;
+}
+
+.rel-aside__module-corner--br::after {
+  bottom: 0;
+  right: 0;
+}
+
+/* ── Artist identity ── */
 
 .rel-aside__profile {
   display: flex;
@@ -27,13 +372,22 @@
   align-items: flex-start;
 }
 
+.rel-aside__avatar-shell {
+  position: relative;
+  flex-shrink: 0;
+  width: 3.35rem;
+  height: 3.35rem;
+}
+
 .rel-aside__avatar {
-  width: 3.25rem;
-  height: 3.25rem;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  flex-shrink: 0;
-  border: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  border: 1px solid color-mix(in oklch, var(--foreground) 14%, transparent);
+  box-shadow:
+    0 0 0 2px color-mix(in oklch, var(--background) 70%, transparent),
+    0 0 20px color-mix(in oklch, var(--rel-aside-accent) 18%, transparent);
 }
 
 .rel-aside__avatar--fb {
@@ -46,6 +400,21 @@
   color: var(--rel-aside-muted);
 }
 
+.rel-aside__avatar-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in oklch, var(--rel-aside-accent) 45%, transparent);
+  animation: rel-aside-ring-spin 12s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rel-aside-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .rel-aside__identity {
   min-width: 0;
   padding-top: 0.1rem;
@@ -53,11 +422,6 @@
 
 .rel-aside__kicker {
   margin: 0;
-  font-size: 0.52rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--rel-aside-accent);
 }
 
 .rel-aside__name {
@@ -68,6 +432,7 @@
   text-transform: uppercase;
   line-height: 1.15;
   color: var(--foreground);
+  text-shadow: 0 0 24px color-mix(in oklch, var(--rel-aside-accent) 18%, transparent);
 }
 
 .rel-aside__label {
@@ -96,16 +461,7 @@
 }
 
 .rel-aside__genre {
-  font-size: 0.5rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 0.32rem 0.58rem;
-  border-radius: 1px;
-  border: 1px solid color-mix(in oklch, var(--rel-aside-accent) 28%, var(--rel-aside-line));
-  color: color-mix(in oklch, var(--foreground) 88%, var(--rel-aside-accent));
-  background: color-mix(in oklch, var(--rel-aside-accent) 6%, transparent);
-  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 0 100%);
+  box-shadow: 0 0 10px color-mix(in oklch, var(--rel-aside-accent) 12%, transparent);
 }
 
 .rel-aside__stats {
@@ -117,71 +473,27 @@
   border-top: 1px solid color-mix(in oklch, var(--rel-aside-line) 55%, transparent);
 }
 
-.rel-aside__stats dt {
-  font-size: 0.5rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--rel-aside-muted);
+.rel-aside__stats .ios-mh-stat {
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 0 100%);
+  box-shadow:
+    inset 0 0 12px color-mix(in oklch, var(--rel-aside-accent) 6%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--background) 35%, transparent);
 }
 
-.rel-aside__stats dd {
-  margin: 0.18rem 0 0;
-  font-family: var(--font-display);
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: var(--foreground);
+.rel-aside__stats .ios-mh-stat dd {
+  text-shadow: 0 0 12px color-mix(in oklch, var(--rel-aside-accent) 22%, transparent);
 }
 
 .rel-aside__studio {
   display: block;
   width: 100%;
   margin-top: 0.95rem;
-  padding: 0.72rem 0.85rem;
-  border-radius: 2px;
-  border: 1px solid color-mix(in oklch, var(--rel-aside-accent-bright) 65%, var(--foreground) 35%);
-  background: linear-gradient(
-    180deg,
-    var(--rel-aside-accent-bright) 0%,
-    var(--rel-aside-accent) 50%,
-    color-mix(in oklch, var(--rel-aside-accent) 82%, var(--background)) 100%
-  );
-  color: var(--rel-aside-accent-fg);
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-align: center;
-  text-decoration: none;
-  clip-path: polygon(
-    0 0,
-    calc(100% - var(--ios-mh-cut)) 0,
-    100% var(--ios-mh-cut),
-    100% 100%,
-    var(--ios-mh-cut) 100%,
-    0 calc(100% - var(--ios-mh-cut))
-  );
-  box-shadow:
-    0 1px 0 color-mix(in oklch, var(--foreground) 15%, transparent) inset,
-    0 4px 18px color-mix(in oklch, var(--rel-aside-accent) 42%, transparent);
-  transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
 }
 
-.rel-aside__studio:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.08);
-  box-shadow:
-    0 1px 0 color-mix(in oklch, var(--foreground) 18%, transparent) inset,
-    0 8px 24px color-mix(in oklch, var(--rel-aside-accent) 52%, transparent);
-}
+/* ── Support module ── */
 
 .rel-aside__section-kicker {
   margin: 0 0 0.7rem;
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--rel-aside-muted);
 }
 
 .rel-aside__stream {
@@ -191,27 +503,41 @@
   gap: 0.5rem;
   padding: 0.78rem 0.85rem;
   margin-bottom: 0.65rem;
-  border: 1px solid color-mix(in oklch, var(--rel-aside-line) 90%, transparent);
-  border-radius: calc(var(--radius));
+  border: 1px solid color-mix(in oklch, var(--rel-aside-accent) 28%, var(--rel-aside-line));
+  border-radius: 2px;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
   color: var(--foreground);
-  transition: border-color 0.2s, color 0.2s;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--rel-aside-accent) 8%, transparent),
+      color-mix(in oklch, var(--background) 30%, transparent)
+    );
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
 }
 
 .rel-aside__stream:hover {
-  border-color: color-mix(in oklch, var(--rel-aside-accent) 45%, var(--rel-aside-line));
+  border-color: color-mix(in oklch, var(--rel-aside-accent) 55%, var(--rel-aside-line));
   color: var(--rel-aside-accent);
+  box-shadow:
+    0 0 18px color-mix(in oklch, var(--rel-aside-accent) 20%, transparent),
+    inset 0 0 16px color-mix(in oklch, var(--rel-aside-accent) 8%, transparent);
 }
 
 .rel-aside__stream-note {
   margin: 0 0 0.65rem;
   padding: 0.78rem 0.85rem;
   border: 1px dashed color-mix(in oklch, var(--rel-aside-line) 85%, transparent);
-  border-radius: calc(var(--radius));
+  border-radius: 2px;
   font-size: 0.65rem;
   line-height: 1.5;
   color: var(--rel-aside-muted);
@@ -232,23 +558,31 @@
   min-height: 3.1rem;
   padding: 0.35rem 0.25rem;
   border: 1px solid color-mix(in oklch, var(--rel-aside-line) 90%, transparent);
-  border-radius: calc(var(--radius));
-  background: transparent;
+  border-radius: 2px;
+  background: color-mix(in oklch, var(--background) 28%, transparent);
   font-size: 0.52rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--rel-aside-muted);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 0 100%);
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
 }
 
 .rel-aside__action:hover,
 .rel-aside__action.is-active {
   border-color: color-mix(in oklch, var(--rel-aside-accent) 45%, var(--rel-aside-line));
   color: var(--rel-aside-accent);
-  background: color-mix(in oklch, var(--rel-aside-accent) 6%, transparent);
+  background: color-mix(in oklch, var(--rel-aside-accent) 8%, transparent);
+  box-shadow: 0 0 14px color-mix(in oklch, var(--rel-aside-accent) 14%, transparent);
 }
+
+/* ── Track list module ── */
 
 .rel-aside__tracks {
   list-style: none;
@@ -265,10 +599,14 @@
   gap: 0.6rem;
   padding: 0.5rem;
   border: 1px solid transparent;
-  border-radius: calc(var(--radius));
+  border-radius: 2px;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.2s, background 0.2s;
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 0 100%);
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
 }
 
 .rel-aside__track:hover {
@@ -278,15 +616,20 @@
 
 .rel-aside__track.is-current {
   border-color: color-mix(in oklch, var(--rel-aside-accent) 50%, var(--rel-aside-line));
-  background: color-mix(in oklch, var(--rel-aside-accent) 7%, transparent);
+  background: color-mix(in oklch, var(--rel-aside-accent) 9%, transparent);
+  box-shadow:
+    inset 3px 0 0 var(--rel-aside-accent),
+    0 0 16px color-mix(in oklch, var(--rel-aside-accent) 12%, transparent);
 }
 
 .rel-aside__track-cover {
   width: 2.45rem;
   height: 2.45rem;
-  border-radius: calc(var(--radius) - 2px);
+  border-radius: 1px;
   object-fit: cover;
   flex-shrink: 0;
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 0 100%);
+  box-shadow: 0 0 12px color-mix(in oklch, var(--background) 40%, transparent);
 }
 
 .rel-aside__track-cover--fb {
@@ -331,4 +674,14 @@
   color: var(--rel-aside-accent);
   font-weight: 800;
   letter-spacing: 0.1em;
+  text-shadow: 0 0 10px color-mix(in oklch, var(--rel-aside-accent) 35%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rel-aside__chassis-glow,
+  .rel-aside__chassis-scan,
+  .rel-aside__device-led,
+  .rel-aside__avatar-ring {
+    animation: none;
+  }
 }

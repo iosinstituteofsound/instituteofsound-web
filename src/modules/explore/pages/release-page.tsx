@@ -25,6 +25,10 @@ import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
 import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import '@/modules/explore/styles/explore.css'
+import '@/modules/explore/styles/explore-mh-chrome.css'
+import '@/modules/explore/styles/release-vinyl-art.css'
+import '@/modules/explore/styles/release-related-rail.css'
+import '@/modules/explore/styles/release-page-mh.css'
 
 const SAVED_KEY = 'ios_saved_releases'
 
@@ -121,7 +125,7 @@ export function ReleasePage() {
   const catalogRef = releaseCatalogRef(release)
 
   return (
-    <div className="explore-release-page">
+    <div className="explore-release-page explore-release-page--mh">
       <div className="explore-release-page__top">
         <AppBreadcrumb
           items={[
@@ -136,13 +140,15 @@ export function ReleasePage() {
 
       <div className="explore-release-page__layout">
         <main className="explore-release-page__main">
-          <section className="explore-release-hero">
+          <section className="explore-release-hero explore-release-hero--mh">
             <div className="explore-release-hero__art">
-              <ReleaseVinylArt release={release} variant="hero" />
+              <ReleaseVinylArt release={release} variant="hero" metalHammer />
             </div>
 
             <div className="explore-release-hero__body">
-              <span className="explore-release-hero__tag">{releaseTypeLabel(release.type)}</span>
+              <span className="explore-release-hero__tag ios-mh-kicker">
+                {releaseTypeLabel(release.type)}
+              </span>
               <h1 className="explore-release-hero__title">{release.title}</h1>
               {release.artistName ? (
                 <p className="explore-release-hero__artist">{release.artistName}</p>
@@ -176,7 +182,7 @@ export function ReleasePage() {
               <div className="explore-release-hero__actions">
                 <button
                   type="button"
-                  className="explore-release-hero__btn explore-release-hero__btn--fill"
+                  className="ios-mh-btn ios-mh-btn--fill explore-release-hero__btn explore-release-hero__btn--fill"
                   onClick={handlePlay}
                   disabled={!release.streamUrl}
                 >
@@ -185,7 +191,7 @@ export function ReleasePage() {
                 </button>
                 <button
                   type="button"
-                  className={`explore-release-hero__btn explore-release-hero__btn--line${saved ? ' is-active' : ''}`}
+                  className={`ios-mh-btn ios-mh-btn--line explore-release-hero__btn explore-release-hero__btn--line${saved ? ' is-active' : ''}`}
                   onClick={toggleSave}
                 >
                   {saved ? 'Saved' : 'Save'}
@@ -198,12 +204,14 @@ export function ReleasePage() {
               <div className="explore-release-hero__about">
                 <div className="explore-release-hero__tags">
                   {genres.slice(0, 2).map((genre) => (
-                    <span key={genre}>{genre.toUpperCase()}</span>
+                    <span key={genre} className="ios-mh-tag">{genre.toUpperCase()}</span>
                   ))}
-                  {genres.length === 0 ? <span>{releaseGenreLabel(release)}</span> : null}
-                  <span>{releaseTypeLabel(release.type)}</span>
+                  {genres.length === 0 ? (
+                    <span className="ios-mh-tag">{releaseGenreLabel(release)}</span>
+                  ) : null}
+                  <span className="ios-mh-tag">{releaseTypeLabel(release.type)}</span>
                   {releasePlaysFormatted(release) ? (
-                    <span className="explore-release-hero__tags-hot">
+                    <span className="ios-mh-tag explore-release-hero__tags-hot">
                       {releasePlaysFormatted(release)} plays
                     </span>
                   ) : null}
@@ -215,7 +223,7 @@ export function ReleasePage() {
               </div>
 
               <div className="explore-release-meta-shell">
-                <p className="explore-release-meta-shell__label">Release details</p>
+                <p className="explore-release-meta-shell__label ios-mh-kicker">Release details</p>
                 <dl className="explore-release-meta-grid" aria-label="Release details">
                 <div className="explore-release-meta-grid__cell">
                   <dt>Release date</dt>
@@ -249,6 +257,7 @@ export function ReleasePage() {
           <ReleaseRelatedRail
             id="explore-release-more"
             title="More from this artist"
+            moduleId="RL·01"
             viewAllHref={artist ? `/profile/${artist.userId}` : '/releases'}
             releases={artistReleases.slice(0, 5)}
           />
@@ -256,6 +265,7 @@ export function ReleasePage() {
           <ReleaseRelatedRail
             id="explore-release-other"
             title="Other artists on the wire"
+            moduleId="RL·02"
             viewAllHref="/releases"
             releases={otherReleases}
           />
