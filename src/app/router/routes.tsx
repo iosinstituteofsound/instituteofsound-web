@@ -102,6 +102,11 @@ const ReleasesPage = lazy(() =>
 const ReleasePage = lazy(() =>
   import('@/modules/explore/pages/release-page').then((m) => ({ default: m.ReleasePage })),
 )
+const ArticleEditorPage = lazy(() =>
+  import('@/modules/editor/pages/article-editor-page').then((m) => ({
+    default: m.ArticleEditorPage,
+  })),
+)
 const EditorDashboardPage = lazy(() =>
   import('@/modules/editor/pages/editor-dashboard-page').then((m) => ({
     default: m.EditorDashboardPage,
@@ -433,6 +438,26 @@ export const router = createBrowserRouter([
           <ResourceGuard name="AchievementsPage">
             <Lazy>
               <AchievementsPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'editor/write',
+        element: (
+          <ResourceGuard name="EditorDashboardPage">
+            <Lazy>
+              <ArticleEditorPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'editor/write/:articleId',
+        element: (
+          <ResourceGuard name="EditorDashboardPage">
+            <Lazy>
+              <ArticleEditorPage />
             </Lazy>
           </ResourceGuard>
         ),

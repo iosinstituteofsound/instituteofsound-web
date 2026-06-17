@@ -60,6 +60,15 @@ function DialogDescription({ className, ...props }: React.ComponentProps<'p'>) {
   return <DialogPrimitive.Description className={cn('text-sm text-muted-foreground', className)} {...props} />
 }
 
+function DialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)}
+      {...props}
+    />
+  )
+}
+
 export {
   Dialog,
   DialogPortal,
@@ -70,4 +79,5 @@ export {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 }

@@ -24,6 +24,11 @@ export async function getArticle(slug: string) {
   return data.data
 }
 
+export async function getEditorArticle(id: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<ArticleDto>>(`${API_V1}/editor/articles/${id}`)
+  return data.data
+}
+
 export async function listEditorArticles(status?: string) {
   const { data } = await apiClient.get<ApiSuccessResponse<ArticleDto[]>>(`${API_V1}/editor/articles`, {
     params: status ? { status } : undefined,

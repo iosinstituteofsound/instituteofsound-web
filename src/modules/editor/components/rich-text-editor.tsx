@@ -15,6 +15,7 @@ interface RichTextEditorProps {
   value: string
   onChange: (html: string) => void
   placeholder?: string
+  minHeight?: string
 }
 
 function normalizeEditorHtml(html: string) {
@@ -27,7 +28,7 @@ function canUseEditor(editor: Editor | null): editor is Editor {
   return Boolean(editor && !editor.isDestroyed && editor.view)
 }
 
-export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, placeholder, minHeight = '280px' }: RichTextEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -48,7 +49,8 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     editorProps: {
       attributes: {
         class:
-          'min-h-[280px] rounded-md border border-border bg-background p-4 prose prose-sm dark:prose-invert max-w-none focus:outline-none',
+          'rounded-md border border-border bg-background p-4 prose prose-sm dark:prose-invert max-w-none focus:outline-none',
+        style: `min-height: ${minHeight}`,
       },
     },
   })
@@ -80,7 +82,10 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
 
   if (!canUseEditor(editor)) {
     return (
-      <div className="min-h-[280px] rounded-md border border-border bg-background p-4 text-sm text-muted-foreground">
+      <div
+        className="rounded-md border border-border bg-background p-4 text-sm text-muted-foreground"
+        style={{ minHeight }}
+      >
         Loading editor…
       </div>
     )

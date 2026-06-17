@@ -1,0 +1,214 @@
+.editor-desk-grid {
+  --editor-desk-danger: color-mix(in oklch, var(--primary) 35%, #f87171 65%);
+  --editor-desk-danger-foreground: #fecaca;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.75rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .editor-desk-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .editor-desk-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem 1.5rem;
+  }
+}
+
+.editor-desk-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.editor-desk-create,
+.editor-desk-card {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--foreground) 8%, transparent),
+    0 8px 24px color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+.editor-desk-create {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--primary) 88%, white 12%),
+    color-mix(in srgb, var(--primary) 72%, black 28%)
+  );
+  color: var(--primary-foreground);
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.editor-desk-create:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 2px 4px color-mix(in srgb, var(--foreground) 10%, transparent),
+    0 12px 28px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+.editor-desk-create__icon {
+  width: 2rem;
+  height: 2rem;
+  opacity: 0.95;
+}
+
+.editor-desk-create__label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.editor-desk-card {
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+}
+
+.editor-desk-card__link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.editor-desk-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.editor-desk-item:hover .editor-desk-card__img {
+  transform: scale(1.03);
+}
+
+.editor-desk-card__fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--muted) 70%, var(--card)),
+    color-mix(in srgb, var(--muted) 40%, var(--background))
+  );
+}
+
+.editor-desk-card__fallback-icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--muted-foreground);
+}
+
+.editor-desk-card__preview-surface {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+}
+
+.editor-desk-card__preview-text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
+  color: color-mix(in srgb, var(--foreground) 88%, transparent);
+  word-break: break-word;
+}
+
+.editor-desk-card__actions {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.editor-desk-item:hover .editor-desk-card__actions,
+.editor-desk-item:focus-within .editor-desk-card__actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.editor-desk-card__menu {
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: color-mix(in srgb, var(--background) 82%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.editor-desk-card__menu-content {
+  border-color: color-mix(in srgb, var(--border) 85%, transparent);
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+.editor-desk-card__menu-content .editor-desk-card__menu-item {
+  color: var(--popover-foreground);
+}
+
+.editor-desk-card__menu-content .editor-desk-card__menu-item:focus,
+.editor-desk-card__menu-content .editor-desk-card__menu-item[data-highlighted] {
+  background: color-mix(in srgb, var(--foreground) 8%, var(--popover));
+  color: var(--popover-foreground);
+}
+
+.editor-desk-card__menu-content .editor-desk-card__menu-item--danger {
+  color: var(--editor-desk-danger);
+}
+
+.editor-desk-card__menu-content .editor-desk-card__menu-item--danger:focus,
+.editor-desk-card__menu-content .editor-desk-card__menu-item--danger[data-highlighted] {
+  background: color-mix(in oklch, var(--editor-desk-danger) 18%, var(--popover));
+  color: var(--editor-desk-danger-foreground);
+}
+
+.editor-desk-card__menu-icon {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.92;
+}
+
+.editor-desk-item__meta {
+  padding-inline: 0.125rem;
+  text-align: center;
+}
+
+.editor-desk-item__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-desk-item__subtitle {
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
-  createEditorArticle,
   createEditorEvent,
   deleteEditorArticle,
   getWireCandidates,
@@ -16,12 +15,11 @@ import {
   saveWirePicks,
 } from '@/modules/explore/api/explore.api'
 import type { WirePickItem } from '@/modules/explore/types/explore.types'
-import { RichTextEditor } from '@/modules/editor/components/rich-text-editor'
+import { EditorDeskGrid } from '@/modules/editor/components/editor-desk-grid'
 import { WirePicksBuilder } from '@/modules/editor/components/wire-picks-builder'
-import { Page, PageHeader, PageTitle, PageSection } from '@/shared/components/layout/page-shell'
+import { Page, PageHeader, PageTitle, PageDescription, PageSection } from '@/shared/components/layout/page-shell'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
-import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { Loader } from '@/shared/components/feedback/loader'
 import { cn } from '@/shared/lib/cn'
@@ -41,20 +39,29 @@ export function EditorDashboardPage() {
   const tab = resolveTab(location.pathname)
   const queryClient = useQueryClient()
 
-  const [title, setTitle] = useState('')
-  const [excerpt, setExcerpt] = useState('')
-  const [bodyHtml, setBodyHtml] = useState('')
-  const [coverUrl, setCoverUrl] = useState('')
   const [submissionFilter, setSubmissionFilter] = useState('all')
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null)
   const [editorNotes, setEditorNotes] = useState('')
   const [wireItems, setWireItems] = useState<WirePickItem[]>([])
 
-  const { data: drafts, isLoading: draftsLoading } = useQuery({
+  const { data: drafts, isLoading: draftsLoading, refetch: refetchDrafts, isError: draftsError } = useQuery({
     queryKey: ['editor-articles', 'draft'],
     queryFn: () => listEditorArticles('draft'),
     enabled: tab === 'drafts' || tab === 'write',
+    refetchOnMount: 'always',
   })
+
+  useEffect(() => {
+    if (draftsError) {
+      toast.error('Could not load drafts')
+    }
+  }, [draftsError])
+
+  useEffect(() => {
+    if (tab === 'write' || tab === 'drafts') {
+      void refetchDrafts()
+    }
+  }, [location.pathname, refetchDrafts, tab])
 
   const { data: submissions, isLoading: subsLoading } = useQuery({
     queryKey: ['editor-submissions', submissionFilter],
@@ -84,25 +91,11 @@ export function EditorDashboardPage() {
     if (wirePicks) setWireItems(wirePicks)
   }, [wirePicks])
 
-  const createMutation = useMutation({
-    mutationFn: () =>
-      createEditorArticle({ title, excerpt, bodyHtml, coverUrl: coverUrl || undefined }),
-    onSuccess: () => {
-      toast.success('Draft saved')
-      void queryClient.invalidateQueries({ queryKey: ['editor-articles'] })
-      setTitle('')
-      setExcerpt('')
-      setBodyHtml('')
-      setCoverUrl('')
-    },
-    onError: () => toast.error('Failed to save draft'),
-  })
-
   const publishMutation = useMutation({
     mutationFn: publishEditorArticle,
     onSuccess: () => {
       toast.success('Published')
-      void queryClient.invalidateQueries({ queryKey: ['editor-articles', 'explore'] })
+      void queryClient.invalidateQueries({ queryKey: ['editor-articles'] })
     },
   })
 
@@ -138,39 +131,19 @@ export function EditorDashboardPage() {
         <PageTitle>Editor Desk</PageTitle>
       </PageHeader>
 
-      {tab === 'write' ? (
-        <PageSection className="max-w-3xl space-y-4">
-          <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-          <Input placeholder="Excerpt" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} />
-          <Input placeholder="Cover image URL" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} />
-          <RichTextEditor value={bodyHtml} onChange={setBodyHtml} />
-          <Button onClick={() => createMutation.mutate()} disabled={!title.trim() || createMutation.isPending}>
-            Save draft
-          </Button>
-        </PageSection>
-      ) : null}
-
-      {tab === 'drafts' ? (
+      {tab === 'write' || tab === 'drafts' ? (
         <PageSection>
+          <PageDescription>
+            Start a new article or pick up where you left off. Drafts stay here on your desk.
+          </PageDescription>
           {draftsLoading ? <Loader /> : null}
-          <div className="space-y-3">
-            {(drafts ?? []).map((draft) => (
-              <div key={draft.id} className="flex items-center justify-between rounded-lg border p-4">
-                <div>
-                  <p className="font-semibold">{draft.title}</p>
-                  <p className="text-sm text-muted-foreground">{draft.excerpt}</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={() => publishMutation.mutate(draft.id)}>
-                    Publish
-                  </Button>
-                  <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(draft.id)}>
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <EditorDeskGrid
+            drafts={drafts ?? []}
+            onPublish={(id) => publishMutation.mutate(id)}
+            onDelete={(id) => deleteMutation.mutate(id)}
+            isPublishing={publishMutation.isPending}
+            isDeleting={deleteMutation.isPending}
+          />
         </PageSection>
       ) : null}
 

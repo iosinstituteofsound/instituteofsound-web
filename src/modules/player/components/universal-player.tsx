@@ -203,7 +203,14 @@ export function UniversalPlayer() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!currentTrack) return
       const target = event.target as HTMLElement | null
-      if (target?.closest('input, textarea, [contenteditable="true"]')) return
+      if (
+        target?.isContentEditable ||
+        target?.closest(
+          'input, textarea, select, [contenteditable], .ProseMirror, .article-inline-rich-text, .article-editor, .article-text-tool__textarea',
+        )
+      ) {
+        return
+      }
 
       if (event.code === 'Space') {
         event.preventDefault()

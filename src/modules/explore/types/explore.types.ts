@@ -17,6 +17,7 @@ export interface ArticleDto {
   status: string
   isCoverStory: boolean
   publishedAt?: string
+  updatedAt?: string
 }
 
 export interface ArtistProfileDto {
