@@ -10,7 +10,6 @@ import {
   releaseGenreLabel,
   releaseInitials,
   releasePlaysFormatted,
-  releaseTypeLabel,
 } from '@/modules/explore/lib/release-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { cn } from '@/shared/lib/cn'
