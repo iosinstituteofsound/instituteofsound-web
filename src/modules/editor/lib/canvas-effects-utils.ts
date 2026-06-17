@@ -11,6 +11,7 @@ import {
   hasCanvasEffects,
   type ArticleCanvasEffects,
 } from '@/modules/editor/types/article-canvas-effects.types'
+import { cloneCanvasRootProps, withCanvasRootProps } from '@/modules/editor/lib/canvas-root-props'
 
 function asString(value: unknown): string {
   return typeof value === 'string' ? value : ''
@@ -40,7 +41,7 @@ export function updateCanvasEffects(data: Data, patch: Partial<ArticleCanvasEffe
     intensity: patch.intensity ?? current.intensity,
     hidden: patch.hidden ?? current.hidden,
   }
-  const props = { ...(data.root?.props ?? {}) }
+  const props = cloneCanvasRootProps(data)
 
   if (next.presetId.trim() && next.presetId !== 'none') {
     props.canvasEffectPresetId = next.presetId.trim()
@@ -65,27 +66,15 @@ export function updateCanvasEffects(data: Data, patch: Partial<ArticleCanvasEffe
     delete props.canvasEffectHidden
   }
 
-  return {
-    ...data,
-    root: {
-      ...data.root,
-      props,
-    },
-  }
+  return withCanvasRootProps(data, props)
 }
 
 export function clearCanvasEffects(data: Data): Data {
-  const props = { ...(data.root?.props ?? {}) }
+  const props = cloneCanvasRootProps(data)
   delete props.canvasEffectPresetId
   delete props.canvasEffectIntensity
   delete props.canvasEffectHidden
-  return {
-    ...data,
-    root: {
-      ...data.root,
-      props,
-    },
-  }
+  return withCanvasRootProps(data, props)
 }
 
 export function canvasEffectsFilterStyle(effects: ArticleCanvasEffects): CSSProperties {

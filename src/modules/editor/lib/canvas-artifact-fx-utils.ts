@@ -12,6 +12,7 @@ import {
   hasCanvasArtifactFx,
   type ArticleCanvasArtifactFx,
 } from '@/modules/editor/types/article-canvas-artifact-fx.types'
+import { cloneCanvasRootProps, withCanvasRootProps } from '@/modules/editor/lib/canvas-root-props'
 
 function asString(value: unknown): string {
   return typeof value === 'string' ? value : ''
@@ -44,7 +45,7 @@ export function updateCanvasArtifactFx(data: Data, patch: Partial<ArticleCanvasA
     intensity: patch.intensity ?? current.intensity,
     hidden: patch.hidden ?? current.hidden,
   }
-  const props = { ...(data.root?.props ?? {}) }
+  const props = cloneCanvasRootProps(data)
 
   if (next.presetId.trim() && next.presetId !== 'none') {
     props.canvasArtifactFxPresetId = next.presetId.trim()
@@ -69,27 +70,15 @@ export function updateCanvasArtifactFx(data: Data, patch: Partial<ArticleCanvasA
     delete props.canvasArtifactFxHidden
   }
 
-  return {
-    ...data,
-    root: {
-      ...data.root,
-      props,
-    },
-  }
+  return withCanvasRootProps(data, props)
 }
 
 export function clearCanvasArtifactFx(data: Data): Data {
-  const props = { ...(data.root?.props ?? {}) }
+  const props = cloneCanvasRootProps(data)
   delete props.canvasArtifactFxPresetId
   delete props.canvasArtifactFxIntensity
   delete props.canvasArtifactFxHidden
-  return {
-    ...data,
-    root: {
-      ...data.root,
-      props,
-    },
-  }
+  return withCanvasRootProps(data, props)
 }
 
 export function canvasArtifactFxFilterStyle(fx: ArticleCanvasArtifactFx): CSSProperties {

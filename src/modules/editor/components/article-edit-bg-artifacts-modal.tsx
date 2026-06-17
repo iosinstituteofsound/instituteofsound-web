@@ -23,6 +23,7 @@ import { resolveInitialArtifactZIndex } from '@/modules/editor/lib/canvas-layers
 import {
   DEFAULT_CANVAS_ARTIFACT_TRANSFORM,
   hasCanvasArtifact,
+  type ArticleCanvasArtifact,
   type CanvasArtifactTransform,
 } from '@/modules/editor/types/article-canvas-artifact.types'
 import { Button } from '@/shared/components/ui/button'
@@ -103,13 +104,7 @@ export function ArticleEditBgArtifactsModal({
   const appliedCategory = findArtifactCategory(artifact.categoryId)
 
   const applyArtifact = (
-    patch: Partial<{
-      categoryId: string
-      designId: string
-      zIndex: number
-      hidden: boolean
-      transform: Partial<CanvasArtifactTransform>
-    }>,
+    patch: Partial<ArticleCanvasArtifact> & { transform?: Partial<CanvasArtifactTransform> },
   ) => {
     const next = updateCanvasArtifact(latestDataRef.current, patch)
     latestDataRef.current = next

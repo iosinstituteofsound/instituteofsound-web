@@ -10,6 +10,7 @@ import {
   type ArticleCanvasArtifact,
   type CanvasArtifactTransform,
 } from '@/modules/editor/types/article-canvas-artifact.types'
+import { cloneCanvasRootProps, withCanvasRootProps } from '@/modules/editor/lib/canvas-root-props'
 
 function asString(value: unknown): string {
   return typeof value === 'string' ? value : ''
@@ -62,7 +63,7 @@ export function updateCanvasArtifact(
     hidden: patch.hidden ?? current.hidden,
     zIndex: nextZIndex,
   }
-  const props = { ...(data.root?.props ?? {}) }
+  const props = cloneCanvasRootProps(data)
 
   if (next.categoryId.trim()) {
     props.canvasArtifactCategoryId = next.categoryId.trim()
@@ -128,17 +129,11 @@ export function updateCanvasArtifact(
     delete props.canvasArtifactZIndex
   }
 
-  return {
-    ...data,
-    root: {
-      ...data.root,
-      props,
-    },
-  }
+  return withCanvasRootProps(data, props)
 }
 
 export function clearCanvasArtifact(data: Data): Data {
-  const props = { ...(data.root?.props ?? {}) }
+  const props = cloneCanvasRootProps(data)
   delete props.canvasArtifactCategoryId
   delete props.canvasArtifactDesignId
   delete props.canvasArtifactRotate
@@ -149,13 +144,7 @@ export function clearCanvasArtifact(data: Data): Data {
   delete props.canvasArtifactHidden
   delete props.canvasArtifactZIndex
 
-  return {
-    ...data,
-    root: {
-      ...data.root,
-      props,
-    },
-  }
+  return withCanvasRootProps(data, props)
 }
 
 const ARTIFACT_SVG_SIZE = 120

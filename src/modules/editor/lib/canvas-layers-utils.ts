@@ -46,7 +46,6 @@ const BLOCK_TYPE_LABELS: Partial<Record<CanvasBlockType, string>> = {
   ArticleLead: 'Lead',
   ArticleBody: 'Text',
   ArticleSection: 'Section',
-  ArticleQuote: 'Quote',
   ArticleImage: 'Image',
   ArticleHero: 'Hero',
   ArticleAudio: 'Audio',

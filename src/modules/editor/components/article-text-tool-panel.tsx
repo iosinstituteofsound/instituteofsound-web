@@ -43,7 +43,6 @@ import type {
   TextFillType,
 } from '@/modules/editor/types/article-canvas.types'
 import {
-  DEFAULT_TEXT_2D_EFFECT,
   hasText2dEffect,
 } from '@/modules/editor/types/article-text-2d-effect.types'
 import type { CanvasBlockType } from '@/modules/editor/types/article-canvas.types'

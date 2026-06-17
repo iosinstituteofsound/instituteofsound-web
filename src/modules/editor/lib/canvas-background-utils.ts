@@ -6,6 +6,7 @@ import {
   type CanvasBackgroundFit,
   surfaceTokenToCss,
 } from '@/modules/editor/types/article-canvas-background.types'
+import { cloneCanvasRootProps, withCanvasRootProps } from '@/modules/editor/lib/canvas-root-props'
 
 function asString(value: unknown): string {
   return typeof value === 'string' ? value : ''
@@ -42,7 +43,7 @@ export function updateCanvasBackground(
 ): Data {
   const current = readCanvasBackground(data)
   const next: ArticleCanvasBackground = { ...current, ...patch }
-  const props = { ...(data.root?.props ?? {}) }
+  const props = cloneCanvasRootProps(data)
 
   if (next.imageUrl.trim()) {
     props.canvasBackgroundUrl = next.imageUrl.trim()
@@ -79,30 +80,18 @@ export function updateCanvasBackground(
     delete props.canvasBackgroundFit
   }
 
-  return {
-    ...data,
-    root: {
-      ...data.root,
-      props,
-    },
-  }
+  return withCanvasRootProps(data, props)
 }
 
 export function clearCanvasBackground(data: Data): Data {
-  const props = { ...(data.root?.props ?? {}) }
+  const props = cloneCanvasRootProps(data)
   delete props.canvasBackgroundUrl
   delete props.canvasBackgroundColorToken
   delete props.canvasBackgroundCustomColor
   delete props.canvasBackgroundFit
   delete props.canvasBackgroundHidden
 
-  return {
-    ...data,
-    root: {
-      ...data.root,
-      props,
-    },
-  }
+  return withCanvasRootProps(data, props)
 }
 
 export function canvasBackgroundToStyle(bg: ArticleCanvasBackground): CSSProperties {

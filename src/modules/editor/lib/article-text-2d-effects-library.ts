@@ -422,7 +422,7 @@ export function scaleTextShadowForIntensity(shadows: string[], intensity: number
   if (t <= 0 || shadows.length === 0) return undefined
 
   const scaled = shadows.map((shadow) => {
-    let result = shadow.replace(/(\d+(?:\.\d+)?)px/g, (match, num) => `${Number(num) * t}px`)
+    let result = shadow.replace(/(\d+(?:\.\d+)?)px/g, (_match, num) => `${Number(num) * t}px`)
     result = result.replace(/rgba?\([^)]+\)/g, (color) => scaleAlphaInColor(color, t))
     return result
   })
