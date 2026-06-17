@@ -17,6 +17,11 @@ import {
   SCENE_GENRES,
   type SceneHubMosaicItem,
 } from '@/modules/explore/lib/scene-hub-meta'
+import {
+  ExploreSectionHead,
+  ExploreSectionHeadAction,
+} from '@/modules/explore/components/explore-section-head'
+import { ExploreStatsBar } from '@/modules/explore/components/explore-stats-bar'
 
 interface ExploreSceneHubsSectionProps {
   hubs: SceneHubDto[]
@@ -95,43 +100,37 @@ function SceneStatsBar({
   const stats = sceneHubNetworkStats(hubs, artistCount, releaseCount, eventCount)
 
   return (
-    <footer className="explore-lbl-stats" aria-label="Scene network statistics">
-      <div className="explore-lbl-stats__item">
-        <Globe2 size={16} strokeWidth={2} aria-hidden />
-        <div>
-          <p className="explore-lbl-stats__val">{stats.hubs}</p>
-          <p className="explore-lbl-stats__label">Scene hubs</p>
-        </div>
-      </div>
-      <div className="explore-lbl-stats__item">
-        <Users size={16} strokeWidth={2} aria-hidden />
-        <div>
-          <p className="explore-lbl-stats__val">{stats.artists}</p>
-          <p className="explore-lbl-stats__label">Artists</p>
-        </div>
-      </div>
-      <div className="explore-lbl-stats__item">
-        <TrendingUp size={16} strokeWidth={2} aria-hidden />
-        <div>
-          <p className="explore-lbl-stats__val">{stats.releases}</p>
-          <p className="explore-lbl-stats__label">Releases</p>
-        </div>
-      </div>
-      <div className="explore-lbl-stats__item">
-        <Calendar size={16} strokeWidth={2} aria-hidden />
-        <div>
-          <p className="explore-lbl-stats__val">{stats.events}</p>
-          <p className="explore-lbl-stats__label">Events</p>
-        </div>
-      </div>
-      <div className="explore-lbl-stats__item explore-lbl-stats__item--accent">
-        <Sparkles size={16} strokeWidth={2} aria-hidden />
-        <div>
-          <p className="explore-lbl-stats__val">IOS</p>
-          <p className="explore-lbl-stats__label">Curated by IOS Desk</p>
-        </div>
-      </div>
-    </footer>
+    <ExploreStatsBar
+      aria-label="Scene network statistics"
+      items={[
+        {
+          icon: <Globe2 size={16} strokeWidth={2} aria-hidden />,
+          value: stats.hubs,
+          label: 'Scene hubs',
+        },
+        {
+          icon: <Users size={16} strokeWidth={2} aria-hidden />,
+          value: stats.artists,
+          label: 'Artists',
+        },
+        {
+          icon: <TrendingUp size={16} strokeWidth={2} aria-hidden />,
+          value: stats.releases,
+          label: 'Releases',
+        },
+        {
+          icon: <Calendar size={16} strokeWidth={2} aria-hidden />,
+          value: stats.events,
+          label: 'Events',
+        },
+        {
+          icon: <Sparkles size={16} strokeWidth={2} aria-hidden />,
+          value: 'IOS',
+          label: 'Curated by IOS Desk',
+          accent: true,
+        },
+      ]}
+    />
   )
 }
 
@@ -148,25 +147,13 @@ export function ExploreSceneHubsSection({
 
   return (
     <section id="explore-scenes" className="explore-section explore-scn-section">
-      <header className="explore-scn-head">
-        <div className="explore-scn-head__brand">
-          <span className="explore-scn-head__num" aria-hidden>
-            06
-          </span>
-          <div>
-            <p className="explore-scn-head__kicker">Scenes</p>
-            <h2 className="explore-scn-head__title">Scene Hubs</h2>
-            <p className="explore-scn-head__sub">City × taste tribe — local density first.</p>
-          </div>
-        </div>
-
-        <a href="#explore-scenes" className="explore-scn-head__all">
-          <span className="explore-scn-head__all-text">All hubs</span>
-          <span className="explore-scn-head__all-arrow" aria-hidden>
-            →
-          </span>
-        </a>
-      </header>
+      <ExploreSectionHead
+        index={6}
+        kicker="Scenes"
+        title="Scene Hubs"
+        description="City × taste tribe — local density first."
+        action={<ExploreSectionHeadAction label="All hubs" href="#explore-scenes" />}
+      />
 
       <div className="explore-scn-mosaic">
         {rows.map((row, rowIndex) => (

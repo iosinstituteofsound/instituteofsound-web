@@ -20,6 +20,10 @@ import {
   playlistTrackCount,
 } from '@/modules/explore/lib/playlist-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import {
+  ExploreSectionHead,
+  ExploreSectionHeadAction,
+} from '@/modules/explore/components/explore-section-head'
 import { cn } from '@/shared/lib/cn'
 
 interface ExplorePlaylistsSectionProps {
@@ -177,25 +181,13 @@ export function ExplorePlaylistsSection({ featured, items }: ExplorePlaylistsSec
 
   return (
     <section id="explore-playlists" className="explore-section explore-pl-section">
-      <header className="explore-pl-head">
-        <div className="explore-pl-head__brand">
-          <span className="explore-pl-head__num" aria-hidden>
-            05
-          </span>
-          <div>
-            <p className="explore-pl-head__kicker">Curated</p>
-            <h2 className="explore-pl-head__title">Playlists</h2>
-            <p className="explore-pl-head__sub">IOS selections and wire picks.</p>
-          </div>
-        </div>
-
-        <a href="#explore-playlists" className="explore-pl-head__all">
-          <span className="explore-pl-head__all-text">All Playlists</span>
-          <span className="explore-pl-head__all-arrow" aria-hidden>
-            →
-          </span>
-        </a>
-      </header>
+      <ExploreSectionHead
+        index={5}
+        kicker="Curated"
+        title="Playlists"
+        description="IOS selections and wire picks."
+        action={<ExploreSectionHeadAction label="All Playlists" href="#explore-playlists" />}
+      />
 
       <div className="explore-pl-layout">
         {resolvedFeatured ? <FeaturedPlaylistCard playlist={resolvedFeatured} /> : null}

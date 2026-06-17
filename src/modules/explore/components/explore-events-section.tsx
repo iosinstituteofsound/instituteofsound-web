@@ -12,6 +12,10 @@ import {
   isFallbackEvent,
   listExploreEvents,
 } from '@/modules/explore/lib/event-meta'
+import {
+  ExploreSectionHead,
+  ExploreSectionHeadAction,
+} from '@/modules/explore/components/explore-section-head'
 
 interface ExploreEventsSectionProps {
   events: EventDto[]
@@ -112,25 +116,13 @@ export function ExploreEventsSection({ events }: ExploreEventsSectionProps) {
 
   return (
     <section id="explore-events" className="explore-section explore-evt-section">
-      <header className="explore-evt-head">
-        <div className="explore-evt-head__brand">
-          <span className="explore-evt-head__num" aria-hidden>
-            07
-          </span>
-          <div>
-            <p className="explore-evt-head__kicker">Live</p>
-            <h2 className="explore-evt-head__title">Events</h2>
-            <p className="explore-evt-head__sub">Gigs on the wire — RSVP when signed in.</p>
-          </div>
-        </div>
-
-        <a href="#explore-events" className="explore-evt-head__board">
-          <span className="explore-evt-head__board-text">Event board</span>
-          <span className="explore-evt-head__board-arrow" aria-hidden>
-            →
-          </span>
-        </a>
-      </header>
+      <ExploreSectionHead
+        index={7}
+        kicker="Live"
+        title="Events"
+        description="Gigs on the wire — RSVP when signed in."
+        action={<ExploreSectionHeadAction label="Event board" href="#explore-events" />}
+      />
 
       <div className="explore-evt-intro">
         <h3 className="explore-evt-intro__title">Upcoming events</h3>

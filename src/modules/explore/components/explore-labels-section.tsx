@@ -21,6 +21,11 @@ import {
   labelNetworkStats,
   labelReleaseCount,
 } from '@/modules/explore/lib/label-meta'
+import {
+  ExploreSectionHead,
+  ExploreSectionHeadAction,
+} from '@/modules/explore/components/explore-section-head'
+import { ExploreStatsBar } from '@/modules/explore/components/explore-stats-bar'
 
 interface ExploreLabelsSectionProps {
   labels: LabelProfileDto[]
@@ -110,51 +115,38 @@ export function ExploreLabelsSection({
 
   return (
     <section id="explore-labels" className="explore-section explore-lbl-section">
-      <header className="explore-lbl-head">
-        <div className="explore-lbl-head__top">
-          <div className="explore-lbl-head__brand">
-            <span className="explore-lbl-head__num" aria-hidden>
-              04
-            </span>
-            <div>
-              <p className="explore-lbl-head__kicker">Imprints</p>
-              <h2 className="explore-lbl-head__title">Labels</h2>
-              <p className="explore-lbl-head__sub">
-                Verified label sign-ups list here automatically.
-              </p>
+      <ExploreSectionHead
+        index={4}
+        kicker="Imprints"
+        title="Labels"
+        description="Verified label sign-ups list here automatically."
+        action={<ExploreSectionHeadAction label="Browse All Labels" href="#explore-labels" />}
+        footer={
+          <div className="explore-lbl-head__controls">
+            <div className="explore-lbl-nav">
+              <div className="explore-lbl-scroll-track explore-lbl-scroll-track--compact" aria-hidden>
+                <span className="explore-lbl-scroll-thumb" style={{ left: `${scrollPct * 0.62}%` }} />
+              </div>
+              <button
+                type="button"
+                className="explore-lbl-nav__btn"
+                aria-label="Scroll labels left"
+                onClick={() => scrollBy(-1)}
+              >
+                <ChevronLeft size={18} strokeWidth={2} />
+              </button>
+              <button
+                type="button"
+                className="explore-lbl-nav__btn"
+                aria-label="Scroll labels right"
+                onClick={() => scrollBy(1)}
+              >
+                <ChevronRight size={18} strokeWidth={2} />
+              </button>
             </div>
           </div>
-
-          <a href="#explore-labels" className="explore-lbl-head__all">
-            Browse All Labels
-            <ArrowUpRight size={14} strokeWidth={2} aria-hidden />
-          </a>
-        </div>
-
-        <div className="explore-lbl-head__controls">
-          <div className="explore-lbl-nav">
-            <div className="explore-lbl-scroll-track explore-lbl-scroll-track--compact" aria-hidden>
-              <span className="explore-lbl-scroll-thumb" style={{ left: `${scrollPct * 0.62}%` }} />
-            </div>
-            <button
-              type="button"
-              className="explore-lbl-nav__btn"
-              aria-label="Scroll labels left"
-              onClick={() => scrollBy(-1)}
-            >
-              <ChevronLeft size={18} strokeWidth={2} />
-            </button>
-            <button
-              type="button"
-              className="explore-lbl-nav__btn"
-              aria-label="Scroll labels right"
-              onClick={() => scrollBy(1)}
-            >
-              <ChevronRight size={18} strokeWidth={2} />
-            </button>
-          </div>
-        </div>
-      </header>
+        }
+      />
 
       <div ref={trackRef} className="explore-lbl-track" onScroll={syncScroll}>
         {labels.map((label, i) => (
@@ -162,43 +154,37 @@ export function ExploreLabelsSection({
         ))}
       </div>
 
-      <footer className="explore-lbl-stats">
-        <div className="explore-lbl-stats__item">
-          <Award size={16} strokeWidth={2} aria-hidden />
-          <div>
-            <p className="explore-lbl-stats__val">{stats.verifiedLabels}</p>
-            <p className="explore-lbl-stats__label">Verified Labels</p>
-          </div>
-        </div>
-        <div className="explore-lbl-stats__item">
-          <Users size={16} strokeWidth={2} aria-hidden />
-          <div>
-            <p className="explore-lbl-stats__val">{stats.artists}</p>
-            <p className="explore-lbl-stats__label">Artists</p>
-          </div>
-        </div>
-        <div className="explore-lbl-stats__item">
-          <Disc3 size={16} strokeWidth={2} aria-hidden />
-          <div>
-            <p className="explore-lbl-stats__val">{stats.releases}</p>
-            <p className="explore-lbl-stats__label">Releases</p>
-          </div>
-        </div>
-        <div className="explore-lbl-stats__item">
-          <Globe2 size={16} strokeWidth={2} aria-hidden />
-          <div>
-            <p className="explore-lbl-stats__val">{stats.cities}</p>
-            <p className="explore-lbl-stats__label">Cities</p>
-          </div>
-        </div>
-        <div className="explore-lbl-stats__item explore-lbl-stats__item--accent">
-          <ShieldCheck size={16} strokeWidth={2} aria-hidden />
-          <div>
-            <p className="explore-lbl-stats__val">IOS</p>
-            <p className="explore-lbl-stats__label">Verified by IOS Desk</p>
-          </div>
-        </div>
-      </footer>
+      <ExploreStatsBar
+        aria-label="Label network statistics"
+        items={[
+          {
+            icon: <Award size={16} strokeWidth={2} aria-hidden />,
+            value: stats.verifiedLabels,
+            label: 'Verified Labels',
+          },
+          {
+            icon: <Users size={16} strokeWidth={2} aria-hidden />,
+            value: stats.artists,
+            label: 'Artists',
+          },
+          {
+            icon: <Disc3 size={16} strokeWidth={2} aria-hidden />,
+            value: stats.releases,
+            label: 'Releases',
+          },
+          {
+            icon: <Globe2 size={16} strokeWidth={2} aria-hidden />,
+            value: stats.cities,
+            label: 'Cities',
+          },
+          {
+            icon: <ShieldCheck size={16} strokeWidth={2} aria-hidden />,
+            value: 'IOS',
+            label: 'Verified by IOS Desk',
+            accent: true,
+          },
+        ]}
+      />
     </section>
   )
 }

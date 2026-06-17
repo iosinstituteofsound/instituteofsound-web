@@ -20,6 +20,10 @@ import {
   type ExploreSpinRow,
   type ExploreTribeRow,
 } from '@/modules/explore/lib/community-meta'
+import {
+  ExploreSectionHead,
+  ExploreSectionHeadAction,
+} from '@/modules/explore/components/explore-section-head'
 
 interface ExploreCommunitySectionProps {
   community: ExplorePayload['community']
@@ -225,24 +229,13 @@ export function ExploreCommunitySection({ community }: ExploreCommunitySectionPr
 
   return (
     <section id="explore-community" className="explore-section explore-com-section">
-      <header className="explore-com-head">
-        <div className="explore-com-head__brand">
-          <span className="explore-com-head__num" aria-hidden>
-            09
-          </span>
-          <div>
-            <p className="explore-com-head__kicker">Wire</p>
-            <h2 className="explore-com-head__title">Community</h2>
-            <p className="explore-com-head__sub">Tribes, spins, and crews — ranked by activity.</p>
-          </div>
-        </div>
-        <Link to="/feed" className="explore-com-head__wire">
-          <span className="explore-com-head__wire-text">Full wire</span>
-          <span className="explore-com-head__wire-arrow" aria-hidden>
-            →
-          </span>
-        </Link>
-      </header>
+      <ExploreSectionHead
+        index={9}
+        kicker="Wire"
+        title="Community"
+        description="Tribes, spins, and crews — ranked by activity."
+        action={<ExploreSectionHeadAction label="Full wire" to="/feed" />}
+      />
 
       <div className="explore-com-grid">
         <article className="explore-com-panel explore-com-panel--tribes">

@@ -9,6 +9,9 @@ import {
   filterArtists,
 } from '@/modules/explore/lib/artist-meta'
 import { ArtistCardMedia, ArtistWaveform } from '@/modules/explore/components/artist-waveform'
+import {
+  ExploreSectionHead,
+} from '@/modules/explore/components/explore-section-head'
 import { cn } from '@/shared/lib/cn'
 
 const FILTER_OPTIONS: { value: ExploreFilter; label: string }[] = [
@@ -83,33 +86,24 @@ export function ExploreArtistsSection({ artists }: { artists: ArtistProfileDto[]
 
   return (
     <section id="explore-artists" className="explore-section explore-art-section">
-      <header className="explore-art-head">
-        <div className="explore-art-head__top">
-          <div className="explore-art-head__brand">
-            <span className="explore-art-head__num" aria-hidden>
-              02
-            </span>
-            <div>
-              <h2 className="explore-art-head__title">Artists</h2>
-              <p className="explore-art-head__sub">
-                Live studio pages on the underground network.
-              </p>
-            </div>
-          </div>
-
-          <div className="explore-art-head__aside">
-            <ul className="explore-art-head__stats">
+      <ExploreSectionHead
+        index={2}
+        title="Artists"
+        description="Live studio pages on the underground network."
+        aside={
+          <>
+            <ul className="explore-section-head__stats">
               <li>
-                <span className="explore-art-head__stat-val">{artists.length}+</span>
-                <span className="explore-art-head__stat-label">Artists</span>
+                <span className="explore-section-head__stat-val">{artists.length}+</span>
+                <span className="explore-section-head__stat-label">Artists</span>
               </li>
               <li>
-                <span className="explore-art-head__stat-val">{openCount}+</span>
-                <span className="explore-art-head__stat-label">Open Studios</span>
+                <span className="explore-section-head__stat-val">{openCount}+</span>
+                <span className="explore-section-head__stat-label">Open Studios</span>
               </li>
-              <li className="explore-art-head__stat-accent">
-                <span className="explore-art-head__stat-val">24/7</span>
-                <span className="explore-art-head__stat-label">The Wire</span>
+              <li className="explore-section-head__stat-accent">
+                <span className="explore-section-head__stat-val">24/7</span>
+                <span className="explore-section-head__stat-label">The Wire</span>
               </li>
             </ul>
             <div className="explore-art-nav explore-art-nav--compact">
@@ -136,22 +130,23 @@ export function ExploreArtistsSection({ artists }: { artists: ArtistProfileDto[]
                 <ChevronRight size={18} strokeWidth={2} />
               </button>
             </div>
+          </>
+        }
+        footer={
+          <div className="explore-art-filters">
+            {FILTER_OPTIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                className={cn('explore-art-filter', filter === value && 'is-active')}
+                onClick={() => setFilter(value)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
-        </div>
-
-        <div className="explore-art-filters">
-          {FILTER_OPTIONS.map(({ value, label }) => (
-            <button
-              key={value}
-              type="button"
-              className={cn('explore-art-filter', filter === value && 'is-active')}
-              onClick={() => setFilter(value)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </header>
+        }
+      />
 
       <div ref={trackRef} className="explore-art-track" onScroll={syncScroll}>
         {filtered.map((artist, i) => (

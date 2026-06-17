@@ -15,6 +15,10 @@ import {
   releaseTypeLabel,
 } from '@/modules/explore/lib/release-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import {
+  ExploreSectionHead,
+  ExploreSectionHeadAction,
+} from '@/modules/explore/components/explore-section-head'
 import { cn } from '@/shared/lib/cn'
 
 const FILTER_OPTIONS: { value: ReleaseFilter; label: string }[] = [
@@ -125,50 +129,40 @@ export function ExploreReleasesSection({ releases }: { releases: ReleaseDto[] })
 
   return (
     <section id="explore-releases" className="explore-section explore-rel-section">
-      <header className="explore-rel-head">
-        <div className="explore-rel-head__top">
-          <div className="explore-rel-head__brand">
-            <span className="explore-rel-head__num" aria-hidden>
-              03
-            </span>
-            <div>
-              <p className="explore-rel-head__kicker">Premieres</p>
-              <h2 className="explore-rel-head__title">Releases</h2>
-              <p className="explore-rel-head__sub">Albums and archive drops from artist studios.</p>
+      <ExploreSectionHead
+        index={3}
+        kicker="Premieres"
+        title="Releases"
+        description="Albums and archive drops from artist studios."
+        action={<ExploreSectionHeadAction label="All Releases" to="/explore/releases" />}
+        footer={
+          <div className="explore-rel-head__controls">
+            <div className="explore-rel-filters">
+              {FILTER_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={cn('explore-rel-filter', filter === value && 'is-active')}
+                  onClick={() => setFilter(value)}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-          </div>
-          <Link to="/explore/releases" className="explore-rel-head__all">
-            All Releases
-            <ArrowUpRight size={14} strokeWidth={2} aria-hidden />
-          </Link>
-        </div>
-
-        <div className="explore-rel-head__controls">
-          <div className="explore-rel-filters">
-            {FILTER_OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                className={cn('explore-rel-filter', filter === value && 'is-active')}
-                onClick={() => setFilter(value)}
-              >
-                {label}
+            <div className="explore-rel-nav">
+              <div className="explore-rel-scroll-track explore-rel-scroll-track--compact" aria-hidden>
+                <span className="explore-rel-scroll-thumb" style={{ left: `${scrollPct * 0.62}%` }} />
+              </div>
+              <button type="button" className="explore-rel-nav__btn" aria-label="Scroll releases left" onClick={() => scrollBy(-1)}>
+                <ChevronLeft size={18} strokeWidth={2} />
               </button>
-            ))}
-          </div>
-          <div className="explore-rel-nav">
-            <div className="explore-rel-scroll-track explore-rel-scroll-track--compact" aria-hidden>
-              <span className="explore-rel-scroll-thumb" style={{ left: `${scrollPct * 0.62}%` }} />
+              <button type="button" className="explore-rel-nav__btn" aria-label="Scroll releases right" onClick={() => scrollBy(1)}>
+                <ChevronRight size={18} strokeWidth={2} />
+              </button>
             </div>
-            <button type="button" className="explore-rel-nav__btn" aria-label="Scroll releases left" onClick={() => scrollBy(-1)}>
-              <ChevronLeft size={18} strokeWidth={2} />
-            </button>
-            <button type="button" className="explore-rel-nav__btn" aria-label="Scroll releases right" onClick={() => scrollBy(1)}>
-              <ChevronRight size={18} strokeWidth={2} />
-            </button>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <div ref={trackRef} className="explore-rel-track" onScroll={syncScroll}>
         {filtered.map((release, i) => (

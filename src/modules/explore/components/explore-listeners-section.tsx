@@ -15,6 +15,10 @@ import {
   listenerNetworkStats,
   listExploreListeners,
 } from '@/modules/explore/lib/listener-meta'
+import {
+  ExploreSectionHead,
+  ExploreSectionHeadAction,
+} from '@/modules/explore/components/explore-section-head'
 
 interface ExploreListenersSectionProps {
   topListener: ListenerStatDto | null
@@ -195,21 +199,13 @@ export function ExploreListenersSection({
 
   return (
     <section id="explore-listeners" className="explore-section explore-lsn-section">
-      <header className="explore-lsn-head">
-        <div className="explore-lsn-head__brand">
-          <span className="explore-lsn-head__num" aria-hidden>
-            08
-          </span>
-          <div>
-            <p className="explore-lsn-head__kicker">Leaderboard</p>
-            <h2 className="explore-lsn-head__title">Listeners</h2>
-            <p className="explore-lsn-head__sub">Weekly dB on the network.</p>
-          </div>
-        </div>
-        <a href="#explore-listeners" className="explore-lsn-head__board">
-          Leaderboards →
-        </a>
-      </header>
+      <ExploreSectionHead
+        index={8}
+        kicker="Leaderboard"
+        title="Listeners"
+        description="Weekly dB on the network."
+        action={<ExploreSectionHeadAction label="Leaderboards" href="#explore-listeners" />}
+      />
 
       <div className="explore-lsn-top">
         <HeroCard row={top} />

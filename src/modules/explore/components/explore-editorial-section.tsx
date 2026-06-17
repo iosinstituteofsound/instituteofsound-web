@@ -7,6 +7,7 @@ import {
   articleReadTime,
   articleViews,
 } from '@/modules/explore/lib/editorial-meta'
+import { ExploreSectionHead } from '@/modules/explore/components/explore-section-head'
 
 function EditorialSidebarRow({
   article,
@@ -114,20 +115,12 @@ export function ExploreEditorialSection({
 
   return (
     <section id="explore-editorial" className="explore-section explore-ed-section">
-      <header className="explore-ed-head">
-        <div className="explore-ed-head__brand">
-          <span className="explore-ed-head__num" aria-hidden>
-            01
-          </span>
-          <div>
-            <p className="explore-ed-head__kicker">Desk</p>
-            <h2 className="explore-ed-head__title">Editorial</h2>
-            <p className="explore-ed-head__sub">
-              Features, reviews, and scene intelligence.
-            </p>
-          </div>
-        </div>
-      </header>
+      <ExploreSectionHead
+        index={1}
+        kicker="Desk"
+        title="Editorial"
+        description="Features, reviews, and scene intelligence."
+      />
 
       <div className="explore-ed-grid">
         {coverStory ? <EditorialLeadCard article={coverStory} /> : null}
