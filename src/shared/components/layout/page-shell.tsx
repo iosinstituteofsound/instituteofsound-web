@@ -19,7 +19,7 @@ export function PageHeaderMain({ children, className }: PageProps) {
 }
 
 export function PageTitle({ children, className }: PageProps) {
-  return <h1 className={cn('text-3xl font-bold tracking-tight', className)}>{children}</h1>
+  return <h1 className={cn('font-display text-3xl font-bold tracking-tight', className)}>{children}</h1>
 }
 
 export function PageDescription({ children, className }: PageProps) {

@@ -21,7 +21,7 @@ export function AuthLayout() {
             className="h-14 w-14 rounded-2xl shadow-lg ring-1 ring-border/60"
           />
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">{env.appName}</h1>
+            <h1 className="font-display text-3xl font-bold tracking-tight">{env.appName}</h1>
             <p className="text-sm text-muted-foreground">Underground music culture, one login away.</p>
           </div>
         </div>

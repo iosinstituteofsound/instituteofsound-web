@@ -90,7 +90,7 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
         ) : (
           <Link
             to="/home"
-            className="dashboard-sidebar-brand-collapsed mx-auto mt-3 flex h-10 w-10 items-center justify-center rounded-lg text-sm font-black text-primary"
+            className="dashboard-sidebar-brand-collapsed font-display mx-auto mt-3 flex h-10 w-10 items-center justify-center rounded-lg text-sm font-extrabold text-primary"
             title={brandTitle}
             onClick={() => setMobileOpen(false)}
           >

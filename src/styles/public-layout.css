@@ -44,6 +44,7 @@
 }
 
 .public-header__brand-mark {
+  font-family: var(--font-display);
   font-size: 0.5625rem;
   font-weight: 800;
   letter-spacing: 0.28em;
@@ -53,6 +54,7 @@
 }
 
 .public-header__brand-name {
+  font-family: var(--font-display);
   font-size: 0.9375rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -183,6 +185,7 @@
 }
 
 .public-footer__brand-mark {
+  font-family: var(--font-display);
   font-size: 0.5625rem;
   font-weight: 800;
   letter-spacing: 0.28em;
@@ -191,6 +194,7 @@
 }
 
 .public-footer__brand-name {
+  font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 700;
 }

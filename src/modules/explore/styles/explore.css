@@ -3,6 +3,39 @@
   color: var(--foreground);
   min-height: 100vh;
   --explore-scroll-margin: 0.75rem;
+  --explore-display: var(--font-display);
+}
+
+/* Section numerals, display headings, and stat figures */
+.explore-ed-head__num,
+.explore-ed-head__title,
+.explore-art-head__num,
+.explore-art-head__title,
+.explore-art-head__stat-val,
+.explore-rel-head__num,
+.explore-rel-head__title,
+.explore-lbl-head__num,
+.explore-lbl-head__title,
+.explore-pl-head__num,
+.explore-pl-head__title,
+.explore-pl-featured__stat-num,
+.explore-scn-head__num,
+.explore-scn-head__title,
+.explore-evt-head__num,
+.explore-evt-head__title,
+.explore-lsn-head__num,
+.explore-lsn-head__title,
+.explore-lsn-hero__stat-val,
+.explore-lsn-trend__db,
+.explore-lsn-foot__network-num,
+.explore-lsn-foot__network-unit,
+.explore-lsn-foot__network-stat-val,
+.explore-com-head__num,
+.explore-com-head__title,
+.explore-release-hero__title,
+.explore-rel-page-rail__title,
+.explore-rel-page-aside__stats dd {
+  font-family: var(--explore-display);
 }
 
 .ios-dashboard-main .explore-page {
@@ -1550,7 +1583,7 @@
   --explore-article-accent-fg: var(--primary-foreground);
   --explore-article-accent-soft: color-mix(in oklch, var(--primary) 22%, transparent);
   --explore-article-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --explore-article-display: 'Bebas Neue', var(--font-sans);
+  --explore-article-display: var(--font-display);
   --explore-article-serif: 'Playfair Display', ui-serif, Georgia, 'Times New Roman', serif;
   --explore-article-glass-bg: color-mix(in oklch, var(--card) 58%, transparent);
   --explore-article-glass-border: color-mix(in oklch, var(--foreground) 14%, transparent);
@@ -8425,7 +8458,7 @@
 }
 
 .explore-release-hero__title {
-  font-family: 'Bebas Neue', var(--font-sans);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 5vw, 3.4rem);
   line-height: 0.95;
   letter-spacing: 0.04em;
@@ -8864,7 +8897,7 @@
 
 .explore-rel-page-rail__title {
   margin: 0;
-  font-family: 'Bebas Neue', var(--font-sans);
+  font-family: var(--font-display);
   font-size: 1.35rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
