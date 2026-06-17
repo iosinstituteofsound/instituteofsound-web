@@ -28,9 +28,9 @@ import {
 import { useLinkPreview } from '@/modules/feed/hooks/use-link-preview'
 import { stripUrlFromText, urlsMatch } from '@/modules/feed/lib/link-preview'
 import type { MediaAttachKind, MediaAttachMode } from '@/modules/feed/lib/media-utils'
-import { Button } from '@/shared/components/ui/button'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -39,6 +39,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { toast } from '@/shared/components/ui/sonner'
 import { cn } from '@/shared/lib/cn'
+import './create-post-dialog.css'
 
 interface CreatePostDialogProps {
   open: boolean
@@ -317,7 +318,8 @@ export function CreatePostDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="gap-0 overflow-hidden p-0 sm:max-w-[500px] [&>button]:top-3 [&>button]:rounded-full [&>button]:bg-muted/80"
+        className="feed-create-post z-[100] bg-card p-0 sm:max-w-[500px] sm:rounded-2xl"
+        hideCloseButton
         onPointerDownOutside={(event) => {
           if (isEmojiPickerTarget(getRadixOutsideEventTarget(event))) event.preventDefault()
         }}
@@ -328,32 +330,35 @@ export function CreatePostDialog({
           if (isEmojiPickerTarget(getRadixOutsideEventTarget(event))) event.preventDefault()
         }}
       >
-        <DialogHeader className="border-b px-4 py-3.5">
-          <DialogTitle className="text-center text-[1.05rem] font-bold">Create post</DialogTitle>
+        <DialogHeader className="feed-create-post__header">
+          <DialogTitle className="feed-create-post__title">Create post</DialogTitle>
+          <DialogClose className="feed-create-post__close" aria-label="Close">
+            <span aria-hidden>×</span>
+          </DialogClose>
         </DialogHeader>
 
-        <div className="max-h-[min(72vh,640px)] space-y-3 overflow-y-auto px-4 py-3">
-          <div className="flex items-center gap-2">
+        <div className="feed-create-post__body feed-create-post__stack">
+          <div className="feed-create-post__author">
             <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10" />
             <div className="min-w-0">
-              <p className="truncate font-semibold leading-tight">{userName}</p>
+              <p className="feed-create-post__author-name">{userName}</p>
               <CreatePostPrivacyBadge />
             </div>
           </div>
 
-          <div className="relative">
+          <div className="feed-create-post__composer">
             <Textarea
               ref={textareaRef}
               value={body}
               onChange={(event) => setBody(event.target.value)}
               placeholder={`What's on your mind, ${firstName}?`}
               rows={4}
-              className="min-h-[140px] resize-none border-0 bg-transparent px-0 pr-10 text-xl leading-relaxed shadow-none placeholder:text-muted-foreground/70 focus-visible:ring-0"
+              className="feed-create-post__textarea focus-visible:ring-0"
             />
             <EmojiTriggerButton
               active={emojiOpen}
               onClick={toggleEmojiPicker}
-              className="absolute bottom-1 right-0"
+              className="feed-create-post__emoji"
             />
           </div>
 
@@ -369,11 +374,11 @@ export function CreatePostDialog({
           ) : null}
 
           {releasePreviewItem ? (
-            <div className="space-y-2">
+            <div className="feed-create-post__stack">
               <ReleaseSharePreview item={releasePreviewItem} compact />
               <button
                 type="button"
-                className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:underline"
+                className="feed-create-post__remove-link"
                 onClick={() => setReleasePayload(null)}
               >
                 Remove release preview
@@ -382,10 +387,10 @@ export function CreatePostDialog({
           ) : null}
 
           {mediaAttachment ? (
-            <div className="relative overflow-hidden rounded-lg border">
+            <div className="feed-create-post__panel relative overflow-hidden">
               <button
                 type="button"
-                className="absolute right-2 top-2 z-10 rounded-full bg-background/90 px-2 py-1 text-xs font-semibold shadow-sm"
+                className="feed-create-post__media-remove"
                 onClick={() => {
                   setMediaAttachment(null)
                   setResolvedMediaKind(null)
@@ -429,7 +434,7 @@ export function CreatePostDialog({
           ) : null}
 
           {showArticleFields ? (
-            <div className="space-y-2 rounded-lg border bg-muted/20 p-3">
+            <div className="feed-create-post__article-fields">
               <Input
                 value={articleUrl}
                 onChange={(event) => setArticleUrl(event.target.value)}
@@ -461,18 +466,15 @@ export function CreatePostDialog({
           anchorEl={emojiAnchor}
         />
 
-        <div className="border-t p-3">
-          <Button
+        <div className="feed-create-post__footer">
+          <button
             type="button"
-            className={cn(
-              'h-11 w-full rounded-lg text-[15px] font-semibold',
-              !canPost && 'opacity-50',
-            )}
+            className={cn('feed-create-post__submit', !canPost && 'opacity-50')}
             disabled={createFeed.isPending || !canPost || mediaUploadState.uploading}
             onClick={handleSubmit}
           >
             {createFeed.isPending ? 'Posting…' : mediaUploadState.uploading ? 'Uploading…' : 'Post'}
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

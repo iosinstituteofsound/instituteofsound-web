@@ -155,17 +155,22 @@ export function CreateStoryCard({
     <button
       type="button"
       onClick={onClick}
-      className="group relative h-[200px] w-[112px] shrink-0 overflow-hidden rounded-xl border bg-card shadow-sm transition-transform hover:scale-[1.02]"
+      className="feed-story-card feed-story-card--create"
+      style={{ '--story-i': 0 } as React.CSSProperties}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-muted/40 to-muted" />
-      <div className="absolute left-3 top-3">
-        <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="h-9 w-9 ring-2 ring-primary" />
+      <div className="feed-story-card__orb">
+        <span className="feed-story-card__orbit" aria-hidden />
+        <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="feed-story-card__avatar" />
       </div>
-      <div className="absolute bottom-0 left-0 right-0 border-t bg-card p-2 text-left">
-        <div className="mx-auto mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
-          <Plus className="h-4 w-4" />
+
+      <div className="feed-story-card__capsule">
+        <div className="feed-story-card__glass">
+          <span className="feed-story-card__hud" aria-hidden />
+          <span className="feed-story-card__core" aria-hidden>
+            <Plus className="h-4 w-4" />
+          </span>
+          <p className="feed-story-card__create-label">Create story</p>
         </div>
-        <p className="text-center text-xs font-semibold leading-tight">Create story</p>
       </div>
     </button>
   )

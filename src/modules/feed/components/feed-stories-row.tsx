@@ -11,8 +11,8 @@ import {
   storyTextStyle,
   storyVideoUrl,
 } from '@/modules/feed/lib/story-content'
-import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
+import './feed-stories-row.css'
 
 interface FeedStoriesRowProps {
   items: FeedItemDto[]
@@ -38,31 +38,36 @@ export function FeedStoriesRow({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl border bg-card shadow-sm">
-      <div
-        ref={scrollRef}
-        className="flex gap-2 overflow-x-auto p-3 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        <CreateStoryCard userName={userName} avatarUrl={avatarUrl} onClick={onCreateStory} />
+    <section className="feed-stories-row" aria-label="Stories">
+      <div className="feed-stories-row__field">
+        <div className="feed-stories-row__head">
+          <p className="feed-stories-row__label">Signal Flux</p>
+          <span className="feed-stories-row__status">
+            <span className="feed-stories-row__status-dot" aria-hidden />
+            {stories.length} active
+          </span>
+        </div>
 
-        {stories.map((item, index) => (
-          <StoryRowCard key={item.id} item={item} index={index} onClick={() => onStoryClick(item.id)} />
-        ))}
+        <div ref={scrollRef} className="feed-stories-row__track">
+          <CreateStoryCard userName={userName} avatarUrl={avatarUrl} onClick={onCreateStory} />
+
+          {stories.map((item, index) => (
+            <StoryRowCard key={item.id} item={item} index={index} onClick={() => onStoryClick(item.id)} />
+          ))}
+        </div>
+
+        {stories.length > 3 ? (
+          <button
+            type="button"
+            className="feed-stories-row__nav"
+            onClick={() => scroll('right')}
+            aria-label="Scroll stories"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        ) : null}
       </div>
-
-      {stories.length > 3 ? (
-        <Button
-          type="button"
-          size="icon"
-          variant="secondary"
-          className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full shadow-md"
-          onClick={() => scroll('right')}
-          aria-label="Scroll stories"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      ) : null}
-    </div>
+    </section>
   )
 }
 
@@ -106,54 +111,54 @@ function StoryRowCard({
       onMouseLeave={stopPreview}
       onFocus={startPreview}
       onBlur={stopPreview}
-      className="relative h-[200px] w-[112px] shrink-0 overflow-hidden rounded-xl border text-left shadow-sm transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="feed-story-card"
+      style={{ '--story-i': index + 1 } as React.CSSProperties}
     >
-      {background.kind === 'image' ? (
-        <img src={background.value} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      ) : (
-        <div className={cn('absolute inset-0 bg-gradient-to-br', background.value)} />
-      )}
-
-      {videoUrl ? (
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          poster={posterUrl}
-          muted
-          playsInline
-          loop
-          preload="metadata"
-          className={cn(
-            'absolute inset-0 h-full w-full object-cover transition-opacity duration-200',
-            isPlaying ? 'opacity-100' : 'opacity-0',
-          )}
-        />
-      ) : null}
-
-      {previewText && !isPlaying ? (
-        <div className="absolute inset-0 flex items-center justify-center p-3">
-          <p
-            className={cn(
-              'line-clamp-6 text-center text-[11px] leading-snug text-white drop-shadow',
-              textStyle,
-            )}
-          >
-            {previewText}
-          </p>
-        </div>
-      ) : null}
-
-      <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/55" />
-      <div className="absolute left-3 top-3">
+      <div className="feed-story-card__orb">
+        <span className="feed-story-card__orbit" aria-hidden />
         <FeedUserAvatar
           name={item.author.name}
           avatarUrl={item.author.avatarUrl}
-          className="h-9 w-9 ring-2 ring-primary"
+          className="feed-story-card__avatar"
         />
       </div>
-      <p className="absolute bottom-3 left-3 right-3 truncate text-xs font-semibold text-white drop-shadow">
-        {item.author.name}
-      </p>
+
+      <div className="feed-story-card__capsule">
+        <div className="feed-story-card__glass">
+          {background.kind === 'image' ? (
+            <img src={background.value} alt="" className="feed-story-card__art" />
+          ) : (
+            <div className={cn('feed-story-card__gradient bg-gradient-to-br', background.value)} />
+          )}
+
+          {videoUrl ? (
+            <video
+              ref={videoRef}
+              src={videoUrl}
+              poster={posterUrl}
+              muted
+              playsInline
+              loop
+              preload="metadata"
+              className={cn(
+                'feed-story-card__art transition-opacity duration-200',
+                isPlaying ? 'opacity-100' : 'opacity-0',
+              )}
+            />
+          ) : null}
+
+          <span className="feed-story-card__hud" aria-hidden />
+          <span className="feed-story-card__index">{String(index + 1).padStart(2, '0')}</span>
+
+          {previewText && !isPlaying ? (
+            <div className="feed-story-card__text">
+              <p className={textStyle}>{previewText}</p>
+            </div>
+          ) : null}
+
+          <p className="feed-story-card__tag">{item.author.name}</p>
+        </div>
+      </div>
     </button>
   )
 }

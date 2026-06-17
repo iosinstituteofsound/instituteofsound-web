@@ -13,7 +13,6 @@ import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { FEED_COLUMN_CLASS } from '@/shared/lib/layout-config'
-import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
 
 export function FeedPage() {
@@ -47,11 +46,17 @@ export function FeedPage() {
 
       <div className="relative z-0 mt-3 space-y-3">
         {isLoading ? (
-          <div className={cn(premiumSurfaceClass, 'overflow-hidden p-3')}>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4].map((key) => (
-                <Skeleton key={key} className="h-[200px] w-[112px] shrink-0 rounded-xl" />
-              ))}
+          <div className="feed-stories-row">
+            <div className="feed-stories-row__field">
+              <div className="feed-stories-row__head">
+                <p className="feed-stories-row__label">Signal Flux</p>
+                <span className="feed-stories-row__status">Syncing</span>
+              </div>
+              <div className="feed-stories-row__track">
+                {[1, 2, 3, 4].map((key) => (
+                  <Skeleton key={key} className="feed-stories-row__skeleton" />
+                ))}
+              </div>
             </div>
           </div>
         ) : (

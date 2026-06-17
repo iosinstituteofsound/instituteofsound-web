@@ -27,9 +27,6 @@ interface CreatePostAddBarProps {
   disabled?: boolean
 }
 
-const ICON_BUTTON =
-  'inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40'
-
 export function CreatePostAddBar({
   activeAction,
   onAction,
@@ -39,17 +36,17 @@ export function CreatePostAddBar({
   disabled = false,
 }: CreatePostAddBarProps) {
   return (
-    <div className="flex items-center justify-between rounded-lg border px-3 py-2">
-      <span className="text-sm font-semibold text-foreground">Add to your post</span>
-      <div className="flex items-center gap-0.5">
+    <div className="feed-create-post__add-bar">
+      <span className="feed-create-post__add-label">Add to your post</span>
+      <div className="feed-create-post__add-actions">
         <button
           type="button"
           title="Photo or video"
           disabled={disabled}
           onClick={() => onAction('photo-video')}
           className={cn(
-            ICON_BUTTON,
-            activeAction === 'photo-video' && 'bg-primary/10',
+            'feed-create-post__add-btn',
+            activeAction === 'photo-video' && 'is-active',
           )}
         >
           <ImageIcon className="h-6 w-6 text-emerald-500" />
@@ -60,7 +57,7 @@ export function CreatePostAddBar({
           title="Audio or music"
           disabled={disabled}
           onClick={() => onAction('audio')}
-          className={cn(ICON_BUTTON, activeAction === 'audio' && 'bg-primary/10')}
+          className={cn('feed-create-post__add-btn', activeAction === 'audio' && 'is-active')}
         >
           <Mic className="h-6 w-6 text-red-500" />
         </button>
@@ -72,9 +69,8 @@ export function CreatePostAddBar({
           disabled={disabled}
           onClick={(event) => onEmojiClick?.(event.currentTarget)}
           className={cn(
-            ICON_BUTTON,
-            emojiActive && 'bg-amber-500/15',
-            'hidden sm:inline-flex',
+            'feed-create-post__add-btn hidden sm:inline-flex',
+            emojiActive && 'is-active',
           )}
         >
           <Smile className="h-6 w-6 text-amber-500" />
@@ -86,7 +82,7 @@ export function CreatePostAddBar({
               type="button"
               title="More options"
               disabled={disabled}
-              className={ICON_BUTTON}
+              className="feed-create-post__add-btn"
             >
               <MoreHorizontal className="h-6 w-6 text-muted-foreground" />
             </button>
@@ -119,7 +115,7 @@ export function CreatePostAddBar({
 
 export function CreatePostPrivacyBadge() {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs font-semibold text-foreground">
+    <span className="feed-create-post__privacy">
       <Globe className="h-3 w-3" />
       Public
     </span>
