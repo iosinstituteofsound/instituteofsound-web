@@ -5,6 +5,7 @@ const COMPOSE_DRAFT_KEY = 'ios_feed_compose_draft'
 export type ComposeDraft = {
   body: string
   initialType?: FeedItemType
+  initialPayload?: Record<string, unknown>
 }
 
 export function setComposeDraft(draft: ComposeDraft) {

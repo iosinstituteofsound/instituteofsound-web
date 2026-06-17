@@ -12,6 +12,7 @@ import { releaseDateLabel } from '@/modules/explore/lib/release-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/explore/styles/explore.css'
+import '@/modules/explore/styles/explore-mh-chrome.css'
 import '@/modules/explore/styles/releases-page.css'
 
 export function ReleasesPage() {
@@ -160,12 +161,20 @@ export function ReleasesPage() {
 
               <div className="releases-page__pager">
                 <p className="releases-page__pager-meta">
-                  Showing {releases.length.toLocaleString()} of {total.toLocaleString()} releases
+                  <span className="releases-page__pager-label">Showing</span>{' '}
+                  <span className="releases-page__pager-count">
+                    {releases.length.toLocaleString()}
+                  </span>
+                  <span aria-hidden> of </span>
+                  <span className="releases-page__pager-total">
+                    {total.toLocaleString()}
+                  </span>{' '}
+                  releases
                 </p>
                 {hasNextPage ? (
                   <button
                     type="button"
-                    className="releases-page__btn releases-page__btn--line"
+                    className="ios-mh-btn ios-mh-btn--line releases-page__btn"
                     disabled={isFetchingNextPage}
                     onClick={() => void fetchNextPage()}
                   >
@@ -186,6 +195,9 @@ export function ReleasesPage() {
                 </h2>
                 <Link to="/explore#explore-releases" className="releases-page__see-all">
                   See all
+                  <span className="releases-page__see-all-arrow" aria-hidden>
+                    →
+                  </span>
                 </Link>
               </div>
               <ul className="releases-page__upcoming-list">
@@ -226,7 +238,7 @@ export function ReleasesPage() {
                       </Link>
                       <button
                         type="button"
-                        className="releases-page__presave"
+                        className="ios-mh-btn ios-mh-btn--line releases-page__presave"
                         disabled
                         title="Coming soon"
                       >
@@ -246,6 +258,9 @@ export function ReleasesPage() {
               </h2>
               <Link to="/releases" className="releases-page__see-all">
                 See all
+                <span className="releases-page__see-all-arrow" aria-hidden>
+                  →
+                </span>
               </Link>
             </div>
             <ReleasesGenreGrid genres={genres} activeSlug={genreSlug} />
@@ -254,12 +269,12 @@ export function ReleasesPage() {
 
         <section className="releases-page__cta">
           <div>
-            <p className="releases-page__cta-kicker">Are you an artist?</p>
+            <p className="releases-page__cta-kicker ios-mh-kicker">Are you an artist?</p>
             <p className="releases-page__cta-text">
               Submit your track — once approved by the desk, it goes live on this catalog for everyone.
             </p>
           </div>
-          <Link to="/artist/submit" className="releases-page__btn releases-page__btn--fill">
+          <Link to="/artist/submit" className="ios-mh-btn ios-mh-btn--fill releases-page__btn">
             Submit your release
           </Link>
         </section>

@@ -1,4 +1,4 @@
-/* Release detail — artist aside panel */
+/* Release detail — artist aside panel (theme badge driven) */
 
 .rel-aside {
   display: flex;
@@ -8,6 +8,7 @@
   top: 5.5rem;
   --rel-aside-accent: var(--primary);
   --rel-aside-accent-fg: var(--primary-foreground);
+  --rel-aside-accent-bright: var(--ios-accent-bright);
   --rel-aside-muted: var(--muted-foreground);
   --rel-aside-line: var(--border);
   --rel-aside-surface: var(--card);
@@ -96,14 +97,15 @@
 
 .rel-aside__genre {
   font-size: 0.5rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 0.32rem 0.58rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklch, var(--rel-aside-line) 90%, transparent);
-  color: var(--foreground);
-  background: color-mix(in oklch, var(--foreground) 4%, transparent);
+  border-radius: 1px;
+  border: 1px solid color-mix(in oklch, var(--rel-aside-accent) 28%, var(--rel-aside-line));
+  color: color-mix(in oklch, var(--foreground) 88%, var(--rel-aside-accent));
+  background: color-mix(in oklch, var(--rel-aside-accent) 6%, transparent);
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 0 100%);
 }
 
 .rel-aside__stats {
@@ -136,9 +138,14 @@
   width: 100%;
   margin-top: 0.95rem;
   padding: 0.72rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid var(--rel-aside-accent);
-  background: var(--rel-aside-accent);
+  border-radius: 2px;
+  border: 1px solid color-mix(in oklch, var(--rel-aside-accent-bright) 65%, var(--foreground) 35%);
+  background: linear-gradient(
+    180deg,
+    var(--rel-aside-accent-bright) 0%,
+    var(--rel-aside-accent) 50%,
+    color-mix(in oklch, var(--rel-aside-accent) 82%, var(--background)) 100%
+  );
   color: var(--rel-aside-accent-fg);
   font-size: 0.62rem;
   font-weight: 800;
@@ -146,11 +153,26 @@
   text-transform: uppercase;
   text-align: center;
   text-decoration: none;
-  transition: filter 0.2s;
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ios-mh-cut)) 0,
+    100% var(--ios-mh-cut),
+    100% 100%,
+    var(--ios-mh-cut) 100%,
+    0 calc(100% - var(--ios-mh-cut))
+  );
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--foreground) 15%, transparent) inset,
+    0 4px 18px color-mix(in oklch, var(--rel-aside-accent) 42%, transparent);
+  transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
 }
 
 .rel-aside__studio:hover {
-  filter: brightness(1.06);
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--foreground) 18%, transparent) inset,
+    0 8px 24px color-mix(in oklch, var(--rel-aside-accent) 52%, transparent);
 }
 
 .rel-aside__section-kicker {

@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query'
 import * as feedApi from '@/modules/feed/api/feed.api'
+import { sortFeedItemsLatest } from '@/modules/feed/lib/feed-sort'
 import type { CreateFeedItemInput, FeedListResponse } from '@/modules/feed/types/feed.types'
 
 export const feedQueryKey = ['feed'] as const
@@ -42,7 +43,7 @@ export function useCreateFeedItem() {
           if (alreadyListed) return current
 
           return {
-            pages: [{ ...firstPage, items: [item, ...existingItems] }, ...rest],
+            pages: [{ ...firstPage, items: sortFeedItemsLatest([item, ...existingItems]) }, ...rest],
             pageParams: current.pageParams,
           }
         },

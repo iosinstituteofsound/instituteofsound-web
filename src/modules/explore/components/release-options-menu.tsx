@@ -17,6 +17,11 @@ import {
 } from '@/modules/explore/lib/release-meta'
 import { setComposeDraft } from '@/modules/feed/lib/compose-draft'
 import {
+  buildReleaseSharePayload,
+  releaseSharePayloadToRecord,
+} from '@/modules/feed/lib/feed-release-payload'
+import { useExplore } from '@/modules/explore/hooks/use-explore'
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -62,11 +67,6 @@ function ReleaseMenuOption({
   )
 }
 
-function releasePageUrl(releaseId: string) {
-  const origin = window.location.origin.replace(/\/+$/, '')
-  return `${origin}/releases/${releaseId}`
-}
-
 function releaseShareLine(release: ReleaseDto) {
   const artist = release.artistName ? ` — ${release.artistName}` : ''
   return `"${release.title}"${artist}`
@@ -74,9 +74,9 @@ function releaseShareLine(release: ReleaseDto) {
 
 export function ReleaseOptionsMenu({ release, artist, triggerClassName }: ReleaseOptionsMenuProps) {
   const navigate = useNavigate()
+  const { data: explore } = useExplore()
   const artistName = artist?.displayName ?? release.artistName ?? 'this artist'
   const platform = releaseStreamPlatform(release.streamUrl)
-  const pageUrl = releasePageUrl(release.id)
 
   const visitArtist = () => {
     if (!artist) {
@@ -103,17 +103,20 @@ export function ReleaseOptionsMenu({ release, artist, triggerClassName }: Releas
   }
 
   const openComposer = (body: string) => {
-    setComposeDraft({ body, initialType: 'music' })
+    const payload = releaseSharePayloadToRecord(
+      buildReleaseSharePayload(release, artist, explore?.releases ?? []),
+    )
+    setComposeDraft({ body, initialType: 'music', initialPayload: payload })
     navigate('/feed')
     toast.success('Composer opened — finish your post on your profile')
   }
 
   const shareToProfile = () => {
-    openComposer(`Sharing on my profile: ${releaseShareLine(release)}\n${pageUrl}`)
+    openComposer(`Loved this song !!`)
   }
 
   const postAsSpinOrDrop = () => {
-    openComposer(`Spin or drop: ${releaseShareLine(release)}\n${pageUrl}`)
+    openComposer(`Spin or drop: ${releaseShareLine(release)}`)
   }
 
   return (

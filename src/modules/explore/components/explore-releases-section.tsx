@@ -71,7 +71,9 @@ function ReleaseCard({ release, index }: { release: ReleaseDto; index: number })
         <div className="explore-rel-card__badges">
           <span className="explore-rel-card__badge">{releaseTypeLabel(release.type)}</span>
           {isHotRelease(release) ? <span className="explore-rel-card__badge">Hot</span> : null}
-          {isNewRelease(release) ? <span className="explore-rel-card__badge explore-rel-card__badge--accent">New</span> : null}
+          {isNewRelease(release) ? (
+            <span className="explore-rel-card__badge explore-rel-card__badge--accent">New</span>
+          ) : null}
         </div>
         {release.streamUrl ? (
           <button

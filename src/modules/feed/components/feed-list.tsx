@@ -1,6 +1,7 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { FeedItemCard } from '@/modules/feed/lib/feed-type-registry'
 import { useFeedList } from '@/modules/feed/hooks/use-feed'
+import { sortFeedItemsLatest } from '@/modules/feed/lib/feed-sort'
 import { isStoryItem } from '@/modules/feed/lib/story-utils'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
@@ -9,7 +10,10 @@ import { useInfiniteScroll } from '@/shared/hooks/use-infinite-scroll'
 
 export function useFeedListItems() {
   const query = useFeedList()
-  const items = query.data?.pages.flatMap((page) => page.items) ?? []
+  const items = useMemo(
+    () => sortFeedItemsLatest(query.data?.pages.flatMap((page) => page.items) ?? []),
+    [query.data?.pages],
+  )
   return { ...query, items }
 }
 
@@ -20,7 +24,10 @@ interface FeedListProps {
 export function FeedList({ compactLoader }: FeedListProps) {
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeedList()
 
-  const items = (data?.pages.flatMap((page) => page.items) ?? []).filter((item) => !isStoryItem(item))
+  const items = useMemo(
+    () => sortFeedItemsLatest(data?.pages.flatMap((page) => page.items) ?? []).filter((item) => !isStoryItem(item)),
+    [data?.pages],
+  )
 
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {

@@ -8,6 +8,9 @@ import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-pro
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'
+import { ReleaseSharePreview } from '@/modules/feed/components/release-share-preview'
+import { isReleaseShareItem } from '@/modules/feed/lib/feed-release-payload'
+import { useEnrichedMusicFeedItem } from '@/modules/feed/hooks/use-enriched-music-feed-item'
 import { feedItemToPlayerTrack } from '@/modules/player/lib/feed-track'
 import { usePlayer } from '@/modules/player/hooks/use-player'
 import { Button } from '@/shared/components/ui/button'
@@ -53,6 +56,12 @@ function FeedPostMedia({ item }: { item: FeedItemDto }) {
 }
 
 function MusicFeedPreviewBlock({ item }: { item: FeedItemDto }) {
+  const enrichedItem = useEnrichedMusicFeedItem(item)
+
+  if (isReleaseShareItem(enrichedItem)) {
+    return <ReleaseSharePreview item={enrichedItem} compact />
+  }
+
   const payload = item.payload
   const trackTitle = payloadString(payload, 'trackTitle')
   const artistName = payloadString(payload, 'artistName')

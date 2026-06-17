@@ -1,5 +1,6 @@
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { payloadString } from '@/modules/feed/components/cards/feed-card-shell'
+import { sortFeedItemsLatest } from '@/modules/feed/lib/feed-sort'
 import { storyGradientClass, storyTextStyleClass } from '@/modules/feed/lib/story-theme'
 import { isStoryItem } from '@/modules/feed/lib/story-utils'
 
@@ -22,7 +23,7 @@ export type StoryGroup = {
 }
 
 export function getStoryItems(items: FeedItemDto[]) {
-  return items.filter(isStoryItem)
+  return sortFeedItemsLatest(items.filter(isStoryItem))
 }
 
 export function groupStoriesByAuthor(items: FeedItemDto[]): StoryGroup[] {

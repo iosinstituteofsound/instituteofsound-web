@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { Outlet } from 'react-router-dom'
 import { PanelLeft } from 'lucide-react'
 import { DashboardHeader } from '@/app/components/dashboard-header'
@@ -9,37 +9,30 @@ import { ScrollToTopButton } from '@/shared/components/navigation/scroll-to-top-
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 import { MAIN_MAX_WIDTH_CLASS, MAIN_PADDING_CLASS } from '@/shared/lib/layout-config'
+import '@/styles/dashboard-sidebar.css'
 
 export function DashboardLayout() {
   const dashboardConfig = useLayoutStore((state) => state.dashboardConfig)
-  const { mobileOpen, setMobileOpen, setCollapsed } = useSidebarStore()
+  const { collapsed, mobileOpen, setMobileOpen } = useSidebarStore()
   const mainScrollRef = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    setCollapsed(dashboardConfig.sidebar.defaultCollapsed)
-  }, [dashboardConfig.sidebar.defaultCollapsed, setCollapsed])
 
   const showSidebar = dashboardConfig.sidebar.visible
   const showHeader = dashboardConfig.header.visible
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className={cn('dashboard-shell', collapsed && 'dashboard-shell--collapsed')}>
       {showSidebar && mobileOpen ? (
         <button
           type="button"
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          className="dashboard-shell__backdrop md:hidden"
           aria-label="Close navigation menu"
           onClick={() => setMobileOpen(false)}
         />
       ) : null}
 
-      {showSidebar ? (
-        <DashboardSidebar
-          className={mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-        />
-      ) : null}
+      {showSidebar ? <DashboardSidebar mobileHidden={!mobileOpen} /> : null}
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="dashboard-shell__main">
         {showHeader ? <DashboardHeader /> : null}
 
         {showSidebar && !mobileOpen ? (

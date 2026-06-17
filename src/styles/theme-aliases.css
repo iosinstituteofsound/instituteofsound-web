@@ -1,0 +1,41 @@
+/**
+ * Derived theme aliases — computed from semantic badge tokens only.
+ * Never use raw hex here; all values flow from --primary, --background, etc.
+ */
+
+:root,
+.dark {
+  /* Accent ladder */
+  --ios-accent-bright: color-mix(in oklch, var(--primary) 78%, white);
+  --ios-accent-deep: color-mix(in oklch, var(--primary) 82%, black);
+  --ios-accent-soft: color-mix(in oklch, var(--primary) 22%, transparent);
+  --ios-accent-glow: color-mix(in oklch, var(--primary) 55%, transparent);
+  --ios-accent-crimson: var(--destructive);
+  --ios-accent-crimson-mix: color-mix(in oklch, var(--destructive) 40%, var(--primary));
+
+  /* Surface ladder */
+  --ios-surface-base: var(--background);
+  --ios-surface-raised: var(--card);
+  --ios-surface-elevated: color-mix(in oklch, var(--card) 90%, var(--foreground) 10%);
+  --ios-surface-hover: color-mix(in oklch, var(--card) 85%, var(--foreground) 15%);
+  --ios-surface-muted: var(--muted);
+  --ios-ink: var(--foreground);
+  --ios-ink-muted: var(--muted-foreground);
+  --ios-ink-on-accent: var(--primary-foreground);
+  --ios-line: var(--border);
+  --ios-line-soft: color-mix(in oklch, var(--border) 70%, transparent);
+
+  /* Vinyl / disc grooves */
+  --ios-vinyl-groove-dark: color-mix(in oklch, var(--background) 96%, var(--primary) 4%);
+  --ios-vinyl-groove-mid: color-mix(in oklch, var(--background) 82%, var(--foreground) 18%);
+  --ios-vinyl-groove-accent: color-mix(in oklch, var(--primary) 28%, var(--background));
+  --ios-vinyl-groove-highlight: color-mix(in oklch, var(--primary) 22%, var(--background));
+  --ios-vinyl-hub: color-mix(in oklch, var(--background) 65%, var(--foreground) 35%);
+  --ios-vinyl-hub-deep: var(--background);
+  --ios-vinyl-rim: color-mix(in oklch, var(--background) 70%, var(--primary) 30%);
+
+  /* MH structural tokens */
+  --ios-mh-cut: 6px;
+  --ios-mh-rule-height: 4px;
+  --ios-mh-scanline: color-mix(in oklch, var(--foreground) 1.2%, transparent);
+}

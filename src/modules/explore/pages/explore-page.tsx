@@ -14,6 +14,7 @@ import { ExploreListenersSection } from '@/modules/explore/components/explore-li
 import { ExploreCommunitySection } from '@/modules/explore/components/explore-community-section'
 import { ExploreSectionDivider } from '@/modules/explore/components/explore-section-divider'
 import '@/modules/explore/styles/explore-section-head.css'
+import '@/modules/explore/styles/explore-mh-chrome.css'
 import '@/modules/explore/styles/explore.css'
 
 export function ExplorePage() {

@@ -112,14 +112,16 @@
 .app-breadcrumb--surface::after {
   content: '';
   display: block;
-  height: 1px;
+  height: var(--ios-mh-rule-height);
   margin-top: 1.15rem;
   background: linear-gradient(
     90deg,
-    color-mix(in oklch, var(--primary) 55%, transparent),
-    color-mix(in oklch, var(--border) 80%, transparent) 38%,
+    var(--primary) 0%,
+    var(--ios-accent-bright) 38%,
+    var(--ios-accent-crimson-mix) 62%,
     transparent 100%
   );
+  box-shadow: 0 0 18px var(--ios-accent-glow);
 }
 
 .app-breadcrumb__surface-row {

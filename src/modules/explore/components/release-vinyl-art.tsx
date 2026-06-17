@@ -5,10 +5,18 @@ import { cn } from '@/shared/lib/cn'
 interface ReleaseVinylArtProps {
   release: ReleaseDto
   variant?: 'hero' | 'card'
+  spinning?: boolean
   className?: string
 }
 
-export function ReleaseVinylArt({ release, variant = 'hero', className }: ReleaseVinylArtProps) {
+export function ReleaseVinylArt({
+  release,
+  variant = 'hero',
+  spinning,
+  className,
+}: ReleaseVinylArtProps) {
+  const shouldSpin = spinning ?? variant === 'hero'
+
   return (
     <div
       className={cn(
@@ -19,7 +27,7 @@ export function ReleaseVinylArt({ release, variant = 'hero', className }: Releas
       )}
     >
       <div
-        className={cn('explore-rel-vinyl', variant === 'hero' && 'explore-rel-vinyl--spin')}
+        className={cn('explore-rel-vinyl', shouldSpin && 'explore-rel-vinyl--spin')}
         aria-hidden
       />
       <div className="explore-rel-vinyl__sleeve">

@@ -4,6 +4,15 @@
   min-height: 100vh;
   --explore-scroll-margin: 0.75rem;
   --explore-display: var(--font-display);
+  --explore-accent: var(--primary);
+  --explore-accent-fg: var(--primary-foreground);
+  --explore-surface: var(--card);
+  --explore-surface-fg: var(--card-foreground);
+  --explore-muted: var(--muted-foreground);
+  --explore-line: var(--border);
+  --explore-accent-bright: var(--ios-accent-bright);
+  --explore-accent-soft: var(--ios-accent-soft);
+  --explore-accent-glow: var(--ios-accent-glow);
 }
 
 /* Section numerals, display headings, and stat figures */
@@ -3838,10 +3847,6 @@
   backdrop-filter: blur(12px) saturate(120%);
   -webkit-backdrop-filter: blur(12px) saturate(120%);
   box-shadow: 0 24px 56px color-mix(in oklch, var(--background) 65%, transparent);
-  transition:
-    border-color var(--explore-rel-duration) var(--explore-rel-ease),
-    box-shadow var(--explore-rel-duration) var(--explore-rel-ease),
-    transform var(--explore-rel-duration) var(--explore-rel-ease);
 }
 
 .explore-rel-card {
@@ -3859,7 +3864,6 @@
     0 0 0 1px color-mix(in oklch, var(--primary) 40%, transparent),
     0 28px 60px color-mix(in oklch, var(--background) 55%, transparent),
     0 0 48px color-mix(in oklch, var(--primary) 18%, transparent);
-  transform: translateY(-3px);
   outline: none;
 }
 
@@ -3875,14 +3879,10 @@
   height: 100%;
   object-fit: cover;
   filter: saturate(0.78) contrast(1.08) brightness(0.88);
-  transition:
-    transform 0.8s var(--explore-rel-ease),
-    filter 0.8s var(--explore-rel-ease);
 }
 
 .explore-rel-card:hover .explore-rel-card__cover-img,
 .explore-rel-card:focus-within .explore-rel-card__cover-img {
-  transform: scale(1.04);
   filter: saturate(0.95) contrast(1.06) brightness(0.95);
 }
 
@@ -3956,18 +3956,12 @@
   -webkit-backdrop-filter: blur(10px);
   color: var(--foreground);
   cursor: pointer;
-  transition:
-    border-color var(--explore-rel-duration) var(--explore-rel-ease),
-    background var(--explore-rel-duration) var(--explore-rel-ease),
-    color var(--explore-rel-duration) var(--explore-rel-ease),
-    transform var(--explore-rel-duration) var(--explore-rel-ease);
 }
 
 .explore-rel-card__play:hover {
   border-color: var(--primary);
   background: var(--primary);
   color: var(--primary-foreground);
-  transform: scale(1.06);
 }
 
 .explore-rel-card__body {
@@ -3983,7 +3977,6 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--explore-rel-muted);
-  transition: color var(--explore-rel-duration) var(--explore-rel-ease);
 }
 
 .explore-rel-card:hover .explore-rel-card__genre,
@@ -3999,6 +3992,11 @@
   line-height: 1.15;
   text-transform: uppercase;
   color: var(--foreground);
+}
+
+.explore-rel-card:hover .explore-rel-card__title,
+.explore-rel-card:focus-within .explore-rel-card__title {
+  color: var(--primary);
 }
 
 .explore-rel-card__artist {
@@ -4082,11 +4080,6 @@
   background: color-mix(in oklch, var(--foreground) 4%, transparent);
   color: color-mix(in oklch, var(--foreground) 82%, transparent);
   cursor: pointer;
-  transition:
-    border-color var(--explore-rel-duration) var(--explore-rel-ease),
-    background var(--explore-rel-duration) var(--explore-rel-ease),
-    color var(--explore-rel-duration) var(--explore-rel-ease),
-    box-shadow var(--explore-rel-duration) var(--explore-rel-ease);
 }
 
 .explore-rel-card__arrow svg {
@@ -4607,12 +4600,12 @@
 .explore-pl-section {
   --explore-pl-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --explore-pl-duration: 0.5s;
-  --explore-pl-surface: #080808;
-  --explore-pl-surface-hover: #0c0c0c;
-  --explore-pl-ink: rgba(255, 255, 255, 0.96);
-  --explore-pl-surface-muted: rgba(255, 255, 255, 0.5);
-  --explore-pl-surface-muted-soft: rgba(255, 255, 255, 0.34);
-  --explore-pl-line: rgba(255, 255, 255, 0.08);
+  --explore-pl-surface: var(--background);
+  --explore-pl-surface-hover: var(--card);
+  --explore-pl-ink: var(--foreground);
+  --explore-pl-surface-muted: var(--muted-foreground);
+  --explore-pl-surface-muted-soft: color-mix(in oklch, var(--muted-foreground) 68%, transparent);
+  --explore-pl-line: var(--border);
 }
 
 @keyframes explore-pl-rise {
@@ -4846,12 +4839,12 @@
   z-index: 1;
   background: repeating-conic-gradient(
     from -8deg,
-    #1a0808 0deg 14deg,
-    #de7828 14deg 28deg,
-    #c41810 28deg 42deg,
-    #2a1210 42deg 56deg,
-    #de7828 56deg 70deg,
-    #1a0808 70deg 360deg
+    color-mix(in oklch, var(--background) 90%, var(--primary) 10%) 0deg 14deg,
+    color-mix(in oklch, var(--accent) 72%, var(--primary)) 14deg 28deg,
+    var(--primary) 28deg 42deg,
+    color-mix(in oklch, var(--background) 82%, var(--primary) 18%) 42deg 56deg,
+    color-mix(in oklch, var(--accent) 72%, var(--primary)) 56deg 70deg,
+    color-mix(in oklch, var(--background) 90%, var(--primary) 10%) 70deg 360deg
   );
   box-shadow: 0 0 24px color-mix(in oklch, var(--primary) 30%, transparent);
 }
@@ -4873,8 +4866,12 @@
   z-index: 2;
   padding: 3px;
   border-radius: 3px;
-  background: linear-gradient(160deg, #eee, #ccc);
-  box-shadow: 8px 10px 28px color-mix(in oklch, black 75%, transparent);
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklch, var(--foreground) 92%, transparent),
+    color-mix(in oklch, var(--muted-foreground) 55%, transparent)
+  );
+  box-shadow: 8px 10px 28px color-mix(in oklch, var(--background) 75%, transparent);
   transform: rotate(-4deg);
   overflow: hidden;
 }
@@ -4889,7 +4886,7 @@
   font-weight: 900;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #c41a12;
+  color: var(--primary);
   white-space: nowrap;
   pointer-events: none;
 }
@@ -5173,9 +5170,9 @@
   width: 100%;
   height: 100%;
   padding: 2px;
-  border: 1px solid color-mix(in oklch, var(--primary) 28%, rgba(255, 255, 255, 0.12));
+  border: 1px solid color-mix(in oklch, var(--primary) 28%, var(--border));
   border-radius: 6px;
-  background: #0f0f0f;
+  background: var(--card);
   overflow: hidden;
   transition:
     border-color 0.32s var(--explore-pl-ease),
@@ -5333,9 +5330,9 @@
 .explore-scn-section {
   --explore-scn-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --explore-scn-duration: 0.55s;
-  --explore-scn-surface: #080808;
-  --explore-scn-line: color-mix(in oklch, var(--border) 65%, rgba(255, 255, 255, 0.08));
-  --explore-lbl-muted: color-mix(in oklch, var(--foreground) 42%, transparent);
+  --explore-scn-surface: var(--background);
+  --explore-scn-line: color-mix(in oklch, var(--border) 80%, transparent);
+  --explore-lbl-muted: var(--muted-foreground);
 }
 
 @keyframes explore-scn-rise {
@@ -5633,7 +5630,7 @@
   text-transform: uppercase;
   letter-spacing: 0.02em;
   line-height: 0.95;
-  color: #fff;
+  color: var(--foreground);
   transition: color 0.2s var(--explore-scn-ease);
 }
 
@@ -5720,8 +5717,8 @@
 .explore-evt-section {
   --explore-evt-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --explore-evt-duration: 0.55s;
-  --explore-evt-surface: #080808;
-  --explore-evt-muted: color-mix(in oklch, var(--foreground) 42%, transparent);
+  --explore-evt-surface: var(--background);
+  --explore-evt-muted: var(--muted-foreground);
 }
 
 @keyframes explore-evt-rise {
@@ -5966,7 +5963,7 @@
 .explore-evt-card__day {
   font-size: 1.65rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--foreground);
 }
 
 .explore-evt-card__month {
@@ -6015,7 +6012,7 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   line-height: 1.05;
-  color: #fff;
+  color: var(--foreground);
 }
 
 .explore-evt-card__sub {
@@ -6065,7 +6062,7 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--foreground);
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 4px;
@@ -6094,7 +6091,7 @@
   padding: 1.1rem 1.15rem;
   border: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
   border-radius: 8px;
-  background: #0a0a0a;
+  background: var(--card);
   text-decoration: none;
   color: inherit;
   transition:
@@ -8232,10 +8229,13 @@
 /* ── Release detail page ── */
 .explore-release-page {
   --explore-rel-page-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --explore-rel-page-muted: color-mix(in oklch, var(--foreground) 42%, transparent);
-  --explore-rel-page-line: color-mix(in oklch, var(--foreground) 10%, transparent);
+  --explore-rel-page-muted: var(--muted-foreground);
+  --explore-rel-page-line: var(--border);
   --explore-rel-page-glass: color-mix(in oklch, var(--card) 42%, transparent);
-  --explore-rel-page-glass-border: color-mix(in oklch, var(--foreground) 10%, transparent);
+  --explore-rel-page-glass-border: color-mix(in oklch, var(--border) 90%, transparent);
+  --explore-rel-page-accent: var(--primary);
+  --explore-rel-page-accent-fg: var(--primary-foreground);
+  --explore-rel-page-accent-bright: var(--ios-accent-bright);
   position: relative;
   padding: 1.5rem clamp(1rem, 3vw, 2.5rem) 4rem;
   min-height: 100%;
@@ -8302,22 +8302,22 @@
   background:
     repeating-conic-gradient(
       from -8deg,
-      #080808 0deg 9deg,
-      #141820 9deg 18deg,
-      color-mix(in oklch, var(--primary) 28%, #1a1420) 18deg 27deg,
-      #0a0a0a 27deg 36deg,
-      #121820 36deg 45deg,
-      color-mix(in oklch, var(--primary) 22%, #181018) 45deg 54deg,
-      #060606 54deg 360deg
+      var(--ios-vinyl-groove-dark) 0deg 9deg,
+      var(--ios-vinyl-groove-mid) 9deg 18deg,
+      var(--ios-vinyl-groove-accent) 18deg 27deg,
+      color-mix(in oklch, var(--background) 96%, transparent) 27deg 36deg,
+      color-mix(in oklch, var(--background) 88%, var(--foreground) 12%) 36deg 45deg,
+      var(--ios-vinyl-groove-highlight) 45deg 54deg,
+      color-mix(in oklch, var(--background) 98%, transparent) 54deg 360deg
     ),
     radial-gradient(
       circle at 40% 36%,
-      #1e2838,
-      #050505 76%
+      var(--ios-vinyl-rim),
+      var(--background) 76%
     );
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.5),
-    8px 10px 28px rgba(0, 0, 0, 0.65),
+    0 0 0 1px color-mix(in oklch, var(--background) 50%, transparent),
+    8px 10px 28px color-mix(in oklch, var(--background) 65%, transparent),
     0 0 36px color-mix(in oklch, var(--primary) 16%, transparent);
 }
 
@@ -8351,8 +8351,8 @@
   position: absolute;
   inset: 27%;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #161616, #020202 70%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  background: radial-gradient(circle at 38% 32%, var(--ios-vinyl-hub), var(--ios-vinyl-hub-deep) 70%);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--foreground) 6%, transparent);
 }
 
 .explore-rel-vinyl__sleeve {
@@ -8364,9 +8364,9 @@
   height: 100%;
   border-radius: 8px;
   overflow: hidden;
-  background: #0a0a0a;
+  background: var(--background);
   box-shadow:
-    4px 10px 32px rgba(0, 0, 0, 0.75),
+    4px 10px 32px color-mix(in oklch, var(--background) 75%, transparent),
     0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent);
 }
 
@@ -8389,7 +8389,7 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   color: color-mix(in oklch, var(--foreground) 55%, transparent);
-  background: linear-gradient(145deg, #111, #050505);
+  background: linear-gradient(145deg, var(--card), var(--background));
 }
 
 /* Hero */
@@ -8536,13 +8536,33 @@
 }
 
 .explore-release-hero__btn--fill {
-  border-color: var(--primary);
-  background: var(--primary);
-  color: var(--primary-foreground);
+  border-color: color-mix(in oklch, var(--explore-rel-page-accent-bright) 70%, var(--foreground) 30%);
+  background: linear-gradient(
+    180deg,
+    var(--explore-rel-page-accent-bright) 0%,
+    var(--explore-rel-page-accent) 48%,
+    color-mix(in oklch, var(--explore-rel-page-accent) 82%, var(--background)) 100%
+  );
+  color: var(--explore-rel-page-accent-fg);
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ios-mh-cut)) 0,
+    100% var(--ios-mh-cut),
+    100% 100%,
+    var(--ios-mh-cut) 100%,
+    0 calc(100% - var(--ios-mh-cut))
+  );
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--foreground) 15%, transparent) inset,
+    0 4px 18px color-mix(in oklch, var(--explore-rel-page-accent) 45%, transparent);
 }
 
 .explore-release-hero__btn--fill:hover:not(:disabled) {
   filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--foreground) 18%, transparent) inset,
+    0 8px 24px color-mix(in oklch, var(--explore-rel-page-accent) 52%, transparent);
 }
 
 .explore-release-hero__btn--fill:disabled {
@@ -8932,12 +8952,10 @@
   overflow: visible;
   animation: explore-rel-rise 0.5s var(--explore-rel-page-rail-ease) both;
   animation-delay: var(--explore-rel-page-rail-delay, 0ms);
-  transition: transform 0.35s var(--explore-rel-page-rail-ease);
 }
 
 .explore-rel-page-rail__card:hover,
 .explore-rel-page-rail__card:focus-visible {
-  transform: translateY(-2px);
   outline: none;
 }
 
@@ -8951,9 +8969,6 @@
   box-shadow:
     0 14px 36px color-mix(in oklch, var(--background) 65%, transparent),
     inset 0 1px 0 color-mix(in oklch, var(--foreground) 8%, transparent);
-  transition:
-    border-color 0.35s var(--explore-rel-page-rail-ease),
-    box-shadow 0.35s var(--explore-rel-page-rail-ease);
 }
 
 .explore-rel-page-rail__card:hover .explore-rel-page-rail__art,
@@ -8971,14 +8986,10 @@
   object-fit: cover;
   display: block;
   filter: saturate(0.82) contrast(1.06) brightness(0.88);
-  transition:
-    transform 0.8s var(--explore-rel-page-rail-ease),
-    filter 0.8s var(--explore-rel-page-rail-ease);
 }
 
 .explore-rel-page-rail__card:hover .explore-rel-page-rail__cover-img,
 .explore-rel-page-rail__card:focus-visible .explore-rel-page-rail__cover-img {
-  transform: scale(1.06);
   filter: saturate(1) contrast(1.04) brightness(0.96);
 }
 
@@ -9018,12 +9029,6 @@
   color: color-mix(in oklch, var(--foreground) 75%, transparent);
   opacity: 0;
   transform: translate(-2px, 2px);
-  transition:
-    opacity 0.3s var(--explore-rel-page-rail-ease),
-    border-color 0.3s var(--explore-rel-page-rail-ease),
-    background 0.3s var(--explore-rel-page-rail-ease),
-    color 0.3s var(--explore-rel-page-rail-ease),
-    transform 0.3s var(--explore-rel-page-rail-ease);
 }
 
 .explore-rel-page-rail__card:hover .explore-rel-page-rail__arrow,
@@ -9073,7 +9078,6 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--explore-rel-page-rail-muted);
-  transition: color 0.35s var(--explore-rel-page-rail-ease);
 }
 
 .explore-rel-page-rail__card:hover .explore-rel-page-rail__genre,
@@ -9093,6 +9097,11 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.explore-rel-page-rail__card:hover .explore-rel-page-rail__name,
+.explore-rel-page-rail__card:focus-visible .explore-rel-page-rail__name {
+  color: var(--primary);
 }
 
 .explore-rel-page-rail__artist {

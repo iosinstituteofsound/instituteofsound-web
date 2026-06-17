@@ -287,7 +287,7 @@
   width: 100%;
   align-items: center;
   justify-content: center;
-  background: #0a0a0a;
+  background: var(--card);
 }
 
 .feed-social-card__media-frame img,

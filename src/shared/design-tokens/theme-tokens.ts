@@ -72,48 +72,61 @@ export const COLOR_GROUPS: Array<{ label: string; description: string; keys: Sem
   },
 ]
 
-export const DEFAULT_LIGHT_COLORS: SemanticColors = {
-  background: 'oklch(1 0 0)',
-  foreground: 'oklch(0.145 0 0)',
+/** Metal Hammer magazine palette — light mode (paper + blood red). */
+export const METAL_HAMMER_LIGHT_COLORS: SemanticColors = {
+  background: 'oklch(0.985 0 0)',
+  foreground: 'oklch(0.12 0 0)',
   card: 'oklch(1 0 0)',
-  'card-foreground': 'oklch(0.145 0 0)',
+  'card-foreground': 'oklch(0.12 0 0)',
   popover: 'oklch(1 0 0)',
-  'popover-foreground': 'oklch(0.145 0 0)',
-  primary: 'oklch(0.205 0 0)',
+  'popover-foreground': 'oklch(0.12 0 0)',
+  primary: 'oklch(0.55 0.254 25)',
   'primary-foreground': 'oklch(0.985 0 0)',
-  secondary: 'oklch(0.97 0 0)',
-  'secondary-foreground': 'oklch(0.205 0 0)',
-  muted: 'oklch(0.97 0 0)',
-  'muted-foreground': 'oklch(0.556 0 0)',
-  accent: 'oklch(0.97 0 0)',
-  'accent-foreground': 'oklch(0.205 0 0)',
-  destructive: 'oklch(0.577 0.245 27.325)',
+  secondary: 'oklch(0.96 0 0)',
+  'secondary-foreground': 'oklch(0.12 0 0)',
+  muted: 'oklch(0.96 0 0)',
+  'muted-foreground': 'oklch(0.5 0 0)',
+  accent: 'oklch(0.62 0.28 25)',
+  'accent-foreground': 'oklch(0.985 0 0)',
+  destructive: 'oklch(0.48 0.2 15)',
   'destructive-foreground': 'oklch(0.985 0 0)',
-  border: 'oklch(0.922 0 0)',
-  input: 'oklch(0.922 0 0)',
-  ring: 'oklch(0.708 0 0)',
+  border: 'oklch(0.88 0 0)',
+  input: 'oklch(0.88 0 0)',
+  ring: 'oklch(0.55 0.254 25)',
 }
 
-export const DEFAULT_DARK_COLORS: SemanticColors = {
-  background: 'oklch(0.145 0 0)',
+/** Metal Hammer magazine palette — dark mode (void black + signal red). */
+export const METAL_HAMMER_DARK_COLORS: SemanticColors = {
+  background: 'oklch(0.08 0 0)',
   foreground: 'oklch(0.985 0 0)',
-  card: 'oklch(0.205 0 0)',
+  card: 'oklch(0.11 0 0)',
   'card-foreground': 'oklch(0.985 0 0)',
-  popover: 'oklch(0.205 0 0)',
+  popover: 'oklch(0.11 0 0)',
   'popover-foreground': 'oklch(0.985 0 0)',
-  primary: 'oklch(0.922 0 0)',
-  'primary-foreground': 'oklch(0.205 0 0)',
-  secondary: 'oklch(0.269 0 0)',
+  primary: 'oklch(0.55 0.254 25)',
+  'primary-foreground': 'oklch(0.985 0 0)',
+  secondary: 'oklch(0.16 0 0)',
   'secondary-foreground': 'oklch(0.985 0 0)',
-  muted: 'oklch(0.269 0 0)',
-  'muted-foreground': 'oklch(0.708 0 0)',
-  accent: 'oklch(0.269 0 0)',
+  muted: 'oklch(0.16 0 0)',
+  'muted-foreground': 'oklch(0.55 0 0)',
+  accent: 'oklch(0.62 0.28 25)',
   'accent-foreground': 'oklch(0.985 0 0)',
-  destructive: 'oklch(0.704 0.191 22.216)',
+  destructive: 'oklch(0.48 0.2 15)',
   'destructive-foreground': 'oklch(0.985 0 0)',
-  border: 'oklch(1 0 0 / 10%)',
+  border: 'oklch(1 0 0 / 12%)',
   input: 'oklch(1 0 0 / 15%)',
-  ring: 'oklch(0.556 0 0)',
+  ring: 'oklch(0.55 0.254 25)',
+}
+
+export const DEFAULT_LIGHT_COLORS: SemanticColors = METAL_HAMMER_LIGHT_COLORS
+
+export const DEFAULT_DARK_COLORS: SemanticColors = METAL_HAMMER_DARK_COLORS
+
+export const METAL_HAMMER_THEME_TOKENS: ThemeTokens = {
+  colors: {
+    light: METAL_HAMMER_LIGHT_COLORS,
+    dark: METAL_HAMMER_DARK_COLORS,
+  },
 }
 
 export const DEFAULT_THEME_TOKENS: ThemeTokens = {

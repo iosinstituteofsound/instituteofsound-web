@@ -1,0 +1,322 @@
+/**
+ * Metal Hammer UI primitives — all colors from badge theme tokens.
+ */
+
+/* Top rule bar */
+.ios-mh-rule {
+  height: var(--ios-mh-rule-height);
+  background: linear-gradient(
+    90deg,
+    var(--primary) 0%,
+    var(--ios-accent-bright) 38%,
+    var(--ios-accent-crimson-mix) 62%,
+    transparent 100%
+  );
+  box-shadow: 0 0 18px var(--ios-accent-glow);
+}
+
+/* Angular MH badge */
+.ios-mh-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.55rem;
+  border: 1px solid color-mix(in oklch, var(--primary) 45%, transparent);
+  background: color-mix(in oklch, var(--primary) 8%, transparent);
+  color: var(--primary);
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 0 100%);
+}
+
+.ios-mh-badge--live {
+  border-color: color-mix(in oklch, var(--primary) 60%, transparent);
+  background: color-mix(in oklch, var(--primary) 15%, transparent);
+}
+
+.ios-mh-badge--crimson {
+  border-color: color-mix(in oklch, var(--destructive) 50%, transparent);
+  background: color-mix(in oklch, var(--destructive) 12%, transparent);
+  color: var(--destructive);
+}
+
+.ios-mh-badge--dark {
+  border-color: var(--border);
+  background: var(--background);
+  color: var(--muted-foreground);
+}
+
+.ios-mh-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+  animation: ios-mh-badge-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ios-mh-badge-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+/* Kicker label */
+.ios-mh-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.ios-mh-kicker::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: var(--primary);
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+  box-shadow: 0 0 8px var(--primary);
+}
+
+/* Primary CTA button */
+.ios-mh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.35rem;
+  padding: 0.52rem 1.05rem;
+  border-radius: 2px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ios-mh-cut)) 0,
+    100% var(--ios-mh-cut),
+    100% 100%,
+    var(--ios-mh-cut) 100%,
+    0 calc(100% - var(--ios-mh-cut))
+  );
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+.ios-mh-btn--fill {
+  border: 1px solid color-mix(in oklch, var(--ios-accent-bright) 70%, var(--foreground) 30%);
+  background: linear-gradient(
+    180deg,
+    var(--ios-accent-bright) 0%,
+    var(--primary) 48%,
+    var(--ios-accent-deep) 100%
+  );
+  color: var(--primary-foreground);
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--foreground) 18%, transparent) inset,
+    0 0 0 1px color-mix(in oklch, var(--primary) 35%, transparent),
+    0 6px 24px color-mix(in oklch, var(--primary) 48%, transparent);
+}
+
+.ios-mh-btn--fill:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--foreground) 22%, transparent) inset,
+    0 0 0 1px color-mix(in oklch, var(--primary) 50%, transparent),
+    0 10px 32px color-mix(in oklch, var(--primary) 58%, transparent);
+}
+
+.ios-mh-btn--line {
+  border: 1px solid color-mix(in oklch, var(--foreground) 18%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--foreground) 6%, transparent), transparent),
+    color-mix(in oklch, var(--background) 55%, transparent);
+  color: var(--foreground);
+}
+
+.ios-mh-btn--line:hover,
+.ios-mh-btn--line.is-active {
+  border-color: color-mix(in oklch, var(--primary) 55%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--primary) 12%, transparent), transparent),
+    color-mix(in oklch, var(--background) 45%, transparent);
+  color: var(--foreground);
+}
+
+/* MH surface card shell */
+.ios-mh-surface {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 2px;
+  border: 1px solid color-mix(in oklch, var(--border) 90%, var(--primary) 10%);
+  background: linear-gradient(
+    168deg,
+    color-mix(in oklch, var(--card) 95%, var(--primary) 5%) 0%,
+    var(--background) 42%,
+    color-mix(in oklch, var(--background) 95%, black) 100%
+  );
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--foreground) 5%, transparent) inset,
+    0 0 0 1px color-mix(in oklch, var(--background) 60%, transparent),
+    0 22px 56px color-mix(in oklch, var(--background) 45%, transparent);
+}
+
+.ios-mh-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 12% 18%,
+      color-mix(in oklch, var(--primary) 16%, transparent),
+      transparent 52%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--ios-mh-scanline) 2px,
+      var(--ios-mh-scanline) 4px
+    );
+  opacity: 0.95;
+  z-index: 0;
+}
+
+.ios-mh-surface::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--ios-mh-rule-height);
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    var(--primary) 0%,
+    var(--ios-accent-bright) 38%,
+    var(--ios-accent-crimson-mix) 62%,
+    transparent 100%
+  );
+  box-shadow: 0 0 18px var(--ios-accent-glow);
+}
+
+.ios-mh-surface > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Stat cell */
+.ios-mh-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.28rem 0.35rem;
+  border: 1px solid var(--ios-line-soft);
+  border-radius: 1px;
+  background: color-mix(in oklch, var(--background) 35%, transparent);
+}
+
+.ios-mh-stat dt {
+  font-size: 0.36rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  line-height: 1;
+}
+
+.ios-mh-stat dd {
+  margin: 0.16rem 0 0;
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--foreground);
+  line-height: 1;
+}
+
+/* Genre / tag chip */
+.ios-mh-tag {
+  font-size: 0.4rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.5rem;
+  border-radius: 1px;
+  border: 1px solid color-mix(in oklch, var(--primary) 28%, var(--border));
+  color: color-mix(in oklch, var(--foreground) 88%, var(--primary));
+  background: color-mix(in oklch, var(--primary) 6%, transparent);
+  line-height: 1.2;
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 0 100%);
+}
+
+/* Shared vinyl disc surface */
+.ios-vinyl-disc {
+  background:
+    repeating-conic-gradient(
+      from -8deg,
+      var(--ios-vinyl-groove-dark) 0deg 9deg,
+      var(--ios-vinyl-groove-mid) 9deg 18deg,
+      var(--ios-vinyl-groove-accent) 18deg 27deg,
+      color-mix(in oklch, var(--background) 96%, transparent) 27deg 36deg,
+      color-mix(in oklch, var(--background) 88%, var(--foreground) 12%) 36deg 45deg,
+      var(--ios-vinyl-groove-highlight) 45deg 54deg,
+      color-mix(in oklch, var(--background) 98%, transparent) 54deg 360deg
+    ),
+    radial-gradient(
+      circle at 40% 36%,
+      var(--ios-vinyl-rim),
+      var(--background) 76%
+    );
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--background) 50%, transparent),
+    8px 10px 28px color-mix(in oklch, var(--background) 65%, transparent),
+    0 0 36px color-mix(in oklch, var(--primary) 16%, transparent);
+}
+
+.ios-vinyl-disc__hub {
+  background: radial-gradient(
+    circle at 38% 32%,
+    var(--ios-vinyl-hub),
+    var(--ios-vinyl-hub-deep) 70%
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--foreground) 6%, transparent);
+}
+
+.ios-vinyl-sleeve {
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--background);
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--primary) 22%, transparent),
+    0 0 0 2px color-mix(in oklch, var(--background) 50%, transparent),
+    0 14px 36px color-mix(in oklch, var(--background) 65%, transparent),
+    0 0 28px color-mix(in oklch, var(--primary) 14%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ios-mh-badge-dot {
+    animation: none;
+  }
+}

@@ -8,7 +8,6 @@ import { SidebarNavIcon } from '@/modules/sidebar/components/sidebar-nav-icon'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { env } from '@/shared/config/env'
 import { cn } from '@/shared/lib/cn'
-import { SIDEBAR_WIDTH_CLASS } from '@/shared/lib/layout-config'
 import { HEADER_NAV_PATHS } from '@/shared/lib/header-nav'
 import { isRegisteredResource } from '@/shared/lib/resource-registry'
 import type { SidebarMenuItemDto } from '@/shared/types/sidebar.types'
@@ -40,15 +39,14 @@ function isSidebarItemActive(pathname: string, itemPath: string) {
 }
 
 interface DashboardSidebarProps {
-  className?: string
+  mobileHidden?: boolean
 }
 
-export function DashboardSidebar({ className }: DashboardSidebarProps) {
+export function DashboardSidebar({ mobileHidden = false }: DashboardSidebarProps) {
   const location = useLocation()
   const dashboardConfig = useLayoutStore((state) => state.dashboardConfig)
   const { collapsed, toggleCollapsed, setMobileOpen } = useSidebarStore()
   const { data: sidebarItems, isLoading: sidebarLoading } = useSidebar()
-  const widthClass = SIDEBAR_WIDTH_CLASS[dashboardConfig.sidebar.width]
   const brandTitle = dashboardConfig.header.brandTitle?.trim() || env.appName
 
   const visibleItems = useMemo(
@@ -75,16 +73,19 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
   return (
     <aside
       className={cn(
-        'dashboard-sidebar fixed inset-y-0 left-0 z-40 flex h-full max-h-dvh flex-col overflow-hidden border-r border-border/50 transition-[width] duration-300 ease-out md:static md:z-auto md:shrink-0',
+        'dashboard-sidebar flex h-full max-h-dvh shrink-0 flex-col overflow-hidden border-r border-border/50',
         collapsed && 'dashboard-sidebar--collapsed',
-        collapsed ? widthClass.collapsed : 'w-[15.5rem]',
-        className,
+        mobileHidden && 'dashboard-sidebar--mobile-hidden',
       )}
     >
       <div className={cn('dashboard-sidebar-top shrink-0', collapsed && 'dashboard-sidebar-top--collapsed')}>
         {!collapsed ? (
           <div className="dashboard-sidebar-brand-row">
-            <Link to="/home" className="dashboard-sidebar-brand block min-w-0 flex-1" onClick={() => setMobileOpen(false)}>
+            <Link
+              to="/home"
+              className="dashboard-sidebar-brand"
+              onClick={() => setMobileOpen(false)}
+            >
               <span className="dashboard-sidebar-brand-ios">IOS</span>
               <span className="dashboard-sidebar-brand-subtitle">{brandTitle.toUpperCase()}</span>
             </Link>

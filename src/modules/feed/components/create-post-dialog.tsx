@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useCreateFeedItem } from '@/modules/feed/hooks/use-feed'
-import type { FeedItemType } from '@/modules/feed/types/feed.types'
+import type { FeedItemDto, FeedItemType } from '@/modules/feed/types/feed.types'
+import { ReleaseSharePreview } from '@/modules/feed/components/release-share-preview'
+import { isReleaseSharePayload } from '@/modules/feed/lib/feed-release-payload'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import {
   AnimatedEmojiPicker,
@@ -43,6 +45,7 @@ interface CreatePostDialogProps {
   onOpenChange: (open: boolean) => void
   initialType?: FeedItemType
   initialBody?: string
+  initialPayload?: Record<string, unknown>
   userName: string
   avatarUrl?: string | null
 }
@@ -80,6 +83,7 @@ export function CreatePostDialog({
   onOpenChange,
   initialType = 'text',
   initialBody = '',
+  initialPayload,
   userName,
   avatarUrl,
 }: CreatePostDialogProps) {
@@ -97,6 +101,7 @@ export function CreatePostDialog({
   const [emojiAnchor, setEmojiAnchor] = useState<HTMLElement | null>(null)
   const [linkPreviewDismissed, setLinkPreviewDismissed] = useState(false)
   const [mediaUploadState, setMediaUploadState] = useState({ uploading: false, hasPreview: false })
+  const [releasePayload, setReleasePayload] = useState<Record<string, unknown> | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mediaPanelRef = useRef<MediaAttachPanelHandle>(null)
 
@@ -129,7 +134,8 @@ export function CreatePostDialog({
     setActiveAction(mapped)
     setShowArticleFields(initialType === 'article')
     setBody(initialBody)
-  }, [open, initialType, initialBody])
+    setReleasePayload(initialPayload && isReleaseSharePayload(initialPayload) ? initialPayload : null)
+  }, [open, initialType, initialBody, initialPayload])
 
   const reset = () => {
     setBody('')
@@ -143,6 +149,7 @@ export function CreatePostDialog({
     setEmojiAnchor(null)
     setLinkPreviewDismissed(false)
     setMediaUploadState({ uploading: false, hasPreview: false })
+    setReleasePayload(null)
     mediaPanelRef.current?.clearPendingPreview()
   }
 
@@ -162,7 +169,7 @@ export function CreatePostDialog({
   }
 
   const mediaMode = mediaModeForAction(activeAction)
-  const showMediaPanel = Boolean(mediaMode) && activeAction !== 'clip'
+  const showMediaPanel = Boolean(mediaMode) && activeAction !== 'clip' && !releasePayload
   const showClipEditor = activeAction === 'clip'
 
   const activeLinkPreview =
@@ -175,14 +182,16 @@ export function CreatePostDialog({
 
   const canPost = useMemo(() => {
     if (mediaUploadState.uploading) return false
+    if (releasePayload) return true
     if (showArticleFields && articleUrl.trim()) return true
     if (mediaAttachment || mediaUploadState.hasPreview) return true
     if (activeLinkPreview) return true
     if (body.trim()) return true
     return false
-  }, [body, mediaAttachment, showArticleFields, articleUrl, activeLinkPreview, mediaUploadState])
+  }, [body, mediaAttachment, showArticleFields, articleUrl, activeLinkPreview, mediaUploadState, releasePayload])
 
   const inferPostType = (attachment: MediaAttachment | null): FeedItemType => {
+    if (releasePayload) return 'music'
     if (showArticleFields && articleUrl.trim()) return 'article'
     if (attachment || mediaUploadState.hasPreview) {
       if (resolvedMediaKind === 'video') return 'video'
@@ -224,7 +233,7 @@ export function CreatePostDialog({
     }
 
     const type = inferPostType(attachment)
-    const payload: Record<string, unknown> = {}
+    const payload: Record<string, unknown> = releasePayload ? { ...releasePayload } : {}
 
     if (type === 'text') {
       const postText = activeLinkPreview ? stripUrlFromText(body, activeLinkPreview.url) : body.trim()
@@ -290,6 +299,21 @@ export function CreatePostDialog({
     }
   }
 
+  const releasePreviewItem = useMemo<FeedItemDto | null>(() => {
+    if (!releasePayload) return null
+    return {
+      id: 'compose-preview',
+      type: 'music',
+      priority: 0,
+      status: 'published',
+      author: { id: 'preview', name: userName, avatarUrl: avatarUrl ?? undefined },
+      body,
+      payload: releasePayload,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+  }, [releasePayload, userName, avatarUrl, body])
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
@@ -342,6 +366,19 @@ export function CreatePostDialog({
               preview={activeLinkPreview}
               onRemove={() => setLinkPreviewDismissed(true)}
             />
+          ) : null}
+
+          {releasePreviewItem ? (
+            <div className="space-y-2">
+              <ReleaseSharePreview item={releasePreviewItem} compact />
+              <button
+                type="button"
+                className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:underline"
+                onClick={() => setReleasePayload(null)}
+              >
+                Remove release preview
+              </button>
+            </div>
           ) : null}
 
           {mediaAttachment ? (

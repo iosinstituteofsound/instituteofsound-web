@@ -8,6 +8,7 @@ export function feedItemToPlayerTrack(item: FeedItemDto): PlayerTrack | null {
   const audioUrl = payloadString(item.payload, 'audioUrl')
   if (!audioUrl) return null
 
+  const releaseId = payloadString(item.payload, 'releaseId')
   const trackTitle = payloadString(item.payload, 'trackTitle') ?? 'Shared track'
   const artistName = payloadString(item.payload, 'artistName')
   const artworkUrl = payloadString(item.payload, 'artworkUrl')
@@ -15,7 +16,7 @@ export function feedItemToPlayerTrack(item: FeedItemDto): PlayerTrack | null {
   const youtubeUrl = payloadString(item.payload, 'youtubeUrl')
 
   return {
-    id: item.id,
+    id: releaseId ?? item.id,
     title: trackTitle,
     artist: artistName,
     artworkUrl,
@@ -24,6 +25,26 @@ export function feedItemToPlayerTrack(item: FeedItemDto): PlayerTrack | null {
     spotifyUrl,
     youtubeUrl,
   }
+}
+
+/** Prefer enriched release-share payload fields when building a player track. */
+export function releaseShareItemToPlayerTrack(
+  item: FeedItemDto,
+  share?: { releaseId: string; trackTitle: string; artistName?: string; audioUrl?: string; artworkUrl?: string } | null,
+): PlayerTrack | null {
+  if (!share?.audioUrl) return feedItemToPlayerTrack(item)
+
+  return feedItemToPlayerTrack({
+    ...item,
+    payload: {
+      ...item.payload,
+      releaseId: share.releaseId,
+      trackTitle: share.trackTitle,
+      artistName: share.artistName,
+      audioUrl: share.audioUrl,
+      artworkUrl: share.artworkUrl,
+    },
+  })
 }
 
 export function buildFeedQueue(items: FeedItemDto[]): PlayerTrack[] {

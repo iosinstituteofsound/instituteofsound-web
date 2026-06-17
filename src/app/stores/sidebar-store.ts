@@ -18,6 +18,6 @@ export const useSidebarStore = create<SidebarState>()(
       setCollapsed: (collapsed) => set({ collapsed }),
       setMobileOpen: (mobileOpen) => set({ mobileOpen }),
     }),
-    { name: 'ios-sidebar', partialize: (s) => ({ collapsed: s.collapsed }) },
+    { name: 'ios-sidebar-v4', partialize: (s) => ({ collapsed: s.collapsed }) },
   ),
 )

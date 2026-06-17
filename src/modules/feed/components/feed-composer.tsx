@@ -15,6 +15,7 @@ export function FeedComposer({ collapseProgress = 0 }: FeedComposerProps) {
   const [open, setOpen] = useState(false)
   const [initialType, setInitialType] = useState<FeedItemType>('text')
   const [initialBody, setInitialBody] = useState('')
+  const [initialPayload, setInitialPayload] = useState<Record<string, unknown> | undefined>()
 
   const userName = me?.user.name ?? 'You'
   const avatarUrl = me?.user ? getUserAvatarThumbnailUrl(me.user) : undefined
@@ -24,11 +25,13 @@ export function FeedComposer({ collapseProgress = 0 }: FeedComposerProps) {
     if (!draft) return
     setInitialType(draft.initialType ?? 'text')
     setInitialBody(draft.body)
+    setInitialPayload(draft.initialPayload)
     setOpen(true)
   }, [])
 
   const openComposer = (type: FeedItemType = 'text') => {
     setInitialBody('')
+    setInitialPayload(undefined)
     setInitialType(type)
     setOpen(true)
   }
@@ -46,6 +49,7 @@ export function FeedComposer({ collapseProgress = 0 }: FeedComposerProps) {
         onOpenChange={setOpen}
         initialType={initialType}
         initialBody={initialBody}
+        initialPayload={initialPayload}
         userName={userName}
         avatarUrl={avatarUrl}
       />

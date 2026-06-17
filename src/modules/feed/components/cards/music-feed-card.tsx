@@ -1,6 +1,9 @@
 import { ExternalLink, Music2, Pause, Play } from 'lucide-react'
 import type { FeedCardProps } from '@/modules/feed/lib/feed-type-registry'
 import { FeedCardShell, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
+import { ReleaseSharePreview } from '@/modules/feed/components/release-share-preview'
+import { isReleaseShareItem } from '@/modules/feed/lib/feed-release-payload'
+import { useEnrichedMusicFeedItem } from '@/modules/feed/hooks/use-enriched-music-feed-item'
 import { feedItemToPlayerTrack } from '@/modules/player/lib/feed-track'
 import { usePlayer } from '@/modules/player/hooks/use-player'
 import { Button } from '@/shared/components/ui/button'
@@ -19,6 +22,16 @@ function musicHeaderContext(trackTitle?: string, artistName?: string) {
 }
 
 export function MusicFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
+  const enrichedItem = useEnrichedMusicFeedItem(item)
+
+  if (isReleaseShareItem(enrichedItem)) {
+    return (
+      <FeedCardShell item={item} defaultCommentsOpen={defaultCommentsOpen}>
+        <ReleaseSharePreview item={enrichedItem} />
+      </FeedCardShell>
+    )
+  }
+
   const trackTitle = payloadString(item.payload, 'trackTitle')
   const artistName = payloadString(item.payload, 'artistName')
   const youtubeUrl = payloadString(item.payload, 'youtubeUrl')
