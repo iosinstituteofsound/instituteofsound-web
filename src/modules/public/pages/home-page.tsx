@@ -1,52 +1,65 @@
-import { Link } from 'react-router-dom'
+﻿import { useExplore } from '@/modules/explore/hooks/use-explore'
+import { ExploreSectionDivider } from '@/modules/explore/components/explore-section-divider'
+import { Loader } from '@/shared/components/feedback/loader'
 import { Button } from '@/shared/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { env } from '@/shared/config/env'
+import { usePlatformStats } from '@/modules/public/hooks/use-platform-stats'
+import { LandingHero } from '@/modules/public/components/landing-hero'
+import { LandingStatsBar } from '@/modules/public/components/landing-stats-bar'
+import { LandingTrendingReleases } from '@/modules/public/components/landing-trending-releases'
+import { LandingEditorialSpotlight } from '@/modules/public/components/landing-editorial-spotlight'
+import { LandingCultureRail } from '@/modules/public/components/landing-culture-rail'
+import { LandingSocialProof } from '@/modules/public/components/landing-social-proof'
+import { LandingJoinSection } from '@/modules/public/components/landing-join-section'
+import { LandingFinalCta } from '@/modules/public/components/landing-final-cta'
+import '@/modules/explore/styles/explore.css'
+import '@/modules/public/styles/landing.css'
 
 export function HomePage() {
+  const { data, isLoading, isError, refetch } = useExplore()
+  const { data: stats, isLoading: statsLoading } = usePlatformStats()
+
+  if (isLoading) {
+    return <Loader className="min-h-screen bg-background" />
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-8 text-center">
+        <p className="text-muted-foreground">Could not load the landing page. Check API connection.</p>
+        <Button type="button" onClick={() => refetch()}>
+          Try again
+        </Button>
+      </div>
+    )
+  }
+
   return (
-    <section className="mx-auto max-w-4xl px-4 py-24 text-center">
-      <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{env.appName}</h1>
-      <p className="mt-4 text-lg text-muted-foreground">
-        Underground music magazine and platform — rebuilt with enterprise-grade architecture.
-      </p>
-      <div className="mt-8 flex justify-center gap-4">
-        <Button asChild size="lg">
-          <Link to="/dashboard">Go to Dashboard</Link>
-        </Button>
-        <Button asChild variant="outline" size="lg">
-          <Link to="/auth/login">Sign in</Link>
-        </Button>
-      </div>
-      <div className="mt-16 grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Modular</CardTitle>
-            <CardDescription>Feature-based architecture</CardDescription>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            Domain-driven modules with clean separation of concerns.
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Secure</CardTitle>
-            <CardDescription>RBAC permission system</CardDescription>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            Route, menu, and component-level authorization.
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Type-safe</CardTitle>
-            <CardDescription>Strict TypeScript + Zod</CardDescription>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            End-to-end type safety from API to UI forms.
-          </CardContent>
-        </Card>
-      </div>
-    </section>
+    <div className="landing-page">
+      <LandingHero coverStory={data.editorial.coverStory} />
+      <LandingStatsBar stats={stats} isLoading={statsLoading} />
+
+      <ExploreSectionDivider variant="gateway" />
+      <LandingTrendingReleases releases={data.releases} />
+
+      <ExploreSectionDivider variant="saturn" />
+      <LandingEditorialSpotlight
+        coverStory={data.editorial.coverStory}
+        sidebar={data.editorial.sidebar}
+      />
+
+      <ExploreSectionDivider variant="lunar" />
+      <LandingCultureRail
+        featured={data.playlists.featured}
+        playlists={data.playlists.items}
+        artists={data.artists}
+      />
+
+      <ExploreSectionDivider variant="eclipse" />
+      <LandingSocialProof listeners={data.listeners} community={data.community} />
+
+      <ExploreSectionDivider variant="nexus" />
+      <LandingJoinSection />
+      <LandingFinalCta />
+    </div>
   )
 }

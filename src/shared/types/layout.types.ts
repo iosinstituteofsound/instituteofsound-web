@@ -82,13 +82,29 @@ export const DEFAULT_LAYOUT_CONFIG: LayoutConfig = {
       showAuthButtons: true,
       navLinks: [
         { label: 'Home', href: '/' },
-        { label: 'Sign in', href: '/auth/login' },
+        { label: 'Explore', href: '/explore' },
+        { label: 'Releases', href: '/explore/releases' },
       ],
     },
     footer: {
       enabled: true,
       copyright: '© Institute of Sound',
-      linkGroups: [],
+      linkGroups: [
+        {
+          title: 'Discover',
+          links: [
+            { label: 'Explore', href: '/explore' },
+            { label: 'Releases', href: '/explore/releases' },
+          ],
+        },
+        {
+          title: 'Account',
+          links: [
+            { label: 'Join free', href: '/auth/register' },
+            { label: 'Sign in', href: '/auth/login' },
+          ],
+        },
+      ],
     },
   },
 }
