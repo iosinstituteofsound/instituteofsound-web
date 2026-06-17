@@ -109,8 +109,8 @@ export function ReleasePage() {
     return (
       <div className="explore-page flex min-h-screen flex-col items-center justify-center gap-4 p-8">
         <p className="text-muted-foreground">Release not found.</p>
-        <Link to="/explore#explore-releases" className="explore-accent-text text-sm underline">
-          Back to Explore
+        <Link to="/releases" className="explore-accent-text text-sm underline">
+          Back to Releases
         </Link>
       </div>
     )
@@ -127,7 +127,7 @@ export function ReleasePage() {
           items={[
             { label: 'Home', href: homeHref, icon: Home },
             { label: 'Explore', href: '/explore', icon: Compass },
-            { label: 'Releases', href: '/explore#explore-releases' },
+            { label: 'Releases', href: '/releases' },
             ...(release.artistName ? [{ label: release.artistName.toUpperCase() }] : []),
             { label: release.title.toUpperCase() },
           ]}
@@ -249,14 +249,14 @@ export function ReleasePage() {
           <ReleaseRelatedRail
             id="explore-release-more"
             title="More from this artist"
-            viewAllHref={artist ? `/profile/${artist.userId}` : '/explore#explore-releases'}
+            viewAllHref={artist ? `/profile/${artist.userId}` : '/releases'}
             releases={artistReleases.slice(0, 5)}
           />
 
           <ReleaseRelatedRail
             id="explore-release-other"
             title="Other artists on the wire"
-            viewAllHref="/explore#explore-releases"
+            viewAllHref="/releases"
             releases={otherReleases}
           />
         </main>

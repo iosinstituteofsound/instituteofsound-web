@@ -38,7 +38,7 @@ export function LandingTrendingReleases({ releases }: LandingTrendingReleasesPro
             Featured drops and high-velocity releases from across the network.
           </p>
         </div>
-        <Link to="/explore/releases" className="landing-section-head__link">
+        <Link to="/releases" className="landing-section-head__link">
           View catalog
           <ArrowUpRight size={16} aria-hidden />
         </Link>
@@ -48,7 +48,7 @@ export function LandingTrendingReleases({ releases }: LandingTrendingReleasesPro
         {items.map((release) => (
           <Link
             key={release.id}
-            to={`/explore/releases/${release.id}`}
+            to={`/releases/${release.id}`}
             className="landing-releases__card"
           >
             <div className="landing-releases__cover">
@@ -66,7 +66,7 @@ export function LandingTrendingReleases({ releases }: LandingTrendingReleasesPro
             <div className="landing-releases__meta">
               <p className="landing-releases__title">{release.title}</p>
               <p className="landing-releases__artist">
-                {release.artistName ?? 'Unknown artist'} · {releaseTypeLabel(release.type)}
+                {release.artistName ?? 'Unknown artist'} � {releaseTypeLabel(release.type)}
               </p>
             </div>
           </Link>

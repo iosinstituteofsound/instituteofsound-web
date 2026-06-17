@@ -196,7 +196,7 @@ export function ReleasesPage() {
                         {releaseDateLabel(release)}
                       </time>
                       <Link
-                        to={`/explore/releases/${release.id}`}
+                        to={`/releases/${release.id}`}
                         className="releases-page__upcoming-main"
                       >
                         {release.coverUrl ? (
@@ -244,7 +244,7 @@ export function ReleasesPage() {
               <h2 id="genre-heading" className="releases-page__section-title">
                 Browse by genre
               </h2>
-              <Link to="/explore/releases" className="releases-page__see-all">
+              <Link to="/releases" className="releases-page__see-all">
                 See all
               </Link>
             </div>

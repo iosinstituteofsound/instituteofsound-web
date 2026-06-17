@@ -1,12 +1,11 @@
 import { Link, useLocation } from 'react-router-dom'
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useMemo } from 'react'
 import { useLayoutStore } from '@/app/stores/layout-store'
 import { useSidebarStore } from '@/app/stores/sidebar-store'
 import { useSidebar } from '@/modules/sidebar/hooks/use-sidebar'
 import { SidebarNavIcon } from '@/modules/sidebar/components/sidebar-nav-icon'
 import { PageLoader } from '@/shared/components/feedback/loader'
-import { Button } from '@/shared/components/ui/button'
 import { env } from '@/shared/config/env'
 import { cn } from '@/shared/lib/cn'
 import { SIDEBAR_WIDTH_CLASS } from '@/shared/lib/layout-config'
@@ -76,46 +75,61 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
   return (
     <aside
       className={cn(
-        'dashboard-sidebar fixed inset-y-0 left-0 z-40 flex h-full max-h-dvh flex-col overflow-hidden border-r border-border/50 transition-all md:static md:z-auto md:shrink-0',
+        'dashboard-sidebar fixed inset-y-0 left-0 z-40 flex h-full max-h-dvh flex-col overflow-hidden border-r border-border/50 transition-[width] duration-300 ease-out md:static md:z-auto md:shrink-0',
+        collapsed && 'dashboard-sidebar--collapsed',
         collapsed ? widthClass.collapsed : 'w-[15.5rem]',
         className,
       )}
     >
-      <div className="dashboard-sidebar-top shrink-0">
+      <div className={cn('dashboard-sidebar-top shrink-0', collapsed && 'dashboard-sidebar-top--collapsed')}>
         {!collapsed ? (
-          <Link to="/home" className="dashboard-sidebar-brand block" onClick={() => setMobileOpen(false)}>
-            <span className="dashboard-sidebar-brand-ios">IOS</span>
-            <span className="dashboard-sidebar-brand-subtitle">{brandTitle.toUpperCase()}</span>
-          </Link>
-        ) : (
-          <Link
-            to="/home"
-            className="dashboard-sidebar-brand-collapsed font-display mx-auto mt-3 flex h-10 w-10 items-center justify-center rounded-lg text-sm font-extrabold text-primary"
-            title={brandTitle}
-            onClick={() => setMobileOpen(false)}
-          >
-            IO
-          </Link>
-        )}
+          <div className="dashboard-sidebar-brand-row">
+            <Link to="/home" className="dashboard-sidebar-brand block min-w-0 flex-1" onClick={() => setMobileOpen(false)}>
+              <span className="dashboard-sidebar-brand-ios">IOS</span>
+              <span className="dashboard-sidebar-brand-subtitle">{brandTitle.toUpperCase()}</span>
+            </Link>
 
-        {dashboardConfig.header.showMenuToggle ? (
-          <div className={cn('flex px-2 pb-2', collapsed ? 'justify-center' : 'justify-end')}>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="dashboard-sidebar-toggle h-8 w-8"
-              onClick={handleToggle}
-              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-            </Button>
+            {dashboardConfig.header.showMenuToggle ? (
+              <button
+                type="button"
+                className="dashboard-sidebar-toggle"
+                onClick={handleToggle}
+                aria-label="Collapse sidebar"
+              >
+                <ChevronLeft className="dashboard-sidebar-toggle__icon" strokeWidth={2.25} aria-hidden />
+              </button>
+            ) : null}
           </div>
-        ) : null}
+        ) : (
+          <>
+            <Link
+              to="/home"
+              className="dashboard-sidebar-brand-collapsed"
+              title={brandTitle}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span className="dashboard-sidebar-brand-collapsed__mark">IO</span>
+            </Link>
+
+            {dashboardConfig.header.showMenuToggle ? (
+              <button
+                type="button"
+                className="dashboard-sidebar-toggle dashboard-sidebar-toggle--collapsed"
+                onClick={handleToggle}
+                aria-label="Expand sidebar"
+              >
+                <ChevronRight className="dashboard-sidebar-toggle__icon" strokeWidth={2.25} aria-hidden />
+              </button>
+            ) : null}
+          </>
+        )}
       </div>
 
       <nav
-        className="dashboard-sidebar-nav min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-5"
+        className={cn(
+          'dashboard-sidebar-nav min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-5',
+          collapsed ? 'px-2 pt-2' : 'px-3 pt-0',
+        )}
         aria-label="Dashboard navigation"
       >
         {sidebarLoading ? (
@@ -127,7 +141,7 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
                 <p className="dashboard-sidebar-group-title">{group.title}</p>
               ) : null}
 
-              <ul className="flex flex-col gap-0.5">
+              <ul className={cn('flex flex-col', collapsed ? 'gap-1.5' : 'gap-0.5')}>
                 {group.items.map((item) => {
                   const active = isSidebarItemActive(location.pathname, item.path)
 
@@ -138,8 +152,10 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
                         onClick={() => setMobileOpen(false)}
                         title={collapsed ? item.label : undefined}
                         className={cn(
-                          'dashboard-sidebar-link flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium leading-tight',
-                          collapsed && 'justify-center px-2',
+                          'dashboard-sidebar-link flex items-center gap-3 rounded-xl text-sm font-medium leading-tight',
+                          collapsed
+                            ? 'dashboard-sidebar-link--rail mx-auto h-10 w-10 justify-center p-0'
+                            : 'px-3 py-2',
                           active ? 'dashboard-sidebar-link-active' : 'text-foreground/75',
                         )}
                       >

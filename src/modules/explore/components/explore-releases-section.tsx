@@ -61,7 +61,7 @@ function ReleaseCard({ release, index }: { release: ReleaseDto; index: number })
 
   return (
     <Link
-      to={`/explore/releases/${release.id}`}
+      to={`/releases/${release.id}`}
       className="explore-rel-card explore-rel-glass"
       style={{ '--explore-rel-card-delay': `${70 + index * 50}ms` } as React.CSSProperties}
       aria-label={`Open ${release.title}`}
@@ -134,7 +134,7 @@ export function ExploreReleasesSection({ releases }: { releases: ReleaseDto[] })
         kicker="Premieres"
         title="Releases"
         description="Albums and archive drops from artist studios."
-        action={<ExploreSectionHeadAction label="All Releases" to="/explore/releases" />}
+        action={<ExploreSectionHeadAction label="All Releases" to="/releases" />}
         footer={
           <div className="explore-rel-head__controls">
             <div className="explore-rel-filters">

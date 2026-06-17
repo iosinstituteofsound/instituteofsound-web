@@ -39,7 +39,7 @@ export function ReleasesGridCard({ release, className }: ReleasesGridCardProps) 
 
   return (
     <Link
-      to={`/explore/releases/${release.id}`}
+      to={`/releases/${release.id}`}
       className={cn('rel-grid-card', className)}
       aria-label={`Open ${release.title}`}
     >

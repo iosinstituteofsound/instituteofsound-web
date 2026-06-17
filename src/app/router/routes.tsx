@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter, Navigate, useParams } from 'react-router-dom'
 import { PublicLayout } from '@/app/layouts/public-layout'
 import { AuthLayout } from '@/app/layouts/auth-layout'
 import { DashboardLayout } from '@/app/layouts/dashboard-layout'
@@ -127,6 +127,11 @@ function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>
 }
 
+function ExploreReleaseRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/releases/${id}`} replace />
+}
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -171,7 +176,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'explore/releases',
+        path: 'releases',
         element: (
           <ReleasesPageGuard>
             <Lazy>
@@ -181,7 +186,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'explore/releases/:id',
+        path: 'releases/:id',
         element: (
           <ExplorePageGuard>
             <Lazy>
@@ -189,6 +194,14 @@ export const router = createBrowserRouter([
             </Lazy>
           </ExplorePageGuard>
         ),
+      },
+      {
+        path: 'explore/releases',
+        element: <Navigate to="/releases" replace />,
+      },
+      {
+        path: 'explore/releases/:id',
+        element: <ExploreReleaseRedirect />,
       },
     ],
   },

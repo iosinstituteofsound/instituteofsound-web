@@ -64,7 +64,7 @@ export function ReleasesFeaturedHero({ featured, rail, onPlay }: ReleasesFeature
                 Listen now
               </button>
             ) : null}
-            <Link to={`/explore/releases/${active.id}`} className="rel-hero__btn rel-hero__btn--line">
+            <Link to={`/releases/${active.id}`} className="rel-hero__btn rel-hero__btn--line">
               View release
             </Link>
           </div>

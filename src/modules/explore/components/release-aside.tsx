@@ -163,7 +163,7 @@ export function ReleaseAside({
               return (
                 <li key={item.id}>
                   <Link
-                    to={`/explore/releases/${item.id}`}
+                    to={`/releases/${item.id}`}
                     className={`rel-aside__track${isCurrent ? ' is-current' : ''}`}
                   >
                     {item.coverUrl ? (

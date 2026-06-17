@@ -44,8 +44,8 @@ export const MAIN_MAX_WIDTH_CLASS: Record<LayoutConfig['dashboard']['main']['max
 }
 
 export const SIDEBAR_WIDTH_CLASS: Record<LayoutConfig['dashboard']['sidebar']['width'], { expanded: string; collapsed: string }> = {
-  compact: { expanded: 'w-56', collapsed: 'w-14' },
-  default: { expanded: 'w-64', collapsed: 'w-16' },
+  compact: { expanded: 'w-56', collapsed: 'w-[4.5rem]' },
+  default: { expanded: 'w-64', collapsed: 'w-[4.5rem]' },
 }
 
 /** Matches centered feed / home column width */

@@ -64,7 +64,7 @@ function ReleaseMenuOption({
 
 function releasePageUrl(releaseId: string) {
   const origin = window.location.origin.replace(/\/+$/, '')
-  return `${origin}/explore/releases/${releaseId}`
+  return `${origin}/releases/${releaseId}`
 }
 
 function releaseShareLine(release: ReleaseDto) {

@@ -83,7 +83,7 @@ export const DEFAULT_LAYOUT_CONFIG: LayoutConfig = {
       navLinks: [
         { label: 'Home', href: '/' },
         { label: 'Explore', href: '/explore' },
-        { label: 'Releases', href: '/explore/releases' },
+        { label: 'Releases', href: '/releases' },
       ],
     },
     footer: {
@@ -94,7 +94,7 @@ export const DEFAULT_LAYOUT_CONFIG: LayoutConfig = {
           title: 'Discover',
           links: [
             { label: 'Explore', href: '/explore' },
-            { label: 'Releases', href: '/explore/releases' },
+            { label: 'Releases', href: '/releases' },
           ],
         },
         {

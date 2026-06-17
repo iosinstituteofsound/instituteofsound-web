@@ -13,7 +13,7 @@ export function ReleasesGenreGrid({ genres, activeSlug }: ReleasesGenreGridProps
       {genres.map((genre, index) => (
         <Link
           key={genre.slug}
-          to={`/explore/releases?genre=${genre.slug}`}
+          to={`/releases?genre=${genre.slug}`}
           className={cn('rel-genre-card', activeSlug === genre.slug && 'is-active')}
           data-tone={String(index % 6)}
           style={
