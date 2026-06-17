@@ -31,7 +31,21 @@ export function releaseTypeLabel(type?: ReleaseType): string {
   return 'RELEASE'
 }
 
+export function releaseBuyMenuLabel(type?: ReleaseType): string {
+  switch (type) {
+    case 'album':
+      return 'Buy this album'
+    case 'ep':
+      return 'Buy this EP'
+    case 'single':
+      return 'Buy this single'
+    default:
+      return 'Buy this track'
+  }
+}
+
 export function releaseGenreLabel(release: ReleaseDto): string {
+  if (release.genre) return release.genre.toUpperCase()
   if (release.labelName) return release.labelName.toUpperCase()
   return GENRE_POOL[hashId(release.id) % GENRE_POOL.length]!
 }
@@ -119,9 +133,12 @@ export function releaseDurationSec(release: ReleaseDto): number {
   return tracks * minsPerTrack + (hashId(release.id) % 6) * 17
 }
 
-export function releasePlaysFormatted(release: ReleaseDto): string {
-  const n = Number(releasePlays(release))
-  return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n)
+export function releasePlaysFormatted(release: ReleaseDto): string | null {
+  if (release.playCount != null && release.playCount > 0) {
+    const n = release.playCount
+    return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n)
+  }
+  return null
 }
 
 export function findArtistForRelease(

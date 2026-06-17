@@ -4,7 +4,7 @@ import { PublicLayout } from '@/app/layouts/public-layout'
 import { AuthLayout } from '@/app/layouts/auth-layout'
 import { DashboardLayout } from '@/app/layouts/dashboard-layout'
 import { ExploreLayoutRoute } from '@/app/layouts/explore-layout-route'
-import { AuthGuard, ExplorePageGuard, GuestGuard, PermissionGuard, ResourceGuard } from '@/app/guards'
+import { AuthGuard, ExplorePageGuard, GuestGuard, PermissionGuard, ReleasesPageGuard, ResourceGuard } from '@/app/guards'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorPage, ForbiddenPage, NotFoundPage } from '@/shared/pages/fallback-pages'
 
@@ -96,6 +96,9 @@ const ExplorePage = lazy(() =>
 const ArticlePage = lazy(() =>
   import('@/modules/explore/pages/article-page').then((m) => ({ default: m.ArticlePage })),
 )
+const ReleasesPage = lazy(() =>
+  import('@/modules/explore/pages/releases-page').then((m) => ({ default: m.ReleasesPage })),
+)
 const ReleasePage = lazy(() =>
   import('@/modules/explore/pages/release-page').then((m) => ({ default: m.ReleasePage })),
 )
@@ -160,6 +163,16 @@ export const router = createBrowserRouter([
               <ArticlePage />
             </Lazy>
           </ExplorePageGuard>
+        ),
+      },
+      {
+        path: 'explore/releases',
+        element: (
+          <ReleasesPageGuard>
+            <Lazy>
+              <ReleasesPage />
+            </Lazy>
+          </ReleasesPageGuard>
         ),
       },
       {

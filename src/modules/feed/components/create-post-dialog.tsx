@@ -42,6 +42,7 @@ interface CreatePostDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialType?: FeedItemType
+  initialBody?: string
   userName: string
   avatarUrl?: string | null
 }
@@ -78,6 +79,7 @@ export function CreatePostDialog({
   open,
   onOpenChange,
   initialType = 'text',
+  initialBody = '',
   userName,
   avatarUrl,
 }: CreatePostDialogProps) {
@@ -126,7 +128,8 @@ export function CreatePostDialog({
     const mapped = mapInitialType(initialType)
     setActiveAction(mapped)
     setShowArticleFields(initialType === 'article')
-  }, [open, initialType])
+    setBody(initialBody)
+  }, [open, initialType, initialBody])
 
   const reset = () => {
     setBody('')

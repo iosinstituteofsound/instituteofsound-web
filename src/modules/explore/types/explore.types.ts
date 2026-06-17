@@ -44,6 +44,7 @@ export interface LabelProfileDto {
 
 export type ReleaseType = 'single' | 'ep' | 'album'
 export type ReleaseFilter = 'all' | 'album' | 'ep' | 'single' | 'archive'
+export type ReleasesPageFilter = 'all' | 'album' | 'epsingles' | 'hot' | 'new'
 
 export interface ReleaseDto {
   id: string
@@ -54,8 +55,45 @@ export interface ReleaseDto {
   labelName?: string
   streamUrl?: string
   type?: ReleaseType
+  genre?: string
+  playCount?: number
   releaseDate?: string
   isFeatured?: boolean
+}
+
+export interface ReleaseGenreDto {
+  slug: string
+  label: string
+  count: number
+  coverUrl?: string
+}
+
+export interface ReleaseFilterOptionDto {
+  id: string
+  label: string
+  count: number
+}
+
+export interface ReleasesCatalogDto {
+  featured: ReleaseDto | null
+  rail: ReleaseDto[]
+  upcoming: ReleaseDto[]
+  genres: ReleaseGenreDto[]
+  stats: {
+    total: number
+    singles: number
+    albums: number
+    eps: number
+  }
+  filters: ReleaseFilterOptionDto[]
+}
+
+export interface ReleasesPageDto {
+  items: ReleaseDto[]
+  total: number
+  page: number
+  limit: number
+  hasMore: boolean
 }
 
 export interface PlaylistTrack {

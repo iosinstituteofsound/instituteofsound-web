@@ -137,10 +137,10 @@ export function ExploreReleasesSection({ releases }: { releases: ReleaseDto[] })
               <p className="explore-rel-head__sub">Albums and archive drops from artist studios.</p>
             </div>
           </div>
-          <a href="#explore-releases" className="explore-rel-head__all">
+          <Link to="/explore/releases" className="explore-rel-head__all">
             All Releases
             <ArrowUpRight size={14} strokeWidth={2} aria-hidden />
-          </a>
+          </Link>
         </div>
 
         <div className="explore-rel-head__controls">

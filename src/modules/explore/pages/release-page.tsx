@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Compass, Home, MoreHorizontal, Play } from 'lucide-react'
+import { Compass, Home, Play } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { ReleaseAside } from '@/modules/explore/components/release-aside'
 import { ReleaseRelatedRail } from '@/modules/explore/components/release-related-rail'
+import { ReleaseOptionsMenu } from '@/modules/explore/components/release-options-menu'
 import { ReleasePlayerBar } from '@/modules/explore/components/release-player-bar'
 import { ReleaseVinylArt } from '@/modules/explore/components/release-vinyl-art'
 import { useExplore } from '@/modules/explore/hooks/use-explore'
@@ -189,17 +190,10 @@ export function ReleasePage() {
                 >
                   {saved ? 'Saved' : 'Save'}
                 </button>
-                <button
-                  type="button"
-                  className="explore-release-hero__btn explore-release-hero__btn--icon"
-                  aria-label="More options"
-                  onClick={() => void navigator.clipboard?.writeText(window.location.href)}
-                >
-                  <MoreHorizontal size={16} strokeWidth={2} aria-hidden />
-                </button>
+                <ReleaseOptionsMenu release={release} artist={artist} />
               </div>
 
-              <ReleasePlayerBar release={release} platform={platform} />
+              <ReleasePlayerBar release={release} />
 
               <div className="explore-release-hero__about">
                 <div className="explore-release-hero__tags">
@@ -208,9 +202,11 @@ export function ReleasePage() {
                   ))}
                   {genres.length === 0 ? <span>{releaseGenreLabel(release)}</span> : null}
                   <span>{releaseTypeLabel(release.type)}</span>
-                  <span className="explore-release-hero__tags-hot">
-                    {releasePlaysFormatted(release)} plays
-                  </span>
+                  {releasePlaysFormatted(release) ? (
+                    <span className="explore-release-hero__tags-hot">
+                      {releasePlaysFormatted(release)} plays
+                    </span>
+                  ) : null}
                 </div>
 
                 <p className="explore-release-hero__dek">
@@ -231,7 +227,7 @@ export function ReleasePage() {
                 </div>
                 <div className="explore-release-meta-grid__cell explore-release-meta-grid__cell--accent">
                   <dt>Plays</dt>
-                  <dd>{releasePlaysFormatted(release)}</dd>
+                  <dd>{releasePlaysFormatted(release) ?? '—'}</dd>
                 </div>
                 <div className="explore-release-meta-grid__cell">
                   <dt>Catalog</dt>

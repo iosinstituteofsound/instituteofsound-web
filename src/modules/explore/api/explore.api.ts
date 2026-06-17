@@ -6,6 +6,9 @@ import type {
   ExploreFilter,
   ExplorePayload,
   LabelProfileDto,
+  ReleasesCatalogDto,
+  ReleasesPageDto,
+  ReleasesPageFilter,
   TrackSubmissionDto,
   WireCandidates,
   WirePickItem,
@@ -147,5 +150,25 @@ export async function getExploreLabels(filter: ExploreFilter = 'all') {
   const { data } = await apiClient.get<ApiSuccessResponse<unknown[]>>(`${API_V1}/explore/labels`, {
     params: { filter },
   })
+  return data.data
+}
+
+export async function getReleasesCatalog() {
+  const { data } = await apiClient.get<ApiSuccessResponse<ReleasesCatalogDto>>(
+    `${API_V1}/explore/releases/catalog`,
+  )
+  return data.data
+}
+
+export async function getReleasesPage(params: {
+  page: number
+  limit: number
+  filter: ReleasesPageFilter
+  genre?: string
+}) {
+  const { data } = await apiClient.get<ApiSuccessResponse<ReleasesPageDto>>(
+    `${API_V1}/explore/releases`,
+    { params },
+  )
   return data.data
 }

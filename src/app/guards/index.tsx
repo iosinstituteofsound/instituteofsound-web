@@ -122,3 +122,18 @@ export function ExplorePageGuard({ children }: ExplorePageGuardProps) {
 
   return <>{children}</>
 }
+
+interface ReleasesPageGuardProps {
+  children: ReactNode
+}
+
+export function ReleasesPageGuard({ children }: ReleasesPageGuardProps) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const hasSession = tokenStorage.hasSession()
+
+  if (isAuthenticated || hasSession) {
+    return <ResourceGuard name="ReleasesPage">{children}</ResourceGuard>
+  }
+
+  return <>{children}</>
+}
