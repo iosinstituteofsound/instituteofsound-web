@@ -127,6 +127,11 @@ const LabelDashboardPage = lazy(() =>
     default: m.LabelDashboardPage,
   })),
 )
+const PlaylistDetailPage = lazy(() =>
+  import('@/modules/music/pages/playlist-detail-page').then((m) => ({
+    default: m.PlaylistDetailPage,
+  })),
+)
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>
@@ -207,6 +212,16 @@ export const router = createBrowserRouter([
       {
         path: 'explore/releases/:id',
         element: <ExploreReleaseRedirect />,
+      },
+      {
+        path: 'playlists/:slug',
+        element: (
+          <ExplorePageGuard>
+            <Lazy>
+              <PlaylistDetailPage />
+            </Lazy>
+          </ExplorePageGuard>
+        ),
       },
     ],
   },
@@ -554,6 +569,40 @@ export const router = createBrowserRouter([
       },
       {
         path: 'artist/submit',
+        element: <Navigate to="/artist/upload" replace />,
+      },
+      {
+        path: 'artist/upload',
+        element: (
+          <ResourceGuard name="ArtistDashboardPage">
+            <Lazy>
+              <ArtistDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'artist/releases',
+        element: (
+          <ResourceGuard name="ArtistDashboardPage">
+            <Lazy>
+              <ArtistDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'artist/playlists',
+        element: (
+          <ResourceGuard name="ArtistDashboardPage">
+            <Lazy>
+              <ArtistDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'artist/profile',
         element: (
           <ResourceGuard name="ArtistDashboardPage">
             <Lazy>

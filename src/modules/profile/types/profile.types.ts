@@ -1,4 +1,4 @@
-export type ProfileViewTab = 'all' | 'posts' | 'about' | 'photos'
+export type ProfileViewTab = 'all' | 'posts' | 'about' | 'photos' | 'music'
 
 export type UpdateProfileInput = {
   name?: string

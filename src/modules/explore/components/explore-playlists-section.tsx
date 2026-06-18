@@ -35,15 +35,17 @@ function playPlaylist(
   playlist: PlaylistDto,
   playTrack: ReturnType<typeof usePlayerStore.getState>['playTrack'],
 ) {
-  const track = playlist.tracks.find((item) => item.streamUrl) ?? playlist.tracks[0]
-  if (!track?.streamUrl) return
-  playTrack({
-    id: `${playlist.id}-0`,
-    title: track.title,
-    artist: track.artistName,
-    audioUrl: track.streamUrl,
-    artworkUrl: playlist.coverUrl,
-  })
+  const queue = playlist.tracks
+    .filter((item) => item.streamUrl || item.audioUrl)
+    .map((item, index) => ({
+      id: `${playlist.id}-${index}`,
+      title: item.title,
+      artist: item.artistName,
+      audioUrl: (item.streamUrl ?? item.audioUrl)!,
+      artworkUrl: playlist.coverUrl,
+    }))
+  if (!queue.length) return
+  playTrack(queue[0], { queue })
 }
 
 function WaveBadge() {

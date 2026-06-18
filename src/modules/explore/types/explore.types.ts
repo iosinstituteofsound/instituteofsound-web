@@ -123,6 +123,7 @@ export interface PlaylistTrack {
   artistName: string
   durationSec?: number
   streamUrl?: string
+  audioUrl?: string
 }
 
 export interface PlaylistDto {
@@ -131,6 +132,7 @@ export interface PlaylistDto {
   slug: string
   coverUrl?: string
   description?: string
+  visibility?: 'public' | 'private'
   tracks: PlaylistTrack[]
 }
 

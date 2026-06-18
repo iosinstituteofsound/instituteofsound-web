@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Compass, Home, Play } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { ReleaseAside } from '@/modules/explore/components/release-aside'
@@ -24,6 +25,8 @@ import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
 import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
+import { getReleaseDetail } from '@/modules/music/api/music.api'
+import { releaseToPlayerQueue } from '@/modules/music/lib/player-queue'
 import '@/modules/explore/styles/explore.css'
 import '@/modules/explore/styles/explore-mh-chrome.css'
 import '@/modules/explore/styles/release-vinyl-art.css'
@@ -46,13 +49,37 @@ export function ReleasePage() {
   const { id = '' } = useParams()
   const homeHref = useBreadcrumbHomeHref()
   const { data: explore, isLoading } = useExplore()
+  const { data: releaseDetail } = useQuery({
+    queryKey: ['release-detail', id],
+    queryFn: () => getReleaseDetail(id),
+    enabled: Boolean(id),
+    retry: false,
+  })
   const playTrack = usePlayerStore((s) => s.playTrack)
   const [saved, setSaved] = useState(false)
 
-  const release = useMemo(
-    () => explore?.releases.find((item) => item.id === id),
-    [explore?.releases, id],
-  )
+  const release = useMemo(() => {
+    const fromExplore = explore?.releases.find((item) => item.id === id)
+    if (fromExplore) return fromExplore
+    if (releaseDetail) {
+      return {
+        id: releaseDetail.id,
+        artistProfileId: releaseDetail.artistProfileId,
+        title: releaseDetail.title,
+        coverUrl: releaseDetail.coverUrl,
+        artistName: releaseDetail.artistName,
+        streamUrl: releaseDetail.streamUrl,
+        type: releaseDetail.type,
+        genre: releaseDetail.genre,
+        playCount: releaseDetail.playCount,
+        releaseDate: releaseDetail.releaseDate,
+        isFeatured: releaseDetail.isFeatured,
+      }
+    }
+    return undefined
+  }, [explore?.releases, id, releaseDetail])
+
+  const detailTracks = releaseDetail?.tracks ?? []
 
   const artist = useMemo(
     () => (release && explore ? findArtistForRelease(release, explore.artists) : undefined),
@@ -97,6 +124,11 @@ export function ReleasePage() {
   }, [id])
 
   const handlePlay = useCallback(() => {
+    if (releaseDetail) {
+      const queue = releaseToPlayerQueue(releaseDetail)
+      if (queue.length) playTrack(queue[0], { queue })
+      return
+    }
     if (!release?.streamUrl) return
     playTrack({
       id: release.id,
@@ -105,7 +137,7 @@ export function ReleasePage() {
       audioUrl: release.streamUrl,
       artworkUrl: release.coverUrl,
     })
-  }, [playTrack, release])
+  }, [playTrack, release, releaseDetail])
 
   if (isLoading) return <Loader className="min-h-screen bg-background" />
 
@@ -184,10 +216,10 @@ export function ReleasePage() {
                   type="button"
                   className="ios-mh-btn ios-mh-btn--fill explore-release-hero__btn explore-release-hero__btn--fill"
                   onClick={handlePlay}
-                  disabled={!release.streamUrl}
+                  disabled={!release.streamUrl && !detailTracks.length}
                 >
                   <Play size={12} strokeWidth={2} fill="currentColor" aria-hidden />
-                  Play track
+                  {detailTracks.length > 1 ? 'Play all' : 'Play track'}
                 </button>
                 <button
                   type="button"
@@ -200,6 +232,36 @@ export function ReleasePage() {
               </div>
 
               <ReleasePlayerBar release={release} />
+
+              {detailTracks.length > 0 ? (
+                <ol className="mt-4 divide-y rounded-lg border">
+                  {detailTracks.map((track) => (
+                    <li key={track.id} className="flex items-center justify-between px-4 py-3">
+                      <div>
+                        <p className="font-medium">
+                          {track.trackNumber}. {track.title}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="explore-release-hero__btn explore-release-hero__btn--line"
+                        disabled={!track.audioUrl}
+                        onClick={() => {
+                          if (!releaseDetail || !track.audioUrl) return
+                          const queue = releaseToPlayerQueue(releaseDetail)
+                          const idx = queue.findIndex((q) => q.id === track.id)
+                          playTrack(queue[idx >= 0 ? idx : 0], {
+                            queue,
+                            queueIndex: idx >= 0 ? idx : 0,
+                          })
+                        }}
+                      >
+                        <Play size={12} aria-hidden />
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              ) : null}
 
               <div className="explore-release-hero__about">
                 <div className="explore-release-hero__tags">
