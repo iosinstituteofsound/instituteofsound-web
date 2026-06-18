@@ -1,0 +1,174 @@
+/* Profile discography — futuristic Metal Hammer transmission deck */
+
+.profile-discography--fx {
+  --disc-accent: var(--primary);
+  --disc-neon: var(--ios-accent-bright);
+  --disc-glow: var(--ios-accent-glow);
+  --disc-grid: color-mix(in oklch, var(--foreground) 4.5%, transparent);
+  --disc-panel: color-mix(in oklch, var(--card) 82%, var(--disc-accent) 18%);
+  position: relative;
+  display: grid;
+  gap: 2rem;
+  padding-top: 2rem;
+}
+
+.profile-discography--fx::before {
+  content: '';
+  position: absolute;
+  inset: -1rem -0.5rem auto;
+  height: 12rem;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 100% at 12% 0%,
+    color-mix(in oklch, var(--disc-accent) 6%, transparent),
+    transparent 72%
+  );
+  z-index: 0;
+}
+
+.profile-discography--fx > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Shared FX primitives ── */
+
+.profile-discography__fx-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    linear-gradient(var(--disc-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--disc-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(180deg, black 0%, black 55%, transparent 100%);
+}
+
+.profile-discography__fx-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    var(--ios-mh-scanline) 2px,
+    var(--ios-mh-scanline) 3px
+  );
+}
+
+.profile-discography__fx-corner {
+  position: absolute;
+  width: 1.15rem;
+  height: 1.15rem;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.profile-discography__fx-corner::before,
+.profile-discography__fx-corner::after {
+  content: '';
+  position: absolute;
+  background: color-mix(in oklch, var(--disc-neon) 75%, var(--foreground));
+  box-shadow: 0 0 6px color-mix(in oklch, var(--disc-glow) 35%, transparent);
+}
+
+.profile-discography__fx-corner::before {
+  width: 100%;
+  height: 2px;
+}
+
+.profile-discography__fx-corner::after {
+  width: 2px;
+  height: 100%;
+}
+
+.profile-discography__fx-corner--tl {
+  top: 0;
+  left: 0;
+}
+
+.profile-discography__fx-corner--tl::before,
+.profile-discography__fx-corner--tl::after {
+  top: 0;
+  left: 0;
+}
+
+.profile-discography__fx-corner--tr {
+  top: 0;
+  right: 0;
+}
+
+.profile-discography__fx-corner--tr::before {
+  top: 0;
+  right: 0;
+}
+
+.profile-discography__fx-corner--tr::after {
+  top: 0;
+  right: 0;
+}
+
+.profile-discography__fx-corner--bl {
+  bottom: 0;
+  left: 0;
+}
+
+.profile-discography__fx-corner--bl::before {
+  bottom: 0;
+  left: 0;
+}
+
+.profile-discography__fx-corner--bl::after {
+  bottom: 0;
+  left: 0;
+}
+
+.profile-discography__fx-corner--br {
+  bottom: 0;
+  right: 0;
+}
+
+.profile-discography__fx-corner--br::before {
+  bottom: 0;
+  right: 0;
+}
+
+.profile-discography__fx-corner--br::after {
+  bottom: 0;
+  right: 0;
+}
+
+.profile-discography__section-head {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.profile-discography__section-kicker {
+  margin: 0;
+}
+
+.profile-discography__section-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.8vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+  text-shadow: 0 0 32px color-mix(in oklch, var(--disc-accent) 22%, transparent);
+}
+
+/* Latest release styles → disc-latest-release.css */
+/* Device panels → disc-device-panel.css */
+
+/* ── Popular + artist pick rack ── */
+
+.profile-discography__body {
+  display: grid;
+  gap: 1.75rem;
+  align-items: start;
+}

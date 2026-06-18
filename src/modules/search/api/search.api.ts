@@ -58,6 +58,7 @@ export async function searchProfiles(q: string, limit = 24) {
 }
 
 import type { AboutProfile } from '@/modules/profile/types/about-profile.types'
+import type { ProfileTabDto } from '@/shared/types/profile-tabs.types'
 
 export interface PublicProfileDto {
   id: string
@@ -74,6 +75,7 @@ export interface PublicProfileDto {
   orgLabel?: string
   linkUrl?: string
   isVerified?: boolean
+  profileTabs?: ProfileTabDto[]
   privacySettings?: {
     showEmail: boolean
     showBio: boolean

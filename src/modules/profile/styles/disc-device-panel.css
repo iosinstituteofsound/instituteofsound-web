@@ -1,0 +1,1040 @@
+/* Discography device panels — cyberdeck chassis (Popular + Artist pick) */
+
+.disc-dev {
+  --dev-accent: var(--primary);
+  --dev-neon: var(--ios-accent-bright, var(--primary));
+  --dev-glow: color-mix(in oklch, var(--dev-accent) 45%, transparent);
+  --dev-chassis: color-mix(in oklch, var(--card) 72%, var(--background));
+  --dev-chassis-deep: color-mix(in oklch, var(--background) 82%, var(--foreground) 18%);
+  --dev-screen: color-mix(in oklch, var(--background) 94%, var(--dev-accent) 6%);
+  --dev-border: color-mix(in oklch, var(--dev-accent) 28%, var(--border));
+  --dev-grid: color-mix(in oklch, var(--foreground) 6%, transparent);
+  --dev-bezel: color-mix(in oklch, var(--background) 55%, var(--foreground) 45%);
+  min-width: 0;
+}
+
+/* ── Rack spine (connects both modules) ── */
+
+.disc-rack {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .disc-rack {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .disc-rack__rail {
+    position: absolute;
+    left: calc(61% - 0.35rem);
+    top: -0.35rem;
+    bottom: -0.35rem;
+    width: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      color-mix(in oklch, var(--dev-accent) 35%, var(--border)) 8%,
+      color-mix(in oklch, var(--dev-accent) 55%, var(--foreground) 20%) 50%,
+      color-mix(in oklch, var(--dev-accent) 35%, var(--border)) 92%,
+      transparent 100%
+    );
+    box-shadow:
+      0 0 16px color-mix(in oklch, var(--dev-accent) 22%, transparent),
+      inset 0 0 2px color-mix(in oklch, var(--foreground) 15%, transparent);
+    animation: disc-dev-rail-pulse 4s ease-in-out infinite;
+  }
+
+  .disc-rack__bus {
+    position: absolute;
+    left: calc(61% - 1.1rem);
+    top: 42%;
+    width: 2.2rem;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklch, var(--dev-accent) 55%, var(--border)),
+      transparent
+    );
+    box-shadow: 0 0 12px color-mix(in oklch, var(--dev-accent) 28%, transparent);
+    animation: disc-dev-bus-flicker 3.5s steps(2, end) infinite;
+  }
+
+  .disc-rack__bus::before,
+  .disc-rack__bus::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    border: 1px solid color-mix(in oklch, var(--dev-accent) 50%, var(--border));
+    border-radius: 1px;
+    background: var(--dev-bezel);
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  .disc-rack__bus::before {
+    left: 0.15rem;
+  }
+
+  .disc-rack__bus::after {
+    right: 0.15rem;
+  }
+}
+
+.disc-dev__chassis {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  isolation: isolate;
+  border: 1px solid var(--dev-border);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--foreground) 4%, transparent) 25%,
+      transparent 25%
+    ),
+    linear-gradient(
+      168deg,
+      color-mix(in oklch, var(--dev-chassis) 90%, var(--dev-accent) 10%) 0%,
+      var(--dev-chassis) 38%,
+      var(--dev-chassis-deep) 100%
+    );
+  clip-path: polygon(
+    0 12px,
+    12px 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--foreground) 12%, transparent),
+    inset 0 -1px 0 color-mix(in oklch, var(--background) 40%, transparent),
+    inset 0 0 30px color-mix(in oklch, var(--dev-accent) 4%, transparent),
+    0 1px 0 color-mix(in oklch, var(--foreground) 6%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--dev-accent) 10%, transparent),
+    0 0 48px color-mix(in oklch, var(--dev-accent) 7%, transparent),
+    0 24px 56px color-mix(in oklch, var(--background) 60%, transparent);
+}
+
+.disc-dev__chassis::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  z-index: 0;
+}
+
+.disc-dev__chassis > * {
+  position: relative;
+  z-index: 1;
+}
+
+.disc-dev__chassis-notch {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--dev-accent) 35%, var(--border));
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in oklch, var(--foreground) 22%, var(--dev-bezel)),
+    var(--dev-bezel) 55%,
+    color-mix(in oklch, var(--background) 70%, var(--foreground) 30%)
+  );
+  box-shadow:
+    inset 0 1px 1px color-mix(in oklch, var(--foreground) 15%, transparent),
+    0 1px 2px color-mix(in oklch, var(--background) 50%, transparent);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.disc-dev__chassis-notch::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--background) 60%, transparent);
+}
+
+.disc-dev__chassis-notch--tl {
+  top: 6px;
+  left: 6px;
+}
+
+.disc-dev__chassis-notch--tr {
+  top: 6px;
+  right: 6px;
+}
+
+.disc-dev__chassis-notch--bl {
+  bottom: 6px;
+  left: 6px;
+}
+
+.disc-dev__chassis-notch--br {
+  bottom: 6px;
+  right: 6px;
+}
+
+/* Side grip rails */
+
+.disc-dev--matrix .disc-dev__chassis::after,
+.disc-dev--pick .disc-dev__chassis::after {
+  content: '';
+  position: absolute;
+  top: 18%;
+  bottom: 18%;
+  width: 3px;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--foreground) 8%, transparent) 0 3px,
+    transparent 3px 7px
+  );
+  opacity: 0.5;
+  z-index: 2;
+}
+
+.disc-dev--matrix .disc-dev__chassis::after {
+  right: 0.45rem;
+}
+
+.disc-dev--pick .disc-dev__chassis::after {
+  left: 0.45rem;
+}
+
+/* ── Header bar ── */
+
+.disc-dev__header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: end;
+  gap: 0.65rem 0.85rem;
+  padding: 0.9rem 1.05rem 0.8rem;
+  position: relative;
+  border-bottom: 1px solid color-mix(in oklch, var(--dev-accent) 22%, var(--border));
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--dev-accent) 12%, transparent),
+    color-mix(in oklch, var(--dev-chassis-deep) 40%, transparent)
+  );
+}
+
+.disc-dev__header::after {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--dev-neon) 50%, transparent) 50%,
+    transparent
+  );
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.disc-dev__vents {
+  position: absolute;
+  top: 0.55rem;
+  right: 1rem;
+  width: 2.8rem;
+  height: 0.35rem;
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--background) 70%, var(--foreground) 30%) 0 2px,
+    transparent 2px 5px
+  );
+  opacity: 0.55;
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.disc-dev__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.disc-dev__led-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 3px 4px;
+  border: 1px solid color-mix(in oklch, var(--dev-accent) 20%, var(--border));
+  border-radius: 3px;
+  background: color-mix(in oklch, var(--background) 80%, var(--foreground) 20%);
+  box-shadow: inset 0 1px 3px color-mix(in oklch, var(--background) 50%, transparent);
+}
+
+.disc-dev__led {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--dev-accent);
+  box-shadow:
+    0 0 8px color-mix(in oklch, var(--dev-accent) 60%, transparent),
+    inset 0 -1px 1px color-mix(in oklch, var(--background) 40%, transparent);
+  animation: disc-dev-led 2.2s ease-in-out infinite;
+}
+
+.disc-dev__led--amber {
+  background: color-mix(in oklch, var(--ios-accent-bright, var(--dev-accent)) 85%, var(--dev-accent));
+  box-shadow:
+    0 0 8px color-mix(in oklch, var(--ios-accent-bright, var(--dev-accent)) 50%, transparent),
+    inset 0 -1px 1px color-mix(in oklch, var(--background) 40%, transparent);
+}
+
+.disc-dev__led--dim {
+  opacity: 0.45;
+  animation: none;
+  background: color-mix(in oklch, var(--dev-accent) 40%, var(--muted-foreground));
+  box-shadow: none;
+}
+
+@keyframes disc-dev-led {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.disc-dev__module-id {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid color-mix(in oklch, var(--dev-accent) 25%, var(--border));
+  border-radius: 2px;
+  background: color-mix(in oklch, var(--background) 75%, var(--dev-accent) 5%);
+  color: color-mix(in oklch, var(--dev-accent) 75%, var(--muted-foreground));
+}
+
+.disc-dev__header-center {
+  min-width: 0;
+}
+
+.disc-dev__kicker {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--dev-neon) 75%, var(--muted-foreground));
+  text-shadow: 0 0 12px color-mix(in oklch, var(--dev-accent) 25%, transparent);
+}
+
+.disc-dev__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 24px color-mix(in oklch, var(--dev-accent) 18%, transparent),
+    0 1px 0 color-mix(in oklch, var(--foreground) 20%, transparent);
+}
+
+.disc-dev__header-meta {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 12%, var(--border));
+  border-radius: 2px;
+  color: color-mix(in oklch, var(--foreground) 55%, var(--muted-foreground));
+  white-space: nowrap;
+  background: color-mix(in oklch, var(--background) 60%, transparent);
+}
+
+.disc-dev__edit {
+  min-height: 1.85rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.48rem;
+}
+
+/* ── Screen well ── */
+
+.disc-dev__screen {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0.75rem 0.75rem 0;
+  padding: 0.35rem 0;
+  background: var(--dev-screen);
+  border: 2px solid color-mix(in oklch, var(--dev-bezel) 80%, var(--border));
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--foreground) 8%, transparent),
+    inset 0 3px 18px color-mix(in oklch, var(--background) 70%, transparent),
+    inset 0 -2px 8px color-mix(in oklch, var(--dev-accent) 6%, transparent),
+    0 1px 0 color-mix(in oklch, var(--foreground) 10%, transparent);
+  overflow: hidden;
+}
+
+.disc-dev__screen-bezel {
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+  border: 1px solid color-mix(in oklch, var(--dev-accent) 18%, transparent);
+  border-radius: 2px;
+  z-index: 3;
+  box-shadow:
+    inset 0 0 24px color-mix(in oklch, var(--dev-accent) 6%, transparent),
+    inset 0 0 0 1px color-mix(in oklch, var(--foreground) 5%, transparent);
+}
+
+.disc-dev__screen-bezel::before,
+.disc-dev__screen-bezel::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-color: color-mix(in oklch, var(--dev-neon) 55%, transparent);
+  border-style: solid;
+  opacity: 0.7;
+}
+
+.disc-dev__screen-bezel::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+.disc-dev__screen-bezel::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+.disc-dev__screen-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(var(--dev-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--dev-grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+  mask-image: linear-gradient(180deg, black 0%, black 70%, transparent 100%);
+  z-index: 1;
+}
+
+.disc-dev__screen-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    var(--ios-mh-scanline, color-mix(in oklch, var(--foreground) 8%, transparent)) 2px,
+    var(--ios-mh-scanline, color-mix(in oklch, var(--foreground) 8%, transparent)) 3px
+  );
+  z-index: 2;
+}
+
+.disc-dev__screen-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 80% 50% at 50% 0%,
+      color-mix(in oklch, var(--dev-accent) 10%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 40% 30% at 100% 100%,
+      color-mix(in oklch, var(--dev-accent) 6%, transparent),
+      transparent 70%
+    );
+  z-index: 1;
+}
+
+.disc-dev__screen-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+}
+
+.disc-dev__screen--viewport {
+  min-height: 16.5rem;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+/* Matrix panel — 10 tracks visible, no internal scroll */
+
+.disc-dev--matrix .disc-dev__screen {
+  overflow: visible;
+  max-height: none;
+}
+
+.disc-dev__track-link--preview {
+  cursor: default;
+}
+
+/* ── Popular tracks ── */
+
+.disc-dev__tracks {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.disc-dev__track {
+  border-bottom: 1px solid color-mix(in oklch, var(--foreground) 5%, var(--border));
+}
+
+.disc-dev__track:nth-child(odd) .disc-dev__track-link {
+  background: color-mix(in oklch, var(--dev-accent) 2.5%, transparent);
+}
+
+.disc-dev__track:first-child .disc-dev__track-rank {
+  color: var(--dev-neon);
+  text-shadow: 0 0 10px var(--dev-glow);
+}
+
+.disc-dev__track:first-child .disc-dev__track-link::before {
+  opacity: 1;
+}
+
+.disc-dev__track:last-child {
+  border-bottom: 0;
+}
+
+.disc-dev__track-link {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.25rem 2.85rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.62rem 0.75rem;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.disc-dev__track-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--dev-accent) 10%, transparent),
+    transparent 55%
+  );
+  transition: opacity 0.18s ease;
+}
+
+.disc-dev__track-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 15%;
+  bottom: 15%;
+  width: 2px;
+  background: var(--dev-accent);
+  box-shadow: 0 0 8px color-mix(in oklch, var(--dev-accent) 40%, transparent);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.disc-dev__track-link:hover {
+  background: color-mix(in oklch, var(--dev-accent) 8%, transparent);
+  box-shadow: inset 0 0 20px color-mix(in oklch, var(--dev-accent) 5%, transparent);
+}
+
+.disc-dev__track-link:hover::after {
+  opacity: 1;
+}
+
+.disc-dev__track-link:hover::before {
+  opacity: 1;
+}
+
+.disc-dev__track-rank {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: color-mix(in oklch, var(--dev-accent) 75%, var(--muted-foreground));
+}
+
+.disc-dev__track-thumb {
+  width: 2.85rem;
+  height: 2.85rem;
+  object-fit: cover;
+  background: var(--muted);
+  border: 1px solid color-mix(in oklch, var(--dev-accent) 28%, var(--border));
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--foreground) 6%, transparent),
+    0 4px 14px color-mix(in oklch, var(--background) 45%, transparent);
+}
+
+.disc-dev__track-thumb--fallback {
+  display: grid;
+  place-items: center;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--muted-foreground);
+}
+
+.disc-dev__track-name {
+  min-width: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.disc-dev__track-stat {
+  display: grid;
+  justify-items: end;
+  gap: 0.08rem;
+  min-width: 4.25rem;
+}
+
+.disc-dev__track-stat-value {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 8px color-mix(in oklch, var(--dev-accent) 12%, transparent);
+}
+
+.disc-dev__track-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.46rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--dev-accent) 58%, var(--muted-foreground));
+}
+
+/* ── Artist pick viewport ── */
+
+.disc-dev__viewport-corner {
+  position: absolute;
+  width: 1.35rem;
+  height: 1.35rem;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.disc-dev__viewport-corner::before,
+.disc-dev__viewport-corner::after {
+  content: '';
+  position: absolute;
+  background: color-mix(in oklch, var(--dev-neon) 85%, var(--foreground));
+  box-shadow: 0 0 10px color-mix(in oklch, var(--dev-accent) 45%, transparent);
+}
+
+.disc-dev__viewport-corner::before {
+  width: 100%;
+  height: 2px;
+}
+
+.disc-dev__viewport-corner::after {
+  width: 2px;
+  height: 100%;
+}
+
+.disc-dev__viewport-corner--tl {
+  top: 0.55rem;
+  left: 0.55rem;
+}
+
+.disc-dev__viewport-corner--tl::before,
+.disc-dev__viewport-corner--tl::after {
+  top: 0;
+  left: 0;
+}
+
+.disc-dev__viewport-corner--tr {
+  top: 0.55rem;
+  right: 0.55rem;
+}
+
+.disc-dev__viewport-corner--tr::before {
+  top: 0;
+  right: 0;
+}
+
+.disc-dev__viewport-corner--tr::after {
+  top: 0;
+  right: 0;
+}
+
+.disc-dev__viewport-corner--bl {
+  bottom: 0.55rem;
+  left: 0.55rem;
+}
+
+.disc-dev__viewport-corner--bl::before {
+  bottom: 0;
+  left: 0;
+}
+
+.disc-dev__viewport-corner--bl::after {
+  bottom: 0;
+  left: 0;
+}
+
+.disc-dev__viewport-corner--br {
+  bottom: 0.55rem;
+  right: 0.55rem;
+}
+
+.disc-dev__viewport-corner--br::before {
+  bottom: 0;
+  right: 0;
+}
+
+.disc-dev__viewport-corner--br::after {
+  bottom: 0;
+  right: 0;
+}
+
+.disc-dev__viewport-link {
+  position: relative;
+  z-index: 1;
+  display: block;
+  height: 100%;
+  min-height: 16.5rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.disc-dev__viewport-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.1) contrast(1.08) brightness(0.94);
+}
+
+.disc-dev__viewport-holo {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    125deg,
+    transparent 38%,
+    color-mix(in oklch, var(--foreground) 8%, transparent) 48%,
+    transparent 58%
+  );
+  opacity: 0.35;
+  mix-blend-mode: screen;
+  animation: disc-dev-holo 9s ease-in-out infinite;
+}
+
+.disc-dev__viewport-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--background) 55%, transparent) 0%,
+      transparent 30%,
+      color-mix(in oklch, var(--background) 92%, transparent) 100%
+    ),
+    radial-gradient(
+      ellipse 90% 80% at 50% 50%,
+      transparent 40%,
+      color-mix(in oklch, var(--background) 35%, transparent) 100%
+    );
+  pointer-events: none;
+}
+
+.disc-dev__viewport-top {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--background) 72%, transparent),
+    transparent
+  );
+}
+
+.disc-dev__viewport-avatar {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid color-mix(in oklch, var(--foreground) 25%, transparent);
+}
+
+.disc-dev__viewport-bottom {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem;
+}
+
+.disc-dev__viewport-mini {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border: 1px solid color-mix(in oklch, var(--dev-accent) 35%, var(--border));
+  box-shadow: 0 8px 20px color-mix(in oklch, var(--background) 50%, transparent);
+}
+
+.disc-dev__viewport-copy {
+  min-width: 0;
+}
+
+.disc-dev__viewport-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 18px color-mix(in oklch, var(--dev-accent) 20%, transparent);
+}
+
+.disc-dev__viewport-type {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--dev-accent) 65%, var(--foreground));
+}
+
+.disc-dev__viewport-empty {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 16.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* ── Footer status bar ── */
+
+.disc-dev__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 1.05rem 0.75rem;
+  margin-top: 0.75rem;
+  border-top: 1px solid color-mix(in oklch, var(--dev-accent) 18%, var(--border));
+  background: linear-gradient(
+    0deg,
+    color-mix(in oklch, var(--dev-chassis-deep) 50%, transparent),
+    transparent
+  );
+}
+
+.disc-dev--pick .disc-dev__footer {
+  margin-top: 0;
+}
+
+.disc-dev__footer-tag {
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 10%, var(--border));
+  border-radius: 2px;
+  background: color-mix(in oklch, var(--background) 65%, transparent);
+  color: color-mix(in oklch, var(--foreground) 52%, var(--muted-foreground));
+}
+
+.disc-dev__footer-tag--live {
+  color: color-mix(in oklch, var(--dev-accent) 80%, var(--foreground));
+  border-color: color-mix(in oklch, var(--dev-accent) 35%, var(--border));
+  box-shadow: 0 0 10px color-mix(in oklch, var(--dev-accent) 15%, transparent);
+  animation: disc-dev-led 2.8s ease-in-out infinite;
+}
+
+.disc-dev__footer-line {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--dev-accent) 30%, transparent) 0 4px,
+    transparent 4px 8px
+  );
+  mask-image: linear-gradient(90deg, black, transparent 95%);
+}
+
+@keyframes disc-dev-holo {
+  0%,
+  100% {
+    transform: translateX(-8%) skewX(-4deg);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateX(8%) skewX(-4deg);
+    opacity: 0.4;
+  }
+}
+
+@keyframes disc-dev-rail-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.15);
+  }
+}
+
+@keyframes disc-dev-bus-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ── Edit dialog options ── */
+
+.disc-dev__pick-options {
+  display: grid;
+  gap: 0.45rem;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.disc-dev__pick-option {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.disc-dev__pick-option:hover {
+  border-color: color-mix(in oklch, var(--primary) 40%, var(--border));
+  background: color-mix(in oklch, var(--primary) 6%, var(--card));
+}
+
+.disc-dev__pick-option--active {
+  border-color: color-mix(in oklch, var(--primary) 55%, var(--border));
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--primary) 20%, transparent);
+}
+
+/* ── Rack layout ── */
+
+.profile-discography__body--rack {
+  position: relative;
+  display: grid;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.profile-discography__body--rack > .disc-dev {
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 1024px) {
+  .profile-discography__body--rack {
+    grid-template-columns: minmax(0, 1.55fr) minmax(17rem, 0.9fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .profile-discography__body--rack > .disc-dev--pick {
+    position: sticky;
+    top: 1rem;
+    align-self: start;
+    z-index: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disc-dev__led,
+  .disc-dev__footer-tag--live,
+  .disc-dev__viewport-holo,
+  .disc-rack__rail,
+  .disc-rack__bus {
+    animation: none;
+  }
+}

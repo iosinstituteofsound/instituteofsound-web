@@ -6,12 +6,14 @@ import type {
   ExploreFilter,
   ExplorePayload,
   LabelProfileDto,
+  ArtistProfileDto,
   ReleasesCatalogDto,
   ReleasesPageDto,
   ReleasesPageFilter,
   TrackSubmissionDto,
   WireCandidates,
   WirePickItem,
+  DiscographyDto,
 } from '@/modules/explore/types/explore.types'
 
 export async function getExplore() {
@@ -174,6 +176,21 @@ export async function getReleasesPage(params: {
   const { data } = await apiClient.get<ApiSuccessResponse<ReleasesPageDto>>(
     `${API_V1}/explore/releases`,
     { params },
+  )
+  return data.data
+}
+
+export async function getProfileDiscography(userId: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<DiscographyDto>>(
+    `${API_V1}/explore/discography/${userId}`,
+  )
+  return data.data
+}
+
+export async function setArtistPick(releaseId: string) {
+  const { data } = await apiClient.put<ApiSuccessResponse<ArtistProfileDto>>(
+    `${API_V1}/artist/discography/pick`,
+    { releaseId },
   )
   return data.data
 }

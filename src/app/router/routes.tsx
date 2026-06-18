@@ -60,6 +60,11 @@ const LayoutsPage = lazy(() =>
     default: m.LayoutsPage,
   })),
 )
+const ProfileTabsPage = lazy(() =>
+  import('@/modules/profile-tabs/pages/profile-tabs-page').then((m) => ({
+    default: m.ProfileTabsPage,
+  })),
+)
 const FeedPage = lazy(() =>
   import('@/modules/feed/pages/feed-page').then((m) => ({
     default: m.FeedPage,
@@ -396,6 +401,18 @@ export const router = createBrowserRouter([
             <PermissionGuard resource="roles" action="read">
               <Lazy>
                 <LayoutsPage />
+              </Lazy>
+            </PermissionGuard>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'profile-tabs',
+        element: (
+          <ResourceGuard name="ProfileTabsPage">
+            <PermissionGuard resource="roles" action="read">
+              <Lazy>
+                <ProfileTabsPage />
               </Lazy>
             </PermissionGuard>
           </ResourceGuard>

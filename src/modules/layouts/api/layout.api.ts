@@ -14,6 +14,8 @@ export async function createLayout(payload: {
   slug: string
   name: string
   defaultSidebarItemId?: string | null
+  profileTabIds?: string[]
+  defaultProfileTabId?: string | null
   shell?: string
   config?: LayoutDto['config']
   sidebarItemIds?: string[]
@@ -32,8 +34,10 @@ export async function updateLayout(
     name: string
     shell: string
     defaultSidebarItemId: string | null
+    defaultProfileTabId: string | null
     config: LayoutDto['config']
     sidebarItemIds: string[]
+    profileTabIds: string[]
     isActive: boolean
   }>,
 ) {

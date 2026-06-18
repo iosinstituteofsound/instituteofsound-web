@@ -1,0 +1,254 @@
+/* Latest release — editorial poster (open layout, no box) */
+
+.disc-spot {
+  --disc-spot-art: clamp(15rem, 36vw, 21rem);
+  --disc-spot-accent: var(--primary);
+  position: relative;
+  isolation: isolate;
+  padding: 0.25rem 0 2.75rem;
+  overflow: visible;
+}
+
+.disc-spot__wash {
+  position: absolute;
+  inset: -0.25rem -3% 0.5rem 28%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 70% 80% at 0% 50%,
+    color-mix(in oklch, var(--disc-spot-accent) 8%, transparent),
+    transparent 68%
+  );
+}
+
+.disc-spot__stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1.75rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .disc-spot__stage {
+    grid-template-columns: auto 1px minmax(0, 1fr);
+    gap: 0 clamp(1.75rem, 4vw, 3rem);
+    align-items: center;
+  }
+}
+
+/* ── Art ── */
+
+.disc-spot__art {
+  position: relative;
+  width: var(--disc-spot-art);
+  padding-right: calc(var(--disc-spot-art) * 0.26);
+  box-sizing: content-box;
+  justify-self: center;
+}
+
+@media (min-width: 768px) {
+  .disc-spot__art {
+    justify-self: start;
+  }
+}
+
+.disc-spot__art::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 20%;
+  bottom: -8%;
+  height: 36%;
+  background: radial-gradient(
+    ellipse 85% 100% at 50% 0%,
+    color-mix(in oklch, var(--disc-spot-accent) 20%, transparent),
+    transparent 70%
+  );
+  filter: blur(20px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.disc-spot__vinyl.explore-rel-vinyl-stack--hero {
+  width: 100%;
+  max-width: var(--disc-spot-art);
+  filter: drop-shadow(0 24px 48px color-mix(in oklch, var(--background) 70%, transparent));
+}
+
+.disc-spot__vinyl .explore-rel-vinyl__sleeve {
+  border-radius: 0.3rem;
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--foreground) 7%, transparent),
+    0 18px 40px color-mix(in oklch, var(--background) 55%, transparent);
+}
+
+/* ── Divider ── */
+
+.disc-spot__divider {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .disc-spot__divider {
+    display: block;
+    width: 1px;
+    height: min(100%, 13.5rem);
+    align-self: center;
+    justify-self: center;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in oklch, var(--disc-spot-accent) 45%, var(--border)) 28%,
+      color-mix(in oklch, var(--disc-spot-accent) 35%, var(--border)) 72%,
+      transparent
+    );
+  }
+}
+
+/* ── Copy ── */
+
+.disc-spot__copy {
+  position: relative;
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  padding: 0.15rem 0;
+}
+
+.disc-spot__watermark {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.15rem;
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 14vw, 7.5rem);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in oklch, var(--foreground) 7%, transparent);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.disc-spot__label {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+.disc-spot__title {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+}
+
+.disc-spot__title a {
+  display: grid;
+  gap: 0.08em;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.disc-spot__title a:hover {
+  opacity: 0.88;
+}
+
+.disc-spot__title-line {
+  display: block;
+  font-size: clamp(2rem, 5.5vw, 3.25rem);
+  color: var(--foreground);
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.disc-spot__title-line--accent {
+  font-size: clamp(1.85rem, 5vw, 3rem);
+  color: color-mix(in oklch, var(--disc-spot-accent) 72%, var(--foreground));
+}
+
+.disc-spot__meta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--foreground) 58%, var(--muted-foreground));
+}
+
+.disc-spot__meta-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--disc-spot-accent) 70%, var(--muted-foreground));
+  opacity: 0.8;
+}
+
+.disc-spot__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+
+.disc-spot__btn {
+  min-height: 2.25rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.56rem;
+}
+
+.disc-spot__btn--fill {
+  gap: 0.35rem;
+}
+
+.disc-spot::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--border) 80%, transparent) 15%,
+    color-mix(in oklch, var(--border) 80%, transparent) 85%,
+    transparent
+  );
+}
+
+@media (max-width: 767px) {
+  .disc-spot__watermark {
+    right: 0;
+    font-size: clamp(3.5rem, 22vw, 5rem);
+    opacity: 0.35;
+  }
+
+  .disc-spot__copy {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disc-spot__vinyl .explore-rel-vinyl--spin {
+    animation: none;
+  }
+}

@@ -52,6 +52,8 @@ export interface LayoutDto {
   defaultSidebarItemId?: string
   config: LayoutConfig
   sidebarItemIds: string[]
+  profileTabIds?: string[]
+  defaultProfileTabId?: string
   isActive?: boolean
 }
 

@@ -1,14 +1,19 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Grid3x3 } from 'lucide-react'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { ProfileAboutSection } from '@/modules/profile/components/about/profile-about-section'
 import { ProfileAllTab } from '@/modules/profile/components/profile-all-tab'
+import { ProfileArtistSubmissionsTab } from '@/modules/profile/components/profile-artist-submissions-tab'
 import { ProfileCoverSection } from '@/modules/profile/components/profile-cover-section'
+import { ProfileDiscographyTab } from '@/modules/profile/components/profile-discography-tab'
+import { ProfileEditorDraftsTab } from '@/modules/profile/components/profile-editor-drafts-tab'
+import { ProfileEditorSubmissionsTab } from '@/modules/profile/components/profile-editor-submissions-tab'
+import { ProfileEditorWireTab } from '@/modules/profile/components/profile-editor-wire-tab'
+import { ProfileEditorialTab } from '@/modules/profile/components/profile-editorial-tab'
 import { ProfilePostsPanel } from '@/modules/profile/components/profile-posts-panel'
 import { usePublicProfile } from '@/modules/profile/hooks/use-public-profile'
 import { useSlidingIndicator } from '@/modules/profile/lib/use-sliding-indicator'
-import type { ProfileViewTab } from '@/modules/profile/types/profile.types'
 import type { PublicProfileDto } from '@/modules/search/api/search.api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { PageLoader } from '@/shared/components/feedback/loader'
@@ -17,11 +22,11 @@ import type { UserDto } from '@/shared/types/auth.types'
 import { cn } from '@/shared/lib/cn'
 import './profile-page.css'
 
-const TABS: { id: ProfileViewTab; label: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'posts', label: 'Posts' },
-  { id: 'about', label: 'About' },
-  { id: 'photos', label: 'Photos' },
+const FALLBACK_TABS: Array<{ id: string; label: string; panelKey: 'all' | 'posts' | 'about' | 'photos' }> = [
+  { id: 'all', label: 'All', panelKey: 'all' },
+  { id: 'posts', label: 'Posts', panelKey: 'posts' },
+  { id: 'about', label: 'About', panelKey: 'about' },
+  { id: 'photos', label: 'Photos', panelKey: 'photos' },
 ]
 
 function mapPublicProfileToUser(profile: PublicProfileDto): UserDto {
@@ -47,7 +52,7 @@ function mapPublicProfileToUser(profile: PublicProfileDto): UserDto {
 
 export function ProfilePage() {
   const { userId: routeUserId } = useParams()
-  const [activeTab, setActiveTab] = useState<ProfileViewTab>('all')
+  const [activeTab, setActiveTab] = useState<string>('')
   const tabNavRef = useRef<HTMLElement>(null)
   const { data: meData, isLoading: meLoading, isError: meError, refetch: refetchMe } = useMe()
   const isOwnProfile = !routeUserId || routeUserId === meData?.user.id
@@ -68,9 +73,36 @@ export function ProfilePage() {
       ? mapPublicProfileToUser(publicProfile)
       : undefined
 
+  const dynamicTabs =
+    (isOwnProfile
+      ? meData?.authorization.activeLayout?.profileTabs
+      : publicProfile?.profileTabs) ?? []
+
+  const tabs = dynamicTabs.length
+    ? dynamicTabs.map((t) => ({ id: t.slug, label: t.label, panelKey: t.panelKey }))
+    : FALLBACK_TABS
+
+  useEffect(() => {
+    if (!tabs.length) return
+    if (!activeTab || !tabs.some((t) => t.id === activeTab)) {
+      setActiveTab(tabs[0]!.id)
+    }
+  }, [activeTab, tabs])
+
   if (isLoading) return <PageLoader />
   if (isError || !user) {
     return <ErrorState onRetry={() => (isOwnProfile ? refetchMe() : refetchPublic())} />
+  }
+
+  const active = tabs.find((t) => t.id === activeTab) ?? tabs[0]
+  const aboutTabId = tabs.find((t) => t.panelKey === 'about')?.id
+  const photosTabId = tabs.find((t) => t.panelKey === 'photos')?.id
+
+  const onNavigateToAbout = () => {
+    if (aboutTabId) setActiveTab(aboutTabId)
+  }
+  const onNavigateToPhotos = () => {
+    if (photosTabId) setActiveTab(photosTabId)
   }
 
   return (
@@ -79,7 +111,7 @@ export function ProfilePage() {
 
       <div className="mt-1 border-b">
         <nav ref={tabNavRef} className="relative -mb-px flex gap-1 overflow-x-auto px-1">
-          {TABS.map(({ id, label }) => {
+          {tabs.map(({ id, label }) => {
             const isActive = activeTab === id
             return (
               <button
@@ -110,20 +142,31 @@ export function ProfilePage() {
 
       <div className="py-4">
         <div key={activeTab} className="profile-tab-content">
-          {activeTab === 'all' ? (
-            <ProfileAllTab
-              user={user}
-              isOwnProfile={isOwnProfile}
-              onNavigateToAbout={() => setActiveTab('about')}
-              onNavigateToPhotos={() => setActiveTab('photos')}
-            />
+          {active?.panelKey === 'all' ? (
+            <ProfileAllTab user={user} isOwnProfile={isOwnProfile} onNavigateToAbout={onNavigateToAbout} onNavigateToPhotos={onNavigateToPhotos} />
           ) : null}
 
-          {activeTab === 'posts' ? (
-            <ProfilePostsPanel user={user} isOwnProfile={isOwnProfile} />
+          {active?.panelKey === 'posts' ? <ProfilePostsPanel user={user} isOwnProfile={isOwnProfile} /> : null}
+
+          {active?.panelKey === 'discography' ? (
+            <ProfileDiscographyTab user={user} isOwnProfile={isOwnProfile} />
           ) : null}
 
-          {activeTab === 'photos' ? (
+          {active?.panelKey === 'artist-submissions' ? (
+            <ProfileArtistSubmissionsTab isOwnProfile={isOwnProfile} />
+          ) : null}
+
+          {active?.panelKey === 'editorial' ? <ProfileEditorialTab isOwnProfile={isOwnProfile} /> : null}
+
+          {active?.panelKey === 'editor-drafts' ? <ProfileEditorDraftsTab isOwnProfile={isOwnProfile} /> : null}
+
+          {active?.panelKey === 'editor-wire' ? <ProfileEditorWireTab isOwnProfile={isOwnProfile} /> : null}
+
+          {active?.panelKey === 'editor-submissions' ? (
+            <ProfileEditorSubmissionsTab isOwnProfile={isOwnProfile} />
+          ) : null}
+
+          {active?.panelKey === 'photos' ? (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -153,7 +196,7 @@ export function ProfilePage() {
             </Card>
           ) : null}
 
-          {activeTab === 'about' ? <ProfileAboutSection user={user} editable={isOwnProfile} /> : null}
+          {active?.panelKey === 'about' ? <ProfileAboutSection user={user} editable={isOwnProfile} /> : null}
         </div>
       </div>
     </div>

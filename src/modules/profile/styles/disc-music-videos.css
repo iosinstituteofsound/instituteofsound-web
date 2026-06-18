@@ -1,0 +1,328 @@
+/* Discography — music videos (futuristic monitor reel) */
+
+.disc-videos {
+  margin-top: 0.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid color-mix(in oklch, var(--primary) 14%, var(--border));
+}
+
+.disc-videos__head {
+  margin-bottom: 1.35rem;
+}
+
+.disc-videos__kicker {
+  color: color-mix(in oklch, var(--primary) 70%, var(--muted-foreground));
+}
+
+.disc-videos__reel {
+  display: grid;
+  gap: 1.35rem 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
+}
+
+@media (min-width: 1024px) {
+  .disc-videos__reel {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.disc-videos__unit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.disc-videos__monitor {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.disc-videos__monitor-id {
+  position: absolute;
+  top: -0.55rem;
+  left: 0.55rem;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 0.46rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.35rem;
+  border: 1px solid color-mix(in oklch, var(--primary) 30%, var(--border));
+  border-radius: 2px;
+  background: color-mix(in oklch, var(--background) 82%, var(--card));
+  color: color-mix(in oklch, var(--primary) 72%, var(--muted-foreground));
+}
+
+.disc-videos__screen {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--primary) 28%, var(--border));
+  border-radius: 3px;
+  background: color-mix(in oklch, var(--card) 60%, var(--background));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--foreground) 6%, transparent),
+    inset 0 2px 16px color-mix(in oklch, var(--background) 65%, transparent),
+    0 12px 32px color-mix(in oklch, var(--background) 55%, transparent);
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+}
+
+.disc-videos__monitor:hover .disc-videos__screen,
+.disc-videos__monitor:focus-visible .disc-videos__screen {
+  border-color: color-mix(in oklch, var(--primary) 55%, var(--border));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--primary) 15%, transparent),
+    inset 0 2px 20px color-mix(in oklch, var(--primary) 8%, transparent),
+    0 16px 40px color-mix(in oklch, var(--background) 50%, transparent),
+    0 0 24px color-mix(in oklch, var(--primary) 10%, transparent);
+  transform: translateY(-3px);
+}
+
+.disc-videos__thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease, filter 0.3s ease;
+}
+
+.disc-videos__thumb--fallback {
+  display: block;
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--muted) 70%, var(--background)),
+    var(--background)
+  );
+}
+
+.disc-videos__monitor:hover .disc-videos__thumb,
+.disc-videos__monitor:focus-visible .disc-videos__thumb {
+  transform: scale(1.04);
+  filter: saturate(1.08) contrast(1.05);
+}
+
+.disc-videos__screen-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(color-mix(in oklch, var(--foreground) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklch, var(--foreground) 5%, transparent) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(180deg, black, transparent 90%);
+}
+
+.disc-videos__screen-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    color-mix(in oklch, var(--foreground) 10%, transparent) 2px,
+    color-mix(in oklch, var(--foreground) 10%, transparent) 3px
+  );
+}
+
+.disc-videos__corner {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.disc-videos__corner::before,
+.disc-videos__corner::after {
+  content: '';
+  position: absolute;
+  background: color-mix(in oklch, var(--primary) 80%, var(--foreground));
+  box-shadow: 0 0 8px color-mix(in oklch, var(--primary) 35%, transparent);
+}
+
+.disc-videos__corner::before {
+  width: 100%;
+  height: 2px;
+}
+
+.disc-videos__corner::after {
+  width: 2px;
+  height: 100%;
+}
+
+.disc-videos__corner--tl {
+  top: 0.45rem;
+  left: 0.45rem;
+}
+
+.disc-videos__corner--tl::before,
+.disc-videos__corner--tl::after {
+  top: 0;
+  left: 0;
+}
+
+.disc-videos__corner--tr {
+  top: 0.45rem;
+  right: 0.45rem;
+}
+
+.disc-videos__corner--tr::before {
+  top: 0;
+  right: 0;
+}
+
+.disc-videos__corner--tr::after {
+  top: 0;
+  right: 0;
+}
+
+.disc-videos__corner--bl {
+  bottom: 0.45rem;
+  left: 0.45rem;
+}
+
+.disc-videos__corner--bl::before {
+  bottom: 0;
+  left: 0;
+}
+
+.disc-videos__corner--bl::after {
+  bottom: 0;
+  left: 0;
+}
+
+.disc-videos__corner--br {
+  bottom: 0.45rem;
+  right: 0.45rem;
+}
+
+.disc-videos__corner--br::before {
+  bottom: 0;
+  right: 0;
+}
+
+.disc-videos__corner--br::after {
+  bottom: 0;
+  right: 0;
+}
+
+.disc-videos__play {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--foreground) 22%, transparent);
+  background: color-mix(in oklch, var(--background) 55%, transparent);
+  color: var(--foreground);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 20px color-mix(in oklch, var(--background) 40%, transparent);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.disc-videos__monitor:hover .disc-videos__play,
+.disc-videos__monitor:focus-visible .disc-videos__play {
+  border-color: color-mix(in oklch, var(--primary) 55%, transparent);
+  color: var(--primary);
+  background: color-mix(in oklch, var(--background) 65%, var(--primary) 8%);
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+.disc-videos__duration {
+  position: absolute;
+  z-index: 2;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.38rem;
+  border-radius: 2px;
+  border: 1px solid color-mix(in oklch, var(--foreground) 14%, transparent);
+  background: color-mix(in oklch, var(--background) 72%, transparent);
+  color: color-mix(in oklch, var(--foreground) 88%, transparent);
+}
+
+.disc-videos__meta {
+  display: grid;
+  gap: 0.28rem;
+  min-height: 3.1rem;
+  padding: 0 0.15rem;
+}
+
+.disc-videos__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(0.88rem * 1.15 * 2);
+}
+
+.disc-videos__stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.disc-videos__stat-value {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.disc-videos__stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.46rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--primary) 58%, var(--muted-foreground));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disc-videos__screen,
+  .disc-videos__thumb,
+  .disc-videos__play {
+    transition: none;
+  }
+
+  .disc-videos__monitor:hover .disc-videos__screen,
+  .disc-videos__monitor:focus-visible .disc-videos__screen {
+    transform: none;
+  }
+
+  .disc-videos__monitor:hover .disc-videos__thumb,
+  .disc-videos__monitor:focus-visible .disc-videos__thumb {
+    transform: none;
+  }
+}

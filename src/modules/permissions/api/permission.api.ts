@@ -4,6 +4,7 @@ import type { ApiSuccessResponse } from '@/shared/types/api.types'
 import type { ResourceSummary, ScopeSummary } from '@/shared/types/auth.types'
 
 import type { SidebarMenuItemDto } from '@/shared/types/sidebar.types'
+import type { ProfileTabDto } from '@/shared/types/profile-tabs.types'
 
 export interface FeatureDto {
   id: string
@@ -32,6 +33,7 @@ export interface CatalogDto {
   features: FeatureDto[]
   layouts: LayoutDto[]
   sidebarItems: SidebarMenuItemDto[]
+  profileTabs: ProfileTabDto[]
 }
 
 export interface PermissionGroupMeta {

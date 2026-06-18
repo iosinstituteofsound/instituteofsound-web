@@ -97,6 +97,27 @@ export interface ReleasesPageDto {
   hasMore: boolean
 }
 
+export interface DiscographyDto {
+  artist: ArtistProfileDto | null
+  latestRelease: ReleaseDto | null
+  popular: ReleaseDto[]
+  artistPick: ReleaseDto | null
+  albumsAndEps: ReleaseDto[]
+  singles: ReleaseDto[]
+  musicVideos: MusicVideoDto[]
+}
+
+export interface MusicVideoDto {
+  id: string
+  artistProfileId: string
+  title: string
+  thumbnailUrl?: string
+  videoUrl: string
+  durationSec?: number
+  viewCount?: number
+  releaseDate?: string
+}
+
 export interface PlaylistTrack {
   title: string
   artistName: string

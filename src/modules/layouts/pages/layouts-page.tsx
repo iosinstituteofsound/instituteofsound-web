@@ -46,8 +46,10 @@ type LayoutFormValues = {
   slug: string
   name: string
   defaultSidebarItemId: string
+  defaultProfileTabId: string
   config: LayoutDto['config']
   sidebarItemIds: string[]
+  profileTabIds: string[]
 }
 
 function resolveDefaultSidebarItemId(layout?: LayoutDto | null): string {
@@ -58,13 +60,23 @@ function resolveDefaultSidebarItemId(layout?: LayoutDto | null): string {
   return ids[0]!
 }
 
+function resolveDefaultProfileTabId(layout?: LayoutDto | null): string {
+  const ids = layout?.profileTabIds ?? []
+  if (ids.length === 0) return ''
+  const current = layout?.defaultProfileTabId
+  if (current && ids.includes(current)) return current
+  return ids[0]!
+}
+
 function toFormValues(layout?: LayoutDto | null): LayoutFormValues {
   return {
     slug: layout?.slug ?? '',
     name: layout?.name ?? '',
     defaultSidebarItemId: resolveDefaultSidebarItemId(layout),
+    defaultProfileTabId: resolveDefaultProfileTabId(layout),
     config: normalizeLayoutConfig(layout?.config),
     sidebarItemIds: layout?.sidebarItemIds ?? [],
+    profileTabIds: layout?.profileTabIds ?? [],
   }
 }
 
@@ -90,12 +102,25 @@ export function LayoutsPage() {
     [catalog?.sidebarItems],
   )
 
+  const profileTabOptions = useMemo(
+    () => (catalog?.profileTabs ?? []).map((tab) => ({ id: tab.id, label: tab.label })),
+    [catalog?.profileTabs],
+  )
+
   const previewSidebarItems = useMemo(
     () =>
       watched.sidebarItemIds
         .map((id) => catalog?.sidebarItems.find((item) => item.id === id))
         .filter((item): item is NonNullable<typeof item> => Boolean(item)),
     [catalog?.sidebarItems, watched.sidebarItemIds],
+  )
+
+  const previewProfileTabs = useMemo(
+    () =>
+      watched.profileTabIds
+        .map((id) => catalog?.profileTabs.find((tab) => tab.id === id))
+        .filter((tab): tab is NonNullable<typeof tab> => Boolean(tab)),
+    [catalog?.profileTabs, watched.profileTabIds],
   )
 
   useEffect(() => {
@@ -110,6 +135,18 @@ export function LayoutsPage() {
     }
   }, [watched.sidebarItemIds, form])
 
+  useEffect(() => {
+    const ids = watched.profileTabIds
+    const current = form.getValues('defaultProfileTabId')
+    if (ids.length === 0) {
+      if (current) form.setValue('defaultProfileTabId', '')
+      return
+    }
+    if (!current || !ids.includes(current)) {
+      form.setValue('defaultProfileTabId', ids[0]!)
+    }
+  }, [watched.profileTabIds, form])
+
   const openDialog = (layout?: LayoutDto | null) => {
     setEditing(layout ?? null)
     form.reset(toFormValues(layout))
@@ -123,8 +160,10 @@ export function LayoutsPage() {
         slug: values.slug.trim(),
         name: values.name.trim(),
         defaultSidebarItemId: values.defaultSidebarItemId || null,
+        defaultProfileTabId: values.defaultProfileTabId || null,
         config: values.config,
         sidebarItemIds: values.sidebarItemIds,
+        profileTabIds: values.profileTabIds,
       }
       if (editing) {
         await updateLayout.mutateAsync({ id: editing.id, ...payload })
@@ -308,6 +347,65 @@ export function LayoutsPage() {
                         </Select>
                         <p className="text-xs text-muted-foreground">
                           Users land on this page after login when this layout is active.
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="profileTabIds"
+                    render={({ field }) => (
+                      <FormItem>
+                        <LayoutSidebarPicker
+                          options={profileTabOptions}
+                          selectedIds={field.value}
+                          onChange={field.onChange}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Profile tabs are shown on user profiles. Manage tab catalog on{' '}
+                          <Link to="/profile-tabs" className="text-primary underline">
+                            Profile tabs
+                          </Link>
+                          .
+                        </p>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="defaultProfileTabId"
+                    rules={{
+                      validate: (value, formValues) =>
+                        formValues.profileTabIds.length === 0 ||
+                        Boolean(value) ||
+                        'Select a default profile tab',
+                    }}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Default profile tab</FormLabel>
+                        <Select
+                          value={field.value || undefined}
+                          onValueChange={field.onChange}
+                          disabled={previewProfileTabs.length === 0}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select profile tab" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {previewProfileTabs.map((tab) => (
+                              <SelectItem key={tab.id} value={tab.id}>
+                                {tab.label} ({tab.slug})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          When users open their profile, this tab is selected by default.
                         </p>
                         <FormMessage />
                       </FormItem>

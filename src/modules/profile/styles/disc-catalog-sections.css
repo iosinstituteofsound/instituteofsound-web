@@ -1,0 +1,153 @@
+/* Discography catalog sections — albums/EP + singles (releases page cards) */
+
+.disc-albums,
+.disc-singles {
+  margin-top: 0.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid color-mix(in oklch, var(--primary) 14%, var(--border));
+}
+
+.disc-albums__head,
+.disc-singles__head {
+  margin-bottom: 1.35rem;
+}
+
+.disc-albums__kicker,
+.disc-singles__kicker {
+  color: color-mix(in oklch, var(--primary) 70%, var(--muted-foreground));
+}
+
+.disc-albums__catalog.releases-page--embed,
+.disc-singles__catalog.releases-page--embed {
+  min-height: 0;
+  padding-bottom: 0;
+  background: transparent;
+  color: inherit;
+}
+
+/* ── Equal-height grid ── */
+
+.disc-catalog__grid {
+  align-items: stretch;
+  gap: 1.5rem 1rem;
+}
+
+.disc-catalog__card {
+  display: flex;
+  height: 100%;
+}
+
+.disc-catalog__card .rel-grid-card__inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.disc-catalog__card:hover .rel-grid-card__inner,
+.disc-catalog__card:focus-visible .rel-grid-card__inner {
+  transform: translateY(-4px);
+  box-shadow:
+    0 16px 40px color-mix(in oklch, var(--background) 50%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--rel-accent) 12%, transparent);
+}
+
+/* ── Art polish ── */
+
+.disc-catalog__card .rel-grid-card__art {
+  flex-shrink: 0;
+}
+
+.disc-catalog__card .rel-grid-card__art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--background) 15%, transparent) 0%,
+    transparent 38%,
+    color-mix(in oklch, var(--background) 20%, transparent) 100%
+  );
+  opacity: 0.85;
+}
+
+.disc-catalog__card .rel-grid-card__img,
+.disc-catalog__card .rel-grid-card__fallback {
+  transition: transform 0.4s ease;
+}
+
+.disc-catalog__card:hover .rel-grid-card__img,
+.disc-catalog__card:focus-visible .rel-grid-card__img {
+  transform: scale(1.045);
+}
+
+/* ── Body — fixed block for equal card shape ── */
+
+.disc-catalog__card .rel-grid-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 5.85rem;
+  padding: 0.8rem 0.85rem 0.7rem;
+}
+
+.disc-catalog__card .rel-grid-card__genre {
+  flex-shrink: 0;
+}
+
+.disc-catalog__card .rel-grid-card__title {
+  min-height: calc(0.92rem * 1.15 * 2);
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+}
+
+.disc-catalog__card .rel-grid-card__artist {
+  margin-top: auto;
+  min-height: 0.95rem;
+  padding-top: 0.3rem;
+}
+
+/* ── Footer — aligned baseline across row ── */
+
+.disc-catalog__card .rel-grid-card__foot {
+  flex-shrink: 0;
+  min-height: 2.35rem;
+  margin-top: auto;
+  padding: 0.6rem 0.85rem;
+}
+
+.disc-catalog__card .rel-grid-card__date {
+  flex: 1;
+  min-width: 0;
+}
+
+.disc-catalog__card .rel-grid-card__plays {
+  flex-shrink: 0;
+}
+
+.disc-catalog__card .rel-grid-card__ext {
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disc-catalog__card .rel-grid-card__inner,
+  .disc-catalog__card .rel-grid-card__img {
+    transition: none;
+  }
+
+  .disc-catalog__card:hover .rel-grid-card__inner,
+  .disc-catalog__card:focus-visible .rel-grid-card__inner {
+    transform: none;
+  }
+
+  .disc-catalog__card:hover .rel-grid-card__img,
+  .disc-catalog__card:focus-visible .rel-grid-card__img {
+    transform: none;
+  }
+}

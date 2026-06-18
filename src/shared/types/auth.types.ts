@@ -29,6 +29,7 @@ export interface AuthzRoleInfo {
 }
 
 import type { LayoutConfig } from '@/shared/types/layout.types'
+import type { ProfileTabDto } from '@/shared/types/profile-tabs.types'
 
 export interface LayoutSummary {
   id: string
@@ -40,6 +41,9 @@ export interface LayoutSummary {
   defaultSidebarItemId?: string
   config: LayoutConfig
   sidebarItemIds: string[]
+  profileTabIds?: string[]
+  defaultProfileTabId?: string
+  profileTabs?: ProfileTabDto[]
   isActive?: boolean
 }
 

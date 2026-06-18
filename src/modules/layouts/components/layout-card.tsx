@@ -91,7 +91,9 @@ export function LayoutCard({ layout, onEdit, onDelete }: LayoutCardProps) {
             <LayoutPublicPreview layoutName={layout.name} config={layout.config.public} compact />
           )}
         </div>
-        <p className="px-3 pb-3 text-xs text-muted-foreground">{layout.sidebarItemIds.length} sidebar items assigned</p>
+        <p className="px-3 pb-3 text-xs text-muted-foreground">
+          {layout.sidebarItemIds.length} sidebar items, {(layout.profileTabIds ?? []).length} profile tabs assigned
+        </p>
       </CardContent>
     </Card>
   )
@@ -154,6 +156,7 @@ export function LayoutSidebarPicker({ options, selectedIds, onChange }: LayoutSi
       </div>
       {available.length > 0 ? (
         <select
+          aria-label="Add item"
           className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
           defaultValue=""
           onChange={(event) => {
@@ -161,7 +164,7 @@ export function LayoutSidebarPicker({ options, selectedIds, onChange }: LayoutSi
             event.target.value = ''
           }}
         >
-          <option value="">Add sidebar item…</option>
+          <option value="">Add item…</option>
           {available.map((option) => (
             <option key={option.id} value={option.id}>
               {option.label}
