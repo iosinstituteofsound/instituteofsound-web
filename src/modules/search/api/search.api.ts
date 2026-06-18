@@ -31,6 +31,7 @@ export interface SearchProfileDto {
   avatarUrl?: string
   roles: string[]
   clickPath?: string | null
+  isVerified?: boolean
 }
 
 export interface SearchUsersResult {

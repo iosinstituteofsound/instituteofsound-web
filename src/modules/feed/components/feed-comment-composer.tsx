@@ -19,7 +19,7 @@ import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { useAddFeedComment } from '@/modules/feed/hooks/use-feed-engagement'
 import type { FeedCommentDto } from '@/modules/feed/types/feed.types'
-import { Textarea } from '@/shared/components/ui/textarea'
+import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { toast } from '@/shared/components/ui/sonner'
 import { cn } from '@/shared/lib/cn'
 
@@ -272,7 +272,12 @@ export function FeedCommentComposer({
         <div className="feed-comment-composer__box">
           {replyTo ? (
             <p className="feed-comment-composer__replying">
-              Replying to <span>{replyTo.author.name}</span>
+              Replying to{' '}
+              <VerifiedUserName
+                name={replyTo.author.name}
+                isVerified={replyTo.author.isVerified}
+                className="inline-flex font-medium text-foreground"
+              />
               <button type="button" onClick={onClearReply}>Cancel</button>
             </p>
           ) : null}
@@ -343,7 +348,12 @@ export function FeedCommentComposer({
       <div className="min-w-0 flex-1 space-y-2">
         {replyTo ? (
           <p className="text-xs text-muted-foreground">
-            Replying to <span className="font-medium text-foreground">{replyTo.author.name}</span>
+            Replying to{' '}
+            <VerifiedUserName
+              name={replyTo.author.name}
+              isVerified={replyTo.author.isVerified}
+              className="inline-flex font-medium text-foreground"
+            />
             <button
               type="button"
               className="ml-2 font-semibold text-primary hover:underline"

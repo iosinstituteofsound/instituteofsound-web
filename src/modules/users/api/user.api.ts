@@ -23,6 +23,7 @@ export interface UserDetail {
   orgLabel?: string
   linkUrl?: string
   dashboardPersona?: string
+  isVerified: boolean
   createdAt: string
   roles: UserRoleAssignment[]
 }
@@ -103,4 +104,12 @@ export async function revokeUserRole(userId: string, roleId: string) {
     { data: { roleId } },
   )
   return data.data
+}
+
+export async function setUserVerified(userId: string, isVerified: boolean) {
+  const { data } = await apiClient.patch<ApiSuccessResponse<{ user: { id: string; isVerified: boolean } }>>(
+    `${API_V1}/admin/users/${userId}/verified`,
+    { isVerified },
+  )
+  return data.data.user
 }

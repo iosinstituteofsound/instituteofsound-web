@@ -1,4 +1,4 @@
-export type PermissionAction = 'read' | 'create' | 'update' | 'delete' | 'manage'
+export type PermissionAction = 'read' | 'create' | 'update' | 'delete' | 'manage' | 'verify'
 
 const ACTION_MAP: Record<PermissionAction, string> = {
   read: 'view',
@@ -6,6 +6,7 @@ const ACTION_MAP: Record<PermissionAction, string> = {
   update: 'edit',
   delete: 'delete',
   manage: 'manage',
+  verify: 'verify',
 }
 
 export function toPermissionSlug(resource: string, action: PermissionAction): string {

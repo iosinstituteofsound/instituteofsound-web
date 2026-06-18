@@ -3,6 +3,7 @@ import { useMemo, useRef, useState } from 'react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { CreateStoryCard } from '@/modules/feed/components/create-post-card'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import {
   getStoryItems,
@@ -156,7 +157,12 @@ function StoryRowCard({
             </div>
           ) : null}
 
-          <p className="feed-story-card__tag">{item.author.name}</p>
+          <VerifiedUserName
+            name={item.author.name}
+            isVerified={item.author.isVerified}
+            className="feed-story-card__tag"
+            nameClassName="truncate"
+          />
         </div>
       </div>
     </button>

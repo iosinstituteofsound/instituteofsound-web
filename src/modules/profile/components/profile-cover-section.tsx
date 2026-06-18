@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  BadgeCheck,
   Camera,
   ImageIcon,
   Loader2,
@@ -10,6 +9,7 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react'
+import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { CoverPhotoRepositionDialog } from '@/modules/profile/components/cover-photo-reposition-dialog'
 import { CroppedCover } from '@/modules/profile/components/cropped-cover'
@@ -226,13 +226,10 @@ export function ProfileCoverSection({ user, editable = true, className }: Profil
               </div>
 
               <div className="min-w-0 space-y-1.5 pb-0.5">
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-1">
                   <h1 className="text-[1.65rem] font-bold tracking-[-0.02em] text-white antialiased drop-shadow-[0_2px_16px_rgba(0,0,0,0.85)] sm:text-[2rem]">
-                    {user.name}
+                    <VerifiedUserName name={user.name} isVerified={user.isVerified} />
                   </h1>
-                  {user.isVerified ? (
-                    <BadgeCheck className="h-5 w-5 text-sky-400 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" />
-                  ) : null}
                 </div>
                 {user.username ? (
                   <p className="text-[13px] font-medium tracking-wide text-white/65">@{user.username}</p>

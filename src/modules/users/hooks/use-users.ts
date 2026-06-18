@@ -49,3 +49,14 @@ export function useRevokeUserRole(userId: string) {
     },
   })
 }
+
+export function useSetUserVerified(userId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (isVerified: boolean) => userApi.setUserVerified(userId, isVerified),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users', userId, 'detail'] })
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+    },
+  })
+}

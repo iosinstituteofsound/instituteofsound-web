@@ -6,6 +6,7 @@ import { FeedPostHiddenState } from '@/modules/feed/components/feed-post-hidden-
 import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options-menu'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
 import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
+import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { Button } from '@/shared/components/ui/button'
@@ -46,7 +47,11 @@ export function FeedCardShell({
               <div className="feed-social-card__meta">
                 <p className="feed-social-card__name-line">
                   <FeedAuthorProfileLink author={item.author} variant="name">
-                    <span className="feed-social-card__name">{item.author.name}</span>
+                    <VerifiedUserName
+                      name={item.author.name}
+                      isVerified={item.author.isVerified}
+                      nameClassName="feed-social-card__name"
+                    />
                   </FeedAuthorProfileLink>
                 </p>
                 <p className="feed-social-card__meta-line">

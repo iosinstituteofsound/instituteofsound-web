@@ -2,7 +2,8 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, BadgeCheck, Loader2, ShieldAlert } from 'lucide-react'
+import { ArrowLeft, Loader2, ShieldAlert } from 'lucide-react'
+import { VerifiedBadge } from '@/shared/components/icons/verified-badge'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { useUpdateProfile } from '@/modules/profile/hooks/use-profile'
 import {
@@ -138,7 +139,7 @@ export function ProfileSettingsPage() {
         <CardContent className="space-y-3">
           {user.isVerified ? (
             <div className="flex items-center gap-2 text-sm">
-              <BadgeCheck className="h-5 w-5 text-primary" />
+              <VerifiedBadge size="md" />
               Your account is verified.
             </div>
           ) : (

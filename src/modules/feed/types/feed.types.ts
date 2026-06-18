@@ -51,6 +51,7 @@ export interface FeedAuthorDto {
   name: string
   username?: string
   avatarUrl?: string
+  isVerified?: boolean
 }
 
 export interface FeedItemDto {

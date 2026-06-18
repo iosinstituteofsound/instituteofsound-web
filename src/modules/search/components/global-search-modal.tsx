@@ -9,6 +9,7 @@ import {
   getRoleDiscoverCategoryLabel,
   type SearchCategoryFilter,
 } from '@/shared/data/role-discover-categories'
+import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { cn } from '@/shared/lib/cn'
 import '@/styles/global-search-modal.css'
 
@@ -94,7 +95,12 @@ function ProfileRow({ profile, onNavigate }: { profile: SearchProfileDto; onNavi
         <span className="global-search-role-thumb rounded-full">{initials(profile.name)}</span>
       )}
       <span className="min-w-0">
-        <span className="block truncate text-sm font-medium">{profile.name}</span>
+        <VerifiedUserName
+          name={profile.name}
+          isVerified={profile.isVerified}
+          className="text-sm font-medium"
+          nameClassName="truncate font-medium"
+        />
         <span className="block truncate text-xs text-muted-foreground">{profileSubtitle(profile)}</span>
       </span>
     </>
@@ -136,7 +142,12 @@ function ProfileCard({ profile, onNavigate }: { profile: SearchProfileDto; onNav
       ) : (
         <span className="global-search-category-avatar">{initials(profile.name)}</span>
       )}
-      <span className="block w-full truncate text-sm font-semibold">{profile.name}</span>
+      <VerifiedUserName
+        name={profile.name}
+        isVerified={profile.isVerified}
+        className="w-full text-sm font-semibold"
+        nameClassName="truncate font-semibold"
+      />
       <span className="block text-xs text-muted-foreground">Profile</span>
     </>
   )
@@ -321,7 +332,12 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
                         </span>
                       )}
                       <span className="min-w-0">
-                        <span className="block truncate text-2xl font-bold">{topProfile.name}</span>
+                        <VerifiedUserName
+                          name={topProfile.name}
+                          isVerified={topProfile.isVerified}
+                          className="text-2xl font-bold"
+                          nameClassName="truncate font-bold"
+                        />
                         <span className="mt-1 block truncate text-sm text-muted-foreground">
                           Profile · {profileSubtitle(topProfile)}
                         </span>
@@ -333,7 +349,12 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
                         {initials(topProfile.name)}
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-2xl font-bold">{topProfile.name}</span>
+                        <VerifiedUserName
+                          name={topProfile.name}
+                          isVerified={topProfile.isVerified}
+                          className="text-2xl font-bold"
+                          nameClassName="truncate font-bold"
+                        />
                         <span className="mt-1 block truncate text-sm text-muted-foreground">
                           Profile · {profileSubtitle(topProfile)}
                         </span>

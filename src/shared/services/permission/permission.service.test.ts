@@ -14,6 +14,10 @@ describe('permission.service', () => {
     expect(toPermissionSlug('users', 'read')).toBe('users.view')
   })
 
+  it('maps verify action to verify slug', () => {
+    expect(toPermissionSlug('users', 'verify')).toBe('users.verify')
+  })
+
   it('grants super admin all access', () => {
     expect(canAccess([], true, 'users', 'delete')).toBe(true)
   })

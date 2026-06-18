@@ -5,6 +5,7 @@ import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components
 import { LinkPreviewCard } from '@/modules/feed/components/link-preview-card'
 import { FeedMediaFrame, musicTrackContextLine, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
+import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'
@@ -185,7 +186,11 @@ export function FeedPostPreview({ item, menuPortalContainer }: FeedPostPreviewPr
         <div className="feed-post-preview__meta">
           <p className="feed-post-preview__name-line">
             <FeedAuthorProfileLink author={item.author} variant="name">
-              <span className="feed-post-preview__name">{item.author.name}</span>
+              <VerifiedUserName
+                name={item.author.name}
+                isVerified={item.author.isVerified}
+                nameClassName="feed-post-preview__name"
+              />
             </FeedAuthorProfileLink>
           </p>
           <p className="feed-post-preview__meta-line">

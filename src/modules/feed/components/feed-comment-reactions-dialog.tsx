@@ -8,7 +8,7 @@ import { useFeedCommentReactions } from '@/modules/feed/hooks/use-feed-engagemen
 import { formatEngagementCount } from '@/modules/feed/lib/format-engagement-count'
 import { FEED_REACTION_OPTIONS, feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
 import type { FeedCommentEngagementSummary, FeedReactionKind } from '@/modules/feed/types/feed.types'
-import { cn } from '@/shared/lib/cn'
+import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import './feed-comment-reactions-dialog.css'
 
 type ReactionFilter = 'all' | FeedReactionKind
@@ -117,7 +117,11 @@ export function FeedCommentReactionsDialog({
                       />
                     </FeedAuthorProfileLink>
                     <FeedAuthorProfileLink author={entry.user} variant="name" className="min-w-0 flex-1">
-                      <span className="feed-comment-reactions-dialog__item-name">{entry.user.name}</span>
+                      <VerifiedUserName
+                        name={entry.user.name}
+                        isVerified={entry.user.isVerified}
+                        className="feed-comment-reactions-dialog__item-name"
+                      />
                     </FeedAuthorProfileLink>
                     <span className="feed-comment-reactions-dialog__item-reaction">
                       <ReactionPickerIcon kind={meta.kind} label={meta.label} size="inline" />

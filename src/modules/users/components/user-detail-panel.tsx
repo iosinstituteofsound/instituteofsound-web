@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ExternalLink, Mail, UserRound } from 'lucide-react'
-import { useAssignUserRole, useRevokeUserRole, useUser } from '@/modules/users/hooks/use-users'
+import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
+import { useAssignUserRole, useRevokeUserRole, useSetUserVerified, useUser } from '@/modules/users/hooks/use-users'
 import { useRoles } from '@/modules/roles/hooks/use-roles'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
@@ -33,6 +34,7 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
   const { data: roles, isLoading: rolesLoading } = useRoles()
   const assignRole = useAssignUserRole(userId)
   const revokeRole = useRevokeUserRole(userId)
+  const setVerified = useSetUserVerified(userId)
 
   const handleAssign = async () => {
     if (!selectedRole) return
@@ -52,6 +54,20 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
   if (isLoading || rolesLoading) return <PageLoader />
   if (isError || !user) return <ErrorState onRetry={() => refetch()} />
 
+  const handleVerifiedToggle = async () => {
+    const nextVerified = !user.isVerified
+    try {
+      await setVerified.mutateAsync(nextVerified)
+      toast.success(nextVerified ? 'Verified badge granted' : 'Verified badge removed')
+    } catch (err) {
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message: string }).message)
+          : 'Failed'
+      toast.error(message)
+    }
+  }
+
   const initials = user.name
     .split(' ')
     .map((part) => part[0])
@@ -67,7 +83,14 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1 space-y-1">
-          <h2 className="truncate text-xl font-semibold">{user.name}</h2>
+          <div className="flex items-center gap-1">
+            <VerifiedUserName
+              name={user.name}
+              isVerified={user.isVerified}
+              className="text-xl font-semibold"
+              nameClassName="truncate font-semibold"
+            />
+          </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Mail className="h-4 w-4 shrink-0" />
             <span className="truncate">{user.email}</span>
@@ -116,6 +139,31 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
       ) : null}
 
       <Separator />
+
+      <PermissionGate resource="users" action="verify">
+        <div className="space-y-3">
+          <div>
+            <h3 className="text-sm font-semibold">Verified Badge</h3>
+            <p className="text-xs text-muted-foreground">
+              Grant or remove the verified badge shown on this user&apos;s profile.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge variant={user.isVerified ? 'default' : 'outline'}>
+              {user.isVerified ? 'Verified' : 'Not verified'}
+            </Badge>
+            <Button
+              variant={user.isVerified ? 'outline' : 'default'}
+              size="sm"
+              onClick={handleVerifiedToggle}
+              disabled={setVerified.isPending}
+            >
+              {user.isVerified ? 'Remove badge' : 'Grant badge'}
+            </Button>
+          </div>
+        </div>
+        <Separator />
+      </PermissionGate>
 
       <div className="space-y-4">
         <div>

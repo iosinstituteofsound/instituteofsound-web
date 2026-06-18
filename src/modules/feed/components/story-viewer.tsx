@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import {
   findStoryLocation,
@@ -241,7 +242,12 @@ export function StoryViewer({
                       className={cn('h-12 w-12', isActive ? 'ring-2 ring-primary' : 'ring-2 ring-primary/80')}
                     />
                     <div className="min-w-0">
-                      <p className="truncate font-semibold">{group.author.name}</p>
+                      <VerifiedUserName
+                        name={group.author.name}
+                        isVerified={group.author.isVerified}
+                        className="truncate font-semibold"
+                        nameClassName="font-semibold"
+                      />
                       <p className="text-xs text-white/60">
                         {group.stories.length} new · {formatFeedTimestamp(latestStory?.createdAt ?? new Date().toISOString())}
                       </p>
@@ -309,7 +315,12 @@ export function StoryViewer({
                     className="h-9 w-9 ring-2 ring-primary"
                   />
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{activeGroup.author.name}</p>
+                    <VerifiedUserName
+                      name={activeGroup.author.name}
+                      isVerified={activeGroup.author.isVerified}
+                      className="truncate text-sm font-semibold"
+                      nameClassName="font-semibold"
+                    />
                     <div className="flex items-center gap-1 text-xs text-white/80">
                       <span>{formatFeedTimestamp(activeStory.createdAt)}</span>
                       <Globe className="h-3 w-3" />
