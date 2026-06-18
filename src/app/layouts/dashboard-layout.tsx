@@ -20,7 +20,10 @@ export function DashboardLayout() {
   const showHeader = dashboardConfig.header.visible
 
   return (
-    <div className={cn('dashboard-shell', collapsed && 'dashboard-shell--collapsed')}>
+    <div
+      className={cn('dashboard-shell', collapsed && 'dashboard-shell--collapsed')}
+      data-sidebar={showSidebar ? 'visible' : 'hidden'}
+    >
       {showSidebar && mobileOpen ? (
         <button
           type="button"

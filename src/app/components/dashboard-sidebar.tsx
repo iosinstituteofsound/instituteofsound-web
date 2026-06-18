@@ -61,6 +61,7 @@ export function DashboardSidebar({ mobileHidden = false }: DashboardSidebarProps
   )
 
   const groups = useMemo(() => groupSidebarItems(visibleItems), [visibleItems])
+  const sidebarWidth = collapsed ? '4.5rem' : '15.5rem'
 
   const handleToggle = () => {
     if (window.matchMedia('(max-width: 767px)').matches) {
@@ -77,6 +78,12 @@ export function DashboardSidebar({ mobileHidden = false }: DashboardSidebarProps
         collapsed && 'dashboard-sidebar--collapsed',
         mobileHidden && 'dashboard-sidebar--mobile-hidden',
       )}
+      style={{
+        width: sidebarWidth,
+        minWidth: sidebarWidth,
+        maxWidth: sidebarWidth,
+        flex: `0 0 ${sidebarWidth}`,
+      }}
     >
       <div className={cn('dashboard-sidebar-top shrink-0', collapsed && 'dashboard-sidebar-top--collapsed')}>
         {!collapsed ? (
