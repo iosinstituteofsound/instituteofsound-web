@@ -20,6 +20,7 @@ import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { useAddFeedComment } from '@/modules/feed/hooks/use-feed-engagement'
 import type { FeedCommentDto } from '@/modules/feed/types/feed.types'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
+import { Textarea } from '@/shared/components/ui/textarea'
 import { toast } from '@/shared/components/ui/sonner'
 import { cn } from '@/shared/lib/cn'
 

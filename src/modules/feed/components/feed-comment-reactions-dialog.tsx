@@ -9,6 +9,7 @@ import { formatEngagementCount } from '@/modules/feed/lib/format-engagement-coun
 import { FEED_REACTION_OPTIONS, feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
 import type { FeedCommentEngagementSummary, FeedReactionKind } from '@/modules/feed/types/feed.types'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
+import { cn } from '@/shared/lib/cn'
 import './feed-comment-reactions-dialog.css'
 
 type ReactionFilter = 'all' | FeedReactionKind
