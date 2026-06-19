@@ -106,6 +106,7 @@ function fillLatestPublications(list: EditorialPublicationDto[]): EditorialPubli
     const base = list[i % list.length]!
     filled.push({
       ...cloneArticle(base, `__preview_latest_${i}`, `${base.title} ${i + 1}`),
+      editorId: base.editorId ?? `__preview_editor_${i}`,
       editorName: DEV_EDITOR_NAMES[i % DEV_EDITOR_NAMES.length] ?? 'Editor',
     })
   }
