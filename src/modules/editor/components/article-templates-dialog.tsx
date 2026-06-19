@@ -1,5 +1,6 @@
 import { LayoutTemplate, Loader2, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { ArticleTemplatePreview } from '@/modules/editor/components/article-template-preview'
 import { useArticleTemplates } from '@/modules/editor/hooks/use-article-templates'
 import { usePublishConfig } from '@/modules/editor/hooks/use-publish-config'
 import type { ArticlePuckDocument } from '@/modules/editor/types/article-editor.types'
@@ -32,28 +33,40 @@ function TemplateCard({
   deleting?: boolean
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <article className="article-template-card group">
       <button
         type="button"
-        className="w-full text-left transition-colors hover:opacity-90"
+        className="article-template-card__select"
         onClick={onSelect}
       >
-        <div className="mb-2 flex items-center gap-2">
-          <LayoutTemplate className="h-4 w-4 text-primary" />
-          <span className="font-medium">{template.name}</span>
-          <span className="ml-auto text-[10px] uppercase tracking-wider text-muted-foreground">
+        <ArticleTemplatePreview template={template} />
+        <span className="article-template-card__overlay">
+          <span className="article-template-card__cta">Use this style</span>
+        </span>
+      </button>
+
+      <div className="article-template-card__meta">
+        <div className="flex items-start gap-2">
+          <LayoutTemplate className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <div className="min-w-0 flex-1">
+            <p className="font-medium leading-tight">{template.name}</p>
+            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+              {template.description || 'No description'}
+            </p>
+          </div>
+          <span className="shrink-0 text-[10px] uppercase tracking-wider text-muted-foreground">
             {template.source}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground">{template.description || 'No description'}</p>
         <p className="mt-2 text-xs uppercase tracking-wider text-muted-foreground">{template.category}</p>
-      </button>
+      </div>
+
       {onDelete ? (
         <Button
           type="button"
           size="sm"
           variant="ghost"
-          className="mt-3 h-8 text-destructive hover:text-destructive"
+          className="article-template-card__delete h-8 text-destructive hover:text-destructive"
           onClick={onDelete}
           disabled={deleting}
         >
@@ -61,13 +74,13 @@ function TemplateCard({
           Delete
         </Button>
       ) : null}
-    </div>
+    </article>
   )
 }
 
 export function ArticleTemplatesDialog({ open, onOpenChange, onSelect }: ArticleTemplatesDialogProps) {
   const [category, setCategory] = useState<string>('all')
-  const { templates, isLoading, isError, deleteTemplate, isDeleting, normalizeTemplateDocument } =
+  const { templates, isLoading, isError, deleteTemplate, isDeleting, prepareSelectedTemplate } =
     useArticleTemplates()
   const { data: publishConfig } = usePublishConfig()
 
@@ -78,10 +91,18 @@ export function ArticleTemplatesDialog({ open, onOpenChange, onSelect }: Article
     { value: 'photo', label: 'Photo essay' },
   ]
 
-  const allTemplates = useMemo(
-    () => [...(templates?.system ?? []), ...(templates?.saved ?? [])],
-    [templates],
-  )
+  const allTemplates = useMemo(() => {
+    const system = templates?.system ?? []
+    const saved = templates?.saved ?? []
+    const orderedSystem = [...system].sort((a, b) => {
+      if (a.id === 'system-blank') return 1
+      if (b.id === 'system-blank') return -1
+      if (a.id === 'system-feature-story') return -1
+      if (b.id === 'system-feature-story') return 1
+      return 0
+    })
+    return [...orderedSystem, ...saved]
+  }, [templates])
 
   const filtered = useMemo(() => {
     if (category === 'all') return allTemplates
@@ -89,17 +110,17 @@ export function ArticleTemplatesDialog({ open, onOpenChange, onSelect }: Article
   }, [allTemplates, category])
 
   const handleSelect = (template: ArticleTemplateDto) => {
-    onSelect(normalizeTemplateDocument(template.puckDocument))
+    onSelect(prepareSelectedTemplate(template))
     onOpenChange(false)
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] max-w-3xl overflow-hidden">
+      <DialogContent elevated className="max-h-[90vh] max-w-5xl overflow-hidden">
         <DialogHeader>
           <DialogTitle>Article templates</DialogTitle>
           <DialogDescription>
-            API-driven layouts — system starters plus your saved templates.
+            Live page styles — pick a layout, apply it to your workspace, then edit every block.
           </DialogDescription>
         </DialogHeader>
 
@@ -129,7 +150,7 @@ export function ArticleTemplatesDialog({ open, onOpenChange, onSelect }: Article
           ))}
         </div>
 
-        <div className="max-h-[50vh] overflow-y-auto">
+        <div className="max-h-[62vh] overflow-y-auto pr-1">
           {isLoading ? (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -142,7 +163,7 @@ export function ArticleTemplatesDialog({ open, onOpenChange, onSelect }: Article
           ) : null}
 
           {!isLoading && !isError ? (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {filtered.map((template) => (
                 <TemplateCard
                   key={template.id}

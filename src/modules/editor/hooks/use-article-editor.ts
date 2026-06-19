@@ -5,16 +5,13 @@ import {
   updateEditorArticle,
 } from '@/modules/explore/api/explore.api'
 import type { ArticleDto } from '@/modules/explore/types/explore.types'
+import { buildArticleSavePayload } from '@/modules/editor/lib/article-save-payload'
 import {
   articleToPuckDocument,
   createEmptyPuckData,
-  serializePuckDocument,
 } from '@/modules/editor/lib/article-puck-data'
 import {
-  extractCoverUrl,
-  extractGalleryUrls,
   extractTitleFromPuck,
-  puckToBodyHtml,
 } from '@/modules/editor/lib/puck-to-html'
 import type { ArticlePuckDocument, SaveStatus } from '@/modules/editor/types/article-editor.types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -27,25 +24,6 @@ import { useArticleCanvasHistory } from '@/modules/editor/hooks/use-article-canv
 import { sendKeepaliveDraftSave } from '@/modules/editor/lib/keepalive-draft-save'
 
 const AUTOSAVE_MS = 1000
-
-function buildSavePayload(doc: ArticlePuckDocument, excerpt: string) {
-  const puck = doc.puck
-  const title = extractTitleFromPuck(puck)
-  const bodyHtml = puckToBodyHtml(puck)
-  const coverUrl = extractCoverUrl(puck)
-  const galleryUrls = extractGalleryUrls(puck)
-
-  return {
-    title: title || 'Untitled draft',
-    excerpt: excerpt || undefined,
-    bodyHtml,
-    coverUrl,
-    galleryUrls,
-    type: doc.meta.type,
-    isCoverStory: doc.meta.isCoverStory,
-    puckData: serializePuckDocument(doc),
-  }
-}
 
 export function useArticleEditor(articleId: string | undefined) {
   const navigate = useNavigate()
@@ -70,7 +48,7 @@ export function useArticleEditor(articleId: string | undefined) {
   })
 
   const persistMutation = useMutation({
-    mutationFn: async (input: { id?: string; payload: ReturnType<typeof buildSavePayload> }) => {
+    mutationFn: async (input: { id?: string; payload: ReturnType<typeof buildArticleSavePayload> }) => {
       if (input.id) {
         return updateEditorArticle(input.id, input.payload)
       }
@@ -81,6 +59,7 @@ export function useArticleEditor(articleId: string | undefined) {
       setSlug(saved.slug)
       setSaveStatus('saved')
       dirtyRef.current = false
+      queryClient.setQueryData(['editor-article', saved.id], saved)
       void queryClient.invalidateQueries({ queryKey: ['editor-articles'] })
       if (!articleId && saved.id) {
         navigate(`/editor/write/${saved.id}`, { replace: true })
@@ -102,7 +81,7 @@ export function useArticleEditor(articleId: string | undefined) {
     void (async () => {
       try {
         setSaveStatus('saving')
-        const payload = buildSavePayload(createEmptyPuckData(), '')
+        const payload = buildArticleSavePayload(createEmptyPuckData(), '')
         await persistRef.current({ payload })
       } catch {
         bootstrapDraftRef.current = false
@@ -126,7 +105,7 @@ export function useArticleEditor(articleId: string | undefined) {
       clearTimeout(saveTimerRef.current)
       saveTimerRef.current = null
     }
-    const payload = buildSavePayload(puckDocument, excerpt)
+    const payload = buildArticleSavePayload(puckDocument, excerpt)
     setSaveStatus('saving')
     await persistMutation.mutateAsync({ id: resolvedId ?? undefined, payload })
   }, [excerpt, persistMutation, puckDocument, resolvedId])
@@ -169,6 +148,8 @@ export function useArticleEditor(articleId: string | undefined) {
 
   useEffect(() => {
     if (!article) return
+    if (dirtyRef.current) return
+
     hydratingRef.current = true
     const doc = articleToPuckDocument(article)
     const rawPuck =
@@ -205,7 +186,7 @@ export function useArticleEditor(articleId: string | undefined) {
       if (hydratingRef.current || !dirtyRef.current) return
 
       const { puckDocument: doc, excerpt: ex, resolvedId: id } = stateRef.current
-      const payload = buildSavePayload(doc, ex)
+      const payload = buildArticleSavePayload(doc, ex)
       void persistRef.current({ id: id ?? undefined, payload })
     }
   }, [])
@@ -221,7 +202,7 @@ export function useArticleEditor(articleId: string | undefined) {
 
       const { puckDocument: doc, excerpt: ex, resolvedId: id } = stateRef.current
       if (id) {
-        sendKeepaliveDraftSave(id, buildSavePayload(doc, ex))
+        sendKeepaliveDraftSave(id, buildArticleSavePayload(doc, ex))
       }
 
       event.preventDefault()
@@ -273,26 +254,54 @@ export function useArticleEditor(articleId: string | undefined) {
     [scheduleSave],
   )
 
-  const loadTemplate = useCallback((document: ArticlePuckDocument) => {
-    hydratingRef.current = true
-    setPuckDocument({
-      ...document,
-      puck: ensureCanvasLayouts(document.puck),
-    })
-    setBaselineRef.current(ensureCanvasLayouts(document.puck))
-    queueMicrotask(() => {
-      hydratingRef.current = false
+  const loadTemplate = useCallback(
+    async (document: ArticlePuckDocument) => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current)
+        saveTimerRef.current = null
+      }
+
+      const nextDoc: ArticlePuckDocument = {
+        version: document.version,
+        puck: ensureCanvasLayouts(document.puck),
+        meta: { ...document.meta },
+      }
+      const nextExcerpt = document.meta.seoDescription || ''
+
+      hydratingRef.current = true
       dirtyRef.current = true
-      scheduleSave()
-    })
-  }, [scheduleSave])
+      stateRef.current = {
+        puckDocument: nextDoc,
+        excerpt: nextExcerpt,
+        resolvedId: stateRef.current.resolvedId,
+      }
+
+      setPuckDocument(nextDoc)
+      setExcerpt(nextExcerpt)
+      setBaselineRef.current(nextDoc.puck)
+      setSaveStatus('saving')
+
+      try {
+        await persistMutation.mutateAsync({
+          id: stateRef.current.resolvedId ?? undefined,
+          payload: buildArticleSavePayload(nextDoc, nextExcerpt),
+        })
+        toast.success('Template applied to workspace')
+      } catch {
+        toast.error('Failed to save template')
+      } finally {
+        hydratingRef.current = false
+      }
+    },
+    [persistMutation],
+  )
 
   const publish = useCallback(async () => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     if (dirtyRef.current || !resolvedId) {
       const saved = await persistMutation.mutateAsync({
         id: resolvedId ?? undefined,
-        payload: buildSavePayload(puckDocument, excerpt),
+        payload: buildArticleSavePayload(puckDocument, excerpt),
       })
       await publishMutation.mutateAsync(saved.id)
       return

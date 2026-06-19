@@ -12,6 +12,10 @@ function isPuckData(data: Record<string, unknown>): data is { puck: Data; meta?:
   return Boolean(data.puck && typeof data.puck === 'object' && Array.isArray((data.puck as Data).content))
 }
 
+export function parseArticleEditorMeta(raw: Record<string, unknown> | undefined): ArticleEditorMeta {
+  return parseMeta(raw)
+}
+
 function parseMeta(raw: Record<string, unknown> | undefined): ArticleEditorMeta {
   if (!raw || typeof raw !== 'object') return { ...DEFAULT_ARTICLE_META }
 

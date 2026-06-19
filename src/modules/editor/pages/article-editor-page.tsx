@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArticleEditorSidebar } from '@/modules/editor/components/article-editor-sidebar'
 import { ArticlePreviewDialog } from '@/modules/editor/components/article-preview-dialog'
 import { ArticleTemplatesDialog } from '@/modules/editor/components/article-templates-dialog'
-import { ArticleCanvasBoard } from '@/modules/editor/components/article-canvas-board'
+import { ArticleLiveWorkspace } from '@/modules/editor/components/article-live-workspace'
 import { PublishConfirmDialog } from '@/modules/editor/components/publish-confirm-dialog'
 import { SaveTemplateDialog } from '@/modules/editor/components/save-template-dialog'
 import { SaveStatusIndicator } from '@/modules/editor/components/save-status-indicator'
@@ -42,6 +42,7 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
   const [publishOpen, setPublishOpen] = useState(false)
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>('desktop')
   const [selectedBlockIds, setSelectedBlockIds] = useState<string[]>([])
+  const [deckEditActive, setDeckEditActive] = useState(false)
 
   const editor = useArticleEditor(articleId)
   const { saveTemplate, isSaving: isSavingTemplate } = useArticleTemplates()
@@ -68,10 +69,17 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
   }, [canvasBlockIdsKey])
 
   const handleSelectBlocks = useCallback((blockIds: string[]) => {
+    setDeckEditActive(false)
     setSelectedBlockIds(blockIds)
   }, [])
 
   const handleDeselectBlocks = useCallback(() => {
+    setDeckEditActive(false)
+    setSelectedBlockIds([])
+  }, [])
+
+  const handleSelectDeck = useCallback(() => {
+    setDeckEditActive(true)
     setSelectedBlockIds([])
   }, [])
 
@@ -140,6 +148,15 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
 
   const authorName = me?.user.name ?? me?.user.email ?? 'Editor'
 
+  const handleTemplateSelect = useCallback(
+    (templateDoc: Parameters<typeof editor.loadTemplate>[0]) => {
+      void editor.loadTemplate(templateDoc).then(() => {
+        window.document.querySelector('.article-editor__write')?.scrollTo({ top: 0, behavior: 'smooth' })
+      })
+    },
+    [editor.loadTemplate],
+  )
+
   if (editor.isLoading) {
     return <Loader className="min-h-screen bg-background" />
   }
@@ -194,13 +211,19 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
 
       <div className="flex min-h-0 flex-1">
         <main className="article-editor__write min-h-0 min-w-0 flex-1">
-          <ArticleCanvasBoard
-            data={editor.puckData}
-            baselineData={history.baselineData ?? undefined}
-            previewMode={history.previewMode}
+          <ArticleLiveWorkspace
+            puckData={editor.puckData}
+            meta={editor.meta}
+            excerpt={editor.excerpt}
+            slug={editor.slug}
+            authorName={authorName}
+            readMinutes={stats.readMinutes}
             selectedBlockIds={selectedBlockIds}
+            deckEditActive={deckEditActive}
             onChange={editor.setPuckData}
             onSelectBlocks={handleSelectBlocks}
+            onSelectDeck={handleSelectDeck}
+            onDeselectBlocks={handleDeselectBlocks}
           />
         </main>
 
@@ -208,6 +231,7 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
           className="article-editor__sidebar hidden lg:flex"
           canvasData={editor.puckData}
           selectedBlockIds={selectedBlockIds}
+          deckEditActive={deckEditActive}
           excerpt={editor.excerpt}
           slug={editor.slug}
           status={editor.article?.status ?? 'draft'}
@@ -244,7 +268,7 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
       <ArticleTemplatesDialog
         open={templatesOpen}
         onOpenChange={setTemplatesOpen}
-        onSelect={editor.loadTemplate}
+        onSelect={handleTemplateSelect}
       />
 
       <SaveTemplateDialog

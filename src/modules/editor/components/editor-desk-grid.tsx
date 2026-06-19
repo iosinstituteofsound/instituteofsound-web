@@ -82,7 +82,7 @@ export function EditorDeskGrid({
         </Link>
         <div className="editor-desk-item__meta">
           <p className="editor-desk-item__title">Create</p>
-          <p className="editor-desk-item__subtitle">Block editor · templates</p>
+          <p className="editor-desk-item__subtitle">Block editor</p>
         </div>
       </article>
 

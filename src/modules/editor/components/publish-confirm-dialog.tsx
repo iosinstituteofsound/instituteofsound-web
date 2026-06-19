@@ -35,7 +35,7 @@ export function PublishConfirmDialog({
 }: PublishConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent elevated className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Publish article?</DialogTitle>
           <DialogDescription>

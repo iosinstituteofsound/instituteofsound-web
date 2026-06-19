@@ -1,7 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import type { Data } from '@measured/puck'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArticleAudioToolPanel } from '@/modules/editor/components/article-audio-tool-panel'
 import { ArticleEditAudioModal } from '@/modules/editor/components/article-edit-audio-modal'
 import { ArticleEditBackgroundModal } from '@/modules/editor/components/article-edit-background-modal'
 import { ArticleEditBgArtifactsModal } from '@/modules/editor/components/article-edit-bg-artifacts-modal'
@@ -9,11 +8,11 @@ import { ArticleEditArtifactsFxModal } from '@/modules/editor/components/article
 import { ArticleEditEffectsModal } from '@/modules/editor/components/article-editor-effects-panel'
 import { ArticleEditVideoModal } from '@/modules/editor/components/article-edit-video-modal'
 import { ArticleEditBlockTiles } from '@/modules/editor/components/article-edit-block-tiles'
-import { ArticleImageToolPanel } from '@/modules/editor/components/article-image-tool-panel'
+import { ArticleSelectedBlockTools } from '@/modules/editor/components/article-selected-block-tools'
 import { ArticleText3dEffectsModal } from '@/modules/editor/components/article-text-3d-effects-modal'
 import { ArticleText2dEffectsModal } from '@/modules/editor/components/article-text-2d-effects-modal'
-import { ArticleTextToolPanel } from '@/modules/editor/components/article-text-tool-panel'
-import { ArticleVideoToolPanel } from '@/modules/editor/components/article-video-tool-panel'
+import { Label } from '@/shared/components/ui/label'
+import { Textarea } from '@/shared/components/ui/textarea'
 import {
   addCanvasBlockWithId,
   CANVAS_BLOCK_DROP_POSITION,
@@ -32,17 +31,25 @@ import {
 interface ArticleEditorEditPanelProps {
   data: Data
   selectedBlockIds: string[]
+  deckEditActive?: boolean
+  excerpt?: string
+  excerptMax?: number
   onChange: (data: Data) => void
   onSelectBlocks: (blockIds: string[]) => void
   onDeselectBlocks: () => void
+  onExcerptChange?: (value: string) => void
 }
 
 export function ArticleEditorEditPanel({
   data,
   selectedBlockIds,
+  deckEditActive = false,
+  excerpt = '',
+  excerptMax = 500,
   onChange,
   onSelectBlocks,
   onDeselectBlocks,
+  onExcerptChange,
 }: ArticleEditorEditPanelProps) {
   const normalizedData = useMemo(() => ensureCanvasLayouts(data), [data])
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -59,10 +66,6 @@ export function ArticleEditorEditPanel({
   const selectedBlocks = normalizedData.content.filter((block) =>
     selectedBlockIds.includes(String((block.props as Record<string, unknown>).blockId)),
   )
-  const primaryBlock = selectedBlocks[0] ?? null
-  const primaryBlockId = primaryBlock
-    ? String((primaryBlock.props as Record<string, unknown>).blockId)
-    : null
   const textBlockIds = selectedBlocks
     .filter((block) => isTextCanvasBlock(block.type as CanvasBlockType))
     .map((block) => String((block.props as Record<string, unknown>).blockId))
@@ -358,54 +361,31 @@ export function ArticleEditorEditPanel({
         />
       ) : null}
 
-      {showTextTool && primaryBlock && primaryBlockId ? (
-        <ArticleTextToolPanel
-          data={normalizedData}
-          selectedBlockIds={textBlockIds}
-          blockType={primaryBlock.type as CanvasBlockType}
-          objectCount={selectedBlocks.length}
-          onChange={onChange}
-          onDeselect={onDeselectBlocks}
-        />
-      ) : showImageTool && primaryBlock && primaryBlockId ? (
-        <ArticleImageToolPanel
-          data={normalizedData}
-          selectedBlockIds={imageBlockIds}
-          blockType={primaryBlock.type as CanvasBlockType}
-          objectCount={selectedBlocks.length}
-          onChange={onChange}
-          onDeselect={onDeselectBlocks}
-        />
-      ) : showAudioTool && primaryBlock && primaryBlockId ? (
-        <ArticleAudioToolPanel
-          data={normalizedData}
-          selectedBlockIds={audioBlockIds}
-          objectCount={selectedBlocks.length}
-          onChange={onChange}
-          onDeselect={onDeselectBlocks}
-        />
-      ) : showVideoTool && primaryBlock && primaryBlockId ? (
-        <ArticleVideoToolPanel
-          data={normalizedData}
-          selectedBlockIds={videoBlockIds}
-          objectCount={selectedBlocks.length}
-          onChange={onChange}
-          onDeselect={onDeselectBlocks}
-        />
-      ) : selectedBlocks.length > 0 &&
-        !showTextTool &&
-        !showImageTool &&
-        !showAudioTool &&
-        !showVideoTool &&
-        !imageUploading &&
-        !mediaModalOpen ? (
-        <div className="article-edit-empty">
-          <p className="article-edit-empty__title">{selectedBlocks.length} objects selected</p>
-          <p className="text-xs text-muted-foreground">
-            Mixed selection — select only one block type to open the tool panel.
+      {deckEditActive ? (
+        <div className="article-edit-deck-panel space-y-2 rounded-lg border border-border p-3">
+          <Label htmlFor="sidebar-hero-deck">Hero deck / excerpt</Label>
+          <Textarea
+            id="sidebar-hero-deck"
+            value={excerpt}
+            onChange={(event) => onExcerptChange?.(event.target.value)}
+            placeholder="Short summary under the headline…"
+            maxLength={excerptMax}
+            rows={5}
+          />
+          <p className="text-right text-xs text-muted-foreground">
+            {excerpt.length}/{excerptMax}
           </p>
         </div>
-      ) : null}
+      ) : (
+        <ArticleSelectedBlockTools
+          data={normalizedData}
+          selectedBlockIds={selectedBlockIds}
+          onChange={onChange}
+          onDeselect={onDeselectBlocks}
+          imageUploading={imageUploading}
+          mediaModalOpen={mediaModalOpen}
+        />
+      )}
     </div>
   )
 }

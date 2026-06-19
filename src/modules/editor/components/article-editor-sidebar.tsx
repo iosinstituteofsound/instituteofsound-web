@@ -31,6 +31,7 @@ const FALLBACK_ARTICLE_TYPES: { value: ArticleType; label: string }[] = [
 interface ArticleEditorSidebarProps {
   canvasData: Data
   selectedBlockIds: string[]
+  deckEditActive?: boolean
   excerpt: string
   slug: string
   status: string
@@ -105,6 +106,7 @@ function TagInput({
 export function ArticleEditorSidebar({
   canvasData,
   selectedBlockIds,
+  deckEditActive = false,
   excerpt,
   slug,
   status,
@@ -158,9 +160,13 @@ export function ArticleEditorSidebar({
             <ArticleEditorEditPanel
               data={canvasData}
               selectedBlockIds={selectedBlockIds}
+              deckEditActive={deckEditActive}
+              excerpt={excerpt}
+              excerptMax={excerptMax}
               onChange={onCanvasChange}
               onSelectBlocks={onSelectBlocks}
               onDeselectBlocks={onDeselectBlocks}
+              onExcerptChange={onExcerptChange}
             />
           </TabsContent>
 

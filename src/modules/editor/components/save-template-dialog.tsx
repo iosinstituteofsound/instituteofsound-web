@@ -64,7 +64,7 @@ export function SaveTemplateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent elevated className="max-w-md">
         <DialogHeader>
           <DialogTitle>Save as template</DialogTitle>
           <DialogDescription>

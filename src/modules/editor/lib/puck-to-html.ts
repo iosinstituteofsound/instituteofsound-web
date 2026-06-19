@@ -80,8 +80,9 @@ export function puckToBodyHtml(puck: Data): string {
         const attribution =
           typeof block.props.attribution === 'string' ? block.props.attribution.trim() : ''
         if (!text && !attribution) break
-        const line = text && attribution ? `${text} — ${attribution}` : text || attribution
-        parts.push(`<p>${escapeHtml(line)}</p>`)
+        parts.push(
+          `<blockquote><p>${escapeHtml(text)}</p>${attribution ? `<cite>${escapeHtml(attribution)}</cite>` : ''}</blockquote>`,
+        )
         break
       }
       case 'ArticleSection': {
