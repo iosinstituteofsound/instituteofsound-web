@@ -21,13 +21,13 @@ function musicHeaderContext(trackTitle?: string, artistName?: string) {
   )
 }
 
-export function MusicFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
+export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {
   const enrichedItem = useEnrichedMusicFeedItem(item)
 
   if (isReleaseShareItem(enrichedItem)) {
     return (
-      <FeedCardShell item={item} defaultCommentsOpen={defaultCommentsOpen}>
-        <ReleaseSharePreview item={enrichedItem} />
+      <FeedCardShell item={item} defaultCommentsOpen={defaultCommentsOpen} compact={compact}>
+        <ReleaseSharePreview item={enrichedItem} compact={compact} />
       </FeedCardShell>
     )
   }
@@ -47,6 +47,7 @@ export function MusicFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
     <FeedCardShell
       item={item}
       defaultCommentsOpen={defaultCommentsOpen}
+      compact={compact}
       headerContext={musicHeaderContext(trackTitle, artistName)}
     >
       <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">

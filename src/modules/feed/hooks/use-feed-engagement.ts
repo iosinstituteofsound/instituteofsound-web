@@ -1,17 +1,16 @@
-import { useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as engagementApi from '@/modules/feed/api/feed-engagement.api'
 import { feedQueryKey } from '@/modules/feed/hooks/use-feed'
 import {
   feedCommentsQueryKey,
   feedCommentReactionsQueryKey,
   feedItemQueryKey,
-  patchFeedItemInCache,
+  patchFeedItemInAllListCaches,
 } from '@/modules/feed/lib/feed-engagement'
 import type {
   FeedCommentDto,
   FeedEngagementSummary,
   FeedItemDto,
-  FeedListResponse,
   FeedReactionKind,
 } from '@/modules/feed/types/feed.types'
 
@@ -48,14 +47,10 @@ function updateEngagementInFeedCaches(
   feedItemId: string,
   engagement: FeedEngagementSummary,
 ) {
-  queryClient.setQueriesData<InfiniteData<FeedListResponse>>(
-    { queryKey: feedQueryKey },
-    (old) =>
-      patchFeedItemInCache(old, feedItemId, (item) => ({
-        ...item,
-        engagement,
-      })),
-  )
+  patchFeedItemInAllListCaches(queryClient, feedItemId, (item) => ({
+    ...item,
+    engagement,
+  }))
 
   queryClient.setQueryData(feedItemQueryKey(feedItemId), (old: FeedItemDto | undefined) =>
     old ? { ...old, engagement } : old,
@@ -124,25 +119,21 @@ export function useAddFeedComment() {
         old ? [...old, comment] : [comment],
       )
 
-      queryClient.setQueriesData<InfiniteData<FeedListResponse>>(
-        { queryKey: feedQueryKey },
-        (old) =>
-          patchFeedItemInCache(old, feedItemId, (item) => {
-            const engagement = item.engagement ?? {
-              reactions: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
-              reactionTotal: 0,
-              commentCount: 0,
-              myReaction: null,
-            }
-            return {
-              ...item,
-              engagement: {
-                ...engagement,
-                commentCount: engagement.commentCount + 1,
-              },
-            }
-          }),
-      )
+      patchFeedItemInAllListCaches(queryClient, feedItemId, (item) => {
+        const engagement = item.engagement ?? {
+          reactions: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
+          reactionTotal: 0,
+          commentCount: 0,
+          myReaction: null,
+        }
+        return {
+          ...item,
+          engagement: {
+            ...engagement,
+            commentCount: engagement.commentCount + 1,
+          },
+        }
+      })
 
       queryClient.setQueryData(feedItemQueryKey(feedItemId), (old: FeedItemDto | undefined) => {
         if (!old?.engagement) return old
@@ -172,6 +163,7 @@ export function useDeleteFeedComment() {
     onSuccess: (_result, { feedItemId }) => {
       void queryClient.invalidateQueries({ queryKey: feedCommentsQueryKey(feedItemId) })
       void queryClient.invalidateQueries({ queryKey: feedQueryKey })
+      void queryClient.invalidateQueries({ queryKey: ['profile-posts'] })
       void queryClient.invalidateQueries({ queryKey: feedItemQueryKey(feedItemId) })
     },
   })

@@ -20,24 +20,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import type { UserDto } from '@/shared/types/auth.types'
-import { ListenerPlaylistsSection, ProfileMusicSection } from '@/modules/profile/components/profile-music-section'
 import { cn } from '@/shared/lib/cn'
 import './profile-page.css'
 
-<<<<<<< Updated upstream
 const FALLBACK_TABS: Array<{ id: string; label: string; panelKey: 'all' | 'posts' | 'about' | 'photos' }> = [
   { id: 'all', label: 'All', panelKey: 'all' },
   { id: 'posts', label: 'Posts', panelKey: 'posts' },
   { id: 'about', label: 'About', panelKey: 'about' },
   { id: 'photos', label: 'Photos', panelKey: 'photos' },
-=======
-const TABS: { id: ProfileViewTab; label: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'posts', label: 'Posts' },
-  { id: 'music', label: 'Music' },
-  { id: 'about', label: 'About' },
-  { id: 'photos', label: 'Photos' },
->>>>>>> Stashed changes
 ]
 
 function mapPublicProfileToUser(profile: PublicProfileDto): UserDto {
@@ -217,18 +207,7 @@ export function ProfilePage() {
             </Card>
           ) : null}
 
-<<<<<<< Updated upstream
           {active?.panelKey === 'about' ? <ProfileAboutSection user={user} editable={isOwnProfile} /> : null}
-=======
-          {activeTab === 'about' ? <ProfileAboutSection user={user} editable={isOwnProfile} /> : null}
-
-          {activeTab === 'music' ? (
-            <div className="space-y-8">
-              <ProfileMusicSection userId={user.id} />
-              <ListenerPlaylistsSection isOwnProfile={isOwnProfile} />
-            </div>
-          ) : null}
->>>>>>> Stashed changes
         </div>
       </div>
     </div>

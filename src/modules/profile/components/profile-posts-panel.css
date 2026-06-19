@@ -28,6 +28,141 @@
 
 .profile-post-item {
   animation: profile-post-item-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  overflow: visible;
+}
+
+.profile-posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.profile-posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.profile-posts-grid .profile-post-item {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  animation: profile-post-grid-in 0.24s ease both;
+}
+
+@keyframes profile-post-grid-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.profile-posts-grid .feed-social-card {
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.profile-posts-grid .feed-social-card:not(.feed-social-card--hidden) .feed-social-card__layer--post {
+  overflow: hidden;
+}
+
+.profile-posts-grid .feed-social-card__header {
+  padding: 10px 10px 6px;
+}
+
+.profile-posts-grid .feed-social-card__name-line {
+  font-size: 0.8125rem;
+}
+
+.profile-posts-grid .feed-social-card__meta-line {
+  font-size: 0.75rem;
+}
+
+.profile-posts-grid .feed-social-card__caption {
+  padding: 0 10px 8px;
+}
+
+.profile-posts-grid .feed-social-card__caption-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+.profile-posts-grid .feed-social-card__media-frame img,
+.profile-posts-grid .feed-social-card__media-frame video {
+  max-height: 200px;
+}
+
+.profile-posts-grid .feed-social-card__body {
+  padding: 6px 10px 4px;
+}
+
+.profile-posts-grid .feed-social-card__engagement {
+  padding: 0 8px 8px;
+}
+
+.profile-posts-grid .feed-social-card__action-btn {
+  min-height: 32px;
+  font-size: 0.8125rem;
+  gap: 6px;
+}
+
+.profile-posts-grid .feed-release-preview {
+  --feed-release-art-size: 4.75rem;
+  --feed-release-art-slot: 6.25rem;
+  --feed-release-title-size: 0.95rem;
+  --feed-release-artist-size: 0.75rem;
+}
+
+.profile-posts-grid .feed-release-preview__main {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.6rem 0.6rem;
+}
+
+.profile-posts-grid .feed-release-preview__art {
+  flex: none;
+  width: var(--feed-release-art-slot);
+  height: calc(var(--feed-release-art-size) + 0.25rem);
+}
+
+.profile-posts-grid .feed-release-preview__info {
+  width: 100%;
+  min-width: 0;
+}
+
+.profile-posts-grid .feed-release-preview__title {
+  font-size: var(--feed-release-title-size);
+  line-height: 1.25;
+}
+
+.profile-posts-grid .feed-release-preview__actions {
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.profile-posts-grid .feed-release-preview__play-btn,
+.profile-posts-grid .feed-release-preview__save-btn {
+  min-height: 2rem;
+  padding: 0 0.65rem;
+  font-size: 0.6875rem;
+}
+
+.profile-posts-grid .feed-release-preview__artist-card {
+  display: none;
+}
+
+.profile-posts-grid .feed-link-preview-outer:not(.feed-link-preview-outer--compact) {
+  margin-inline: -10px;
 }
 
 .profile-posts-filter-indicator {
@@ -66,7 +201,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .profile-posts-panel-content,
-  .profile-post-item {
+  .profile-post-item,
+  .profile-posts-grid .profile-post-item {
     animation: none;
   }
 

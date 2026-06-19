@@ -65,8 +65,11 @@ export function ProfilePostsPanel({ user, isOwnProfile }: ProfilePostsPanelProps
   useEffect(() => {
     if (isFetching && !isFetchingNextPage) return
     setDisplayPosts(posts)
+  }, [posts, isFetching, isFetchingNextPage])
+
+  useEffect(() => {
     setContentKey((value) => value + 1)
-  }, [posts, isFetching, isFetchingNextPage, activeFilter, viewMode])
+  }, [activeFilter, viewMode])
 
   const filterIndicator = useSlidingIndicator(filterRowRef, activeFilter)
   const viewIndicator = useSlidingIndicator(viewRowRef, viewMode)
@@ -218,18 +221,17 @@ function PostsCollection({
   items: FeedItemDto[]
   viewMode: PostsViewMode
 }) {
-  const containerClass =
-    viewMode === 'list' ? 'space-y-3' : 'grid grid-cols-1 gap-3 sm:grid-cols-2'
+  const isGrid = viewMode === 'grid'
 
   return (
-    <div className={containerClass}>
+    <div className={isGrid ? 'profile-posts-grid' : 'profile-posts-list'}>
       {items.map((item, index) => (
         <div
           key={item.id}
           className="profile-post-item"
-          style={{ animationDelay: `${Math.min(index * 45, 360)}ms` }}
+          style={isGrid ? undefined : { animationDelay: `${Math.min(index * 45, 360)}ms` }}
         >
-          <FeedItemCard item={item} />
+          <FeedItemCard item={item} compact={isGrid} />
         </div>
       ))}
     </div>

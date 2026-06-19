@@ -9,6 +9,7 @@ import { VideoFeedCard } from '@/modules/feed/components/cards/video-feed-card'
 export interface FeedCardProps {
   item: FeedItemDto
   defaultCommentsOpen?: boolean
+  compact?: boolean
 }
 
 export const FEED_RENDERERS = {
@@ -19,7 +20,7 @@ export const FEED_RENDERERS = {
   article: ArticleFeedCard,
 } satisfies Record<FeedItemDto['type'], ComponentType<FeedCardProps>>
 
-export function FeedItemCard({ item, defaultCommentsOpen }: FeedCardProps) {
+export function FeedItemCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {
   const Renderer = FEED_RENDERERS[item.type]
-  return <Renderer item={item} defaultCommentsOpen={defaultCommentsOpen} />
+  return <Renderer item={item} defaultCommentsOpen={defaultCommentsOpen} compact={compact} />
 }

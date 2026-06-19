@@ -5,6 +5,14 @@ import { payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { env } from '@/shared/config/env'
 import type { PageMeta } from '@/shared/hooks/use-page-meta'
 
+export function getFeedItemPhotoUrl(item: FeedItemDto): string | undefined {
+  const payload = item.payload
+
+  if (item.type === 'image') return payloadString(payload, 'imageUrl')
+  if (item.type === 'article') return payloadString(payload, 'coverUrl')
+  return undefined
+}
+
 function resolveFeedImage(item: FeedItemDto): string | undefined {
   const payload = item.payload
 

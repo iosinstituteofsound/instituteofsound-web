@@ -40,6 +40,33 @@ export function patchFeedItemInCache(
   }
 }
 
+export const profilePostsQueryKeyPrefix = ['profile-posts'] as const
+
+export function patchFeedItemInAllListCaches(
+  queryClient: {
+    setQueriesData: <T>(
+      filters: { queryKey: readonly unknown[] },
+      updater: (old: T | undefined) => T | undefined,
+    ) => void
+    setQueryData: <T>(queryKey: readonly unknown[], updater: T | ((old: T | undefined) => T | undefined)) => void
+  },
+  feedItemId: string,
+  patch: (item: FeedItemDto) => FeedItemDto,
+) {
+  const patchList = (old: InfiniteData<FeedListResponse> | undefined) =>
+    patchFeedItemInCache(old, feedItemId, patch)
+
+  queryClient.setQueriesData<InfiniteData<FeedListResponse>>(
+    { queryKey: feedQueryKey },
+    patchList,
+  )
+
+  queryClient.setQueriesData<InfiniteData<FeedListResponse>>(
+    { queryKey: profilePostsQueryKeyPrefix },
+    patchList,
+  )
+}
+
 export function feedItemQueryKey(id: string) {
   return [...feedQueryKey, 'item', id] as const
 }

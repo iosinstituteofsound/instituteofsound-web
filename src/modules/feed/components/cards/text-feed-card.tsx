@@ -3,7 +3,7 @@ import { LinkPreviewCard } from '@/modules/feed/components/link-preview-card'
 import { FeedCardShell, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'
 
-export function TextFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
+export function TextFeedCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {
   const text = payloadString(item.payload, 'text') ?? item.body
   const linkPreview = parseLinkPreviewFromPayload(item.payload)
 
@@ -11,8 +11,9 @@ export function TextFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
     <FeedCardShell
       item={{ ...item, body: text, title: undefined }}
       defaultCommentsOpen={defaultCommentsOpen}
+      compact={compact}
     >
-      {linkPreview ? <LinkPreviewCard preview={linkPreview} /> : null}
+      {linkPreview ? <LinkPreviewCard preview={linkPreview} compact={compact} /> : null}
     </FeedCardShell>
   )
 }

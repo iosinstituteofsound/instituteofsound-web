@@ -1,7 +1,7 @@
 import type { FeedCardProps } from '@/modules/feed/lib/feed-type-registry'
 import { FeedCardShell, FeedMediaFrame, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 
-export function VideoFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
+export function VideoFeedCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {
   const videoUrl = payloadString(item.payload, 'videoUrl')
   const posterUrl = payloadString(item.payload, 'posterUrl')
 
@@ -9,6 +9,7 @@ export function VideoFeedCard({ item, defaultCommentsOpen }: FeedCardProps) {
     <FeedCardShell
       item={item}
       defaultCommentsOpen={defaultCommentsOpen}
+      compact={compact}
       media={
         videoUrl ? (
           <FeedMediaFrame>

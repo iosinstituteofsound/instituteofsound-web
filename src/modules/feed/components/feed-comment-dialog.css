@@ -1,7 +1,7 @@
 .feed-comment-dialog__overlay {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 160;
   background: color-mix(in oklch, black 72%, transparent);
   animation: feed-comment-overlay-in 0.2s ease-out;
 }
@@ -18,7 +18,7 @@
 
 .feed-comment-dialog {
   position: fixed;
-  z-index: 101;
+  z-index: 161;
   left: 50%;
   top: 50%;
   display: flex;

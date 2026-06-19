@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, type KeyboardEvent } from 'react'
 import { Globe, X } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
+import { FeedPhotoViewer } from '@/modules/feed/components/feed-photo-viewer'
 import { FeedPostHiddenState } from '@/modules/feed/components/feed-post-hidden-state'
 import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options-menu'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
@@ -9,6 +10,7 @@ import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-pro
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
+import { getFeedItemPhotoUrl } from '@/modules/feed/lib/feed-post-meta'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 import './feed-card.css'
@@ -20,6 +22,7 @@ export function FeedCardShell({
   className,
   defaultCommentsOpen = false,
   headerContext,
+  compact = false,
 }: {
   item: FeedItemDto
   children?: React.ReactNode
@@ -27,12 +30,33 @@ export function FeedCardShell({
   className?: string
   defaultCommentsOpen?: boolean
   headerContext?: React.ReactNode
+  compact?: boolean
 }) {
   const [isHidden, setIsHidden] = useState(false)
+  const [photoViewerOpen, setPhotoViewerOpen] = useState(false)
   const captionText = buildPostCaptionText(item.title, item.body)
+  const photoUrl = getFeedItemPhotoUrl(item)
+  const mediaIsInteractive = Boolean(photoUrl)
+
+  const openPhotoViewer = () => {
+    if (!photoUrl) return
+    setPhotoViewerOpen(true)
+  }
+
+  const handleMediaKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      openPhotoViewer()
+    }
+  }
+
+  const photoAlt =
+    item.type === 'article'
+      ? (item.title ?? 'Article cover')
+      : (payloadString(item.payload, 'alt') ?? item.title ?? 'Post photo')
 
   return (
-    <article className={cn('feed-social-card', isHidden && 'feed-social-card--hidden', className)}>
+    <article className={cn('feed-social-card', isHidden && 'feed-social-card--hidden', compact && 'feed-social-card--compact', className)}>
       <div className="feed-social-card__layers">
         <div
           className="feed-social-card__layer feed-social-card__layer--post"
@@ -79,11 +103,27 @@ export function FeedCardShell({
 
             {captionText ? <FeedPostCaption text={captionText} /> : null}
 
-            {media ? <div className="feed-social-card__media">{media}</div> : null}
+            {media ? (
+              <div
+                className={cn(
+                  'feed-social-card__media',
+                  mediaIsInteractive && 'feed-social-card__media--interactive',
+                )}
+                {...(mediaIsInteractive
+                  ? {
+                      role: 'button',
+                      tabIndex: 0,
+                      'aria-label': 'View photo',
+                      onClick: openPhotoViewer,
+                      onKeyDown: handleMediaKeyDown,
+                    }
+                  : {})}
+              >
+                {media}
+              </div>
+            ) : null}
 
             {children ? <div className="feed-social-card__body">{children}</div> : null}
-
-            <FeedEngagement item={item} defaultCommentsOpen={defaultCommentsOpen} variant="social" />
           </div>
         </div>
 
@@ -96,6 +136,20 @@ export function FeedCardShell({
           </div>
         </div>
       </div>
+
+      {!isHidden ? (
+        <FeedEngagement item={item} defaultCommentsOpen={defaultCommentsOpen} variant="social" />
+      ) : null}
+
+      {photoUrl ? (
+        <FeedPhotoViewer
+          open={photoViewerOpen}
+          onOpenChange={setPhotoViewerOpen}
+          item={item}
+          imageUrl={photoUrl}
+          alt={photoAlt}
+        />
+      ) : null}
     </article>
   )
 }
