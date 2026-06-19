@@ -90,20 +90,28 @@ export const DEFAULT_LAYOUT_CONFIG: LayoutConfig = {
     },
     footer: {
       enabled: true,
-      copyright: '© Institute of Sound',
+      copyright: '© 2026 Institute of Sound',
       linkGroups: [
         {
           title: 'Discover',
           links: [
             { label: 'Explore', href: '/explore' },
             { label: 'Releases', href: '/releases' },
+            { label: 'Home', href: '/' },
           ],
         },
         {
-          title: 'Account',
+          title: 'Creators',
           links: [
             { label: 'Join free', href: '/auth/register' },
             { label: 'Sign in', href: '/auth/login' },
+          ],
+        },
+        {
+          title: 'Platform',
+          links: [
+            { label: 'Editorial', href: '/explore' },
+            { label: 'Playlists', href: '/explore' },
           ],
         },
       ],
