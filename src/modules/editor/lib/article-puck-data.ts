@@ -7,6 +7,7 @@ import {
   type ArticlePuckDocument,
 } from '@/modules/editor/types/article-editor.types'
 import { ensureCanvasLayouts } from '@/modules/editor/lib/canvas-block-utils'
+import { parseSoundDnaFields } from '@/modules/editor/lib/sound-dna-utils'
 
 function isPuckData(data: Record<string, unknown>): data is { puck: Data; meta?: ArticleEditorMeta } {
   return Boolean(data.puck && typeof data.puck === 'object' && Array.isArray((data.puck as Data).content))
@@ -34,6 +35,11 @@ function parseMeta(raw: Record<string, unknown> | undefined): ArticleEditorMeta 
       typeof meta.sessionLabel === 'string' && meta.sessionLabel.trim()
         ? meta.sessionLabel
         : DEFAULT_ARTICLE_META.sessionLabel,
+    workspaceMode:
+      meta.workspaceMode === 'live' || meta.workspaceMode === 'canvas'
+        ? meta.workspaceMode
+        : undefined,
+    soundDna: parseSoundDnaFields(meta.soundDna),
   }
 }
 

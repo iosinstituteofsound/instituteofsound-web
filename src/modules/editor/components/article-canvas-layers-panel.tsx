@@ -31,7 +31,9 @@ import type { Data } from '@measured/puck'
 import {
   ARTIFACT_LAYER_ID,
   buildCanvasBackgroundLayer,
+  buildCanvasContentOrderLayers,
   buildCanvasStackLayers,
+  moveCanvasContentLayer,
   moveCanvasStackLayer,
   reorderCanvasStackLayers,
   toggleCanvasArtifactVisibility,
@@ -39,6 +41,7 @@ import {
   toggleCanvasBlockVisibility,
   type CanvasLayerEntry,
 } from '@/modules/editor/lib/canvas-layers-utils'
+import { reorderPuckContentByIds } from '@/modules/editor/lib/reorder-puck-content'
 import { cn } from '@/shared/lib/cn'
 
 interface ArticleCanvasLayersPanelProps {
@@ -48,6 +51,8 @@ interface ArticleCanvasLayersPanelProps {
   onChange: (data: Data) => void
   onSelectBlock: (blockId: string) => void
   onClose: () => void
+  /** When true, drag reorders puck.content (article stack) instead of z-index. */
+  reorderContent?: boolean
 }
 
 function LayerThumbnail({ layer }: { layer: CanvasLayerEntry }) {
@@ -184,8 +189,9 @@ export function ArticleCanvasLayersPanel({
   onChange,
   onSelectBlock,
   onClose,
+  reorderContent = false,
 }: ArticleCanvasLayersPanelProps) {
-  const stackLayers = buildCanvasStackLayers(data)
+  const stackLayers = reorderContent ? buildCanvasContentOrderLayers(data) : buildCanvasStackLayers(data)
   const backgroundLayer = buildCanvasBackgroundLayer(data)
   const selectedBlockId = selectedBlockIds.length === 1 ? selectedBlockIds[0] : null
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null)
@@ -205,17 +211,32 @@ export function ArticleCanvasLayersPanel({
     const { active, over } = event
     if (!over || active.id === over.id) return
 
-    const ids = stackLayers.map((layer) => layer.id)
+    const blockLayers = stackLayers.filter((layer) => layer.kind === 'block')
+    const ids = blockLayers.map((layer) => layer.id)
     const oldIndex = ids.indexOf(String(active.id))
     const newIndex = ids.indexOf(String(over.id))
     if (oldIndex < 0 || newIndex < 0) return
 
-    onChange(reorderCanvasStackLayers(data, arrayMove(ids, oldIndex, newIndex)))
+    if (reorderContent) {
+      onChange(reorderPuckContentByIds(data, arrayMove(ids, oldIndex, newIndex)))
+      return
+    }
+
+    const stackIds = stackLayers.map((layer) => layer.id)
+    const stackOldIndex = stackIds.indexOf(String(active.id))
+    const stackNewIndex = stackIds.indexOf(String(over.id))
+    if (stackOldIndex < 0 || stackNewIndex < 0) return
+
+    onChange(reorderCanvasStackLayers(data, arrayMove(stackIds, stackOldIndex, stackNewIndex)))
   }
 
   const activeLayerId = selectedLayerId ?? selectedBlockId
 
   const handleMove = (layerId: string, direction: 'up' | 'down') => {
+    if (reorderContent) {
+      onChange(moveCanvasContentLayer(data, layerId, direction))
+      return
+    }
     onChange(moveCanvasStackLayer(data, layerId, direction))
   }
 

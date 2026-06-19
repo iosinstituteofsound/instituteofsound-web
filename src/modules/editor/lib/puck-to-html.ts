@@ -30,6 +30,27 @@ export function extractGalleryUrls(puck: Data): string[] {
   return [...new Set(urls)]
 }
 
+export function findPuckBlockById(puck: Data, blockId: string): Data['content'][number] | undefined {
+  return puck.content.find(
+    (block) => String((block.props as Record<string, unknown>).blockId) === blockId,
+  )
+}
+
+export function readImageBlockUrl(block: Data['content'][number] | undefined): string | undefined {
+  if (!block || (block.type !== 'ArticleHero' && block.type !== 'ArticleImage')) return undefined
+  const imageUrl = (block.props as Record<string, unknown>).imageUrl
+  return typeof imageUrl === 'string' && imageUrl.trim() ? imageUrl.trim() : undefined
+}
+
+/** Cover image for the composed hero — prefers the resolved hero block id. */
+export function extractHeroImageUrl(puck: Data, heroBlockId?: string): string | undefined {
+  if (heroBlockId) {
+    const fromHeroBlock = readImageBlockUrl(findPuckBlockById(puck, heroBlockId))
+    if (fromHeroBlock) return fromHeroBlock
+  }
+  return extractCoverUrl(puck)
+}
+
 export function extractCoverUrl(puck: Data): string | undefined {
   const hero = puck.content.find((block) => block.type === 'ArticleHero')
   const imageUrl = hero?.props.imageUrl

@@ -18,6 +18,7 @@ import { Switch } from '@/shared/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Textarea } from '@/shared/components/ui/textarea'
 import type { Data } from '@measured/puck'
+import { normalizeArticleSlug } from '@/modules/editor/lib/article-slug'
 import { cn } from '@/shared/lib/cn'
 
 const FALLBACK_ARTICLE_TYPES: { value: ArticleType; label: string }[] = [
@@ -32,16 +33,19 @@ interface ArticleEditorSidebarProps {
   canvasData: Data
   selectedBlockIds: string[]
   deckEditActive?: boolean
+  soundDnaEditActive?: boolean
+  liveWorkspace?: boolean
   excerpt: string
   slug: string
   status: string
   meta: ArticleEditorMeta
   authorName: string
   className?: string
-  onCanvasChange: (data: Data) => void
+  onCanvasChange: (data: Data | ((prev: Data) => Data)) => void
   onSelectBlocks: (blockIds: string[]) => void
   onDeselectBlocks: () => void
   onExcerptChange: (value: string) => void
+  onSlugChange: (value: string) => void
   onMetaChange: (patch: Partial<ArticleEditorMeta>) => void
   canUndo: boolean
   canRedo: boolean
@@ -107,6 +111,8 @@ export function ArticleEditorSidebar({
   canvasData,
   selectedBlockIds,
   deckEditActive = false,
+  soundDnaEditActive = false,
+  liveWorkspace = false,
   excerpt,
   slug,
   status,
@@ -117,6 +123,7 @@ export function ArticleEditorSidebar({
   onSelectBlocks,
   onDeselectBlocks,
   onExcerptChange,
+  onSlugChange,
   onMetaChange,
   canUndo,
   canRedo,
@@ -161,12 +168,17 @@ export function ArticleEditorSidebar({
               data={canvasData}
               selectedBlockIds={selectedBlockIds}
               deckEditActive={deckEditActive}
+              soundDnaEditActive={soundDnaEditActive}
+              liveWorkspace={liveWorkspace}
+              meta={meta}
+              slug={slug}
               excerpt={excerpt}
               excerptMax={excerptMax}
               onChange={onCanvasChange}
               onSelectBlocks={onSelectBlocks}
               onDeselectBlocks={onDeselectBlocks}
               onExcerptChange={onExcerptChange}
+              onMetaChange={onMetaChange}
             />
           </TabsContent>
 
@@ -207,10 +219,17 @@ export function ArticleEditorSidebar({
 
             <div className="space-y-2">
               <Label>URL slug</Label>
-              <Input value={slug || 'untitled-article'} readOnly className="bg-muted/40" />
-              {slug ? (
-                <p className="text-xs text-muted-foreground">/explore/articles/{slug}</p>
-              ) : null}
+              <Input
+                value={slug}
+                onChange={(e) => onSlugChange(normalizeArticleSlug(e.target.value))}
+                placeholder="cathedral-of-noise"
+                spellCheck={false}
+                autoCapitalize="off"
+                autoCorrect="off"
+              />
+              <p className="text-xs text-muted-foreground">
+                /explore/articles/{slug || 'your-slug'}
+              </p>
             </div>
 
             <div className="space-y-2">

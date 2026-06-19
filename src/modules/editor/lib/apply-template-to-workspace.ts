@@ -65,11 +65,13 @@ function applyCanvasLayoutsToPuck(puck: Data): Data {
       const layout: CanvasBlockLayout = hasExplicitLayout(props)
         ? {
             ...(props.layout as CanvasBlockLayout),
+            placement: 'flow',
             zIndex: index,
           }
         : {
             ...defaultLayoutForType(type, index),
             ...preset,
+            placement: 'flow',
             zIndex: index,
           }
 

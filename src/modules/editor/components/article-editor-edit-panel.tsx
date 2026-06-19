@@ -9,6 +9,7 @@ import { ArticleEditEffectsModal } from '@/modules/editor/components/article-edi
 import { ArticleEditVideoModal } from '@/modules/editor/components/article-edit-video-modal'
 import { ArticleEditBlockTiles } from '@/modules/editor/components/article-edit-block-tiles'
 import { ArticleSelectedBlockTools } from '@/modules/editor/components/article-selected-block-tools'
+import { ArticleSoundDnaToolPanel } from '@/modules/editor/components/article-sound-dna-tool-panel'
 import { ArticleText3dEffectsModal } from '@/modules/editor/components/article-text-3d-effects-modal'
 import { ArticleText2dEffectsModal } from '@/modules/editor/components/article-text-2d-effects-modal'
 import { Label } from '@/shared/components/ui/label'
@@ -17,6 +18,7 @@ import {
   addCanvasBlockWithId,
   CANVAS_BLOCK_DROP_POSITION,
   ensureCanvasLayouts,
+  addFreeCanvasBlockWithId,
   updateCanvasBlock,
 } from '@/modules/editor/lib/canvas-block-utils'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
@@ -27,29 +29,40 @@ import {
   isTextCanvasBlock,
   isVideoCanvasBlock,
 } from '@/modules/editor/types/article-canvas.types'
+import type { ArticleEditorMeta } from '@/modules/editor/types/article-editor.types'
 
 interface ArticleEditorEditPanelProps {
   data: Data
   selectedBlockIds: string[]
   deckEditActive?: boolean
+  soundDnaEditActive?: boolean
+  liveWorkspace?: boolean
+  meta: ArticleEditorMeta
+  slug: string
   excerpt?: string
   excerptMax?: number
-  onChange: (data: Data) => void
+  onChange: (data: Data | ((prev: Data) => Data)) => void
   onSelectBlocks: (blockIds: string[]) => void
   onDeselectBlocks: () => void
   onExcerptChange?: (value: string) => void
+  onMetaChange: (patch: Partial<ArticleEditorMeta>) => void
 }
 
 export function ArticleEditorEditPanel({
   data,
   selectedBlockIds,
   deckEditActive = false,
+  soundDnaEditActive = false,
+  liveWorkspace = false,
+  meta,
+  slug,
   excerpt = '',
   excerptMax = 500,
   onChange,
   onSelectBlocks,
   onDeselectBlocks,
   onExcerptChange,
+  onMetaChange,
 }: ArticleEditorEditPanelProps) {
   const normalizedData = useMemo(() => ensureCanvasLayouts(data), [data])
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -123,6 +136,17 @@ export function ArticleEditorEditPanel({
     if (videoModalOpen && videoBlockIds.length > 0) setVideoModalOpen(false)
   }, [videoModalOpen, videoBlockIds.length])
 
+  const addCanvasBlockAtDefault = (type: CanvasBlockType, patch?: Record<string, unknown>) => {
+    const addBlock = liveWorkspace ? addFreeCanvasBlockWithId : addCanvasBlockWithId
+    const { data: next, blockId } = addBlock(
+      normalizedData,
+      type,
+      { ...CANVAS_BLOCK_DROP_POSITION, zIndex: normalizedData.content.length },
+    )
+    onChange(patch ? updateCanvasBlock(next, blockId, patch) : next)
+    onSelectBlocks([blockId])
+  }
+
   const addTextBlock = () => {
     setAudioModalOpen(false)
     setVideoModalOpen(false)
@@ -132,13 +156,7 @@ export function ArticleEditorEditPanel({
     setArtifactsFxPanelOpen(false)
     setText2dPanelOpen(false)
     setText3dPanelOpen(false)
-    const { data: next, blockId } = addCanvasBlockWithId(
-      normalizedData,
-      'ArticleBody',
-      CANVAS_BLOCK_DROP_POSITION,
-    )
-    onChange(next)
-    onSelectBlocks([blockId])
+    addCanvasBlockAtDefault('ArticleBody')
   }
 
   const handleImageFile = async (file: File) => {
@@ -154,13 +172,17 @@ export function ArticleEditorEditPanel({
     setImageUploading(true)
     try {
       const uploaded = await uploadMediaFile(file, file.name)
-      const { data: next, blockId } = addCanvasBlockWithId(
-        normalizedData,
-        'ArticleImage',
-        CANVAS_BLOCK_DROP_POSITION,
-      )
-      onChange(updateCanvasBlock(next, blockId, { imageUrl: uploaded.url }))
-      onSelectBlocks([blockId])
+      const imageUrl = uploaded.absoluteUrl ?? uploaded.url
+      onChange((current) => {
+        const addBlock = liveWorkspace ? addFreeCanvasBlockWithId : addCanvasBlockWithId
+        const { data: next, blockId } = addBlock(
+          ensureCanvasLayouts(current),
+          'ArticleImage',
+          { ...CANVAS_BLOCK_DROP_POSITION, zIndex: current.content.length },
+        )
+        onSelectBlocks([blockId])
+        return updateCanvasBlock(next, blockId, { imageUrl })
+      })
     } finally {
       setImageUploading(false)
     }
@@ -376,6 +398,13 @@ export function ArticleEditorEditPanel({
             {excerpt.length}/{excerptMax}
           </p>
         </div>
+      ) : soundDnaEditActive ? (
+        <ArticleSoundDnaToolPanel
+          meta={meta}
+          slug={slug}
+          onMetaChange={onMetaChange}
+          onDeselect={onDeselectBlocks}
+        />
       ) : (
         <ArticleSelectedBlockTools
           data={normalizedData}

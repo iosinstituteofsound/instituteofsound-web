@@ -3,6 +3,8 @@ import type { ArticleType } from '@/modules/explore/types/explore.types'
 
 export const ARTICLE_PUCK_VERSION = 1
 
+export type ArticleWorkspaceMode = 'canvas' | 'live'
+
 export interface ArticleEditorMeta {
   type: ArticleType
   tags: string[]
@@ -14,6 +16,14 @@ export interface ArticleEditorMeta {
   seoDescription: string
   sessionAudioUrl: string
   sessionLabel: string
+  soundDna?: ArticleSoundDnaField[]
+  /** `canvas` = free-form board (default). `live` = published-article layout after template apply. */
+  workspaceMode?: ArticleWorkspaceMode
+}
+
+export interface ArticleSoundDnaField {
+  label: string
+  value: string
 }
 
 export interface ArticlePuckDocument {

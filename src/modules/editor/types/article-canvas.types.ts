@@ -31,6 +31,8 @@ export interface CanvasBlockLayout {
   zIndex?: number
   /** hug = box wraps text; fixed = user resized width */
   sizing?: 'hug' | 'fixed'
+  /** flow = article stack; free = positioned overlay in live workspace */
+  placement?: 'flow' | 'free'
   /** Layer panel visibility — hidden blocks are not shown on canvas */
   hidden?: boolean
 }

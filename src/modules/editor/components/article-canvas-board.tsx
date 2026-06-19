@@ -39,6 +39,7 @@ import {
   readCanvasEffects,
 } from '@/modules/editor/lib/canvas-effects-utils'
 import { ArticleCanvasEffectsOverlay } from '@/modules/editor/components/article-canvas-effects-overlay'
+import { percentFromPointer, pointerAngle } from '@/modules/editor/lib/canvas-pointer-utils'
 import type { CanvasBlockLayout } from '@/modules/editor/types/article-canvas.types'
 import type { CanvasBlockType } from '@/modules/editor/types/article-canvas.types'
 import type { CanvasPreviewMode } from '@/modules/editor/hooks/use-article-canvas-history'
@@ -97,23 +98,6 @@ function boundsEqual(a: GroupBounds | null, b: GroupBounds | null): boolean {
   if (a === b) return true
   if (!a || !b) return false
   return a.left === b.left && a.top === b.top && a.width === b.width && a.height === b.height
-}
-
-function percentFromPointer(
-  canvas: DOMRect,
-  clientX: number,
-  clientY: number,
-): { x: number; y: number } {
-  const x = ((clientX - canvas.left) / canvas.width) * 100
-  const y = ((clientY - canvas.top) / canvas.height) * 100
-  return {
-    x: Math.min(92, Math.max(2, x)),
-    y: Math.min(96, Math.max(2, y)),
-  }
-}
-
-function pointerAngle(centerX: number, centerY: number, clientX: number, clientY: number): number {
-  return (Math.atan2(clientY - centerY, clientX - centerX) * 180) / Math.PI
 }
 
 function getBlockElement(board: HTMLElement, blockId: string): HTMLElement | null {

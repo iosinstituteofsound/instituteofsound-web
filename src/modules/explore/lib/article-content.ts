@@ -146,10 +146,48 @@ export function articleAuthorAvatar(slug: string): string {
   return `https://picsum.photos/seed/${slug}-author/80/80`
 }
 
-export function formatQuoteLines(text: string): string[] {
-  const normalized = text.replace(/\s+/g, ' ').trim()
-  if (!normalized) return []
+const MAX_QUOTE_LINE_LENGTH = 38
 
+function wrapLongQuoteLine(line: string, maxLength = MAX_QUOTE_LINE_LENGTH): string[] {
+  const trimmed = line.trim()
+  if (!trimmed) return []
+  if (trimmed.length <= maxLength) return [trimmed]
+
+  const words = trimmed.split(/\s+/).filter(Boolean)
+  if (!words.length) return [trimmed.slice(0, maxLength)]
+
+  const result: string[] = []
+  let bucket: string[] = []
+
+  const flush = () => {
+    if (!bucket.length) return
+    result.push(bucket.join(' '))
+    bucket = []
+  }
+
+  for (const word of words) {
+    if (word.length > maxLength) {
+      flush()
+      for (let index = 0; index < word.length; index += maxLength) {
+        result.push(word.slice(index, index + maxLength))
+      }
+      continue
+    }
+
+    const candidate = [...bucket, word].join(' ')
+    if (candidate.length > maxLength && bucket.length > 0) {
+      flush()
+      bucket = [word]
+    } else {
+      bucket.push(word)
+    }
+  }
+
+  flush()
+  return result.length ? result : [trimmed]
+}
+
+function seedQuoteLines(normalized: string): string[] {
   if (normalized.includes(' / ')) {
     return normalized.split(' / ').map((line) => line.trim()).filter(Boolean)
   }
@@ -159,17 +197,26 @@ export function formatQuoteLines(text: string): string[] {
     .map((line) => line.trim())
     .filter(Boolean)
 
-  if (sentenceParts.length >= 2) {
-    return sentenceParts.map((line) => line.toUpperCase())
-  }
+  if (sentenceParts.length >= 2) return sentenceParts
 
-  const words = normalized.split(/\s+/)
-  if (words.length <= 5) return [normalized.toUpperCase()]
+  const words = normalized.split(/\s+/).filter(Boolean)
+  if (words.length <= 5) return [normalized]
 
   const midpoint = Math.ceil(words.length / 2)
-  return [words.slice(0, midpoint).join(' '), words.slice(midpoint).join(' ')].map((line) =>
-    line.toUpperCase(),
-  )
+  return [words.slice(0, midpoint).join(' '), words.slice(midpoint).join(' ')]
+}
+
+export function formatQuoteLines(text: string): string[] {
+  const raw = text.replace(/\r\n/g, '\n').trim()
+  if (!raw) return []
+
+  const segments = raw.includes('\n')
+    ? raw.split('\n').map((line) => line.replace(/\s+/g, ' ').trim()).filter(Boolean)
+    : [raw.replace(/\s+/g, ' ').trim()]
+
+  return segments
+    .flatMap((segment) => seedQuoteLines(segment))
+    .flatMap((line) => wrapLongQuoteLine(line.toUpperCase()))
 }
 
 export interface ArticleSessionTrack {

@@ -96,10 +96,9 @@ export function ArticleCanvasBlock({
     top: `${layout.y}%`,
     zIndex: dragging ? baseZIndex + 10_000 : baseZIndex,
     transform: `rotate(${style.angle}deg)${effectTransform ? ` ${effectTransform}` : ''}`,
-    width: hugText ? 'fit-content' : `${layout.width}%`,
-    maxWidth: hugText ? `${layout.width}%` : undefined,
-    opacity: layout.hidden ? 0 : undefined,
-    visibility: layout.hidden ? 'hidden' : undefined,
+    width: isText ? `${layout.width}%` : hugText ? 'fit-content' : `${layout.width}%`,
+    maxWidth: isText ? `${layout.width}%` : hugText ? `${layout.width}%` : undefined,
+    display: layout.hidden ? 'none' : undefined,
     pointerEvents: layout.hidden ? 'none' : undefined,
   } as React.CSSProperties
 

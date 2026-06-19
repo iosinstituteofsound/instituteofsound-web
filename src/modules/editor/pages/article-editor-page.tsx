@@ -10,6 +10,8 @@ import { ArticleEditorSidebar } from '@/modules/editor/components/article-editor
 import { ArticlePreviewDialog } from '@/modules/editor/components/article-preview-dialog'
 import { ArticleTemplatesDialog } from '@/modules/editor/components/article-templates-dialog'
 import { ArticleLiveWorkspace } from '@/modules/editor/components/article-live-workspace'
+import { ArticleCanvasBoard } from '@/modules/editor/components/article-canvas-board'
+import { resolveWorkspaceMode } from '@/modules/editor/lib/workspace-mode'
 import { PublishConfirmDialog } from '@/modules/editor/components/publish-confirm-dialog'
 import { SaveTemplateDialog } from '@/modules/editor/components/save-template-dialog'
 import { SaveStatusIndicator } from '@/modules/editor/components/save-status-indicator'
@@ -43,6 +45,7 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>('desktop')
   const [selectedBlockIds, setSelectedBlockIds] = useState<string[]>([])
   const [deckEditActive, setDeckEditActive] = useState(false)
+  const [soundDnaEditActive, setSoundDnaEditActive] = useState(false)
 
   const editor = useArticleEditor(articleId)
   const { saveTemplate, isSaving: isSavingTemplate } = useArticleTemplates()
@@ -70,22 +73,37 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
 
   const handleSelectBlocks = useCallback((blockIds: string[]) => {
     setDeckEditActive(false)
+    setSoundDnaEditActive(false)
     setSelectedBlockIds(blockIds)
   }, [])
 
   const handleDeselectBlocks = useCallback(() => {
     setDeckEditActive(false)
+    setSoundDnaEditActive(false)
     setSelectedBlockIds([])
   }, [])
 
   const handleSelectDeck = useCallback(() => {
     setDeckEditActive(true)
+    setSoundDnaEditActive(false)
+    setSelectedBlockIds([])
+  }, [])
+
+  const handleSelectSoundDna = useCallback(() => {
+    setSoundDnaEditActive(true)
+    setDeckEditActive(false)
     setSelectedBlockIds([])
   }, [])
 
   const history = editor.canvasHistory
   const previousPreviewRef = useRef<CanvasPreviewMode>('current')
   void history.revision
+
+  const workspaceMode = useMemo(
+    () => resolveWorkspaceMode(editor.meta, editor.puckData),
+    [editor.meta, editor.puckData],
+  )
+  const isLiveWorkspace = workspaceMode === 'live'
 
   const handleUndo = useCallback(() => {
     history.undo(editor.puckData)
@@ -211,20 +229,33 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
 
       <div className="flex min-h-0 flex-1">
         <main className="article-editor__write min-h-0 min-w-0 flex-1">
-          <ArticleLiveWorkspace
-            puckData={editor.puckData}
-            meta={editor.meta}
-            excerpt={editor.excerpt}
-            slug={editor.slug}
-            authorName={authorName}
-            readMinutes={stats.readMinutes}
-            selectedBlockIds={selectedBlockIds}
-            deckEditActive={deckEditActive}
-            onChange={editor.setPuckData}
-            onSelectBlocks={handleSelectBlocks}
-            onSelectDeck={handleSelectDeck}
-            onDeselectBlocks={handleDeselectBlocks}
-          />
+          {isLiveWorkspace ? (
+            <ArticleLiveWorkspace
+              puckData={editor.puckData}
+              meta={editor.meta}
+              excerpt={editor.excerpt}
+              slug={editor.slug}
+              authorName={authorName}
+              readMinutes={stats.readMinutes}
+              selectedBlockIds={selectedBlockIds}
+              deckEditActive={deckEditActive}
+              soundDnaEditActive={soundDnaEditActive}
+              onChange={editor.setPuckData}
+              onSelectBlocks={handleSelectBlocks}
+              onSelectDeck={handleSelectDeck}
+              onSelectSoundDna={handleSelectSoundDna}
+              onDeselectBlocks={handleDeselectBlocks}
+            />
+          ) : (
+            <ArticleCanvasBoard
+              data={editor.puckData}
+              baselineData={history.baselineData ?? undefined}
+              previewMode={history.previewMode}
+              selectedBlockIds={selectedBlockIds}
+              onChange={editor.setPuckData}
+              onSelectBlocks={handleSelectBlocks}
+            />
+          )}
         </main>
 
         <ArticleEditorSidebar
@@ -232,6 +263,8 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
           canvasData={editor.puckData}
           selectedBlockIds={selectedBlockIds}
           deckEditActive={deckEditActive}
+          soundDnaEditActive={soundDnaEditActive}
+          liveWorkspace={isLiveWorkspace}
           excerpt={editor.excerpt}
           slug={editor.slug}
           status={editor.article?.status ?? 'draft'}
@@ -241,6 +274,7 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
           onSelectBlocks={handleSelectBlocks}
           onDeselectBlocks={handleDeselectBlocks}
           onExcerptChange={editor.setExcerpt}
+          onSlugChange={editor.setSlug}
           onMetaChange={editor.setMeta}
           canUndo={history.canUndo}
           canRedo={history.canRedo}
@@ -288,6 +322,10 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
         title={editor.title}
         excerpt={editor.excerpt}
         authorName={authorName}
+        slug={editor.slug}
+        readMinutes={stats.readMinutes}
+        meta={editor.meta}
+        workspaceMode={workspaceMode}
         puckData={editor.puckData}
       />
 

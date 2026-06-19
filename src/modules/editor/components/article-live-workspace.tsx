@@ -1,19 +1,37 @@
-import { useMemo, type ReactNode } from 'react'
+import { useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Data } from '@measured/puck'
 import { ArticleAudioWidget } from '@/modules/explore/components/article-audio-widget'
 import { articleAuthorAvatar } from '@/modules/explore/lib/article-content'
 import {
-  formatLiveQuoteLines,
-  resolvePuckLivePreview,
-} from '@/modules/editor/lib/puck-live-preview'
+  ArticleCanvasLayersPanel,
+  ArticleCanvasLayersRail,
+} from '@/modules/editor/components/article-canvas-layers-panel'
+import { ArticleCanvasArtifactLayer } from '@/modules/editor/components/article-canvas-artifact-layer'
+import { ArticleCanvasEffectsOverlay } from '@/modules/editor/components/article-canvas-effects-overlay'
+import { ArticleLiveFreeBlocksLayer } from '@/modules/editor/components/article-live-free-blocks-layer'
+import { ArticleLiveSortableStack } from '@/modules/editor/components/article-live-sortable-stack'
+import { readCanvasArtifact } from '@/modules/editor/lib/canvas-artifact-utils'
 import {
-  addCanvasBlockWithId,
+  canvasBackgroundToStyle,
+  readCanvasBackground,
+} from '@/modules/editor/lib/canvas-background-utils'
+import {
+  canvasEffectsFilterStyle,
+  readCanvasEffects,
+} from '@/modules/editor/lib/canvas-effects-utils'
+import { getHeroBlockIdSet } from '@/modules/editor/lib/live-article-body'
+import { resolvePuckLivePreview } from '@/modules/editor/lib/puck-live-preview'
+import { extractHeroImageUrl } from '@/modules/editor/lib/puck-to-html'
+import {
+  addFreeCanvasBlockWithId,
   ensureCanvasLayouts,
   IOS_BLOCK_PAYLOAD_MIME,
   IOS_BLOCK_TYPE_MIME,
+  isCanvasBlockHiddenById,
   updateCanvasBlock,
   type AudioBlockDragPayload,
 } from '@/modules/editor/lib/canvas-block-utils'
+import { percentFromPointer } from '@/modules/editor/lib/canvas-pointer-utils'
 import type { CanvasBlockType } from '@/modules/editor/types/article-canvas.types'
 import type { ArticleEditorMeta } from '@/modules/editor/types/article-editor.types'
 import { cn } from '@/shared/lib/cn'
@@ -27,9 +45,11 @@ interface ArticleLiveWorkspaceProps {
   readMinutes: number
   selectedBlockIds: string[]
   deckEditActive?: boolean
+  soundDnaEditActive?: boolean
   onChange: (data: Data) => void
   onSelectBlocks: (blockIds: string[]) => void
   onSelectDeck: () => void
+  onSelectSoundDna: () => void
   onDeselectBlocks: () => void
 }
 
@@ -69,62 +89,38 @@ function LiveEditable({
   )
 }
 
-function LiveQuote({
-  text,
-  attribution,
+function LiveHeroImageEditWrap({
+  blockId,
   selected,
-  onActivate,
+  onSelect,
+  children,
 }: {
-  text: string
-  attribution?: string
+  blockId?: string
   selected: boolean
-  onActivate: () => void
+  onSelect: (blockId: string) => void
+  children: ReactNode
 }) {
-  const lines = formatLiveQuoteLines(text)
-
   return (
-    <LiveEditable selected={selected} label="Edit quote" onActivate={onActivate} className="explore-article-quote">
-      <div className="explore-article-quote__texture" aria-hidden />
-      <div className="explore-article-quote__inner">
-        <div className="explore-article-quote__stage">
-          <span className="explore-article-quote__mark explore-article-quote__mark--open" aria-hidden>
-            &ldquo;
-          </span>
-          <div className="explore-article-quote__copy">
-            <blockquote className="explore-article-quote__text">
-              {lines.map((line) => (
-                <span key={line} className="explore-article-quote__line">
-                  {line}
-                </span>
-              ))}
-            </blockquote>
-            {attribution ? (
-              <figcaption className="explore-article-quote__cite">{attribution}</figcaption>
-            ) : null}
-          </div>
-          <span className="explore-article-quote__mark explore-article-quote__mark--close" aria-hidden>
-            &rdquo;
-          </span>
-        </div>
-      </div>
-    </LiveEditable>
-  )
-}
-
-function LiveSoundDnaPanel({ rows }: { rows: Array<{ label: string; value: string }> }) {
-  return (
-    <aside className="explore-article-dna explore-ed-glass pointer-events-none" aria-hidden>
-      <p className="explore-article-dna__kicker">Sound DNA</p>
-      <dl className="explore-article-dna__list">
-        {rows.map((row) => (
-          <div key={row.label} className="explore-article-dna__row">
-            <dt>{row.label}</dt>
-            <dd>{row.value}</dd>
-          </div>
-        ))}
-      </dl>
-      <span className="explore-article-dna__cta">View session gear &amp; notes →</span>
-    </aside>
+    <div
+      className={cn(
+        'article-live-hero-image-wrap',
+        selected && 'article-live-hero-image-wrap--selected',
+      )}
+    >
+      {children}
+      {blockId ? (
+        <button
+          type="button"
+          className="article-live-hero-image-wrap__replace"
+          onClick={(event) => {
+            event.stopPropagation()
+            onSelect(blockId)
+          }}
+        >
+          Replace image
+        </button>
+      ) : null}
+    </div>
   )
 }
 
@@ -171,11 +167,23 @@ export function ArticleLiveWorkspace({
   readMinutes,
   selectedBlockIds,
   deckEditActive = false,
+  soundDnaEditActive = false,
   onChange,
   onSelectBlocks,
   onSelectDeck,
+  onSelectSoundDna,
   onDeselectBlocks,
 }: ArticleLiveWorkspaceProps) {
+  const stageRef = useRef<HTMLDivElement>(null)
+  const [layersOpen, setLayersOpen] = useState(false)
+  const canvasBackground = readCanvasBackground(puckData)
+  const canvasBackgroundStyle = canvasBackground.hidden
+    ? { background: 'transparent' }
+    : canvasBackgroundToStyle(canvasBackground)
+  const canvasArtifact = readCanvasArtifact(puckData)
+  const canvasEffects = readCanvasEffects(puckData)
+  const canvasEffectsFilter = canvasEffectsFilterStyle(canvasEffects)
+
   const preview = useMemo(
     () =>
       resolvePuckLivePreview({
@@ -189,6 +197,25 @@ export function ArticleLiveWorkspace({
     [excerpt, meta, puckData, slug],
   )
 
+  const heroBlockIds = useMemo(() => getHeroBlockIdSet(preview.blockIds), [preview.blockIds])
+
+  const heroBlockId = useMemo(() => {
+    const fromPreview = preview.blockIds.hero ?? preview.blockIds.images[0]
+    if (fromPreview) return fromPreview
+    const fallback = puckData.content.find(
+      (block) => block.type === 'ArticleHero' || block.type === 'ArticleImage',
+    )
+    if (!fallback) return undefined
+    return String((fallback.props as Record<string, unknown>).blockId)
+  }, [preview.blockIds.hero, preview.blockIds.images, puckData.content])
+  const heroImageUrl = useMemo(
+    () => extractHeroImageUrl(puckData, heroBlockId) ?? preview.coverUrl,
+    [heroBlockId, preview.coverUrl, puckData],
+  )
+  const heroImageHidden = isCanvasBlockHiddenById(puckData, heroBlockId)
+  const heroTitleHidden = isCanvasBlockHiddenById(puckData, preview.blockIds.title)
+  const heroAudioHidden = isCanvasBlockHiddenById(puckData, preview.blockIds.heroAudio)
+
   const selectBlock = (blockId?: string) => {
     if (!blockId) return
     onSelectBlocks([blockId])
@@ -197,9 +224,15 @@ export function ArticleLiveWorkspace({
   const handleDrop = (event: React.DragEvent) => {
     event.preventDefault()
     const type = event.dataTransfer.getData(IOS_BLOCK_TYPE_MIME) as CanvasBlockType
-    if (!type) return
+    if (!type || !stageRef.current) return
 
-    const { data: next, blockId } = addCanvasBlockWithId(ensureCanvasLayouts(puckData), type)
+    const rect = stageRef.current.getBoundingClientRect()
+    const { x, y } = percentFromPointer(rect, event.clientX, event.clientY)
+    const { data: next, blockId } = addFreeCanvasBlockWithId(ensureCanvasLayouts(puckData), type, {
+      x,
+      y,
+      zIndex: puckData.content.length,
+    })
     const payloadRaw = event.dataTransfer.getData(IOS_BLOCK_PAYLOAD_MIME)
 
     if (payloadRaw) {
@@ -223,230 +256,158 @@ export function ArticleLiveWorkspace({
   }
 
   return (
-    <div
-      className="article-live-workspace"
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onDeselectBlocks()
-      }}
-    >
-      <article className="explore-article explore-article--editor-workspace">
-        <header className="explore-article-hero">
-          <LiveEditable
-            selected={isSelected(selectedBlockIds, preview.blockIds.hero)}
-            label="Edit hero image"
-            onActivate={() => selectBlock(preview.blockIds.hero ?? preview.blockIds.images[0])}
-            className="explore-article-hero__img-wrap"
-          >
-            {preview.coverUrl ? (
-              <img src={preview.coverUrl} alt="" className="explore-article-hero__img" />
-            ) : (
-              <span className="explore-article-hero__img explore-article-hero__img--empty" aria-hidden />
-            )}
-          </LiveEditable>
-          <div className="explore-article-hero__scrim" aria-hidden />
-          <div className="explore-article-hero__glow" aria-hidden />
-          <div className="explore-article-hero__grain" aria-hidden />
+    <div className="article-live-workspace-shell">
+      <ArticleCanvasLayersRail open={layersOpen} onToggle={() => setLayersOpen((open) => !open)} />
 
-          <div className="explore-article-hero__stage">
-            <div className="explore-article-hero__content">
-              <span className="explore-article-hero__tag">{preview.category}</span>
+      <ArticleCanvasLayersPanel
+        open={layersOpen}
+        data={puckData}
+        selectedBlockIds={selectedBlockIds}
+        reorderContent
+        onChange={onChange}
+        onSelectBlock={(blockId) => {
+          if (!blockId) {
+            onDeselectBlocks()
+            return
+          }
+          onSelectBlocks([blockId])
+        }}
+        onClose={() => setLayersOpen(false)}
+      />
 
-              <LiveEditable
-                selected={isSelected(selectedBlockIds, preview.blockIds.title)}
-                label="Edit headline"
-                onActivate={() => selectBlock(preview.blockIds.title)}
-              >
-                <h1 className="explore-article-hero__title">{preview.title}</h1>
-              </LiveEditable>
-
-              {preview.deck ? (
-                <LiveEditable
-                  selected={deckEditActive}
-                  label="Edit hero deck"
-                  onActivate={onSelectDeck}
-                >
-                  <p className="explore-article-hero__deck">{preview.deck}</p>
-                </LiveEditable>
-              ) : null}
-
-              <div className="explore-article-hero__meta pointer-events-none">
-                <img
-                  src={articleAuthorAvatar(slug || preview.title)}
-                  alt=""
-                  className="explore-article-hero__avatar"
-                />
-                <p className="explore-article-hero__byline">
-                  <span>
-                    By <strong>{authorName}</strong> (IOS)
-                  </span>
-                  <span className="explore-article-hero__dot" aria-hidden />
-                  <span>{readMinutes} min read</span>
-                </p>
-              </div>
-            </div>
-
-            <LiveAudioEditWrap
-              blockId={preview.blockIds.heroAudio}
-              selected={isSelected(selectedBlockIds, preview.blockIds.heroAudio)}
+      <div
+        className={cn(
+          'article-live-workspace article-canvas-board relative min-h-full w-full',
+          layersOpen && 'article-canvas-board--layers-open',
+        )}
+        style={canvasBackgroundStyle}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) onDeselectBlocks()
+        }}
+      >
+        <div
+          ref={stageRef}
+          className="article-canvas-board__stage min-h-full w-full"
+          style={canvasEffectsFilter}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          <ArticleCanvasArtifactLayer artifact={canvasArtifact} data={puckData} />
+          <article className="explore-article explore-article--editor-workspace relative z-[1]">
+          <header className="explore-article-hero">
+            {!heroImageHidden ? (
+            <LiveHeroImageEditWrap
+              blockId={heroBlockId}
+              selected={isSelected(selectedBlockIds, heroBlockId)}
               onSelect={selectBlock}
             >
-              <ArticleAudioWidget
-                title={preview.title}
-                streamUrl={preview.sessionAudio}
-                tracks={preview.sessionTracks}
-                sessionLabel={preview.sessionLabel}
-                variant="hero"
-                className="explore-article-hero__audio"
-              />
-            </LiveAudioEditWrap>
-          </div>
-        </header>
-
-        <LiveEditable
-          selected={isSelected(selectedBlockIds, preview.blockIds.lead)}
-          label="Edit intro"
-          onActivate={() => selectBlock(preview.blockIds.lead)}
-          className="explore-article-main explore-article-main--intro"
-        >
-          <section className="explore-article-intro">
-            <div
-              className="explore-article-intro__text"
-              dangerouslySetInnerHTML={{ __html: preview.introHtml }}
-            />
-            {preview.introImage ? (
               <LiveEditable
-                selected={isSelected(selectedBlockIds, preview.blockIds.images[0])}
-                label="Edit image"
-                onActivate={() => selectBlock(preview.blockIds.images[0])}
-                className="explore-article-intro__figure"
+                selected={isSelected(selectedBlockIds, heroBlockId)}
+                label="Replace image"
+                onActivate={() => selectBlock(heroBlockId)}
+                className="explore-article-hero__img-wrap"
               >
-                <img src={preview.introImage} alt="" loading="lazy" />
-                <span className="explore-article-intro__figure-grain" aria-hidden />
+                {heroImageUrl ? (
+                  <img
+                    key={heroImageUrl}
+                    src={heroImageUrl}
+                    alt=""
+                    className="explore-article-hero__img"
+                  />
+                ) : (
+                  <span className="explore-article-hero__img explore-article-hero__img--empty" aria-hidden />
+                )}
               </LiveEditable>
+            </LiveHeroImageEditWrap>
             ) : null}
-          </section>
-        </LiveEditable>
+            <div className="explore-article-hero__scrim" aria-hidden />
+            <div className="explore-article-hero__glow" aria-hidden />
+            <div className="explore-article-hero__grain" aria-hidden />
 
-        {preview.quote ? (
-          <LiveQuote
-            text={preview.quote.text}
-            attribution={preview.quote.attribution}
-            selected={isSelected(selectedBlockIds, preview.blockIds.quoteBody)}
-            onActivate={() => selectBlock(preview.blockIds.quoteBody)}
-          />
-        ) : null}
+            <div className="explore-article-hero__stage">
+              <div className="explore-article-hero__content">
+                <span className="explore-article-hero__tag">{preview.category}</span>
 
-        <div className="explore-article-main">
-          {preview.sections[0] ? (
-            <section className="explore-article-block">
-              <LiveEditable
-                selected={isSelected(selectedBlockIds, preview.sections[0].blockId)}
-                label="Edit section"
-                onActivate={() => selectBlock(preview.sections[0]?.blockId)}
-                className="explore-article-block__copy"
-              >
-                <span className="explore-article-block__num">{preview.sections[0].num}</span>
-                <h2 className="explore-article-block__title">{preview.sections[0].heading}</h2>
-                <div
-                  className="explore-article-body explore-article-block__body"
-                  dangerouslySetInnerHTML={{ __html: preview.sections[0].html }}
-                />
-                <LiveAudioEditWrap
-                  blockId={preview.blockIds.sectionAudios[0] ?? preview.blockIds.heroAudio}
-                  selected={isSelected(
-                    selectedBlockIds,
-                    preview.blockIds.sectionAudios[0] ?? preview.blockIds.heroAudio,
-                  )}
-                  onSelect={selectBlock}
-                >
-                  <ArticleAudioWidget
-                    title={preview.title}
-                    streamUrl={preview.sessionAudio}
-                    tracks={preview.sessionTracks}
-                    sessionLabel={preview.sessionLabel}
-                    variant="compact"
-                    className="explore-article-block__audio"
-                  />
-                </LiveAudioEditWrap>
-              </LiveEditable>
-              {preview.showSoundDna ? <LiveSoundDnaPanel rows={preview.soundDna} /> : null}
-            </section>
-          ) : null}
-
-          {preview.breakImage ? (
-            <LiveEditable
-              selected={isSelected(
-                selectedBlockIds,
-                preview.blockIds.images[1] ?? preview.blockIds.images[0],
-              )}
-              label="Edit break image"
-              onActivate={() => selectBlock(preview.blockIds.images[1] ?? preview.blockIds.images[0])}
-              className="explore-article-break"
-            >
-              <img src={preview.breakImage} alt="" loading="lazy" />
-              <span className="explore-article-break__grain" aria-hidden />
-            </LiveEditable>
-          ) : null}
-
-          {preview.sections[1] ? (
-            <section className="explore-article-block explore-article-block--reverse">
-              {preview.sectionImage ? (
+                {!heroTitleHidden ? (
                 <LiveEditable
-                  selected={isSelected(
-                    selectedBlockIds,
-                    preview.blockIds.images[2] ?? preview.blockIds.images[1],
-                  )}
-                  label="Edit section image"
-                  onActivate={() =>
-                    selectBlock(preview.blockIds.images[2] ?? preview.blockIds.images[1])
-                  }
-                  className="explore-article-block__figure"
+                  selected={isSelected(selectedBlockIds, preview.blockIds.title)}
+                  label="Edit headline"
+                  onActivate={() => selectBlock(preview.blockIds.title)}
                 >
-                  <img src={preview.sectionImage} alt="" loading="lazy" />
+                  <h1 className="explore-article-hero__title">{preview.title}</h1>
                 </LiveEditable>
-              ) : null}
-              <LiveEditable
-                selected={isSelected(selectedBlockIds, preview.sections[1].blockId)}
-                label="Edit section"
-                onActivate={() => selectBlock(preview.sections[1]?.blockId)}
-                className="explore-article-block__copy"
-              >
-                <span className="explore-article-block__num">{preview.sections[1].num}</span>
-                <h2 className="explore-article-block__title">{preview.sections[1].heading}</h2>
-                <div
-                  className="explore-article-body explore-article-block__body"
-                  dangerouslySetInnerHTML={{ __html: preview.sections[1].html }}
-                />
-                <LiveAudioEditWrap
-                  blockId={
-                    preview.blockIds.sectionAudios[1] ??
-                    preview.blockIds.sectionAudios[0] ??
-                    preview.blockIds.heroAudio
-                  }
-                  selected={isSelected(
-                    selectedBlockIds,
-                    preview.blockIds.sectionAudios[1] ??
-                      preview.blockIds.sectionAudios[0] ??
-                      preview.blockIds.heroAudio,
-                  )}
-                  onSelect={selectBlock}
-                >
-                  <ArticleAudioWidget
-                    title={`${preview.title} · Session`}
-                    streamUrl={preview.sessionAudio}
-                    tracks={preview.sessionTracks}
-                    sessionLabel={preview.sessionLabel}
-                    variant="compact"
-                    className="explore-article-block__audio"
+                ) : null}
+
+                {preview.deck ? (
+                  <LiveEditable
+                    selected={deckEditActive}
+                    label="Edit hero deck"
+                    onActivate={onSelectDeck}
+                  >
+                    <p className="explore-article-hero__deck">{preview.deck}</p>
+                  </LiveEditable>
+                ) : null}
+
+                <div className="explore-article-hero__meta pointer-events-none">
+                  <img
+                    src={articleAuthorAvatar(slug || preview.title)}
+                    alt=""
+                    className="explore-article-hero__avatar"
                   />
-                </LiveAudioEditWrap>
-              </LiveEditable>
-            </section>
-          ) : null}
+                  <p className="explore-article-hero__byline">
+                    <span>
+                      By <strong>{authorName}</strong> (IOS)
+                    </span>
+                    <span className="explore-article-hero__dot" aria-hidden />
+                    <span>{readMinutes} min read</span>
+                  </p>
+                </div>
+              </div>
+
+              {!heroAudioHidden ? (
+              <LiveAudioEditWrap
+                blockId={preview.blockIds.heroAudio}
+                selected={isSelected(selectedBlockIds, preview.blockIds.heroAudio)}
+                onSelect={selectBlock}
+              >
+                <ArticleAudioWidget
+                  title={preview.title}
+                  streamUrl={preview.sessionAudio}
+                  tracks={preview.sessionTracks}
+                  sessionLabel={preview.sessionLabel}
+                  variant="hero"
+                  className="explore-article-hero__audio"
+                />
+              </LiveAudioEditWrap>
+              ) : null}
+            </div>
+          </header>
+
+          <div className="explore-article-main article-live-flow-main">
+            <ArticleLiveSortableStack
+              puckData={puckData}
+              preview={preview}
+              heroBlockIds={heroBlockIds}
+              selectedBlockIds={selectedBlockIds}
+              onChange={onChange}
+              onSelectBlocks={onSelectBlocks}
+              showSoundDna={preview.showSoundDna}
+              soundDna={preview.soundDna}
+              soundDnaEditActive={soundDnaEditActive}
+              onSelectSoundDna={onSelectSoundDna}
+            />
+          </div>
+          </article>
+          <ArticleLiveFreeBlocksLayer
+            boardRef={stageRef}
+            data={puckData}
+            selectedBlockIds={selectedBlockIds}
+            onChange={onChange}
+            onSelectBlocks={onSelectBlocks}
+          />
         </div>
-      </article>
+        <ArticleCanvasEffectsOverlay effects={canvasEffects} />
+      </div>
     </div>
   )
 }

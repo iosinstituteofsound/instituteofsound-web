@@ -9,6 +9,13 @@ import {
   type CanvasBlockType,
 } from '@/modules/editor/types/article-canvas.types'
 import { TEXT_CANVAS_BLOCK_TYPES } from '@/modules/editor/types/article-canvas.types'
+import {
+  buildQuoteBodyHtml,
+  isQuoteBodyHtml,
+  parseQuoteFromBodyHtml,
+  stripBodyHtmlToPlain,
+  type BodyQuoteContent,
+} from '@/modules/editor/lib/quote-body-utils'
 
 export function createBlockId(): string {
   return `blk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
@@ -57,20 +64,74 @@ export function parseBlockStyle(raw: unknown): CanvasBlockStyle {
   return { ...DEFAULT_CANVAS_BLOCK_STYLE, ...style, effects }
 }
 
+function readLayoutNumber(value: unknown, fallback: number): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return fallback
+}
+
 export function parseBlockLayout(raw: unknown, type: CanvasBlockType, index: number): CanvasBlockLayout {
   const layout = (raw && typeof raw === 'object' ? raw : {}) as Partial<CanvasBlockLayout>
   const defaults = defaultLayoutForType(type, index)
   return {
-    x: typeof layout.x === 'number' ? layout.x : defaults.x,
-    y: typeof layout.y === 'number' ? layout.y : defaults.y,
-    width: typeof layout.width === 'number' ? layout.width : defaults.width,
-    zIndex: typeof layout.zIndex === 'number' ? layout.zIndex : index,
+    x: readLayoutNumber(layout.x, defaults.x),
+    y: readLayoutNumber(layout.y, defaults.y),
+    width: readLayoutNumber(layout.width, defaults.width),
+    zIndex: readLayoutNumber(layout.zIndex, index),
     sizing:
       layout.sizing === 'fixed' || layout.sizing === 'hug'
         ? layout.sizing
         : defaults.sizing ?? 'fixed',
+    placement: layout.placement === 'free' ? 'free' : 'flow',
     hidden: layout.hidden === true,
   }
+}
+
+export function isFreeCanvasBlock(block: Data['content'][number], index = 0): boolean {
+  const type = block.type as CanvasBlockType
+  const props = block.props as Record<string, unknown>
+  return parseBlockLayout(props.layout, type, index).placement === 'free'
+}
+
+export function getFreeCanvasBlocks(
+  data: Data,
+): Array<{ block: Data['content'][number]; blockId: string; index: number }> {
+  const normalized = ensureCanvasLayouts(data)
+  return normalized.content
+    .map((block, index) => ({
+      block,
+      blockId: String((block.props as Record<string, unknown>).blockId),
+      index,
+    }))
+    .filter(({ block, index }) => isFreeCanvasBlock(block, index))
+}
+
+export function addFreeCanvasBlockWithId(
+  data: Data,
+  type: CanvasBlockType,
+  position?: Partial<CanvasBlockLayout>,
+): { data: Data; blockId: string } {
+  return addCanvasBlockWithId(data, type, { ...position, placement: 'free' })
+}
+
+export function isCanvasBlockHidden(block: Data['content'][number], index = 0): boolean {
+  const type = block.type as CanvasBlockType
+  const props = block.props as Record<string, unknown>
+  return parseBlockLayout(props.layout, type, index).hidden === true
+}
+
+export function isCanvasBlockHiddenById(data: Data, blockId: string | undefined): boolean {
+  if (!blockId) return false
+
+  const index = data.content.findIndex(
+    (block) => String((block.props as Record<string, unknown>).blockId) === blockId,
+  )
+  if (index < 0) return false
+
+  return isCanvasBlockHidden(data.content[index]!, index)
 }
 
 export function createCanvasBlock(
@@ -162,6 +223,35 @@ export function sanitizeSelectedBlockIds(data: Data, selectedBlockIds: string[])
 }
 
 export function puckNeedsLayoutSync(data: Data): boolean {
+  const needsBlockMeta = data.content.some((block, index) => {
+    const props = block.props as Record<string, unknown>
+    const id = props.blockId
+    if (typeof id !== 'string' || !id.trim()) return true
+    if (!props.layout || typeof props.layout !== 'object') return true
+    if (!props.style || typeof props.style !== 'object') return true
+    const type = block.type as CanvasBlockType
+    const layout = props.layout as Partial<CanvasBlockLayout>
+    const defaults = defaultLayoutForType(type, index)
+    if (layout.x === undefined && layout.y === undefined) return true
+    if (
+      layout.x !== undefined &&
+      typeof layout.x !== 'number' &&
+      (typeof layout.x !== 'string' || Number.isNaN(Number(layout.x)))
+    ) {
+      return true
+    }
+    if (
+      layout.y !== undefined &&
+      typeof layout.y !== 'number' &&
+      (typeof layout.y !== 'string' || Number.isNaN(Number(layout.y)))
+    ) {
+      return true
+    }
+    void defaults
+    return false
+  })
+  if (needsBlockMeta) return true
+
   const ensured = ensureCanvasLayouts(data)
   if (data.content.length !== ensured.content.length) return true
 
@@ -202,7 +292,7 @@ export function updateCanvasBlock(
     ...data,
     content: data.content.map((block) => {
       const props = block.props as Record<string, unknown>
-      if (props.blockId !== blockId) return block
+      if (String(props.blockId) !== blockId) return block
       return { ...block, props: { ...props, ...patch } }
     }),
   }
@@ -217,7 +307,7 @@ export function updateCanvasBlockLayout(
     ...data,
     content: data.content.map((block) => {
       const props = block.props as Record<string, unknown>
-      if (props.blockId !== blockId) return block
+      if (String(props.blockId) !== blockId) return block
       const current = parseBlockLayout(props.layout, block.type as CanvasBlockType, 0)
       return {
         ...block,
@@ -239,7 +329,7 @@ export function updateCanvasBlockStyle(
     ...data,
     content: data.content.map((block) => {
       const props = block.props as Record<string, unknown>
-      if (props.blockId !== blockId) return block
+      if (String(props.blockId) !== blockId) return block
       const current = parseBlockStyle(props.style)
       return {
         ...block,
@@ -384,6 +474,27 @@ export function findBlockIndex(data: Data, blockId: string): number {
   return data.content.findIndex((block) => (block.props as Record<string, unknown>).blockId === blockId)
 }
 
+export function getBlockBodyQuote(block: Data['content'][number]): BodyQuoteContent | null {
+  if (block.type !== 'ArticleBody' && block.type !== 'ArticleLead') return null
+  const body = String((block.props as Record<string, unknown>).body ?? '')
+  if (!isQuoteBodyHtml(body)) return null
+  return parseQuoteFromBodyHtml(body).quote ?? { text: '', attribution: undefined }
+}
+
+export function getBlockSectionBody(block: Data['content'][number]): string {
+  if (block.type !== 'ArticleSection') return ''
+  const body = String((block.props as Record<string, unknown>).body ?? '')
+  return stripBodyHtmlToPlain(body)
+}
+
+export function setBlockSectionBody(data: Data, blockId: string, text: string): Data {
+  const block = data.content.find(
+    (item) => String((item.props as Record<string, unknown>).blockId) === blockId,
+  )
+  if (!block || block.type !== 'ArticleSection') return data
+  return patchBlockProps(data, blockId, { body: plainTextToBodyHtml(text) })
+}
+
 export function getBlockTextContent(block: Data['content'][number]): string {
   const props = block.props as Record<string, unknown>
   switch (block.type) {
@@ -392,15 +503,19 @@ export function getBlockTextContent(block: Data['content'][number]): string {
     case 'ArticleSection':
       return String(props.heading ?? '')
     case 'ArticleLead':
-    case 'ArticleBody':
-      return String(props.body ?? '')
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<\/p>\s*<p>/gi, '\n')
-        .replace(/<[^>]+>/g, '')
-        .replace(/&nbsp;/g, ' ')
+    case 'ArticleBody': {
+      const body = String(props.body ?? '')
+      const quote = parseQuoteFromBodyHtml(body).quote
+      if (quote) return quote.text
+      return stripBodyHtmlToPlain(body)
+    }
     default:
       return ''
   }
+}
+
+export function getBlockQuoteAttribution(block: Data['content'][number]): string {
+  return getBlockBodyQuote(block)?.attribution ?? ''
 }
 
 function escapeHtml(text: string): string {
@@ -417,13 +532,56 @@ function plainTextToBodyHtml(text: string): string {
   return lines.map((line) => `<p>${escapeHtml(line) || '<br>'}</p>`).join('')
 }
 
+export function setBlockQuoteContent(
+  data: Data,
+  blockId: string,
+  text: string,
+  attribution?: string,
+): Data {
+  const block = data.content.find(
+    (item) => String((item.props as Record<string, unknown>).blockId) === blockId,
+  )
+  if (!block || (block.type !== 'ArticleBody' && block.type !== 'ArticleLead')) return data
+
+  return patchBlockProps(data, blockId, {
+    body: buildQuoteBodyHtml(text, attribution),
+  })
+}
+
+function patchBlockProps(
+  data: Data,
+  blockId: string,
+  patch: Record<string, unknown>,
+): Data {
+  return {
+    ...data,
+    content: data.content.map((item) => {
+      const itemProps = item.props as Record<string, unknown>
+      if (String(itemProps.blockId) !== blockId) return item
+      return {
+        ...item,
+        props: {
+          ...itemProps,
+          ...patch,
+          layout: itemProps.layout,
+          style: itemProps.style,
+        },
+      }
+    }),
+  }
+}
+
 export function setBlockTextContent(
   data: Data,
   blockId: string,
   text: string,
 ): Data {
-  const block = data.content.find((item) => (item.props as Record<string, unknown>).blockId === blockId)
+  const block = data.content.find(
+    (item) => String((item.props as Record<string, unknown>).blockId) === blockId,
+  )
   if (!block) return data
+
+  const props = block.props as Record<string, unknown>
 
   const patch: Record<string, unknown> = (() => {
     switch (block.type) {
@@ -432,15 +590,21 @@ export function setBlockTextContent(
       case 'ArticleSection':
         return { heading: text }
       case 'ArticleLead':
-      case 'ArticleBody':
+      case 'ArticleBody': {
+        const body = String(props.body ?? '')
+        if (isQuoteBodyHtml(body)) {
+          const quote = parseQuoteFromBodyHtml(body).quote
+          return { body: buildQuoteBodyHtml(text, quote?.attribution) }
+        }
         return { body: plainTextToBodyHtml(text) }
+      }
       default:
         return {}
     }
   })()
 
   if (!Object.keys(patch).length) return data
-  return updateCanvasBlock(data, blockId, patch)
+  return patchBlockProps(data, blockId, patch)
 }
 
 export function duplicateCanvasBlock(data: Data, blockId: string): Data {

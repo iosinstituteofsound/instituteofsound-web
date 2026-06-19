@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { Data } from '@measured/puck'
 import { ensureCanvasLayouts, puckNeedsLayoutSync } from '@/modules/editor/lib/canvas-block-utils'
+import { withLiveWorkspace } from '@/modules/editor/lib/workspace-mode'
 import { useArticleCanvasHistory } from '@/modules/editor/hooks/use-article-canvas-history'
 import { sendKeepaliveDraftSave } from '@/modules/editor/lib/keepalive-draft-save'
 
@@ -36,10 +37,11 @@ export function useArticleEditor(articleId: string | undefined) {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const dirtyRef = useRef(false)
   const hydratingRef = useRef(false)
+  const skipNextHydrateRef = useRef(false)
   const bootstrapDraftRef = useRef(false)
-  const stateRef = useRef({ puckDocument, excerpt, resolvedId })
+  const stateRef = useRef({ puckDocument, excerpt, slug, resolvedId })
 
-  stateRef.current = { puckDocument, excerpt, resolvedId }
+  stateRef.current = { puckDocument, excerpt, slug, resolvedId }
 
   const { data: article, isLoading } = useQuery({
     queryKey: ['editor-article', articleId],
@@ -59,15 +61,29 @@ export function useArticleEditor(articleId: string | undefined) {
       setSlug(saved.slug)
       setSaveStatus('saved')
       dirtyRef.current = false
+      skipNextHydrateRef.current = true
       queryClient.setQueryData(['editor-article', saved.id], saved)
       void queryClient.invalidateQueries({ queryKey: ['editor-articles'] })
       if (!articleId && saved.id) {
         navigate(`/editor/write/${saved.id}`, { replace: true })
       }
     },
-    onError: () => {
+    onError: (error: unknown) => {
       setSaveStatus('error')
-      toast.error('Failed to save article')
+      const message =
+        error &&
+        typeof error === 'object' &&
+        'response' in error &&
+        error.response &&
+        typeof error.response === 'object' &&
+        'data' in error.response &&
+        error.response.data &&
+        typeof error.response.data === 'object' &&
+        'message' in error.response.data &&
+        typeof error.response.data.message === 'string'
+          ? error.response.data.message
+          : null
+      toast.error(message === 'Article slug already exists' ? 'That URL slug is already taken' : 'Failed to save article')
     },
   })
 
@@ -81,7 +97,7 @@ export function useArticleEditor(articleId: string | undefined) {
     void (async () => {
       try {
         setSaveStatus('saving')
-        const payload = buildArticleSavePayload(createEmptyPuckData(), '')
+        const payload = buildArticleSavePayload(createEmptyPuckData(), '', '')
         await persistRef.current({ payload })
       } catch {
         bootstrapDraftRef.current = false
@@ -105,10 +121,12 @@ export function useArticleEditor(articleId: string | undefined) {
       clearTimeout(saveTimerRef.current)
       saveTimerRef.current = null
     }
-    const payload = buildArticleSavePayload(puckDocument, excerpt)
+
+    const { puckDocument: doc, excerpt: ex, slug: currentSlug, resolvedId: id } = stateRef.current
+    const payload = buildArticleSavePayload(doc, ex, currentSlug)
     setSaveStatus('saving')
-    await persistMutation.mutateAsync({ id: resolvedId ?? undefined, payload })
-  }, [excerpt, persistMutation, puckDocument, resolvedId])
+    await persistMutation.mutateAsync({ id: id ?? undefined, payload })
+  }, [persistMutation])
 
   const flushIfDirty = useCallback(async () => {
     if (hydratingRef.current || !dirtyRef.current) return
@@ -149,6 +167,10 @@ export function useArticleEditor(articleId: string | undefined) {
   useEffect(() => {
     if (!article) return
     if (dirtyRef.current) return
+    if (skipNextHydrateRef.current) {
+      skipNextHydrateRef.current = false
+      return
+    }
 
     hydratingRef.current = true
     const doc = articleToPuckDocument(article)
@@ -185,8 +207,8 @@ export function useArticleEditor(articleId: string | undefined) {
       }
       if (hydratingRef.current || !dirtyRef.current) return
 
-      const { puckDocument: doc, excerpt: ex, resolvedId: id } = stateRef.current
-      const payload = buildArticleSavePayload(doc, ex)
+      const { puckDocument: doc, excerpt: ex, slug: currentSlug, resolvedId: id } = stateRef.current
+      const payload = buildArticleSavePayload(doc, ex, currentSlug)
       void persistRef.current({ id: id ?? undefined, payload })
     }
   }, [])
@@ -200,9 +222,9 @@ export function useArticleEditor(articleId: string | undefined) {
         saveTimerRef.current = null
       }
 
-      const { puckDocument: doc, excerpt: ex, resolvedId: id } = stateRef.current
+      const { puckDocument: doc, excerpt: ex, slug: currentSlug, resolvedId: id } = stateRef.current
       if (id) {
-        sendKeepaliveDraftSave(id, buildArticleSavePayload(doc, ex))
+        sendKeepaliveDraftSave(id, buildArticleSavePayload(doc, ex, currentSlug))
       }
 
       event.preventDefault()
@@ -224,14 +246,18 @@ export function useArticleEditor(articleId: string | undefined) {
   }, [articleId])
 
   const setPuckData = useCallback(
-    (data: Data) => {
+    (dataOrUpdater: Data | ((prev: Data) => Data)) => {
       setPuckDocument((prev) => {
         recordChangeRef.current(prev.puck)
-        const puck =
-          data.content === prev.puck.content && !puckNeedsLayoutSync(data)
-            ? data
-            : ensureCanvasLayouts(data)
-        return { ...prev, puck }
+        const nextData =
+          typeof dataOrUpdater === 'function' ? dataOrUpdater(prev.puck) : dataOrUpdater
+        const puck = puckNeedsLayoutSync(nextData) ? ensureCanvasLayouts(nextData) : nextData
+        const nextDoc = { ...prev, puck }
+        stateRef.current = {
+          ...stateRef.current,
+          puckDocument: nextDoc,
+        }
+        return nextDoc
       })
       scheduleSave()
     },
@@ -240,7 +266,14 @@ export function useArticleEditor(articleId: string | undefined) {
 
   const setMeta = useCallback(
     (patch: Partial<ArticlePuckDocument['meta']>) => {
-      setPuckDocument((prev) => ({ ...prev, meta: { ...prev.meta, ...patch } }))
+      setPuckDocument((prev) => {
+        const nextDoc = { ...prev, meta: { ...prev.meta, ...patch } }
+        stateRef.current = {
+          ...stateRef.current,
+          puckDocument: nextDoc,
+        }
+        return nextDoc
+      })
       scheduleSave()
     },
     [scheduleSave],
@@ -249,6 +282,22 @@ export function useArticleEditor(articleId: string | undefined) {
   const setExcerptField = useCallback(
     (value: string) => {
       setExcerpt(value)
+      stateRef.current = {
+        ...stateRef.current,
+        excerpt: value,
+      }
+      scheduleSave()
+    },
+    [scheduleSave],
+  )
+
+  const setSlugField = useCallback(
+    (value: string) => {
+      setSlug(value)
+      stateRef.current = {
+        ...stateRef.current,
+        slug: value,
+      }
       scheduleSave()
     },
     [scheduleSave],
@@ -264,7 +313,7 @@ export function useArticleEditor(articleId: string | undefined) {
       const nextDoc: ArticlePuckDocument = {
         version: document.version,
         puck: ensureCanvasLayouts(document.puck),
-        meta: { ...document.meta },
+        meta: withLiveWorkspace(document.meta),
       }
       const nextExcerpt = document.meta.seoDescription || ''
 
@@ -273,6 +322,7 @@ export function useArticleEditor(articleId: string | undefined) {
       stateRef.current = {
         puckDocument: nextDoc,
         excerpt: nextExcerpt,
+        slug: stateRef.current.slug,
         resolvedId: stateRef.current.resolvedId,
       }
 
@@ -284,7 +334,7 @@ export function useArticleEditor(articleId: string | undefined) {
       try {
         await persistMutation.mutateAsync({
           id: stateRef.current.resolvedId ?? undefined,
-          payload: buildArticleSavePayload(nextDoc, nextExcerpt),
+          payload: buildArticleSavePayload(nextDoc, nextExcerpt, stateRef.current.slug),
         })
         toast.success('Template applied to workspace')
       } catch {
@@ -301,13 +351,13 @@ export function useArticleEditor(articleId: string | undefined) {
     if (dirtyRef.current || !resolvedId) {
       const saved = await persistMutation.mutateAsync({
         id: resolvedId ?? undefined,
-        payload: buildArticleSavePayload(puckDocument, excerpt),
+        payload: buildArticleSavePayload(puckDocument, excerpt, slug),
       })
       await publishMutation.mutateAsync(saved.id)
       return
     }
     if (resolvedId) await publishMutation.mutateAsync(resolvedId)
-  }, [excerpt, persistMutation, publishMutation, puckDocument, resolvedId])
+  }, [excerpt, persistMutation, publishMutation, puckDocument, resolvedId, slug])
 
   const title = extractTitleFromPuck(puckDocument.puck)
   const puckData = useMemo(() => ensureCanvasLayouts(puckDocument.puck), [puckDocument])
@@ -326,6 +376,7 @@ export function useArticleEditor(articleId: string | undefined) {
     setPuckData,
     setMeta,
     setExcerpt: setExcerptField,
+    setSlug: setSlugField,
     loadTemplate,
     publish,
     saveNow: flushSave,

@@ -7,6 +7,7 @@ import {
 } from '@/modules/editor/api/editor.api'
 import { prepareTemplateForWorkspace } from '@/modules/editor/lib/apply-template-to-workspace'
 import { enrichTemplatePuckForWorkspace } from '@/modules/editor/lib/enrich-template-workspace'
+import { withLiveWorkspace } from '@/modules/editor/lib/workspace-mode'
 import {
   getSystemTemplateDocument,
   shouldUseWebTemplateFallback,
@@ -38,7 +39,11 @@ export function prepareSelectedTemplate(template: ArticleTemplateDto): ArticlePu
   if (!puck) return prepareTemplateForWorkspace(raw, template.id)
 
   const enriched = enrichTemplatePuckForWorkspace(puck, template.id, template.category)
-  return prepareTemplateForWorkspace({ ...raw, puck: enriched }, template.id)
+  const doc = prepareTemplateForWorkspace({ ...raw, puck: enriched }, template.id)
+  return {
+    ...doc,
+    meta: withLiveWorkspace(doc.meta),
+  }
 }
 
 export function useArticleTemplates() {

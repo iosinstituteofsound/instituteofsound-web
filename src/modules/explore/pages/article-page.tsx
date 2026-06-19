@@ -11,9 +11,13 @@ import {
   resolveArticleSessionAudio,
   resolveArticleSessionTracks,
   articleSessionLabel,
-  articleSoundDna,
   parseArticleContent,
 } from '@/modules/explore/lib/article-content'
+import {
+  buildDefaultSoundDnaRows,
+  readSoundDnaFromPuckMeta,
+  resolveVisibleSoundDna,
+} from '@/modules/editor/lib/sound-dna-utils'
 import {
   articleCategory,
   articleDate,
@@ -32,6 +36,7 @@ function ArticleQuote({
   attribution?: string
 }) {
   const lines = formatQuoteLines(text)
+  const displayLines = lines.length > 0 ? lines : ['']
 
   return (
     <figure className="explore-article-quote">
@@ -43,9 +48,9 @@ function ArticleQuote({
           </span>
           <div className="explore-article-quote__copy">
             <blockquote className="explore-article-quote__text">
-              {lines.map((line) => (
-                <span key={line} className="explore-article-quote__line">
-                  {line}
+              {displayLines.map((line, index) => (
+                <span key={`${index}-${line}`} className="explore-article-quote__line">
+                  {line || '\u00a0'}
                 </span>
               ))}
             </blockquote>
@@ -63,7 +68,14 @@ function ArticleQuote({
 }
 
 function SoundDnaPanel({ article }: { article: import('@/modules/explore/types/explore.types').ArticleDto }) {
-  const rows = articleSoundDna(article)
+  const fallback = buildDefaultSoundDnaRows(article)
+  const rows = resolveVisibleSoundDna(
+    { soundDna: readSoundDnaFromPuckMeta(article.puckData) },
+    fallback,
+  )
+
+  if (!rows.length) return null
+
   return (
     <aside className="explore-article-dna explore-ed-glass">
       <p className="explore-article-dna__kicker">Sound DNA</p>

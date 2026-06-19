@@ -519,6 +519,10 @@ export const router = createBrowserRouter([
       },
       {
         path: 'editor/drafts',
+        element: <Navigate to="/editor/published" replace />,
+      },
+      {
+        path: 'editor/published',
         element: (
           <ResourceGuard name="EditorDashboardPage">
             <Lazy>

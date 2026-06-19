@@ -24,6 +24,7 @@ import {
   updateCanvasBlock,
   updateCanvasBlocksStyle,
 } from '@/modules/editor/lib/canvas-block-utils'
+import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import type {
   BlendMode,
@@ -48,7 +49,7 @@ interface ArticleImageToolPanelProps {
   selectedBlockIds: string[]
   blockType: CanvasBlockType
   objectCount: number
-  onChange: (data: Data) => void
+  onChange: (data: Data | ((prev: Data) => Data)) => void
   onDeselect: () => void
 }
 
@@ -183,7 +184,9 @@ export function ArticleImageToolPanel({
     setReplacing(true)
     try {
       const uploaded = await uploadMediaFile(file, file.name)
-      onChange(updateCanvasBlock(data, primaryBlockId, { imageUrl: uploaded.url }))
+      const imageUrl = normalizeMediaUrl(uploaded.absoluteUrl ?? uploaded.url)
+      if (!imageUrl) return
+      onChange((current) => updateCanvasBlock(current, primaryBlockId, { imageUrl }))
     } finally {
       setReplacing(false)
     }

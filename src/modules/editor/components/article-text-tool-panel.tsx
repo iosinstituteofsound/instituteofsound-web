@@ -27,11 +27,16 @@ import { getFontLabel, resolveFontFamily } from '@/modules/editor/lib/article-fo
 import { fillSwatchClass } from '@/modules/editor/lib/canvas-style-to-css'
 import {
   duplicateCanvasBlock,
+  getBlockBodyQuote,
+  getBlockQuoteAttribution,
+  getBlockSectionBody,
   getBlockTextContent,
   parseBlockStyle,
   removeCanvasBlocks,
   reorderBlock,
   rotateBlockAngle,
+  setBlockQuoteContent,
+  setBlockSectionBody,
   setBlockTextContent,
   toggleBlocksEffect,
   updateCanvasBlocksStyle,
@@ -178,13 +183,24 @@ export function ArticleTextToolPanel({
 
   const style = parseBlockStyle((selectedBlock.props as Record<string, unknown>).style)
   const isText = isTextCanvasBlock(blockType)
-  const panelTitle = objectCount > 1 ? `Text (${objectCount})` : 'Text'
 
   const applyStyle = (patch: Partial<CanvasBlockStyle>) => {
     onChange(updateCanvasBlocksStyle(data, selectedBlockIds, patch))
   }
 
   const textContent = objectCount === 1 ? getBlockTextContent(selectedBlock) : ''
+  const sectionBody = objectCount === 1 ? getBlockSectionBody(selectedBlock) : ''
+  const quoteAttribution = objectCount === 1 ? getBlockQuoteAttribution(selectedBlock) : ''
+  const isQuoteBlock = objectCount === 1 && Boolean(getBlockBodyQuote(selectedBlock))
+  const isSectionBlock = blockType === 'ArticleSection'
+  const panelTitle =
+    objectCount > 1
+      ? `Text (${objectCount})`
+      : isQuoteBlock
+        ? 'Quote'
+        : isSectionBlock
+          ? 'Section'
+          : 'Text'
 
   return (
     <div className="article-text-tool article-edit-tool-panel">
@@ -250,20 +266,72 @@ export function ArticleTextToolPanel({
       {isText ? (
         <>
           {objectCount === 1 ? (
-            <textarea
-              value={textContent}
-              onChange={(e) => onChange(setBlockTextContent(data, primaryBlockId, e.target.value))}
-              onKeyDown={(e) => e.stopPropagation()}
-              rows={3}
-              className="article-text-tool__textarea"
-              placeholder="Type your text..."
-            />
+            isSectionBlock ? (
+              <div className="article-text-tool__section-fields">
+                <div className="article-text-tool__field">
+                  <Label className="article-text-tool__section-label">Heading</Label>
+                  <textarea
+                    value={textContent}
+                    onChange={(e) => onChange(setBlockTextContent(data, primaryBlockId, e.target.value))}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    rows={2}
+                    className="article-text-tool__textarea"
+                    placeholder="Section heading…"
+                  />
+                </div>
+                <div className="article-text-tool__field">
+                  <Label className="article-text-tool__section-label">Body text</Label>
+                  <textarea
+                    value={sectionBody}
+                    onChange={(e) => onChange(setBlockSectionBody(data, primaryBlockId, e.target.value))}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    rows={6}
+                    className="article-text-tool__textarea"
+                    placeholder="Section body copy…"
+                  />
+                </div>
+              </div>
+            ) : isQuoteBlock ? (
+              <div className="article-text-tool__quote-fields space-y-2">
+                <textarea
+                  value={textContent}
+                  onChange={(e) =>
+                    onChange(setBlockQuoteContent(data, primaryBlockId, e.target.value, quoteAttribution))
+                  }
+                  onKeyDown={(e) => e.stopPropagation()}
+                  rows={4}
+                  className="article-text-tool__textarea"
+                  placeholder="Quote text..."
+                />
+                <input
+                  type="text"
+                  value={quoteAttribution}
+                  onChange={(e) =>
+                    onChange(setBlockQuoteContent(data, primaryBlockId, textContent, e.target.value))
+                  }
+                  onKeyDown={(e) => e.stopPropagation()}
+                  className="article-text-tool__textarea h-8 px-2 text-xs"
+                  placeholder="Attribution (e.g. Static Artist)"
+                />
+              </div>
+            ) : (
+              <textarea
+                value={textContent}
+                onChange={(e) => onChange(setBlockTextContent(data, primaryBlockId, e.target.value))}
+                onKeyDown={(e) => e.stopPropagation()}
+                rows={3}
+                className="article-text-tool__textarea"
+                placeholder="Type your text..."
+              />
+            )
           ) : (
             <p className="px-2 py-1 text-xs text-muted-foreground">
               {objectCount} text objects — style changes apply to all selected.
             </p>
           )}
 
+          {!isQuoteBlock ? (
+          <>
           <div className="article-text-tool__font-row">
             <button
               type="button"
@@ -382,9 +450,13 @@ export function ArticleTextToolPanel({
               />
             ))}
           </div>
+          </>
+          ) : null}
         </>
       ) : null}
 
+      {!isQuoteBlock ? (
+      <>
       <div className="article-text-tool__checkbox-row">
         <label className="article-text-tool__checkbox">
           <Checkbox
@@ -534,6 +606,8 @@ export function ArticleTextToolPanel({
           Show more options
         </Button>
       )}
+      </>
+      ) : null}
       </div>
 
       {text2dOpen ? (

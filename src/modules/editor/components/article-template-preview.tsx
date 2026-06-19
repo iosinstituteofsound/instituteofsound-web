@@ -23,6 +23,7 @@ function TemplateQuotePreview({
   attribution?: string
 }) {
   const lines = formatTemplateQuoteLines(text)
+  const displayLines = lines.length > 0 ? lines : ['']
 
   return (
     <figure className="explore-article-quote">
@@ -34,9 +35,9 @@ function TemplateQuotePreview({
           </span>
           <div className="explore-article-quote__copy">
             <blockquote className="explore-article-quote__text">
-              {lines.map((line) => (
-                <span key={line} className="explore-article-quote__line">
-                  {line}
+              {displayLines.map((line, index) => (
+                <span key={`${index}-${line}`} className="explore-article-quote__line">
+                  {line || '\u00a0'}
                 </span>
               ))}
             </blockquote>

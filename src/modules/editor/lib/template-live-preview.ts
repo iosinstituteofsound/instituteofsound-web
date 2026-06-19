@@ -1,33 +1,15 @@
 import type { Data } from '@measured/puck'
 import type { ArticleSessionTrack, SoundDnaRow } from '@/modules/explore/lib/article-content'
-import { articleSoundDna } from '@/modules/explore/lib/article-content'
-import type { ArticleDto } from '@/modules/explore/types/explore.types'
 import {
   formatLiveQuoteLines,
   parseSessionTracks,
   resolvePuckLivePreview,
   type PuckLivePreviewModel,
 } from '@/modules/editor/lib/puck-live-preview'
+import { parseSoundDnaFields } from '@/modules/editor/lib/sound-dna-utils'
 import type { ArticleTemplateDto } from '@/modules/editor/types/article-template.types'
 
 export type TemplateLivePreviewModel = PuckLivePreviewModel
-
-function buildSoundDnaArticle(template: ArticleTemplateDto, title: string): ArticleDto {
-  const meta = (template.puckDocument.meta ?? {}) as Record<string, unknown>
-  const type = typeof meta.type === 'string' ? meta.type : template.category === 'review' ? 'review' : 'feature'
-
-  return {
-    id: template.id,
-    editorId: 'template',
-    type: type as ArticleDto['type'],
-    title,
-    slug: template.id,
-    excerpt: template.description,
-    bodyHtml: '',
-    status: 'draft',
-    isCoverStory: false,
-  }
-}
 
 export function resolveTemplateLivePreview(template: ArticleTemplateDto): TemplateLivePreviewModel {
   const metaRaw = (template.puckDocument.meta ?? {}) as Record<string, unknown>
@@ -46,6 +28,7 @@ export function resolveTemplateLivePreview(template: ArticleTemplateDto): Templa
     sessionLabel:
       (typeof metaRaw.sessionLabel === 'string' ? metaRaw.sessionLabel : '') ||
       (typeof template.puckDocument.sessionLabel === 'string' ? template.puckDocument.sessionLabel : 'Listen to the session'),
+    soundDna: parseSoundDnaFields(metaRaw.soundDna),
   }
 
   const puck = (template.puckDocument.puck ?? { root: { props: {} }, content: [] }) as Data
@@ -61,12 +44,10 @@ export function resolveTemplateLivePreview(template: ArticleTemplateDto): Templa
     seedId: template.id,
   })
 
-  const stub = buildSoundDnaArticle(template, model.title)
-
   return {
     ...model,
-    soundDna: articleSoundDna(stub),
-    showSoundDna: template.category === 'feature' || template.category === 'review',
+    showSoundDna:
+      (template.category === 'feature' || template.category === 'review') && model.soundDna.length > 0,
   }
 }
 

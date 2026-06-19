@@ -12,6 +12,7 @@ import {
   readCanvasBackground,
   updateCanvasBackground,
 } from '@/modules/editor/lib/canvas-background-utils'
+import { reorderPuckContentByIds } from '@/modules/editor/lib/reorder-puck-content'
 import { hasCustomCanvasBackground } from '@/modules/editor/types/article-canvas-background.types'
 import {
   hasCanvasArtifact,
@@ -161,6 +162,42 @@ export function buildCanvasStackLayers(data: Data): CanvasLayerEntry[] {
   return layers.sort((a, b) => b.zIndex - a.zIndex)
 }
 
+/** Layers in puck.content order (top of list = top of article). */
+export function buildCanvasContentOrderLayers(data: Data): CanvasLayerEntry[] {
+  const layers: CanvasLayerEntry[] = data.content.map((block, index) => {
+    const props = block.props as Record<string, unknown>
+    const blockId = String(props.blockId ?? `fallback-${index}`)
+    const type = block.type as CanvasBlockType
+    const layout = parseBlockLayout(props.layout, type, index)
+
+    return {
+      id: blockId,
+      kind: 'block' as const,
+      blockId,
+      label: getBlockLayerLabel(block),
+      zIndex: layout.zIndex ?? index,
+      visible: !layout.hidden,
+      locked: false,
+      ...getBlockThumbnail(block),
+    }
+  })
+
+  const artifact = readCanvasArtifact(data)
+  if (hasCanvasArtifact(artifact)) {
+    layers.push({
+      id: ARTIFACT_LAYER_ID,
+      kind: 'artifact',
+      label: 'BG Artifact',
+      zIndex: artifact.zIndex ?? 0,
+      thumbnail: 'artifact',
+      visible: !artifact.hidden,
+      locked: true,
+    })
+  }
+
+  return layers
+}
+
 export function resolveInitialArtifactZIndex(data: Data): number {
   if (!data.content.length) return 0
 
@@ -282,4 +319,24 @@ export function moveCanvasBlockLayer(
   direction: 'up' | 'down',
 ): Data {
   return moveCanvasStackLayer(data, blockId, direction)
+}
+
+export function moveCanvasContentLayer(
+  data: Data,
+  blockId: string,
+  direction: 'up' | 'down',
+): Data {
+  const ids = data.content.map((block, index) =>
+    String((block.props as Record<string, unknown>).blockId ?? `fallback-${index}`),
+  )
+  const index = ids.indexOf(blockId)
+  if (index < 0) return data
+
+  const targetIndex = direction === 'up' ? index - 1 : index + 1
+  if (targetIndex < 0 || targetIndex >= ids.length) return data
+
+  const nextIds = [...ids]
+  ;[nextIds[index], nextIds[targetIndex]] = [nextIds[targetIndex]!, nextIds[index]!]
+
+  return reorderPuckContentByIds(data, nextIds)
 }

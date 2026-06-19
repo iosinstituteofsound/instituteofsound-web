@@ -24,10 +24,10 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import { Loader } from '@/shared/components/feedback/loader'
 import { cn } from '@/shared/lib/cn'
 
-type EditorTab = 'write' | 'drafts' | 'wire' | 'submissions' | 'events'
+type EditorTab = 'write' | 'published' | 'wire' | 'submissions' | 'events'
 
 function resolveTab(pathname: string): EditorTab {
-  if (pathname.includes('/drafts')) return 'drafts'
+  if (pathname.includes('/published')) return 'published'
   if (pathname.includes('/wire')) return 'wire'
   if (pathname.includes('/submissions')) return 'submissions'
   if (pathname.includes('/events')) return 'events'
@@ -47,7 +47,19 @@ export function EditorDashboardPage() {
   const { data: drafts, isLoading: draftsLoading, refetch: refetchDrafts, isError: draftsError } = useQuery({
     queryKey: ['editor-articles', 'draft'],
     queryFn: () => listEditorArticles('draft'),
-    enabled: tab === 'drafts' || tab === 'write',
+    enabled: tab === 'write',
+    refetchOnMount: 'always',
+  })
+
+  const {
+    data: publishedArticles,
+    isLoading: publishedLoading,
+    refetch: refetchPublished,
+    isError: publishedError,
+  } = useQuery({
+    queryKey: ['editor-articles', 'published'],
+    queryFn: () => listEditorArticles('published'),
+    enabled: tab === 'published',
     refetchOnMount: 'always',
   })
 
@@ -58,10 +70,19 @@ export function EditorDashboardPage() {
   }, [draftsError])
 
   useEffect(() => {
-    if (tab === 'write' || tab === 'drafts') {
+    if (publishedError) {
+      toast.error('Could not load published articles')
+    }
+  }, [publishedError])
+
+  useEffect(() => {
+    if (tab === 'write') {
       void refetchDrafts()
     }
-  }, [location.pathname, refetchDrafts, tab])
+    if (tab === 'published') {
+      void refetchPublished()
+    }
+  }, [location.pathname, refetchDrafts, refetchPublished, tab])
 
   const { data: submissions, isLoading: subsLoading } = useQuery({
     queryKey: ['editor-submissions', submissionFilter],
@@ -131,17 +152,38 @@ export function EditorDashboardPage() {
         <PageTitle>Editor Desk</PageTitle>
       </PageHeader>
 
-      {tab === 'write' || tab === 'drafts' ? (
+      {tab === 'write' ? (
         <PageSection>
           <PageDescription>
             Start a new article or pick up where you left off. Drafts stay here on your desk.
           </PageDescription>
           {draftsLoading ? <Loader /> : null}
           <EditorDeskGrid
-            drafts={drafts ?? []}
+            articles={drafts ?? []}
+            variant="desk"
             onPublish={(id) => publishMutation.mutate(id)}
             onDelete={(id) => deleteMutation.mutate(id)}
             isPublishing={publishMutation.isPending}
+            isDeleting={deleteMutation.isPending}
+          />
+        </PageSection>
+      ) : null}
+
+      {tab === 'published' ? (
+        <PageSection>
+          <PageDescription>
+            Your live articles on Institute of Sound. Edit anytime or open the public page.
+          </PageDescription>
+          {publishedLoading ? <Loader /> : null}
+          {!publishedLoading && (publishedArticles ?? []).length === 0 ? (
+            <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+              No published articles yet. Publish a draft from Write to see it here.
+            </p>
+          ) : null}
+          <EditorDeskGrid
+            articles={publishedArticles ?? []}
+            variant="published"
+            onDelete={(id) => deleteMutation.mutate(id)}
             isDeleting={deleteMutation.isPending}
           />
         </PageSection>

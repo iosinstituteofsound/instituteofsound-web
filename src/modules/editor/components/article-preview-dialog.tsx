@@ -1,5 +1,8 @@
 import { Render } from '@measured/puck'
 import { Monitor, Smartphone, Tablet, X } from 'lucide-react'
+import { ArticleComposedArticlePreview } from '@/modules/editor/components/article-composed-article-preview'
+import { ArticleCanvasArtifactLayer } from '@/modules/editor/components/article-canvas-artifact-layer'
+import { ArticleCanvasEffectsOverlay } from '@/modules/editor/components/article-canvas-effects-overlay'
 import { articlePuckConfig } from '@/modules/editor/lib/article-puck-config'
 import {
   canvasBackgroundToStyle,
@@ -10,8 +13,8 @@ import {
   canvasEffectsFilterStyle,
   readCanvasEffects,
 } from '@/modules/editor/lib/canvas-effects-utils'
-import { ArticleCanvasArtifactLayer } from '@/modules/editor/components/article-canvas-artifact-layer'
-import { ArticleCanvasEffectsOverlay } from '@/modules/editor/components/article-canvas-effects-overlay'
+import type { ArticleWorkspaceMode } from '@/modules/editor/types/article-editor.types'
+import type { ArticleEditorMeta } from '@/modules/editor/types/article-editor.types'
 import type { Data } from '@measured/puck'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -22,13 +25,15 @@ import {
   DialogTitle,
 } from '@/shared/components/ui/dialog'
 import { cn } from '@/shared/lib/cn'
+import '@/modules/explore/styles/explore.css'
+import '@/modules/editor/styles/article-editor.css'
 
 export type PreviewDevice = 'desktop' | 'tablet' | 'mobile'
 
-const DEVICE_WIDTH: Record<PreviewDevice, string> = {
-  desktop: 'max-w-4xl',
-  tablet: 'max-w-2xl',
-  mobile: 'max-w-sm',
+const DEVICE_FRAME_CLASS: Record<PreviewDevice, string> = {
+  desktop: 'w-full',
+  tablet: 'w-full max-w-[768px]',
+  mobile: 'w-full max-w-[390px]',
 }
 
 interface ArticlePreviewDialogProps {
@@ -39,6 +44,10 @@ interface ArticlePreviewDialogProps {
   title: string
   excerpt: string
   authorName: string
+  slug: string
+  readMinutes: number
+  meta: ArticleEditorMeta
+  workspaceMode: ArticleWorkspaceMode
   puckData: Data
 }
 
@@ -50,8 +59,13 @@ export function ArticlePreviewDialog({
   title,
   excerpt,
   authorName,
+  slug,
+  readMinutes,
+  meta,
+  workspaceMode,
   puckData,
 }: ArticlePreviewDialogProps) {
+  const isLivePreview = workspaceMode === 'live'
   const canvasBackground = readCanvasBackground(puckData)
   const canvasBackgroundStyle = canvasBackground.hidden
     ? undefined
@@ -93,30 +107,48 @@ export function ArticlePreviewDialog({
           </div>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto bg-muted/20 p-6">
-          <div className={cn('mx-auto w-full transition-all', DEVICE_WIDTH[device])}>
-            <article
-              className="relative overflow-hidden rounded-2xl border border-border bg-background p-6 shadow-sm md:p-10"
-              style={canvasBackgroundStyle}
-            >
-              <div className="relative min-h-[12rem]" style={canvasEffectsFilter}>
-                <ArticleCanvasArtifactLayer artifact={canvasArtifact} data={puckData} />
-                <div className="relative z-[2]">
-                <header className="mb-8 space-y-3 border-b border-border pb-6">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">Preview</p>
-                  <h1 className="font-serif text-3xl font-bold leading-tight md:text-4xl">
-                    {title || 'Untitled article'}
-                  </h1>
-                  {excerpt ? <p className="text-muted-foreground">{excerpt}</p> : null}
-                  <p className="text-sm text-muted-foreground">By {authorName}</p>
-                </header>
-                <div className="article-editor-preview space-y-8">
-                  <Render config={articlePuckConfig} data={puckData} />
+        <div className="min-h-0 flex-1 overflow-y-auto bg-muted/20 p-4 md:p-6">
+          <div
+            className={cn(
+              'article-preview-dialog__device-frame mx-auto transition-[max-width] duration-200 ease-out',
+              DEVICE_FRAME_CLASS[device],
+              isLivePreview && 'article-preview-dialog__live-frame',
+            )}
+            data-preview-device={device}
+          >
+            {isLivePreview ? (
+              <ArticleComposedArticlePreview
+                puckData={puckData}
+                meta={meta}
+                excerpt={excerpt}
+                slug={slug}
+                authorName={authorName}
+                readMinutes={readMinutes}
+              />
+            ) : (
+              <article
+                className="relative overflow-hidden rounded-2xl border border-border bg-background p-6 shadow-sm md:p-10"
+                style={canvasBackgroundStyle}
+              >
+                <div className="relative min-h-[12rem]" style={canvasEffectsFilter}>
+                  <ArticleCanvasArtifactLayer artifact={canvasArtifact} data={puckData} />
+                  <div className="relative z-[2]">
+                    <header className="mb-8 space-y-3 border-b border-border pb-6">
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground">Preview</p>
+                      <h1 className="font-serif text-3xl font-bold leading-tight md:text-4xl">
+                        {title || 'Untitled article'}
+                      </h1>
+                      {excerpt ? <p className="text-muted-foreground">{excerpt}</p> : null}
+                      <p className="text-sm text-muted-foreground">By {authorName}</p>
+                    </header>
+                    <div className="article-editor-preview space-y-8">
+                      <Render config={articlePuckConfig} data={puckData} />
+                    </div>
+                  </div>
                 </div>
-                </div>
-              </div>
-              <ArticleCanvasEffectsOverlay effects={canvasEffects} />
-            </article>
+                <ArticleCanvasEffectsOverlay effects={canvasEffects} />
+              </article>
+            )}
           </div>
         </div>
       </DialogContent>

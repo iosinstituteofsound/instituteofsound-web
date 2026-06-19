@@ -47,7 +47,8 @@ export function ProfileEditorDraftsTab({ isOwnProfile }: ProfileEditorDraftsTabP
       </CardHeader>
       <CardContent>
         <EditorDeskGrid
-          drafts={data ?? []}
+          articles={data ?? []}
+          variant="desk"
           onPublish={(id) => publishMutation.mutate(id)}
           onDelete={(id) => deleteMutation.mutate(id)}
           isPublishing={publishMutation.isPending}

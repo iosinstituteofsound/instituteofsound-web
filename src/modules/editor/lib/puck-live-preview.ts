@@ -1,6 +1,5 @@
 import type { Data } from '@measured/puck'
 import {
-  articleSoundDna,
   formatQuoteLines,
   type ArticleSessionTrack,
   type SoundDnaRow,
@@ -10,8 +9,14 @@ import type { ArticleEditorMeta } from '@/modules/editor/types/article-editor.ty
 import {
   extractCoverUrl,
   extractGalleryUrls,
+  extractHeroImageUrl,
   extractTitleFromPuck,
 } from '@/modules/editor/lib/puck-to-html'
+import { parseQuoteFromBodyHtml } from '@/modules/editor/lib/quote-body-utils'
+import {
+  buildDefaultSoundDnaRows,
+  resolveVisibleSoundDna,
+} from '@/modules/editor/lib/sound-dna-utils'
 
 export interface PuckLiveBlockIds {
   title?: string
@@ -116,30 +121,6 @@ export function parseSessionTracks(raw: unknown, fallbackTitle: string): Article
           streamUrl: DEMO_SESSION_AUDIO,
         },
       ]
-}
-
-function parseQuoteFromHtml(html: string): {
-  quote?: { text: string; attribution?: string }
-  rest: string
-} {
-  if (typeof DOMParser === 'undefined') {
-    return { rest: html }
-  }
-
-  const doc = new DOMParser().parseFromString(html, 'text/html')
-  const blockquote = doc.body.querySelector('blockquote')
-  if (!blockquote) return { rest: html }
-
-  const cite = blockquote.querySelector('cite')?.textContent?.trim()
-  const clone = blockquote.cloneNode(true) as HTMLElement
-  clone.querySelector('cite')?.remove()
-  const text = clone.textContent?.trim() ?? ''
-  blockquote.remove()
-
-  return {
-    quote: text ? { text, attribution: cite } : undefined,
-    rest: doc.body.innerHTML.trim(),
-  }
 }
 
 function resolveDeck(
@@ -252,7 +233,7 @@ export function resolvePuckLivePreview(input: ResolvePuckLivePreviewInput): Puck
     if (block.type === 'ArticleBody') {
       if (id) blockIds.quoteBody = id
       const html = asHtml(props.body)
-      const parsed = parseQuoteFromHtml(html)
+      const parsed = parseQuoteFromBodyHtml(html)
       if (parsed.quote && !quote) quote = parsed.quote
       if (parsed.rest) bodyHtml += parsed.rest
       continue
@@ -289,7 +270,9 @@ export function resolvePuckLivePreview(input: ResolvePuckLivePreviewInput): Puck
   sessionLabel = sessionLabel || sessionMeta.sessionLabel
   if (sessionTracks.length === 0) sessionTracks = sessionMeta.sessionTracks
 
-  const coverUrl = heroUrl ?? gallery[0] ?? demoImg(seedId, 1400, 900)
+  const heroBlockId = blockIds.hero ?? blockIds.images[0]
+  const coverUrl =
+    extractHeroImageUrl(puck, heroBlockId) ?? heroUrl ?? gallery[0] ?? demoImg(seedId, 1400, 900)
   const inlineImages = gallery.filter((url) => url !== coverUrl)
   const introImage = inlineImages[0]
   const breakImage = inlineImages[1] ?? inlineImages[0]
@@ -330,6 +313,9 @@ export function resolvePuckLivePreview(input: ResolvePuckLivePreviewInput): Puck
     category === 'review'
 
   const articleType = (meta.type ?? categoryKey) as ArticleType | undefined
+  const soundDnaFallback = buildDefaultSoundDnaRows(
+    buildSoundDnaStub(title, slug, articleType, excerpt ?? ''),
+  )
 
   return {
     title,
@@ -346,7 +332,7 @@ export function resolvePuckLivePreview(input: ResolvePuckLivePreviewInput): Puck
     sessionLabel,
     sessionTracks,
     showSoundDna,
-    soundDna: articleSoundDna(buildSoundDnaStub(title, slug, articleType, excerpt ?? '')),
+    soundDna: resolveVisibleSoundDna(meta, soundDnaFallback),
     blockIds,
   }
 }

@@ -17,7 +17,7 @@ import {
 interface ArticleSelectedBlockToolsProps {
   data: Data
   selectedBlockIds: string[]
-  onChange: (data: Data) => void
+  onChange: (data: Data | ((prev: Data) => Data)) => void
   onDeselect: () => void
   imageUploading?: boolean
   mediaModalOpen?: boolean
