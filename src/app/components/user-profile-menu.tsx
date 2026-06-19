@@ -13,15 +13,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
+import { cn } from '@/shared/lib/cn'
+import '@/styles/user-profile-menu.css'
 
 function getInitials(name?: string) {
   if (!name?.trim()) return 'U'
@@ -50,59 +45,88 @@ export function UserProfileMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-9 w-9 rounded-full px-0">
+        <Button variant="ghost" className="profile-menu-trigger">
           <CroppedAvatar
             src={avatarDisplay.src}
             alt={user?.name ?? 'User'}
             crop={avatarDisplay.crop}
             fallback={getInitials(user?.name)}
-            className="h-8 w-8"
+            className="h-8 w-8 rounded-full"
             size={32}
           />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-2">
-            <div className="space-y-1">
-              <p className="truncate text-sm font-medium leading-none">{user?.name ?? 'User'}</p>
-              <p className="truncate text-xs text-muted-foreground">{user?.email ?? ''}</p>
+      <DropdownMenuContent
+        align="end"
+        sideOffset={8}
+        className="profile-menu z-50 p-0 shadow-none"
+      >
+        <div className="profile-menu__glow" aria-hidden />
+        <div className="profile-menu__inner">
+          <div className="profile-menu__header">
+            <div className="profile-menu__avatar-ring">
+              <CroppedAvatar
+                src={avatarDisplay.src}
+                alt=""
+                crop={avatarDisplay.crop}
+                fallback={getInitials(user?.name)}
+                className="profile-menu__avatar h-10 w-10"
+                size={40}
+              />
             </div>
-            <UserIdentityBadges className="flex-wrap gap-1.5" />
+            <div className="profile-menu__identity">
+              <p className="profile-menu__name">{user?.name ?? 'User'}</p>
+              <p className="profile-menu__email">{user?.email ?? ''}</p>
+            </div>
           </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link to={profilePath}>
-            <UserRound className="h-4 w-4" />
-            Profile
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <Sun className="h-4 w-4" />
-            Theme
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuRadioGroup value={mode} onValueChange={(value) => setMode(value as ThemeMode)}>
-              {themeOptions.map(({ value, label }) => (
-                <DropdownMenuRadioItem key={value} value={value}>
+
+          <UserIdentityBadges variant="menu" className="profile-menu__badges" />
+
+          <div className="profile-menu__divider" role="separator" />
+
+          <DropdownMenuItem asChild className="profile-menu__item">
+            <Link to={profilePath} className="flex w-full items-center gap-2.5">
+              <span className="profile-menu__item-icon">
+                <UserRound className="h-4 w-4" />
+              </span>
+              Profile
+            </Link>
+          </DropdownMenuItem>
+
+          <div className="profile-menu__divider" role="separator" />
+
+          <div>
+            <p className="profile-menu__section-label">Appearance</p>
+            <div className="profile-menu__theme" role="group" aria-label="Theme">
+              {themeOptions.map(({ value, label, icon: Icon }) => (
+                <button
+                  key={value}
+                  type="button"
+                  className="profile-menu__theme-btn"
+                  data-active={mode === value}
+                  aria-pressed={mode === value}
+                  onClick={() => setMode(value)}
+                >
+                  <Icon className="h-3.5 w-3.5" aria-hidden />
                   {label}
-                </DropdownMenuRadioItem>
+                </button>
               ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => logout.mutate()}
-          disabled={logout.isPending}
-          className="text-destructive focus:text-destructive"
-        >
-          <LogOut className="h-4 w-4" />
-          Sign out
-        </DropdownMenuItem>
+            </div>
+          </div>
+
+          <div className="profile-menu__divider" role="separator" />
+
+          <DropdownMenuItem
+            onClick={() => logout.mutate()}
+            disabled={logout.isPending}
+            className={cn('profile-menu__item profile-menu__signout')}
+          >
+            <span className="profile-menu__item-icon">
+              <LogOut className="h-4 w-4" />
+            </span>
+            Sign out
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   )
