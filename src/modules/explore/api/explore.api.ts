@@ -14,6 +14,8 @@ import type {
   WireCandidates,
   WirePickItem,
   DiscographyDto,
+  EditorialDeskDto,
+  EditorialPickDto,
 } from '@/modules/explore/types/explore.types'
 
 export async function getExplore() {
@@ -183,6 +185,21 @@ export async function getReleasesPage(params: {
 export async function getProfileDiscography(userId: string) {
   const { data } = await apiClient.get<ApiSuccessResponse<DiscographyDto>>(
     `${API_V1}/explore/discography/${userId}`,
+  )
+  return data.data
+}
+
+export async function getProfileEditorialDesk(userId: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<EditorialDeskDto>>(
+    `${API_V1}/explore/editorial-desk/${userId}`,
+  )
+  return data.data
+}
+
+export async function searchEditorialPickCandidates(query: string, limit = 20) {
+  const { data } = await apiClient.get<ApiSuccessResponse<EditorialPickDto[]>>(
+    `${API_V1}/editor/editorial-picks/search`,
+    { params: { q: query, limit } },
   )
   return data.data
 }

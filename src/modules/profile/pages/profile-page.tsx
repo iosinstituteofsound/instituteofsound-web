@@ -156,7 +156,9 @@ export function ProfilePage() {
             <ProfileArtistSubmissionsTab isOwnProfile={isOwnProfile} />
           ) : null}
 
-          {active?.panelKey === 'editorial' ? <ProfileEditorialTab isOwnProfile={isOwnProfile} /> : null}
+          {active?.panelKey === 'editorial' ? (
+            <ProfileEditorialTab user={user} isOwnProfile={isOwnProfile} />
+          ) : null}
 
           {active?.panelKey === 'editor-drafts' ? <ProfileEditorDraftsTab isOwnProfile={isOwnProfile} /> : null}
 

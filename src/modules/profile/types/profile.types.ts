@@ -4,6 +4,8 @@ export type UpdateProfileInput = {
   name?: string
   username?: string | null
   bio?: string | null
+  editorsNote?: string | null
+  editorPicks?: string[]
   avatarUrl?: string | null
   avatarThumbnailUrl?: string | null
   avatarCrop?: import('@/shared/types/auth.types').AvatarCrop | null
