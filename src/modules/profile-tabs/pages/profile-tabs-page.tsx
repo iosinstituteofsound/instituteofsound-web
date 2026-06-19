@@ -32,6 +32,7 @@ import {
 import type { ProfileTabDto, ProfileTabPanelKey } from '@/shared/types/profile-tabs.types'
 
 const PANEL_KEYS: Array<{ id: ProfileTabPanelKey; label: string }> = [
+  { id: 'overview', label: 'Overview (blank)' },
   { id: 'all', label: 'All' },
   { id: 'posts', label: 'Posts' },
   { id: 'about', label: 'About' },

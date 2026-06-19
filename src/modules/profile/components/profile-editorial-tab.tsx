@@ -1,59 +1,97 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { listEditorArticles } from '@/modules/explore/api/explore.api'
+import type { UserDto } from '@/shared/types/auth.types'
+import { EditorialInterviews } from '@/modules/profile/components/editorial-interviews'
+import { EditorialEditorsNote } from '@/modules/profile/components/editorial-editors-note'
+import { EditorialFeaturedStory } from '@/modules/profile/components/editorial-featured-story'
+import { EditorialLatestPublications } from '@/modules/profile/components/editorial-latest-publications'
+import { EditorialPicks } from '@/modules/profile/components/editorial-picks'
+import { EditorialPopularArticles } from '@/modules/profile/components/editorial-popular-articles'
+import { EditorialArticleCatalog } from '@/modules/profile/components/editorial-article-catalog'
 import { ProfileTabEmpty } from '@/modules/profile/components/profile-tab-empty'
-import { Badge } from '@/shared/components/ui/badge'
-import { Button } from '@/shared/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { useProfileEditorial } from '@/modules/profile/hooks/use-profile-editorial'
+import { enrichEditorialDesk } from '@/modules/profile/lib/editorial-desk-format'
 import { PageLoader } from '@/shared/components/feedback/loader'
+import { Button } from '@/shared/components/ui/button'
+import '@/modules/profile/styles/profile-editorial.css'
 
 type ProfileEditorialTabProps = {
-  isOwnProfile: boolean
+  user: UserDto
+  isOwnProfile?: boolean
 }
 
-export function ProfileEditorialTab({ isOwnProfile }: ProfileEditorialTabProps) {
-  const { data, isLoading } = useQuery({
-    queryKey: ['editor-articles', 'published'],
-    queryFn: () => listEditorArticles('published'),
-    enabled: isOwnProfile,
-  })
+export function ProfileEditorialTab({ user, isOwnProfile }: ProfileEditorialTabProps) {
+  const { data, isLoading, isError } = useProfileEditorial(user.id)
 
-  if (!isOwnProfile) {
-    return <ProfileTabEmpty message="Published editorial work is only visible on the editor's own profile." />
-  }
+  const desk = useMemo(() => (data ? enrichEditorialDesk(data) : null), [data])
 
   if (isLoading) return <PageLoader />
 
+  if (isError || !desk) {
+    return (
+      <ProfileTabEmpty message="Could not load editorial desk. Check your connection and try again." />
+    )
+  }
+
+  const hasContent =
+    desk.featuredStory ||
+    desk.popular.length > 0 ||
+    desk.picks.length > 0 ||
+    desk.interviews.length > 0 ||
+    desk.readingLists.length > 0 ||
+    desk.latest.length > 0
+
+  if (!hasContent) {
+    return (
+      <ProfileTabEmpty
+        message={
+          isOwnProfile
+            ? 'No published editorial yet. Open your desk to write and publish your first story.'
+            : 'No published editorial from this editor yet.'
+        }
+        action={
+          isOwnProfile ? (
+            <Button asChild size="sm" variant="outline">
+              <Link to="/editor">Open desk</Link>
+            </Button>
+          ) : undefined
+        }
+      />
+    )
+  }
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-        <CardTitle className="text-base">Published Editorial</CardTitle>
-        <Button asChild size="sm" variant="outline">
-          <Link to="/editor">Open desk</Link>
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {(data ?? []).length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">No published articles yet.</p>
-        ) : (
-          (data ?? []).map((article) => (
-            <div key={article.id} className="flex items-center justify-between gap-3 rounded-lg border p-4">
-              <div className="min-w-0">
-                <p className="truncate font-semibold">{article.title || 'Untitled'}</p>
-                <p className="truncate text-sm text-muted-foreground">{article.excerpt || article.type}</p>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <Badge variant="outline">Published</Badge>
-                {article.slug ? (
-                  <Button asChild size="sm" variant="ghost">
-                    <Link to={`/explore/articles/${article.slug}`}>View</Link>
-                  </Button>
-                ) : null}
-              </div>
-            </div>
-          ))
-        )}
-      </CardContent>
-    </Card>
+    <div className="profile-editorial">
+      <div className="profile-editorial__hero">
+        {desk.featuredStory ? (
+          <div className="profile-editorial__hero-featured">
+            <EditorialFeaturedStory article={desk.featuredStory} />
+          </div>
+        ) : null}
+        <div className="profile-editorial__hero-note">
+          <EditorialEditorsNote
+            note={desk.editorsNote}
+            editable={isOwnProfile}
+            userId={user.id}
+          />
+        </div>
+      </div>
+
+      <div className="profile-editorial__middle">
+        <div className="profile-editorial__middle-main">
+          <EditorialPopularArticles articles={desk.popular} />
+        </div>
+        <div className="profile-editorial__aside">
+          <EditorialPicks picks={desk.picks} editable={isOwnProfile} userId={user.id} />
+          <EditorialInterviews articles={desk.interviews} />
+        </div>
+      </div>
+
+      <div id="profile-ed-articles">
+        <EditorialArticleCatalog groups={desk.readingLists} />
+      </div>
+
+      <EditorialLatestPublications articles={desk.latest} />
+    </div>
   )
 }

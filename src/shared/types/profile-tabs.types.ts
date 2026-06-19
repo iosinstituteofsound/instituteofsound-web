@@ -1,4 +1,5 @@
 export type ProfileTabPanelKey =
+  | 'overview'
   | 'all'
   | 'posts'
   | 'about'

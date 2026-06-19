@@ -11,6 +11,7 @@ import { ProfileEditorDraftsTab } from '@/modules/profile/components/profile-edi
 import { ProfileEditorSubmissionsTab } from '@/modules/profile/components/profile-editor-submissions-tab'
 import { ProfileEditorWireTab } from '@/modules/profile/components/profile-editor-wire-tab'
 import { ProfileEditorialTab } from '@/modules/profile/components/profile-editorial-tab'
+import { ProfileLabelOverviewTab } from '@/modules/profile/components/profile-label-overview-tab'
 import { ProfilePostsPanel } from '@/modules/profile/components/profile-posts-panel'
 import { usePublicProfile } from '@/modules/profile/hooks/use-public-profile'
 import { useSlidingIndicator } from '@/modules/profile/lib/use-sliding-indicator'
@@ -152,6 +153,14 @@ export function ProfilePage() {
 
       <div className="py-4">
         <div key={activeTab} className="profile-tab-content">
+          {active?.panelKey === 'overview' ? (
+            <ProfileLabelOverviewTab
+              user={user}
+              isOwnProfile={isOwnProfile}
+              onNavigateToAbout={onNavigateToAbout}
+            />
+          ) : null}
+
           {active?.panelKey === 'all' ? (
             <ProfileAllTab user={user} isOwnProfile={isOwnProfile} onNavigateToAbout={onNavigateToAbout} onNavigateToPhotos={onNavigateToPhotos} />
           ) : null}
@@ -166,7 +175,9 @@ export function ProfilePage() {
             <ProfileArtistSubmissionsTab isOwnProfile={isOwnProfile} />
           ) : null}
 
-          {active?.panelKey === 'editorial' ? <ProfileEditorialTab isOwnProfile={isOwnProfile} /> : null}
+          {active?.panelKey === 'editorial' ? (
+            <ProfileEditorialTab user={user} isOwnProfile={isOwnProfile} />
+          ) : null}
 
           {active?.panelKey === 'editor-drafts' ? <ProfileEditorDraftsTab isOwnProfile={isOwnProfile} /> : null}
 

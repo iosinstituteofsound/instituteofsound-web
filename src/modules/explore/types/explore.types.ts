@@ -6,6 +6,7 @@ export type ArticleType = 'review' | 'single' | 'ep' | 'feature' | 'band_profile
 
 export interface ArticleDto {
   id: string
+  editorId?: string
   title: string
   slug: string
   type?: ArticleType
@@ -41,6 +42,33 @@ export interface LabelProfileDto {
   logoUrl?: string
   coverUrl?: string
   genres: string[]
+  featuredReleaseIds?: string[]
+  foundedYear?: number
+  founderName?: string
+  basedIn?: string
+}
+
+export interface LabelOverviewLabelDto extends LabelProfileDto {
+  foundedYear?: number
+  founderName?: string
+  basedIn?: string
+}
+
+export interface LabelOverviewStatsDto {
+  releases: number
+  artists: number
+  streams: number
+  countriesReach: number
+}
+
+export interface LabelOverviewDto {
+  label: LabelOverviewLabelDto
+  featuredReleases: ReleaseDto[]
+  artists: ArtistProfileDto[]
+  latestReleases: ReleaseDto[]
+  latestNews: ArticleDto[]
+  playlists: PlaylistDto[]
+  stats: LabelOverviewStatsDto
 }
 
 export type ReleaseType = 'single' | 'ep' | 'album'
@@ -166,6 +194,53 @@ export interface ListenerStatDto {
   dbScore: number
   totalPlays: number
   rank?: number
+}
+
+export interface EditorialPickDto {
+  id: string
+  title: string
+  genre: string
+  coverUrl?: string
+  slug?: string
+  kind?: 'article' | 'release'
+  releaseId?: string
+  action?: 'play' | 'view_release' | 'view_profile'
+  articleType?: ArticleType
+  releaseType?: ReleaseType
+  streamUrl?: string
+  artistName?: string
+}
+
+export interface EditorialReadingListDto {
+  id: string
+  title: string
+  slug: string
+  coverUrl?: string
+  articleCount: number
+  leadArticleSlug?: string
+}
+
+export interface EditorsNoteDto {
+  quote: string
+  signature: string
+  authorName: string
+}
+
+export interface EditorialPublicationDto extends ArticleDto {
+  editorId: string
+  editorName: string
+}
+
+export interface EditorialDeskDto {
+  editor: { name: string; avatarUrl?: string }
+  featuredStory: ArticleDto | null
+  editorsNote: EditorsNoteDto
+  popular: ArticleDto[]
+  picks: EditorialPickDto[]
+  pickCandidates: EditorialPickDto[]
+  interviews: ArticleDto[]
+  readingLists: EditorialReadingListDto[]
+  latest: EditorialPublicationDto[]
 }
 
 export interface ExplorePayload {

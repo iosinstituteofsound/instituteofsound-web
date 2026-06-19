@@ -97,6 +97,7 @@ export interface UserDto {
   linkUrl?: string
   username?: string
   bio?: string
+  editorsNote?: string
   aboutProfile?: AboutProfile
   isVerified?: boolean
   privacySettings?: PrivacySettings

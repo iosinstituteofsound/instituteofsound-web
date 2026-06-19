@@ -1,0 +1,410 @@
+/* Label overview — tactical stats HUD */
+
+@keyframes lbl-ov-numbers-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 6px var(--lbl-num-red);
+  }
+  50% {
+    opacity: 0.55;
+    box-shadow: 0 0 2px var(--lbl-num-red);
+  }
+}
+
+@keyframes lbl-ov-numbers-vinyl-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lbl-ov-numbers {
+  --lbl-num-red: var(--primary);
+  --lbl-num-red-dim: color-mix(in oklch, var(--lbl-num-red) 45%, transparent);
+  --lbl-num-red-glow: color-mix(in oklch, var(--lbl-num-red) 55%, transparent);
+  --lbl-num-panel: color-mix(in oklch, var(--background) 94%, var(--lbl-num-red) 6%);
+  --lbl-num-cell: color-mix(in oklch, var(--background) 88%, var(--lbl-num-red) 12%);
+  min-width: 0;
+  height: 100%;
+}
+
+.lbl-ov-numbers__chassis {
+  position: relative;
+  height: 100%;
+  min-height: 100%;
+  isolation: isolate;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklch, var(--lbl-num-red) 38%, var(--border));
+  background: var(--lbl-num-panel);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--foreground) 6%, transparent),
+    inset 0 0 48px color-mix(in oklch, var(--lbl-num-red) 8%, transparent),
+    0 0 24px color-mix(in oklch, var(--lbl-num-red) 12%, transparent),
+    0 0 1px color-mix(in oklch, var(--lbl-num-red) 40%, transparent);
+  overflow: hidden;
+}
+
+.lbl-ov-numbers__fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.lbl-ov-numbers__scanlines {
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0 2px,
+    color-mix(in oklch, var(--foreground) 18%, transparent) 2px 3px
+  );
+}
+
+.lbl-ov-numbers__grid-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(color-mix(in oklch, var(--lbl-num-red) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklch, var(--lbl-num-red) 8%, transparent) 1px, transparent 1px);
+  background-size: 20px 20px;
+  mask-image: linear-gradient(180deg, black 0%, black 70%, transparent 100%);
+}
+
+.lbl-ov-numbers__glow {
+  position: absolute;
+  inset: -30% -20%;
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in oklch, var(--lbl-num-red) 14%, transparent), transparent 38%),
+    radial-gradient(circle at 88% 100%, color-mix(in oklch, var(--lbl-num-red) 10%, transparent), transparent 42%);
+}
+
+.lbl-ov-numbers__bracket {
+  position: absolute;
+  width: 1.125rem;
+  height: 1.125rem;
+  pointer-events: none;
+  z-index: 3;
+  border-color: color-mix(in oklch, var(--foreground) 88%, var(--lbl-num-red));
+}
+
+.lbl-ov-numbers__bracket--tl {
+  top: 0.55rem;
+  left: 0.55rem;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+
+.lbl-ov-numbers__bracket--tr {
+  top: 0.55rem;
+  right: 0.55rem;
+  border-top: 2px solid;
+  border-right: 2px solid;
+}
+
+.lbl-ov-numbers__bracket--bl {
+  bottom: 0.55rem;
+  left: 0.55rem;
+  border-bottom: 2px solid;
+  border-left: 2px solid;
+}
+
+.lbl-ov-numbers__bracket--br {
+  bottom: 0.55rem;
+  right: 0.55rem;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
+
+.lbl-ov-numbers__body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+  padding: 0.85rem 0.9rem 0.9rem;
+}
+
+.lbl-ov-numbers__topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.lbl-ov-numbers__module-id {
+  flex-shrink: 0;
+  padding: 0.28rem 0.42rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 35%, var(--border));
+  border-radius: 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--foreground) 72%, var(--muted-foreground));
+  background: color-mix(in oklch, var(--background) 60%, transparent);
+}
+
+.lbl-ov-numbers__live {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.lbl-ov-numbers__live-bracket {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-top: 2px solid color-mix(in oklch, var(--foreground) 88%, var(--lbl-num-red));
+  border-right: 2px solid color-mix(in oklch, var(--foreground) 88%, var(--lbl-num-red));
+}
+
+.lbl-ov-numbers__live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lbl-num-red);
+}
+
+.lbl-ov-numbers__live-dot {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: var(--lbl-num-red);
+  animation: lbl-ov-numbers-live-pulse 2.2s ease-in-out infinite;
+}
+
+.lbl-ov-numbers__title {
+  margin: 0;
+  font-family: var(--font-display, var(--font-sans));
+  font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+.lbl-ov-numbers__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.lbl-ov-numbers__stat {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-items: center;
+  min-height: 4.75rem;
+  padding: 0.45rem 0.4rem 0.42rem;
+  border: 1px solid color-mix(in oklch, var(--lbl-num-red) 32%, var(--border));
+  border-radius: 0.45rem;
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in oklch, var(--lbl-num-cell) 80%, transparent) 0%,
+      color-mix(in oklch, var(--background) 92%, var(--lbl-num-red) 8%) 100%
+    );
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--foreground) 4%, transparent);
+}
+
+.lbl-ov-numbers__stat-code {
+  align-self: start;
+  font-family: var(--font-mono);
+  font-size: 0.4375rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--foreground) 42%, var(--muted-foreground));
+}
+
+.lbl-ov-numbers__stat-value {
+  margin: 0;
+  justify-self: center;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-display, var(--font-sans));
+  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+  text-shadow: 0 0 20px color-mix(in oklch, var(--lbl-num-red-glow) 35%, transparent);
+}
+
+.lbl-ov-numbers__stat-label {
+  margin: 0;
+  align-self: end;
+  font-family: var(--font-mono);
+  font-size: 0.4375rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--foreground) 46%, var(--muted-foreground));
+}
+
+.lbl-ov-numbers__cta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 1;
+  min-height: 7.25rem;
+  margin-top: 0.15rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px dashed color-mix(in oklch, var(--lbl-num-red) 58%, var(--border));
+  border-radius: 0.55rem;
+  background: color-mix(in oklch, var(--background) 82%, var(--lbl-num-red) 18%);
+  overflow: hidden;
+}
+
+.lbl-ov-numbers__cta-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.42rem;
+  max-width: 12.5rem;
+}
+
+.lbl-ov-numbers__cta-title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lbl-num-red);
+}
+
+.lbl-ov-numbers__cta-text {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: color-mix(in oklch, var(--foreground) 78%, var(--muted-foreground));
+}
+
+.lbl-ov-numbers__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
+  margin-top: 0.15rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 62%, var(--border));
+  border-radius: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  background: transparent;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.lbl-ov-numbers__cta-btn:hover {
+  border-color: var(--lbl-num-red);
+  color: var(--lbl-num-red);
+  box-shadow: 0 0 14px color-mix(in oklch, var(--lbl-num-red) 25%, transparent);
+}
+
+.lbl-ov-numbers__vinyl {
+  position: absolute;
+  right: -1.35rem;
+  bottom: -1.55rem;
+  width: 7rem;
+  height: 7rem;
+  pointer-events: none;
+}
+
+.lbl-ov-numbers__vinyl-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--foreground) 10%, transparent);
+  box-shadow: 0 0 28px color-mix(in oklch, var(--lbl-num-red) 22%, transparent);
+}
+
+.lbl-ov-numbers__vinyl-disc {
+  position: absolute;
+  inset: 0.15rem;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 16%, #0a0a0a 17%, #111 68%),
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0 2px,
+      color-mix(in oklch, var(--foreground) 7%, transparent) 2px 3px
+    );
+  animation: lbl-ov-numbers-vinyl-spin 28s linear infinite;
+}
+
+.lbl-ov-numbers__vinyl-hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: var(--lbl-num-red);
+  transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 16px color-mix(in oklch, var(--lbl-num-red) 70%, transparent),
+    inset 0 0 0 3px color-mix(in oklch, var(--background) 50%, black);
+}
+
+@media (max-width: 1023px) {
+  .lbl-ov-numbers__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lbl-ov-numbers__stat {
+    min-height: 4.25rem;
+  }
+
+  .lbl-ov-numbers__stat-value {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .lbl-ov-numbers__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lbl-ov-numbers__title {
+    font-size: 1.1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lbl-ov-numbers__chassis {
+    margin-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lbl-ov-numbers__live-dot,
+  .lbl-ov-numbers__vinyl-disc {
+    animation: none;
+  }
+}

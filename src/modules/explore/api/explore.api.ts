@@ -14,6 +14,10 @@ import type {
   WireCandidates,
   WirePickItem,
   DiscographyDto,
+  EditorialDeskDto,
+  EditorialPickDto,
+  LabelOverviewDto,
+  ReleaseDto,
 } from '@/modules/explore/types/explore.types'
 
 export async function getExplore() {
@@ -128,10 +132,28 @@ export async function getLabelProfile() {
   return data.data
 }
 
-export async function updateLabelProfile(input: Record<string, unknown>) {
+export async function updateLabelProfile(input: {
+  displayName?: string
+  bio?: string
+  logoUrl?: string
+  coverUrl?: string
+  genres?: string[]
+  featuredReleaseIds?: string[]
+  foundedYear?: number | null
+  founderName?: string | null
+  basedIn?: string | null
+}) {
   const { data } = await apiClient.patch<ApiSuccessResponse<LabelProfileDto>>(
     `${API_V1}/label/profile`,
     input,
+  )
+  return data.data
+}
+
+export async function searchLabelFeaturedReleases(query: string, limit = 20) {
+  const { data } = await apiClient.get<ApiSuccessResponse<ReleaseDto[]>>(
+    `${API_V1}/label/featured-releases/search`,
+    { params: { q: query, limit } },
   )
   return data.data
 }
@@ -183,6 +205,28 @@ export async function getReleasesPage(params: {
 export async function getProfileDiscography(userId: string) {
   const { data } = await apiClient.get<ApiSuccessResponse<DiscographyDto>>(
     `${API_V1}/explore/discography/${userId}`,
+  )
+  return data.data
+}
+
+export async function getProfileEditorialDesk(userId: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<EditorialDeskDto>>(
+    `${API_V1}/explore/editorial-desk/${userId}`,
+  )
+  return data.data
+}
+
+export async function getProfileLabelOverview(userId: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<LabelOverviewDto | null>>(
+    `${API_V1}/explore/label-overview/${userId}`,
+  )
+  return data.data
+}
+
+export async function searchEditorialPickCandidates(query: string, limit = 20) {
+  const { data } = await apiClient.get<ApiSuccessResponse<EditorialPickDto[]>>(
+    `${API_V1}/editor/editorial-picks/search`,
+    { params: { q: query, limit } },
   )
   return data.data
 }
