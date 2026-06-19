@@ -1,6 +1,6 @@
 import type { ReleaseDto } from '@/modules/explore/types/explore.types'
 import { ReleasesGridCard } from '@/modules/explore/components/releases-grid-card'
-import { fillSinglesPreview } from '@/modules/profile/lib/discography-format'
+import { fillSinglesPreview, isSinglePreviewRelease } from '@/modules/profile/lib/discography-format'
 import '@/modules/explore/styles/releases-page.css'
 import '@/modules/profile/styles/disc-catalog-sections.css'
 
@@ -26,9 +26,15 @@ export function DiscographySinglesSection({ releases, artistName }: DiscographyS
 
       <div className="disc-singles__catalog releases-page releases-page--embed">
         <div className="releases-page__grid disc-catalog__grid">
-          {items.map((release) => (
-            <ReleasesGridCard key={release.id} release={release} className="disc-catalog__card" />
-          ))}
+          {items.map((release) =>
+            isSinglePreviewRelease(release.id) ? (
+              <div key={release.id} className="disc-catalog__card disc-catalog__card--preview">
+                <ReleasesGridCard release={release} className="pointer-events-none" />
+              </div>
+            ) : (
+              <ReleasesGridCard key={release.id} release={release} className="disc-catalog__card" />
+            ),
+          )}
         </div>
       </div>
     </section>

@@ -1,17 +1,69 @@
-import { Link } from 'react-router-dom'
+import { useMemo } from 'react'
 import type { ReleaseDto } from '@/modules/explore/types/explore.types'
 import { releaseInitials } from '@/modules/explore/lib/release-meta'
-import { formatDiscographyPlays, fillPopularPreview, isPopularPreviewRelease } from '@/modules/profile/lib/discography-format'
+import type { PlayerTrack } from '@/modules/player/types/player.types'
+import { usePlayerStore } from '@/modules/player/stores/player-store'
+import {
+  formatDiscographyPlays,
+  fillPopularPreview,
+  isPopularPreviewRelease,
+} from '@/modules/profile/lib/discography-format'
+import { cn } from '@/shared/lib/cn'
 import '@/modules/profile/styles/disc-device-panel.css'
 
 type DiscographyPopularListProps = {
   releases: ReleaseDto[]
+  artistName?: string
 }
 
-export function DiscographyPopularList({ releases }: DiscographyPopularListProps) {
-  if (releases.length === 0) return null
+const DEMO_STREAM_URLS = [
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+] as const
+
+function releaseStreamUrl(release: ReleaseDto, index: number): string | undefined {
+  if (release.streamUrl) return release.streamUrl
+  if (isPopularPreviewRelease(release.id)) {
+    return DEMO_STREAM_URLS[index % DEMO_STREAM_URLS.length]
+  }
+  return undefined
+}
+
+function popularReleasesToPlayerQueue(releases: ReleaseDto[], artistName?: string): PlayerTrack[] {
+  return releases.flatMap((release, index) => {
+    const audioUrl = releaseStreamUrl(release, index)
+    if (!audioUrl) return []
+
+    return [
+      {
+        id: release.id,
+        title: release.title,
+        artist: release.artistName ?? artistName ?? 'Unknown',
+        audioUrl,
+        artworkUrl: release.coverUrl,
+      },
+    ]
+  })
+}
+
+export function DiscographyPopularList({ releases, artistName }: DiscographyPopularListProps) {
+  const playTrack = usePlayerStore((s) => s.playTrack)
+  const currentTrack = usePlayerStore((s) => s.currentTrack)
 
   const tracks = fillPopularPreview(releases)
+  const queue = useMemo(() => popularReleasesToPlayerQueue(tracks, artistName), [tracks, artistName])
+
+  if (tracks.length === 0) return null
+
+  const onPlay = (release: ReleaseDto) => {
+    const queueIndex = queue.findIndex((track) => track.id === release.id)
+    if (queueIndex < 0) return
+    playTrack(queue[queueIndex]!, { queue, queueIndex })
+  }
 
   return (
     <section className="disc-dev disc-dev--matrix" aria-labelledby="discography-popular-heading">
@@ -48,41 +100,46 @@ export function DiscographyPopularList({ releases }: DiscographyPopularListProps
 
           <ol className="disc-dev__tracks">
             {tracks.map((release, index) => {
+              const playable = queue.some((track) => track.id === release.id)
+              const active = currentTrack?.id === release.id
               const preview = isPopularPreviewRelease(release.id)
-              const row = (
-                <>
-                  <span className="disc-dev__track-rank">{String(index + 1).padStart(2, '0')}</span>
-                  {release.coverUrl ? (
-                    <img
-                      src={release.coverUrl}
-                      alt=""
-                      className="disc-dev__track-thumb"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span className="disc-dev__track-thumb disc-dev__track-thumb--fallback" aria-hidden>
-                      {releaseInitials(release.title)}
-                    </span>
-                  )}
-                  <span className="disc-dev__track-name">{release.title}</span>
-                  <span className="disc-dev__track-stat">
-                    <span className="disc-dev__track-stat-value">
-                      {formatDiscographyPlays(release.playCount)}
-                    </span>
-                    <span className="disc-dev__track-stat-label">streams</span>
-                  </span>
-                </>
-              )
 
               return (
                 <li key={release.id} className="disc-dev__track">
-                  {preview ? (
-                    <div className="disc-dev__track-link disc-dev__track-link--preview">{row}</div>
-                  ) : (
-                    <Link to={`/releases/${release.id}`} className="disc-dev__track-link">
-                      {row}
-                    </Link>
-                  )}
+                  <button
+                    type="button"
+                    className={cn(
+                      'disc-dev__track-link',
+                      preview && 'disc-dev__track-link--preview',
+                      active && 'disc-dev__track-link--active',
+                      !playable && 'disc-dev__track-link--disabled',
+                    )}
+                    onClick={() => onPlay(release)}
+                    disabled={!playable}
+                    aria-label={`Play ${release.title}`}
+                    aria-current={active ? 'true' : undefined}
+                  >
+                    <span className="disc-dev__track-rank">{String(index + 1).padStart(2, '0')}</span>
+                    {release.coverUrl ? (
+                      <img
+                        src={release.coverUrl}
+                        alt=""
+                        className="disc-dev__track-thumb"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="disc-dev__track-thumb disc-dev__track-thumb--fallback" aria-hidden>
+                        {releaseInitials(release.title)}
+                      </span>
+                    )}
+                    <span className="disc-dev__track-name">{release.title}</span>
+                    <span className="disc-dev__track-stat">
+                      <span className="disc-dev__track-stat-value">
+                        {formatDiscographyPlays(release.playCount)}
+                      </span>
+                      <span className="disc-dev__track-stat-label">streams</span>
+                    </span>
+                  </button>
                 </li>
               )
             })}

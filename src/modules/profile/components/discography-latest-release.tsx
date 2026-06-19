@@ -5,6 +5,7 @@ import type { ReleaseDto } from '@/modules/explore/types/explore.types'
 import {
   discographyReleaseDate,
   discographyReleaseType,
+  isLatestPreviewRelease,
 } from '@/modules/profile/lib/discography-format'
 import '@/modules/explore/styles/release-vinyl-art.css'
 import '@/modules/explore/styles/explore.css'
@@ -22,9 +23,19 @@ function splitTitle(title: string) {
 
 export function DiscographyLatestRelease({ release }: DiscographyLatestReleaseProps) {
   const { lead, rest } = splitTitle(release.title)
+  const preview = isLatestPreviewRelease(release.id)
+
+  const titleContent = (
+    <>
+      <span className="disc-spot__title-line">{lead}</span>
+      {rest ? (
+        <span className="disc-spot__title-line disc-spot__title-line--accent">{rest}</span>
+      ) : null}
+    </>
+  )
 
   return (
-    <section className="disc-spot" aria-labelledby="disc-spot-heading">
+    <section className={`disc-spot${preview ? ' disc-spot--preview' : ''}`} aria-labelledby="disc-spot-heading">
       <span className="disc-spot__wash" aria-hidden />
 
       <div className="disc-spot__stage">
@@ -41,20 +52,19 @@ export function DiscographyLatestRelease({ release }: DiscographyLatestReleasePr
 
         <div className="disc-spot__copy">
           <span className="disc-spot__watermark" aria-hidden>
-            NEW
+            {preview ? 'DEMO' : 'NEW'}
           </span>
 
           <p id="disc-spot-heading" className="disc-spot__label ios-mh-kicker">
-            Latest release
+            {preview ? 'Latest release · sample slot' : 'Latest release'}
           </p>
 
           <h2 className="disc-spot__title">
-            <Link to={`/releases/${release.id}`}>
-              <span className="disc-spot__title-line">{lead}</span>
-              {rest ? (
-                <span className="disc-spot__title-line disc-spot__title-line--accent">{rest}</span>
-              ) : null}
-            </Link>
+            {preview ? (
+              <span>{titleContent}</span>
+            ) : (
+              <Link to={`/releases/${release.id}`}>{titleContent}</Link>
+            )}
           </h2>
 
           <div className="disc-spot__meta">
@@ -81,12 +91,14 @@ export function DiscographyLatestRelease({ release }: DiscographyLatestReleasePr
                 Listen
               </a>
             ) : null}
-            <Link
-              to={`/releases/${release.id}`}
-              className="disc-spot__btn ios-mh-btn ios-mh-btn--line"
-            >
-              View release
-            </Link>
+            {!preview ? (
+              <Link
+                to={`/releases/${release.id}`}
+                className="disc-spot__btn ios-mh-btn ios-mh-btn--line"
+              >
+                View release
+              </Link>
+            ) : null}
           </div>
         </div>
       </div>

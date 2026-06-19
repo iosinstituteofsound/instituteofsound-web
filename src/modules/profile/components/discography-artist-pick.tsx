@@ -93,7 +93,9 @@ export function DiscographyArtistPick({
 
           {!pick ? (
             <div className="disc-dev__viewport-empty">
-              {editable ? 'Select a track to broadcast.' : 'No artist pick yet.'}
+              {editable
+                ? 'Your featured release will appear here. Publish tracks to set your artist pick.'
+                : 'No artist pick yet.'}
             </div>
           ) : (
             <Link to={`/releases/${pick.id}`} className="disc-dev__viewport-link">

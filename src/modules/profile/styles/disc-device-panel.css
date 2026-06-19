@@ -216,6 +216,14 @@
   left: 0.45rem;
 }
 
+.disc-dev--pick .disc-dev__footer {
+  margin-top: 0;
+}
+
+.disc-dev--telemetry .disc-dev__footer {
+  margin-top: 0;
+}
+
 /* ── Header bar ── */
 
 .disc-dev__header {
@@ -494,15 +502,48 @@
   padding: 0;
 }
 
-/* Matrix panel — 10 tracks visible, no internal scroll */
+/* Matrix panel — tracks fill rack height (aligned with artist metrics column) */
 
 .disc-dev--matrix .disc-dev__screen {
   overflow: visible;
   max-height: none;
+  margin-bottom: 0;
 }
 
 .disc-dev__track-link--preview {
-  cursor: default;
+  cursor: pointer;
+}
+
+.disc-dev__track-link {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+.disc-dev__track-link--active {
+  background: color-mix(in oklch, var(--dev-accent) 12%, transparent) !important;
+  box-shadow: inset 0 0 24px color-mix(in oklch, var(--dev-accent) 8%, transparent);
+}
+
+.disc-dev__track-link--active::before {
+  opacity: 1 !important;
+}
+
+.disc-dev__track-link--active .disc-dev__track-rank {
+  color: var(--dev-neon);
+  text-shadow: 0 0 10px var(--dev-glow);
+}
+
+.disc-dev__track-link--disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.disc-dev__track-link--disabled:hover {
+  background: transparent;
+  box-shadow: none;
 }
 
 /* ── Popular tracks ── */
@@ -895,10 +936,6 @@
   );
 }
 
-.disc-dev--pick .disc-dev__footer {
-  margin-top: 0;
-}
-
 .disc-dev__footer-tag {
   font-family: var(--font-mono);
   font-size: 0.48rem;
@@ -1016,12 +1053,52 @@
 
 @media (min-width: 1024px) {
   .profile-discography__body--rack {
-    grid-template-columns: minmax(0, 1.55fr) minmax(17rem, 0.9fr);
+    grid-template-columns: minmax(0, 1.45fr) minmax(19rem, 1fr);
     gap: 1rem;
-    align-items: start;
+    align-items: stretch;
   }
 
-  .profile-discography__body--rack > .disc-dev--pick {
+  .profile-discography__body--rack > .disc-dev--matrix {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .disc-dev--matrix .disc-dev__chassis {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .disc-dev--matrix .disc-dev__screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .disc-dev--matrix .disc-dev__tracks {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .disc-dev--matrix .disc-dev__track {
+    flex: 1;
+    display: flex;
+    min-height: 3.2rem;
+  }
+
+  .disc-dev--matrix .disc-dev__track-link,
+  .disc-dev--matrix .disc-dev__track-link--preview {
+    flex: 1;
+    width: 100%;
+    align-content: center;
+  }
+
+  .profile-discography__body--rack > .profile-discography__rack-side {
     position: sticky;
     top: 1rem;
     align-self: start;

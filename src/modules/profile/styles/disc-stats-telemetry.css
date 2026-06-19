@@ -1,0 +1,469 @@
+/* Discography stats telemetry — orbital metrics HUD */
+
+.disc-dev--telemetry {
+  --stats-accent: var(--primary);
+  --stats-neon: var(--ios-accent-bright, var(--primary));
+  --stats-glow: color-mix(in oklch, var(--stats-accent) 42%, transparent);
+}
+
+.disc-stats__led {
+  background: var(--stats-neon);
+  box-shadow:
+    0 0 10px var(--stats-glow),
+    inset 0 -1px 1px color-mix(in oklch, var(--background) 40%, transparent);
+  animation: disc-stats-led 2s ease-in-out infinite;
+}
+
+@keyframes disc-stats-led {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.disc-dev--telemetry .disc-dev__chassis::after {
+  content: '';
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  left: 0.45rem;
+  width: 3px;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--stats-accent) 22%, transparent) 0 3px,
+    transparent 3px 7px
+  );
+  opacity: 0.55;
+  z-index: 2;
+}
+
+/* ── Header (stacked for narrow rack column) ── */
+
+.disc-stats__header {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: 1fr;
+  padding: 0.85rem 1rem 0.75rem;
+}
+
+.disc-stats__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.disc-stats__header-copy {
+  min-width: 0;
+}
+
+.disc-stats__title {
+  font-size: clamp(1rem, 2.4vw, 1.25rem);
+  letter-spacing: 0.06em;
+}
+
+.disc-stats__status {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid color-mix(in oklch, var(--stats-accent) 40%, var(--border));
+  border-radius: 2px;
+  color: color-mix(in oklch, var(--stats-accent) 85%, var(--foreground));
+  background: color-mix(in oklch, var(--stats-accent) 10%, var(--background));
+  box-shadow: 0 0 12px color-mix(in oklch, var(--stats-accent) 12%, transparent);
+}
+
+.disc-stats__status--demo {
+  color: color-mix(in oklch, var(--foreground) 72%, var(--muted-foreground));
+  border-color: color-mix(in oklch, var(--foreground) 18%, var(--border));
+  background: color-mix(in oklch, var(--background) 70%, transparent);
+  box-shadow: none;
+}
+
+/* ── Screen ── */
+
+.disc-stats__screen {
+  margin-bottom: 0;
+  padding: 0;
+  min-height: 20.5rem;
+  overflow: hidden;
+}
+
+.disc-stats__radar {
+  position: absolute;
+  top: -3rem;
+  left: 50%;
+  width: 11rem;
+  height: 11rem;
+  margin-left: -5.5rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--stats-accent) 18%, transparent);
+  background:
+    repeating-radial-gradient(
+      circle at center,
+      transparent 0 16px,
+      color-mix(in oklch, var(--stats-accent) 7%, transparent) 16px 17px
+    ),
+    radial-gradient(circle at center, color-mix(in oklch, var(--stats-accent) 8%, transparent), transparent 70%);
+  opacity: 0.28;
+  z-index: 1;
+  pointer-events: none;
+  animation: disc-stats-radar-spin 22s linear infinite;
+}
+
+.disc-stats__radar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    color-mix(in oklch, var(--stats-accent) 28%, transparent) 24deg,
+    transparent 48deg
+  );
+  animation: disc-stats-sweep 5s linear infinite;
+}
+
+.disc-stats__hex {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-width='0.6' d='M28 1 L55 16 L55 46 L28 61 L1 46 L1 16 Z M28 39 L55 54 L55 84 L28 99 L1 84 L1 54 Z'/%3E%3C/svg%3E");
+  background-size: 56px 100px;
+  mask-image: radial-gradient(ellipse 90% 75% at 50% 35%, black, transparent 88%);
+}
+
+.disc-stats__wave {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 2.15rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  opacity: 0.22;
+  z-index: 2;
+  pointer-events: none;
+  mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent);
+}
+
+.disc-stats__wave-bar {
+  flex: 1;
+  min-width: 2px;
+  height: 42%;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--stats-neon) 75%, var(--primary)),
+    color-mix(in oklch, var(--primary) 45%, transparent)
+  );
+  animation: disc-stats-wave calc(1.2s + (var(--disc-stats-wave-i) * 0.05s)) ease-in-out infinite alternate;
+}
+
+.disc-stats__wave-bar:nth-child(3n) {
+  height: 68%;
+}
+
+.disc-stats__wave-bar:nth-child(4n) {
+  height: 52%;
+}
+
+.disc-stats__wave-bar:nth-child(5n) {
+  height: 82%;
+}
+
+@keyframes disc-stats-wave {
+  from {
+    transform: scaleY(0.5);
+    opacity: 0.35;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 0.9;
+  }
+}
+
+/* ── Metrics grid ── */
+
+.disc-stats__grid {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(6.25rem, 1fr));
+  gap: 0.65rem;
+  padding: 0.9rem 0.8rem 2.65rem;
+}
+
+.disc-stats__cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.35rem;
+  min-height: 6.25rem;
+  padding: 0.7rem 0.75rem 0.65rem;
+  border: 1px solid color-mix(in oklch, var(--stats-accent) 30%, var(--border));
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in oklch, var(--stats-accent) 9%, transparent) 0%,
+      transparent 45%
+    ),
+    color-mix(in oklch, var(--background) 90%, var(--stats-accent) 10%);
+  clip-path: polygon(
+    0 7px,
+    7px 0,
+    calc(100% - 7px) 0,
+    100% 7px,
+    100% calc(100% - 7px),
+    calc(100% - 7px) 100%,
+    7px 100%,
+    0 calc(100% - 7px)
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--foreground) 7%, transparent),
+    inset 0 0 20px color-mix(in oklch, var(--stats-accent) 5%, transparent);
+  overflow: hidden;
+}
+
+.disc-stats__cell-bracket {
+  position: absolute;
+  width: 0.65rem;
+  height: 0.65rem;
+  pointer-events: none;
+  z-index: 2;
+  border-color: color-mix(in oklch, var(--stats-neon) 65%, var(--foreground));
+}
+
+.disc-stats__cell-bracket--tl {
+  top: 0.4rem;
+  left: 0.4rem;
+  border-top: 1.5px solid;
+  border-left: 1.5px solid;
+}
+
+.disc-stats__cell-bracket--tr {
+  top: 0.4rem;
+  right: 0.4rem;
+  border-top: 1.5px solid;
+  border-right: 1.5px solid;
+}
+
+.disc-stats__cell-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in oklch, var(--stats-accent) 10%, transparent) 50%,
+    transparent 100%
+  );
+  transform: translateY(-120%);
+  animation: disc-stats-cell-scan 6s ease-in-out infinite;
+}
+
+.disc-stats__cell:nth-child(2) .disc-stats__cell-scan {
+  animation-delay: 1s;
+}
+
+.disc-stats__cell:nth-child(3) .disc-stats__cell-scan {
+  animation-delay: 2s;
+}
+
+.disc-stats__cell:nth-child(4) .disc-stats__cell-scan {
+  animation-delay: 3s;
+}
+
+.disc-stats__cell:nth-child(5) .disc-stats__cell-scan {
+  animation-delay: 4s;
+}
+
+.disc-stats__cell:nth-child(6) .disc-stats__cell-scan {
+  animation-delay: 5s;
+}
+
+@keyframes disc-stats-cell-scan {
+  0%,
+  100% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.65;
+  }
+  25% {
+    transform: translateY(120%);
+    opacity: 0;
+  }
+}
+
+.disc-stats__cell-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.disc-stats__cell-code {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  padding: 0.15rem 0.35rem;
+  border: 1px solid color-mix(in oklch, var(--stats-accent) 28%, var(--border));
+  border-radius: 2px;
+  color: color-mix(in oklch, var(--stats-neon) 80%, var(--foreground));
+  background: color-mix(in oklch, var(--stats-accent) 8%, var(--background));
+}
+
+.disc-stats__cell-slot {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: color-mix(in oklch, var(--foreground) 45%, var(--muted-foreground));
+}
+
+.disc-stats__cell-value {
+  margin: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: clamp(1.35rem, 3.5vw, 1.75rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+  text-shadow: 0 0 20px color-mix(in oklch, var(--stats-accent) 18%, transparent);
+}
+
+.disc-stats__cell-value--empty {
+  font-size: clamp(1.5rem, 3.8vw, 1.9rem);
+  color: color-mix(in oklch, var(--foreground) 38%, var(--muted-foreground));
+  text-shadow: none;
+}
+
+.disc-stats__cell-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: color-mix(in oklch, var(--foreground) 78%, var(--muted-foreground));
+}
+
+.disc-stats__cell-bar {
+  position: relative;
+  height: 4px;
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--foreground) 10%, transparent);
+  overflow: hidden;
+}
+
+.disc-stats__cell-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  min-width: 4px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--primary) 65%, transparent),
+    var(--stats-neon)
+  );
+  box-shadow: 0 0 8px var(--stats-glow);
+  transition: width 0.6s ease;
+}
+
+/* ── Ticker ── */
+
+.disc-stats__ticker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  overflow: hidden;
+  border-top: 1px solid color-mix(in oklch, var(--stats-accent) 22%, var(--border));
+  background: color-mix(in oklch, var(--background) 78%, var(--stats-accent) 22%);
+}
+
+.disc-stats__ticker-track {
+  display: block;
+  padding: 0.48rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: color-mix(in oklch, var(--stats-neon) 72%, var(--muted-foreground));
+  animation: disc-stats-ticker 24s linear infinite;
+}
+
+.disc-stats__footer .disc-dev__footer-tag {
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+}
+
+@keyframes disc-stats-radar-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes disc-stats-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes disc-stats-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.profile-discography__rack-side {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disc-stats__led,
+  .disc-stats__radar,
+  .disc-stats__radar::before,
+  .disc-stats__wave-bar,
+  .disc-stats__cell-scan,
+  .disc-stats__ticker-track {
+    animation: none;
+  }
+}

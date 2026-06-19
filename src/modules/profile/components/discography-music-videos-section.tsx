@@ -4,6 +4,7 @@ import {
   fillMusicVideosPreview,
   formatVideoDuration,
   formatVideoViews,
+  isVideoPreviewRelease,
 } from '@/modules/profile/lib/discography-format'
 import '@/modules/profile/styles/disc-music-videos.css'
 
@@ -27,15 +28,10 @@ export function DiscographyMusicVideosSection({ videos }: DiscographyMusicVideos
       </header>
 
       <div className="disc-videos__reel">
-        {items.map((video, index) => (
-          <article key={video.id} className="disc-videos__unit">
-            <a
-              href={video.videoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="disc-videos__monitor"
-              aria-label={`Watch ${video.title}`}
-            >
+        {items.map((video, index) => {
+          const preview = isVideoPreviewRelease(video.id)
+          const monitor = (
+            <>
               <span className="disc-videos__monitor-id" aria-hidden>
                 MV-{String(index + 1).padStart(2, '0')}
               </span>
@@ -57,17 +53,37 @@ export function DiscographyMusicVideosSection({ videos }: DiscographyMusicVideos
                 </span>
                 <span className="disc-videos__duration">{formatVideoDuration(video.durationSec)}</span>
               </span>
-            </a>
+            </>
+          )
 
-            <div className="disc-videos__meta">
-              <h3 className="disc-videos__name">{video.title}</h3>
-              <p className="disc-videos__stat">
-                <span className="disc-videos__stat-value">{formatVideoViews(video.viewCount)}</span>
-                <span className="disc-videos__stat-label">views</span>
-              </p>
-            </div>
-          </article>
-        ))}
+          return (
+            <article key={video.id} className={`disc-videos__unit${preview ? ' disc-videos__unit--preview' : ''}`}>
+              {preview ? (
+                <div className="disc-videos__monitor" aria-label={video.title}>
+                  {monitor}
+                </div>
+              ) : (
+                <a
+                  href={video.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="disc-videos__monitor"
+                  aria-label={`Watch ${video.title}`}
+                >
+                  {monitor}
+                </a>
+              )}
+
+              <div className="disc-videos__meta">
+                <h3 className="disc-videos__name">{video.title}</h3>
+                <p className="disc-videos__stat">
+                  <span className="disc-videos__stat-value">{formatVideoViews(video.viewCount)}</span>
+                  <span className="disc-videos__stat-label">views</span>
+                </p>
+              </div>
+            </article>
+          )
+        })}
       </div>
     </section>
   )
