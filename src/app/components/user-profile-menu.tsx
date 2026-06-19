@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
+import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { cn } from '@/shared/lib/cn'
 import '@/styles/user-profile-menu.css'
 
@@ -75,7 +76,12 @@ export function UserProfileMenu() {
               />
             </div>
             <div className="profile-menu__identity">
-              <p className="profile-menu__name">{user?.name ?? 'User'}</p>
+              <VerifiedUserName
+                name={user?.name ?? 'User'}
+                isVerified={user?.isVerified}
+                className="profile-menu__name"
+                nameClassName="truncate"
+              />
               <p className="profile-menu__email">{user?.email ?? ''}</p>
             </div>
           </div>
