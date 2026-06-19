@@ -68,7 +68,7 @@ export function UserProfileMenu() {
               <p className="truncate text-sm font-medium leading-none">{user?.name ?? 'User'}</p>
               <p className="truncate text-xs text-muted-foreground">{user?.email ?? ''}</p>
             </div>
-            <UserIdentityBadges />
+            <UserIdentityBadges className="flex-wrap gap-1.5" />
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

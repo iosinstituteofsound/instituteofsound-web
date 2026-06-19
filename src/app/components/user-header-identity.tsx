@@ -127,11 +127,3 @@ export function UserIdentityBadges({ compact = false, className }: UserIdentityB
   )
 }
 
-export function UserHeaderIdentity() {
-  return (
-    <>
-      <UserIdentityBadges compact className="flex sm:hidden" />
-      <UserIdentityBadges className="hidden sm:flex" />
-    </>
-  )
-}

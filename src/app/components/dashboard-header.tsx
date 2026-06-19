@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { Bell, LayoutGrid, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { UserHeaderIdentity } from '@/app/components/user-header-identity'
 import { UserProfileMenu } from '@/app/components/user-profile-menu'
 import { useLayoutStore } from '@/app/stores/layout-store'
 import { GlobalSearchModal } from '@/modules/search/components/global-search-modal'
@@ -121,11 +120,6 @@ export function DashboardHeader() {
             <Bell className="h-5 w-5" />
           </button>
 
-          {dashboardConfig.header.showIdentity ? (
-            <div className="hidden lg:block">
-              <UserHeaderIdentity />
-            </div>
-          ) : null}
           {dashboardConfig.header.showProfileMenu ? <UserProfileMenu /> : null}
         </div>
       </div>
