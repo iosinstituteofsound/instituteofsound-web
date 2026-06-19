@@ -956,10 +956,15 @@
 }
 
 /* Editorial tab — unified heading scale (devices + rows) */
-.profile-editorial .ed-picks-dev__title,
-.profile-editorial .ed-int-dev__title,
 .profile-editorial .ed-note-dev__title {
   font-size: var(--profile-ed-device-title);
+}
+
+.profile-editorial .ed-picks-dev__title,
+.profile-editorial .ed-int-dev__title {
+  font-size: clamp(0.92rem, 1.55vw, 1.1rem);
+  letter-spacing: 0.1em;
+  line-height: 1.05;
 }
 
 .profile-editorial .ed-picks-dev__pick-title,
