@@ -1,0 +1,148 @@
+/* Label overview — latest releases shell (cards use explore-rel-*) */
+
+.lbl-ov-latest-rel {
+  min-width: 0;
+  padding: 1.15rem 1.15rem 1.05rem;
+  border: 1px solid color-mix(in oklch, var(--primary) 16%, var(--border));
+  border-radius: 1rem;
+  background: color-mix(in oklch, var(--card) 72%, var(--background));
+}
+
+.lbl-ov-latest-rel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.lbl-ov-latest-rel__title {
+  margin: 0;
+  font-family: var(--font-display, var(--font-sans));
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+.lbl-ov-latest-rel__view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--foreground) 58%, var(--muted-foreground));
+  transition: color 0.2s ease;
+}
+
+.lbl-ov-latest-rel__view-all:hover {
+  color: var(--primary);
+}
+
+.lbl-ov-latest-rel__track {
+  gap: 0.65rem;
+  padding: 0.15rem 0.1rem 0.35rem;
+}
+
+/* Compact explore release cards inside label overview */
+.lbl-ov-latest-rel .explore-rel-card {
+  width: min(9.75rem, 38vw);
+  border-radius: 0.75rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__body {
+  padding: 0.6rem 0.65rem 0.55rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__genre {
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__title {
+  margin-top: 0.3rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__artist {
+  margin-top: 0.2rem;
+  font-size: 0.625rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__meta {
+  margin-top: 0.3rem;
+  font-size: 0.5rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__foot {
+  gap: 0.45rem;
+  padding-top: 0.55rem;
+  grid-template-columns: auto minmax(0, 1fr) 1.35rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__date {
+  gap: 0.25rem;
+  font-size: 0.5rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__date svg {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__wave {
+  height: 0.95rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__arrow svg {
+  width: 12px;
+  height: 12px;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__badges {
+  top: 0.45rem;
+  left: 0.45rem;
+  gap: 0.25rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__badge {
+  padding: 0.18rem 0.32rem;
+  font-size: 0.4375rem;
+  letter-spacing: 0.1em;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__play {
+  top: 0.45rem;
+  right: 0.45rem;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__play svg {
+  width: 10px;
+  height: 10px;
+}
+
+.lbl-ov-latest-rel .explore-rel-card__cover-mono span {
+  font-size: 1.75rem;
+}
+
+.lbl-ov-latest-rel .explore-rel-card:hover,
+.lbl-ov-latest-rel .explore-rel-card:focus-within {
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--primary) 40%, transparent),
+    0 12px 28px color-mix(in oklch, var(--background) 55%, transparent),
+    0 0 24px color-mix(in oklch, var(--primary) 16%, transparent);
+}
+
+@media (min-width: 1024px) {
+  .lbl-ov-latest-rel .explore-rel-card {
+    width: min(10.25rem, calc((100% - 1.95rem) / 4));
+  }
+}

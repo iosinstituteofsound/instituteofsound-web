@@ -42,6 +42,33 @@ export interface LabelProfileDto {
   logoUrl?: string
   coverUrl?: string
   genres: string[]
+  featuredReleaseIds?: string[]
+  foundedYear?: number
+  founderName?: string
+  basedIn?: string
+}
+
+export interface LabelOverviewLabelDto extends LabelProfileDto {
+  foundedYear?: number
+  founderName?: string
+  basedIn?: string
+}
+
+export interface LabelOverviewStatsDto {
+  releases: number
+  artists: number
+  streams: number
+  countriesReach: number
+}
+
+export interface LabelOverviewDto {
+  label: LabelOverviewLabelDto
+  featuredReleases: ReleaseDto[]
+  artists: ArtistProfileDto[]
+  latestReleases: ReleaseDto[]
+  latestNews: ArticleDto[]
+  playlists: PlaylistDto[]
+  stats: LabelOverviewStatsDto
 }
 
 export type ReleaseType = 'single' | 'ep' | 'album'

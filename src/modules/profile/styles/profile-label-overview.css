@@ -1,0 +1,97 @@
+.profile-label-overview {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.profile-label-overview__hero {
+  display: grid;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .profile-label-overview__hero {
+    grid-template-columns: minmax(0, 1.65fr) minmax(18rem, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+.profile-label-overview__featured,
+.profile-label-overview__about {
+  min-width: 0;
+  min-height: 100%;
+}
+
+.profile-label-overview__featured > *,
+.profile-label-overview__about > * {
+  height: 100%;
+}
+
+.profile-label-overview__about--solo {
+  grid-column: 1 / -1;
+  max-width: 36rem;
+}
+
+.profile-label-overview__intel {
+  display: grid;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .profile-label-overview__about--solo {
+    max-width: none;
+  }
+
+  .profile-label-overview__intel,
+  .profile-label-overview__catalog {
+    grid-template-columns: minmax(0, 1.65fr) minmax(16rem, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+.profile-label-overview__catalog {
+  display: grid;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.profile-label-overview__catalog > * {
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .profile-label-overview__catalog {
+    grid-template-columns: minmax(0, 1.65fr) minmax(16rem, 1fr);
+    grid-template-rows: auto 1fr;
+    gap: 1rem 1.25rem;
+    align-items: stretch;
+  }
+
+  .profile-label-overview__catalog > * {
+    height: 100%;
+  }
+
+  .lbl-ov-playlists {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .lbl-ov-playlists__head {
+    grid-row: 1;
+  }
+
+  .lbl-ov-playlists__track {
+    grid-row: 2;
+    align-self: stretch;
+    min-height: 0;
+  }
+
+  .lbl-ov-playlists__card {
+    aspect-ratio: 1;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: 100%;
+  }
+}

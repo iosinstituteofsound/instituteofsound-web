@@ -9,6 +9,7 @@ export const createProfileTabSchema = z.object({
     .regex(/^[a-z0-9-]+$/, 'Use lowercase letters, numbers, and hyphens'),
   label: z.string().trim().min(1, 'Display name is required').max(80),
   panelKey: z.enum([
+    'overview',
     'all',
     'posts',
     'about',
