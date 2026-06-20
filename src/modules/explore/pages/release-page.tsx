@@ -60,7 +60,23 @@ export function ReleasePage() {
 
   const release = useMemo(() => {
     const fromExplore = explore?.releases.find((item) => item.id === id)
-    if (fromExplore) return fromExplore
+    const detailDurationSec = releaseDetail?.tracks.reduce(
+      (sum, track) => sum + (track.durationSec ?? 0),
+      0,
+    )
+    const detailTrackCount = releaseDetail?.tracks.length ?? 0
+
+    if (fromExplore) {
+      return {
+        ...fromExplore,
+        durationSec:
+          detailDurationSec && detailDurationSec > 0
+            ? detailDurationSec
+            : fromExplore.durationSec,
+        trackCount:
+          detailTrackCount > 0 ? detailTrackCount : fromExplore.trackCount,
+      }
+    }
     if (releaseDetail) {
       return {
         id: releaseDetail.id,
@@ -74,6 +90,8 @@ export function ReleasePage() {
         playCount: releaseDetail.playCount,
         releaseDate: releaseDetail.releaseDate,
         isFeatured: releaseDetail.isFeatured,
+        durationSec: detailDurationSec && detailDurationSec > 0 ? detailDurationSec : undefined,
+        trackCount: detailTrackCount > 0 ? detailTrackCount : undefined,
       }
     }
     return undefined
@@ -136,6 +154,7 @@ export function ReleasePage() {
       artist: release.artistName ?? 'Unknown',
       audioUrl: release.streamUrl,
       artworkUrl: release.coverUrl,
+      durationSec: release.durationSec,
     })
   }, [playTrack, release, releaseDetail])
 

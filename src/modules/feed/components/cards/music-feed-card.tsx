@@ -1,5 +1,5 @@
 import { ExternalLink, Music2, Pause, Play } from 'lucide-react'
-import type { FeedCardProps } from '@/modules/feed/lib/feed-type-registry'
+import type { FeedCardProps } from '@/modules/feed/lib/feed-card-props'
 import { FeedCardShell, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { ReleaseSharePreview } from '@/modules/feed/components/release-share-preview'
 import { isReleaseShareItem } from '@/modules/feed/lib/feed-release-payload'

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Play } from 'lucide-react'
 import { ReleaseVinylArt } from '@/modules/explore/components/release-vinyl-art'
 import type { ReleaseDto } from '@/modules/explore/types/explore.types'
+import { usePlayerStore } from '@/modules/player/stores/player-store'
 import {
   discographyReleaseDate,
   discographyReleaseType,
@@ -22,8 +23,10 @@ function splitTitle(title: string) {
 }
 
 export function DiscographyLatestRelease({ release }: DiscographyLatestReleaseProps) {
+  const playTrack = usePlayerStore((s) => s.playTrack)
   const { lead, rest } = splitTitle(release.title)
   const preview = isLatestPreviewRelease(release.id)
+  const canPlay = Boolean(release.streamUrl)
 
   const titleContent = (
     <>
@@ -80,16 +83,24 @@ export function DiscographyLatestRelease({ release }: DiscographyLatestReleasePr
           </div>
 
           <div className="disc-spot__actions">
-            {release.streamUrl ? (
-              <a
-                href={release.streamUrl}
-                target="_blank"
-                rel="noreferrer"
+            {canPlay ? (
+              <button
+                type="button"
                 className="disc-spot__btn disc-spot__btn--fill ios-mh-btn ios-mh-btn--fill"
+                onClick={() =>
+                  playTrack({
+                    id: release.id,
+                    title: release.title,
+                    artist: release.artistName ?? 'Unknown',
+                    audioUrl: release.streamUrl!,
+                    artworkUrl: release.coverUrl,
+                    durationSec: release.durationSec,
+                  })
+                }
               >
                 <Play size={11} strokeWidth={2.5} fill="currentColor" aria-hidden />
                 Listen
-              </a>
+              </button>
             ) : null}
             {!preview ? (
               <Link

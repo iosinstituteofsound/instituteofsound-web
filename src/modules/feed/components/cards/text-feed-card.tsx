@@ -1,4 +1,4 @@
-import type { FeedCardProps } from '@/modules/feed/lib/feed-type-registry'
+import type { FeedCardProps } from '@/modules/feed/lib/feed-card-props'
 import { LinkPreviewCard } from '@/modules/feed/components/link-preview-card'
 import { FeedCardShell, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'

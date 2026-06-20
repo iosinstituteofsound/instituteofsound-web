@@ -25,7 +25,12 @@ export function ReleasePlayerBar({ release }: ReleasePlayerBarProps) {
   const isActive = currentTrack?.id === release.id
   const playing = isActive && isPlaying
   const fallbackDuration = releaseDurationSec(release)
-  const totalDuration = isActive && duration > 0 ? duration : fallbackDuration
+  const totalDuration =
+    isActive && duration > 0
+      ? duration
+      : release.durationSec && release.durationSec > 0
+        ? release.durationSec
+        : fallbackDuration
   const disabled = !release.streamUrl
   const volumeLevel = muted ? 0 : volume
 
@@ -41,6 +46,7 @@ export function ReleasePlayerBar({ release }: ReleasePlayerBarProps) {
       artist: release.artistName ?? 'Unknown',
       audioUrl: release.streamUrl!,
       artworkUrl: release.coverUrl,
+      durationSec: release.durationSec,
     })
   }
 

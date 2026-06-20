@@ -62,6 +62,7 @@ export function releaseDateLabel(release: ReleaseDto): string {
 }
 
 export function releaseTrackCount(release: ReleaseDto): number {
+  if (release.trackCount != null && release.trackCount > 0) return release.trackCount
   const base = release.type === 'album' ? 9 : release.type === 'ep' ? 5 : 1
   return base + (hashId(release.id) % 4)
 }
@@ -128,6 +129,7 @@ export function releaseDurationLabel(release: ReleaseDto): string {
 }
 
 export function releaseDurationSec(release: ReleaseDto): number {
+  if (release.durationSec != null && release.durationSec > 0) return release.durationSec
   const tracks = releaseTrackCount(release)
   const minsPerTrack = release.type === 'single' ? 228 : release.type === 'ep' ? 252 : 288
   return tracks * minsPerTrack + (hashId(release.id) % 6) * 17

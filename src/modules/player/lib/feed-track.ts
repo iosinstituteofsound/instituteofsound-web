@@ -1,5 +1,5 @@
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
-import { payloadString } from '@/modules/feed/components/cards/feed-card-shell'
+import { payloadNumber, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import type { PlayerTrack } from '@/modules/player/types/player.types'
 
 export function feedItemToPlayerTrack(item: FeedItemDto): PlayerTrack | null {
@@ -21,6 +21,7 @@ export function feedItemToPlayerTrack(item: FeedItemDto): PlayerTrack | null {
     artist: artistName,
     artworkUrl,
     audioUrl,
+    durationSec: payloadNumber(item.payload, 'durationSec'),
     sourceId: item.id,
     spotifyUrl,
     youtubeUrl,

@@ -45,6 +45,7 @@ function popularReleasesToPlayerQueue(releases: ReleaseDto[], artistName?: strin
         artist: release.artistName ?? artistName ?? 'Unknown',
         audioUrl,
         artworkUrl: release.coverUrl,
+        durationSec: release.durationSec,
       },
     ]
   })

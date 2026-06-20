@@ -23,6 +23,12 @@ import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/player/styles/universal-player.css'
 
+function resolveAudioDuration(audioDuration: number, fallbackSec?: number): number {
+  if (Number.isFinite(audioDuration) && audioDuration > 0) return audioDuration
+  if (fallbackSec != null && fallbackSec > 0) return fallbackSec
+  return 0
+}
+
 function PlayerControlButton({
   label,
   active = false,
@@ -78,8 +84,12 @@ export function UniversalPlayer() {
   const setPlaybackState = usePlayerStore((s) => s.setPlaybackState)
 
   const visible = Boolean(currentTrack)
+  const effectiveDuration =
+    duration > 0 ? duration : (currentTrack?.durationSec ?? 0)
   const progressPercent =
-    duration > 0 ? `${Math.min(100, (currentTime / duration) * 100)}%` : '0%'
+    effectiveDuration > 0
+      ? `${Math.min(100, (currentTime / effectiveDuration) * 100)}%`
+      : '0%'
 
   useEffect(() => {
     document.body.dataset.playerActive = visible ? 'true' : 'false'
@@ -94,12 +104,12 @@ export function UniversalPlayer() {
 
     audio.src = currentTrack.audioUrl
     audio.load()
-    setPlaybackState({ currentTime: 0, duration: 0 })
+    setPlaybackState({ currentTime: 0, duration: currentTrack.durationSec ?? 0 })
 
     if (isPlaying) {
       void audio.play().catch(() => setPlaybackState({ isPlaying: false }))
     }
-  }, [currentTrack?.id, currentTrack?.audioUrl])
+  }, [currentTrack?.id, currentTrack?.audioUrl, currentTrack?.durationSec])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -123,9 +133,14 @@ export function UniversalPlayer() {
     const audio = audioRef.current
     if (!audio) return
 
+    const syncDuration = () => {
+      const fallbackSec = usePlayerStore.getState().currentTrack?.durationSec
+      setPlaybackState({ duration: resolveAudioDuration(audio.duration, fallbackSec) })
+    }
     const handleTimeUpdate = () => setPlaybackState({ currentTime: audio.currentTime })
-    const handleLoadedMetadata = () => setPlaybackState({ duration: audio.duration || 0 })
-    const handleDurationChange = () => setPlaybackState({ duration: audio.duration || 0 })
+    const handleLoadedMetadata = () => syncDuration()
+    const handleDurationChange = () => syncDuration()
+    const handleLoadedData = () => syncDuration()
     const handleEnded = () => {
       if (repeat === 'one') {
         audio.currentTime = 0
@@ -146,6 +161,7 @@ export function UniversalPlayer() {
     audio.addEventListener('timeupdate', handleTimeUpdate)
     audio.addEventListener('loadedmetadata', handleLoadedMetadata)
     audio.addEventListener('durationchange', handleDurationChange)
+    audio.addEventListener('loadeddata', handleLoadedData)
     audio.addEventListener('ended', handleEnded)
     audio.addEventListener('play', handlePlay)
     audio.addEventListener('pause', handlePause)
@@ -154,6 +170,7 @@ export function UniversalPlayer() {
       audio.removeEventListener('timeupdate', handleTimeUpdate)
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
       audio.removeEventListener('durationchange', handleDurationChange)
+      audio.removeEventListener('loadeddata', handleLoadedData)
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('play', handlePlay)
       audio.removeEventListener('pause', handlePause)
@@ -346,10 +363,10 @@ export function UniversalPlayer() {
                 aria-label="Seek"
                 variant="progress"
                 value={currentTime}
-                max={duration > 0 ? duration : 100}
+                max={effectiveDuration > 0 ? effectiveDuration : 100}
                 onValueChange={handleSeek}
               />
-              <span className="ios-universal-player__time">{formatPlayerTime(duration)}</span>
+              <span className="ios-universal-player__time">{formatPlayerTime(effectiveDuration)}</span>
             </div>
           </div>
 

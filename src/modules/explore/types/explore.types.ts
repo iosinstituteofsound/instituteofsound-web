@@ -88,6 +88,8 @@ export interface ReleaseDto {
   playCount?: number
   releaseDate?: string
   isFeatured?: boolean
+  durationSec?: number
+  trackCount?: number
 }
 
 export interface ReleaseGenreDto {

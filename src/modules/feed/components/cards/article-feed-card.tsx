@@ -1,5 +1,5 @@
 import { ExternalLink } from 'lucide-react'
-import type { FeedCardProps } from '@/modules/feed/lib/feed-type-registry'
+import type { FeedCardProps } from '@/modules/feed/lib/feed-card-props'
 import { FeedCardShell, FeedMediaFrame, payloadNumber, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { Button } from '@/shared/components/ui/button'
 

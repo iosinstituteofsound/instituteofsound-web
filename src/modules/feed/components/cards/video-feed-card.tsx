@@ -1,4 +1,4 @@
-import type { FeedCardProps } from '@/modules/feed/lib/feed-type-registry'
+import type { FeedCardProps } from '@/modules/feed/lib/feed-card-props'
 import { FeedCardShell, FeedMediaFrame, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 
 export function VideoFeedCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {

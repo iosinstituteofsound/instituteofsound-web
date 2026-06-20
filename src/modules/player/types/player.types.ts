@@ -4,6 +4,7 @@ export interface PlayerTrack {
   artist?: string
   artworkUrl?: string
   audioUrl: string
+  durationSec?: number
   sourceId?: string
   spotifyUrl?: string
   youtubeUrl?: string

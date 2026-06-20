@@ -2,7 +2,16 @@ import type { PlayerTrack } from '@/modules/player/types/player.types'
 import type { PlaylistDetailDto, PlaylistTrackRefDto, ReleaseDetailDto } from '@/modules/music/types/music.types'
 
 export function tracksToPlayerQueue(
-  tracks: Array<{ id?: string; trackId?: string; title: string; artistName?: string; artist?: string; audioUrl?: string; streamUrl?: string }>,
+  tracks: Array<{
+    id?: string
+    trackId?: string
+    title: string
+    artistName?: string
+    artist?: string
+    audioUrl?: string
+    streamUrl?: string
+    durationSec?: number
+  }>,
   artworkUrl?: string,
 ): PlayerTrack[] {
   return tracks
@@ -12,6 +21,7 @@ export function tracksToPlayerQueue(
       title: t.title,
       artist: t.artistName ?? t.artist ?? 'Unknown',
       audioUrl: (t.audioUrl ?? t.streamUrl)!,
+      durationSec: t.durationSec,
       artworkUrl,
     }))
 }
@@ -24,11 +34,13 @@ export function releaseToPlayerQueue(release: ReleaseDetailDto): PlayerTrack[] {
         title: t.title,
         artist: release.artistName,
         audioUrl: t.audioUrl,
+        durationSec: t.durationSec,
       })),
       release.coverUrl,
     )
   }
   if (release.streamUrl) {
+    const durationSec = release.tracks.reduce((sum, track) => sum + (track.durationSec ?? 0), 0)
     return [
       {
         id: release.id,
@@ -36,6 +48,7 @@ export function releaseToPlayerQueue(release: ReleaseDetailDto): PlayerTrack[] {
         artist: release.artistName ?? 'Unknown',
         audioUrl: release.streamUrl,
         artworkUrl: release.coverUrl,
+        durationSec: durationSec > 0 ? durationSec : undefined,
       },
     ]
   }
@@ -49,6 +62,7 @@ export function playlistToPlayerQueue(playlist: PlaylistDetailDto): PlayerTrack[
       title: t.title,
       artistName: t.artistName,
       audioUrl: t.audioUrl ?? t.streamUrl,
+      durationSec: t.durationSec,
     })),
     playlist.coverUrl,
   )
