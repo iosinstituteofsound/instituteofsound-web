@@ -33,9 +33,10 @@ function toPoints(locations: LocationAggregateDto[]): GeoMapPoint[] {
 
 type Props = {
   locations: LocationAggregateDto[]
+  height?: number
 }
 
-export function ReleaseLocationMap({ locations }: Props) {
+export function ReleaseLocationMap({ locations, height = 420 }: Props) {
   const regions = useMemo(() => toRegions(locations), [locations])
   const points = useMemo(() => toPoints(locations), [locations])
 
@@ -45,7 +46,7 @@ export function ReleaseLocationMap({ locations }: Props) {
       points={points}
       valueLabel="plays"
       formatValue={formatPlays}
-      height={420}
+      height={height}
       defaultStyleMode="hybrid"
       emptyMessage="Play this release to populate the listener map. Location is estimated from your network region."
     />

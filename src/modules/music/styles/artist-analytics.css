@@ -1,0 +1,135 @@
+.ios-artist-analytics--full {
+  width: 100%;
+  max-width: none;
+}
+
+.ios-artist-analytics__body {
+  gap: 0;
+}
+
+.ios-artist-analytics__panel {
+  width: 100%;
+  padding: 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--background) 92%, var(--foreground) 8%);
+}
+
+.ios-artist-analytics__stats {
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+}
+
+.ios-artist-analytics__map-trends {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.ios-artist-analytics__map {
+  width: 100%;
+}
+
+.ios-artist-analytics__map .ios-release-analytics__map-wrap {
+  min-height: 20rem;
+}
+
+@media (min-width: 768px) {
+  .ios-artist-analytics__map .ios-release-analytics__map-wrap {
+    min-height: 28rem;
+  }
+}
+
+.ios-artist-analytics__trends {
+  width: 100%;
+}
+
+.ios-artist-analytics__trends .ios-release-analytics__chart {
+  min-height: 8rem;
+}
+
+.ios-artist-analytics__releases {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.ios-artist-analytics__release-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ios-artist-analytics__release-row {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background: color-mix(in srgb, var(--background) 88%, var(--foreground) 12%);
+}
+
+@media (min-width: 900px) {
+  .ios-artist-analytics__release-row {
+    grid-template-columns: minmax(0, 1.4fr) auto auto;
+    align-items: center;
+  }
+}
+
+.ios-artist-analytics__release-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.ios-artist-analytics__release-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.ios-artist-analytics__release-head h4 {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ios-artist-analytics__release-head p {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  opacity: 0.65;
+}
+
+.ios-artist-analytics__release-bar {
+  height: 0.3rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+  overflow: hidden;
+}
+
+.ios-artist-analytics__release-bar span {
+  display: block;
+  height: 100%;
+  background: color-mix(in srgb, var(--primary, #e11) 75%, white);
+}
+
+.ios-artist-analytics__release-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.ios-artist-analytics__release-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  font-size: 0.8125rem;
+}
+
+.ios-artist-analytics__release-links a {
+  text-decoration: underline;
+}

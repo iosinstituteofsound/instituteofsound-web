@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Disc3, BarChart3, ListMusic, Upload, User } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { listArtistReleases, listArtistTracks } from '@/modules/music/api/music.api'
+import { listArtistReleases, listArtistTracks, getArtistAnalyticsDashboard } from '@/modules/music/api/music.api'
+import { formatListenTime, formatPlays } from '@/modules/music/lib/analytics-format'
 import { Page, PageHeader, PageTitle, PageSection } from '@/shared/components/layout/page-shell'
 import { Button } from '@/shared/components/ui/button'
 import { Loader } from '@/shared/components/feedback/loader'
@@ -14,6 +15,10 @@ export function ArtistStudioHomePage() {
   const { data: tracks, isLoading: tracksLoading } = useQuery({
     queryKey: ['artist-tracks'],
     queryFn: listArtistTracks,
+  })
+  const { data: analytics } = useQuery({
+    queryKey: ['artist-analytics'],
+    queryFn: getArtistAnalyticsDashboard,
   })
 
   return (
@@ -41,10 +46,10 @@ export function ArtistStudioHomePage() {
               Playlists
             </Link>
           </Button>
-          <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
+          <Button asChild variant="default" className="h-auto flex-col gap-2 py-6">
             <Link to="/artist/analytics">
               <BarChart3 className="size-6" />
-              Analytics
+              Listening Analytics
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
@@ -54,6 +59,29 @@ export function ArtistStudioHomePage() {
             </Link>
           </Button>
         </div>
+
+        {analytics ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-lg border p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Plays</p>
+              <p className="text-2xl font-bold">{formatPlays(analytics.overview.qualifiedPlays)}</p>
+            </div>
+            <div className="rounded-lg border p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Listen time</p>
+              <p className="text-2xl font-bold">{formatListenTime(analytics.overview.totalListenSec)}</p>
+            </div>
+            <div className="rounded-lg border p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Listeners</p>
+              <p className="text-2xl font-bold">{formatPlays(analytics.overview.uniqueListeners)}</p>
+            </div>
+            <Button asChild variant="outline" className="h-auto min-h-[5.5rem] flex-col gap-1 py-4">
+              <Link to="/artist/analytics">
+                <BarChart3 className="size-5" />
+                Open full analytics
+              </Link>
+            </Button>
+          </div>
+        ) : null}
 
         {releasesLoading || tracksLoading ? <Loader /> : null}
 

@@ -7,8 +7,12 @@ import {
   getReleaseAnalyticsTrends,
   toggleTrackLike,
 } from '@/modules/music/api/music.api'
-import type { ReleaseAnalyticsSummaryDto } from '@/modules/music/types/analytics.types'
 import { formatListenTime, formatPercent, formatPlays } from '@/modules/music/lib/analytics-format'
+import {
+  AnalyticsLocationList,
+  AnalyticsStatCell,
+  AnalyticsTrendsChart,
+} from '@/modules/music/components/analytics-dashboard-blocks'
 import { ReleaseLocationMap } from '@/modules/explore/components/release-location-map'
 import { ReleaseListenerCard } from '@/modules/explore/components/release-listener-card'
 import '@/modules/explore/styles/release-analytics.css'
@@ -16,63 +20,6 @@ import '@/modules/explore/styles/release-analytics.css'
 type Props = {
   releaseId: string
   primaryTrackId?: string
-}
-
-function StatCell({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="ios-release-analytics__stat">
-      <span className="ios-release-analytics__stat-label">{label}</span>
-      <span className="ios-release-analytics__stat-value">{value}</span>
-    </div>
-  )
-}
-
-function TrendsChart({
-  points,
-}: {
-  points: Array<{ date: string; qualifiedPlays: number; totalListenSec: number }>
-}) {
-  const maxPlays = Math.max(1, ...points.map((p) => p.qualifiedPlays))
-  return (
-    <div className="ios-release-analytics__chart" role="img" aria-label="Daily plays trend">
-      {points.map((p) => (
-        <div key={p.date} className="ios-release-analytics__chart-bar-wrap">
-          <div
-            className="ios-release-analytics__chart-bar"
-            style={{ height: `${Math.max(4, (p.qualifiedPlays / maxPlays) * 100)}%` }}
-            title={`${p.date}: ${p.qualifiedPlays} plays`}
-          />
-          <span className="ios-release-analytics__chart-label">{p.date.slice(5)}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function LocationList({ analytics }: { analytics: ReleaseAnalyticsSummaryDto }) {
-  const maxPlays = Math.max(1, ...analytics.locations.map((l) => l.qualifiedPlays))
-  return (
-    <ul className="ios-release-analytics__locations">
-      {analytics.locations.slice(0, 8).map((loc) => (
-        <li key={`${loc.countryCode}-${loc.city ?? ''}`}>
-          <div className="ios-release-analytics__loc-head">
-            <MapPin size={14} aria-hidden />
-            <span>
-              {loc.city ? `${loc.city}, ` : ''}
-              {loc.countryName ?? loc.countryCode}
-            </span>
-            <span>{formatPlays(loc.qualifiedPlays)}</span>
-          </div>
-          <div className="ios-release-analytics__loc-bar">
-            <span style={{ width: `${(loc.qualifiedPlays / maxPlays) * 100}%` }} />
-          </div>
-        </li>
-      ))}
-      {!analytics.locations.length ? (
-        <li className="ios-release-analytics__empty">No location data yet.</li>
-      ) : null}
-    </ul>
-  )
 }
 
 export function ReleaseAnalyticsPanel({ releaseId, primaryTrackId }: Props) {
@@ -130,14 +77,14 @@ export function ReleaseAnalyticsPanel({ releaseId, primaryTrackId }: Props) {
       </div>
 
       <div className="ios-release-analytics__grid">
-        <StatCell label="Plays" value={formatPlays(analytics.qualifiedPlays)} />
-        <StatCell label="Listen time" value={formatListenTime(analytics.totalListenSec)} />
-        <StatCell label="Avg listen" value={formatListenTime(analytics.averageListenSec)} />
-        <StatCell label="Completion" value={formatPercent(analytics.completionRate)} />
-        <StatCell label="Skip rate" value={formatPercent(analytics.skipRate)} />
-        <StatCell label="Likes" value={formatPlays(analytics.activeLikes)} />
-        <StatCell label="Listeners" value={formatPlays(analytics.uniqueListeners)} />
-        <StatCell label="Locations" value={String(analytics.uniqueLocations)} />
+        <AnalyticsStatCell label="Plays" value={formatPlays(analytics.qualifiedPlays)} />
+        <AnalyticsStatCell label="Listen time" value={formatListenTime(analytics.totalListenSec)} />
+        <AnalyticsStatCell label="Avg listen" value={formatListenTime(analytics.averageListenSec)} />
+        <AnalyticsStatCell label="Completion" value={formatPercent(analytics.completionRate)} />
+        <AnalyticsStatCell label="Skip rate" value={formatPercent(analytics.skipRate)} />
+        <AnalyticsStatCell label="Likes" value={formatPlays(analytics.activeLikes)} />
+        <AnalyticsStatCell label="Listeners" value={formatPlays(analytics.uniqueListeners)} />
+        <AnalyticsStatCell label="Locations" value={String(analytics.uniqueLocations)} />
       </div>
 
       <div className="ios-release-analytics__section">
@@ -153,7 +100,7 @@ export function ReleaseAnalyticsPanel({ releaseId, primaryTrackId }: Props) {
             </button>
           </div>
         </div>
-        {trends?.length ? <TrendsChart points={trends} /> : (
+        {trends?.length ? <AnalyticsTrendsChart points={trends} /> : (
           <p className="ios-release-analytics__empty">Play this release to see trends.</p>
         )}
       </div>
@@ -190,7 +137,7 @@ export function ReleaseAnalyticsPanel({ releaseId, primaryTrackId }: Props) {
             <MapPin size={16} aria-hidden />
             <h3>Locations</h3>
           </div>
-          <LocationList analytics={analytics} />
+          <AnalyticsLocationList locations={analytics.locations} />
         </div>
       </div>
 

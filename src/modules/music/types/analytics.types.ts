@@ -95,11 +95,16 @@ export type ArtistAnalyticsDashboardDto = {
   overview: {
     qualifiedPlays: number
     totalListenSec: number
+    averageListenSec: number
     averageCompletionRate: number
+    skipRate: number
     activeLikes: number
     uniqueListeners: number
+    uniqueLocations: number
   }
   trend: AnalyticsTrendPointDto[]
+  topListeners: ListenerProfileDto[]
+  locations: LocationAggregateDto[]
   releases: Array<{
     releaseId: string
     title: string
