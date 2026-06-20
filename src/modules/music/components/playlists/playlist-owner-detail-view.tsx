@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Copy, Play, Settings, Shuffle, Trash2 } from 'lucide-react'
+import { ArrowLeft, Copy, Play, Settings, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { AddTracksPanel } from '@/modules/music/components/playlists/add-tracks-panel'
 import { PlaylistSettingsDialog } from '@/modules/music/components/playlists/playlist-settings-dialog'
@@ -40,7 +40,6 @@ export function PlaylistOwnerDetailView({ mode, slug, basePath }: PlaylistOwnerD
     deleteMutation,
     playAtIndex,
     handlePlayAll,
-    handleShufflePlay,
   } = usePlaylistDetailPage({ mode, slug, basePath })
 
   if (isLoading) return <Loader />
@@ -151,15 +150,6 @@ export function PlaylistOwnerDetailView({ mode, slug, basePath }: PlaylistOwnerD
             <Button className="gap-1.5" onClick={handlePlayAll} disabled={!trackCount}>
               <Play className="size-4" fill="currentColor" aria-hidden />
               Play
-            </Button>
-            <Button
-              variant="outline"
-              className="gap-1.5"
-              onClick={() => void handleShufflePlay()}
-              disabled={!trackCount}
-            >
-              <Shuffle className="size-4" aria-hidden />
-              Shuffle
             </Button>
             {playlist.visibility === 'public' ? (
               <Button variant="outline" className="gap-1.5" onClick={() => void handleCopyLink()}>

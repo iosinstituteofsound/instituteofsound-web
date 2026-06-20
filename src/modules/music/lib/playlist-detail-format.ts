@@ -53,3 +53,8 @@ export function playlistSavesLabel(slug: string): string {
   const label = n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}K` : String(n)
   return `${label} saves`
 }
+
+export function playlistTrackReleaseHref(track: PlaylistTrackRefDto): string | null {
+  const id = track.releaseSlug ?? track.releaseId
+  return id ? `/releases/${id}` : null
+}

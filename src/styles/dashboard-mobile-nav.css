@@ -62,7 +62,8 @@
   }
 
   body[data-mobile-nav='true'] .ios-dashboard-main,
-  body[data-mobile-nav='true'][data-player-active='true'] .ios-dashboard-main {
+  body[data-mobile-nav='true'][data-player-active='true'] .ios-dashboard-main,
+  body[data-mobile-nav='true'][data-player-dock='true'] .ios-dashboard-main {
     padding-bottom: calc(
       var(--ios-bottom-nav-offset, var(--ios-bottom-nav-height)) + var(--ios-player-offset, 0px) +
         env(safe-area-inset-bottom, 0px)

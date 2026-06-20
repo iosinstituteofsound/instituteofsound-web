@@ -248,6 +248,16 @@
   color: inherit;
 }
 
+a.playlist-track-list__main {
+  text-decoration: none;
+}
+
+a.playlist-track-list__main:hover .playlist-track-list__title,
+a.playlist-track-list__main:focus-visible .playlist-track-list__title {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .playlist-track-list__thumb {
   width: 2.25rem;
   height: 2.25rem;

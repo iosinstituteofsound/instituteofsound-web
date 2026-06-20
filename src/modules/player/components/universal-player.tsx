@@ -91,6 +91,7 @@ export function UniversalPlayer() {
   const shuffle = usePlayerStore((s) => s.shuffle)
   const repeat = usePlayerStore((s) => s.repeat)
   const isExpanded = usePlayerStore((s) => s.isExpanded)
+  const isBarOpen = usePlayerStore((s) => s.isBarOpen)
   const mobileView = usePlayerStore((s) => s.mobileView)
   const togglePlay = usePlayerStore((s) => s.togglePlay)
   const seek = usePlayerStore((s) => s.seek)
@@ -100,7 +101,7 @@ export function UniversalPlayer() {
   const cycleRepeat = usePlayerStore((s) => s.cycleRepeat)
   const next = usePlayerStore((s) => s.next)
   const previous = usePlayerStore((s) => s.previous)
-  const close = usePlayerStore((s) => s.close)
+  const closeBar = usePlayerStore((s) => s.closeBar)
   const setExpanded = usePlayerStore((s) => s.setExpanded)
   const openNowPlaying = usePlayerStore((s) => s.openNowPlaying)
   const setPlaybackState = usePlayerStore((s) => s.setPlaybackState)
@@ -147,6 +148,7 @@ export function UniversalPlayer() {
   })
 
   const visible = Boolean(currentTrack)
+  const showPlayerBar = visible && isBarOpen
   const effectiveDuration =
     duration > 0 ? duration : (currentTrack?.durationSec ?? 0)
   const progressPercent =
@@ -195,17 +197,27 @@ export function UniversalPlayer() {
 
   useEffect(() => {
     document.body.dataset.playerActive = visible ? 'true' : 'false'
+    document.body.dataset.playerBarOpen = showPlayerBar ? 'true' : 'false'
     return () => {
       delete document.body.dataset.playerActive
+      delete document.body.dataset.playerBarOpen
     }
-  }, [visible])
+  }, [visible, showPlayerBar])
 
   useEffect(() => {
-    document.body.dataset.playerSheet = visible && isMobile && mobileView === 'sheet' ? 'true' : 'false'
+    const isMobileMini = isMobile && mobileView === 'mini'
+    document.body.dataset.playerMobileMini = visible && isMobileMini ? 'true' : 'false'
+    return () => {
+      delete document.body.dataset.playerMobileMini
+    }
+  }, [visible, isMobile, mobileView])
+
+  useEffect(() => {
+    document.body.dataset.playerSheet = showPlayerBar && isMobile && mobileView === 'sheet' ? 'true' : 'false'
     return () => {
       delete document.body.dataset.playerSheet
     }
-  }, [visible, isMobile, mobileView])
+  }, [showPlayerBar, isMobile, mobileView])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -215,7 +227,11 @@ export function UniversalPlayer() {
     audio.src = currentTrack.audioUrl
     audio.load()
     audio.volume = 0
-    setPlaybackState({ currentTime: 0, duration: currentTrack.durationSec ?? 0 })
+    const resumeTime = usePlayerStore.getState().currentTime
+    setPlaybackState({
+      currentTime: resumeTime,
+      duration: currentTrack.durationSec ?? 0,
+    })
 
     if (usePlayerStore.getState().isPlaying) {
       void fadeInPlay()
@@ -388,6 +404,10 @@ export function UniversalPlayer() {
   const showMobileMini = isMobile && mobileView === 'mini'
   const showDesktopBar = !isMobile
 
+  if (!showPlayerBar) {
+    return <audio ref={audioRef} className="sr-only" preload="metadata" />
+  }
+
   if (isMobile && mobileView === 'sheet') {
     return (
       <>
@@ -406,6 +426,7 @@ export function UniversalPlayer() {
           'ios-universal-player',
           isExpanded && showDesktopBar && 'ios-universal-player--expanded',
           showMobileMini && 'ios-universal-player--mobile-mini',
+          'ios-universal-player--visible',
         )}
         data-playing={isPlaying ? 'true' : 'false'}
         aria-label="Now playing"
@@ -684,8 +705,8 @@ export function UniversalPlayer() {
             </PlayerControlButton>
 
             <PlayerControlButton
-              label="Close player"
-              onClick={close}
+              label="Minimize player"
+              onClick={closeBar}
               className="ios-universal-player__control--close"
             >
               <X className="h-4 w-4" strokeWidth={2.25} />

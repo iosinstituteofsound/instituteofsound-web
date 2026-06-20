@@ -17,6 +17,7 @@ interface PlayerState {
   shuffle: boolean
   repeat: RepeatMode
   isExpanded: boolean
+  isBarOpen: boolean
   mobileView: 'mini' | 'sheet'
   isQueueOpen: boolean
   isPlaylistModalOpen: boolean
@@ -38,6 +39,7 @@ interface PlayerState {
   addToQueue: (track: PlayerTrack) => void
   addToQueueNext: (track: PlayerTrack) => void
   removeFromQueue: (index: number) => void
+  reorderQueue: (oldIndex: number, newIndex: number) => void
   playQueueIndex: (index: number) => void
   clearUpcoming: () => void
   openQueue: () => void
@@ -46,6 +48,9 @@ interface PlayerState {
   closePlaylistModal: () => void
   close: () => void
   setExpanded: (expanded: boolean) => void
+  toggleBarOpen: () => void
+  openBar: () => void
+  closeBar: () => void
   openNowPlaying: () => void
   closeNowPlaying: () => void
   setPlaybackState: (state: Partial<Pick<PlayerState, 'currentTime' | 'duration' | 'isPlaying'>>) => void
@@ -105,6 +110,43 @@ function wait(ms: number) {
   })
 }
 
+type PersistedPlayerState = Pick<
+  PlayerState,
+  | 'volume'
+  | 'muted'
+  | 'shuffle'
+  | 'repeat'
+  | 'currentTrack'
+  | 'queue'
+  | 'queueIndex'
+  | 'queueSource'
+  | 'currentTime'
+>
+
+function mergePersistedPlayerState(
+  persisted: unknown,
+  current: PlayerState,
+): PlayerState {
+  const saved = (persisted ?? {}) as Partial<PersistedPlayerState>
+  const next: PlayerState = { ...current, ...saved }
+
+  if (!saved.currentTrack) return next
+
+  return {
+    ...next,
+    displayQueue: saved.queue ?? [],
+    duration: saved.currentTrack.durationSec ?? 0,
+    isPlaying: false,
+    isBarOpen: false,
+    isExpanded: false,
+    mobileView: 'mini',
+    isQueueOpen: false,
+    isPlaylistModalOpen: false,
+    isShuffling: false,
+    shuffleAnimationKey: 0,
+  }
+}
+
 export const usePlayerStore = create<PlayerState>()(
   persist(
     (set, get) => ({
@@ -121,6 +163,7 @@ export const usePlayerStore = create<PlayerState>()(
       shuffle: false,
       repeat: 'off',
       isExpanded: false,
+      isBarOpen: false,
       mobileView: 'mini',
       isQueueOpen: false,
       isPlaylistModalOpen: false,
@@ -138,6 +181,7 @@ export const usePlayerStore = create<PlayerState>()(
           queueIndex,
           queueSource: options?.queueSource ?? get().queueSource,
           isPlaying: options?.autoplay !== false,
+          isBarOpen: false,
           currentTime: 0,
           duration: 0,
         })
@@ -325,6 +369,30 @@ export const usePlayerStore = create<PlayerState>()(
         set({ queue, displayQueue: queue, queueIndex })
       },
 
+      reorderQueue: (oldIndex, newIndex) => {
+        const state = get()
+        if (state.isShuffling) return
+        if (oldIndex === newIndex) return
+        if (oldIndex < 0 || newIndex < 0 || oldIndex >= state.queue.length || newIndex >= state.queue.length) {
+          return
+        }
+
+        const queue = [...state.queue]
+        const [moved] = queue.splice(oldIndex, 1)
+        if (!moved) return
+        queue.splice(newIndex, 0, moved)
+
+        const queueIndex = state.currentTrack
+          ? queue.findIndex((track) => track.id === state.currentTrack!.id)
+          : state.queueIndex
+
+        set({
+          queue,
+          displayQueue: queue,
+          queueIndex: queueIndex >= 0 ? queueIndex : 0,
+        })
+      },
+
       playQueueIndex: (index) => {
         const state = get()
         const track = state.queue[index]
@@ -348,14 +416,9 @@ export const usePlayerStore = create<PlayerState>()(
       openQueue: () => set({ isQueueOpen: true }),
       closeQueue: () => set({ isQueueOpen: false }),
 
-      openPlaylistModal: () => {
-        const state = get()
-        if (state.queueSource?.kind === 'playlist' || state.queueSource?.kind === 'release') {
-          set({ isPlaylistModalOpen: true })
-        }
-      },
+      openPlaylistModal: () => set({ isQueueOpen: true }),
 
-      closePlaylistModal: () => set({ isPlaylistModalOpen: false }),
+      closePlaylistModal: () => set({ isQueueOpen: false }),
 
       close: () =>
         set({
@@ -368,6 +431,7 @@ export const usePlayerStore = create<PlayerState>()(
           currentTime: 0,
           duration: 0,
           isExpanded: false,
+          isBarOpen: false,
           mobileView: 'mini',
           isQueueOpen: false,
           isPlaylistModalOpen: false,
@@ -375,6 +439,12 @@ export const usePlayerStore = create<PlayerState>()(
         }),
 
       setExpanded: (isExpanded) => set({ isExpanded }),
+
+      toggleBarOpen: () => set((state) => ({ isBarOpen: state.currentTrack ? !state.isBarOpen : false })),
+
+      openBar: () => set((state) => (state.currentTrack ? { isBarOpen: true } : { isBarOpen: false })),
+
+      closeBar: () => set({ isBarOpen: false, isExpanded: false, mobileView: 'mini' }),
 
       openNowPlaying: () => set({ mobileView: 'sheet' }),
 
@@ -384,12 +454,24 @@ export const usePlayerStore = create<PlayerState>()(
     }),
     {
       name: 'ios-player',
-      partialize: (state) => ({
-        volume: state.volume,
-        muted: state.muted,
-        shuffle: state.shuffle,
-        repeat: state.repeat,
-      }),
+      merge: mergePersistedPlayerState,
+      partialize: (state) => {
+        const base = {
+          volume: state.volume,
+          muted: state.muted,
+          shuffle: state.shuffle,
+          repeat: state.repeat,
+        }
+        if (!state.currentTrack) return base
+        return {
+          ...base,
+          currentTrack: state.currentTrack,
+          queue: state.queue,
+          queueIndex: state.queueIndex,
+          queueSource: state.queueSource,
+          currentTime: state.currentTime,
+        }
+      },
     },
   ),
 )

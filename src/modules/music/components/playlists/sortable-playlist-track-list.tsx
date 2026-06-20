@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import {
   DndContext,
   KeyboardSensor,
@@ -19,6 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, Trash2 } from 'lucide-react'
 import type { PlaylistDetailDto, PlaylistTrackRefDto } from '@/modules/music/types/music.types'
+import { PlaylistTrackRowMain } from '@/modules/music/components/playlists/playlist-track-row-main'
 import {
   formatDateAdded,
   formatTrackDuration,
@@ -33,16 +33,6 @@ type SortablePlaylistTrackListProps = {
   onReorder: (trackIds: string[]) => void
   isRemoving?: boolean
   isReordering?: boolean
-}
-
-function trackThumb(track: PlaylistTrackRefDto, playlist: PlaylistDetailDto) {
-  const src = track.coverUrl ?? playlist.coverUrl
-  if (src) return <img src={src} alt="" className="playlist-track-list__thumb" loading="lazy" />
-  return (
-    <span className="playlist-track-list__thumb-fallback" aria-hidden>
-      ♪
-    </span>
-  )
 }
 
 function SortableTrackRow({
@@ -81,29 +71,12 @@ function SortableTrackRow({
         <GripVertical size={16} aria-hidden />
       </button>
       <span className="playlist-track-list__index">{index + 1}</span>
-      <button
-        type="button"
-        className="playlist-track-list__main"
-        onClick={() => onPlayTrack(index)}
-      >
-        {trackThumb(track, playlist)}
-        <span className="playlist-track-list__copy">
-          <span className="playlist-track-list__title">{track.title}</span>
-          <span className="playlist-track-list__artist">
-            {track.artistSlug ? (
-              <Link
-                to={`/artist/${track.artistSlug}`}
-                className="playlist-track-list__artist-link"
-                onClick={(event) => event.stopPropagation()}
-              >
-                {track.artistName}
-              </Link>
-            ) : (
-              track.artistName
-            )}
-          </span>
-        </span>
-      </button>
+      <PlaylistTrackRowMain
+        track={track}
+        playlist={playlist}
+        index={index}
+        onPlayTrack={onPlayTrack}
+      />
       <span className="playlist-track-list__added">{formatDateAdded(track.addedAt)}</span>
       <span className="playlist-track-list__duration">{formatTrackDuration(track.durationSec)}</span>
       <div className="playlist-track-list__actions">

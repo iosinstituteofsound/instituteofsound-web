@@ -32,6 +32,7 @@
   isolation: isolate;
 }
 
+body[data-player-dock='true'] .scroll-to-top-button,
 body[data-player-active='true'] .scroll-to-top-button {
   bottom: calc(
     1.25rem + var(--ios-player-offset, var(--ios-player-height, 4.5rem)) +
@@ -47,6 +48,7 @@ body[data-player-active='true'] .scroll-to-top-button {
     );
   }
 
+  body[data-mobile-nav='true'][data-player-dock='true'] .scroll-to-top-button,
   body[data-mobile-nav='true'][data-player-active='true'] .scroll-to-top-button {
     bottom: calc(
       1.25rem + var(--ios-bottom-nav-offset, var(--ios-bottom-nav-height)) +

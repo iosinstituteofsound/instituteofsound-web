@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Play, Shuffle } from 'lucide-react'
+import { ArrowLeft, Play } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { getPlaylistDetail } from '@/modules/music/api/music.api'
 import { PlaylistTrackList } from '@/modules/music/components/playlists/playlist-track-list'
@@ -26,7 +26,6 @@ export function PlaylistPublicDetailView({
   backLabel = 'Back to Explore',
 }: PlaylistPublicDetailViewProps) {
   const playTrack = usePlayerStore((s) => s.playTrack)
-  const shuffleQueueAnimated = usePlayerStore((s) => s.shuffleQueueAnimated)
 
   const { data: playlist, isLoading, isError } = useQuery({
     queryKey: ['playlist', slug],
@@ -42,12 +41,6 @@ export function PlaylistPublicDetailView({
   const handlePlayAll = () => {
     if (!playlist) return
     playPlaylistFromDetail(playlist, playTrack)
-  }
-
-  const handleShufflePlay = async () => {
-    if (!playlist) return
-    playPlaylistFromDetail(playlist, playTrack, { shuffled: true })
-    await shuffleQueueAnimated()
   }
 
   if (isLoading) return <Loader />
@@ -108,15 +101,6 @@ export function PlaylistPublicDetailView({
             <Button className="gap-1.5" onClick={handlePlayAll} disabled={!trackCount}>
               <Play className="size-4" fill="currentColor" aria-hidden />
               Play
-            </Button>
-            <Button
-              variant="outline"
-              className="gap-1.5"
-              onClick={() => void handleShufflePlay()}
-              disabled={!trackCount}
-            >
-              <Shuffle className="size-4" aria-hidden />
-              Shuffle
             </Button>
           </div>
         </PageSection>

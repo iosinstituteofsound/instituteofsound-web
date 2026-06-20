@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, useParams } from 'react-router-dom'
+import { AppRoot } from '@/app/layouts/app-root'
 import { PublicLayout } from '@/app/layouts/public-layout'
 import { AuthLayout } from '@/app/layouts/auth-layout'
 import { DashboardLayout } from '@/app/layouts/dashboard-layout'
@@ -169,9 +170,12 @@ function ExploreReleaseRedirect() {
 
 export const router = createBrowserRouter([
   {
+    element: <AppRoot />,
+    errorElement: <ErrorPage />,
+    children: [
+  {
     path: '/',
     element: <PublicLayout />,
-    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
@@ -188,7 +192,6 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <ExploreLayoutRoute />,
-    errorElement: <ErrorPage />,
     children: [
       {
         path: 'explore',
@@ -762,4 +765,6 @@ export const router = createBrowserRouter([
   { path: '/404', element: <NotFoundPage /> },
   { path: '/500', element: <ErrorPage /> },
   { path: '*', element: <Navigate to="/404" replace /> },
+    ],
+  },
 ])

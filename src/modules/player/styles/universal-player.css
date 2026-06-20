@@ -42,6 +42,19 @@
     0 -1px 0 color-mix(in oklch, var(--primary) 18%, transparent) inset,
     0 -12px 40px color-mix(in oklch, var(--background) 55%, transparent),
     0 -4px 24px color-mix(in oklch, var(--primary) 6%, transparent);
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.44s var(--ios-player-ease),
+    opacity 0.32s ease,
+    height 0.32s var(--ios-player-ease);
+}
+
+.ios-universal-player--visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
   animation: ios-player-enter 0.44s var(--ios-player-ease);
 }
 
@@ -680,14 +693,32 @@
   }
 }
 
-body[data-player-active='true'] {
+body[data-player-dock='true'] {
+  --ios-player-offset: var(--ios-player-dock-height, 2.35rem);
+}
+
+body[data-player-dock='true'][data-player-bar-open='true'] {
   --ios-player-offset: var(--ios-player-height);
 }
 
-body[data-player-active='true'] .ios-universal-player--expanded {
+body[data-player-dock='true'][data-player-bar-open='true'] .ios-universal-player--expanded {
   --ios-player-offset: var(--ios-player-height-expanded);
 }
 
+body[data-player-dock='true'][data-player-bar-open='true'][data-player-mobile-mini='true'] {
+  --ios-player-offset: 3.75rem;
+}
+
+body[data-player-active='true'] {
+  --ios-player-offset: var(--ios-player-dock-height, 2.35rem);
+}
+
+body[data-player-active='true'][data-player-bar-open='true'] {
+  --ios-player-offset: var(--ios-player-height);
+}
+
+body[data-player-dock='true'] .ios-dashboard-main,
+body[data-player-dock='true'] .ios-public-main,
 body[data-player-active='true'] .ios-dashboard-main,
 body[data-player-active='true'] .ios-public-main {
   padding-bottom: calc(var(--ios-player-offset) + env(safe-area-inset-bottom, 0px));
@@ -695,6 +726,10 @@ body[data-player-active='true'] .ios-public-main {
 
 @media (prefers-reduced-motion: reduce) {
   .ios-universal-player {
+    animation: none;
+  }
+
+  .ios-universal-player--visible {
     animation: none;
   }
 

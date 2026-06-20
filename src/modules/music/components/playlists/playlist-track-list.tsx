@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom'
-import type { PlaylistDetailDto, PlaylistTrackRefDto } from '@/modules/music/types/music.types'
+import type { PlaylistDetailDto } from '@/modules/music/types/music.types'
 import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
+import { PlaylistTrackRowMain } from '@/modules/music/components/playlists/playlist-track-row-main'
 import {
   formatDateAdded,
   formatTrackDuration,
@@ -15,16 +15,6 @@ type PlaylistTrackListProps = {
   showDateAdded?: boolean
   showAddToPlaylist?: boolean
   className?: string
-}
-
-function trackThumb(track: PlaylistTrackRefDto, playlist: PlaylistDetailDto) {
-  const src = track.coverUrl ?? playlist.coverUrl
-  if (src) return <img src={src} alt="" className="playlist-track-list__thumb" loading="lazy" />
-  return (
-    <span className="playlist-track-list__thumb-fallback" aria-hidden>
-      ♪
-    </span>
-  )
 }
 
 export function PlaylistTrackList({
@@ -54,29 +44,12 @@ export function PlaylistTrackList({
       {playlist.tracks.map((track, index) => (
         <div key={`${track.trackId}-${index}`} className="playlist-track-list__row" role="row">
           <span className="playlist-track-list__index">{index + 1}</span>
-          <button
-            type="button"
-            className="playlist-track-list__main"
-            onClick={() => onPlayTrack(index)}
-          >
-            {trackThumb(track, playlist)}
-            <span className="playlist-track-list__copy">
-              <span className="playlist-track-list__title">{track.title}</span>
-              <span className="playlist-track-list__artist">
-                {track.artistSlug ? (
-                  <Link
-                    to={`/artist/${track.artistSlug}`}
-                    className="playlist-track-list__artist-link"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    {track.artistName}
-                  </Link>
-                ) : (
-                  track.artistName
-                )}
-              </span>
-            </span>
-          </button>
+          <PlaylistTrackRowMain
+            track={track}
+            playlist={playlist}
+            index={index}
+            onPlayTrack={onPlayTrack}
+          />
           {showAddedCol ? (
             <span className="playlist-track-list__added">{formatDateAdded(track.addedAt)}</span>
           ) : null}
