@@ -117,9 +117,9 @@ const ReleaseLikesPage = lazy(() =>
     default: m.ReleaseLikesPage,
   })),
 )
-const TrackReleaseRedirectPage = lazy(() =>
-  import('@/modules/explore/pages/track-release-redirect-page').then((m) => ({
-    default: m.TrackReleaseRedirectPage,
+const TrackPage = lazy(() =>
+  import('@/modules/explore/pages/track-page').then((m) => ({
+    default: m.TrackPage,
   })),
 )
 const ArticleEditorPage = lazy(() =>
@@ -255,7 +255,7 @@ export const router = createBrowserRouter([
         element: (
           <ExplorePageGuard>
             <Lazy>
-              <TrackReleaseRedirectPage />
+              <TrackPage />
             </Lazy>
           </ExplorePageGuard>
         ),

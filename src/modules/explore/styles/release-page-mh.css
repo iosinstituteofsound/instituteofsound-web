@@ -475,3 +475,23 @@
     padding-top: calc(var(--ios-mh-rule-height) + 0.85rem);
   }
 }
+
+.explore-release-tracklist__link {
+  display: block;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.explore-release-tracklist__link:hover {
+  color: var(--primary);
+}
+
+.explore-release-tracklist li.is-current {
+  background: color-mix(in oklch, var(--primary) 8%, transparent);
+}
+
+.explore-release-tracklist li.is-current .explore-release-tracklist__link {
+  color: var(--primary);
+}

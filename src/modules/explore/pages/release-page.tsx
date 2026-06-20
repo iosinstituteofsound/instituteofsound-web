@@ -28,8 +28,7 @@ import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import { getReleaseDetail } from '@/modules/music/api/music.api'
 import { playReleaseFromDetail } from '@/modules/music/lib/player-queue'
-import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
-import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
+import { ReleaseTrackList } from '@/modules/explore/components/release-track-list'
 import '@/modules/explore/styles/explore.css'
 import '@/modules/explore/styles/explore-mh-chrome.css'
 import '@/modules/explore/styles/release-vinyl-art.css'
@@ -164,6 +163,14 @@ export function ReleasePage() {
     })
   }, [playTrack, release, releaseDetail])
 
+  const handlePlayTrack = useCallback(
+    (index: number) => {
+      if (!releaseDetail) return
+      playReleaseFromDetail(releaseDetail, playTrack, { startIndex: index })
+    },
+    [playTrack, releaseDetail],
+  )
+
   if (isLoading) return <Loader className="min-h-screen bg-background" />
 
   if (!release) {
@@ -282,51 +289,12 @@ export function ReleasePage() {
                 }
               />
 
-              {detailTracks.length > 0 ? (
-                <ol className="explore-release-tracklist mt-4 divide-y rounded-lg border">
-                  {detailTracks.map((track) => (
-                    <li key={track.id} className="flex items-center justify-between gap-2 px-4 py-3">
-                      <div>
-                        <p className="font-medium">
-                          {track.trackNumber}. {track.title}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          className="explore-release-hero__btn explore-release-hero__btn--line"
-                          disabled={!track.audioUrl}
-                          onClick={() => {
-                            if (!releaseDetail || !track.audioUrl) return
-                            playReleaseFromDetail(releaseDetail, playTrack, {
-                              startIndex: detailTracks.findIndex((t) => t.id === track.id),
-                            })
-                          }}
-                        >
-                          <Play size={12} aria-hidden />
-                        </button>
-                        <AddToPlaylistButton
-                          trackId={track.id}
-                          title={track.title}
-                          artist={releaseDetail?.artistName}
-                          artworkUrl={releaseDetail?.coverUrl}
-                          className="explore-release-hero__btn explore-release-hero__btn--line"
-                        />
-                        <TrackActionsMenu
-                          trackId={track.id}
-                          title={track.title}
-                          artist={releaseDetail?.artistName}
-                          audioUrl={track.audioUrl}
-                          artworkUrl={releaseDetail?.coverUrl}
-                          durationSec={track.durationSec}
-                          releaseId={releaseDetail?.id}
-                          artistProfileId={releaseDetail?.artistProfileId}
-                          triggerClassName="explore-release-hero__btn explore-release-hero__btn--line"
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ol>
+              {releaseDetail && detailTracks.length > 0 ? (
+                <ReleaseTrackList
+                  tracks={detailTracks}
+                  releaseDetail={releaseDetail}
+                  onPlayTrack={handlePlayTrack}
+                />
               ) : null}
 
               <div className="explore-release-hero__about">
