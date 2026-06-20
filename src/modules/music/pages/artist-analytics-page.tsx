@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useRef } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Download } from 'lucide-react'
 import { downloadArtistAnalyticsCsv, getArtistAnalyticsDashboard } from '@/modules/music/api/music.api'
 import { ArtistListeningAnalytics } from '@/modules/music/components/artist-listening-analytics'
@@ -9,11 +10,27 @@ import '@/modules/explore/styles/release-analytics.css'
 import '@/modules/music/styles/artist-analytics.css'
 
 export function ArtistAnalyticsPage() {
+  const queryClient = useQueryClient()
+  const refreshTimerRef = useRef<number | undefined>(undefined)
+
   const { data, isLoading } = useQuery({
     queryKey: ['artist-analytics'],
     queryFn: getArtistAnalyticsDashboard,
-    refetchInterval: 30_000,
   })
+
+  useEffect(() => {
+    const refresh = () => {
+      window.clearTimeout(refreshTimerRef.current)
+      refreshTimerRef.current = window.setTimeout(() => {
+        void queryClient.invalidateQueries({ queryKey: ['artist-analytics'] })
+      }, 10_000)
+    }
+    window.addEventListener('ios:listen-flushed', refresh)
+    return () => {
+      window.removeEventListener('ios:listen-flushed', refresh)
+      window.clearTimeout(refreshTimerRef.current)
+    }
+  }, [queryClient])
 
   const handleExport = async () => {
     const csv = await downloadArtistAnalyticsCsv()

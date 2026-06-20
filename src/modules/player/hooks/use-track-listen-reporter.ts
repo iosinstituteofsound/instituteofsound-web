@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { randomUUID } from '@/shared/lib/random-uuid'
 import { API_V1 } from '@/shared/config/env'
 import { apiClient } from '@/shared/services/api/api-client'
-import { randomUUID } from '@/shared/lib/random-uuid'
 import type { PlayerTrack } from '@/modules/player/types/player.types'
 import { getListenerGeoHint, type ListenerGeoHint } from '@/modules/player/lib/listener-geo'
 
@@ -63,14 +62,15 @@ export function useTrackListenReporter(
   isPlaying: boolean,
   getCurrentTime: () => number,
 ) {
-  const queryClient = useQueryClient()
   const sessionIdRef = useRef<string | null>(null)
   const lastTickRef = useRef<number>(Date.now())
   const accumulatedRef = useRef(0)
   const lastFlushedSecRef = useRef(0)
   const geoHintRef = useRef<ListenerGeoHint | undefined>(undefined)
   const trackRef = useRef(track)
+  const getCurrentTimeRef = useRef(getCurrentTime)
   trackRef.current = track
+  getCurrentTimeRef.current = getCurrentTime
 
   useEffect(() => {
     void getListenerGeoHint().then((hint) => {
@@ -79,8 +79,8 @@ export function useTrackListenReporter(
   }, [])
 
   const resolveListenedSec = useCallback(() => {
-    return Math.max(accumulatedRef.current, Math.floor(getCurrentTime()))
-  }, [getCurrentTime])
+    return Math.max(accumulatedRef.current, Math.floor(getCurrentTimeRef.current()))
+  }, [])
 
   const flush = useCallback(
     async (opts?: {
@@ -115,13 +115,15 @@ export function useTrackListenReporter(
 
       if (ok) {
         lastFlushedSecRef.current = listenedSec
-        void queryClient.invalidateQueries({ queryKey: ['release-analytics', t.releaseId] })
       }
 
       return ok
     },
-    [queryClient, resolveListenedSec],
+    [resolveListenedSec],
   )
+
+  const flushRef = useRef(flush)
+  flushRef.current = flush
 
   useEffect(() => {
     sessionIdRef.current = newSessionId()
@@ -145,25 +147,14 @@ export function useTrackListenReporter(
 
     const intervalId = window.setInterval(tick, 1000)
     const progressId = window.setInterval(() => {
-      void flush()
+      void flushRef.current()
     }, PROGRESS_FLUSH_SEC * 1000)
 
     return () => {
       window.clearInterval(intervalId)
       window.clearInterval(progressId)
     }
-  }, [isPlaying, track?.releaseId, flush])
-
-  useEffect(() => {
-    const onListenFlushed = (event: Event) => {
-      const releaseId = (event as CustomEvent<{ releaseId: string }>).detail?.releaseId
-      if (releaseId) {
-        void queryClient.invalidateQueries({ queryKey: ['release-analytics', releaseId] })
-      }
-    }
-    window.addEventListener('ios:listen-flushed', onListenFlushed)
-    return () => window.removeEventListener('ios:listen-flushed', onListenFlushed)
-  }, [queryClient])
+  }, [isPlaying, track?.releaseId])
 
   useEffect(() => {
     return () => {
@@ -172,24 +163,28 @@ export function useTrackListenReporter(
       const listenedSec = resolveListenedSec()
       if (listenedSec < MIN_FLUSH_SEC) return
       if (listenedSec < 15) {
-        void flush({ skippedEarly: true, endedEarly: true, force: true })
+        void flushRef.current({ skippedEarly: true, endedEarly: true, force: true })
       } else {
-        void flush({ endedEarly: true, force: true })
+        void flushRef.current({ endedEarly: true, force: true })
       }
     }
-  }, [track?.trackId, track?.id, flush, resolveListenedSec])
+  }, [track?.trackId, track?.id, resolveListenedSec])
+
+  const reportCompleted = useCallback(() => {
+    accumulatedRef.current = Math.max(accumulatedRef.current, getCurrentTimeRef.current())
+    return flushRef.current({ completed: true, force: true })
+  }, [])
+
+  const reportPause = useCallback((listenedSec: number) => {
+    accumulatedRef.current = Math.max(accumulatedRef.current, listenedSec)
+    if (listenedSec < 15) {
+      return flushRef.current({ skippedEarly: true, endedEarly: true, force: true })
+    }
+    return flushRef.current({ endedEarly: true, force: true })
+  }, [])
 
   return {
-    reportCompleted: () => {
-      accumulatedRef.current = Math.max(accumulatedRef.current, getCurrentTime())
-      return flush({ completed: true, force: true })
-    },
-    reportPause: (listenedSec: number) => {
-      accumulatedRef.current = Math.max(accumulatedRef.current, listenedSec)
-      if (listenedSec < 15) {
-        return flush({ skippedEarly: true, endedEarly: true, force: true })
-      }
-      return flush({ endedEarly: true, force: true })
-    },
+    reportCompleted,
+    reportPause,
   }
 }
