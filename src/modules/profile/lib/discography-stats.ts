@@ -10,22 +10,11 @@ export type ArtistDiscographyStats = {
   countriesReached: number
 }
 
-const TRACK_ESTIMATE: Record<string, number> = {
-  album: 10,
-  ep: 5,
-  single: 1,
-}
-
 function collectRealReleases(data: DiscographyDto) {
   const seen = new Set<string>()
   const items = []
 
-  for (const release of [
-    data.latestRelease,
-    ...data.popular,
-    ...(data.albumsAndEps ?? []),
-    ...(data.singles ?? []),
-  ]) {
+  for (const release of [data.latestRelease, ...(data.albumsAndEps ?? []), ...(data.singles ?? [])]) {
     if (!release || isDiscographyPreviewId(release.id) || seen.has(release.id)) continue
     seen.add(release.id)
     items.push(release)
@@ -34,20 +23,18 @@ function collectRealReleases(data: DiscographyDto) {
   return items
 }
 
-function estimateTrackCount(releases: DiscographyDto['popular']): number {
-  return releases.reduce((sum, release) => {
-    const type = release.type ?? 'single'
-    return sum + (TRACK_ESTIMATE[type] ?? 1)
-  }, 0)
+function collectRealTracks(data: DiscographyDto) {
+  return (data.tracks ?? []).filter((track) => !isDiscographyPreviewId(track.id))
 }
 
 export function buildArtistDiscographyStats(data: DiscographyDto): ArtistDiscographyStats {
   const releases = collectRealReleases(data)
+  const tracks = collectRealTracks(data)
 
   return {
-    totalReleases: releases.length,
-    totalTracks: estimateTrackCount(releases),
-    totalStreams: releases.reduce((sum, release) => sum + (release.playCount ?? 0), 0),
+    totalReleases: tracks.length > 0 ? tracks.length : releases.length,
+    totalTracks: tracks.length > 0 ? tracks.length : releases.length,
+    totalStreams: tracks.reduce((sum, track) => sum + (track.playCount ?? 0), 0),
     monthlyListeners: 0,
     followers: 0,
     countriesReached: 0,

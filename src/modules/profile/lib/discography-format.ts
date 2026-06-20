@@ -1,9 +1,9 @@
-import type { DiscographyDto, ReleaseDto, MusicVideoDto } from '@/modules/explore/types/explore.types'
+import type { DiscographyDto, DiscographyTrackDto, ReleaseDto, MusicVideoDto } from '@/modules/explore/types/explore.types'
 import type { UserDto } from '@/shared/types/auth.types'
 import { releaseDateLabel, releaseTypeLabel } from '@/modules/explore/lib/release-meta'
 
 function previewEnabled(preview?: boolean): boolean {
-  return preview ?? import.meta.env.DEV
+  return preview === true
 }
 
 export function isDiscographyPreviewId(id: string): boolean {
@@ -54,13 +54,13 @@ export function isVideoPreviewRelease(id: string): boolean {
   return id.startsWith('__preview_video_')
 }
 
-export function fillPopularPreview(releases: ReleaseDto[], preview?: boolean): ReleaseDto[] {
-  if (!previewEnabled(preview) || releases.length >= POPULAR_PREVIEW_TARGET) return releases
+export function fillPopularPreview(tracks: DiscographyTrackDto[], preview?: boolean): DiscographyTrackDto[] {
+  if (!previewEnabled(preview) || tracks.length >= POPULAR_PREVIEW_TARGET) return tracks
 
-  const filled = [...releases]
-  for (let i = releases.length; i < POPULAR_PREVIEW_TARGET; i++) {
-    const base = releases.length > 0 ? releases[i % releases.length]! : undefined
-    const filler = POPULAR_PREVIEW_FILLER[i - releases.length]
+  const filled = [...tracks]
+  for (let i = tracks.length; i < POPULAR_PREVIEW_TARGET; i++) {
+    const base = tracks.length > 0 ? tracks[i % tracks.length]! : undefined
+    const filler = POPULAR_PREVIEW_FILLER[i - tracks.length]
     const slot = String(i + 1).padStart(2, '0')
     filled.push({
       ...(base ?? {}),
@@ -234,6 +234,7 @@ export function discographyHasContent(data: DiscographyDto): boolean {
   return Boolean(
     data.latestRelease ||
       data.popular.length > 0 ||
+      (data.tracks?.length ?? 0) > 0 ||
       (data.albumsAndEps?.length ?? 0) > 0 ||
       (data.singles?.length ?? 0) > 0 ||
       (data.musicVideos?.length ?? 0) > 0,
@@ -255,6 +256,7 @@ export function enrichDiscographyForDisplay(
     ...data,
     latestRelease: fillLatestReleasePreview(data.latestRelease, artistName, true),
     popular: fillPopularPreview(data.popular, true),
+    tracks: data.tracks ?? [],
     albumsAndEps: fillAlbumsPreview(data.albumsAndEps ?? [], artistName, true),
     singles: fillSinglesPreview(data.singles ?? [], artistName, true),
     musicVideos: fillMusicVideosPreview(data.musicVideos ?? [], true),

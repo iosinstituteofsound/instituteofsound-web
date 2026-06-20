@@ -91,6 +91,7 @@ export interface ReleaseDto {
   isFeatured?: boolean
   durationSec?: number
   trackCount?: number
+  parentReleaseId?: string
 }
 
 export interface ReleaseGenreDto {
@@ -128,10 +129,26 @@ export interface ReleasesPageDto {
   hasMore: boolean
 }
 
+export interface DiscographyTrackDto {
+  id: string
+  releaseId?: string
+  artistProfileId?: string
+  title: string
+  coverUrl?: string
+  artistName?: string
+  streamUrl?: string
+  playCount?: number
+  durationSec?: number
+  releaseDate?: string
+  type?: ReleaseType
+  genre?: string
+}
+
 export interface DiscographyDto {
   artist: ArtistProfileDto | null
   latestRelease: ReleaseDto | null
-  popular: ReleaseDto[]
+  popular: DiscographyTrackDto[]
+  tracks: DiscographyTrackDto[]
   artistPick: ReleaseDto | null
   albumsAndEps: ReleaseDto[]
   singles: ReleaseDto[]

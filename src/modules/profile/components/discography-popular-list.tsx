@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { ReleaseDto } from '@/modules/explore/types/explore.types'
+import type { DiscographyTrackDto } from '@/modules/explore/types/explore.types'
 import { releaseInitials } from '@/modules/explore/lib/release-meta'
 import type { PlayerTrack } from '@/modules/player/types/player.types'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
@@ -12,7 +12,7 @@ import { cn } from '@/shared/lib/cn'
 import '@/modules/profile/styles/disc-device-panel.css'
 
 type DiscographyPopularListProps = {
-  releases: ReleaseDto[]
+  tracks: DiscographyTrackDto[]
   artistName?: string
 }
 
@@ -25,43 +25,43 @@ const DEMO_STREAM_URLS = [
   'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
 ] as const
 
-function releaseStreamUrl(release: ReleaseDto, index: number): string | undefined {
-  if (release.streamUrl) return release.streamUrl
-  if (isPopularPreviewRelease(release.id)) {
+function trackStreamUrl(track: DiscographyTrackDto, index: number): string | undefined {
+  if (track.streamUrl) return track.streamUrl
+  if (isPopularPreviewRelease(track.id)) {
     return DEMO_STREAM_URLS[index % DEMO_STREAM_URLS.length]
   }
   return undefined
 }
 
-function popularReleasesToPlayerQueue(releases: ReleaseDto[], artistName?: string): PlayerTrack[] {
-  return releases.flatMap((release, index) => {
-    const audioUrl = releaseStreamUrl(release, index)
+function popularTracksToPlayerQueue(tracks: DiscographyTrackDto[], artistName?: string): PlayerTrack[] {
+  return tracks.flatMap((track, index) => {
+    const audioUrl = trackStreamUrl(track, index)
     if (!audioUrl) return []
 
     return [
       {
-        id: release.id,
-        title: release.title,
-        artist: release.artistName ?? artistName ?? 'Unknown',
+        id: track.id,
+        title: track.title,
+        artist: track.artistName ?? artistName ?? 'Unknown',
         audioUrl,
-        artworkUrl: release.coverUrl,
-        durationSec: release.durationSec,
+        artworkUrl: track.coverUrl,
+        durationSec: track.durationSec,
       },
     ]
   })
 }
 
-export function DiscographyPopularList({ releases, artistName }: DiscographyPopularListProps) {
+export function DiscographyPopularList({ tracks: inputTracks, artistName }: DiscographyPopularListProps) {
   const playTrack = usePlayerStore((s) => s.playTrack)
   const currentTrack = usePlayerStore((s) => s.currentTrack)
 
-  const tracks = fillPopularPreview(releases)
-  const queue = useMemo(() => popularReleasesToPlayerQueue(tracks, artistName), [tracks, artistName])
+  const tracks = fillPopularPreview(inputTracks)
+  const queue = useMemo(() => popularTracksToPlayerQueue(tracks, artistName), [tracks, artistName])
 
   if (tracks.length === 0) return null
 
-  const onPlay = (release: ReleaseDto) => {
-    const queueIndex = queue.findIndex((track) => track.id === release.id)
+  const onPlay = (track: DiscographyTrackDto) => {
+    const queueIndex = queue.findIndex((item) => item.id === track.id)
     if (queueIndex < 0) return
     playTrack(queue[queueIndex]!, { queue, queueIndex })
   }
@@ -100,13 +100,13 @@ export function DiscographyPopularList({ releases, artistName }: DiscographyPopu
           <span className="disc-dev__screen-noise" aria-hidden />
 
           <ol className="disc-dev__tracks">
-            {tracks.map((release, index) => {
-              const playable = queue.some((track) => track.id === release.id)
-              const active = currentTrack?.id === release.id
-              const preview = isPopularPreviewRelease(release.id)
+            {tracks.map((track, index) => {
+              const playable = queue.some((item) => item.id === track.id)
+              const active = currentTrack?.id === track.id
+              const preview = isPopularPreviewRelease(track.id)
 
               return (
-                <li key={release.id} className="disc-dev__track">
+                <li key={track.id} className="disc-dev__track">
                   <button
                     type="button"
                     className={cn(
@@ -115,28 +115,28 @@ export function DiscographyPopularList({ releases, artistName }: DiscographyPopu
                       active && 'disc-dev__track-link--active',
                       !playable && 'disc-dev__track-link--disabled',
                     )}
-                    onClick={() => onPlay(release)}
+                    onClick={() => onPlay(track)}
                     disabled={!playable}
-                    aria-label={`Play ${release.title}`}
+                    aria-label={`Play ${track.title}`}
                     aria-current={active ? 'true' : undefined}
                   >
                     <span className="disc-dev__track-rank">{String(index + 1).padStart(2, '0')}</span>
-                    {release.coverUrl ? (
+                    {track.coverUrl ? (
                       <img
-                        src={release.coverUrl}
+                        src={track.coverUrl}
                         alt=""
                         className="disc-dev__track-thumb"
                         loading="lazy"
                       />
                     ) : (
                       <span className="disc-dev__track-thumb disc-dev__track-thumb--fallback" aria-hidden>
-                        {releaseInitials(release.title)}
+                        {releaseInitials(track.title)}
                       </span>
                     )}
-                    <span className="disc-dev__track-name">{release.title}</span>
+                    <span className="disc-dev__track-name">{track.title}</span>
                     <span className="disc-dev__track-stat">
                       <span className="disc-dev__track-stat-value">
-                        {formatDiscographyPlays(release.playCount)}
+                        {formatDiscographyPlays(track.playCount)}
                       </span>
                       <span className="disc-dev__track-stat-label">streams</span>
                     </span>

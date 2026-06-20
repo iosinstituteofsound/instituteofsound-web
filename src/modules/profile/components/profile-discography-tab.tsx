@@ -42,7 +42,6 @@ export function ProfileDiscographyTab({ user, isOwnProfile }: ProfileDiscography
     const items = []
     for (const release of [
       display.latestRelease,
-      ...display.popular,
       ...(display.albumsAndEps ?? []),
       ...(display.singles ?? []),
     ]) {
@@ -100,7 +99,7 @@ export function ProfileDiscographyTab({ user, isOwnProfile }: ProfileDiscography
           <span className="disc-rack__rail" />
           <span className="disc-rack__bus" />
         </div>
-        <DiscographyPopularList releases={display.popular} artistName={artistName} />
+        <DiscographyPopularList tracks={display.popular} artistName={artistName} />
         <div className="profile-discography__rack-side">
           <DiscographyArtistPick
             userId={user.id}
