@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { API_V1 } from '@/shared/config/env'
 import { apiClient } from '@/shared/services/api/api-client'
 import type { PlayerTrack } from '@/modules/player/types/player.types'
+import { getListenerGeoHint, type ListenerGeoHint } from '@/modules/player/lib/listener-geo'
 
 const ANON_KEY = 'ios_listen_anon_id'
 const PROGRESS_FLUSH_SEC = 10
@@ -37,6 +38,7 @@ type FlushPayload = {
   skippedEarly?: boolean
   endedEarly?: boolean
   anonymousId?: string
+  geoHint?: ListenerGeoHint
 }
 
 async function postListen(trackId: string, payload: FlushPayload, releaseId?: string) {
@@ -65,8 +67,15 @@ export function useTrackListenReporter(
   const lastTickRef = useRef<number>(Date.now())
   const accumulatedRef = useRef(0)
   const lastFlushedSecRef = useRef(0)
+  const geoHintRef = useRef<ListenerGeoHint | undefined>(undefined)
   const trackRef = useRef(track)
   trackRef.current = track
+
+  useEffect(() => {
+    void getListenerGeoHint().then((hint) => {
+      geoHintRef.current = hint
+    })
+  }, [])
 
   const resolveListenedSec = useCallback(() => {
     return Math.max(accumulatedRef.current, Math.floor(getCurrentTime()))
@@ -98,6 +107,7 @@ export function useTrackListenReporter(
           skippedEarly: opts?.skippedEarly,
           endedEarly: opts?.endedEarly,
           anonymousId: getAnonymousId(),
+          geoHint: geoHintRef.current,
         },
         t.releaseId,
       )

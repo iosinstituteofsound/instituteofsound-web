@@ -9,6 +9,7 @@ import {
 } from '@/modules/music/api/music.api'
 import type { ReleaseAnalyticsSummaryDto } from '@/modules/music/types/analytics.types'
 import { formatListenTime, formatPercent, formatPlays } from '@/modules/music/lib/analytics-format'
+import { ReleaseLocationMap } from '@/modules/explore/components/release-location-map'
 import { ReleaseListenerCard } from '@/modules/explore/components/release-listener-card'
 import '@/modules/explore/styles/release-analytics.css'
 
@@ -155,6 +156,14 @@ export function ReleaseAnalyticsPanel({ releaseId, primaryTrackId }: Props) {
         {trends?.length ? <TrendsChart points={trends} /> : (
           <p className="ios-release-analytics__empty">Play this release to see trends.</p>
         )}
+      </div>
+
+      <div className="ios-release-analytics__section ios-release-analytics__section--map">
+        <div className="ios-release-analytics__section-head">
+          <MapPin size={16} aria-hidden />
+          <h3>Listener map</h3>
+        </div>
+        <ReleaseLocationMap locations={analytics.locations} />
       </div>
 
       <div className="ios-release-analytics__split">

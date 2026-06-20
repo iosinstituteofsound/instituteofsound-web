@@ -229,6 +229,83 @@
   opacity: 0.65;
 }
 
+.ios-release-analytics__section--map {
+  padding: 0.75rem;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--background) 84%, var(--foreground) 16%);
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.ios-release-analytics__map-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ios-release-analytics__map-wrap {
+  position: relative;
+  width: 100%;
+  min-height: 14rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    color-mix(in srgb, #c40000 8%, transparent),
+    color-mix(in srgb, var(--background) 95%, black)
+  );
+}
+
+.ios-release-analytics__map-wrap svg {
+  width: 100% !important;
+}
+
+.ios-release-analytics__map-markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ios-release-analytics__map-dot {
+  position: absolute;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  background: #ff4d4d;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35), 0 0 12px rgba(255, 77, 77, 0.85);
+}
+
+.ios-release-analytics__map-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.45rem 0.75rem;
+}
+
+.ios-release-analytics__map-legend li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+}
+
+.ios-release-analytics__map-legend-swatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 0.15rem;
+  background: #c40000;
+}
+
+.ios-release-analytics__map-legend-label {
+  opacity: 0.85;
+}
+
+.ios-release-analytics__map-legend-value {
+  font-weight: 600;
+}
+
 .ios-release-analytics__likes-row {
   margin-top: 1rem;
   padding-top: 0.75rem;
