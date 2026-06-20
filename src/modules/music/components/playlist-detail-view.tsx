@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  ListMusic,
+  ArrowLeft,
   MoreHorizontal,
   Play,
   Plus,
@@ -10,12 +10,13 @@ import {
 import type { PlaylistDetailDto } from '@/modules/music/types/music.types'
 import type { PlaylistDto } from '@/modules/explore/types/explore.types'
 import { PlaylistTrackTable } from '@/modules/music/components/playlist-track-table'
+import { usePlaylistCoverTheme } from '@/modules/music/hooks/use-playlist-cover-theme'
 import { playlistToPlayerQueue } from '@/modules/music/lib/player-queue'
+import { playlistCoverThemeStyle } from '@/modules/music/lib/playlist-cover-theme'
 import {
   formatPlaylistTotalDuration,
   playlistCuratorLabel,
   playlistSavesLabel,
-  playlistVisibilityLabel,
 } from '@/modules/music/lib/playlist-detail-format'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { cn } from '@/shared/lib/cn'
@@ -26,7 +27,9 @@ interface PlaylistDetailViewProps {
   relatedPlaylists?: PlaylistDto[]
   onRemoveTrack?: (trackId: string) => void
   isRemovingTrack?: boolean
-  topSlot?: React.ReactNode
+  backHref?: string
+  backLabel?: string
+  headerActions?: React.ReactNode
 }
 
 export function PlaylistDetailView({
@@ -34,12 +37,17 @@ export function PlaylistDetailView({
   relatedPlaylists = [],
   onRemoveTrack,
   isRemovingTrack,
-  topSlot,
+  backHref,
+  backLabel = 'Go back',
+  headerActions,
 }: PlaylistDetailViewProps) {
   const playTrack = usePlayerStore((s) => s.playTrack)
   const toggleShuffle = usePlayerStore((s) => s.toggleShuffle)
   const shuffle = usePlayerStore((s) => s.shuffle)
   const [saved, setSaved] = useState(false)
+
+  const theme = usePlaylistCoverTheme(playlist.coverUrl, playlist.slug)
+  const themeStyle = useMemo(() => playlistCoverThemeStyle(theme), [theme])
 
   const cover =
     playlist.coverUrl ?? `https://picsum.photos/seed/playlist-${playlist.slug}/640/640`
@@ -76,10 +84,26 @@ export function PlaylistDetailView({
     .slice(0, 6)
 
   return (
-    <div className="playlist-detail">
-      {topSlot}
-
+    <div className="playlist-detail" style={themeStyle}>
       <header className="playlist-detail__hero">
+        <div className="playlist-detail__hero-bg" aria-hidden />
+        <div className="playlist-detail__hero-noise" aria-hidden />
+
+        {(backHref || headerActions) && (
+          <div className="playlist-detail__hero-nav">
+            {backHref ? (
+              <Link to={backHref} className="playlist-detail__back" aria-label={backLabel}>
+                <ArrowLeft size={18} strokeWidth={2} aria-hidden />
+              </Link>
+            ) : (
+              <span />
+            )}
+            {headerActions ? (
+              <div className="playlist-detail__hero-actions">{headerActions}</div>
+            ) : null}
+          </div>
+        )}
+
         <div className="playlist-detail__hero-inner">
           <div className="playlist-detail__cover-wrap">
             {playlist.coverUrl ? (
@@ -92,7 +116,6 @@ export function PlaylistDetailView({
           </div>
 
           <div className="playlist-detail__meta">
-            <span className="playlist-detail__type">{playlistVisibilityLabel(playlist)}</span>
             <h1 className="playlist-detail__title">{playlist.title}</h1>
             {playlist.description ? (
               <p className="playlist-detail__desc">{playlist.description}</p>
@@ -113,7 +136,7 @@ export function PlaylistDetailView({
               </span>
               {playlist.tracks.length > 0 ? (
                 <>
-                  <span className="playlist-detail__stats-sep">,</span>
+                  <span className="playlist-detail__stats-sep">·</span>
                   <span>{formatPlaylistTotalDuration(playlist.tracks)}</span>
                 </>
               ) : null}
@@ -130,7 +153,7 @@ export function PlaylistDetailView({
           disabled={!queue.length}
           onClick={handlePlayAll}
         >
-          <Play size={22} fill="currentColor" aria-hidden />
+          <Play size={20} fill="currentColor" aria-hidden />
         </button>
         <button
           type="button"
@@ -139,7 +162,7 @@ export function PlaylistDetailView({
           disabled={!queue.length}
           onClick={toggleShuffle}
         >
-          <Shuffle size={18} strokeWidth={2} aria-hidden />
+          <Shuffle size={17} strokeWidth={2} aria-hidden />
         </button>
         <button
           type="button"
@@ -147,15 +170,11 @@ export function PlaylistDetailView({
           aria-label={saved ? 'Saved to library' : 'Save to library'}
           onClick={() => setSaved((value) => !value)}
         >
-          <Plus size={20} strokeWidth={2} aria-hidden />
+          <Plus size={18} strokeWidth={2} aria-hidden />
         </button>
         <button type="button" className="playlist-detail__icon-btn" aria-label="More options">
-          <MoreHorizontal size={20} strokeWidth={2} aria-hidden />
+          <MoreHorizontal size={18} strokeWidth={2} aria-hidden />
         </button>
-        <span className="playlist-detail__toolbar-spacer" />
-        <span className="playlist-detail__icon-btn" aria-hidden>
-          <ListMusic size={18} strokeWidth={2} />
-        </span>
       </div>
 
       <div className="playlist-detail__body">
@@ -178,12 +197,14 @@ export function PlaylistDetailView({
                   to={`/playlists/${item.slug}`}
                   className="playlist-detail__related-card"
                 >
-                  <img
-                    src={item.coverUrl ?? `https://picsum.photos/seed/${item.slug}-rel/320/320`}
-                    alt=""
-                    className="playlist-detail__related-cover"
-                    loading="lazy"
-                  />
+                  <div className="playlist-detail__related-cover-wrap">
+                    <img
+                      src={item.coverUrl ?? `https://picsum.photos/seed/${item.slug}-rel/320/320`}
+                      alt=""
+                      className="playlist-detail__related-cover"
+                      loading="lazy"
+                    />
+                  </div>
                   <p className="playlist-detail__related-name">{item.title}</p>
                   <p className="playlist-detail__related-by">By Institute of Sound</p>
                 </Link>
