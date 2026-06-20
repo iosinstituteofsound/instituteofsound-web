@@ -20,6 +20,7 @@ import {
   playlistTrackCount,
 } from '@/modules/explore/lib/playlist-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { playExplorePlaylist } from '@/modules/music/lib/player-queue'
 import {
   ExploreSectionHead,
   ExploreSectionHeadAction,
@@ -35,17 +36,7 @@ function playPlaylist(
   playlist: PlaylistDto,
   playTrack: ReturnType<typeof usePlayerStore.getState>['playTrack'],
 ) {
-  const queue = playlist.tracks
-    .filter((item) => item.streamUrl || item.audioUrl)
-    .map((item, index) => ({
-      id: `${playlist.id}-${index}`,
-      title: item.title,
-      artist: item.artistName,
-      audioUrl: (item.streamUrl ?? item.audioUrl)!,
-      artworkUrl: playlist.coverUrl,
-    }))
-  if (!queue.length) return
-  playTrack(queue[0], { queue })
+  playExplorePlaylist(playlist, playTrack)
 }
 
 function WaveBadge() {

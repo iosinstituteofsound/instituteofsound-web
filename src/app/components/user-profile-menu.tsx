@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { LogOut, Monitor, Moon, Sun, UserRound } from 'lucide-react'
+import { ListMusic, LogOut, Monitor, Moon, Sun, UserRound } from 'lucide-react'
 import { UserIdentityBadges } from '@/app/components/user-header-identity'
 import { useLogout, useMe } from '@/modules/auth/hooks/use-auth'
 import { useEnsureAvatarThumbnail } from '@/modules/profile/hooks/use-ensure-avatar-thumbnail'
@@ -96,6 +96,15 @@ export function UserProfileMenu() {
                 <UserRound className="h-4 w-4" />
               </span>
               Profile
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild className="profile-menu__item">
+            <Link to="/library/playlists" className="flex w-full items-center gap-2.5">
+              <span className="profile-menu__item-icon">
+                <ListMusic className="h-4 w-4" />
+              </span>
+              My Playlists
             </Link>
           </DropdownMenuItem>
 

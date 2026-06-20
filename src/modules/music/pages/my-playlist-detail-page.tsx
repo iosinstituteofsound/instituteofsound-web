@@ -1,13 +1,13 @@
 import { useParams } from 'react-router-dom'
 import { PlaylistOwnerDetailView } from '@/modules/music/components/playlists/playlist-owner-detail-view'
 
-export function ArtistPlaylistDetailPage() {
+export function MyPlaylistDetailPage() {
   const { slug = '' } = useParams()
   return (
     <PlaylistOwnerDetailView
-      mode="artist"
+      mode="listener"
       slug={slug}
-      basePath="/artist/playlists"
+      basePath="/library/playlists"
     />
   )
 }

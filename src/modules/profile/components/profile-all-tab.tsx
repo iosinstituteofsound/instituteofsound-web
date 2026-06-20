@@ -1,6 +1,7 @@
 import type { UserDto } from '@/shared/types/auth.types'
 import { ProfileIntroSidebar } from '@/modules/profile/components/profile-intro-sidebar'
 import { ProfilePostsPanel } from '@/modules/profile/components/profile-posts-panel'
+import { ListenerPlaylistsSection } from '@/modules/profile/components/listener-playlists-section'
 
 type ProfileAllTabProps = {
   user: UserDto
@@ -25,6 +26,11 @@ export function ProfileAllTab({
           onSeeMoreAbout={onNavigateToAbout}
           onSeeAllPhotos={onNavigateToPhotos}
         />
+        {isOwnProfile ? (
+          <div className="mt-4">
+            <ListenerPlaylistsSection isOwnProfile />
+          </div>
+        ) : null}
       </aside>
       <div className="min-w-0 lg:pl-1">
         <ProfilePostsPanel user={user} isOwnProfile={isOwnProfile} />

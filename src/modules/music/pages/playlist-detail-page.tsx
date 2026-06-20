@@ -1,46 +1,7 @@
-import { useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Link, useParams } from 'react-router-dom'
-import { getPlaylistDetail } from '@/modules/music/api/music.api'
-import { PlaylistDetailView } from '@/modules/music/components/playlist-detail-view'
-import { useExplore } from '@/modules/explore/hooks/use-explore'
-import { listPlaylists } from '@/modules/explore/lib/playlist-meta'
-import { Loader } from '@/shared/components/feedback/loader'
+import { useParams } from 'react-router-dom'
+import { PlaylistPublicDetailView } from '@/modules/music/components/playlists/playlist-public-detail-view'
 
 export function PlaylistDetailPage() {
   const { slug = '' } = useParams()
-  const { data: explore } = useExplore()
-
-  const { data: playlist, isLoading, isError } = useQuery({
-    queryKey: ['playlist', slug],
-    queryFn: () => getPlaylistDetail(slug),
-    enabled: Boolean(slug),
-  })
-
-  const relatedPlaylists = useMemo(() => {
-    if (!explore) return []
-    return listPlaylists(explore.playlists.featured, explore.playlists.items, 8)
-  }, [explore])
-
-  if (isLoading) return <Loader className="min-h-[50vh] bg-[#121212]" />
-
-  if (isError || !playlist) {
-    return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 bg-[#121212] p-8 text-white">
-        <p className="text-[#b3b3b3]">Playlist not found or is private.</p>
-        <Link to="/explore" className="text-sm text-white underline">
-          Back to Explore
-        </Link>
-      </div>
-    )
-  }
-
-  return (
-    <PlaylistDetailView
-      playlist={playlist}
-      relatedPlaylists={relatedPlaylists}
-      backHref="/explore"
-      backLabel="Back to Explore"
-    />
-  )
+  return <PlaylistPublicDetailView slug={slug} />
 }

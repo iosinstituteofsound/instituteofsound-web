@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ChevronDown,
   Heart,
+  ListMusic,
+  ListEnd,
   Music2,
   Pause,
   Play,
@@ -17,6 +19,7 @@ import {
 } from 'lucide-react'
 import { PlayerSlider } from '@/modules/player/components/player-slider'
 import { formatPlayerTime } from '@/modules/player/lib/format-time'
+import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { getReleaseAnalytics, toggleTrackLike } from '@/modules/music/api/music.api'
 import { tokenStorage } from '@/shared/services/api/token-storage'
@@ -58,6 +61,7 @@ export function NowPlayingSheet() {
   const queryClient = useQueryClient()
   const currentTrack = usePlayerStore((s) => s.currentTrack)
   const queue = usePlayerStore((s) => s.queue)
+  const queueSource = usePlayerStore((s) => s.queueSource)
   const isPlaying = usePlayerStore((s) => s.isPlaying)
   const currentTime = usePlayerStore((s) => s.currentTime)
   const duration = usePlayerStore((s) => s.duration)
@@ -76,6 +80,11 @@ export function NowPlayingSheet() {
   const previous = usePlayerStore((s) => s.previous)
   const close = usePlayerStore((s) => s.close)
   const closeNowPlaying = usePlayerStore((s) => s.closeNowPlaying)
+  const openQueue = usePlayerStore((s) => s.openQueue)
+  const openPlaylistModal = usePlayerStore((s) => s.openPlaylistModal)
+
+  const canOpenSourceModal =
+    queueSource?.kind === 'playlist' || queueSource?.kind === 'release'
 
   const releaseId = currentTrack?.releaseId
   const trackId =
@@ -133,7 +142,10 @@ export function NowPlayingSheet() {
         </div>
 
         <div className="now-playing-sheet__body">
-          <div className="now-playing-sheet__artwork">
+          <div
+            className={cn('now-playing-sheet__artwork', canOpenSourceModal && 'cursor-pointer')}
+            onClick={() => canOpenSourceModal && openPlaylistModal()}
+          >
             {currentTrack.artworkUrl ? (
               <img src={currentTrack.artworkUrl} alt="" />
             ) : (
@@ -147,6 +159,15 @@ export function NowPlayingSheet() {
             <h2 className="now-playing-sheet__title">{currentTrack.title}</h2>
             {currentTrack.artist ? (
               <p className="now-playing-sheet__artist">{currentTrack.artist}</p>
+            ) : null}
+            {queueSource?.title ? (
+              <button
+                type="button"
+                className="now-playing-sheet__source-link"
+                onClick={() => openPlaylistModal()}
+              >
+                {queueSource.title}
+              </button>
             ) : null}
           </div>
 
@@ -228,6 +249,16 @@ export function NowPlayingSheet() {
               />
             </SheetControlButton>
 
+            <AddToPlaylistButton
+              trackId={trackId}
+              id={currentTrack.id}
+              title={currentTrack.title}
+              artist={currentTrack.artist}
+              artworkUrl={currentTrack.artworkUrl}
+              className="now-playing-sheet__add-playlist"
+              size="md"
+            />
+
             <div className="now-playing-sheet__volume">
               <SheetControlButton
                 label={muted || volume === 0 ? 'Unmute' : 'Mute'}
@@ -248,10 +279,24 @@ export function NowPlayingSheet() {
               />
             </div>
 
-            {queue.length > 1 ? (
-              <p className="now-playing-sheet__queue-hint">
+            {canOpenSourceModal ? (
+              <SheetControlButton label="View playlist" onClick={openPlaylistModal}>
+                <ListMusic className="h-5 w-5" strokeWidth={2.25} />
+              </SheetControlButton>
+            ) : null}
+
+            <SheetControlButton label="Open queue" onClick={openQueue} disabled={queue.length === 0}>
+              <ListEnd className="h-5 w-5" strokeWidth={2.25} />
+            </SheetControlButton>
+
+            {queue.length > 0 ? (
+              <button
+                type="button"
+                className="now-playing-sheet__queue-hint"
+                onClick={openQueue}
+              >
                 {queue.length} tracks in queue
-              </p>
+              </button>
             ) : null}
           </div>
         </div>

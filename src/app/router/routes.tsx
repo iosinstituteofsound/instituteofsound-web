@@ -147,6 +147,16 @@ const PlaylistDetailPage = lazy(() =>
     default: m.PlaylistDetailPage,
   })),
 )
+const MyPlaylistsPage = lazy(() =>
+  import('@/modules/music/pages/my-playlists-page').then((m) => ({
+    default: m.MyPlaylistsPage,
+  })),
+)
+const MyPlaylistDetailPage = lazy(() =>
+  import('@/modules/music/pages/my-playlist-detail-page').then((m) => ({
+    default: m.MyPlaylistDetailPage,
+  })),
+)
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>
@@ -379,6 +389,22 @@ export const router = createBrowserRouter([
         element: (
           <Lazy>
             <ProfileSettingsPage />
+          </Lazy>
+        ),
+      },
+      {
+        path: 'library/playlists',
+        element: (
+          <Lazy>
+            <MyPlaylistsPage />
+          </Lazy>
+        ),
+      },
+      {
+        path: 'library/playlists/:slug',
+        element: (
+          <Lazy>
+            <MyPlaylistDetailPage />
           </Lazy>
         ),
       },

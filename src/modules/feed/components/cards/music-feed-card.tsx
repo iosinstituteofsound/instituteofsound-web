@@ -4,8 +4,10 @@ import { FeedCardShell, payloadString } from '@/modules/feed/components/cards/fe
 import { ReleaseSharePreview } from '@/modules/feed/components/release-share-preview'
 import { isReleaseShareItem } from '@/modules/feed/lib/feed-release-payload'
 import { useEnrichedMusicFeedItem } from '@/modules/feed/hooks/use-enriched-music-feed-item'
+import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
 import { feedItemToPlayerTrack } from '@/modules/player/lib/feed-track'
 import { usePlayer } from '@/modules/player/hooks/use-player'
+import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 
@@ -94,21 +96,41 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardPr
             </a>
           </Button>
         ) : playerTrack ? (
-          <Button
-            variant={isActive ? 'default' : 'outline'}
-            size="sm"
-            className="shrink-0 rounded-lg"
-            onClick={() => {
-              if (isActive) {
-                togglePlay()
-                return
-              }
-              play(playerTrack)
-            }}
-          >
-            {showPause ? <Pause className="mr-1 h-4 w-4" /> : <Play className="mr-1 h-4 w-4" />}
-            {showPause ? 'Pause' : 'Play'}
-          </Button>
+          <div className="flex shrink-0 items-center gap-1">
+            <Button
+              variant={isActive ? 'default' : 'outline'}
+              size="sm"
+              className="rounded-lg"
+              onClick={() => {
+                if (isActive) {
+                  togglePlay()
+                  return
+                }
+                play(playerTrack)
+              }}
+            >
+              {showPause ? <Pause className="mr-1 h-4 w-4" /> : <Play className="mr-1 h-4 w-4" />}
+              {showPause ? 'Pause' : 'Play'}
+            </Button>
+            <AddToPlaylistButton
+              trackId={playerTrack.trackId}
+              id={playerTrack.id}
+              title={playerTrack.title}
+              artist={playerTrack.artist}
+              artworkUrl={playerTrack.artworkUrl}
+            />
+            <TrackActionsMenu
+              trackId={playerTrack.trackId}
+              id={playerTrack.id}
+              title={playerTrack.title}
+              artist={playerTrack.artist}
+              audioUrl={playerTrack.audioUrl}
+              artworkUrl={playerTrack.artworkUrl}
+              durationSec={playerTrack.durationSec}
+              releaseId={playerTrack.releaseId}
+              triggerClassName="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/60"
+            />
+          </div>
         ) : null}
       </div>
     </FeedCardShell>

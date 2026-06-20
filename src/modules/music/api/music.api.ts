@@ -177,6 +177,13 @@ export async function updateArtistPlaylist(
   return data.data
 }
 
+export async function deleteArtistPlaylist(id: string) {
+  const { data } = await apiClient.delete<ApiSuccessResponse<{ deleted: boolean }>>(
+    `${API_V1}/artist/playlists/${id}`,
+  )
+  return data.data
+}
+
 export async function getArtistPlaylist(idOrSlug: string) {
   const { data } = await apiClient.get<ApiSuccessResponse<PlaylistDetailDto>>(
     `${API_V1}/artist/playlists/${idOrSlug}`,
@@ -192,6 +199,13 @@ export async function addTrackToArtistPlaylist(playlistId: string, trackId: stri
   return data.data
 }
 
+export async function removeTrackFromArtistPlaylist(playlistId: string, trackId: string) {
+  const { data } = await apiClient.delete<ApiSuccessResponse<PlaylistDetailDto>>(
+    `${API_V1}/artist/playlists/${playlistId}/tracks/${trackId}`,
+  )
+  return data.data
+}
+
 export async function searchArtistPlaylistTracks(q: string, limit = 10) {
   const { data } = await apiClient.get<ApiSuccessResponse<PlaylistTrackSearchResultDto>>(
     `${API_V1}/artist/playlists/search/tracks`,
@@ -202,6 +216,13 @@ export async function searchArtistPlaylistTracks(q: string, limit = 10) {
 
 export async function listMyPlaylists() {
   const { data } = await apiClient.get<ApiSuccessResponse<PlaylistDetailDto[]>>(`${API_V1}/me/playlists`)
+  return data.data
+}
+
+export async function getMyPlaylist(idOrSlug: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<PlaylistDetailDto>>(
+    `${API_V1}/me/playlists/${idOrSlug}`,
+  )
   return data.data
 }
 
@@ -247,6 +268,13 @@ export async function addTrackToMyPlaylist(playlistId: string, trackId: string) 
   const { data } = await apiClient.post<ApiSuccessResponse<PlaylistDetailDto>>(
     `${API_V1}/me/playlists/${playlistId}/tracks`,
     { trackId },
+  )
+  return data.data
+}
+
+export async function removeTrackFromMyPlaylist(playlistId: string, trackId: string) {
+  const { data } = await apiClient.delete<ApiSuccessResponse<PlaylistDetailDto>>(
+    `${API_V1}/me/playlists/${playlistId}/tracks/${trackId}`,
   )
   return data.data
 }

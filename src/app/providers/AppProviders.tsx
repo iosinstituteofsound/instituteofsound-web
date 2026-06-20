@@ -9,6 +9,9 @@ import { useTheme } from '@/shared/hooks/use-theme'
 import { useBadgeThemeApplier } from '@/shared/hooks/use-badge-theme'
 import { ThemeEffectsLayer } from '@/shared/components/theme-effects/theme-effects-layer'
 import { UniversalPlayer } from '@/modules/player/components/universal-player'
+import { PlayerQueuePanel } from '@/modules/player/components/player-queue-panel'
+import { PlayerPlaylistModal } from '@/modules/player/components/player-playlist-modal'
+import { AddToPlaylistDialog } from '@/modules/music/components/add-to-playlist-dialog'
 
 function ThemeInitializer() {
   useTheme()
@@ -25,6 +28,9 @@ export function AppProviders() {
           <ThemeEffectsLayer />
           <RouterProvider router={router} />
           <UniversalPlayer />
+          <PlayerQueuePanel />
+          <PlayerPlaylistModal />
+          <AddToPlaylistDialog />
           <Toaster richColors position="top-right" />
         </TooltipProvider>
       </QueryClientProvider>

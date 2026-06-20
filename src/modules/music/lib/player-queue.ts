@@ -1,5 +1,46 @@
-import type { PlayerTrack } from '@/modules/player/types/player.types'
+import type { PlayTrackOptions, PlayerTrack, PlayPlaylistOptions, QueueSource } from '@/modules/player/types/player.types'
 import type { PlaylistDetailDto, PlaylistTrackRefDto, ReleaseDetailDto } from '@/modules/music/types/music.types'
+import type { PlaylistDto } from '@/modules/explore/types/explore.types'
+
+export function fisherYatesShuffle<T>(items: T[]): T[] {
+  const copy = [...items]
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
+export function trackToPlayerTrack(
+  track: {
+    id?: string
+    trackId?: string
+    title: string
+    artistName?: string
+    artist?: string
+    audioUrl?: string
+    streamUrl?: string
+    durationSec?: number
+    releaseId?: string
+    artistProfileId?: string
+    coverUrl?: string
+  },
+  artworkUrl?: string,
+): PlayerTrack | null {
+  const audioUrl = track.audioUrl ?? track.streamUrl
+  if (!audioUrl) return null
+  return {
+    id: track.id ?? track.trackId ?? `${track.title}-${audioUrl}`,
+    trackId: track.trackId ?? track.id,
+    title: track.title,
+    artist: track.artistName ?? track.artist ?? 'Unknown',
+    audioUrl,
+    durationSec: track.durationSec,
+    artworkUrl: track.coverUrl ?? artworkUrl,
+    releaseId: track.releaseId,
+    artistProfileId: track.artistProfileId,
+  }
+}
 
 export function tracksToPlayerQueue(
   tracks: Array<{
@@ -11,22 +52,14 @@ export function tracksToPlayerQueue(
     audioUrl?: string
     streamUrl?: string
     durationSec?: number
+    releaseId?: string
+    artistProfileId?: string
   }>,
   artworkUrl?: string,
 ): PlayerTrack[] {
   return tracks
-    .filter((t) => t.audioUrl || t.streamUrl)
-    .map((t) => ({
-      id: t.id ?? t.trackId ?? `${t.title}-${t.audioUrl ?? t.streamUrl}`,
-      trackId: t.trackId ?? t.id,
-      title: t.title,
-      artist: t.artistName ?? t.artist ?? 'Unknown',
-      audioUrl: (t.audioUrl ?? t.streamUrl)!,
-      durationSec: t.durationSec,
-      artworkUrl,
-      releaseId: (t as { releaseId?: string }).releaseId,
-      artistProfileId: (t as { artistProfileId?: string }).artistProfileId,
-    }))
+    .map((t) => trackToPlayerTrack(t, artworkUrl))
+    .filter((t): t is PlayerTrack => Boolean(t))
 }
 
 export function releaseToPlayerQueue(release: ReleaseDetailDto): PlayerTrack[] {
@@ -76,10 +109,145 @@ export function playlistToPlayerQueue(playlist: PlaylistDetailDto): PlayerTrack[
       audioUrl: t.audioUrl ?? t.streamUrl,
       durationSec: t.durationSec,
       releaseId: t.releaseId,
+      coverUrl: t.coverUrl,
     })),
     playlist.coverUrl,
   ).map((track, index) => ({
     ...track,
     artworkUrl: playable[index]?.coverUrl ?? playlist.coverUrl ?? track.artworkUrl,
   }))
+}
+
+export function explorePlaylistToPlayerQueue(playlist: PlaylistDto): PlayerTrack[] {
+  return tracksToPlayerQueue(
+    playlist.tracks.map((item, index) => ({
+      id: `${playlist.id}-${index}`,
+      title: item.title,
+      artistName: item.artistName,
+      audioUrl: item.audioUrl ?? item.streamUrl,
+      durationSec: item.durationSec,
+    })),
+    playlist.coverUrl,
+  )
+}
+
+export function playExplorePlaylist(
+  playlist: PlaylistDto,
+  playTrack: PlayTrackFn,
+  options: PlayPlaylistOptions = {},
+) {
+  let queue = explorePlaylistToPlayerQueue(playlist)
+  if (!queue.length) return
+
+  if (options.shuffled) {
+    queue = fisherYatesShuffle(queue)
+  }
+
+  const startIndex = Math.min(options.startIndex ?? 0, queue.length - 1)
+  playTrack(queue[startIndex], {
+    queue,
+    queueIndex: startIndex,
+    autoplay: options.autoplay !== false,
+    queueSource: {
+      kind: 'playlist',
+      id: playlist.id,
+      slug: playlist.slug,
+      title: playlist.title,
+      coverUrl: playlist.coverUrl,
+    },
+  })
+}
+
+export function playlistQueueSource(playlist: PlaylistDetailDto, isOwn = false): QueueSource {
+  return {
+    kind: 'playlist',
+    id: playlist.id,
+    slug: playlist.slug,
+    title: playlist.title,
+    coverUrl: playlist.coverUrl,
+    isOwn,
+  }
+}
+
+export function releaseQueueSource(release: ReleaseDetailDto): QueueSource {
+  return {
+    kind: 'release',
+    id: release.id,
+    slug: release.slug,
+    title: release.title,
+    coverUrl: release.coverUrl,
+  }
+}
+
+type PlayTrackFn = (track: PlayerTrack, options?: PlayTrackOptions) => void
+
+export function playPlaylistFromDetail(
+  playlist: PlaylistDetailDto,
+  playTrack: PlayTrackFn,
+  options: PlayPlaylistOptions & { isOwn?: boolean } = {},
+) {
+  let queue = playlistToPlayerQueue(playlist)
+  if (!queue.length) return
+
+  if (options.shuffled) {
+    queue = fisherYatesShuffle(queue)
+  }
+
+  const startIndex = Math.min(options.startIndex ?? 0, queue.length - 1)
+  playTrack(queue[startIndex], {
+    queue,
+    queueIndex: startIndex,
+    autoplay: options.autoplay !== false,
+    queueSource: playlistQueueSource(playlist, options.isOwn),
+  })
+}
+
+export function playReleaseFromDetail(
+  release: ReleaseDetailDto,
+  playTrack: PlayTrackFn,
+  options: PlayPlaylistOptions = {},
+) {
+  let queue = releaseToPlayerQueue(release)
+  if (!queue.length) return
+
+  if (options.shuffled) {
+    queue = fisherYatesShuffle(queue)
+  }
+
+  const startIndex = Math.min(options.startIndex ?? 0, queue.length - 1)
+  playTrack(queue[startIndex], {
+    queue,
+    queueIndex: startIndex,
+    autoplay: options.autoplay !== false,
+    queueSource: releaseQueueSource(release),
+  })
+}
+
+export function playerTrackFromCurrent(track: {
+  trackId?: string
+  id?: string
+  title: string
+  artist?: string
+  artistName?: string
+  audioUrl?: string
+  streamUrl?: string
+  artworkUrl?: string
+  coverUrl?: string
+  durationSec?: number
+  releaseId?: string
+  artistProfileId?: string
+}): PlayerTrack | null {
+  return trackToPlayerTrack(
+    {
+      trackId: track.trackId ?? track.id,
+      title: track.title,
+      artistName: track.artistName ?? track.artist,
+      audioUrl: track.audioUrl ?? track.streamUrl,
+      durationSec: track.durationSec,
+      releaseId: track.releaseId,
+      artistProfileId: track.artistProfileId,
+      coverUrl: track.coverUrl,
+    },
+    track.artworkUrl ?? track.coverUrl,
+  )
 }

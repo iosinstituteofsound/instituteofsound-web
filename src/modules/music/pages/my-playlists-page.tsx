@@ -1,5 +1,5 @@
 import { PlaylistIndexView } from '@/modules/music/components/playlists/playlist-index-view'
 
-export function MusicPlaylistsPage() {
-  return <PlaylistIndexView mode="artist" />
+export function MyPlaylistsPage() {
+  return <PlaylistIndexView mode="listener" />
 }

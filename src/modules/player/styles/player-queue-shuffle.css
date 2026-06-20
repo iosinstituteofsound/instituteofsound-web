@@ -1,0 +1,219 @@
+.player-queue-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: min(70vh, 32rem);
+}
+
+.player-queue-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+  margin-bottom: 0.75rem;
+}
+
+.player-queue-panel__source {
+  min-width: 0;
+}
+
+.player-queue-panel__source-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.player-queue-panel__source-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-queue-panel__source-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.player-queue-panel__source-btn:hover .player-queue-panel__source-title {
+  text-decoration: underline;
+}
+
+.player-queue-panel__count {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+.player-queue-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.player-queue-panel__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  will-change: transform;
+}
+
+.player-queue-panel__row--current {
+  background: hsl(var(--primary) / 0.08);
+}
+
+.player-queue-panel__row--shuffling {
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.player-queue-panel__row-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0.5rem;
+}
+
+.player-queue-panel__row-main:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.35);
+}
+
+.player-queue-panel__row-main:disabled {
+  cursor: default;
+}
+
+.player-queue-panel__thumb,
+.player-queue-panel__thumb-fallback {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.35rem;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: hsl(var(--muted));
+}
+
+.player-queue-panel__thumb-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+
+.player-queue-panel__meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.player-queue-panel__title {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-queue-panel__title.is-current {
+  color: hsl(var(--primary));
+}
+
+.player-queue-panel__artist {
+  display: block;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-queue-panel__duration {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.player-queue-panel__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.player-queue-panel__remove:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+}
+
+.player-queue-panel__now-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+  padding: 0 0.5rem;
+  flex-shrink: 0;
+}
+
+.player-queue-panel__empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.player-queue-panel__shuffling-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+  animation: player-queue-shuffle-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes player-queue-shuffle-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player-queue-panel__row--shuffling {
+    transition: none;
+  }
+
+  .player-queue-panel__shuffling-badge {
+    animation: none;
+  }
+}

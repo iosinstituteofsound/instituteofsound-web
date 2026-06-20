@@ -7,6 +7,7 @@ import { tokenStorage } from '@/shared/services/api/token-storage'
 import {
   Heart,
   ListMusic,
+  ListEnd,
   Maximize2,
   Mic2,
   MonitorSpeaker,
@@ -31,6 +32,8 @@ import {
   PLAYER_FADE_MS,
 } from '@/modules/player/lib/audio-fade'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
+import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
 import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/player/styles/universal-player.css'
@@ -78,6 +81,8 @@ export function UniversalPlayer() {
   const isMobile = useIsMobile()
   const currentTrack = usePlayerStore((s) => s.currentTrack)
   const queue = usePlayerStore((s) => s.queue)
+  const queueSource = usePlayerStore((s) => s.queueSource)
+  const isShuffling = usePlayerStore((s) => s.isShuffling)
   const isPlaying = usePlayerStore((s) => s.isPlaying)
   const currentTime = usePlayerStore((s) => s.currentTime)
   const duration = usePlayerStore((s) => s.duration)
@@ -99,6 +104,15 @@ export function UniversalPlayer() {
   const setExpanded = usePlayerStore((s) => s.setExpanded)
   const openNowPlaying = usePlayerStore((s) => s.openNowPlaying)
   const setPlaybackState = usePlayerStore((s) => s.setPlaybackState)
+  const openQueue = usePlayerStore((s) => s.openQueue)
+  const openPlaylistModal = usePlayerStore((s) => s.openPlaylistModal)
+
+  const canOpenSourceModal =
+    queueSource?.kind === 'playlist' || queueSource?.kind === 'release'
+
+  const handleSourceClick = () => {
+    if (canOpenSourceModal) openPlaylistModal()
+  }
 
   const getCurrentTime = useCallback(
     () => audioRef.current?.currentTime ?? usePlayerStore.getState().currentTime,
@@ -433,7 +447,20 @@ export function UniversalPlayer() {
                 : undefined
             }
           >
-            <div className="ios-universal-player__artwork">
+            <div
+              className={cn(
+                'ios-universal-player__artwork',
+                canOpenSourceModal && 'cursor-pointer',
+              )}
+              onClick={
+                canOpenSourceModal
+                  ? (event) => {
+                      event.stopPropagation()
+                      handleSourceClick()
+                    }
+                  : undefined
+              }
+            >
               {currentTrack.artworkUrl ? (
                 <img src={currentTrack.artworkUrl} alt="" />
               ) : (
@@ -443,10 +470,25 @@ export function UniversalPlayer() {
               )}
             </div>
 
-            <div className="ios-universal-player__meta">
+            <div
+              className={cn('ios-universal-player__meta', canOpenSourceModal && 'cursor-pointer')}
+              onClick={
+                canOpenSourceModal
+                  ? (event) => {
+                      event.stopPropagation()
+                      handleSourceClick()
+                    }
+                  : undefined
+              }
+            >
               <p className="ios-universal-player__title">{currentTrack.title}</p>
               {currentTrack.artist ? (
                 <p className="ios-universal-player__artist">{currentTrack.artist}</p>
+              ) : null}
+              {queueSource?.title ? (
+                <p className="ios-universal-player__source text-xs text-muted-foreground">
+                  {queueSource.title}
+                </p>
               ) : null}
             </div>
 
@@ -475,6 +517,18 @@ export function UniversalPlayer() {
                 className={cn('h-4 w-4', releaseAnalytics?.userLiked && 'fill-current text-red-400')}
               />
             </PlayerControlButton>
+
+            {currentTrack ? (
+              <AddToPlaylistButton
+                trackId={trackId}
+                id={currentTrack.id}
+                title={currentTrack.title}
+                artist={currentTrack.artist}
+                artworkUrl={currentTrack.artworkUrl}
+                className="ios-universal-player__control ios-universal-player__control--add-playlist"
+                size="md"
+              />
+            ) : null}
           </div>
 
           <div className={cn('ios-universal-player__center', showMobileMini && 'ios-universal-player__center--mobile')}>
@@ -482,6 +536,7 @@ export function UniversalPlayer() {
               <PlayerControlButton
                 label={shuffle ? 'Shuffle on' : 'Shuffle off'}
                 active={shuffle}
+                disabled={isShuffling || queue.length <= 1}
                 onClick={toggleShuffle}
                 className={showMobileMini ? 'ios-universal-player__control--mobile-hidden' : undefined}
               >
@@ -562,9 +617,40 @@ export function UniversalPlayer() {
             <PlayerControlButton label="Lyrics" disabled className={showMobileMini ? 'ios-universal-player__control--mobile-hidden' : undefined}>
               <Mic2 className="h-4 w-4" strokeWidth={2.25} />
             </PlayerControlButton>
-            <PlayerControlButton label="Queue" disabled={queue.length <= 1}>
-              <ListMusic className="h-4 w-4" strokeWidth={2.25} />
+            {canOpenSourceModal ? (
+              <PlayerControlButton
+                label="View playlist"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  openPlaylistModal()
+                }}
+              >
+                <ListMusic className="h-4 w-4" strokeWidth={2.25} />
+              </PlayerControlButton>
+            ) : null}
+            <PlayerControlButton
+              label="Queue"
+              disabled={queue.length === 0}
+              onClick={(event) => {
+                event.stopPropagation()
+                openQueue()
+              }}
+            >
+              <ListEnd className="h-4 w-4" strokeWidth={2.25} />
             </PlayerControlButton>
+            {currentTrack ? (
+              <TrackActionsMenu
+                trackId={trackId}
+                title={currentTrack.title}
+                artist={currentTrack.artist}
+                audioUrl={currentTrack.audioUrl}
+                artworkUrl={currentTrack.artworkUrl}
+                durationSec={currentTrack.durationSec}
+                releaseId={currentTrack.releaseId}
+                artistProfileId={currentTrack.artistProfileId}
+                triggerClassName="ios-universal-player__control"
+              />
+            ) : null}
             <PlayerControlButton label="Connect to a device" disabled>
               <MonitorSpeaker className="h-4 w-4" strokeWidth={2.25} />
             </PlayerControlButton>

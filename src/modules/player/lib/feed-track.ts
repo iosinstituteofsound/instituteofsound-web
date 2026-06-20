@@ -9,6 +9,7 @@ export function feedItemToPlayerTrack(item: FeedItemDto): PlayerTrack | null {
   if (!audioUrl) return null
 
   const releaseId = payloadString(item.payload, 'releaseId')
+  const trackId = payloadString(item.payload, 'trackId')
   const trackTitle = payloadString(item.payload, 'trackTitle') ?? 'Shared track'
   const artistName = payloadString(item.payload, 'artistName')
   const artworkUrl = payloadString(item.payload, 'artworkUrl')
@@ -16,7 +17,9 @@ export function feedItemToPlayerTrack(item: FeedItemDto): PlayerTrack | null {
   const youtubeUrl = payloadString(item.payload, 'youtubeUrl')
 
   return {
-    id: releaseId ?? item.id,
+    id: trackId ?? releaseId ?? item.id,
+    trackId: trackId ?? undefined,
+    releaseId,
     title: trackTitle,
     artist: artistName,
     artworkUrl,

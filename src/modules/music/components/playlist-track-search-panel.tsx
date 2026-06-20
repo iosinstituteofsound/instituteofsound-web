@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2, Plus, Search } from 'lucide-react'
 import { searchArtistPlaylistTracks } from '@/modules/music/api/music.api'
-import type { PlaylistTrackSearchItemDto } from '@/modules/music/types/music.types'
+import type { PlaylistTrackSearchItemDto, PlaylistTrackSearchResultDto } from '@/modules/music/types/music.types'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/cn'
@@ -29,6 +29,8 @@ type PlaylistTrackSearchPanelProps = {
   isAdding?: boolean
   variant?: 'default' | 'studio'
   hideHeader?: boolean
+  searchFn?: (q: string, limit?: number) => Promise<PlaylistTrackSearchResultDto>
+  searchHint?: string
 }
 
 function TrackResultRow({
@@ -131,14 +133,16 @@ export function PlaylistTrackSearchPanel({
   isAdding,
   variant = 'default',
   hideHeader = false,
+  searchFn = searchArtistPlaylistTracks,
+  searchHint = 'Search across your releases, other releases, and site tracks.',
 }: PlaylistTrackSearchPanelProps) {
   const [trackQuery, setTrackQuery] = useState('')
   const debouncedQuery = useDebouncedValue(trackQuery, 300)
   const trimmedQuery = debouncedQuery.trim()
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['artist-playlist-track-search', trimmedQuery],
-    queryFn: () => searchArtistPlaylistTracks(trimmedQuery, 10),
+    queryKey: ['playlist-track-search', trimmedQuery, searchFn.name],
+    queryFn: () => searchFn(trimmedQuery, 10),
     enabled: trimmedQuery.length >= 2,
     staleTime: 30_000,
   })
@@ -160,7 +164,7 @@ export function PlaylistTrackSearchPanel({
             Add tracks
           </p>
           <p className="playlist-search-panel__hint mt-1 text-sm text-muted-foreground">
-            Search across your releases, other releases, and site tracks.
+            {searchHint}
           </p>
           <div className="relative mt-4">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

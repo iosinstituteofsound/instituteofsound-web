@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Play } from 'lucide-react'
 import type { PlaylistDto } from '@/modules/explore/types/explore.types'
 import { playlistTrackCount } from '@/modules/explore/lib/playlist-meta'
+import { playExplorePlaylist } from '@/modules/music/lib/player-queue'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import '@/modules/profile/styles/label-overview-playlists.css'
 
@@ -14,16 +15,7 @@ function playPlaylist(
   playlist: PlaylistDto,
   playTrack: ReturnType<typeof usePlayerStore.getState>['playTrack'],
 ) {
-  const track = playlist.tracks.find((item) => item.streamUrl) ?? playlist.tracks[0]
-  if (!track?.streamUrl) return
-
-  playTrack({
-    id: `${playlist.id}-0`,
-    title: track.title,
-    artist: track.artistName,
-    audioUrl: track.streamUrl,
-    artworkUrl: playlist.coverUrl,
-  })
+  playExplorePlaylist(playlist, playTrack)
 }
 
 export function LabelOverviewPlaylists({

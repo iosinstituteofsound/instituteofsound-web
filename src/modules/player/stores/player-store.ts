@@ -1,11 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { PlayTrackOptions, PlayerTrack, RepeatMode } from '@/modules/player/types/player.types'
+import { fisherYatesShuffle } from '@/modules/music/lib/player-queue'
+import type { PlayTrackOptions, PlayerTrack, QueueSource, RepeatMode } from '@/modules/player/types/player.types'
 
 interface PlayerState {
   currentTrack: PlayerTrack | null
   queue: PlayerTrack[]
+  displayQueue: PlayerTrack[]
   queueIndex: number
+  queueSource: QueueSource
   isPlaying: boolean
   currentTime: number
   duration: number
@@ -15,6 +18,10 @@ interface PlayerState {
   repeat: RepeatMode
   isExpanded: boolean
   mobileView: 'mini' | 'sheet'
+  isQueueOpen: boolean
+  isPlaylistModalOpen: boolean
+  isShuffling: boolean
+  shuffleAnimationKey: number
   playTrack: (track: PlayerTrack, options?: PlayTrackOptions) => void
   togglePlay: () => void
   pause: () => void
@@ -23,9 +30,20 @@ interface PlayerState {
   setVolume: (volume: number) => void
   toggleMute: () => void
   toggleShuffle: () => void
+  shuffleQueueAnimated: () => Promise<void>
+  commitShuffledQueue: (newQueue: PlayerTrack[]) => void
   cycleRepeat: () => void
   next: () => void
   previous: () => void
+  addToQueue: (track: PlayerTrack) => void
+  addToQueueNext: (track: PlayerTrack) => void
+  removeFromQueue: (index: number) => void
+  playQueueIndex: (index: number) => void
+  clearUpcoming: () => void
+  openQueue: () => void
+  closeQueue: () => void
+  openPlaylistModal: () => void
+  closePlaylistModal: () => void
   close: () => void
   setExpanded: (expanded: boolean) => void
   openNowPlaying: () => void
@@ -73,12 +91,28 @@ function pickPreviousIndex(state: Pick<PlayerState, 'queue' | 'queueIndex' | 'sh
   return state.queueIndex > 0 ? state.queueIndex - 1 : 0
 }
 
+function computeShuffledQueue(queue: PlayerTrack[], currentTrack: PlayerTrack | null) {
+  if (!currentTrack || queue.length <= 1) return fisherYatesShuffle(queue)
+  const current = queue.find((t) => t.id === currentTrack.id)
+  const rest = queue.filter((t) => t.id !== currentTrack.id)
+  const shuffledRest = fisherYatesShuffle(rest)
+  return current ? [current, ...shuffledRest] : shuffledRest
+}
+
+function wait(ms: number) {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, ms)
+  })
+}
+
 export const usePlayerStore = create<PlayerState>()(
   persist(
     (set, get) => ({
       currentTrack: null,
       queue: [],
+      displayQueue: [],
       queueIndex: 0,
+      queueSource: null,
       isPlaying: false,
       currentTime: 0,
       duration: 0,
@@ -88,6 +122,10 @@ export const usePlayerStore = create<PlayerState>()(
       repeat: 'off',
       isExpanded: false,
       mobileView: 'mini',
+      isQueueOpen: false,
+      isPlaylistModalOpen: false,
+      isShuffling: false,
+      shuffleAnimationKey: 0,
 
       playTrack: (track, options) => {
         const queue = options?.queue?.length ? options.queue : [track]
@@ -96,7 +134,9 @@ export const usePlayerStore = create<PlayerState>()(
         set({
           currentTrack: track,
           queue,
+          displayQueue: queue,
           queueIndex,
+          queueSource: options?.queueSource ?? get().queueSource,
           isPlaying: options?.autoplay !== false,
           currentTime: 0,
           duration: 0,
@@ -119,7 +159,81 @@ export const usePlayerStore = create<PlayerState>()(
 
       toggleMute: () => set((state) => ({ muted: !state.muted })),
 
-      toggleShuffle: () => set((state) => ({ shuffle: !state.shuffle })),
+      toggleShuffle: () => {
+        const state = get()
+        const nextShuffle = !state.shuffle
+        set({ shuffle: nextShuffle })
+        if (nextShuffle && state.queue.length > 1) {
+          void get().shuffleQueueAnimated()
+        }
+      },
+
+      shuffleQueueAnimated: async () => {
+        const state = get()
+        if (state.queue.length <= 1 || state.isShuffling) return
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        const targetQueue = computeShuffledQueue(state.queue, state.currentTrack)
+
+        if (prefersReducedMotion) {
+          const newIndex = state.currentTrack
+            ? targetQueue.findIndex((t) => t.id === state.currentTrack!.id)
+            : 0
+          set({
+            queue: targetQueue,
+            displayQueue: targetQueue,
+            queueIndex: newIndex >= 0 ? newIndex : 0,
+            shuffle: true,
+          })
+          return
+        }
+
+        set({
+          isShuffling: true,
+          displayQueue: [...state.queue],
+          shuffleAnimationKey: state.shuffleAnimationKey + 1,
+        })
+
+        const rounds = Math.min(5, Math.max(3, Math.floor(state.queue.length / 2)))
+        for (let round = 0; round < rounds; round += 1) {
+          const current = get().displayQueue
+          if (current.length < 2) break
+          let a = Math.floor(Math.random() * current.length)
+          let b = Math.floor(Math.random() * current.length)
+          while (b === a) b = Math.floor(Math.random() * current.length)
+
+          const nextDisplay = [...current]
+          ;[nextDisplay[a], nextDisplay[b]] = [nextDisplay[b], nextDisplay[a]]
+          set({ displayQueue: nextDisplay, shuffleAnimationKey: get().shuffleAnimationKey + 1 })
+          await wait(180 + round * 40)
+        }
+
+        await wait(220)
+        const newIndex = state.currentTrack
+          ? targetQueue.findIndex((t) => t.id === state.currentTrack!.id)
+          : 0
+
+        set({
+          queue: targetQueue,
+          displayQueue: targetQueue,
+          queueIndex: newIndex >= 0 ? newIndex : 0,
+          shuffle: true,
+          isShuffling: false,
+        })
+      },
+
+      commitShuffledQueue: (newQueue) => {
+        const state = get()
+        const newIndex = state.currentTrack
+          ? newQueue.findIndex((t) => t.id === state.currentTrack!.id)
+          : 0
+        set({
+          queue: newQueue,
+          displayQueue: newQueue,
+          queueIndex: newIndex >= 0 ? newIndex : 0,
+          isShuffling: false,
+        })
+      },
 
       cycleRepeat: () =>
         set((state) => {
@@ -172,16 +286,92 @@ export const usePlayerStore = create<PlayerState>()(
         })
       },
 
+      addToQueue: (track) => {
+        const state = get()
+        if (state.queue.some((t) => t.id === track.id)) return
+        const queue = [...state.queue, track]
+        set({ queue, displayQueue: queue })
+      },
+
+      addToQueueNext: (track) => {
+        const state = get()
+        if (state.queue.some((t) => t.id === track.id)) return
+        const insertAt = state.queueIndex + 1
+        const queue = [...state.queue]
+        queue.splice(insertAt, 0, track)
+        set({ queue, displayQueue: queue })
+      },
+
+      removeFromQueue: (index) => {
+        const state = get()
+        if (index < 0 || index >= state.queue.length) return
+        const queue = state.queue.filter((_, i) => i !== index)
+        let queueIndex = state.queueIndex
+        if (index < state.queueIndex) queueIndex -= 1
+        else if (index === state.queueIndex) {
+          queueIndex = Math.min(queueIndex, Math.max(0, queue.length - 1))
+          const nextTrack = queue[queueIndex] ?? null
+          set({
+            queue,
+            displayQueue: queue,
+            queueIndex,
+            currentTrack: nextTrack,
+            isPlaying: nextTrack ? state.isPlaying : false,
+            currentTime: 0,
+            duration: 0,
+          })
+          return
+        }
+        set({ queue, displayQueue: queue, queueIndex })
+      },
+
+      playQueueIndex: (index) => {
+        const state = get()
+        const track = state.queue[index]
+        if (!track) return
+        set({
+          currentTrack: track,
+          queueIndex: index,
+          isPlaying: true,
+          currentTime: 0,
+          duration: 0,
+        })
+      },
+
+      clearUpcoming: () => {
+        const state = get()
+        if (!state.currentTrack) return
+        const queue = state.queue.slice(0, state.queueIndex + 1)
+        set({ queue, displayQueue: queue })
+      },
+
+      openQueue: () => set({ isQueueOpen: true }),
+      closeQueue: () => set({ isQueueOpen: false }),
+
+      openPlaylistModal: () => {
+        const state = get()
+        if (state.queueSource?.kind === 'playlist' || state.queueSource?.kind === 'release') {
+          set({ isPlaylistModalOpen: true })
+        }
+      },
+
+      closePlaylistModal: () => set({ isPlaylistModalOpen: false }),
+
       close: () =>
         set({
           currentTrack: null,
           queue: [],
+          displayQueue: [],
           queueIndex: 0,
+          queueSource: null,
           isPlaying: false,
           currentTime: 0,
           duration: 0,
           isExpanded: false,
           mobileView: 'mini',
+          isQueueOpen: false,
+          isPlaylistModalOpen: false,
+          isShuffling: false,
         }),
 
       setExpanded: (isExpanded) => set({ isExpanded }),
@@ -203,3 +393,10 @@ export const usePlayerStore = create<PlayerState>()(
     },
   ),
 )
+
+export function useActiveQueue() {
+  const queue = usePlayerStore((s) => s.queue)
+  const displayQueue = usePlayerStore((s) => s.displayQueue)
+  const isShuffling = usePlayerStore((s) => s.isShuffling)
+  return isShuffling && displayQueue.length ? displayQueue : queue
+}

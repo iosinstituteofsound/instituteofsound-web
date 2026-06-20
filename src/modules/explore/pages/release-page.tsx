@@ -27,7 +27,9 @@ import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
 import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import { getReleaseDetail } from '@/modules/music/api/music.api'
-import { releaseToPlayerQueue } from '@/modules/music/lib/player-queue'
+import { playReleaseFromDetail } from '@/modules/music/lib/player-queue'
+import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
+import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
 import '@/modules/explore/styles/explore.css'
 import '@/modules/explore/styles/explore-mh-chrome.css'
 import '@/modules/explore/styles/release-vinyl-art.css'
@@ -146,8 +148,7 @@ export function ReleasePage() {
 
   const handlePlay = useCallback(() => {
     if (releaseDetail) {
-      const queue = releaseToPlayerQueue(releaseDetail)
-      if (queue.length) playTrack(queue[0], { queue })
+      playReleaseFromDetail(releaseDetail, playTrack)
       return
     }
     if (!release?.streamUrl) return
@@ -290,22 +291,39 @@ export function ReleasePage() {
                           {track.trackNumber}. {track.title}
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        className="explore-release-hero__btn explore-release-hero__btn--line"
-                        disabled={!track.audioUrl}
-                        onClick={() => {
-                          if (!releaseDetail || !track.audioUrl) return
-                          const queue = releaseToPlayerQueue(releaseDetail)
-                          const idx = queue.findIndex((q) => q.id === track.id)
-                          playTrack(queue[idx >= 0 ? idx : 0], {
-                            queue,
-                            queueIndex: idx >= 0 ? idx : 0,
-                          })
-                        }}
-                      >
-                        <Play size={12} aria-hidden />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          className="explore-release-hero__btn explore-release-hero__btn--line"
+                          disabled={!track.audioUrl}
+                          onClick={() => {
+                            if (!releaseDetail || !track.audioUrl) return
+                            playReleaseFromDetail(releaseDetail, playTrack, {
+                              startIndex: detailTracks.findIndex((t) => t.id === track.id),
+                            })
+                          }}
+                        >
+                          <Play size={12} aria-hidden />
+                        </button>
+                        <AddToPlaylistButton
+                          trackId={track.id}
+                          title={track.title}
+                          artist={releaseDetail?.artistName}
+                          artworkUrl={releaseDetail?.coverUrl}
+                          className="explore-release-hero__btn explore-release-hero__btn--line"
+                        />
+                        <TrackActionsMenu
+                          trackId={track.id}
+                          title={track.title}
+                          artist={releaseDetail?.artistName}
+                          audioUrl={track.audioUrl}
+                          artworkUrl={releaseDetail?.coverUrl}
+                          durationSec={track.durationSec}
+                          releaseId={releaseDetail?.id}
+                          artistProfileId={releaseDetail?.artistProfileId}
+                          triggerClassName="explore-release-hero__btn explore-release-hero__btn--line"
+                        />
+                      </div>
                     </li>
                   ))}
                 </ol>
