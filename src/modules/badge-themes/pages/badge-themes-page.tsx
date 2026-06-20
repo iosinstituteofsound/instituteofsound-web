@@ -11,6 +11,7 @@ import type { ThemeDto } from '@/modules/badges/api/gamification.api'
 import { ThemeCard } from '@/modules/badge-themes/components/theme-card'
 import { ThemePreview } from '@/modules/badge-themes/components/theme-preview'
 import { ThemeTokensEditor } from '@/modules/badge-themes/components/theme-tokens-editor'
+import { ThemeFluidConfigEditor } from '@/modules/badge-themes/components/theme-fluid-config-editor'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -43,7 +44,9 @@ import {
   type ThemeMode,
   type ThemeTokens,
 } from '@/shared/design-tokens/theme-tokens'
+import { cloneFluidConfig, TRANSLUCENT_FLUID_CONFIG } from '@/shared/design-tokens/fluid-config'
 import { toast } from '@/shared/components/ui/sonner'
+import { usePermission } from '@/shared/hooks/use-permission'
 
 type ThemeFormValues = {
   slug: string
@@ -60,6 +63,7 @@ function toFormValues(theme?: ThemeDto | null): ThemeFormValues {
 }
 
 export function BadgeThemesPage() {
+  const { isSuperAdmin } = usePermission()
   const { data: catalog, isLoading: catalogLoading, isError, refetch } = useGamificationCatalog()
   const { data: themes, isLoading: themesLoading } = useThemes()
   const createTheme = useCreateTheme()
@@ -150,7 +154,8 @@ export function BadgeThemesPage() {
         <PageHeaderMain>
           <PageTitle>Badge Themes</PageTitle>
           <PageDescription>
-            Badge themes control colors only. Fonts and layout use the global app defaults.
+            Badge themes control colors and optional liquid WebGL effects. Fonts and layout use global
+            defaults.
           </PageDescription>
         </PageHeaderMain>
         <PermissionGate resource="roles" action="update">
@@ -261,6 +266,28 @@ export function BadgeThemesPage() {
                         </FormItem>
                       )}
                     />
+
+                    {isSuperAdmin ? (
+                      <ThemeFluidConfigEditor
+                        badgeVariant={watched.tokens.badgeVariant}
+                        fluidConfig={watched.tokens.fluidConfig}
+                        onBadgeVariantChange={(variant) => {
+                          const next = cloneThemeTokens(form.getValues('tokens'))
+                          if (variant) {
+                            next.badgeVariant = variant
+                            if (!next.fluidConfig) next.fluidConfig = cloneFluidConfig(TRANSLUCENT_FLUID_CONFIG)
+                          } else {
+                            delete next.badgeVariant
+                          }
+                          form.setValue('tokens', next, { shouldDirty: true })
+                        }}
+                        onFluidConfigChange={(fluidConfig) => {
+                          const next = cloneThemeTokens(form.getValues('tokens'))
+                          next.fluidConfig = fluidConfig
+                          form.setValue('tokens', next, { shouldDirty: true })
+                        }}
+                      />
+                    ) : null}
                   </div>
 
                   <div className="shrink-0 border-t bg-background px-6 py-4">

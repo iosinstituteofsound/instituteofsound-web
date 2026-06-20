@@ -6,13 +6,16 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Input } from '@/shared/components/ui/input'
 import { Separator } from '@/shared/components/ui/separator'
 import { ThemeDashboardPreview } from '@/modules/badge-themes/components/theme-dashboard-preview'
+import { LiquidWebGLBackground } from '@/shared/components/theme-effects/liquid-webgl-background'
 import { cn } from '@/shared/lib/cn'
 import {
   COLOR_GROUPS,
   formatColorLabel,
+  LIQUID_WEBGL_VARIANT,
   normalizeThemeTokens,
   SEMANTIC_COLOR_KEYS,
   themeTokensToCssProperties,
+  TRANSLUCENT_THEME_SLUG,
   type SemanticColorKey,
   type ThemeMode,
   type ThemeTokens,
@@ -118,6 +121,9 @@ export function ThemePreview({ themeName, tokens, mode, onTokenSelect }: ThemePr
   const resolved = useMemo(() => normalizeThemeTokens(tokens), [tokens])
   const colors = resolved.colors[mode]
   const previewStyle = themeTokensToCssProperties(tokens, mode) as CSSProperties
+  const showLiquidWebGL =
+    themeName?.toLowerCase() === TRANSLUCENT_THEME_SLUG ||
+    resolved.badgeVariant === LIQUID_WEBGL_VARIANT
 
   return (
     <div className="space-y-3">
@@ -130,10 +136,22 @@ export function ThemePreview({ themeName, tokens, mode, onTokenSelect }: ThemePr
       </div>
 
       <div
-        className="overflow-hidden rounded-xl border bg-background text-foreground shadow-sm"
+        className={cn(
+          'relative overflow-hidden rounded-xl border bg-background text-foreground shadow-sm',
+          showLiquidWebGL && 'translucent-theme-preview bg-transparent',
+        )}
         style={previewStyle}
+        data-theme-slug={showLiquidWebGL ? TRANSLUCENT_THEME_SLUG : undefined}
+        data-theme-variant={showLiquidWebGL ? LIQUID_WEBGL_VARIANT : undefined}
       >
-        <div className="space-y-5 p-4">
+        {showLiquidWebGL ? (
+          <LiquidWebGLBackground
+            active
+            className="absolute inset-0 z-0 h-full w-full"
+            fluidConfig={resolved.fluidConfig}
+          />
+        ) : null}
+        <div className={cn('space-y-5 p-4', showLiquidWebGL && 'relative z-10')}>
           <PreviewSection
             title="Dashboard preview"
             description="Sidebar, header, role, badge, cards — how the app actually looks"

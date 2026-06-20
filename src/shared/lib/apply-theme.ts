@@ -6,7 +6,11 @@ import {
   normalizeThemeTokens,
 } from '@/shared/design-tokens/theme-tokens'
 
-export function applyThemeTokens(rawTokens: ThemeTokens | unknown, mode: ThemeMode) {
+export function applyThemeTokens(
+  rawTokens: ThemeTokens | unknown,
+  mode: ThemeMode,
+  meta?: { slug?: string },
+) {
   if (typeof document === 'undefined') return
 
   const tokens = normalizeThemeTokens(rawTokens)
@@ -18,6 +22,12 @@ export function applyThemeTokens(rawTokens: ThemeTokens | unknown, mode: ThemeMo
   }
 
   root.dataset.badgeTheme = 'active'
+
+  if (meta?.slug) root.dataset.themeSlug = meta.slug
+  else delete root.dataset.themeSlug
+
+  if (tokens.badgeVariant) root.dataset.themeVariant = tokens.badgeVariant
+  else delete root.dataset.themeVariant
 }
 
 export function resetThemeOverrides() {
@@ -28,6 +38,8 @@ export function resetThemeOverrides() {
     root.style.removeProperty(cssVar)
   }
   delete root.dataset.badgeTheme
+  delete root.dataset.themeSlug
+  delete root.dataset.themeVariant
 }
 
 export function resolveThemeMode(mode: 'light' | 'dark' | 'system'): ThemeMode {

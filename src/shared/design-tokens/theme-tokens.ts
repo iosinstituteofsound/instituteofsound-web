@@ -1,7 +1,14 @@
 /**
  * Semantic color design tokens (shadcn/ui compatible).
- * Themes control colors only — fonts, radius, and layout stay in globals.css.
+ * Themes control colors and optional visual effects (liquid WebGL, etc.).
  */
+
+import {
+  cloneFluidConfig,
+  normalizeFluidConfig,
+  TRANSLUCENT_FLUID_CONFIG,
+  type ThemeFluidConfig,
+} from '@/shared/design-tokens/fluid-config'
 
 export const SEMANTIC_COLOR_KEYS = [
   'background',
@@ -31,7 +38,16 @@ export type ThemeMode = 'light' | 'dark'
 
 export interface ThemeTokens {
   colors: Record<ThemeMode, SemanticColors>
+  /** Visual effect variant — e.g. `liquid-webgl` for animated shader backgrounds */
+  badgeVariant?: string
+  /** PavelDoGreat fluid simulation settings (super-admin configurable) */
+  fluidConfig?: ThemeFluidConfig
 }
+
+export type { ThemeFluidConfig }
+
+export const TRANSLUCENT_THEME_SLUG = 'translucent'
+export const LIQUID_WEBGL_VARIANT = 'liquid-webgl'
 
 export const COLOR_GROUPS: Array<{ label: string; description: string; keys: SemanticColorKey[] }> = [
   { label: 'Base', description: 'Page background and default text', keys: ['background', 'foreground'] },
@@ -144,6 +160,8 @@ export function cloneThemeTokens(tokens: ThemeTokens): ThemeTokens {
       light: { ...tokens.colors.light },
       dark: { ...tokens.colors.dark },
     },
+    ...(tokens.badgeVariant ? { badgeVariant: tokens.badgeVariant } : {}),
+    ...(tokens.fluidConfig ? { fluidConfig: cloneFluidConfig(tokens.fluidConfig) } : {}),
   }
 }
 
@@ -183,25 +201,90 @@ export function normalizeThemeTokens(raw?: unknown): ThemeTokens {
     darkOverrides = flat
   }
 
+  const badgeVariant =
+    typeof tokens.badgeVariant === 'string' && tokens.badgeVariant.trim()
+      ? tokens.badgeVariant.trim()
+      : undefined
+
+  const fluidConfig =
+    tokens.fluidConfig && typeof tokens.fluidConfig === 'object'
+      ? normalizeFluidConfig(tokens.fluidConfig, TRANSLUCENT_FLUID_CONFIG)
+      : undefined
+
   return {
     colors: {
       light: mergeSemanticColors(DEFAULT_LIGHT_COLORS, lightOverrides),
       dark: mergeSemanticColors(DEFAULT_DARK_COLORS, darkOverrides),
     },
+    ...(badgeVariant ? { badgeVariant } : {}),
+    ...(fluidConfig ? { fluidConfig } : {}),
   }
 }
 
 export function buildBrandThemeTokens(brand: {
   light?: Partial<SemanticColors>
   dark?: Partial<SemanticColors>
+  badgeVariant?: string
+  fluidConfig?: ThemeFluidConfig
 }): ThemeTokens {
-  return {
+  const result: ThemeTokens = {
     colors: {
       light: mergeSemanticColors(DEFAULT_LIGHT_COLORS, brand.light),
       dark: mergeSemanticColors(DEFAULT_DARK_COLORS, brand.dark),
     },
   }
+  if (brand.badgeVariant?.trim()) result.badgeVariant = brand.badgeVariant.trim()
+  if (brand.fluidConfig) result.fluidConfig = normalizeFluidConfig(brand.fluidConfig, TRANSLUCENT_FLUID_CONFIG)
+  return result
 }
+
+/** Glassy translucent palette — violet glass UI over calm cyan-violet liquid. */
+export const TRANSLUCENT_THEME_TOKENS: ThemeTokens = buildBrandThemeTokens({
+  badgeVariant: LIQUID_WEBGL_VARIANT,
+  fluidConfig: TRANSLUCENT_FLUID_CONFIG,
+  light: {
+    background: 'oklch(0.985 0.012 288 / 16%)',
+    foreground: 'oklch(0.24 0.045 288)',
+    card: 'oklch(0.995 0.008 288 / 36%)',
+    'card-foreground': 'oklch(0.24 0.045 288)',
+    popover: 'oklch(0.995 0.01 288 / 52%)',
+    'popover-foreground': 'oklch(0.24 0.045 288)',
+    primary: 'oklch(0.52 0.17 288)',
+    'primary-foreground': 'oklch(0.985 0 0)',
+    secondary: 'oklch(0.96 0.02 288 / 42%)',
+    'secondary-foreground': 'oklch(0.28 0.05 288)',
+    muted: 'oklch(0.96 0.018 288 / 38%)',
+    'muted-foreground': 'oklch(0.46 0.05 288)',
+    accent: 'oklch(0.62 0.11 210)',
+    'accent-foreground': 'oklch(0.22 0.05 288)',
+    destructive: 'oklch(0.52 0.2 25)',
+    'destructive-foreground': 'oklch(0.985 0 0)',
+    border: 'oklch(0.55 0.06 288 / 14%)',
+    input: 'oklch(0.55 0.06 288 / 18%)',
+    ring: 'oklch(0.52 0.17 288)',
+  },
+  dark: {
+    background: 'oklch(0.11 0.055 288 / 82%)',
+    foreground: 'oklch(0.96 0.015 288)',
+    card: 'oklch(0.15 0.058 288 / 80%)',
+    'card-foreground': 'oklch(0.96 0.015 288)',
+    popover: 'oklch(0.17 0.058 288 / 90%)',
+    'popover-foreground': 'oklch(0.96 0.015 288)',
+    primary: 'oklch(0.74 0.16 288)',
+    'primary-foreground': 'oklch(0.12 0.045 288)',
+    secondary: 'oklch(0.20 0.052 288 / 72%)',
+    'secondary-foreground': 'oklch(0.92 0.02 288)',
+    muted: 'oklch(0.19 0.05 288 / 70%)',
+    'muted-foreground': 'oklch(0.74 0.04 288)',
+    accent: 'oklch(0.68 0.13 210)',
+    'accent-foreground': 'oklch(0.96 0.015 288)',
+    destructive: 'oklch(0.65 0.19 25)',
+    'destructive-foreground': 'oklch(0.98 0 0)',
+    border: 'oklch(0.78 0.06 288 / 20%)',
+    input: 'oklch(0.72 0.05 288 / 24%)',
+    ring: 'oklch(0.74 0.16 288)',
+  },
+})
 
 export function formatColorLabel(key: SemanticColorKey): string {
   return key

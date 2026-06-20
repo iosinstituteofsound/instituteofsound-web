@@ -1,0 +1,434 @@
+/* Translucent theme — ambient liquid behind frosted glass UI */
+
+:root {
+  --translucent-glass-blur: 20px;
+  --translucent-glass-saturate: 1.4;
+  --translucent-fluid-opacity: 0.62;
+  --translucent-glass-fill: 64%;
+  --translucent-glass-panel: oklch(0.995 0.008 288);
+  --translucent-glass-border: oklch(0.55 0.06 288);
+}
+
+html.dark[data-theme-slug='translucent'],
+html.dark[data-theme-variant='liquid-webgl'],
+.dark[data-theme-slug='translucent'],
+.dark[data-theme-variant='liquid-webgl'] {
+  --translucent-glass-blur: 24px;
+  --translucent-glass-saturate: 1.6;
+  --translucent-fluid-opacity: 0.82;
+  --translucent-glass-fill: 86%;
+  --translucent-glass-panel: oklch(0.15 0.058 288);
+  --translucent-glass-border: oklch(0.78 0.06 288);
+}
+
+.liquid-webgl-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: var(--translucent-fluid-opacity);
+  filter: saturate(1.08);
+}
+
+html.dark[data-theme-slug='translucent'] .liquid-webgl-bg,
+html.dark[data-theme-variant='liquid-webgl'] .liquid-webgl-bg,
+.dark[data-theme-slug='translucent'] .liquid-webgl-bg,
+.dark[data-theme-variant='liquid-webgl'] .liquid-webgl-bg {
+  filter: saturate(1.28) brightness(1.12);
+}
+
+/* Readability veil between fluid and UI */
+html[data-theme-slug='translucent'] body::after,
+html[data-theme-variant='liquid-webgl'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 90% 60% at 50% -10%,
+      color-mix(in oklch, var(--background) 72%, transparent),
+      transparent 68%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--background) 48%, transparent) 0%,
+      color-mix(in oklch, var(--background) 58%, transparent) 45%,
+      color-mix(in oklch, var(--background) 72%, transparent) 100%
+    );
+}
+
+/* Dark mode — deep void base so glass panels read clearly */
+html.dark[data-theme-slug='translucent'] body::after,
+html.dark[data-theme-variant='liquid-webgl'] body::after,
+.dark[data-theme-slug='translucent'] body::after,
+.dark[data-theme-variant='liquid-webgl'] body::after {
+  background:
+    radial-gradient(
+      ellipse 110% 75% at 50% -15%,
+      oklch(0.08 0.055 288 / 94%),
+      oklch(0.10 0.05 288 / 72%) 42%,
+      transparent 72%
+    ),
+    linear-gradient(
+      180deg,
+      oklch(0.09 0.052 288 / 90%) 0%,
+      oklch(0.11 0.055 288 / 93%) 48%,
+      oklch(0.12 0.058 288 / 96%) 100%
+    );
+}
+
+html[data-theme-slug='translucent'] #root,
+html[data-theme-variant='liquid-webgl'] #root {
+  position: relative;
+  z-index: 2;
+}
+
+html[data-theme-slug='translucent'] body,
+html[data-theme-variant='liquid-webgl'] body {
+  background-color: transparent;
+  color: var(--foreground);
+}
+
+html[data-theme-slug='translucent'] .min-h-screen.bg-background,
+html[data-theme-variant='liquid-webgl'] .min-h-screen.bg-background,
+html[data-theme-slug='translucent'] .dashboard-shell,
+html[data-theme-variant='liquid-webgl'] .dashboard-shell,
+html[data-theme-slug='translucent'] .dashboard-shell__main,
+html[data-theme-variant='liquid-webgl'] .dashboard-shell__main {
+  background: transparent;
+}
+
+html[data-theme-slug='translucent'] .dashboard-shell,
+html[data-theme-variant='liquid-webgl'] .dashboard-shell {
+  position: relative;
+  z-index: 2;
+}
+
+/* Header — frosted top bar */
+html[data-theme-slug='translucent'] .dashboard-header,
+html[data-theme-variant='liquid-webgl'] .dashboard-header {
+  background: color-mix(in oklch, var(--translucent-glass-panel) var(--translucent-glass-fill), transparent);
+  backdrop-filter: blur(var(--translucent-glass-blur)) saturate(var(--translucent-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--translucent-glass-blur)) saturate(var(--translucent-glass-saturate));
+  border-bottom-color: color-mix(in oklch, var(--translucent-glass-border) 16%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--foreground) 8%, transparent),
+    0 8px 28px oklch(0.08 0.04 288 / 18%);
+}
+
+html.dark[data-theme-slug='translucent'] .dashboard-header,
+html.dark[data-theme-variant='liquid-webgl'] .dashboard-header,
+.dark[data-theme-slug='translucent'] .dashboard-header,
+.dark[data-theme-variant='liquid-webgl'] .dashboard-header {
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--foreground) 10%, transparent),
+    0 10px 32px oklch(0.04 0.04 288 / 55%);
+}
+
+html[data-theme-slug='translucent'] .dashboard-header-search,
+html[data-theme-variant='liquid-webgl'] .dashboard-header-search {
+  background: color-mix(in oklch, var(--translucent-glass-panel) 55%, transparent);
+  border-color: color-mix(in oklch, var(--translucent-glass-border) 20%, transparent);
+  color: var(--foreground);
+}
+
+html[data-theme-slug='translucent'] .dashboard-header-search::placeholder,
+html[data-theme-variant='liquid-webgl'] .dashboard-header-search::placeholder {
+  color: color-mix(in oklch, var(--muted-foreground) 88%, transparent);
+}
+
+html[data-theme-slug='translucent'] .dashboard-header-utility,
+html[data-theme-variant='liquid-webgl'] .dashboard-header-utility {
+  background: color-mix(in oklch, var(--translucent-glass-panel) 50%, transparent);
+  border: 1px solid color-mix(in oklch, var(--translucent-glass-border) 14%, transparent);
+}
+
+/* Sidebar — frosted rail */
+html[data-theme-slug='translucent'] .dashboard-sidebar,
+html[data-theme-variant='liquid-webgl'] .dashboard-sidebar {
+  background: color-mix(in oklch, var(--translucent-glass-panel) var(--translucent-glass-fill), transparent);
+  backdrop-filter: blur(var(--translucent-glass-blur)) saturate(var(--translucent-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--translucent-glass-blur)) saturate(var(--translucent-glass-saturate));
+  border-right: 1px solid color-mix(in oklch, var(--translucent-glass-border) 14%, transparent);
+  box-shadow:
+    inset -1px 0 0 color-mix(in oklch, var(--foreground) 7%, transparent),
+    8px 0 32px oklch(0.08 0.04 288 / 16%);
+}
+
+html.dark[data-theme-slug='translucent'] .dashboard-sidebar,
+html.dark[data-theme-variant='liquid-webgl'] .dashboard-sidebar,
+.dark[data-theme-slug='translucent'] .dashboard-sidebar,
+.dark[data-theme-variant='liquid-webgl'] .dashboard-sidebar {
+  box-shadow:
+    inset -1px 0 0 color-mix(in oklch, var(--foreground) 9%, transparent),
+    10px 0 40px oklch(0.03 0.04 288 / 62%);
+}
+
+html[data-theme-slug='translucent'] .dashboard-sidebar-link,
+html[data-theme-variant='liquid-webgl'] .dashboard-sidebar-link {
+  color: color-mix(in oklch, var(--foreground) 78%, transparent);
+}
+
+html.dark[data-theme-slug='translucent'] .dashboard-sidebar-link,
+html.dark[data-theme-variant='liquid-webgl'] .dashboard-sidebar-link,
+.dark[data-theme-slug='translucent'] .dashboard-sidebar-link,
+.dark[data-theme-variant='liquid-webgl'] .dashboard-sidebar-link {
+  color: color-mix(in oklch, var(--foreground) 84%, transparent);
+}
+
+html[data-theme-slug='translucent'] .dashboard-sidebar-link:hover,
+html[data-theme-variant='liquid-webgl'] .dashboard-sidebar-link:hover {
+  color: var(--foreground);
+  background: color-mix(in oklch, var(--translucent-glass-panel) 42%, transparent);
+}
+
+html[data-theme-slug='translucent'] .dashboard-sidebar-link-active,
+html[data-theme-variant='liquid-webgl'] .dashboard-sidebar-link-active {
+  color: var(--foreground);
+  background: color-mix(in oklch, var(--primary) 18%, transparent);
+  border: 1px solid color-mix(in oklch, var(--primary) 28%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--foreground) 8%, transparent);
+}
+
+html.dark[data-theme-slug='translucent'] .dashboard-sidebar-link-active,
+html.dark[data-theme-variant='liquid-webgl'] .dashboard-sidebar-link-active,
+.dark[data-theme-slug='translucent'] .dashboard-sidebar-link-active,
+.dark[data-theme-variant='liquid-webgl'] .dashboard-sidebar-link-active {
+  background:
+    radial-gradient(
+      circle at 0% 50%,
+      color-mix(in oklch, var(--primary) 24%, transparent),
+      transparent 72%
+    ),
+    color-mix(in oklch, var(--primary) 16%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--foreground) 10%, transparent),
+    0 0 20px color-mix(in oklch, var(--primary) 18%, transparent);
+}
+
+html[data-theme-slug='translucent'] .dashboard-sidebar-group-title,
+html[data-theme-variant='liquid-webgl'] .dashboard-sidebar-group-title {
+  color: color-mix(in oklch, var(--primary) 88%, var(--foreground));
+}
+
+/* Cards & surfaces */
+html[data-theme-slug='translucent'] .ios-surface:not(.ios-premium-surface),
+html[data-theme-variant='liquid-webgl'] .ios-surface:not(.ios-premium-surface),
+html[data-theme-slug='translucent'] [data-slot='card'],
+html[data-theme-variant='liquid-webgl'] [data-slot='card'] {
+  border: 1px solid color-mix(in oklch, var(--translucent-glass-border) 13%, transparent);
+  background: color-mix(in oklch, var(--translucent-glass-panel) var(--translucent-glass-fill), transparent);
+  backdrop-filter: blur(var(--translucent-glass-blur)) saturate(var(--translucent-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--translucent-glass-blur)) saturate(var(--translucent-glass-saturate));
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--foreground) 9%, transparent),
+    0 10px 36px color-mix(in oklch, var(--primary) 8%, transparent);
+}
+
+html.dark[data-theme-slug='translucent'] .ios-surface:not(.ios-premium-surface),
+html.dark[data-theme-variant='liquid-webgl'] .ios-surface:not(.ios-premium-surface),
+html.dark[data-theme-slug='translucent'] [data-slot='card'],
+html.dark[data-theme-variant='liquid-webgl'] [data-slot='card'],
+.dark[data-theme-slug='translucent'] .ios-surface:not(.ios-premium-surface),
+.dark[data-theme-variant='liquid-webgl'] .ios-surface:not(.ios-premium-surface),
+.dark[data-theme-slug='translucent'] [data-slot='card'],
+.dark[data-theme-variant='liquid-webgl'] [data-slot='card'] {
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--foreground) 11%, transparent),
+    0 14px 44px oklch(0.04 0.04 288 / 52%),
+    0 0 0 1px color-mix(in oklch, var(--primary) 8%, transparent);
+}
+
+html[data-theme-slug='translucent'] .ios-premium-surface,
+html[data-theme-variant='liquid-webgl'] .ios-premium-surface {
+  background: color-mix(in oklch, var(--translucent-glass-panel) calc(var(--translucent-glass-fill) - 8%), transparent);
+  backdrop-filter: blur(calc(var(--translucent-glass-blur) - 4px)) saturate(var(--translucent-glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--translucent-glass-blur) - 4px)) saturate(var(--translucent-glass-saturate));
+}
+
+/* Tables */
+html[data-theme-slug='translucent'] table thead tr,
+html[data-theme-variant='liquid-webgl'] table thead tr {
+  background: color-mix(in oklch, var(--translucent-glass-panel) 52%, transparent);
+  border-bottom: 1px solid color-mix(in oklch, var(--translucent-glass-border) 16%, transparent);
+}
+
+html[data-theme-slug='translucent'] table tbody tr,
+html[data-theme-variant='liquid-webgl'] table tbody tr {
+  border-bottom: 1px solid color-mix(in oklch, var(--translucent-glass-border) 10%, transparent);
+}
+
+html[data-theme-slug='translucent'] table tbody tr:hover,
+html[data-theme-variant='liquid-webgl'] table tbody tr:hover {
+  background: color-mix(in oklch, var(--translucent-glass-panel) 38%, transparent);
+}
+
+html.dark[data-theme-slug='translucent'] table thead tr,
+html.dark[data-theme-variant='liquid-webgl'] table thead tr,
+.dark[data-theme-slug='translucent'] table thead tr,
+.dark[data-theme-variant='liquid-webgl'] table thead tr {
+  background: color-mix(in oklch, var(--translucent-glass-panel) 68%, transparent);
+}
+
+html.dark[data-theme-slug='translucent'] table tbody tr:hover,
+html.dark[data-theme-variant='liquid-webgl'] table tbody tr:hover,
+.dark[data-theme-slug='translucent'] table tbody tr:hover,
+.dark[data-theme-variant='liquid-webgl'] table tbody tr:hover {
+  background: color-mix(in oklch, var(--primary) 10%, var(--translucent-glass-panel) 42%);
+}
+
+html[data-theme-slug='translucent'] table th,
+html[data-theme-variant='liquid-webgl'] table th {
+  color: color-mix(in oklch, var(--foreground) 88%, transparent);
+  font-weight: 600;
+}
+
+html[data-theme-slug='translucent'] table td,
+html[data-theme-variant='liquid-webgl'] table td {
+  color: color-mix(in oklch, var(--foreground) 92%, transparent);
+}
+
+html[data-theme-slug='translucent'] table td .text-muted-foreground,
+html[data-theme-variant='liquid-webgl'] table td .text-muted-foreground,
+html[data-theme-slug='translucent'] table td .font-mono,
+html[data-theme-variant='liquid-webgl'] table td .font-mono {
+  color: var(--muted-foreground);
+}
+
+/* Dialogs & popovers */
+html[data-theme-slug='translucent'] [data-slot='dialog-content'],
+html[data-theme-variant='liquid-webgl'] [data-slot='dialog-content'],
+html[data-theme-slug='translucent'] [data-slot='popover-content'],
+html[data-theme-variant='liquid-webgl'] [data-slot='popover-content'],
+html[data-theme-slug='translucent'] [data-slot='dropdown-menu-content'],
+html[data-theme-variant='liquid-webgl'] [data-slot='dropdown-menu-content'] {
+  background: color-mix(in oklch, var(--popover) 88%, transparent) !important;
+  backdrop-filter: blur(calc(var(--translucent-glass-blur) + 6px)) saturate(var(--translucent-glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--translucent-glass-blur) + 6px)) saturate(var(--translucent-glass-saturate));
+  border-color: color-mix(in oklch, var(--translucent-glass-border) 18%, transparent) !important;
+  box-shadow:
+    0 18px 48px oklch(0.06 0.04 288 / 38%),
+    inset 0 1px 0 color-mix(in oklch, var(--foreground) 8%, transparent);
+}
+
+html.dark[data-theme-slug='translucent'] [data-slot='dialog-content'],
+html.dark[data-theme-variant='liquid-webgl'] [data-slot='dialog-content'],
+html.dark[data-theme-slug='translucent'] [data-slot='popover-content'],
+html.dark[data-theme-variant='liquid-webgl'] [data-slot='popover-content'],
+html.dark[data-theme-slug='translucent'] [data-slot='dropdown-menu-content'],
+html.dark[data-theme-variant='liquid-webgl'] [data-slot='dropdown-menu-content'],
+.dark[data-theme-slug='translucent'] [data-slot='dialog-content'],
+.dark[data-theme-variant='liquid-webgl'] [data-slot='dialog-content'],
+.dark[data-theme-slug='translucent'] [data-slot='popover-content'],
+.dark[data-theme-variant='liquid-webgl'] [data-slot='popover-content'],
+.dark[data-theme-slug='translucent'] [data-slot='dropdown-menu-content'],
+.dark[data-theme-variant='liquid-webgl'] [data-slot='dropdown-menu-content'] {
+  box-shadow:
+    0 22px 56px oklch(0.02 0.04 288 / 72%),
+    inset 0 1px 0 color-mix(in oklch, var(--foreground) 10%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--primary) 10%, transparent);
+}
+
+/* Inputs */
+html[data-theme-slug='translucent'] input:not([type='checkbox']):not([type='radio']):not([type='range']),
+html[data-theme-variant='liquid-webgl'] input:not([type='checkbox']):not([type='radio']):not([type='range']),
+html[data-theme-slug='translucent'] textarea,
+html[data-theme-variant='liquid-webgl'] textarea {
+  background: color-mix(in oklch, var(--translucent-glass-panel) 58%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--foreground);
+}
+
+html.dark[data-theme-slug='translucent'] input:not([type='checkbox']):not([type='radio']):not([type='range']),
+html.dark[data-theme-variant='liquid-webgl'] input:not([type='checkbox']):not([type='radio']):not([type='range']),
+html.dark[data-theme-slug='translucent'] textarea,
+html.dark[data-theme-variant='liquid-webgl'] textarea,
+.dark[data-theme-slug='translucent'] input:not([type='checkbox']):not([type='radio']):not([type='range']),
+.dark[data-theme-variant='liquid-webgl'] input:not([type='checkbox']):not([type='radio']):not([type='range']),
+.dark[data-theme-slug='translucent'] textarea,
+.dark[data-theme-variant='liquid-webgl'] textarea {
+  background: color-mix(in oklch, var(--translucent-glass-panel) 72%, transparent);
+}
+
+/* Text legibility */
+html[data-theme-slug='translucent'] h1,
+html[data-theme-slug='translucent'] h2,
+html[data-theme-slug='translucent'] h3,
+html[data-theme-variant='liquid-webgl'] h1,
+html[data-theme-variant='liquid-webgl'] h2,
+html[data-theme-variant='liquid-webgl'] h3 {
+  text-shadow: 0 1px 12px color-mix(in oklch, var(--background) 80%, transparent);
+}
+
+html.dark[data-theme-slug='translucent'] h1,
+html.dark[data-theme-slug='translucent'] h2,
+html.dark[data-theme-slug='translucent'] h3,
+html.dark[data-theme-variant='liquid-webgl'] h1,
+html.dark[data-theme-variant='liquid-webgl'] h2,
+html.dark[data-theme-variant='liquid-webgl'] h3,
+.dark[data-theme-slug='translucent'] h1,
+.dark[data-theme-slug='translucent'] h2,
+.dark[data-theme-slug='translucent'] h3,
+.dark[data-theme-variant='liquid-webgl'] h1,
+.dark[data-theme-variant='liquid-webgl'] h2,
+.dark[data-theme-variant='liquid-webgl'] h3 {
+  text-shadow: 0 2px 18px oklch(0.06 0.05 288 / 85%);
+}
+
+html[data-theme-slug='translucent'] .text-muted-foreground,
+html[data-theme-variant='liquid-webgl'] .text-muted-foreground {
+  text-shadow: 0 1px 8px color-mix(in oklch, var(--background) 70%, transparent);
+}
+
+html.dark[data-theme-slug='translucent'] .text-muted-foreground,
+html.dark[data-theme-variant='liquid-webgl'] .text-muted-foreground,
+.dark[data-theme-slug='translucent'] .text-muted-foreground,
+.dark[data-theme-variant='liquid-webgl'] .text-muted-foreground {
+  text-shadow: 0 1px 12px oklch(0.06 0.05 288 / 75%);
+}
+
+/* Theme editor preview */
+.translucent-theme-preview .liquid-webgl-bg {
+  opacity: 0.48;
+  filter: saturate(1.05) blur(1px);
+}
+
+html.dark .translucent-theme-preview .liquid-webgl-bg,
+.dark .translucent-theme-preview .liquid-webgl-bg {
+  opacity: 0.62;
+  filter: saturate(1.2) brightness(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-webgl-bg {
+    display: none;
+  }
+
+  html[data-theme-slug='translucent'] body::after,
+  html[data-theme-variant='liquid-webgl'] body::after {
+    display: none;
+  }
+
+  html[data-theme-slug='translucent'] body,
+  html[data-theme-variant='liquid-webgl'] body {
+    background:
+      radial-gradient(circle at 18% 14%, oklch(0.62 0.12 288 / 22%), transparent 42%),
+      radial-gradient(circle at 82% 78%, oklch(0.58 0.1 210 / 18%), transparent 40%),
+      var(--background);
+  }
+
+  html.dark[data-theme-slug='translucent'] body,
+  html.dark[data-theme-variant='liquid-webgl'] body,
+  .dark[data-theme-slug='translucent'] body,
+  .dark[data-theme-variant='liquid-webgl'] body {
+    background:
+      radial-gradient(circle at 18% 14%, oklch(0.42 0.12 288 / 28%), transparent 42%),
+      radial-gradient(circle at 82% 78%, oklch(0.38 0.1 210 / 22%), transparent 40%),
+      var(--background);
+  }
+}

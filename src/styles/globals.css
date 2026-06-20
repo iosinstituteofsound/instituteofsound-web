@@ -2,6 +2,7 @@
 @import './theme-aliases.css';
 @import './metal-hammer.css';
 @import './premium-surface.css';
+@import './translucent-theme.css';
 @import './dashboard-sidebar.css';
 
 @custom-variant dark (&:is(.dark *));

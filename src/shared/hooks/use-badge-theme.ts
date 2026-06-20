@@ -24,7 +24,9 @@ export function useBadgeThemeApplier() {
 
     const apply = () => {
       if (data?.source === 'badge' && data.activeTheme?.tokens) {
-        applyThemeTokens(data.activeTheme.tokens, resolveThemeMode(mode))
+        applyThemeTokens(data.activeTheme.tokens, resolveThemeMode(mode), {
+          slug: data.activeTheme.slug,
+        })
         return
       }
       resetThemeOverrides()
@@ -36,7 +38,9 @@ export function useBadgeThemeApplier() {
     const media = window.matchMedia('(prefers-color-scheme: dark)')
     const handleChange = () => {
       if (data?.source === 'badge' && data.activeTheme?.tokens) {
-        applyThemeTokens(data.activeTheme.tokens, resolveThemeMode(mode))
+        applyThemeTokens(data.activeTheme.tokens, resolveThemeMode(mode), {
+          slug: data.activeTheme.slug,
+        })
       }
     }
 

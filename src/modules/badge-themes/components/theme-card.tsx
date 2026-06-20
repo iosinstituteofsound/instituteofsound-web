@@ -7,6 +7,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import {
+  LIQUID_WEBGL_VARIANT,
   normalizeThemeTokens,
   themeTokensToCssProperties,
   type ThemeMode,
@@ -21,7 +22,9 @@ interface ThemeCardProps {
 
 export function ThemeCard({ theme, onEdit, onDelete }: ThemeCardProps) {
   const [previewMode, setPreviewMode] = useState<ThemeMode>('dark')
-  const previewStyle = themeTokensToCssProperties(normalizeThemeTokens(theme.tokens), previewMode) as CSSProperties
+  const normalized = normalizeThemeTokens(theme.tokens)
+  const previewStyle = themeTokensToCssProperties(normalized, previewMode) as CSSProperties
+  const hasLiquidWebGL = normalized.badgeVariant === LIQUID_WEBGL_VARIANT
 
   return (
     <Card className={cn('overflow-hidden', theme.isDefault && 'border-primary/30')}>
@@ -30,6 +33,7 @@ export function ThemeCard({ theme, onEdit, onDelete }: ThemeCardProps) {
           <div className="flex flex-wrap items-center gap-2">
             <CardTitle className="truncate text-lg">{theme.name}</CardTitle>
             {theme.isDefault ? <Badge>Default</Badge> : null}
+            {hasLiquidWebGL ? <Badge variant="secondary">Liquid WebGL</Badge> : null}
           </div>
           <CardDescription className="font-mono text-xs">{theme.slug}</CardDescription>
         </div>
