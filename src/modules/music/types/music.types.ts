@@ -60,6 +60,21 @@ export interface PlaylistDetailDto {
   tracks: PlaylistTrackRefDto[]
 }
 
+export interface PlaylistTrackSearchItemDto {
+  trackId: string
+  title: string
+  artistName: string
+  releaseId: string
+  releaseTitle?: string
+  durationSec?: number
+}
+
+export interface PlaylistTrackSearchResultDto {
+  yourReleases: PlaylistTrackSearchItemDto[]
+  otherReleases: PlaylistTrackSearchItemDto[]
+  siteTracks: PlaylistTrackSearchItemDto[]
+}
+
 export interface ArtistPublicDto {
   profile: {
     id: string

@@ -10,15 +10,22 @@ type ProfileImageUploadProps = {
   description?: string
   value?: string
   aspect?: 'square' | 'cover'
+  size?: 'sm' | 'lg'
   onChange: (url: string | null) => void
   disabled?: boolean
 }
+
+const squareSizeClass = {
+  sm: 'h-28 w-28',
+  lg: 'mx-auto aspect-square w-[min(100%,14rem)] sm:mx-0 sm:size-48 md:size-52 lg:size-56',
+} as const
 
 export function ProfileImageUpload({
   label,
   description,
   value,
   aspect = 'square',
+  size = 'sm',
   onChange,
   disabled,
 }: ProfileImageUploadProps) {
@@ -49,23 +56,29 @@ export function ProfileImageUpload({
   }
 
   return (
-    <div className="space-y-2">
+    <div className={cn('space-y-2', size === 'lg' && 'flex flex-col items-center md:items-start')}>
       <div>
         <p className="text-sm font-medium">{label}</p>
         {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
       </div>
 
-      <div
+      <button
+        type="button"
+        disabled={disabled || uploading}
+        onClick={() => inputRef.current?.click()}
         className={cn(
-          'relative overflow-hidden rounded-xl border border-dashed border-border/80 bg-muted/30',
-          aspect === 'cover' ? 'h-36 w-full sm:h-44' : 'h-28 w-28',
+          'relative block overflow-hidden rounded-xl border border-dashed border-border/80 bg-muted/30 transition-colors hover:bg-muted/45 disabled:pointer-events-none disabled:opacity-60',
+          aspect === 'cover' ? 'h-36 w-full sm:h-44' : squareSizeClass[size],
         )}
       >
         {value ? (
           <img src={value} alt={label} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            <ImagePlus className="h-8 w-8 opacity-60" />
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-3 text-muted-foreground">
+            <ImagePlus className={cn('opacity-60', size === 'lg' ? 'h-10 w-10' : 'h-8 w-8')} />
+            {size === 'lg' ? (
+              <span className="text-center text-xs text-muted-foreground">Click to upload</span>
+            ) : null}
           </div>
         )}
 
@@ -74,9 +87,9 @@ export function ProfileImageUpload({
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : null}
-      </div>
+      </button>
 
-      <div className="flex flex-wrap gap-2">
+      <div className={cn('flex flex-wrap gap-2', size === 'lg' && 'justify-center md:justify-start')}>
         <Button
           type="button"
           variant="outline"

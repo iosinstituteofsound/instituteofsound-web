@@ -5,6 +5,7 @@ import type {
   ArtistPublicDto,
   AudioUploadJobDto,
   PlaylistDetailDto,
+  PlaylistTrackSearchResultDto,
   ReleaseDetailDto,
   TrackDto,
 } from '@/modules/music/types/music.types'
@@ -165,6 +166,29 @@ export async function updateArtistPlaylist(
   const { data } = await apiClient.patch<ApiSuccessResponse<PlaylistDetailDto>>(
     `${API_V1}/artist/playlists/${id}`,
     input,
+  )
+  return data.data
+}
+
+export async function getArtistPlaylist(idOrSlug: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<PlaylistDetailDto>>(
+    `${API_V1}/artist/playlists/${idOrSlug}`,
+  )
+  return data.data
+}
+
+export async function addTrackToArtistPlaylist(playlistId: string, trackId: string) {
+  const { data } = await apiClient.post<ApiSuccessResponse<PlaylistDetailDto>>(
+    `${API_V1}/artist/playlists/${playlistId}/tracks`,
+    { trackId },
+  )
+  return data.data
+}
+
+export async function searchArtistPlaylistTracks(q: string, limit = 10) {
+  const { data } = await apiClient.get<ApiSuccessResponse<PlaylistTrackSearchResultDto>>(
+    `${API_V1}/artist/playlists/search/tracks`,
+    { params: { q, limit } },
   )
   return data.data
 }
