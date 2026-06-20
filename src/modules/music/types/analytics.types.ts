@@ -91,6 +91,39 @@ export type PaginatedLikersDto = {
   pageSize: number
 }
 
+export type AnalyticsRangePreset = '30d' | '90d' | '365d' | 'lifetime' | 'custom'
+
+export type ArtistReleasePerformanceDto = {
+  range: {
+    preset: AnalyticsRangePreset
+    from?: string
+    to?: string
+    label: string
+  }
+  aggregateTrend: AnalyticsTrendPointDto[]
+  totals: {
+    qualifiedPlays: number
+    totalListenSec: number
+    activeLikes: number
+    uniqueListeners: number
+    completionRate: number
+  }
+  releases: Array<{
+    releaseId: string
+    title: string
+    type: string
+    coverUrl?: string
+    releaseDate?: string
+    status: string
+    qualifiedPlays: number
+    totalListenSec: number
+    completionRate: number
+    activeLikes: number
+    uniqueListeners: number
+    trend: AnalyticsTrendPointDto[]
+  }>
+}
+
 export type ArtistAnalyticsDashboardDto = {
   overview: {
     qualifiedPlays: number

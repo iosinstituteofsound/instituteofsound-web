@@ -11,6 +11,8 @@ import type {
 } from '@/modules/music/types/music.types'
 import type {
   ArtistAnalyticsDashboardDto,
+  ArtistReleasePerformanceDto,
+  AnalyticsRangePreset,
   AnalyticsTrendPointDto,
   LikeToggleResultDto,
   PaginatedLikersDto,
@@ -316,7 +318,10 @@ export async function getReleaseAnalytics(releaseId: string) {
   return data.data
 }
 
-export async function getReleaseAnalyticsTrends(releaseId: string, range: '7d' | '30d' = '7d') {
+export async function getReleaseAnalyticsTrends(
+  releaseId: string,
+  range: '7d' | '30d' | '90d' | '365d' | 'lifetime' = '7d',
+) {
   const { data } = await apiClient.get<ApiSuccessResponse<AnalyticsTrendPointDto[]>>(
     `${API_V1}/music/releases/${releaseId}/analytics/trends`,
     { params: { range } },
@@ -349,6 +354,18 @@ export async function getReleaseLikes(
 export async function toggleTrackLike(trackId: string) {
   const { data } = await apiClient.post<ApiSuccessResponse<LikeToggleResultDto>>(
     `${API_V1}/music/tracks/${trackId}/like`,
+  )
+  return data.data
+}
+
+export async function getArtistReleasePerformance(params: {
+  range?: AnalyticsRangePreset
+  from?: string
+  to?: string
+}) {
+  const { data } = await apiClient.get<ApiSuccessResponse<ArtistReleasePerformanceDto>>(
+    `${API_V1}/artist/analytics/release-performance`,
+    { params },
   )
   return data.data
 }

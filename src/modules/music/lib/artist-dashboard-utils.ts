@@ -2,6 +2,31 @@ import type { AnalyticsTrendPointDto } from '@/modules/music/types/analytics.typ
 
 export type DashboardAccent = 'primary' | 'success' | 'warning' | 'info'
 
+export type AnalyticsRangePreset = '30d' | '90d' | '365d' | 'lifetime' | 'custom'
+
+export const ANALYTICS_RANGE_PRESETS: Array<{
+  id: AnalyticsRangePreset
+  label: string
+}> = [
+  { id: '30d', label: 'Last 30 days' },
+  { id: '90d', label: 'Last 90 days' },
+  { id: '365d', label: 'Last 365 days' },
+  { id: 'lifetime', label: 'Lifetime' },
+  { id: 'custom', label: 'Custom' },
+]
+
+export function filterTrendByDateRange(
+  points: AnalyticsTrendPointDto[],
+  from?: string,
+  to?: string,
+) {
+  return points.filter((p) => {
+    if (from && p.date < from) return false
+    if (to && p.date > to) return false
+    return true
+  })
+}
+
 export function filterTrendByDays(points: AnalyticsTrendPointDto[], days: number) {
   const cutoff = new Date()
   cutoff.setUTCDate(cutoff.getUTCDate() - days)
@@ -68,6 +93,56 @@ export function formatRelativeTime(iso?: string): string {
   return `${days}d ago`
 }
 
+export function fillTrendDateGaps(
+  points: AnalyticsTrendPointDto[],
+  fromDate?: string,
+  toDate?: string,
+): AnalyticsTrendPointDto[] {
+  if (!fromDate && !toDate) {
+    const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date))
+    if (sorted.length <= 1) return sorted
+    return fillTrendDateGaps(points, sorted[0].date, sorted[sorted.length - 1].date)
+  }
+
+  const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date))
+  const start = fromDate ?? sorted[0]?.date
+  const end = toDate ?? sorted[sorted.length - 1]?.date
+  if (!start || !end) return sorted
+
+  const byDate = new Map(sorted.map((point) => [point.date, point]))
+  const filled: AnalyticsTrendPointDto[] = []
+  const cursor = new Date(`${start}T00:00:00Z`)
+  const endTime = new Date(`${end}T00:00:00Z`).getTime()
+
+  while (cursor.getTime() <= endTime) {
+    const key = cursor.toISOString().slice(0, 10)
+    filled.push(
+      byDate.get(key) ?? {
+        date: key,
+        qualifiedPlays: 0,
+        totalListenSec: 0,
+        sessions: 0,
+        completions: 0,
+        skips: 0,
+        likes: 0,
+      },
+    )
+    cursor.setUTCDate(cursor.getUTCDate() + 1)
+  }
+
+  return filled
+}
+
+export function trendToChartPoints(
+  points: AnalyticsTrendPointDto[],
+  valueKey: keyof Pick<AnalyticsTrendPointDto, 'qualifiedPlays' | 'sessions' | 'likes' | 'completions'> = 'qualifiedPlays',
+) {
+  return points.map((point) => ({
+    label: point.date.slice(5).replace('-', '/'),
+    value: point[valueKey],
+  }))
+}
+
 export function buildSparklinePath(values: number[], width = 100, height = 36): string {
   if (!values.length) return ''
   const max = Math.max(1, ...values)
@@ -105,11 +180,24 @@ export function buildLineChartPaths(
     return { x, y, label: point.label, value: point.value }
   })
 
-  const linePath = coords
-    .map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(2)} ${c.y.toFixed(2)}`)
-    .join(' ')
+  const linePath =
+    coords.length === 1
+      ? (() => {
+          const c = coords[0]
+          const span = Math.min(48, innerW / 2)
+          return `M ${(c.x - span).toFixed(2)} ${c.y.toFixed(2)} L ${(c.x + span).toFixed(2)} ${c.y.toFixed(2)}`
+        })()
+      : coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(2)} ${c.y.toFixed(2)}`).join(' ')
 
-  const areaPath = `${linePath} L ${coords[coords.length - 1].x.toFixed(2)} ${(padding.top + innerH).toFixed(2)} L ${coords[0].x.toFixed(2)} ${(padding.top + innerH).toFixed(2)} Z`
+  const areaPath =
+    coords.length === 1
+      ? (() => {
+          const c = coords[0]
+          const span = Math.min(48, innerW / 2)
+          const baseY = (padding.top + innerH).toFixed(2)
+          return `M ${(c.x - span).toFixed(2)} ${c.y.toFixed(2)} L ${(c.x + span).toFixed(2)} ${c.y.toFixed(2)} L ${(c.x + span).toFixed(2)} ${baseY} L ${(c.x - span).toFixed(2)} ${baseY} Z`
+        })()
+      : `${linePath} L ${coords[coords.length - 1].x.toFixed(2)} ${(padding.top + innerH).toFixed(2)} L ${coords[0].x.toFixed(2)} ${(padding.top + innerH).toFixed(2)} Z`
 
   const labelEvery = Math.max(1, Math.ceil(points.length / 6))
   const labels = coords

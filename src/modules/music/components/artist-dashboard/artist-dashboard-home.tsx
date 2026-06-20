@@ -23,8 +23,8 @@ import {
   listArtistReleases,
   listArtistTracks,
 } from '@/modules/music/api/music.api'
+import { DashboardLineChart } from '@/modules/music/components/artist-dashboard/dashboard-line-chart'
 import {
-  buildLineChartPaths,
   buildSparklinePath,
   computePeriodDelta,
   deltaClass,
@@ -39,6 +39,16 @@ import {
 import { formatPlays } from '@/modules/music/lib/analytics-format'
 import { Loader } from '@/shared/components/feedback/loader'
 import '@/modules/music/styles/artist-dashboard-home.css'
+import {
+  ArtistDashboardMetricModal,
+  type MetricDetailKind,
+} from '@/modules/music/components/artist-dashboard/artist-dashboard-metric-modal'
+import {
+  ArtistDashboardPeriodSelector,
+  ArtistDashboardReleasesModal,
+  useArtistReleasePerformanceCard,
+} from '@/modules/music/components/artist-dashboard/artist-dashboard-releases-modal'
+import type { AnalyticsRangePreset } from '@/modules/music/lib/artist-dashboard-utils'
 
 type MetricCardProps = {
   accent: DashboardAccent
@@ -48,6 +58,7 @@ type MetricCardProps = {
   delta: number | null
   deltaSuffix?: string
   sparkline: number[]
+  onOpen: () => void
 }
 
 function MetricSparkline({ values }: { values: number[] }) {
@@ -70,12 +81,27 @@ function MetricSparkline({ values }: { values: number[] }) {
   )
 }
 
-function MetricCard({ accent, icon, label, value, delta, deltaSuffix, sparkline }: MetricCardProps) {
+function MetricCard({
+  accent,
+  icon,
+  label,
+  value,
+  delta,
+  deltaSuffix,
+  sparkline,
+  onOpen,
+}: MetricCardProps) {
   const trendClass = deltaClass(delta)
   const TrendIcon = trendClass === 'is-up' ? ArrowUp : trendClass === 'is-down' ? ArrowDown : Minus
 
   return (
-    <article className="ios-artist-dashboard__metric" data-accent={accent}>
+    <button
+      type="button"
+      className="ios-artist-dashboard__metric ios-artist-dashboard__metric--clickable"
+      data-accent={accent}
+      onClick={onOpen}
+      aria-label={`View detailed ${label}`}
+    >
       <div className="ios-artist-dashboard__metric-head">
         <span className="ios-artist-dashboard__metric-icon">{icon}</span>
         <span className="ios-artist-dashboard__metric-label">{label}</span>
@@ -87,81 +113,48 @@ function MetricCard({ accent, icon, label, value, delta, deltaSuffix, sparkline 
       </p>
       <p className="ios-artist-dashboard__metric-sub">vs last 30 days</p>
       <MetricSparkline values={sparkline} />
-    </article>
+    </button>
   )
 }
 
 function StreamsLineChart({
   points,
 }: {
-  points: Array<{ label: string; value: number }>
+  points: Array<{ date: string; qualifiedPlays: number }>
 }) {
-  const chart = useMemo(() => buildLineChartPaths(points), [points])
-
-  if (!points.length) {
-    return (
-      <p className="ios-artist-dashboard__chart-empty">
-        Publish releases and get plays to see your stream trend.
-      </p>
-    )
-  }
+  const toDate = new Date().toISOString().slice(0, 10)
+  const from = new Date()
+  from.setUTCDate(from.getUTCDate() - 30)
 
   return (
-    <div className="ios-artist-dashboard__chart-wrap" role="img" aria-label="Streams overview chart">
-      <svg viewBox="0 0 600 200" preserveAspectRatio="none">
-        {chart.yTicks.map((tick) => {
-          const y = 12 + (188 - 12) * (1 - tick / Math.max(1, chart.max ?? 1))
-          return (
-            <g key={tick}>
-              <line
-                x1="36"
-                y1={y}
-                x2="588"
-                y2={y}
-                stroke="color-mix(in oklch, var(--border) 80%, transparent)"
-                strokeWidth="1"
-              />
-              <text
-                x="30"
-                y={y + 4}
-                textAnchor="end"
-                fontSize="10"
-                fill="var(--ios-dashboard-text-secondary)"
-              >
-                {formatPlays(tick)}
-              </text>
-            </g>
-          )
-        })}
-        <path d={chart.areaPath} fill="var(--ios-dashboard-chart-fill)" />
-        <path
-          d={chart.linePath}
-          fill="none"
-          stroke="var(--ios-dashboard-chart-line)"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="ios-artist-dashboard__chart-line"
-        />
-        {chart.labels.map((label) => (
-          <text
-            key={`${label.x}-${label.label}`}
-            x={label.x}
-            y="198"
-            textAnchor="middle"
-            fontSize="10"
-            fill="var(--ios-dashboard-text-secondary)"
-          >
-            {label.label}
-          </text>
-        ))}
-      </svg>
-    </div>
+    <DashboardLineChart
+      points={points.map((p) => ({
+        date: p.date,
+        qualifiedPlays: p.qualifiedPlays,
+        totalListenSec: 0,
+        sessions: 0,
+        completions: 0,
+        skips: 0,
+        likes: 0,
+      }))}
+      fromDate={from.toISOString().slice(0, 10)}
+      toDate={toDate}
+      className="ios-artist-dashboard__chart-wrap"
+      width={600}
+      height={200}
+      emptyMessage="Publish releases and get plays to see your stream trend."
+      ariaLabel="Streams overview chart"
+    />
   )
 }
 
 export function ArtistDashboardHome() {
   const [rangeDays] = useState(30)
+  const [activeMetric, setActiveMetric] = useState<MetricDetailKind | null>(null)
+  const [releasesModalOpen, setReleasesModalOpen] = useState(false)
+  const [releasePeriodPreset, setReleasePeriodPreset] = useState<AnalyticsRangePreset>('30d')
+  const [releaseCustomFrom, setReleaseCustomFrom] = useState('')
+  const [releaseCustomTo, setReleaseCustomTo] = useState(() => new Date().toISOString().slice(0, 10))
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
     queryKey: ['artist-analytics'],
@@ -179,6 +172,11 @@ export function ArtistDashboardHome() {
     queryKey: ['artist-profile'],
     queryFn: getArtistProfile,
   })
+  const { data: releasePerformance } = useArtistReleasePerformanceCard(
+    releasePeriodPreset,
+    releaseCustomFrom,
+    releaseCustomTo,
+  )
 
   const trend30 = useMemo(
     () => filterTrendByDays(analytics?.trend ?? [], rangeDays),
@@ -211,29 +209,22 @@ export function ArtistDashboardHome() {
   )
 
   const latestReleaseBundle = useMemo(() => {
-    const published = (releases ?? [])
-      .filter((r) => r.status === 'published')
-      .sort((a, b) => {
-        const aTime = a.releaseDate ? new Date(a.releaseDate).getTime() : 0
-        const bTime = b.releaseDate ? new Date(b.releaseDate).getTime() : 0
-        return bTime - aTime
-      })
-    const latest = published[0]
-    if (!latest) return null
+    if (!releasePerformance?.releases.length) return null
 
-    const stats = (analytics?.releases ?? []).find((r) => r.releaseId === latest.id)
-    const previous = published[1]
-    const previousStats = previous
-      ? (analytics?.releases ?? []).find((r) => r.releaseId === previous.id)
-      : undefined
-
+    const sorted = [...releasePerformance.releases].sort((a, b) => {
+      const aTime = a.releaseDate ? new Date(a.releaseDate).getTime() : 0
+      const bTime = b.releaseDate ? new Date(b.releaseDate).getTime() : 0
+      return bTime - aTime
+    })
+    const latest = sorted[0]
+    const previous = sorted[1]
     const growth =
-      previousStats && previousStats.qualifiedPlays > 0
-        ? ((stats?.qualifiedPlays ?? 0) - previousStats.qualifiedPlays) / previousStats.qualifiedPlays
+      previous && previous.qualifiedPlays > 0
+        ? (latest.qualifiedPlays - previous.qualifiedPlays) / previous.qualifiedPlays
         : null
 
-    return { latest, stats, growth }
-  }, [analytics?.releases, releases])
+    return { latest, growth }
+  }, [releasePerformance?.releases])
 
   const topTracks = useMemo(() => {
     const releaseCoverById = new Map((releases ?? []).map((r) => [r.id, r.coverUrl]))
@@ -248,11 +239,7 @@ export function ArtistDashboardHome() {
   }, [releases, tracks])
 
   const chartPoints = useMemo(
-    () =>
-      trend30.map((p) => ({
-        label: p.date.slice(5).replace('-', '/'),
-        value: p.qualifiedPlays,
-      })),
+    () => trend30.map((p) => ({ date: p.date, qualifiedPlays: p.qualifiedPlays })),
     [trend30],
   )
 
@@ -289,6 +276,57 @@ export function ArtistDashboardHome() {
 
   const overview = analytics?.overview
 
+  const metricCards: Array<{
+    kind: MetricDetailKind
+    accent: DashboardAccent
+    icon: ReactNode
+    label: string
+    value: string
+    delta: number | null
+    deltaSuffix?: string
+    sparkline: number[]
+  }> = [
+    {
+      kind: 'streams',
+      accent: 'primary',
+      icon: <Play size={16} aria-hidden />,
+      label: 'Total Streams',
+      value: formatPlays(overview?.qualifiedPlays ?? 0),
+      delta: playsDelta,
+      sparkline: playSparkline,
+    },
+    {
+      kind: 'listeners',
+      accent: 'success',
+      icon: <Users size={16} aria-hidden />,
+      label: 'Monthly Listeners',
+      value: formatPlays(overview?.uniqueListeners ?? 0),
+      delta: listenersDelta,
+      sparkline: listenerSparkline,
+    },
+    {
+      kind: 'supporters',
+      accent: 'warning',
+      icon: <Heart size={16} aria-hidden />,
+      label: 'Active Supporters',
+      value: formatPlays(overview?.activeLikes ?? 0),
+      delta: likesDelta,
+      sparkline: likesSparkline,
+    },
+    {
+      kind: 'rank',
+      accent: 'info',
+      icon: <TrendingUp size={16} aria-hidden />,
+      label: 'dB Rank',
+      value: estimateDbRank(overview?.qualifiedPlays ?? 0),
+      delta: rankDelta,
+      deltaSuffix: '',
+      sparkline: rankSparkline,
+    },
+  ]
+
+  const activeMetricCard = metricCards.find((card) => card.kind === activeMetric) ?? null
+
   return (
     <div className="ios-artist-dashboard">
       <div className="ios-artist-dashboard__header">
@@ -302,49 +340,46 @@ export function ArtistDashboardHome() {
       <div className="ios-artist-dashboard__layout">
         <div className="ios-artist-dashboard__main">
           <section className="ios-artist-dashboard__metrics" aria-label="Key metrics">
-            <MetricCard
-              accent="primary"
-              icon={<Play size={16} aria-hidden />}
-              label="Total Streams"
-              value={formatPlays(overview?.qualifiedPlays ?? 0)}
-              delta={playsDelta}
-              sparkline={playSparkline}
-            />
-            <MetricCard
-              accent="success"
-              icon={<Users size={16} aria-hidden />}
-              label="Monthly Listeners"
-              value={formatPlays(overview?.uniqueListeners ?? 0)}
-              delta={listenersDelta}
-              sparkline={listenerSparkline}
-            />
-            <MetricCard
-              accent="warning"
-              icon={<Heart size={16} aria-hidden />}
-              label="Active Supporters"
-              value={formatPlays(overview?.activeLikes ?? 0)}
-              delta={likesDelta}
-              sparkline={likesSparkline}
-            />
-            <MetricCard
-              accent="info"
-              icon={<TrendingUp size={16} aria-hidden />}
-              label="dB Rank"
-              value={estimateDbRank(overview?.qualifiedPlays ?? 0)}
-              delta={rankDelta}
-              deltaSuffix=""
-              sparkline={rankSparkline}
-            />
+            {metricCards.map((card) => (
+              <MetricCard
+                key={card.kind}
+                accent={card.accent}
+                icon={card.icon}
+                label={card.label}
+                value={card.value}
+                delta={card.delta}
+                deltaSuffix={card.deltaSuffix}
+                sparkline={card.sparkline}
+                onOpen={() => setActiveMetric(card.kind)}
+              />
+            ))}
           </section>
 
-          <section className="ios-artist-dashboard__panel" aria-labelledby="latest-release-heading">
+          <section
+            className="ios-artist-dashboard__panel ios-artist-dashboard__panel--clickable"
+            aria-labelledby="latest-release-heading"
+          >
             <div className="ios-artist-dashboard__panel-head">
               <h2 id="latest-release-heading" className="ios-artist-dashboard__panel-title">
                 Latest Release Performance
               </h2>
-              <span className="ios-artist-dashboard__range">Last 30 Days</span>
+              <ArtistDashboardPeriodSelector
+                compact
+                preset={releasePeriodPreset}
+                customFrom={releaseCustomFrom}
+                customTo={releaseCustomTo}
+                onPresetChange={setReleasePeriodPreset}
+                onCustomFromChange={setReleaseCustomFrom}
+                onCustomToChange={setReleaseCustomTo}
+              />
             </div>
 
+            <button
+              type="button"
+              className="ios-artist-dashboard__release-trigger"
+              onClick={() => setReleasesModalOpen(true)}
+              aria-label="Open all release performance details"
+            >
             {latestReleaseBundle ? (
               <div className="ios-artist-dashboard__release">
                 <div className="ios-artist-dashboard__release-art">
@@ -370,21 +405,21 @@ export function ArtistDashboardHome() {
                     {[
                       {
                         label: 'Streams',
-                        value: formatPlays(latestReleaseBundle.stats?.qualifiedPlays ?? 0),
+                        value: formatPlays(latestReleaseBundle.latest.qualifiedPlays),
                         delta: latestReleaseBundle.growth,
                       },
                       {
                         label: 'Listeners',
-                        value: formatPlays(latestReleaseBundle.stats?.uniqueListeners ?? 0),
+                        value: formatPlays(latestReleaseBundle.latest.uniqueListeners),
                       },
                       {
                         label: 'Saves',
-                        value: formatPlays(latestReleaseBundle.stats?.activeLikes ?? 0),
+                        value: formatPlays(latestReleaseBundle.latest.activeLikes),
                       },
                       {
                         label: 'Shares',
                         value: formatPlays(
-                          Math.max(0, Math.round((latestReleaseBundle.stats?.qualifiedPlays ?? 0) * 0.08)),
+                          Math.max(0, Math.round(latestReleaseBundle.latest.qualifiedPlays * 0.08)),
                         ),
                       },
                     ].map((stat) => (
@@ -405,8 +440,8 @@ export function ArtistDashboardHome() {
                       {
                         '--release-progress': `${Math.min(
                           100,
-                          ((latestReleaseBundle.stats?.qualifiedPlays ?? 0) /
-                            Math.max(1, overview?.qualifiedPlays ?? 1)) *
+                          ((latestReleaseBundle.latest.qualifiedPlays ?? 0) /
+                            Math.max(1, releasePerformance?.totals.qualifiedPlays ?? 1)) *
                             100,
                         ).toFixed(1)}%`,
                       } as CSSProperties
@@ -429,11 +464,12 @@ export function ArtistDashboardHome() {
             ) : (
               <p className="ios-artist-dashboard__empty">
                 No published releases yet.{' '}
-                <Link to="/artist/upload" className="ios-artist-dashboard__link">
+                <Link to="/artist/upload" className="ios-artist-dashboard__link" onClick={(e) => e.stopPropagation()}>
                   Upload your first release
                 </Link>
               </p>
             )}
+            </button>
           </section>
 
           <section className="ios-artist-dashboard__actions" aria-label="Quick actions">
@@ -626,6 +662,31 @@ export function ArtistDashboardHome() {
           </section>
         </aside>
       </div>
+
+      {analytics && activeMetricCard ? (
+        <ArtistDashboardMetricModal
+          kind={activeMetric}
+          onClose={() => setActiveMetric(null)}
+          analytics={analytics}
+          accent={activeMetricCard.accent}
+          icon={activeMetricCard.icon}
+          label={activeMetricCard.label}
+          value={activeMetricCard.value}
+          delta={activeMetricCard.delta}
+          deltaSuffix={activeMetricCard.deltaSuffix}
+        />
+      ) : null}
+
+      <ArtistDashboardReleasesModal
+        open={releasesModalOpen}
+        onClose={() => setReleasesModalOpen(false)}
+        preset={releasePeriodPreset}
+        customFrom={releaseCustomFrom}
+        customTo={releaseCustomTo}
+        onPresetChange={setReleasePeriodPreset}
+        onCustomFromChange={setReleaseCustomFrom}
+        onCustomToChange={setReleaseCustomTo}
+      />
     </div>
   )
 }
