@@ -16,12 +16,8 @@ export const FEED_RENDERERS: Record<FeedItemDto['type'], ComponentType<FeedCardP
   image: ImageFeedCard,
   text: TextFeedCard,
   article: ArticleFeedCard,
-<<<<<<< Updated upstream
   model: ModelFeedCard,
-} satisfies Record<FeedItemDto['type'], ComponentType<FeedCardProps>>
-=======
 }
->>>>>>> Stashed changes
 
 export function FeedItemCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {
   const Renderer = FEED_RENDERERS[item.type] ?? TextFeedCard
