@@ -1,4 +1,4 @@
-import { Film, ImageIcon, Music2, Plus } from 'lucide-react'
+import { Box, Film, ImageIcon, Music2, Plus } from 'lucide-react'
 import type { FeedItemType } from '@/modules/feed/types/feed.types'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { Button } from '@/shared/components/ui/button'
@@ -14,6 +14,7 @@ export const QUICK_POST_ACTIONS: {
   { type: 'video', label: 'Video', icon: Film, iconClass: 'text-pink-500' },
   { type: 'image', label: 'Photo', icon: ImageIcon, iconClass: 'text-emerald-500' },
   { type: 'music', label: 'Audio', icon: Music2, iconClass: 'text-red-500' },
+  { type: 'model', label: '3D', icon: Box, iconClass: 'text-violet-500' },
 ]
 
 const INLINE_ACTIONS_WIDTH = QUICK_POST_ACTIONS.length * 36 + (QUICK_POST_ACTIONS.length - 1) * 4

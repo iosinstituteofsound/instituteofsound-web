@@ -1,4 +1,5 @@
 import {
+  Box,
   FileText,
   Globe,
   ImageIcon,
@@ -16,7 +17,7 @@ import {
 } from '@/shared/components/ui/dropdown-menu'
 import { cn } from '@/shared/lib/cn'
 
-export type PostAddAction = 'photo-video' | 'audio' | 'record-video' | 'record-audio' | 'clip' | 'article'
+export type PostAddAction = 'photo-video' | 'audio' | 'model' | 'record-video' | 'record-audio' | 'clip' | 'article'
 
 interface CreatePostAddBarProps {
   activeAction: PostAddAction | null
@@ -60,6 +61,16 @@ export function CreatePostAddBar({
           className={cn('feed-create-post__add-btn', activeAction === 'audio' && 'is-active')}
         >
           <Mic className="h-6 w-6 text-red-500" />
+        </button>
+
+        <button
+          type="button"
+          title="3D model"
+          disabled={disabled}
+          onClick={() => onAction('model')}
+          className={cn('feed-create-post__add-btn', activeAction === 'model' && 'is-active')}
+        >
+          <Box className="h-6 w-6 text-violet-500" />
         </button>
 
         <button

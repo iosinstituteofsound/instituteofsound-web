@@ -12,6 +12,9 @@ export type MediaUploadResult = {
   mimeType: string
   sizeBytes: number
   originalName: string
+  sourceFormat?: string
+  convertedFormat?: string
+  converted?: boolean
 }
 
 export async function uploadMediaFile(

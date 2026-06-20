@@ -105,6 +105,7 @@ export const MediaAttachPanel = forwardRef<MediaAttachPanelHandle, MediaAttachPa
   const activeKind = resolvedKind ?? (kind === 'photo-video' ? 'image' : kind)
 
   const extensionForBlob = (blob: Blob, blobKind: MediaAttachKind) => {
+    if (blobKind === 'model') return '.glb'
     if (blobKind === 'image') {
       if (blob.type.includes('png')) return '.png'
       if (blob.type.includes('webp')) return '.webp'
@@ -183,11 +184,12 @@ export const MediaAttachPanel = forwardRef<MediaAttachPanelHandle, MediaAttachPa
   }
 
   const startRecording = async () => {
-    if (activeKind === 'image') return
+    if (activeKind !== 'video' && activeKind !== 'audio') return
 
     try {
+      const recordKind = activeKind
       const constraints: MediaStreamConstraints =
-        activeKind === 'video'
+        recordKind === 'video'
           ? { audio: true, video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } }
           : { audio: true, video: false }
 
@@ -195,7 +197,7 @@ export const MediaAttachPanel = forwardRef<MediaAttachPanelHandle, MediaAttachPa
       recordStreamRef.current = stream
       recordChunksRef.current = []
 
-      const mimeType = pickRecorderMime(activeKind)
+      const mimeType = pickRecorderMime(recordKind)
       const recorder = new MediaRecorder(stream, { mimeType })
       recorderRef.current = recorder
 
@@ -209,9 +211,9 @@ export const MediaAttachPanel = forwardRef<MediaAttachPanelHandle, MediaAttachPa
         recorderRef.current = null
         setRecording(false)
         setRecordSeconds(0)
-        setResolvedKind(activeKind)
-        onResolvedKind?.(activeKind)
-        await setPreviewFromBlob(blob, activeKind)
+        setResolvedKind(recordKind)
+        onResolvedKind?.(recordKind)
+        await setPreviewFromBlob(blob, recordKind)
       }
 
       recorder.start(250)
@@ -562,5 +564,6 @@ export function mediaKindForFeedType(type: string): MediaAttachKind | null {
   if (type === 'image') return 'image'
   if (type === 'video') return 'video'
   if (type === 'music') return 'audio'
+  if (type === 'model') return 'model'
   return null
 }

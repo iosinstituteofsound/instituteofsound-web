@@ -30,7 +30,6 @@ import {
   createFeedWirePick,
   createReleaseWirePick,
   createWirePickDragIds,
-  feedItemTitle,
   insertWirePickAt,
   isWirePickAlreadySelected,
   resolveWirePick,

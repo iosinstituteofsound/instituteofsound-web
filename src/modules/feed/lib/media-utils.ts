@@ -1,5 +1,32 @@
-export type MediaAttachKind = 'image' | 'video' | 'audio'
+export type MediaAttachKind = 'image' | 'video' | 'audio' | 'model'
 export type MediaAttachMode = MediaAttachKind | 'photo-video'
+
+export const MODEL_EXTENSIONS = [
+  '.glb',
+  '.gltf',
+  '.obj',
+  '.mtl',
+  '.fbx',
+  '.stl',
+  '.dae',
+  '.3ds',
+  '.ply',
+  '.blend',
+  '.x',
+  '.md5mesh',
+  '.usdz',
+] as const
+
+/** Comma-separated list for `<input accept>` — every extension needs its own dot. */
+export const MODEL_FILE_ACCEPT = [
+  ...MODEL_EXTENSIONS,
+  'model/gltf+json',
+  'model/gltf-binary',
+  'application/vnd.usdz+zip',
+  // macOS often reports OBJ/STL as generic binary or plain text
+  'application/octet-stream',
+  'text/plain',
+].join(',')
 
 export function acceptForKind(kind: MediaAttachMode): string {
   if (kind === 'photo-video') {
@@ -12,13 +39,25 @@ export function acceptForKind(kind: MediaAttachMode): string {
       return 'video/mp4,video/webm,video/quicktime'
     case 'audio':
       return 'audio/mpeg,audio/wav,audio/webm,audio/ogg,audio/mp4'
+    case 'model':
+      return MODEL_FILE_ACCEPT
   }
 }
 
+function extensionFromName(name: string): string {
+  const dot = name.lastIndexOf('.')
+  return dot >= 0 ? name.slice(dot).toLowerCase() : ''
+}
+
 export function kindFromFile(file: File): MediaAttachKind | null {
+  const ext = extensionFromName(file.name)
+  if (ext === '.mtl') return null
+  if (MODEL_EXTENSIONS.includes(ext as (typeof MODEL_EXTENSIONS)[number])) return 'model'
   if (file.type.startsWith('image/')) return 'image'
   if (file.type.startsWith('video/')) return 'video'
   if (file.type.startsWith('audio/')) return 'audio'
+  if (file.type === 'model/gltf+json' || file.type === 'model/gltf-binary') return 'model'
+  if (file.type === 'application/vnd.usdz+zip') return 'model'
   return null
 }
 
@@ -87,4 +126,10 @@ export function pickRecorderMime(kind: 'video' | 'audio'): string {
       : ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus']
 
   return candidates.find((mime) => MediaRecorder.isTypeSupported(mime)) ?? candidates[candidates.length - 1]!
+}
+
+export function modelFormatLabel(sourceFormat?: string, converted?: boolean): string {
+  if (!sourceFormat) return '3D model'
+  const label = sourceFormat.toUpperCase()
+  return converted ? `${label} → GLB` : label
 }

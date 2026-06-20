@@ -22,6 +22,11 @@ import {
   type MediaAttachPanelHandle,
 } from '@/modules/feed/components/media-attach-panel'
 import {
+  ModelAttachPanel,
+  type ModelAttachment,
+  type ModelAttachPanelHandle,
+} from '@/modules/feed/components/model-attach-panel'
+import {
   LinkPreviewCard,
   LinkPreviewCardSkeleton,
 } from '@/modules/feed/components/link-preview-card'
@@ -54,6 +59,7 @@ interface CreatePostDialogProps {
 function mapInitialType(type: FeedItemType): PostAddAction | null {
   if (type === 'image' || type === 'video') return 'photo-video'
   if (type === 'music') return 'audio'
+  if (type === 'model') return 'model'
   if (type === 'article') return 'article'
   return null
 }
@@ -95,6 +101,7 @@ export function CreatePostDialog({
   const [activeAction, setActiveAction] = useState<PostAddAction | null>(null)
   const [resolvedMediaKind, setResolvedMediaKind] = useState<MediaAttachKind | null>(null)
   const [mediaAttachment, setMediaAttachment] = useState<MediaAttachment | null>(null)
+  const [modelAttachment, setModelAttachment] = useState<ModelAttachment | null>(null)
   const [showArticleFields, setShowArticleFields] = useState(false)
   const [articleUrl, setArticleUrl] = useState('')
   const [articleExcerpt, setArticleExcerpt] = useState('')
@@ -102,11 +109,14 @@ export function CreatePostDialog({
   const [emojiAnchor, setEmojiAnchor] = useState<HTMLElement | null>(null)
   const [linkPreviewDismissed, setLinkPreviewDismissed] = useState(false)
   const [mediaUploadState, setMediaUploadState] = useState({ uploading: false, hasPreview: false })
+  const [modelUploadState, setModelUploadState] = useState({ uploading: false, hasPreview: false })
   const [releasePayload, setReleasePayload] = useState<Record<string, unknown> | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mediaPanelRef = useRef<MediaAttachPanelHandle>(null)
+  const modelPanelRef = useRef<ModelAttachPanelHandle>(null)
 
-  const linkPreviewEnabled = !mediaAttachment && !showArticleFields && !linkPreviewDismissed
+  const linkPreviewEnabled =
+    !mediaAttachment && !modelAttachment && !showArticleFields && !linkPreviewDismissed
   const { detectedUrl, preview: linkPreview, isLoading: linkPreviewLoading } = useLinkPreview(
     body,
     linkPreviewEnabled,
@@ -143,6 +153,7 @@ export function CreatePostDialog({
     setActiveAction(null)
     setResolvedMediaKind(null)
     setMediaAttachment(null)
+    setModelAttachment(null)
     setShowArticleFields(false)
     setArticleUrl('')
     setArticleExcerpt('')
@@ -150,8 +161,10 @@ export function CreatePostDialog({
     setEmojiAnchor(null)
     setLinkPreviewDismissed(false)
     setMediaUploadState({ uploading: false, hasPreview: false })
+    setModelUploadState({ uploading: false, hasPreview: false })
     setReleasePayload(null)
     mediaPanelRef.current?.clearPendingPreview()
+    modelPanelRef.current?.clearPendingPreview()
   }
 
   const handleClose = (next: boolean) => {
@@ -170,7 +183,8 @@ export function CreatePostDialog({
   }
 
   const mediaMode = mediaModeForAction(activeAction)
-  const showMediaPanel = Boolean(mediaMode) && activeAction !== 'clip' && !releasePayload
+  const showModelPanel = activeAction === 'model' && !releasePayload
+  const showMediaPanel = Boolean(mediaMode) && activeAction !== 'clip' && activeAction !== 'model' && !releasePayload
   const showClipEditor = activeAction === 'clip'
 
   const activeLinkPreview =
@@ -181,18 +195,36 @@ export function CreatePostDialog({
       ? linkPreview
       : null
 
+  const isUploading = mediaUploadState.uploading || modelUploadState.uploading
+
   const canPost = useMemo(() => {
-    if (mediaUploadState.uploading) return false
+    if (isUploading) return false
     if (releasePayload) return true
     if (showArticleFields && articleUrl.trim()) return true
+    if (modelAttachment || modelUploadState.hasPreview) return true
     if (mediaAttachment || mediaUploadState.hasPreview) return true
     if (activeLinkPreview) return true
     if (body.trim()) return true
     return false
-  }, [body, mediaAttachment, showArticleFields, articleUrl, activeLinkPreview, mediaUploadState, releasePayload])
+  }, [
+    body,
+    mediaAttachment,
+    modelAttachment,
+    showArticleFields,
+    articleUrl,
+    activeLinkPreview,
+    mediaUploadState,
+    modelUploadState,
+    releasePayload,
+    isUploading,
+  ])
 
-  const inferPostType = (attachment: MediaAttachment | null): FeedItemType => {
+  const inferPostType = (
+    attachment: MediaAttachment | null,
+    model: ModelAttachment | null,
+  ): FeedItemType => {
     if (releasePayload) return 'music'
+    if (model || modelUploadState.hasPreview) return 'model'
     if (showArticleFields && articleUrl.trim()) return 'article'
     if (attachment || mediaUploadState.hasPreview) {
       if (resolvedMediaKind === 'video') return 'video'
@@ -221,19 +253,25 @@ export function CreatePostDialog({
   }
 
   const handleSubmit = async () => {
-    if (mediaUploadState.uploading) {
-      toast.error('Wait for your media upload to finish')
+    if (isUploading) {
+      toast.error('Wait for your upload to finish')
       return
     }
 
     let attachment = mediaAttachment
+    let model = modelAttachment
+
+    if (!model && modelUploadState.hasPreview) {
+      model = (await modelPanelRef.current?.uploadPendingPreview()) ?? null
+      if (!model) return
+    }
 
     if (!attachment && mediaUploadState.hasPreview) {
       attachment = (await mediaPanelRef.current?.uploadPendingPreview()) ?? null
-      if (!attachment) return
+      if (!attachment && !model) return
     }
 
-    const type = inferPostType(attachment)
+    const type = inferPostType(attachment, model)
     const payload: Record<string, unknown> = releasePayload ? { ...releasePayload } : {}
 
     if (type === 'text') {
@@ -266,6 +304,14 @@ export function CreatePostDialog({
       }
       payload.articleUrl = articleUrl.trim()
       if (articleExcerpt.trim()) payload.excerpt = articleExcerpt.trim()
+    }
+
+    if (model) {
+      payload.modelUrl = model.url
+      if (model.sourceFormat) payload.sourceFormat = model.sourceFormat
+      if (model.convertedFormat) payload.convertedFormat = model.convertedFormat
+      if (model.converted !== undefined) payload.converted = model.converted
+      if (model.originalName) payload.originalName = model.originalName
     }
 
     if (attachment) {
@@ -415,6 +461,25 @@ export function CreatePostDialog({
                 </div>
               ) : null}
             </div>
+          ) : modelAttachment ? (
+            <ModelAttachPanel
+              attachment={modelAttachment}
+              onAttachmentChange={setModelAttachment}
+              disabled={createFeed.isPending || isUploading}
+              embedded
+            />
+          ) : showModelPanel ? (
+            <ModelAttachPanel
+              ref={modelPanelRef}
+              attachment={null}
+              onAttachmentChange={(nextAttachment) => {
+                setModelAttachment(nextAttachment)
+                if (nextAttachment) setActiveAction(null)
+              }}
+              onUploadStateChange={setModelUploadState}
+              disabled={createFeed.isPending || isUploading}
+              embedded
+            />
           ) : showMediaPanel && mediaMode ? (
             <MediaAttachPanel
               ref={mediaPanelRef}
@@ -426,7 +491,7 @@ export function CreatePostDialog({
               }}
               onResolvedKind={setResolvedMediaKind}
               onUploadStateChange={setMediaUploadState}
-              disabled={createFeed.isPending || mediaUploadState.uploading}
+              disabled={createFeed.isPending || isUploading}
               embedded
               initialTab={initialTabForAction(activeAction)}
               showClipEditor={showClipEditor}
@@ -454,8 +519,13 @@ export function CreatePostDialog({
             onAction={handleAddAction}
             onEmojiClick={toggleEmojiPicker}
             emojiActive={emojiOpen}
-            hasMedia={Boolean(mediaAttachment) || mediaUploadState.hasPreview}
-            disabled={createFeed.isPending || mediaUploadState.uploading}
+            hasMedia={
+              Boolean(mediaAttachment) ||
+              mediaUploadState.hasPreview ||
+              Boolean(modelAttachment) ||
+              modelUploadState.hasPreview
+            }
+            disabled={createFeed.isPending || isUploading}
           />
         </div>
 
@@ -470,10 +540,16 @@ export function CreatePostDialog({
           <button
             type="button"
             className={cn('feed-create-post__submit', !canPost && 'opacity-50')}
-            disabled={createFeed.isPending || !canPost || mediaUploadState.uploading}
+            disabled={createFeed.isPending || !canPost || isUploading}
             onClick={handleSubmit}
           >
-            {createFeed.isPending ? 'Posting…' : mediaUploadState.uploading ? 'Uploading…' : 'Post'}
+            {createFeed.isPending
+              ? 'Posting…'
+              : isUploading
+                ? modelUploadState.uploading
+                  ? 'Converting model…'
+                  : 'Uploading…'
+                : 'Post'}
           </button>
         </div>
       </DialogContent>

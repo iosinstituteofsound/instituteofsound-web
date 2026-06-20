@@ -9,6 +9,7 @@ export function getFeedItemPhotoUrl(item: FeedItemDto): string | undefined {
   const payload = item.payload
 
   if (item.type === 'image') return payloadString(payload, 'imageUrl')
+  if (item.type === 'model') return payloadString(payload, 'posterUrl')
   if (item.type === 'article') return payloadString(payload, 'coverUrl')
   return undefined
 }
@@ -23,6 +24,8 @@ function resolveFeedImage(item: FeedItemDto): string | undefined {
       return payloadString(payload, 'posterUrl')
     case 'article':
       return payloadString(payload, 'coverUrl')
+    case 'model':
+      return payloadString(payload, 'posterUrl')
     case 'text':
       return parseLinkPreviewFromPayload(payload)?.imageUrl
     default:

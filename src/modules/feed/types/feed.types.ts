@@ -1,4 +1,4 @@
-export type FeedItemType = 'music' | 'video' | 'image' | 'text' | 'article'
+export type FeedItemType = 'music' | 'video' | 'image' | 'text' | 'article' | 'model'
 export type FeedItemStatus = 'published' | 'hidden'
 
 export const FEED_REACTION_KINDS = ['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const
@@ -87,4 +87,5 @@ export const FEED_ITEM_TYPES: { value: FeedItemType; label: string }[] = [
   { value: 'image', label: 'Image' },
   { value: 'text', label: 'Text' },
   { value: 'article', label: 'Article' },
+  { value: 'model', label: '3D Model' },
 ]

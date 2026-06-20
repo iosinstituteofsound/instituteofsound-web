@@ -7,7 +7,6 @@ import {
   releaseGenreLabel,
   releaseInitials,
   releasePlaysFormatted,
-  releaseTypeLabel,
 } from '@/modules/explore/lib/release-meta'
 import type { ReleaseDto, WirePickItem } from '@/modules/explore/types/explore.types'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
