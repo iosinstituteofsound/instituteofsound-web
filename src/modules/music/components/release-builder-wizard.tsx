@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
-import { createRelease } from '@/modules/music/api/music.api'
+import { createRelease, updateArtistTrack } from '@/modules/music/api/music.api'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
 import { ReleaseBuilderScene } from '@/modules/music/components/release-builder-scene'
@@ -77,9 +77,9 @@ export function ReleaseBuilderWizard() {
 
   useEffect(() => {
     if (releaseTitle.trim()) return
-    const firstReady = uploadQueue.queue.find((item) => item.status === 'ready')
-    if (firstReady) {
-      setReleaseTitle(firstReady.title)
+    const ready = uploadQueue.queue.filter((item) => item.status === 'ready')
+    if (ready.length === 1) {
+      setReleaseTitle(ready[0]!.title)
       return
     }
     const firstPending = uploadQueue.queue[0]
@@ -104,22 +104,30 @@ export function ReleaseBuilderWizard() {
 
   const coverImageSrc = coverUrl || coverPreviewUrl
 
+  const readyTracks = useMemo(
+    () => uploadQueue.queue.filter((item) => item.status === 'ready'),
+    [uploadQueue.queue],
+  )
+
   const validationErrors = useMemo(() => {
     const errors: string[] = []
     if (!uploadQueue.hasReadyTracks) errors.push('Upload at least one track')
     if (!releaseTitle.trim()) errors.push('Release title is required')
     if (!genre.trim()) errors.push('Primary genre is required')
+    if (readyTracks.some((track) => !track.title.trim())) errors.push('Each track needs a title')
     if (!releaseDate) errors.push('Release date is required')
     return errors
-  }, [uploadQueue.hasReadyTracks, releaseTitle, genre, releaseDate])
+  }, [uploadQueue.hasReadyTracks, releaseTitle, genre, releaseDate, readyTracks])
 
   const errorSteps = useMemo(() => {
     const steps: ReleaseBuilderStep[] = []
     if (!uploadQueue.hasReadyTracks) steps.push('upload')
-    if (!releaseTitle.trim() || !genre.trim()) steps.push('details')
+    if (!releaseTitle.trim() || !genre.trim() || readyTracks.some((track) => !track.title.trim())) {
+      steps.push('details')
+    }
     if (!releaseDate) steps.push('schedule')
     return steps
-  }, [uploadQueue.hasReadyTracks, releaseTitle, genre, releaseDate])
+  }, [uploadQueue.hasReadyTracks, releaseTitle, genre, releaseDate, readyTracks])
 
   const completedSteps = useMemo(() => {
     const completed: ReleaseBuilderStep[] = []
@@ -133,10 +141,18 @@ export function ReleaseBuilderWizard() {
   const publishMutation = useMutation({
     mutationFn: async () => {
       const resolvedCoverUrl = await resolveCoverUrlForPublish(coverUrl, coverPreviewUrl)
+      const combinedGenre = [genre.trim(), secondaryGenre.trim()].filter(Boolean).join(' / ')
+
+      for (const item of readyTracks) {
+        if (!item.trackId) continue
+        const trackTitle = item.title.trim() || titleFromFilename(item.file.name)
+        await updateArtistTrack(item.trackId, { title: trackTitle })
+      }
+
       return createRelease({
         title: releaseTitle.trim(),
         type: releaseType,
-        genre: genre.trim() || undefined,
+        genre: combinedGenre || undefined,
         coverUrl: resolvedCoverUrl,
         trackIds: uploadQueue.readyTrackIds,
         releaseDate: buildReleaseDateIso(
@@ -165,13 +181,18 @@ export function ReleaseBuilderWizard() {
       return uploadQueue.hasReadyTracks && !uploadQueue.isProcessing
     }
     if (step === 'details') {
-      return Boolean(releaseTitle.trim() && genre.trim())
+      return Boolean(
+        releaseTitle.trim() &&
+          genre.trim() &&
+          readyTracks.length > 0 &&
+          readyTracks.every((track) => track.title.trim()),
+      )
     }
     if (step === 'schedule') {
       return Boolean(releaseDate)
     }
     return false
-  }, [step, uploadQueue.hasReadyTracks, uploadQueue.isProcessing, releaseTitle, genre, releaseDate])
+  }, [step, uploadQueue.hasReadyTracks, uploadQueue.isProcessing, releaseTitle, genre, releaseDate, readyTracks])
 
   const goNext = () => {
     const index = RELEASE_BUILDER_STEPS.findIndex((s) => s.id === step)

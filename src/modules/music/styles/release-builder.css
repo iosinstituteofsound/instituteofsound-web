@@ -502,6 +502,99 @@
   border-color: color-mix(in oklch, var(--rbl-accent) 45%, transparent);
 }
 
+.rbl-track-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rbl-track-card {
+  border: 1px solid var(--rbl-border-soft);
+  border-radius: var(--radius-md);
+  background: var(--rbl-deep);
+  overflow: hidden;
+}
+
+.rbl-track-card--dragging {
+  opacity: 0.72;
+  border-color: color-mix(in oklch, var(--rbl-accent) 45%, transparent);
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--rbl-accent) 18%, transparent);
+}
+
+.rbl-track-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--rbl-border-soft);
+  background: color-mix(in oklch, var(--rbl-secondary) 5%, transparent);
+}
+
+.rbl-track-card__filename {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rbl-track-card__meta {
+  margin: 0.125rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rbl-muted);
+}
+
+.rbl-track-card__duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--rbl-accent-bright);
+}
+
+.rbl-track-card__body {
+  padding: 1rem;
+}
+
+.rbl-track-row--review {
+  align-items: center;
+}
+
+.rbl-holo__tracklist {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rbl-border-soft);
+}
+
+.rbl-holo__tracklist li {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid color-mix(in oklch, var(--rbl-border-soft) 70%, transparent);
+  font-size: 0.75rem;
+  color: var(--rbl-muted);
+}
+
+.rbl-holo__tracklist li span:first-child {
+  font-family: var(--font-mono);
+  color: var(--rbl-secondary);
+}
+
+.rbl-holo__tracklist li span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--rbl-text);
+}
+
 .rbl-queue__index {
   display: grid;
   place-items: center;

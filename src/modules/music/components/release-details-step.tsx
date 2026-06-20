@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Disc3, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
-import { getArtistProfile } from '@/modules/music/api/music.api'
-import { ReleaseTrackManifestList } from '@/modules/music/components/release-track-manifest-list'
+import { getArtistProfile, listArtistTracks } from '@/modules/music/api/music.api'
+import { ReleaseTrackDetailsList } from '@/modules/music/components/release-track-details-list'
 import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
 import { Input } from '@/shared/components/ui/input'
@@ -61,8 +61,23 @@ export function ReleaseDetailsStep({
     queryFn: getArtistProfile,
   })
 
+  const { data: artistTracks } = useQuery({
+    queryKey: ['artist-tracks'],
+    queryFn: listArtistTracks,
+  })
+
   const readyTracks = queue.filter((item) => item.status === 'ready')
   const isMultiTrack = readyTracks.length > 1
+
+  const trackDurations = useMemo(() => {
+    const map: Record<string, number | undefined> = {}
+    for (const item of readyTracks) {
+      if (!item.trackId) continue
+      const track = artistTracks?.find((entry) => entry.id === item.trackId)
+      if (track?.durationSec) map[item.id] = track.durationSec
+    }
+    return map
+  }, [artistTracks, readyTracks])
 
   const handleCoverUpload = async (file: File) => {
     setCoverFileName(file.name)
@@ -86,23 +101,24 @@ export function ReleaseDetailsStep({
       <div className="space-y-8">
         <header className="rbl-section-head">
           <p className="rbl-section-head__kicker">Phase 02 · Metadata matrix</p>
-          <h2 className="rbl-section-head__title">Release Details</h2>
+          <h2 className="rbl-section-head__title">Release &amp; Track Details</h2>
           <p className="rbl-section-head__desc">
-            Encode your release identity. Single transmissions auto-classify as Singles; multi-track payloads unlock EP
-            or Album designation.
+            Fill in your {isMultiTrack ? 'album or EP' : 'release'} information first, then set each track title
+            individually before scheduling the launch.
           </p>
         </header>
 
         <section className="rbl-panel">
           <div className="rbl-panel__header">
-            <h3 className="rbl-panel__title">Core identifiers</h3>
+            <h3 className="rbl-panel__title">{isMultiTrack ? 'Album / release details' : 'Release details'}</h3>
+            <p className="rbl-panel__meta">Cover, genre, and release identity</p>
           </div>
           <div className="rbl-panel__body space-y-5">
             <div className="rbl-field">
-              <label htmlFor="release-title">Release title</label>
+              <label htmlFor="release-title">{isMultiTrack ? 'Album / release title' : 'Release title'}</label>
               <Input
                 id="release-title"
-                placeholder="Enter release designation"
+                placeholder={isMultiTrack ? 'Enter album or EP title' : 'Enter release title'}
                 value={releaseTitle}
                 onChange={(e) => onReleaseTitleChange(e.target.value)}
               />
@@ -204,18 +220,23 @@ export function ReleaseDetailsStep({
 
         <section className="rbl-panel">
           <div className="rbl-panel__header">
-            <h3 className="rbl-panel__title">Track manifest</h3>
+            <h3 className="rbl-panel__title">Track details</h3>
             <p className="rbl-panel__meta">
-              {readyTracks.length} signal{readyTracks.length === 1 ? '' : 's'}
+              {readyTracks.length} track{readyTracks.length === 1 ? '' : 's'}
               {readyTracks.length > 1 ? ' · drag to reorder' : ''}
             </p>
           </div>
           <div className="rbl-panel__body">
-            <ReleaseTrackManifestList
-              tracks={readyTracks}
-              onTrackTitleChange={onTrackTitleChange}
-              onReorder={onTrackReorder}
-            />
+            {readyTracks.length === 0 ? (
+              <p className="rbl-field__hint">Upload and sync at least one track before editing track details.</p>
+            ) : (
+              <ReleaseTrackDetailsList
+                tracks={readyTracks}
+                trackDurations={trackDurations}
+                onTrackTitleChange={onTrackTitleChange}
+                onReorder={onTrackReorder}
+              />
+            )}
           </div>
         </section>
       </div>
@@ -238,6 +259,16 @@ export function ReleaseDetailsStep({
           <p className="rbl-holo__title">{releaseTitle || 'Untitled Transmission'}</p>
           <p className="rbl-holo__artist">{profile?.displayName ?? 'Unknown artist'}</p>
           <span className="rbl-holo__type">{releaseType}</span>
+          {readyTracks.length > 0 ? (
+            <ol className="rbl-holo__tracklist">
+              {readyTracks.map((track, index) => (
+                <li key={track.id}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <span>{track.title.trim() || 'Untitled track'}</span>
+                </li>
+              ))}
+            </ol>
+          ) : null}
         </div>
       </aside>
     </div>

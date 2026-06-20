@@ -85,6 +85,11 @@ export async function listArtistTracks() {
   return data.data
 }
 
+export async function updateArtistTrack(id: string, input: { title: string }) {
+  const { data } = await apiClient.patch<ApiSuccessResponse<TrackDto>>(`${API_V1}/artist/tracks/${id}`, input)
+  return data.data
+}
+
 export async function listArtistReleases() {
   const { data } = await apiClient.get<ApiSuccessResponse<ReleaseDetailDto[]>>(`${API_V1}/artist/releases`)
   return data.data

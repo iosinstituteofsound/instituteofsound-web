@@ -1,7 +1,9 @@
 import { AlertTriangle, Disc3, Lock, Music2, Rocket } from 'lucide-react'
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getArtistProfile } from '@/modules/music/api/music.api'
+import { getArtistProfile, listArtistTracks } from '@/modules/music/api/music.api'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
+import { formatDuration } from '@/modules/music/types/release-builder.types'
 
 interface ReleaseReviewStepProps {
   queue: QueuedUpload[]
@@ -61,13 +63,28 @@ export function ReleaseReviewStep({
     queryFn: getArtistProfile,
   })
 
+  const { data: artistTracks } = useQuery({
+    queryKey: ['artist-tracks'],
+    queryFn: listArtistTracks,
+  })
+
   const readyTracks = queue.filter((item) => item.status === 'ready')
   const canPublish = validationErrors.length === 0 && readyTracks.length > 0
+  const combinedGenre = [genre.trim(), secondaryGenre.trim()].filter(Boolean).join(' / ')
+
+  const trackDurations = useMemo(() => {
+    const map: Record<string, number | undefined> = {}
+    for (const item of readyTracks) {
+      if (!item.trackId) continue
+      const track = artistTracks?.find((entry) => entry.id === item.trackId)
+      if (track?.durationSec) map[item.id] = track.durationSec
+    }
+    return map
+  }, [artistTracks, readyTracks])
 
   const rows: { label: string; value: string; error?: boolean }[] = [
     { label: 'Release Type', value: releaseType, error: !releaseType },
-    { label: 'Primary Genre', value: genre || '—', error: !genre.trim() },
-    { label: 'Secondary Genre', value: secondaryGenre || '—' },
+    { label: 'Genre', value: combinedGenre || '—', error: !genre.trim() },
     { label: 'Language', value: language || '—' },
     {
       label: 'Release Date',
@@ -157,10 +174,16 @@ export function ReleaseReviewStep({
           ) : (
             <div className="space-y-2">
               {readyTracks.map((track, index) => (
-                <div key={track.id} className="rbl-track-row">
+                <div key={track.id} className="rbl-track-row rbl-track-row--review">
                   <span className="rbl-track-row__num">{String(index + 1).padStart(2, '0')}</span>
                   <Music2 className="rbl-text-accent size-4" />
-                  <span className="font-medium">{track.title}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium">{track.title.trim() || 'Untitled track'}</p>
+                    <p className="rbl-track-card__meta">{track.file.name}</p>
+                  </div>
+                  {trackDurations[track.id] ? (
+                    <span className="rbl-track-card__duration">{formatDuration(trackDurations[track.id]!)}</span>
+                  ) : null}
                 </div>
               ))}
             </div>
