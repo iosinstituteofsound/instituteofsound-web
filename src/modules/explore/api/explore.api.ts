@@ -16,6 +16,7 @@ import type {
   DiscographyDto,
   EditorialDeskDto,
   EditorialPickDto,
+  EventDto,
   LabelOverviewDto,
   ReleaseDto,
 } from '@/modules/explore/types/explore.types'
@@ -103,13 +104,46 @@ export async function getWireCandidates() {
 }
 
 export async function listEditorEvents() {
-  const { data } = await apiClient.get<ApiSuccessResponse<unknown[]>>(`${API_V1}/editor/events`)
+  const { data } = await apiClient.get<ApiSuccessResponse<EventDto[]>>(`${API_V1}/editor/events`)
   return data.data
 }
 
-export async function createEditorEvent(input: Record<string, unknown>) {
-  const { data } = await apiClient.post<ApiSuccessResponse<unknown>>(`${API_V1}/editor/events`, input)
+export async function createEditorEvent(input: {
+  title: string
+  slug: string
+  startsAt: string
+  venue: string
+  coverUrl?: string
+  description?: string
+  ticketUrl?: string
+  hubId?: string
+}) {
+  const { data } = await apiClient.post<ApiSuccessResponse<EventDto>>(`${API_V1}/editor/events`, input)
   return data.data
+}
+
+export async function updateEditorEvent(
+  id: string,
+  input: Partial<{
+    title: string
+    slug: string
+    startsAt: string
+    venue: string
+    coverUrl: string
+    description: string
+    ticketUrl: string
+    hubId: string
+  }>,
+) {
+  const { data } = await apiClient.patch<ApiSuccessResponse<EventDto>>(
+    `${API_V1}/editor/events/${id}`,
+    input,
+  )
+  return data.data
+}
+
+export async function deleteEditorEvent(id: string) {
+  await apiClient.delete(`${API_V1}/editor/events/${id}`)
 }
 
 export async function createArtistSubmission(input: Record<string, unknown>) {

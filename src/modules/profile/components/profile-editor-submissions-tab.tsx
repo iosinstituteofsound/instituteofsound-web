@@ -13,7 +13,7 @@ type ProfileEditorSubmissionsTabProps = {
 
 export function ProfileEditorSubmissionsTab({ isOwnProfile }: ProfileEditorSubmissionsTabProps) {
   const { data, isLoading } = useQuery({
-    queryKey: ['editor-submissions', 'all'],
+    queryKey: ['editor-submissions'],
     queryFn: () => listEditorSubmissions(),
     enabled: isOwnProfile,
   })

@@ -73,7 +73,7 @@ export interface LabelOverviewDto {
 
 export type ReleaseType = 'single' | 'ep' | 'album'
 export type ReleaseFilter = 'all' | 'album' | 'ep' | 'single' | 'archive'
-export type ReleasesPageFilter = 'all' | 'album' | 'epsingles' | 'hot' | 'new'
+export type ReleasesPageFilter = 'all' | 'album' | 'epsingles' | 'hot' | 'new' | 'undiscovered'
 
 export interface ReleaseDto {
   id: string
@@ -266,6 +266,9 @@ export interface ExplorePayload {
 
 export interface TrackSubmissionDto {
   id: string
+  artistId?: string
+  artistName?: string
+  artistEmail?: string
   projectName: string
   genre: string
   trackTitle: string
@@ -274,7 +277,11 @@ export interface TrackSubmissionDto {
   coverUrl?: string
   status: 'pending' | 'in_review' | 'approved' | 'rejected'
   editorNotes?: string
+  reviewedById?: string
+  reviewedByName?: string
+  reviewedAt?: string
   createdAt: string
+  updatedAt?: string
 }
 
 export interface WirePickItem {
@@ -287,5 +294,16 @@ export interface WirePickItem {
 
 export interface WireCandidates {
   feedItems: FeedItemDto[]
-  releases: Array<{ id: string; title: string; artistName?: string; coverUrl?: string }>
+  releases: Array<{
+    id: string
+    title: string
+    artistName?: string
+    coverUrl?: string
+    streamUrl?: string
+    type?: ReleaseType
+    genre?: string
+    playCount?: number
+    releaseDate?: string
+    isFeatured?: boolean
+  }>
 }

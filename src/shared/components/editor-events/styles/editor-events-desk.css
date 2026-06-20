@@ -1,0 +1,452 @@
+/* Editor Events Desk — transmission calendar console */
+
+.evt-desk {
+  --evt-accent: var(--primary);
+  --evt-neon: var(--ios-accent-bright, var(--primary));
+  --evt-chassis: color-mix(in oklch, var(--card) 72%, var(--background));
+  --evt-deep: color-mix(in oklch, var(--background) 90%, var(--foreground) 18%);
+  --evt-border: color-mix(in oklch, var(--evt-accent) 28%, var(--border));
+  --evt-muted: color-mix(in oklch, var(--foreground) 68%, var(--muted-foreground));
+  --evt-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .evt-desk {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: stretch;
+  }
+}
+
+.evt-desk__panel {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  border: 2px solid var(--evt-border);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in oklch, var(--foreground) 3%, transparent) 0 1px,
+      transparent 1px 18px
+    ),
+    linear-gradient(168deg, var(--evt-chassis) 0%, var(--evt-deep) 100%);
+  clip-path: polygon(
+    0 12px,
+    12px 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--foreground) 12%, transparent),
+    0 0 48px color-mix(in oklch, var(--evt-accent) 6%, transparent),
+    0 20px 48px color-mix(in oklch, var(--background) 70%, transparent);
+}
+
+.evt-desk__panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.evt-desk__panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.evt-desk__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.125rem 0.75rem;
+  border-bottom: 1px solid color-mix(in oklch, var(--evt-accent) 18%, var(--border));
+}
+
+.evt-desk__kicker {
+  margin: 0;
+  font-size: 0.5625rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--evt-muted);
+}
+
+.evt-desk__title {
+  margin: 0.125rem 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.evt-desk__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid color-mix(in oklch, var(--evt-accent) 35%, var(--border));
+  border-radius: 999px;
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--evt-neon);
+  background: color-mix(in oklch, var(--evt-accent) 10%, transparent);
+}
+
+.evt-desk__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 1rem 1.125rem 1.125rem;
+}
+
+.evt-desk__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 0.875rem;
+}
+
+.evt-desk__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4375rem 0.75rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 10%, var(--border));
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--evt-muted);
+  transition:
+    color 160ms var(--evt-ease),
+    border-color 160ms var(--evt-ease),
+    background 160ms var(--evt-ease);
+}
+
+.evt-desk__filter:hover {
+  color: var(--foreground);
+  border-color: color-mix(in oklch, var(--evt-accent) 30%, var(--border));
+}
+
+.evt-desk__filter--active {
+  color: var(--evt-neon);
+  border-color: color-mix(in oklch, var(--evt-accent) 50%, var(--border));
+  background: color-mix(in oklch, var(--evt-accent) 12%, transparent);
+  box-shadow: 0 0 20px color-mix(in oklch, var(--evt-accent) 10%, transparent);
+}
+
+.evt-desk__filter-count {
+  min-width: 1.125rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--foreground) 8%, transparent);
+  font-size: 0.5625rem;
+  text-align: center;
+}
+
+.evt-desk__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  scrollbar-width: thin;
+}
+
+.evt-desk__scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.evt-desk__scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--evt-accent) 30%, var(--border));
+}
+
+.evt-desk__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.evt-desk__empty {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-height: 14rem;
+  padding: 2rem 1rem;
+  border: 1px dashed color-mix(in oklch, var(--evt-accent) 22%, var(--border));
+  border-radius: 0.5rem;
+  text-align: center;
+  color: var(--evt-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.evt-desk__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 10%, var(--border));
+  border-radius: 0.625rem;
+  background:
+    linear-gradient(135deg, color-mix(in oklch, var(--evt-accent) 5%, transparent), transparent),
+    color-mix(in oklch, var(--card) 88%, var(--background));
+  text-align: left;
+  transition:
+    border-color 180ms var(--evt-ease),
+    box-shadow 180ms var(--evt-ease);
+}
+
+.evt-desk__row:hover {
+  border-color: color-mix(in oklch, var(--evt-accent) 35%, var(--border));
+  box-shadow: 0 0 24px color-mix(in oklch, var(--evt-accent) 8%, transparent);
+}
+
+.evt-desk__row--active {
+  border-color: color-mix(in oklch, var(--evt-accent) 55%, var(--border));
+  background:
+    linear-gradient(135deg, color-mix(in oklch, var(--evt-accent) 14%, transparent), transparent),
+    color-mix(in oklch, var(--card) 92%, var(--background));
+  box-shadow: 0 0 28px color-mix(in oklch, var(--evt-accent) 12%, transparent);
+}
+
+.evt-desk__poster {
+  position: relative;
+  width: 3.5rem;
+  height: 4.25rem;
+  overflow: hidden;
+  border-radius: 0.375rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 12%, var(--border));
+}
+
+.evt-desk__poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.evt-desk__date-badge {
+  position: absolute;
+  right: 0.25rem;
+  bottom: 0.25rem;
+  display: grid;
+  place-items: center;
+  min-width: 1.75rem;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  background: color-mix(in oklch, var(--background) 72%, transparent);
+  backdrop-filter: blur(6px);
+  text-align: center;
+}
+
+.evt-desk__date-day {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.evt-desk__date-month {
+  display: block;
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  color: var(--evt-muted);
+}
+
+.evt-desk__info {
+  min-width: 0;
+}
+
+.evt-desk__event-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.evt-desk__event-meta {
+  margin: 0.125rem 0 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--evt-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.evt-desk__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.375rem;
+}
+
+.evt-desk__badge {
+  padding: 0.125rem 0.375rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--evt-accent) 24%, var(--border));
+  font-size: 0.5625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.evt-desk__badge--live {
+  color: color-mix(in oklch, #34d399 88%, white);
+  border-color: color-mix(in oklch, #34d399 35%, var(--border));
+  background: color-mix(in oklch, #34d399 10%, transparent);
+}
+
+.evt-desk__badge--past {
+  color: var(--evt-muted);
+}
+
+.evt-desk__detail {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.evt-desk__detail-empty {
+  flex: 1;
+  min-height: 18rem;
+}
+
+.evt-desk__hero {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .evt-desk__hero {
+    grid-template-columns: 8rem minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.evt-desk__hero-poster {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in oklch, var(--evt-accent) 22%, var(--border));
+}
+
+.evt-desk__hero-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.evt-desk__hero-title {
+  margin: 0.375rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+}
+
+.evt-desk__hero-meta {
+  margin: 0.375rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--evt-muted);
+}
+
+.evt-desk__form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .evt-desk__form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .evt-desk__form-field--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.evt-desk__form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.evt-desk__label {
+  font-size: 0.5625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--evt-muted);
+}
+
+.evt-desk__input,
+.evt-desk__textarea {
+  width: 100%;
+  border: 1px solid color-mix(in oklch, var(--foreground) 10%, var(--border));
+  border-radius: 0.375rem;
+  background: color-mix(in oklch, var(--background) 92%, var(--foreground) 3%);
+  padding: 0.5rem 0.625rem;
+  font-size: 0.8125rem;
+  color: var(--foreground);
+}
+
+.evt-desk__textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+.evt-desk__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.evt-desk__action {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.evt-desk__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.evt-desk__new-btn {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+@media (min-width: 1024px) {
+  .evt-desk__panel--detail {
+    position: sticky;
+    top: 5.5rem;
+    align-self: stretch;
+  }
+}
