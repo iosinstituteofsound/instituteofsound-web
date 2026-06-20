@@ -21,6 +21,10 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/api/auth/:path*",
+      "destination": "https://instituteofsound-api.onrender.com/api/auth/:path*"
+    },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
