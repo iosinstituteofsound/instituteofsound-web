@@ -1,5 +1,6 @@
 import type { Data } from '@measured/puck'
 import { extractCoverUrl, extractGalleryUrls } from '@/modules/editor/lib/puck-to-html'
+import { puckContentBlock } from '@/modules/editor/lib/puck-content-block'
 
 function demoImg(seed: string, w: number, h: number) {
   return `https://picsum.photos/seed/ios-template-${seed}/${w}/${h}`
@@ -28,24 +29,26 @@ export function enrichTemplatePuckForWorkspace(
   const insertAfterTitle = titleIdx >= 0 ? titleIdx + 1 : 0
 
   if (!hasUsableImage) {
-    content.splice(insertAfterTitle, 0, {
-      type: 'ArticleHero',
-      props: {
+    content.splice(
+      insertAfterTitle,
+      0,
+      puckContentBlock('ArticleHero', {
         imageUrl: demoImg(templateId, 1400, 900),
         caption:
           templateId === 'system-blank'
             ? 'Add your hero image — replace via sidebar'
             : 'Hero image — replace in sidebar',
-      },
-    })
+      }),
+    )
   } else if (!content.some((block) => block.type === 'ArticleHero') && coverUrl) {
-    content.splice(insertAfterTitle, 0, {
-      type: 'ArticleHero',
-      props: {
+    content.splice(
+      insertAfterTitle,
+      0,
+      puckContentBlock('ArticleHero', {
         imageUrl: coverUrl,
         caption: '',
-      },
-    })
+      }),
+    )
   }
 
   const minImages: Record<string, number> = {
@@ -60,13 +63,14 @@ export function enrichTemplatePuckForWorkspace(
   while (countImageBlocks(content) < min) {
     const leadIdx = content.findIndex((block) => block.type === 'ArticleLead')
     const insertAt = leadIdx >= 0 ? leadIdx + 1 + extra : content.length
-    content.splice(insertAt, 0, {
-      type: 'ArticleImage',
-      props: {
+    content.splice(
+      insertAt,
+      0,
+      puckContentBlock('ArticleImage', {
         imageUrl: demoImg(`${templateId}-section-${extra}`, 1200, 900),
         caption: `Section image ${extra + 1}`,
-      },
-    })
+      }),
+    )
     extra += 1
   }
 

@@ -1,5 +1,6 @@
 import type { ArticlePuckDocument } from '@/modules/editor/types/article-editor.types'
 import { createEmptyPuckData } from '@/modules/editor/lib/article-puck-data'
+import { puckContentBlock } from '@/modules/editor/lib/puck-content-block'
 
 export interface ArticleTemplate {
   id: string
@@ -27,11 +28,11 @@ export const ARTICLE_TEMPLATES: ArticleTemplate[] = [
       puck: {
         root: { props: {} },
         content: [
-          { type: 'ArticleTitle', props: { text: '' } },
-          { type: 'ArticleHero', props: { imageUrl: '', caption: '' } },
-          { type: 'ArticleLead', props: { body: '<p></p>' } },
-          { type: 'ArticleBody', props: { body: '<p></p>' } },
-          { type: 'ArticleSection', props: { heading: '', body: '<p></p>' } },
+          puckContentBlock('ArticleTitle', { text: '' }),
+          puckContentBlock('ArticleHero', { imageUrl: '', caption: '' }),
+          puckContentBlock('ArticleLead', { body: '<p></p>' }),
+          puckContentBlock('ArticleBody', { body: '<p></p>' }),
+          puckContentBlock('ArticleSection', { heading: '', body: '<p></p>' }),
         ],
       },
       meta: {
@@ -58,11 +59,11 @@ export const ARTICLE_TEMPLATES: ArticleTemplate[] = [
       puck: {
         root: { props: {} },
         content: [
-          { type: 'ArticleTitle', props: { text: '' } },
-          { type: 'ArticleLead', props: { body: '<p></p>' } },
-          { type: 'ArticleImage', props: { imageUrl: '', caption: '' } },
-          { type: 'ArticleBody', props: { body: '<p></p>' } },
-          { type: 'ArticleSection', props: { heading: 'Verdict', body: '<p></p>' } },
+          puckContentBlock('ArticleTitle', { text: '' }),
+          puckContentBlock('ArticleLead', { body: '<p></p>' }),
+          puckContentBlock('ArticleImage', { imageUrl: '', caption: '' }),
+          puckContentBlock('ArticleBody', { body: '<p></p>' }),
+          puckContentBlock('ArticleSection', { heading: 'Verdict', body: '<p></p>' }),
         ],
       },
       meta: {
@@ -89,11 +90,11 @@ export const ARTICLE_TEMPLATES: ArticleTemplate[] = [
       puck: {
         root: { props: {} },
         content: [
-          { type: 'ArticleTitle', props: { text: '' } },
-          { type: 'ArticleLead', props: { body: '<p></p>' } },
-          { type: 'ArticleImage', props: { imageUrl: '', caption: '' } },
-          { type: 'ArticleBody', props: { body: '<p></p>' } },
-          { type: 'ArticleImage', props: { imageUrl: '', caption: '' } },
+          puckContentBlock('ArticleTitle', { text: '' }),
+          puckContentBlock('ArticleLead', { body: '<p></p>' }),
+          puckContentBlock('ArticleImage', { imageUrl: '', caption: '' }),
+          puckContentBlock('ArticleBody', { body: '<p></p>' }),
+          puckContentBlock('ArticleImage', { imageUrl: '', caption: '' }),
         ],
       },
       meta: {

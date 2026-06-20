@@ -1,5 +1,6 @@
 import type { Data } from '@measured/puck'
 import { extractTitleFromPuck } from '@/modules/editor/lib/puck-to-html'
+import { puckContentBlock } from '@/modules/editor/lib/puck-content-block'
 
 const DEMO_SESSION_AUDIO = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
 
@@ -34,16 +35,13 @@ function demoSessionTracks(title: string) {
 }
 
 function demoAudioBlock(trackTitle: string, sessionLabel = 'Listen to the session') {
-  return {
-    type: 'ArticleAudio' as const,
-    props: {
-      audioUrl: DEMO_SESSION_AUDIO,
-      trackTitle,
-      sessionLabel,
-      durationSec: 372,
-      sessionTracks: demoSessionTracks(trackTitle),
-    },
-  }
+  return puckContentBlock('ArticleAudio', {
+    audioUrl: DEMO_SESSION_AUDIO,
+    trackTitle,
+    sessionLabel,
+    durationSec: 372,
+    sessionTracks: demoSessionTracks(trackTitle),
+  })
 }
 
 function demoMeta(
@@ -71,7 +69,7 @@ export const WEB_SYSTEM_TEMPLATE_DOCUMENTS: Record<string, Record<string, unknow
     puck: {
       root: { props: {} },
       content: [
-        { type: 'ArticleTitle', props: { text: 'Your headline' } },
+        puckContentBlock('ArticleTitle', { text: 'Your headline' }),
         {
           type: 'ArticleHero',
           props: {
@@ -101,7 +99,7 @@ export const WEB_SYSTEM_TEMPLATE_DOCUMENTS: Record<string, Record<string, unknow
     puck: {
       root: { props: {} },
       content: [
-        { type: 'ArticleTitle', props: { text: 'Cathedral of Noise' } },
+        puckContentBlock('ArticleTitle', { text: 'Cathedral of Noise' }),
         {
           type: 'ArticleHero',
           props: {
@@ -168,7 +166,7 @@ export const WEB_SYSTEM_TEMPLATE_DOCUMENTS: Record<string, Record<string, unknow
     puck: {
       root: { props: {} },
       content: [
-        { type: 'ArticleTitle', props: { text: 'VOID CONVO Sessions' } },
+        puckContentBlock('ArticleTitle', { text: 'VOID CONVO Sessions' }),
         {
           type: 'ArticleLead',
           props: {
@@ -217,7 +215,7 @@ export const WEB_SYSTEM_TEMPLATE_DOCUMENTS: Record<string, Record<string, unknow
     puck: {
       root: { props: {} },
       content: [
-        { type: 'ArticleTitle', props: { text: 'On the Record: Static Artist' } },
+        puckContentBlock('ArticleTitle', { text: 'On the Record: Static Artist' }),
         {
           type: 'ArticleHero',
           props: {
@@ -267,7 +265,7 @@ export const WEB_SYSTEM_TEMPLATE_DOCUMENTS: Record<string, Record<string, unknow
     puck: {
       root: { props: {} },
       content: [
-        { type: 'ArticleTitle', props: { text: 'Warehouse Signals' } },
+        puckContentBlock('ArticleTitle', { text: 'Warehouse Signals' }),
         {
           type: 'ArticleLead',
           props: {

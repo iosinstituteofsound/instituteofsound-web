@@ -13,6 +13,7 @@ import {
   updateCanvasBackground,
 } from '@/modules/editor/lib/canvas-background-utils'
 import { reorderPuckContentByIds } from '@/modules/editor/lib/reorder-puck-content'
+import { withPuckId } from '@/modules/editor/lib/puck-block-id'
 import { hasCustomCanvasBackground } from '@/modules/editor/types/article-canvas-background.types'
 import {
   hasCanvasArtifact,
@@ -256,13 +257,13 @@ export function reorderCanvasStackLayers(data: Data, orderedLayerIds: string[]):
 
         return {
           ...block,
-          props: {
+          props: withPuckId({
             ...props,
             layout: {
               ...layout,
               zIndex,
             },
-          },
+          }),
         }
       }),
     }

@@ -16,6 +16,7 @@ import {
   stripBodyHtmlToPlain,
   type BodyQuoteContent,
 } from '@/modules/editor/lib/quote-body-utils'
+import { withPuckId } from '@/modules/editor/lib/puck-block-id'
 
 export function createBlockId(): string {
   return `blk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
@@ -179,12 +180,12 @@ export function createCanvasBlock(
 
   return {
     type,
-    props: {
+    props: withPuckId({
       ...baseProps,
       blockId: createBlockId(),
       layout,
       style: defaultStyleForType(type),
-    },
+    }),
   }
 }
 
@@ -272,12 +273,12 @@ export function ensureCanvasLayouts(data: Data): Data {
       const props = block.props as Record<string, unknown>
       return {
         ...block,
-        props: {
+        props: withPuckId({
           ...props,
           blockId: resolveBlockId(type, index, props),
           layout: parseBlockLayout(props.layout, type, index),
           style: parseBlockStyle(props.style ?? defaultStyleForType(type)),
-        },
+        }),
       }
     }),
   }
@@ -293,7 +294,7 @@ export function updateCanvasBlock(
     content: data.content.map((block) => {
       const props = block.props as Record<string, unknown>
       if (String(props.blockId) !== blockId) return block
-      return { ...block, props: { ...props, ...patch } }
+      return { ...block, props: withPuckId({ ...props, ...patch }) }
     }),
   }
 }
@@ -311,10 +312,10 @@ export function updateCanvasBlockLayout(
       const current = parseBlockLayout(props.layout, block.type as CanvasBlockType, 0)
       return {
         ...block,
-        props: {
+        props: withPuckId({
           ...props,
           layout: { ...current, ...layout },
-        },
+        }),
       }
     }),
   }
@@ -333,10 +334,10 @@ export function updateCanvasBlockStyle(
       const current = parseBlockStyle(props.style)
       return {
         ...block,
-        props: {
+        props: withPuckId({
           ...props,
           style: { ...current, ...style },
-        },
+        }),
       }
     }),
   }
@@ -371,10 +372,10 @@ export function updateCanvasBlocksStyle(
       const current = parseBlockStyle(props.style)
       return {
         ...block,
-        props: {
+        props: withPuckId({
           ...props,
           style: { ...current, ...style },
-        },
+        }),
       }
     }),
   }
@@ -395,14 +396,14 @@ export function moveCanvasBlocks(
       const layout = parseBlockLayout(props.layout, block.type as CanvasBlockType, 0)
       return {
         ...block,
-        props: {
+        props: withPuckId({
           ...props,
           layout: {
             ...layout,
             x: Math.min(92, Math.max(2, layout.x + delta.x)),
             y: Math.min(96, Math.max(2, layout.y + delta.y)),
           },
-        },
+        }),
       }
     }),
   }
@@ -560,12 +561,12 @@ function patchBlockProps(
       if (String(itemProps.blockId) !== blockId) return item
       return {
         ...item,
-        props: {
+        props: withPuckId({
           ...itemProps,
           ...patch,
           layout: itemProps.layout,
           style: itemProps.style,
-        },
+        }),
       }
     }),
   }
@@ -615,7 +616,7 @@ export function duplicateCanvasBlock(data: Data, blockId: string): Data {
   const layout = parseBlockLayout(props.layout, block.type as CanvasBlockType, index)
   const duplicate = {
     ...block,
-    props: {
+    props: withPuckId({
       ...props,
       blockId: createBlockId(),
       layout: {
@@ -624,7 +625,7 @@ export function duplicateCanvasBlock(data: Data, blockId: string): Data {
         y: Math.min(90, layout.y + 4),
         zIndex: data.content.length,
       },
-    },
+    }),
   }
   return { ...data, content: [...data.content, duplicate] }
 }
@@ -668,13 +669,13 @@ export function reorderBlock(
 
       return {
         ...block,
-        props: {
+        props: withPuckId({
           ...props,
           layout: {
             ...layout,
             zIndex: nextZIndex,
           },
-        },
+        }),
       }
     }),
   }

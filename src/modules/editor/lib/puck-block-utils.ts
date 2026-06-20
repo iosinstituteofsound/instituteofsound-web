@@ -1,24 +1,25 @@
 import type { Data } from '@measured/puck'
 import type { ArticlePuckComponents } from '@/modules/editor/lib/article-puck-config'
+import { puckContentBlock } from '@/modules/editor/lib/puck-content-block'
 
 type BlockType = keyof ArticlePuckComponents
 
 export function createBlock(type: BlockType): Data['content'][number] {
   switch (type) {
     case 'ArticleTitle':
-      return { type, props: { text: '' } }
+      return puckContentBlock('ArticleTitle', { text: '' })
     case 'ArticleLead':
     case 'ArticleBody':
-      return { type, props: { body: '<p></p>' } }
+      return puckContentBlock(type, { body: '<p></p>' })
     case 'ArticleHero':
     case 'ArticleImage':
-      return { type, props: { imageUrl: '', caption: '' } }
+      return puckContentBlock(type, { imageUrl: '', caption: '' })
     case 'ArticleSection':
-      return { type, props: { heading: '', body: '<p></p>' } }
+      return puckContentBlock('ArticleSection', { heading: '', body: '<p></p>' })
     case 'ArticleDivider':
-      return { type, props: {} }
+      return puckContentBlock('ArticleDivider', {})
     default:
-      return { type: 'ArticleBody', props: { body: '<p></p>' } }
+      return puckContentBlock('ArticleBody', { body: '<p></p>' })
   }
 }
 

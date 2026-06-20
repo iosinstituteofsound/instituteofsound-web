@@ -10,6 +10,7 @@ import {
   createEmptyPuckData,
   parseArticleEditorMeta,
 } from '@/modules/editor/lib/article-puck-data'
+import { withPuckId } from '@/modules/editor/lib/puck-block-id'
 import { ARTICLE_PUCK_VERSION } from '@/modules/editor/types/article-editor.types'
 import type { ArticlePuckDocument } from '@/modules/editor/types/article-editor.types'
 import type { CanvasBlockLayout, CanvasBlockType } from '@/modules/editor/types/article-canvas.types'
@@ -77,12 +78,12 @@ function applyCanvasLayoutsToPuck(puck: Data): Data {
 
       return {
         ...block,
-        props: {
+        props: withPuckId({
           ...props,
           blockId: createBlockId(),
           layout,
           style: parseBlockStyle(props.style ?? defaultStyleForType(type)),
-        },
+        }),
       }
     }),
   }

@@ -8,6 +8,7 @@ import {
 } from '@/modules/editor/types/article-editor.types'
 import { ensureCanvasLayouts } from '@/modules/editor/lib/canvas-block-utils'
 import { parseSoundDnaFields } from '@/modules/editor/lib/sound-dna-utils'
+import { puckContentBlock } from '@/modules/editor/lib/puck-content-block'
 
 function isPuckData(data: Record<string, unknown>): data is { puck: Data; meta?: ArticleEditorMeta } {
   return Boolean(data.puck && typeof data.puck === 'object' && Array.isArray((data.puck as Data).content))
@@ -58,13 +59,13 @@ function bodyHtmlToBlocks(bodyHtml: string): Data['content'] {
   const blocks: Data['content'] = []
   const trimmed = bodyHtml.trim()
   if (!trimmed) {
-    blocks.push({ type: 'ArticleBody', props: { body: '<p></p>' } })
+    blocks.push(puckContentBlock('ArticleBody', { body: '<p></p>' }))
     return blocks
   }
 
   const doc = typeof DOMParser !== 'undefined' ? new DOMParser().parseFromString(trimmed, 'text/html') : null
   if (!doc) {
-    blocks.push({ type: 'ArticleBody', props: { body: trimmed } })
+    blocks.push(puckContentBlock('ArticleBody', { body: trimmed }))
     return blocks
   }
 
@@ -73,7 +74,7 @@ function bodyHtmlToBlocks(bodyHtml: string): Data['content'] {
 
   const flushParagraphs = () => {
     if (!buffer.length) return
-    blocks.push({ type: 'ArticleBody', props: { body: buffer.join('') } })
+    blocks.push(puckContentBlock('ArticleBody', { body: buffer.join('') }))
     buffer = []
   }
 
@@ -88,10 +89,11 @@ function bodyHtmlToBlocks(bodyHtml: string): Data['content'] {
       text.querySelector('cite')?.remove()
       const quoteText = text.textContent?.trim() ?? ''
       if (quoteText) {
-        blocks.push({
-          type: 'ArticleTitle',
-          props: { text: cite ? `${quoteText} — ${cite}` : quoteText },
-        })
+        blocks.push(
+          puckContentBlock('ArticleTitle', {
+            text: cite ? `${quoteText} — ${cite}` : quoteText,
+          }),
+        )
       }
       continue
     }
@@ -101,16 +103,18 @@ function bodyHtmlToBlocks(bodyHtml: string): Data['content'] {
       const heading = el.querySelector('h2, h3')?.textContent?.trim() ?? ''
       const clone = el.cloneNode(true) as HTMLElement
       clone.querySelector('h2, h3')?.remove()
-      blocks.push({
-        type: 'ArticleSection',
-        props: { heading, body: clone.innerHTML.trim() || '<p></p>' },
-      })
+      blocks.push(
+        puckContentBlock('ArticleSection', {
+          heading,
+          body: clone.innerHTML.trim() || '<p></p>',
+        }),
+      )
       continue
     }
 
     if (el.tagName === 'HR') {
       flushParagraphs()
-      blocks.push({ type: 'ArticleDivider', props: {} })
+      blocks.push(puckContentBlock('ArticleDivider', {}))
       continue
     }
 
@@ -119,7 +123,7 @@ function bodyHtmlToBlocks(bodyHtml: string): Data['content'] {
 
   flushParagraphs()
   if (!blocks.length) {
-    blocks.push({ type: 'ArticleBody', props: { body: '<p></p>' } })
+    blocks.push(puckContentBlock('ArticleBody', { body: '<p></p>' }))
   }
   return blocks
 }
@@ -144,21 +148,23 @@ export function articleToPuckDocument(article: ArticleDto): ArticlePuckDocument 
   }
 
   const content: Data['content'] = [
-    { type: 'ArticleTitle', props: { text: article.title } },
+    puckContentBlock('ArticleTitle', { text: article.title }),
   ]
 
   if (article.coverUrl) {
-    content.push({
-      type: 'ArticleHero',
-      props: { imageUrl: article.coverUrl, caption: article.excerpt ?? '' },
-    })
+    content.push(
+      puckContentBlock('ArticleHero', {
+        imageUrl: article.coverUrl,
+        caption: article.excerpt ?? '',
+      }),
+    )
   }
 
   const bodyBlocks = bodyHtmlToBlocks(article.bodyHtml)
   const [firstBody, ...restBody] = bodyBlocks
 
   if (firstBody?.type === 'ArticleBody') {
-    content.push({ type: 'ArticleLead', props: { body: firstBody.props.body } })
+    content.push(puckContentBlock('ArticleLead', { body: firstBody.props.body }))
     content.push(...restBody)
   } else {
     content.push(...bodyBlocks)
@@ -166,7 +172,7 @@ export function articleToPuckDocument(article: ArticleDto): ArticlePuckDocument 
 
   for (const url of article.galleryUrls ?? []) {
     if (url === article.coverUrl) continue
-    content.push({ type: 'ArticleImage', props: { imageUrl: url, caption: '' } })
+    content.push(puckContentBlock('ArticleImage', { imageUrl: url, caption: '' }))
   }
 
   const legacyMeta = parseMeta(raw)

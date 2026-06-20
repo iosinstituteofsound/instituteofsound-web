@@ -5,6 +5,7 @@ import {
   findBlockIndex,
   parseBlockLayout,
 } from '@/modules/editor/lib/canvas-block-utils'
+import { withPuckId } from '@/modules/editor/lib/puck-block-id'
 import type { CanvasBlockType } from '@/modules/editor/types/article-canvas.types'
 
 function blockId(block: Data['content'][number]): string {
@@ -76,10 +77,10 @@ export function applyEditorialStackLayouts(data: Data): Data {
 
       return {
         ...block,
-        props: {
+        props: withPuckId({
           ...props,
           layout: nextLayout,
-        },
+        }),
       }
     }),
   }
