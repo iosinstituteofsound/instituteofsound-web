@@ -680,6 +680,22 @@ export function reorderBlock(
   }
 }
 
+export function toggleTextDecoration(
+  current: CanvasBlockStyle['textDecoration'],
+  part: 'underline' | 'line-through',
+): CanvasBlockStyle['textDecoration'] {
+  const parts = new Set<'underline' | 'line-through'>()
+  if (current.includes('underline')) parts.add('underline')
+  if (current.includes('line-through')) parts.add('line-through')
+
+  if (parts.has(part)) parts.delete(part)
+  else parts.add(part)
+
+  if (parts.size === 0) return 'none'
+  if (parts.size === 2) return 'underline line-through'
+  return parts.values().next().value!
+}
+
 export function rotateBlockAngle(
   data: Data,
   blockId: string,

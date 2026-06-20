@@ -88,6 +88,7 @@ export function ArticleCanvasBlock({
   const hugText = isText && layout.sizing !== 'fixed'
   const inkMetrics = useCanvasTextFit(type, props, style, isText)
   const imageCss = isImage ? buildCanvasImageCss(style) : null
+  const resolvedLineHeight = style.lineSpacing ? 1 + style.lineSpacing / 100 : undefined
 
   const baseZIndex = layout.zIndex ?? 0
 
@@ -100,6 +101,8 @@ export function ArticleCanvasBlock({
     maxWidth: isText ? `${layout.width}%` : hugText ? `${layout.width}%` : undefined,
     display: layout.hidden ? 'none' : undefined,
     pointerEvents: layout.hidden ? 'none' : undefined,
+    opacity: isText ? style.opacity / 100 : undefined,
+    mixBlendMode: isText ? (style.blendMode === 'normal' ? undefined : style.blendMode) : undefined,
   } as React.CSSProperties
 
   const frameStyle = {
@@ -120,7 +123,7 @@ export function ArticleCanvasBlock({
         padding: `${inkMetrics.paddingTop}px ${inkMetrics.paddingRight}px ${inkMetrics.paddingBottom}px ${inkMetrics.paddingLeft}px`,
         minHeight: `${inkMetrics.minHeight + inkMetrics.paddingTop + inkMetrics.paddingBottom}px`,
         minWidth: `${inkMetrics.minWidth + inkMetrics.paddingLeft + inkMetrics.paddingRight}px`,
-        lineHeight: 'normal' as const,
+        lineHeight: resolvedLineHeight ?? ('normal' as const),
         boxSizing: 'border-box' as const,
         ...(style.textAlign === 'center'
           ? { marginLeft: 'auto', marginRight: 'auto' }
@@ -128,7 +131,10 @@ export function ArticleCanvasBlock({
             ? { marginLeft: 'auto' }
             : {}),
       }
-    : { lineHeight: 'normal' as const, boxSizing: 'border-box' as const }
+    : {
+        lineHeight: resolvedLineHeight ?? ('normal' as const),
+        boxSizing: 'border-box' as const,
+      }
 
   return (
     <div

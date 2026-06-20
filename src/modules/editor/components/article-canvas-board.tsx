@@ -15,6 +15,7 @@ import {
   type GroupBounds,
   type PixelRect,
 } from '@/modules/editor/lib/canvas-marquee-utils'
+import { computeTextBlockResize } from '@/modules/editor/lib/canvas-text-resize-utils'
 import {
   addCanvasBlockWithId,
   ensureCanvasLayouts,
@@ -82,6 +83,7 @@ type BoardInteraction =
       startY: number
       startLayout: CanvasBlockLayout
       startFontSize: number
+      preserveAspectRatio: boolean
     }
   | {
       kind: 'rotate'
@@ -326,6 +328,7 @@ export function ArticleCanvasBoard({
         startY: clientY,
         startLayout: layout,
         startFontSize: style.fontSize,
+        preserveAspectRatio: style.preserveAspectRatio,
       }
       setDraggingId(blockId)
       onSelectBlocks([blockId])
@@ -421,34 +424,19 @@ export function ArticleCanvasBoard({
 
     const dx = ((event.clientX - interaction.startX) / boardRect.width) * 100
     const dy = ((event.clientY - interaction.startY) / boardRect.height) * 100
-    const { startLayout, handle, startFontSize } = interaction
-    let nextX = startLayout.x
-    let nextWidth = startLayout.width
-    let nextFontSize = startFontSize
+    const { startLayout, handle, startFontSize, preserveAspectRatio } = interaction
 
-    const isLeft = handle === 'w' || handle === 'nw' || handle === 'sw'
-    const isRight = handle === 'e' || handle === 'ne' || handle === 'se'
-    const isTop = handle === 'n' || handle === 'nw' || handle === 'ne'
-    const isBottom = handle === 's' || handle === 'sw' || handle === 'se'
-
-    if (isRight) nextWidth = startLayout.width + dx
-    if (isLeft) {
-      nextWidth = startLayout.width - dx
-      nextX = startLayout.x + dx
-    }
-
-    if (isTop) nextFontSize = Math.round(startFontSize - dy * 2)
-    if (isBottom) nextFontSize = Math.round(startFontSize + dy * 2)
-
-    nextWidth = Math.min(92, Math.max(12, nextWidth))
-    nextX = Math.min(90, Math.max(2, nextX))
-    nextFontSize = Math.min(400, Math.max(8, nextFontSize))
-
-    const layoutPatch: Partial<CanvasBlockLayout> = { x: nextX, width: nextWidth }
-    if (isLeft || isRight) layoutPatch.sizing = 'fixed'
+    const { layout: layoutPatch, fontSize: nextFontSize } = computeTextBlockResize({
+      handle,
+      startLayout,
+      startFontSize,
+      dx,
+      dy,
+      preserveAspectRatio,
+    })
 
     let nextData = updateCanvasBlockLayout(current, interaction.blockId, layoutPatch)
-    if (nextFontSize !== startFontSize) {
+    if (nextFontSize !== undefined) {
       nextData = updateCanvasBlockStyle(nextData, interaction.blockId, { fontSize: nextFontSize })
     }
     onChange(nextData)

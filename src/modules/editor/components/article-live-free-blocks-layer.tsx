@@ -13,6 +13,7 @@ import {
   updateCanvasBlockStyle,
 } from '@/modules/editor/lib/canvas-block-utils'
 import { percentFromPointer, pointerAngle } from '@/modules/editor/lib/canvas-pointer-utils'
+import { computeTextBlockResize } from '@/modules/editor/lib/canvas-text-resize-utils'
 import type { CanvasBlockLayout } from '@/modules/editor/types/article-canvas.types'
 import type { CanvasBlockType } from '@/modules/editor/types/article-canvas.types'
 
@@ -41,6 +42,7 @@ type FreeBlockInteraction =
       startY: number
       startLayout: CanvasBlockLayout
       startFontSize: number
+      preserveAspectRatio: boolean
     }
   | {
       kind: 'rotate'
@@ -118,6 +120,7 @@ export function ArticleLiveFreeBlocksLayer({
         startY: clientY,
         startLayout: layout,
         startFontSize: style.fontSize,
+        preserveAspectRatio: style.preserveAspectRatio,
       }
       setDraggingId(blockId)
       onSelectBlocks([blockId])
@@ -187,22 +190,21 @@ export function ArticleLiveFreeBlocksLayer({
       const boardRect = boardRef.current.getBoundingClientRect()
       const dx = ((event.clientX - interaction.startX) / boardRect.width) * 100
       const dy = ((event.clientY - interaction.startY) / boardRect.height) * 100
-      const { handle, startLayout } = interaction
-      let nextX = startLayout.x
-      let nextWidth = startLayout.width
 
-      if (handle.includes('e')) nextWidth = Math.min(96, Math.max(12, startLayout.width + dx))
-      if (handle.includes('w')) {
-        nextWidth = Math.min(96, Math.max(12, startLayout.width - dx))
-        nextX = Math.min(92, Math.max(2, startLayout.x + dx))
+      const { layout: layoutPatch, fontSize: nextFontSize } = computeTextBlockResize({
+        handle: interaction.handle,
+        startLayout: interaction.startLayout,
+        startFontSize: interaction.startFontSize,
+        dx,
+        dy,
+        preserveAspectRatio: interaction.preserveAspectRatio,
+      })
+
+      let nextData = updateCanvasBlockLayout(ensureCanvasLayouts(data), interaction.blockId, layoutPatch)
+      if (nextFontSize !== undefined) {
+        nextData = updateCanvasBlockStyle(nextData, interaction.blockId, { fontSize: nextFontSize })
       }
-
-      const layoutPatch: Partial<CanvasBlockLayout> = { x: nextX, width: nextWidth, sizing: 'fixed' }
-      if (handle.includes('n') || handle.includes('s')) {
-        void dy
-      }
-
-      onChange(updateCanvasBlockLayout(ensureCanvasLayouts(data), interaction.blockId, layoutPatch))
+      onChange(nextData)
     }
   }
 

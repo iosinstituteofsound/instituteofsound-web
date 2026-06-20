@@ -46,7 +46,7 @@ export interface CanvasBlockStyle {
   opacity: number
   fontWeight: 'normal' | 'bold'
   fontStyle: 'normal' | 'italic'
-  textDecoration: 'none' | 'underline' | 'line-through'
+  textDecoration: 'none' | 'underline' | 'line-through' | 'underline line-through'
   textAlign: 'left' | 'center' | 'right' | 'justify'
   fillType: TextFillType
   preserveAspectRatio: boolean

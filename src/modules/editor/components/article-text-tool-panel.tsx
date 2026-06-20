@@ -39,6 +39,7 @@ import {
   setBlockSectionBody,
   setBlockTextContent,
   toggleBlocksEffect,
+  toggleTextDecoration,
   updateCanvasBlocksStyle,
 } from '@/modules/editor/lib/canvas-block-utils'
 import type {
@@ -380,10 +381,10 @@ export function ArticleTextToolPanel({
             </ToolIconButton>
             <ToolIconButton
               title="Underline"
-              active={style.textDecoration === 'underline'}
+              active={style.textDecoration.includes('underline')}
               onClick={() =>
                 applyStyle({
-                  textDecoration: style.textDecoration === 'underline' ? 'none' : 'underline',
+                  textDecoration: toggleTextDecoration(style.textDecoration, 'underline'),
                 })
               }
             >
@@ -391,10 +392,10 @@ export function ArticleTextToolPanel({
             </ToolIconButton>
             <ToolIconButton
               title="Strikethrough"
-              active={style.textDecoration === 'line-through'}
+              active={style.textDecoration.includes('line-through')}
               onClick={() =>
                 applyStyle({
-                  textDecoration: style.textDecoration === 'line-through' ? 'none' : 'line-through',
+                  textDecoration: toggleTextDecoration(style.textDecoration, 'line-through'),
                 })
               }
             >
