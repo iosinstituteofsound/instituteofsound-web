@@ -13,14 +13,60 @@ import { randomUUID } from '@/shared/lib/random-uuid'
 
 const POLL_INTERVAL_MS = 2500
 const POLL_ERROR_TOLERANCE = 12
-const UPLOAD_CONCURRENCY = 4
+const UPLOAD_RETRY_ATTEMPTS = 3
+const LARGE_FILE_BYTES = 50 * 1024 * 1024
 
 function apiErrorMessage(err: unknown, fallback: string): string {
   if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
-    return (err as NormalizedApiError).message || fallback
+    const message = (err as NormalizedApiError).message || fallback
+    if (message === 'Network Error') {
+      return 'Connection lost during upload. Large WAV files upload one at a time — tap Retry.'
+    }
+    const status = (err as NormalizedApiError).status
+    if (status === 413) return 'File too large for the server limit.'
+    if (status === 502 || status === 503 || status === 504) {
+      return 'Server busy — wait a moment and retry.'
+    }
+    return message
   }
-  if (err instanceof Error && err.message) return err.message
+  if (err instanceof Error && err.message) {
+    if (err.message === 'Network Error') {
+      return 'Connection lost during upload. Large WAV files upload one at a time — tap Retry.'
+    }
+    return err.message
+  }
   return fallback
+}
+
+function isRetryableUploadError(err: unknown): boolean {
+  if (err && typeof err === 'object' && 'message' in err) {
+    const normalized = err as NormalizedApiError
+    if (normalized.message === 'Network Error') return true
+    if (normalized.status >= 500) return true
+    if (normalized.status === 408 || normalized.status === 429) return true
+  }
+  return false
+}
+
+async function withUploadRetry<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  let lastError: unknown
+  for (let attempt = 1; attempt <= UPLOAD_RETRY_ATTEMPTS; attempt++) {
+    try {
+      return await fn()
+    } catch (err) {
+      lastError = err
+      if (!isRetryableUploadError(err) || attempt === UPLOAD_RETRY_ATTEMPTS) throw err
+      await new Promise((resolve) => setTimeout(resolve, 1500 * attempt))
+    }
+  }
+  throw lastError ?? new Error(`${label} failed`)
+}
+
+function uploadConcurrencyFor(items: QueuedUpload[]) {
+  const largest = Math.max(...items.map((item) => item.file.size), 0)
+  if (largest >= LARGE_FILE_BYTES) return 1
+  if (largest >= 20 * 1024 * 1024) return 2
+  return 3
 }
 
 function createQueueItem(file: File): QueuedUpload {
@@ -170,14 +216,16 @@ export function useAudioUploadQueue() {
       })
 
       try {
-        const job = await createAudioUploadJob()
+        const job = await withUploadRetry('Create upload job', createAudioUploadJob)
         updateItem(item.id, { jobId: job.id })
 
-        await uploadAudioFile(job.id, item.file, (percent) => {
-          if (percent === 100 || percent % 5 === 0) {
-            updateItem(item.id, { uploadProgress: percent })
-          }
-        })
+        await withUploadRetry(`Upload ${item.file.name}`, () =>
+          uploadAudioFile(job.id, item.file, (percent) => {
+            if (percent === 100 || percent % 5 === 0) {
+              updateItem(item.id, { uploadProgress: percent })
+            }
+          }),
+        )
 
         updateItem(item.id, {
           status: 'processing',
@@ -186,7 +234,9 @@ export function useAudioUploadQueue() {
           processingProgress: 25,
         })
 
-        await finalizeAudioUpload(job.id, item.title.trim() || titleFromFilename(item.file.name))
+        await withUploadRetry('Finalize upload', () =>
+          finalizeAudioUpload(job.id, item.title.trim() || titleFromFilename(item.file.name)),
+        )
         startPolling(item.id, job.id)
       } catch (err) {
         updateItem(item.id, {
@@ -207,7 +257,7 @@ export function useAudioUploadQueue() {
     )
     if (!pending.length) return
 
-    await runPool(pending, UPLOAD_CONCURRENCY, uploadItem)
+    await runPool(pending, uploadConcurrencyFor(pending), uploadItem)
 
     const stillPending = queueRef.current.filter(
       (item) => item.status === 'pending' && !uploadingItemsRef.current.has(item.id),

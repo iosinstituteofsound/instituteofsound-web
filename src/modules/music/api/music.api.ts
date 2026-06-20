@@ -34,7 +34,6 @@ export async function uploadAudioFile(
     `${API_V1}/music/uploads/${jobId}/file`,
     formData,
     {
-      headers: { 'Content-Type': 'multipart/form-data' },
       timeout: 0,
       maxBodyLength: Infinity,
       maxContentLength: Infinity,
