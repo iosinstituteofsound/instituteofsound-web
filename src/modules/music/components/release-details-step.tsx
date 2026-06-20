@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Disc3, Music2, Sparkles } from 'lucide-react'
+import { Disc3, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { getArtistProfile } from '@/modules/music/api/music.api'
+import { ReleaseTrackManifestList } from '@/modules/music/components/release-track-manifest-list'
 import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
 import { Input } from '@/shared/components/ui/input'
@@ -31,6 +32,7 @@ interface ReleaseDetailsStepProps {
   releaseType: 'single' | 'ep' | 'album'
   onReleaseTypeChange: (value: 'single' | 'ep' | 'album') => void
   onTrackTitleChange: (id: string, title: string) => void
+  onTrackReorder: (activeId: string, overId: string) => void
 }
 
 export function ReleaseDetailsStep({
@@ -49,6 +51,7 @@ export function ReleaseDetailsStep({
   releaseType,
   onReleaseTypeChange,
   onTrackTitleChange,
+  onTrackReorder,
 }: ReleaseDetailsStepProps) {
   const [coverFileName, setCoverFileName] = useState('')
   const [coverUploading, setCoverUploading] = useState(false)
@@ -204,20 +207,15 @@ export function ReleaseDetailsStep({
             <h3 className="rbl-panel__title">Track manifest</h3>
             <p className="rbl-panel__meta">
               {readyTracks.length} signal{readyTracks.length === 1 ? '' : 's'}
+              {readyTracks.length > 1 ? ' · drag to reorder' : ''}
             </p>
           </div>
-          <div className="rbl-panel__body space-y-2">
-            {readyTracks.map((track, index) => (
-              <div key={track.id} className="rbl-track-row">
-                <span className="rbl-track-row__num">{String(index + 1).padStart(2, '0')}</span>
-                <Music2 className="rbl-text-accent size-4 shrink-0" />
-                <Input
-                  value={track.title}
-                  onChange={(e) => onTrackTitleChange(track.id, e.target.value)}
-                  className="flex-1"
-                />
-              </div>
-            ))}
+          <div className="rbl-panel__body">
+            <ReleaseTrackManifestList
+              tracks={readyTracks}
+              onTrackTitleChange={onTrackTitleChange}
+              onReorder={onTrackReorder}
+            />
           </div>
         </section>
       </div>

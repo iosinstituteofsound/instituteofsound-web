@@ -1,3 +1,4 @@
+import { arrayMove } from '@dnd-kit/sortable'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   createAudioUploadJob,
@@ -192,6 +193,37 @@ export function useAudioUploadQueue() {
     updateItem(id, { title })
   }, [updateItem])
 
+  const reorderQueue = useCallback(
+    (activeId: string, overId: string) => {
+      const items = queueRef.current
+      const oldIndex = items.findIndex((item) => item.id === activeId)
+      const newIndex = items.findIndex((item) => item.id === overId)
+      if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return
+      syncQueue(arrayMove(items, oldIndex, newIndex))
+    },
+    [syncQueue],
+  )
+
+  const reorderReadyTracks = useCallback(
+    (activeId: string, overId: string) => {
+      const items = queueRef.current
+      const readyIds = items.filter((item) => item.status === 'ready').map((item) => item.id)
+      const oldIndex = readyIds.indexOf(activeId)
+      const newIndex = readyIds.indexOf(overId)
+      if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return
+      const nextReadyIds = arrayMove(readyIds, oldIndex, newIndex)
+      const readyById = new Map(items.filter((item) => item.status === 'ready').map((item) => [item.id, item]))
+      let readyCursor = 0
+      syncQueue(
+        items.map((item) => {
+          if (item.status !== 'ready') return item
+          return readyById.get(nextReadyIds[readyCursor++]!)!
+        }),
+      )
+    },
+    [syncQueue],
+  )
+
   const resetQueue = useCallback(() => {
     stopPolling()
     processingRef.current = false
@@ -209,6 +241,8 @@ export function useAudioUploadQueue() {
     removeItem,
     retryItem,
     updateTitle,
+    reorderQueue,
+    reorderReadyTracks,
     resetQueue,
     readyTrackIds,
     isProcessing,

@@ -235,6 +235,7 @@ export function ReleaseBuilderWizard() {
               releaseType={releaseType}
               onReleaseTypeChange={setReleaseType}
               onTrackTitleChange={uploadQueue.updateTitle}
+              onTrackReorder={uploadQueue.reorderReadyTracks}
             />
           ) : null}
           {step === 'schedule' ? (

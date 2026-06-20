@@ -460,6 +460,48 @@
   border-color: color-mix(in oklch, var(--rbl-warn) 40%, transparent);
 }
 
+.rbl-queue__item--dragging {
+  opacity: 0.72;
+  z-index: 1;
+  border-color: color-mix(in oklch, var(--rbl-accent) 55%, transparent);
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--rbl-accent) 18%, transparent);
+}
+
+.rbl-queue__handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 0.125rem;
+  padding: 0;
+  border: 1px solid color-mix(in oklch, var(--rbl-secondary) 25%, transparent);
+  border-radius: var(--radius-sm);
+  color: var(--rbl-muted);
+  background: color-mix(in oklch, var(--rbl-secondary) 6%, transparent);
+  cursor: grab;
+  touch-action: none;
+}
+
+.rbl-queue__handle:hover {
+  color: var(--rbl-accent-bright);
+  border-color: color-mix(in oklch, var(--rbl-accent) 35%, transparent);
+}
+
+.rbl-queue__handle:active {
+  cursor: grabbing;
+}
+
+.rbl-queue__handle--disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.rbl-track-row--dragging {
+  opacity: 0.72;
+  border-color: color-mix(in oklch, var(--rbl-accent) 45%, transparent);
+}
+
 .rbl-queue__index {
   display: grid;
   place-items: center;

@@ -1,10 +1,9 @@
 import { useCallback, useRef, useState } from 'react'
-import { FileAudio, RotateCcw, Upload, X } from 'lucide-react'
+import { Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import type { useAudioUploadQueue } from '@/modules/music/hooks/use-audio-upload-queue'
-import { ProcessingStatus } from '@/modules/music/components/processing-status'
+import { ReleaseUploadQueueList } from '@/modules/music/components/release-upload-queue-list'
 import { MAX_AUDIO_UPLOAD_MB } from '@/modules/music/types/release-builder.types'
-import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/cn'
 
 type UploadQueue = ReturnType<typeof useAudioUploadQueue>
@@ -14,12 +13,6 @@ interface ReleaseUploadStepProps {
 }
 
 const FORMATS = ['WAV', 'MP3', 'FLAC', 'AAC', 'M4A']
-
-function statusClass(status: string) {
-  if (status === 'ready') return 'rbl-queue__status--ready'
-  if (status === 'failed') return 'rbl-queue__status--failed'
-  return ''
-}
 
 export function ReleaseUploadStep({ queue }: ReleaseUploadStepProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -106,85 +99,11 @@ export function ReleaseUploadStep({ queue }: ReleaseUploadStepProps) {
             <p className="rbl-panel__meta">
               {queue.readyTrackIds.length}/{queue.queue.length} synced
               {queue.isProcessing ? ' · uplink active' : ''}
+              {queue.queue.length > 1 ? ' · drag grip to reorder' : ''}
             </p>
           </div>
           <div className="rbl-panel__body">
-            <div className="rbl-queue">
-              {queue.queue.map((item, index) => {
-                const isActive = item.status === 'uploading' || item.status === 'processing'
-                return (
-                  <div
-                    key={item.id}
-                    className={cn(
-                      'rbl-queue__item',
-                      isActive && 'rbl-queue__item--active',
-                      item.status === 'ready' && 'rbl-queue__item--ready',
-                      item.status === 'failed' && 'rbl-queue__item--failed',
-                    )}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="rbl-queue__index">{String(index + 1).padStart(2, '0')}</span>
-                      <FileAudio className="rbl-text-accent mt-0.5 size-5 shrink-0" />
-                      <div className="min-w-0 flex-1 space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="rbl-queue__name">{item.file.name}</p>
-                            <p className="rbl-queue__meta">
-                              {(item.file.size / (1024 * 1024)).toFixed(1)} MB · track {index + 1}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className={cn('rbl-queue__status', statusClass(item.status))}>{item.status}</span>
-                            {item.status === 'pending' || item.status === 'failed' ? (
-                              <button
-                                type="button"
-                                className="rbl-btn rbl-btn--icon"
-                                onClick={() => queue.removeItem(item.id)}
-                                aria-label="Remove track"
-                              >
-                                <X className="size-4" />
-                              </button>
-                            ) : null}
-                          </div>
-                        </div>
-
-                        {item.status === 'pending' ? (
-                          <div className="rbl-field">
-                            <span className="rbl-field__label">Track title</span>
-                            <Input
-                              placeholder="Track title"
-                              value={item.title}
-                              onChange={(e) => queue.updateTitle(item.id, e.target.value)}
-                            />
-                          </div>
-                        ) : null}
-
-                        {item.status === 'uploading' && item.uploadProgress > 0 ? (
-                          <ProcessingStatus variant="scifi" status="uploaded" progress={item.uploadProgress} />
-                        ) : null}
-
-                        {(item.status === 'processing' || item.status === 'ready' || item.status === 'failed') &&
-                        item.processingStatus !== 'created' ? (
-                          <ProcessingStatus
-                            variant="scifi"
-                            status={item.processingStatus}
-                            progress={item.processingProgress}
-                            errorMessage={item.errorMessage}
-                          />
-                        ) : null}
-
-                        {item.status === 'failed' ? (
-                          <button type="button" className="rbl-btn" onClick={() => queue.retryItem(item.id)}>
-                            <RotateCcw className="size-3.5" />
-                            Retry upload
-                          </button>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+            <ReleaseUploadQueueList queue={queue} />
           </div>
         </section>
       ) : null}
