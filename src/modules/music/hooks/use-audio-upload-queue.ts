@@ -11,6 +11,9 @@ import { MAX_AUDIO_UPLOAD_MB, titleFromFilename } from '@/modules/music/types/re
 import type { NormalizedApiError } from '@/shared/types/api.types'
 import { randomUUID } from '@/shared/lib/random-uuid'
 
+const POLL_INTERVAL_MS = 3000
+const POLL_ERROR_TOLERANCE = 8
+
 function apiErrorMessage(err: unknown, fallback: string): string {
   if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
     return (err as NormalizedApiError).message || fallback
@@ -45,22 +48,29 @@ export function validateAudioFile(file: File): string | null {
 export function useAudioUploadQueue() {
   const [queue, setQueue] = useState<QueuedUpload[]>([])
   const queueRef = useRef<QueuedUpload[]>([])
-  const processingRef = useRef(false)
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const activeItemsRef = useRef(new Set<string>())
+  const pollIntervalsRef = useRef(new Map<string, ReturnType<typeof setInterval>>())
 
   const syncQueue = useCallback((next: QueuedUpload[]) => {
     queueRef.current = next
     setQueue(next)
   }, [])
 
-  const stopPolling = useCallback(() => {
-    if (pollRef.current) {
-      clearInterval(pollRef.current)
-      pollRef.current = null
-    }
+  const stopPollingJob = useCallback((jobId: string) => {
+    const intervalId = pollIntervalsRef.current.get(jobId)
+    if (!intervalId) return
+    clearInterval(intervalId)
+    pollIntervalsRef.current.delete(jobId)
   }, [])
 
-  useEffect(() => () => stopPolling(), [stopPolling])
+  const stopAllPolling = useCallback(() => {
+    for (const intervalId of pollIntervalsRef.current.values()) {
+      clearInterval(intervalId)
+    }
+    pollIntervalsRef.current.clear()
+  }, [])
+
+  useEffect(() => () => stopAllPolling(), [stopAllPolling])
 
   const updateItem = useCallback((id: string, patch: Partial<QueuedUpload>) => {
     const current = queueRef.current.find((item) => item.id === id)
@@ -76,34 +86,46 @@ export function useAudioUploadQueue() {
   const pollJob = useCallback(
     (itemId: string, jobId: string): Promise<string | null> =>
       new Promise((resolve) => {
-        stopPolling()
-        pollRef.current = setInterval(async () => {
+        stopPollingJob(jobId)
+        let pollErrors = 0
+
+        const intervalId = setInterval(async () => {
           try {
             const job = await getAudioUploadJob(jobId)
+            pollErrors = 0
             updateItem(itemId, {
               processingStatus: job.status,
               processingProgress: job.progress,
               errorMessage: job.errorMessage,
             })
             if (job.status === 'ready' && job.trackId) {
-              stopPolling()
+              stopPollingJob(jobId)
               resolve(job.trackId)
+              return
             }
             if (job.status === 'failed') {
-              stopPolling()
+              stopPollingJob(jobId)
               resolve(null)
             }
           } catch {
-            stopPolling()
-            resolve(null)
+            pollErrors += 1
+            if (pollErrors >= POLL_ERROR_TOLERANCE) {
+              stopPollingJob(jobId)
+              resolve(null)
+            }
           }
-        }, 3000)
+        }, POLL_INTERVAL_MS)
+
+        pollIntervalsRef.current.set(jobId, intervalId)
       }),
-    [stopPolling, updateItem],
+    [stopPollingJob, updateItem],
   )
 
   const processItem = useCallback(
     async (item: QueuedUpload) => {
+      if (activeItemsRef.current.has(item.id)) return
+      activeItemsRef.current.add(item.id)
+
       updateItem(item.id, { status: 'uploading', uploadProgress: 0, errorMessage: undefined })
       try {
         const job = await createAudioUploadJob()
@@ -113,7 +135,7 @@ export function useAudioUploadQueue() {
             updateItem(item.id, { uploadProgress: percent })
           }
         })
-        updateItem(item.id, { status: 'processing', processingStatus: 'analyzing' })
+        updateItem(item.id, { status: 'processing', processingStatus: 'analyzing', uploadProgress: 100 })
         await finalizeAudioUpload(job.id, item.title.trim() || titleFromFilename(item.file.name))
         const trackId = await pollJob(item.id, job.id)
         if (trackId) {
@@ -129,25 +151,22 @@ export function useAudioUploadQueue() {
       } catch (err) {
         updateItem(item.id, {
           status: 'failed',
+          processingStatus: 'failed',
           errorMessage: apiErrorMessage(err, 'Upload failed'),
         })
+      } finally {
+        activeItemsRef.current.delete(item.id)
       }
     },
     [pollJob, updateItem],
   )
 
   const runQueue = useCallback(async () => {
-    if (processingRef.current) return
-    processingRef.current = true
-    try {
-      while (true) {
-        const nextItem = queueRef.current.find((item) => item.status === 'pending')
-        if (!nextItem) break
-        await processItem(nextItem)
-      }
-    } finally {
-      processingRef.current = false
-    }
+    const pending = queueRef.current.filter(
+      (item) => item.status === 'pending' && !activeItemsRef.current.has(item.id),
+    )
+    if (!pending.length) return
+    await Promise.all(pending.map((item) => processItem(item)))
   }, [processItem])
 
   const addFiles = useCallback(
@@ -166,15 +185,23 @@ export function useAudioUploadQueue() {
       }
       return errors
     },
-    [runQueue],
+    [runQueue, syncQueue],
   )
 
-  const removeItem = useCallback((id: string) => {
-    syncQueue(queueRef.current.filter((item) => item.id !== id))
-  }, [syncQueue])
+  const removeItem = useCallback(
+    (id: string) => {
+      const item = queueRef.current.find((entry) => entry.id === id)
+      if (item?.jobId) stopPollingJob(item.jobId)
+      activeItemsRef.current.delete(id)
+      syncQueue(queueRef.current.filter((entry) => entry.id !== id))
+    },
+    [stopPollingJob, syncQueue],
+  )
 
   const retryItem = useCallback(
     (id: string) => {
+      const item = queueRef.current.find((entry) => entry.id === id)
+      if (item?.jobId) stopPollingJob(item.jobId)
       updateItem(id, {
         status: 'pending',
         uploadProgress: 0,
@@ -186,7 +213,7 @@ export function useAudioUploadQueue() {
       })
       void runQueue()
     },
-    [runQueue, updateItem],
+    [runQueue, stopPollingJob, updateItem],
   )
 
   const updateTitle = useCallback((id: string, title: string) => {
@@ -225,10 +252,10 @@ export function useAudioUploadQueue() {
   )
 
   const resetQueue = useCallback(() => {
-    stopPolling()
-    processingRef.current = false
+    stopAllPolling()
+    activeItemsRef.current.clear()
     syncQueue([])
-  }, [stopPolling, syncQueue])
+  }, [stopAllPolling, syncQueue])
 
   const readyTrackIds = queue.filter((item) => item.status === 'ready' && item.trackId).map((item) => item.trackId!)
   const isProcessing = queue.some((item) => item.status === 'uploading' || item.status === 'processing')

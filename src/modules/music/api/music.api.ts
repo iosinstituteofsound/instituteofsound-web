@@ -35,6 +35,9 @@ export async function uploadAudioFile(
     formData,
     {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 0,
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
       onUploadProgress: (event) => {
         if (!onProgress || !event.total) return
         onProgress(Math.round((event.loaded / event.total) * 100))
