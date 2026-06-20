@@ -4,6 +4,7 @@
 @import './premium-surface.css';
 @import './translucent-theme.css';
 @import './dashboard-sidebar.css';
+@import './dashboard-mobile-nav.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -128,6 +129,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 @layer base {

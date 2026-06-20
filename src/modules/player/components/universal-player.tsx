@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTrackListenReporter } from '@/modules/player/hooks/use-track-listen-reporter'
+import { NowPlayingSheet } from '@/modules/player/components/now-playing-sheet'
 import { getReleaseAnalytics, toggleTrackLike } from '@/modules/music/api/music.api'
 import { tokenStorage } from '@/shared/services/api/token-storage'
 import {
@@ -30,6 +31,7 @@ import {
   PLAYER_FADE_MS,
 } from '@/modules/player/lib/audio-fade'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/player/styles/universal-player.css'
 
@@ -73,6 +75,7 @@ export function UniversalPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const fadeHandleRef = useRef(createFadeHandle())
   const targetVolumeRef = useRef(0.85)
+  const isMobile = useIsMobile()
   const currentTrack = usePlayerStore((s) => s.currentTrack)
   const queue = usePlayerStore((s) => s.queue)
   const isPlaying = usePlayerStore((s) => s.isPlaying)
@@ -83,6 +86,7 @@ export function UniversalPlayer() {
   const shuffle = usePlayerStore((s) => s.shuffle)
   const repeat = usePlayerStore((s) => s.repeat)
   const isExpanded = usePlayerStore((s) => s.isExpanded)
+  const mobileView = usePlayerStore((s) => s.mobileView)
   const togglePlay = usePlayerStore((s) => s.togglePlay)
   const seek = usePlayerStore((s) => s.seek)
   const setVolume = usePlayerStore((s) => s.setVolume)
@@ -93,6 +97,7 @@ export function UniversalPlayer() {
   const previous = usePlayerStore((s) => s.previous)
   const close = usePlayerStore((s) => s.close)
   const setExpanded = usePlayerStore((s) => s.setExpanded)
+  const openNowPlaying = usePlayerStore((s) => s.openNowPlaying)
   const setPlaybackState = usePlayerStore((s) => s.setPlaybackState)
 
   const getCurrentTime = useCallback(
@@ -180,6 +185,13 @@ export function UniversalPlayer() {
       delete document.body.dataset.playerActive
     }
   }, [visible])
+
+  useEffect(() => {
+    document.body.dataset.playerSheet = visible && isMobile && mobileView === 'sheet' ? 'true' : 'false'
+    return () => {
+      delete document.body.dataset.playerSheet
+    }
+  }, [visible, isMobile, mobileView])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -359,20 +371,68 @@ export function UniversalPlayer() {
 
   if (!visible || !currentTrack) return <audio ref={audioRef} className="sr-only" preload="metadata" />
 
+  const showMobileMini = isMobile && mobileView === 'mini'
+  const showDesktopBar = !isMobile
+
+  if (isMobile && mobileView === 'sheet') {
+    return (
+      <>
+        <audio ref={audioRef} className="sr-only" preload="metadata" />
+        <NowPlayingSheet />
+      </>
+    )
+  }
+
   return (
     <>
       <audio ref={audioRef} className="sr-only" preload="metadata" />
+      <NowPlayingSheet />
       <section
-        className={cn('ios-universal-player', isExpanded && 'ios-universal-player--expanded')}
+        className={cn(
+          'ios-universal-player',
+          isExpanded && showDesktopBar && 'ios-universal-player--expanded',
+          showMobileMini && 'ios-universal-player--mobile-mini',
+        )}
         data-playing={isPlaying ? 'true' : 'false'}
         aria-label="Now playing"
         style={{ '--ios-player-progress': progressPercent } as React.CSSProperties}
       >
         <div className="ios-universal-player__ambient" aria-hidden />
-        <div className="ios-universal-player__mobile-progress" aria-hidden />
+
+        {showMobileMini ? (
+          <div className="ios-universal-player__mobile-progress ios-universal-player__mobile-progress--interactive">
+            <PlayerSlider
+              aria-label="Seek"
+              variant="progress"
+              value={currentTime}
+              max={effectiveDuration > 0 ? effectiveDuration : 100}
+              onValueChange={handleSeek}
+            />
+          </div>
+        ) : (
+          <div className="ios-universal-player__mobile-progress" aria-hidden />
+        )}
 
         <div className="ios-universal-player__inner">
-          <div className="ios-universal-player__track">
+          <div
+            className={cn(
+              'ios-universal-player__track',
+              showMobileMini && 'ios-universal-player__track--tap',
+            )}
+            role={showMobileMini ? 'button' : undefined}
+            tabIndex={showMobileMini ? 0 : undefined}
+            onClick={showMobileMini ? openNowPlaying : undefined}
+            onKeyDown={
+              showMobileMini
+                ? (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      openNowPlaying()
+                    }
+                  }
+                : undefined
+            }
+          >
             <div className="ios-universal-player__artwork">
               {currentTrack.artworkUrl ? (
                 <img src={currentTrack.artworkUrl} alt="" />
@@ -403,8 +463,10 @@ export function UniversalPlayer() {
               className={cn(
                 'ios-universal-player__control--like',
                 releaseAnalytics?.userLiked && 'ios-universal-player__control--active',
+                showMobileMini && 'ios-universal-player__control--mobile-hidden',
               )}
-              onClick={() => {
+              onClick={(event) => {
+                event.stopPropagation()
                 if (!canLike) return
                 likeMutation.mutate()
               }}
@@ -415,12 +477,13 @@ export function UniversalPlayer() {
             </PlayerControlButton>
           </div>
 
-          <div className="ios-universal-player__center">
+          <div className={cn('ios-universal-player__center', showMobileMini && 'ios-universal-player__center--mobile')}>
             <div className="ios-universal-player__controls">
               <PlayerControlButton
                 label={shuffle ? 'Shuffle on' : 'Shuffle off'}
                 active={shuffle}
                 onClick={toggleShuffle}
+                className={showMobileMini ? 'ios-universal-player__control--mobile-hidden' : undefined}
               >
                 <Shuffle className="h-4 w-4" strokeWidth={2.25} />
               </PlayerControlButton>
@@ -428,7 +491,10 @@ export function UniversalPlayer() {
               <PlayerControlButton
                 label="Previous track"
                 className="ios-universal-player__control--nav"
-                onClick={previous}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  previous()
+                }}
               >
                 <SkipBack className="h-5 w-5" fill="currentColor" />
               </PlayerControlButton>
@@ -436,7 +502,10 @@ export function UniversalPlayer() {
               <PlayerControlButton
                 label={isPlaying ? 'Pause' : 'Play'}
                 primary
-                onClick={togglePlay}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  togglePlay()
+                }}
               >
                 {isPlaying ? (
                   <Pause className="h-4 w-4" fill="currentColor" />
@@ -448,7 +517,10 @@ export function UniversalPlayer() {
               <PlayerControlButton
                 label="Next track"
                 className="ios-universal-player__control--nav"
-                onClick={next}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  next()
+                }}
               >
                 <SkipForward className="h-5 w-5" fill="currentColor" />
               </PlayerControlButton>
@@ -463,6 +535,7 @@ export function UniversalPlayer() {
                 }
                 active={repeat !== 'off'}
                 onClick={cycleRepeat}
+                className={showMobileMini ? 'ios-universal-player__control--mobile-hidden' : undefined}
               >
                 {repeat === 'one' ? (
                   <Repeat1 className="h-4 w-4" strokeWidth={2.25} />
@@ -485,8 +558,8 @@ export function UniversalPlayer() {
             </div>
           </div>
 
-          <div className="ios-universal-player__extras">
-            <PlayerControlButton label="Lyrics" disabled>
+          <div className={cn('ios-universal-player__extras', showMobileMini && 'ios-universal-player__extras--mobile')}>
+            <PlayerControlButton label="Lyrics" disabled className={showMobileMini ? 'ios-universal-player__control--mobile-hidden' : undefined}>
               <Mic2 className="h-4 w-4" strokeWidth={2.25} />
             </PlayerControlButton>
             <PlayerControlButton label="Queue" disabled={queue.length <= 1}>
@@ -517,8 +590,9 @@ export function UniversalPlayer() {
             </div>
 
             <PlayerControlButton
-              label={isExpanded ? 'Collapse player' : 'Full screen'}
-              onClick={() => setExpanded(!isExpanded)}
+              label={showMobileMini ? 'Open now playing' : isExpanded ? 'Collapse player' : 'Full screen'}
+              onClick={() => (showMobileMini ? openNowPlaying() : setExpanded(!isExpanded))}
+              className={showMobileMini ? 'ios-universal-player__control--mobile-hidden' : undefined}
             >
               <Maximize2 className="h-4 w-4" strokeWidth={2.25} />
             </PlayerControlButton>

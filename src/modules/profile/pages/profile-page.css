@@ -21,6 +21,7 @@
 }
 
 .profile-tab-button {
+  min-height: 2.75rem;
   transition: color 0.24s ease;
 }
 

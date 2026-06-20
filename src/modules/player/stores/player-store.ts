@@ -14,6 +14,7 @@ interface PlayerState {
   shuffle: boolean
   repeat: RepeatMode
   isExpanded: boolean
+  mobileView: 'mini' | 'sheet'
   playTrack: (track: PlayerTrack, options?: PlayTrackOptions) => void
   togglePlay: () => void
   pause: () => void
@@ -27,6 +28,8 @@ interface PlayerState {
   previous: () => void
   close: () => void
   setExpanded: (expanded: boolean) => void
+  openNowPlaying: () => void
+  closeNowPlaying: () => void
   setPlaybackState: (state: Partial<Pick<PlayerState, 'currentTime' | 'duration' | 'isPlaying'>>) => void
 }
 
@@ -84,6 +87,7 @@ export const usePlayerStore = create<PlayerState>()(
       shuffle: false,
       repeat: 'off',
       isExpanded: false,
+      mobileView: 'mini',
 
       playTrack: (track, options) => {
         const queue = options?.queue?.length ? options.queue : [track]
@@ -177,9 +181,14 @@ export const usePlayerStore = create<PlayerState>()(
           currentTime: 0,
           duration: 0,
           isExpanded: false,
+          mobileView: 'mini',
         }),
 
       setExpanded: (isExpanded) => set({ isExpanded }),
+
+      openNowPlaying: () => set({ mobileView: 'sheet' }),
+
+      closeNowPlaying: () => set({ mobileView: 'mini' }),
 
       setPlaybackState: (playback) => set(playback),
     }),

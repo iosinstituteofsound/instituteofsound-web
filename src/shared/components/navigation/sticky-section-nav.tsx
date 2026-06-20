@@ -30,6 +30,8 @@ export type StickySectionNavProps = {
   activeId?: string | null
   /** Disable scroll-spy (e.g. while loading). */
   disabled?: boolean
+  /** Layout mode — horizontal chip row for mobile explore. */
+  layout?: 'sidebar' | 'horizontal'
 }
 
 function formatSectionNumber(item: SectionNavItem, position: number) {
@@ -48,6 +50,7 @@ export function StickySectionNav({
   className,
   activeId: controlledActiveId,
   disabled = false,
+  layout = 'sidebar',
 }: StickySectionNavProps) {
   const sectionIds = items.map((item) => item.id)
   const { activeId: spyActiveId, lockActive } = useActiveSection(sectionIds, {
@@ -68,8 +71,17 @@ export function StickySectionNav({
   }
 
   return (
-    <nav className={cn('sticky-section-nav', className)} aria-label={ariaLabel}>
-      {heading ? <p className="sticky-section-nav__heading">{heading}</p> : null}
+    <nav
+      className={cn(
+        'sticky-section-nav',
+        layout === 'horizontal' && 'sticky-section-nav--horizontal',
+        className,
+      )}
+      aria-label={ariaLabel}
+    >
+      {heading && layout === 'sidebar' ? (
+        <p className="sticky-section-nav__heading">{heading}</p>
+      ) : null}
 
       <ul className="sticky-section-nav__list">
         {items.map((item, index) => {
@@ -88,7 +100,7 @@ export function StickySectionNav({
                   <span className="sticky-section-nav__sheen" />
                 </span>
                 <span className="sticky-section-nav__content">
-                  {showNumbers ? (
+                  {showNumbers && layout === 'sidebar' ? (
                     <span className="sticky-section-nav__num">
                       {formatSectionNumber(item, index + 1)}
                     </span>

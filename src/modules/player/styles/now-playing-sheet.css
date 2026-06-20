@@ -1,0 +1,197 @@
+.now-playing-sheet {
+  max-height: 92vh;
+  max-height: 92dvh;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  border-top-left-radius: 1.25rem;
+  border-top-right-radius: 1.25rem;
+}
+
+.now-playing-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem 0.25rem;
+}
+
+.now-playing-sheet__kicker {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.now-playing-sheet__dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: none;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.now-playing-sheet__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.5rem 1.25rem 1.5rem;
+  overflow-y: auto;
+}
+
+.now-playing-sheet__artwork {
+  width: min(72vw, 18rem);
+  aspect-ratio: 1;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow:
+    0 20px 50px color-mix(in oklch, var(--background) 35%, transparent),
+    0 8px 24px color-mix(in oklch, var(--primary) 12%, transparent);
+}
+
+.now-playing-sheet__artwork img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.now-playing-sheet__artwork-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: color-mix(in srgb, var(--foreground) 8%, var(--background));
+  color: color-mix(in srgb, var(--foreground) 45%, transparent);
+}
+
+.now-playing-sheet__meta {
+  width: 100%;
+  text-align: center;
+}
+
+.now-playing-sheet__title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.now-playing-sheet__artist {
+  margin: 0.35rem 0 0;
+  font-size: 1rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
+.now-playing-sheet__album {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--foreground) 45%, transparent);
+}
+
+.now-playing-sheet__progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.now-playing-sheet__time {
+  flex-shrink: 0;
+  width: 2.5rem;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.now-playing-sheet__time:last-child {
+  text-align: right;
+}
+
+.now-playing-sheet__slider {
+  flex: 1;
+}
+
+.now-playing-sheet__slider .ios-player-slider__input::-webkit-slider-thumb {
+  width: 1rem;
+  height: 1rem;
+}
+
+.now-playing-sheet__slider .ios-player-slider__input::-moz-range-thumb {
+  width: 1rem;
+  height: 1rem;
+}
+
+.now-playing-sheet__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.now-playing-sheet__control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.now-playing-sheet__control--active {
+  color: var(--primary);
+}
+
+.now-playing-sheet__control--primary {
+  width: 4rem;
+  height: 4rem;
+  min-width: 4rem;
+  min-height: 4rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--primary) 35%, transparent);
+}
+
+.now-playing-sheet__control:active {
+  transform: scale(0.96);
+}
+
+.now-playing-sheet__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.now-playing-sheet__volume {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+  max-width: 12rem;
+}
+
+.now-playing-sheet__queue-hint {
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--foreground) 45%, transparent);
+}

@@ -1,8 +1,12 @@
 import { Compass, Home } from 'lucide-react'
+import { useMemo } from 'react'
 import { useExplore } from '@/modules/explore/hooks/use-explore'
+import { buildExploreSectionNavItems } from '@/modules/explore/lib/explore-section-nav'
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
+import { StickySectionNav } from '@/shared/components/navigation/sticky-section-nav'
 import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
+import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import { ExploreEditorialSection } from '@/modules/explore/components/explore-editorial-section'
 import { ExploreArtistsSection } from '@/modules/explore/components/explore-artists-section'
 import { ExploreReleasesSection } from '@/modules/explore/components/explore-releases-section'
@@ -20,6 +24,12 @@ import '@/modules/explore/styles/explore.css'
 export function ExplorePage() {
   const { data, isLoading, isError } = useExplore()
   const homeHref = useBreadcrumbHomeHref()
+  const isMobile = useIsMobile()
+
+  const sectionNavItems = useMemo(
+    () => (data ? buildExploreSectionNavItems(data) : []),
+    [data],
+  )
 
   if (isLoading) return <Loader className="min-h-screen bg-background" />
   if (isError || !data) {
@@ -42,6 +52,17 @@ export function ExplorePage() {
           description="Artists, releases, labels, and editorial picks from across the network."
         />
       </div>
+
+      {isMobile && sectionNavItems.length > 1 ? (
+        <StickySectionNav
+          items={sectionNavItems}
+          layout="horizontal"
+          showNumbers={false}
+          heading=""
+          scrollOffset={112}
+          ariaLabel="Explore sections"
+        />
+      ) : null}
 
       <ExploreEditorialSection
         coverStory={data.editorial.coverStory}

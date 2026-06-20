@@ -40,12 +40,14 @@ function isSidebarItemActive(pathname: string, itemPath: string) {
 
 interface DashboardSidebarProps {
   mobileHidden?: boolean
+  forceExpanded?: boolean
 }
 
-export function DashboardSidebar({ mobileHidden = false }: DashboardSidebarProps) {
+export function DashboardSidebar({ mobileHidden = false, forceExpanded = false }: DashboardSidebarProps) {
   const location = useLocation()
   const dashboardConfig = useLayoutStore((state) => state.dashboardConfig)
-  const { collapsed, toggleCollapsed, setMobileOpen } = useSidebarStore()
+  const { collapsed: storeCollapsed, toggleCollapsed, setMobileOpen } = useSidebarStore()
+  const collapsed = forceExpanded ? false : storeCollapsed
   const { data: sidebarItems, isLoading: sidebarLoading } = useSidebar()
   const brandTitle = dashboardConfig.header.brandTitle?.trim() || env.appName
 
@@ -102,7 +104,7 @@ export function DashboardSidebar({ mobileHidden = false }: DashboardSidebarProps
                 type="button"
                 className="dashboard-sidebar-toggle"
                 onClick={handleToggle}
-                aria-label="Collapse sidebar"
+                aria-label="Close sidebar"
               >
                 <ChevronLeft className="dashboard-sidebar-toggle__icon" strokeWidth={2.25} aria-hidden />
               </button>

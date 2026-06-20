@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { Menu } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
-import { Sheet } from '@/shared/components/ui/sheet'
+import { SideSheet } from '@/shared/components/ui/side-sheet'
 import type { LayoutNavLink } from '@/shared/types/layout.types'
+import { useBodyScrollLock } from '@/shared/hooks/use-body-scroll-lock'
 import { cn } from '@/shared/lib/cn'
+import '@/styles/side-sheet.css'
 
 interface PublicHeaderProps {
   brand: string
@@ -20,6 +22,18 @@ export function PublicHeader({ brand, navLinks, showAuthButtons }: PublicHeaderP
   const [menuOpen, setMenuOpen] = useState(false)
 
   const closeMenu = () => setMenuOpen(false)
+  useBodyScrollLock(menuOpen)
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeMenu()
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [menuOpen])
 
   return (
     <header className="public-header">
@@ -65,7 +79,7 @@ export function PublicHeader({ brand, navLinks, showAuthButtons }: PublicHeaderP
         </div>
       </div>
 
-      <Sheet open={menuOpen} onOpenChange={setMenuOpen} title="Menu">
+      <SideSheet open={menuOpen} onOpenChange={setMenuOpen} title="Menu">
         <nav className="public-header__drawer" aria-label="Mobile">
           {navLinks.map((link) => (
             <NavLink
@@ -93,7 +107,7 @@ export function PublicHeader({ brand, navLinks, showAuthButtons }: PublicHeaderP
             </div>
           ) : null}
         </nav>
-      </Sheet>
+      </SideSheet>
     </header>
   )
 }

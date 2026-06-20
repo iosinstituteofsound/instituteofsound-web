@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Bell, LayoutGrid, Search } from 'lucide-react'
+import { Bell, LayoutGrid, PanelLeft, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { UserProfileMenu } from '@/app/components/user-profile-menu'
 import { useLayoutStore } from '@/app/stores/layout-store'
 import { GlobalSearchModal } from '@/modules/search/components/global-search-modal'
 import { SidebarNavIcon } from '@/modules/sidebar/components/sidebar-nav-icon'
 import { Input } from '@/shared/components/ui/input'
+import { Button } from '@/shared/components/ui/button'
 import { usePermission } from '@/shared/hooks/use-permission'
 import { isRegisteredResource } from '@/shared/lib/resource-registry'
 import {
@@ -13,11 +14,12 @@ import {
   isHeaderNavTabActive,
   type HeaderNavTab,
 } from '@/shared/lib/header-nav'
+import { resolveMobilePageTitle } from '@/shared/lib/mobile-page-title'
 import type { PermissionAction } from '@/shared/services/permission/permission.service'
 import { cn } from '@/shared/lib/cn'
 import '@/styles/dashboard-header.css'
 
-const HEADER_SEARCH_PLACEHOLDER = 'Search artists, tribes, curators, editors and more'
+const HEADER_SEARCH_PLACEHOLDER_DESKTOP = 'Search artists, tribes, curators, editors and more'
 
 function canSeeHeaderTab(
   tab: HeaderNavTab,
@@ -30,11 +32,16 @@ function canSeeHeaderTab(
   return true
 }
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  onOpenMenu?: () => void
+}
+
+export function DashboardHeader({ onOpenMenu }: DashboardHeaderProps) {
   const location = useLocation()
   const dashboardConfig = useLayoutStore((state) => state.dashboardConfig)
   const { hasResource, can } = usePermission()
   const [searchOpen, setSearchOpen] = useState(false)
+  const pageTitle = resolveMobilePageTitle(location.pathname)
 
   const visibleTabs = useMemo(
     () => HEADER_NAV_TABS.filter((tab) => canSeeHeaderTab(tab, hasResource, can)),
@@ -43,8 +50,40 @@ export function DashboardHeader() {
 
   return (
     <header className="dashboard-header relative z-20 w-full shrink-0">
-      <div className="dashboard-header-inner">
-        <div className="dashboard-header-left">
+      <div className="dashboard-header-inner dashboard-header-inner--mobile md:grid">
+        <div className="dashboard-header-mobile md:hidden">
+          {onOpenMenu ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="dashboard-header-mobile__menu h-9 w-9 shrink-0"
+              onClick={onOpenMenu}
+              aria-label="Open navigation menu"
+            >
+              <PanelLeft className="h-5 w-5" />
+            </Button>
+          ) : null}
+
+          <p className="dashboard-header-mobile__title">{pageTitle}</p>
+
+          <div className="dashboard-header-mobile__actions">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 shrink-0"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Open search"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+
+            {dashboardConfig.header.showProfileMenu ? <UserProfileMenu /> : null}
+          </div>
+        </div>
+
+        <div className="dashboard-header-left hidden md:block">
           <div
             className="dashboard-header-search-wrap cursor-pointer"
             onClick={() => setSearchOpen(true)}
@@ -62,9 +101,9 @@ export function DashboardHeader() {
             <Input
               type="search"
               readOnly
-              placeholder={HEADER_SEARCH_PLACEHOLDER}
+              placeholder={HEADER_SEARCH_PLACEHOLDER_DESKTOP}
               className="dashboard-header-search pointer-events-none h-9 w-full cursor-pointer pl-9 text-sm sm:h-10 sm:pl-10 sm:text-[0.9375rem]"
-              aria-label={HEADER_SEARCH_PLACEHOLDER}
+              aria-label={HEADER_SEARCH_PLACEHOLDER_DESKTOP}
             />
           </div>
         </div>
@@ -90,29 +129,7 @@ export function DashboardHeader() {
           <div className="hidden md:block" aria-hidden />
         )}
 
-        <div className="dashboard-header-right">
-          {visibleTabs.length > 0 ? (
-            <nav className="flex items-center gap-0.5 md:hidden" aria-label="Primary navigation">
-              {visibleTabs.map((tab) => {
-                const active = isHeaderNavTabActive(location.pathname, tab.path)
-                return (
-                  <Link
-                    key={tab.path}
-                    to={tab.path}
-                    title={tab.label}
-                    className={cn(
-                      'flex h-10 w-10 items-center justify-center rounded-full',
-                      active ? 'bg-primary/10 text-primary' : 'text-muted-foreground',
-                    )}
-                  >
-                    <SidebarNavIcon icon={tab.icon} size="md" />
-                    <span className="sr-only">{tab.label}</span>
-                  </Link>
-                )
-              })}
-            </nav>
-          ) : null}
-
+        <div className="dashboard-header-right hidden md:flex">
           <button type="button" className="dashboard-header-utility hidden sm:inline-flex" aria-label="Apps">
             <LayoutGrid className="h-5 w-5" />
           </button>

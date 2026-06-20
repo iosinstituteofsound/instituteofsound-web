@@ -1,12 +1,13 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Outlet } from 'react-router-dom'
-import { PanelLeft } from 'lucide-react'
 import { DashboardHeader } from '@/app/components/dashboard-header'
+import { DashboardMobileNav } from '@/app/components/dashboard-mobile-nav'
 import { DashboardSidebar } from '@/app/components/dashboard-sidebar'
 import { useLayoutStore } from '@/app/stores/layout-store'
 import { useSidebarStore } from '@/app/stores/sidebar-store'
 import { ScrollToTopButton } from '@/shared/components/navigation/scroll-to-top-button'
-import { Button } from '@/shared/components/ui/button'
+import { useBodyScrollLock } from '@/shared/hooks/use-body-scroll-lock'
+import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import { cn } from '@/shared/lib/cn'
 import { MAIN_MAX_WIDTH_CLASS, MAIN_PADDING_CLASS } from '@/shared/lib/layout-config'
 import '@/styles/dashboard-sidebar.css'
@@ -14,14 +15,29 @@ import '@/styles/dashboard-sidebar.css'
 export function DashboardLayout() {
   const dashboardConfig = useLayoutStore((state) => state.dashboardConfig)
   const { collapsed, mobileOpen, setMobileOpen } = useSidebarStore()
+  const isMobile = useIsMobile()
   const mainScrollRef = useRef<HTMLElement>(null)
 
   const showSidebar = dashboardConfig.sidebar.visible
   const showHeader = dashboardConfig.header.visible
+  const showMobileNav = showSidebar && isMobile
+
+  useBodyScrollLock(showSidebar && mobileOpen && isMobile)
+
+  useEffect(() => {
+    if (!mobileOpen) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileOpen(false)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [mobileOpen, setMobileOpen])
 
   return (
     <div
-      className={cn('dashboard-shell', collapsed && 'dashboard-shell--collapsed')}
+      className={cn('dashboard-shell', collapsed && !isMobile && 'dashboard-shell--collapsed')}
       data-sidebar={showSidebar ? 'visible' : 'hidden'}
     >
       {showSidebar && mobileOpen ? (
@@ -33,23 +49,10 @@ export function DashboardLayout() {
         />
       ) : null}
 
-      {showSidebar ? <DashboardSidebar mobileHidden={!mobileOpen} /> : null}
+      {showSidebar ? <DashboardSidebar mobileHidden={!mobileOpen} forceExpanded={isMobile} /> : null}
 
       <div className="dashboard-shell__main">
-        {showHeader ? <DashboardHeader /> : null}
-
-        {showSidebar && !mobileOpen ? (
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon"
-            className="fixed left-3 top-3 z-20 h-9 w-9 rounded-full shadow-md md:hidden"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open navigation menu"
-          >
-            <PanelLeft className="h-4 w-4" />
-          </Button>
-        ) : null}
+        {showHeader ? <DashboardHeader onOpenMenu={() => setMobileOpen(true)} /> : null}
 
         <main
           ref={mainScrollRef}
@@ -66,6 +69,8 @@ export function DashboardLayout() {
         </main>
         <ScrollToTopButton containerRef={mainScrollRef} />
       </div>
+
+      {showMobileNav ? <DashboardMobileNav /> : null}
     </div>
   )
 }

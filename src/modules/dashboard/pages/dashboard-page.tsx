@@ -24,7 +24,7 @@ export function DashboardPage() {
         </PageHeaderMain>
       </PageHeader>
 
-      <div className="ios-page-grid md:grid-cols-3">
+      <div className="ios-page-grid grid-cols-1 md:grid-cols-3">
         <Card>
           <CardHeader>
             <p className="ios-surface-eyebrow">Roles</p>
