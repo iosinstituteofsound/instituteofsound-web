@@ -10,6 +10,7 @@ import { env } from '@/shared/config/env'
 import { cn } from '@/shared/lib/cn'
 import { HEADER_NAV_PATHS } from '@/shared/lib/header-nav'
 import { isRegisteredResource } from '@/shared/lib/resource-registry'
+import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import type { SidebarMenuItemDto } from '@/shared/types/sidebar.types'
 import '@/styles/dashboard-sidebar.css'
 
@@ -39,11 +40,18 @@ function isSidebarItemActive(pathname: string, itemPath: string) {
 }
 
 interface DashboardSidebarProps {
-  mobileHidden?: boolean
+  isMobile?: boolean
+  mobileOpen?: boolean
   forceExpanded?: boolean
 }
 
-export function DashboardSidebar({ mobileHidden = false, forceExpanded = false }: DashboardSidebarProps) {
+export function DashboardSidebar({
+  isMobile: isMobileProp,
+  mobileOpen = false,
+  forceExpanded = false,
+}: DashboardSidebarProps) {
+  const isMobileHook = useIsMobile()
+  const isMobile = isMobileProp ?? isMobileHook
   const location = useLocation()
   const dashboardConfig = useLayoutStore((state) => state.dashboardConfig)
   const { collapsed: storeCollapsed, toggleCollapsed, setMobileOpen } = useSidebarStore()
@@ -64,6 +72,14 @@ export function DashboardSidebar({ mobileHidden = false, forceExpanded = false }
 
   const groups = useMemo(() => groupSidebarItems(visibleItems), [visibleItems])
   const sidebarWidth = collapsed ? '4.5rem' : '15.5rem'
+  const desktopLayoutStyle = isMobile
+    ? undefined
+    : {
+        width: sidebarWidth,
+        minWidth: sidebarWidth,
+        maxWidth: sidebarWidth,
+        flex: `0 0 ${sidebarWidth}`,
+      }
 
   const handleToggle = () => {
     if (window.matchMedia('(max-width: 767px)').matches) {
@@ -77,15 +93,14 @@ export function DashboardSidebar({ mobileHidden = false, forceExpanded = false }
     <aside
       className={cn(
         'dashboard-sidebar flex h-full max-h-dvh shrink-0 flex-col overflow-hidden border-r border-border/50',
-        collapsed && 'dashboard-sidebar--collapsed',
-        mobileHidden && 'dashboard-sidebar--mobile-hidden',
+        collapsed && !isMobile && 'dashboard-sidebar--collapsed',
+        isMobile && 'dashboard-sidebar--mobile',
+        isMobile && mobileOpen && 'dashboard-sidebar--mobile-open',
+        isMobile && !mobileOpen && 'dashboard-sidebar--mobile-closed',
       )}
-      style={{
-        width: sidebarWidth,
-        minWidth: sidebarWidth,
-        maxWidth: sidebarWidth,
-        flex: `0 0 ${sidebarWidth}`,
-      }}
+      style={desktopLayoutStyle}
+      aria-hidden={isMobile && !mobileOpen ? true : undefined}
+      inert={isMobile && !mobileOpen ? true : undefined}
     >
       <div className={cn('dashboard-sidebar-top shrink-0', collapsed && 'dashboard-sidebar-top--collapsed')}>
         {!collapsed ? (

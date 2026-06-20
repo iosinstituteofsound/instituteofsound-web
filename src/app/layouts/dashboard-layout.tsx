@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { DashboardHeader } from '@/app/components/dashboard-header'
 import { DashboardMobileNav } from '@/app/components/dashboard-mobile-nav'
 import { DashboardSidebar } from '@/app/components/dashboard-sidebar'
@@ -16,6 +16,7 @@ export function DashboardLayout() {
   const dashboardConfig = useLayoutStore((state) => state.dashboardConfig)
   const { collapsed, mobileOpen, setMobileOpen } = useSidebarStore()
   const isMobile = useIsMobile()
+  const location = useLocation()
   const mainScrollRef = useRef<HTMLElement>(null)
 
   const showSidebar = dashboardConfig.sidebar.visible
@@ -23,6 +24,14 @@ export function DashboardLayout() {
   const showMobileNav = showSidebar && isMobile
 
   useBodyScrollLock(showSidebar && mobileOpen && isMobile)
+
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname, setMobileOpen])
+
+  useEffect(() => {
+    if (!isMobile) setMobileOpen(false)
+  }, [isMobile, setMobileOpen])
 
   useEffect(() => {
     if (!mobileOpen) return
@@ -37,20 +46,29 @@ export function DashboardLayout() {
 
   return (
     <div
-      className={cn('dashboard-shell', collapsed && !isMobile && 'dashboard-shell--collapsed')}
+      className={cn(
+        'dashboard-shell',
+        collapsed && !isMobile && 'dashboard-shell--collapsed',
+        isMobile && 'dashboard-shell--mobile',
+        isMobile && mobileOpen && 'dashboard-shell--mobile-menu-open',
+      )}
       data-sidebar={showSidebar ? 'visible' : 'hidden'}
     >
-      {showSidebar && mobileOpen ? (
+      {showSidebar && mobileOpen && isMobile ? (
         <button
           type="button"
-          className="dashboard-shell__backdrop md:hidden"
+          className="dashboard-shell__backdrop"
           aria-label="Close navigation menu"
           onClick={() => setMobileOpen(false)}
         />
       ) : null}
 
       {showSidebar ? (
-        <DashboardSidebar mobileHidden={isMobile && !mobileOpen} forceExpanded={isMobile} />
+        <DashboardSidebar
+          isMobile={isMobile}
+          mobileOpen={mobileOpen}
+          forceExpanded={isMobile}
+        />
       ) : null}
 
       <div className="dashboard-shell__main">

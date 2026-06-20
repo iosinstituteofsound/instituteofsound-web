@@ -40,6 +40,12 @@ body,
   cursor: pointer;
 }
 
+@media (min-width: 768px) {
+  .dashboard-shell__backdrop {
+    display: none;
+  }
+}
+
 .dashboard-sidebar {
   width: 100%;
   min-width: 0;
@@ -55,12 +61,50 @@ body,
     );
 }
 
+.dashboard-shell--mobile {
+  --dashboard-shell-sidebar-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.dashboard-shell--mobile .dashboard-shell__main {
+  width: 100%;
+}
+
+.dashboard-sidebar--mobile {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 45;
+  width: min(18rem, 88vw) !important;
+  min-width: min(18rem, 88vw) !important;
+  max-width: min(18rem, 88vw) !important;
+  flex: none !important;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 12px 0 32px color-mix(in srgb, black 28%, transparent);
+  transition: transform 0.28s ease, visibility 0.28s ease;
+  will-change: transform;
+}
+
+.dashboard-sidebar--mobile-closed {
+  pointer-events: none;
+  visibility: hidden;
+  transform: translateX(-100%);
+}
+
+.dashboard-sidebar--mobile-open {
+  pointer-events: auto;
+  visibility: visible;
+  transform: translateX(0);
+}
+
 @media (max-width: 767px) {
   .dashboard-shell {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .dashboard-shell[data-sidebar='visible'] .dashboard-sidebar {
+  .dashboard-shell[data-sidebar='visible'] .dashboard-sidebar:not(.dashboard-sidebar--mobile) {
     position: fixed;
     inset: 0 auto 0 0;
     width: min(18rem, 88vw);
