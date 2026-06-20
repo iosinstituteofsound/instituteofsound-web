@@ -16,6 +16,7 @@ import {
   updateArtistPlaylist,
 } from '@/modules/music/api/music.api'
 import { PlaylistTrackSearchPanel } from '@/modules/music/components/playlist-track-search-panel'
+import { PlaylistDetailView } from '@/modules/music/components/playlist-detail-view'
 import { playlistToPlayerQueue } from '@/modules/music/lib/player-queue'
 import { ProfileImageUpload } from '@/modules/profile/components/profile-image-upload'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
@@ -137,6 +138,44 @@ export function ArtistPlaylistDetailPage() {
           </Button>
         </PageSection>
       </Page>
+    )
+  }
+
+  if (!isEditing) {
+    return (
+      <PlaylistDetailView
+        playlist={playlist}
+        onRemoveTrack={(trackId) => removeTrackMutation.mutate(trackId)}
+        isRemovingTrack={removeTrackMutation.isPending}
+        topSlot={
+          <div className="border-b border-white/10 bg-[#121212] px-4 py-3 sm:px-6">
+            <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3">
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" asChild>
+                <Link to="/artist/playlists">
+                  <ArrowLeft className="size-4" />
+                  Back
+                </Link>
+              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="gap-2"
+                  onClick={() => setIsEditing(true)}
+                >
+                  <Pencil className="size-4" />
+                  Edit playlist
+                </Button>
+                {playlist.visibility === 'public' ? (
+                  <Button size="sm" variant="outline" className="border-white/20 text-white" asChild>
+                    <Link to={`/playlists/${playlist.slug}`}>Public page</Link>
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        }
+      />
     )
   }
 

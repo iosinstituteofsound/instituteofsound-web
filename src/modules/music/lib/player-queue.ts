@@ -67,14 +67,19 @@ export function releaseToPlayerQueue(release: ReleaseDetailDto): PlayerTrack[] {
 }
 
 export function playlistToPlayerQueue(playlist: PlaylistDetailDto): PlayerTrack[] {
+  const playable = playlist.tracks.filter((t) => t.audioUrl || t.streamUrl)
   return tracksToPlayerQueue(
-    playlist.tracks.map((t: PlaylistTrackRefDto) => ({
+    playable.map((t: PlaylistTrackRefDto) => ({
       trackId: t.trackId,
       title: t.title,
       artistName: t.artistName,
       audioUrl: t.audioUrl ?? t.streamUrl,
       durationSec: t.durationSec,
+      releaseId: t.releaseId,
     })),
     playlist.coverUrl,
-  )
+  ).map((track, index) => ({
+    ...track,
+    artworkUrl: playable[index]?.coverUrl ?? playlist.coverUrl ?? track.artworkUrl,
+  }))
 }

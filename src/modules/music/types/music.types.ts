@@ -44,9 +44,15 @@ export interface PlaylistTrackRefDto {
   sortOrder: number
   title: string
   artistName: string
+  artistSlug?: string
+  releaseId?: string
+  releaseTitle?: string
+  releaseSlug?: string
+  coverUrl?: string
   durationSec?: number
   audioUrl?: string
   streamUrl?: string
+  addedAt?: string
 }
 
 export interface PlaylistDetailDto {
@@ -57,7 +63,12 @@ export interface PlaylistDetailDto {
   description?: string
   visibility: 'public' | 'private'
   ownerType: 'editorial' | 'artist' | 'listener'
+  curatorName?: string
+  artistProfileId?: string
+  artistSlug?: string
   tracks: PlaylistTrackRefDto[]
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface PlaylistTrackSearchItemDto {
