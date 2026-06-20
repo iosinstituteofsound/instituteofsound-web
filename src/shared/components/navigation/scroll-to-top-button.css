@@ -39,19 +39,21 @@ body[data-player-active='true'] .scroll-to-top-button {
   );
 }
 
-body[data-mobile-nav='true'] .scroll-to-top-button {
-  bottom: calc(
-    1.25rem + var(--ios-bottom-nav-offset, var(--ios-bottom-nav-height)) +
-      env(safe-area-inset-bottom, 0px)
-  );
-}
+@media (max-width: 767px) {
+  body[data-mobile-nav='true'] .scroll-to-top-button {
+    bottom: calc(
+      1.25rem + var(--ios-bottom-nav-offset, var(--ios-bottom-nav-height)) +
+        env(safe-area-inset-bottom, 0px)
+    );
+  }
 
-body[data-mobile-nav='true'][data-player-active='true'] .scroll-to-top-button {
-  bottom: calc(
-    1.25rem + var(--ios-bottom-nav-offset, var(--ios-bottom-nav-height)) +
-      var(--ios-player-offset, var(--ios-player-height, 4.5rem)) +
-      env(safe-area-inset-bottom, 0px)
-  );
+  body[data-mobile-nav='true'][data-player-active='true'] .scroll-to-top-button {
+    bottom: calc(
+      1.25rem + var(--ios-bottom-nav-offset, var(--ios-bottom-nav-height)) +
+        var(--ios-player-offset, var(--ios-player-height, 4.5rem)) +
+        env(safe-area-inset-bottom, 0px)
+    );
+  }
 }
 
 .scroll-to-top-button::before {

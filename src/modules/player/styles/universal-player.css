@@ -561,8 +561,18 @@
   }
 }
 
-body[data-mobile-nav='true'] .ios-universal-player {
-  bottom: calc(var(--ios-bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+@media (max-width: 767px) {
+  body[data-mobile-nav='true'] .ios-universal-player {
+    bottom: calc(var(--ios-bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  }
+
+  body[data-mobile-nav='true'][data-player-active='true'] {
+    --ios-player-offset: var(--ios-player-height);
+  }
+
+  body[data-mobile-nav='true'][data-player-active='true'] .ios-universal-player--mobile-mini {
+    --ios-player-offset: 3.75rem;
+  }
 }
 
 .ios-universal-player--mobile-mini {
@@ -619,14 +629,6 @@ body[data-mobile-nav='true'] .ios-universal-player {
 
 .ios-universal-player--mobile-mini .ios-universal-player__mobile-progress--interactive .ios-player-slider__input {
   height: 100%;
-}
-
-body[data-mobile-nav='true'][data-player-active='true'] {
-  --ios-player-offset: var(--ios-player-height);
-}
-
-body[data-mobile-nav='true'][data-player-active='true'] .ios-universal-player--mobile-mini {
-  --ios-player-offset: 3.75rem;
 }
 
 @media (max-width: 639px) {

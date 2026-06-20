@@ -68,7 +68,7 @@ export function DashboardMobileNav() {
   if (tabs.length === 0) return null
 
   return (
-    <nav className="dashboard-mobile-nav md:hidden" aria-label="Primary navigation">
+    <nav className="dashboard-mobile-nav" aria-label="Primary navigation">
       {tabs.map((tab) => {
         const active = isHeaderNavTabActive(location.pathname, tab.path)
         return (

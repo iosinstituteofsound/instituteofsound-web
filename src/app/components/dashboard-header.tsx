@@ -50,8 +50,8 @@ export function DashboardHeader({ onOpenMenu }: DashboardHeaderProps) {
 
   return (
     <header className="dashboard-header relative z-20 w-full shrink-0">
-      <div className="dashboard-header-inner dashboard-header-inner--mobile md:grid">
-        <div className="dashboard-header-mobile md:hidden">
+      <div className="dashboard-header-inner">
+        <div className="dashboard-header-mobile">
           {onOpenMenu ? (
             <Button
               type="button"
@@ -83,7 +83,7 @@ export function DashboardHeader({ onOpenMenu }: DashboardHeaderProps) {
           </div>
         </div>
 
-        <div className="dashboard-header-left hidden md:block">
+        <div className="dashboard-header-left">
           <div
             className="dashboard-header-search-wrap cursor-pointer"
             onClick={() => setSearchOpen(true)}
@@ -109,7 +109,7 @@ export function DashboardHeader({ onOpenMenu }: DashboardHeaderProps) {
         </div>
 
         {visibleTabs.length > 0 ? (
-          <nav className="dashboard-header-tabs hidden md:flex" aria-label="Primary navigation">
+          <nav className="dashboard-header-tabs" aria-label="Primary navigation">
             {visibleTabs.map((tab) => {
               const active = isHeaderNavTabActive(location.pathname, tab.path)
               return (
@@ -126,10 +126,10 @@ export function DashboardHeader({ onOpenMenu }: DashboardHeaderProps) {
             })}
           </nav>
         ) : (
-          <div className="hidden md:block" aria-hidden />
+          <div aria-hidden />
         )}
 
-        <div className="dashboard-header-right hidden md:flex">
+        <div className="dashboard-header-right">
           <button type="button" className="dashboard-header-utility hidden sm:inline-flex" aria-label="Apps">
             <LayoutGrid className="h-5 w-5" />
           </button>

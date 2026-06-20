@@ -49,7 +49,9 @@ export function DashboardLayout() {
         />
       ) : null}
 
-      {showSidebar ? <DashboardSidebar mobileHidden={!mobileOpen} forceExpanded={isMobile} /> : null}
+      {showSidebar ? (
+        <DashboardSidebar mobileHidden={isMobile && !mobileOpen} forceExpanded={isMobile} />
+      ) : null}
 
       <div className="dashboard-shell__main">
         {showHeader ? <DashboardHeader onOpenMenu={() => setMobileOpen(true)} /> : null}
