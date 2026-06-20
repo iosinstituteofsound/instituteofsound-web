@@ -1,12 +1,13 @@
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { usePermission } from '@/shared/hooks/use-permission'
+import { ArtistDashboardHome } from '@/modules/music/components/artist-dashboard/artist-dashboard-home'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import { Page, PageDescription, PageHeader, PageHeaderMain, PageTitle } from '@/shared/components/layout/page-shell'
 
-export function DashboardPage() {
+function AdminDashboardSummary() {
   const { data, isLoading, isError, refetch } = useMe()
   const { isSuperAdmin } = usePermission()
 
@@ -71,4 +72,16 @@ export function DashboardPage() {
       </Card>
     </Page>
   )
+}
+
+export function DashboardPage() {
+  const { hasResource, hydrated } = usePermission()
+
+  if (!hydrated) return <PageLoader />
+
+  if (hasResource('ArtistDashboardPage')) {
+    return <ArtistDashboardHome />
+  }
+
+  return <AdminDashboardSummary />
 }

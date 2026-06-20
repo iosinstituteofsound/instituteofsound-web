@@ -38,4 +38,23 @@
   --ios-mh-cut: 6px;
   --ios-mh-rule-height: 4px;
   --ios-mh-scanline: color-mix(in oklch, var(--foreground) 1.2%, transparent);
+
+  /* Artist dashboard — derived accent ladder (no raw hex) */
+  --ios-dashboard-bg: var(--background);
+  --ios-dashboard-card-bg: var(--card);
+  --ios-dashboard-text-primary: var(--foreground);
+  --ios-dashboard-text-secondary: var(--muted-foreground);
+  --ios-dashboard-primary: var(--primary);
+  --ios-dashboard-success: color-mix(in oklch, var(--accent) 62%, var(--primary));
+  --ios-dashboard-warning: color-mix(in oklch, var(--destructive) 48%, var(--accent));
+  --ios-dashboard-info: color-mix(in oklch, var(--accent) 72%, var(--foreground));
+  --ios-dashboard-danger: var(--destructive);
+  --ios-dashboard-primary-soft: color-mix(in oklch, var(--primary) 18%, transparent);
+  --ios-dashboard-success-soft: color-mix(in oklch, var(--ios-dashboard-success) 18%, transparent);
+  --ios-dashboard-warning-soft: color-mix(in oklch, var(--ios-dashboard-warning) 18%, transparent);
+  --ios-dashboard-info-soft: color-mix(in oklch, var(--ios-dashboard-info) 18%, transparent);
+  --ios-dashboard-positive: var(--ios-dashboard-success);
+  --ios-dashboard-chart-line: var(--primary);
+  --ios-dashboard-chart-glow: color-mix(in oklch, var(--primary) 35%, transparent);
+  --ios-dashboard-chart-fill: color-mix(in oklch, var(--primary) 12%, transparent);
 }

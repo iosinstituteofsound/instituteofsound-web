@@ -1,0 +1,674 @@
+.ios-artist-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  color: var(--ios-dashboard-text-primary);
+}
+
+.ios-artist-dashboard__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.ios-artist-dashboard__upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--primary-foreground);
+  background: linear-gradient(
+    135deg,
+    var(--ios-dashboard-primary) 0%,
+    color-mix(in oklch, var(--ios-dashboard-primary) 72%, var(--ios-dashboard-info)) 100%
+  );
+  box-shadow: 0 4px 18px color-mix(in oklch, var(--ios-dashboard-primary) 28%, transparent);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.ios-artist-dashboard__upload-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.ios-artist-dashboard__layout {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1100px) {
+  .ios-artist-dashboard__layout {
+    grid-template-columns: minmax(0, 1fr) 18.5rem;
+    align-items: start;
+  }
+}
+
+.ios-artist-dashboard__main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.ios-artist-dashboard__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.ios-artist-dashboard__metrics {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .ios-artist-dashboard__metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.ios-artist-dashboard__metric {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1rem 0.65rem;
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in oklch, var(--border) 85%, transparent);
+  background: color-mix(in oklch, var(--ios-dashboard-card-bg) 92%, var(--ios-dashboard-text-primary) 8%);
+  overflow: hidden;
+}
+
+.ios-artist-dashboard__metric::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background: radial-gradient(
+    ellipse 80% 60% at 100% 0%,
+    var(--ios-artist-dashboard-accent-soft, var(--ios-dashboard-primary-soft)),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.ios-artist-dashboard__metric[data-accent='primary'] {
+  --ios-artist-dashboard-accent: var(--ios-dashboard-primary);
+  --ios-artist-dashboard-accent-soft: var(--ios-dashboard-primary-soft);
+}
+
+.ios-artist-dashboard__metric[data-accent='success'] {
+  --ios-artist-dashboard-accent: var(--ios-dashboard-success);
+  --ios-artist-dashboard-accent-soft: var(--ios-dashboard-success-soft);
+}
+
+.ios-artist-dashboard__metric[data-accent='warning'] {
+  --ios-artist-dashboard-accent: var(--ios-dashboard-warning);
+  --ios-artist-dashboard-accent-soft: var(--ios-dashboard-warning-soft);
+}
+
+.ios-artist-dashboard__metric[data-accent='info'] {
+  --ios-artist-dashboard-accent: var(--ios-dashboard-info);
+  --ios-artist-dashboard-accent-soft: var(--ios-dashboard-info-soft);
+}
+
+.ios-artist-dashboard__metric-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ios-artist-dashboard__metric-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  color: var(--ios-artist-dashboard-accent, var(--ios-dashboard-primary));
+  background: var(--ios-artist-dashboard-accent-soft, var(--ios-dashboard-primary-soft));
+}
+
+.ios-artist-dashboard__metric-label {
+  font-size: 0.75rem;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__metric-value {
+  position: relative;
+  z-index: 1;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.ios-artist-dashboard__metric-delta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ios-artist-dashboard__metric-delta.is-up {
+  color: var(--ios-dashboard-positive);
+}
+
+.ios-artist-dashboard__metric-delta.is-down {
+  color: var(--ios-dashboard-danger);
+}
+
+.ios-artist-dashboard__metric-delta.is-flat {
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__metric-sub {
+  position: relative;
+  z-index: 1;
+  font-size: 0.6875rem;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__metric-sparkline {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 2.25rem;
+  margin-top: 0.15rem;
+}
+
+.ios-artist-dashboard__metric-sparkline svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ios-artist-dashboard__panel {
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in oklch, var(--border) 85%, transparent);
+  background: color-mix(in oklch, var(--ios-dashboard-card-bg) 94%, var(--ios-dashboard-text-primary) 6%);
+  padding: 1.1rem 1.15rem;
+}
+
+.ios-artist-dashboard__panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.ios-artist-dashboard__panel-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.ios-artist-dashboard__range {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--border) 90%, transparent);
+  background: color-mix(in oklch, var(--ios-dashboard-bg) 88%, var(--ios-dashboard-text-primary) 12%);
+  font-size: 0.75rem;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ios-dashboard-primary);
+  text-decoration: none;
+}
+
+.ios-artist-dashboard__link:hover {
+  text-decoration: underline;
+}
+
+.ios-artist-dashboard__release {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .ios-artist-dashboard__release {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.ios-artist-dashboard__release-art {
+  width: 6.5rem;
+  height: 6.5rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+  background: color-mix(in oklch, var(--muted) 80%, transparent);
+}
+
+.ios-artist-dashboard__release-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ios-artist-dashboard__release-art-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__release-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.ios-artist-dashboard__release-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.ios-artist-dashboard__release-meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__release-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+@media (min-width: 768px) {
+  .ios-artist-dashboard__release-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.ios-artist-dashboard__release-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.ios-artist-dashboard__release-stat-label {
+  font-size: 0.6875rem;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__release-stat-value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.ios-artist-dashboard__release-stat-delta {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--ios-dashboard-positive);
+}
+
+.ios-artist-dashboard__release-bar {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--ios-dashboard-text-primary) 8%, transparent);
+  overflow: hidden;
+}
+
+.ios-artist-dashboard__release-bar span {
+  display: block;
+  height: 100%;
+  width: var(--release-progress, 0%);
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--ios-dashboard-primary),
+    color-mix(in oklch, var(--ios-dashboard-info) 55%, var(--ios-dashboard-primary))
+  );
+}
+
+.ios-artist-dashboard__chart-line {
+  filter: drop-shadow(0 0 6px var(--ios-dashboard-chart-glow));
+}
+
+.ios-artist-dashboard__release-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__actions {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .ios-artist-dashboard__actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .ios-artist-dashboard__actions {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.ios-artist-dashboard__action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 1rem 0.75rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in oklch, var(--border) 85%, transparent);
+  background: color-mix(in oklch, var(--ios-dashboard-card-bg) 92%, var(--ios-dashboard-text-primary) 8%);
+  text-decoration: none;
+  color: inherit;
+  text-align: center;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.ios-artist-dashboard__action:hover {
+  border-color: color-mix(in oklch, var(--ios-artist-dashboard-accent, var(--ios-dashboard-primary)) 35%, var(--border));
+  transform: translateY(-1px);
+}
+
+.ios-artist-dashboard__action[data-accent='primary'] {
+  --ios-artist-dashboard-accent: var(--ios-dashboard-primary);
+}
+
+.ios-artist-dashboard__action[data-accent='warning'] {
+  --ios-artist-dashboard-accent: var(--ios-dashboard-warning);
+}
+
+.ios-artist-dashboard__action[data-accent='success'] {
+  --ios-artist-dashboard-accent: var(--ios-dashboard-success);
+}
+
+.ios-artist-dashboard__action[data-accent='info'] {
+  --ios-artist-dashboard-accent: var(--ios-dashboard-info);
+}
+
+.ios-artist-dashboard__action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: var(--radius-md);
+  color: var(--ios-artist-dashboard-accent, var(--ios-dashboard-primary));
+  background: color-mix(in oklch, var(--ios-artist-dashboard-accent, var(--ios-dashboard-primary)) 16%, transparent);
+}
+
+.ios-artist-dashboard__action-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.ios-artist-dashboard__action-hint {
+  font-size: 0.6875rem;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__split {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .ios-artist-dashboard__split {
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  }
+}
+
+.ios-artist-dashboard__chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 14rem;
+}
+
+.ios-artist-dashboard__chart-wrap svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ios-artist-dashboard__chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 14rem;
+  font-size: 0.8125rem;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.ios-artist-dashboard__track {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
+}
+
+.ios-artist-dashboard__track:last-child {
+  border-bottom: none;
+}
+
+.ios-artist-dashboard__track-rank {
+  width: 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__track-art {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: color-mix(in oklch, var(--muted) 80%, transparent);
+}
+
+.ios-artist-dashboard__track-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ios-artist-dashboard__track-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ios-artist-dashboard__track-plays {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__sidebar-panel {
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in oklch, var(--border) 85%, transparent);
+  background: color-mix(in oklch, var(--ios-dashboard-card-bg) 94%, var(--ios-dashboard-text-primary) 6%);
+  padding: 1rem;
+}
+
+.ios-artist-dashboard__sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ios-artist-dashboard__sidebar-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.ios-artist-dashboard__supporter,
+.ios-artist-dashboard__recent {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.45rem 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.ios-artist-dashboard__supporter:hover .ios-artist-dashboard__supporter-name,
+.ios-artist-dashboard__recent:hover .ios-artist-dashboard__supporter-name {
+  color: var(--ios-dashboard-primary);
+}
+
+.ios-artist-dashboard__supporter-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary-foreground);
+  background: color-mix(in oklch, var(--ios-dashboard-primary) 75%, var(--ios-dashboard-info));
+}
+
+.ios-artist-dashboard__supporter-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ios-artist-dashboard__supporter-name {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ios-artist-dashboard__supporter-meta {
+  margin: 0.1rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__supporter-score {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  color: var(--primary-foreground);
+  background: color-mix(in oklch, var(--ios-dashboard-primary) 80%, transparent);
+}
+
+.ios-artist-dashboard__recent + .ios-artist-dashboard__recent {
+  border-top: 1px solid color-mix(in oklch, var(--border) 65%, transparent);
+}
+
+.ios-artist-dashboard__supporter + .ios-artist-dashboard__supporter {
+  border-top: 1px solid color-mix(in oklch, var(--border) 65%, transparent);
+}
+
+.ios-artist-dashboard__recent-heart {
+  color: var(--ios-dashboard-primary);
+}
+
+.ios-artist-dashboard__event {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.55rem 0;
+}
+
+.ios-artist-dashboard__event + .ios-artist-dashboard__event {
+  border-top: 1px solid color-mix(in oklch, var(--border) 65%, transparent);
+}
+
+.ios-artist-dashboard__event-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklch, var(--ios-dashboard-primary) 35%, var(--border));
+  background: color-mix(in oklch, var(--ios-dashboard-primary) 10%, transparent);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--ios-dashboard-primary);
+}
+
+.ios-artist-dashboard__event-date strong {
+  font-size: 0.875rem;
+}
+
+.ios-artist-dashboard__event-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.ios-artist-dashboard__event-location {
+  margin: 0.15rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--ios-dashboard-text-secondary);
+}
+
+.ios-artist-dashboard__event-tickets {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--ios-dashboard-primary);
+  text-decoration: none;
+}
+
+.ios-artist-dashboard__empty {
+  margin: 0;
+  padding: 0.5rem 0;
+  font-size: 0.8125rem;
+  color: var(--ios-dashboard-text-secondary);
+}
