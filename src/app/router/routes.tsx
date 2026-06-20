@@ -586,6 +586,16 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'artist/releases/:releaseId/edit',
+        element: (
+          <ResourceGuard name="ArtistDashboardPage">
+            <Lazy>
+              <ArtistDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
         path: 'artist/releases',
         element: (
           <ResourceGuard name="ArtistDashboardPage">

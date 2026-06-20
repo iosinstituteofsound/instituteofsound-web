@@ -87,6 +87,8 @@ export async function createRelease(input: {
   genre?: string
   coverUrl?: string
   trackIds?: string[]
+  releaseDate?: string
+  status?: 'draft' | 'published'
 }) {
   const { data } = await apiClient.post<ApiSuccessResponse<ReleaseDetailDto>>(
     `${API_V1}/artist/releases`,
@@ -103,6 +105,8 @@ export async function updateRelease(
     genre?: string
     coverUrl?: string
     trackIds?: string[]
+    releaseDate?: string
+    status?: 'draft' | 'published'
   },
 ) {
   const { data } = await apiClient.patch<ApiSuccessResponse<ReleaseDetailDto>>(

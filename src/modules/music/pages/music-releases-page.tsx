@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   createRelease,
@@ -51,6 +52,7 @@ export function MusicReleasesPage() {
     onSuccess: () => {
       toast.success('Release deleted')
       void queryClient.invalidateQueries({ queryKey: ['artist-releases'] })
+      void queryClient.invalidateQueries({ queryKey: ['profile-discography'] })
     },
   })
 
@@ -113,11 +115,22 @@ export function MusicReleasesPage() {
 
         <div className="space-y-3">
           {(releases ?? []).map((release) => (
-            <div key={release.id} className="flex items-start justify-between gap-4 rounded-lg border p-4">
-              <div>
+            <div key={release.id} className="flex items-start gap-4 rounded-lg border p-4">
+              <div className="size-16 shrink-0 overflow-hidden rounded-md border bg-muted">
+                {release.coverUrl ? (
+                  <img src={release.coverUrl} alt="" className="size-full object-cover" />
+                ) : (
+                  <div className="flex size-full items-center justify-center text-xs font-semibold uppercase text-muted-foreground">
+                    {release.title.slice(0, 2)}
+                  </div>
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
                 <p className="font-semibold">{release.title}</p>
                 <p className="text-sm capitalize text-muted-foreground">
-                  {release.type} · {release.tracks.length} tracks
+                  {release.type} · {release.tracks.length} track{release.tracks.length === 1 ? '' : 's'}
+                  {release.genre ? ` · ${release.genre}` : ''}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1">
                   {release.tracks.map((t) => (
@@ -127,13 +140,23 @@ export function MusicReleasesPage() {
                   ))}
                 </div>
               </div>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => deleteMutation.mutate(release.id)}
-              >
-                Delete
-              </Button>
+
+              <div className="flex shrink-0 gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <Link to={`/artist/releases/${release.id}/edit`}>
+                    <Pencil className="size-3.5" />
+                    Edit
+                  </Link>
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => deleteMutation.mutate(release.id)}
+                  disabled={deleteMutation.isPending}
+                >
+                  Delete
+                </Button>
+              </div>
             </div>
           ))}
         </div>

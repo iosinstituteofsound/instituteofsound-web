@@ -26,7 +26,7 @@ export function ArtistStudioHomePage() {
           <Button asChild className="h-auto flex-col gap-2 py-6">
             <Link to="/artist/upload">
               <Upload className="size-6" />
-              Upload Track
+              Upload Music
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
