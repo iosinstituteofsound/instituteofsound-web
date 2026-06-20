@@ -95,12 +95,21 @@ export function ReleaseUploadStep({ queue }: ReleaseUploadStepProps) {
       {queue.queue.length > 0 ? (
         <section className="rbl-panel">
           <div className="rbl-panel__header">
-            <h3 className="rbl-panel__title">Transmission Queue</h3>
-            <p className="rbl-panel__meta">
-              {queue.readyTrackIds.length}/{queue.queue.length} synced
-              {queue.isProcessing ? ' · uplink active' : ''}
-              {queue.queue.length > 1 ? ' · drag grip to reorder' : ''}
-            </p>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 className="rbl-panel__title">Transmission Queue</h3>
+                <p className="rbl-panel__meta">
+                  {queue.readyTrackIds.length}/{queue.queue.length} synced
+                  {queue.isProcessing ? ' · uplink active' : ''}
+                  {queue.queue.length > 1 ? ' · drag grip to reorder' : ''}
+                </p>
+              </div>
+              {queue.failedCount > 0 ? (
+                <button type="button" className="rbl-btn" onClick={() => queue.retryAllFailed()}>
+                  Retry all failed ({queue.failedCount})
+                </button>
+              ) : null}
+            </div>
           </div>
           <div className="rbl-panel__body">
             <ReleaseUploadQueueList queue={queue} />

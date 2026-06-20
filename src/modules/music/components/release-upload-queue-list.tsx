@@ -95,7 +95,9 @@ function SortableQueueItem({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className={cn('rbl-queue__status', statusClass(item.status))}>{item.status}</span>
+              <span className={cn('rbl-queue__status', statusClass(item.status))}>
+                {item.status === 'pending' && queue.isProcessing ? 'queued' : item.status}
+              </span>
               {item.status === 'pending' || item.status === 'failed' ? (
                 <button
                   type="button"
