@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { getArtistProfile, updateArtistProfile } from '@/modules/music/api/music.api'
+import { invalidateArtistSurfaceQueries } from '@/modules/explore/lib/invalidate-artist-surface'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { Page, PageHeader, PageTitle, PageSection } from '@/shared/components/layout/page-shell'
 import { Button } from '@/shared/components/ui/button'
@@ -41,9 +42,10 @@ export function ArtistProfileEditorPage() {
         coverUrl: coverUrl || undefined,
         genres: genres.split(',').map((g) => g.trim()).filter(Boolean),
       }),
-    onSuccess: () => {
+    onSuccess: (saved) => {
       toast.success('Artist profile saved')
       void queryClient.invalidateQueries({ queryKey: ['artist-profile'] })
+      invalidateArtistSurfaceQueries(queryClient, saved.userId)
     },
   })
 

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { invalidateArtistSurfaceQueries } from '@/modules/explore/lib/invalidate-artist-surface'
 import { getProfileDiscography, setArtistPick } from '@/modules/explore/api/explore.api'
 
 export function useProfileDiscography(userId: string) {
@@ -16,7 +17,7 @@ export function useSetArtistPick(userId: string) {
   return useMutation({
     mutationFn: setArtistPick,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['profile-discography', userId] })
+      invalidateArtistSurfaceQueries(queryClient, userId)
     },
   })
 }

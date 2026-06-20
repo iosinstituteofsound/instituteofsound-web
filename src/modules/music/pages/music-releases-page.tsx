@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
 import { toast } from 'sonner'
+import { invalidateArtistSurfaceQueries } from '@/modules/explore/lib/invalidate-artist-surface'
 import {
   createRelease,
   deleteRelease,
@@ -41,6 +42,7 @@ export function MusicReleasesPage() {
     onSuccess: () => {
       toast.success('Release created')
       void queryClient.invalidateQueries({ queryKey: ['artist-releases'] })
+      invalidateArtistSurfaceQueries(queryClient)
       setShowCreate(false)
       setTitle('')
       setSelectedTrackIds([])
@@ -52,7 +54,7 @@ export function MusicReleasesPage() {
     onSuccess: () => {
       toast.success('Release deleted')
       void queryClient.invalidateQueries({ queryKey: ['artist-releases'] })
-      void queryClient.invalidateQueries({ queryKey: ['profile-discography'] })
+      invalidateArtistSurfaceQueries(queryClient)
     },
   })
 

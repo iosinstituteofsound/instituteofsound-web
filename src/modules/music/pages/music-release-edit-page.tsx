@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Disc3 } from 'lucide-react'
 import { toast } from 'sonner'
+import { invalidateArtistSurfaceQueries } from '@/modules/explore/lib/invalidate-artist-surface'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
 import { listArtistReleases, listArtistTracks, updateRelease } from '@/modules/music/api/music.api'
@@ -119,7 +120,7 @@ export function MusicReleaseEditPage() {
     onSuccess: () => {
       toast.success('Release updated')
       void queryClient.invalidateQueries({ queryKey: ['artist-releases'] })
-      void queryClient.invalidateQueries({ queryKey: ['profile-discography'] })
+      invalidateArtistSurfaceQueries(queryClient)
       navigate('/artist/releases')
     },
     onError: () => toast.error('Could not update release'),

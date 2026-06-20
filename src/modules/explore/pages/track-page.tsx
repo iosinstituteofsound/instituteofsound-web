@@ -52,6 +52,9 @@ export function TrackPage() {
     queryFn: () => getReleaseDetail(releaseId),
     enabled: Boolean(releaseId),
     retry: false,
+    staleTime: 15_000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,
   })
 
   const track = useMemo(

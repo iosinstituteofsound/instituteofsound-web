@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Bookmark, Copy, ExternalLink, Share2 } from 'lucide-react'
 import type { ArtistProfileDto, ReleaseDto } from '@/modules/explore/types/explore.types'
+import { useArtistTerminal } from '@/modules/explore/hooks/use-artist-terminal'
 import {
-  artistReleaseStats,
   releaseStreamPlatform,
   releaseTypeLabel,
 } from '@/modules/explore/lib/release-meta'
@@ -38,14 +38,21 @@ export function ReleaseAside({
   saved,
   onToggleSave,
 }: ReleaseAsideProps) {
-  const stats = artist ? artistReleaseStats(artist, allReleases) : null
+  const terminal = useArtistTerminal({
+    fallbackArtist: artist,
+    listReleases: artistReleases,
+    statsReleases: allReleases,
+  })
+  const liveArtist = terminal.artist
+  const liveReleases = terminal.artistReleases
+  const stats = terminal.stats
   const sidebarTracks = useMemo(
-    () => [release, ...artistReleases.filter((item) => item.id !== release.id)].slice(0, 5),
-    [artistReleases, release],
+    () => [release, ...liveReleases.filter((item) => item.id !== release.id)].slice(0, 5),
+    [liveReleases, release],
   )
   const platform = releaseStreamPlatform(release.streamUrl)
-  const genreTags = useMemo(() => collectGenreTags(artist, release), [artist, release])
-  const bio = artist?.bio?.trim()
+  const genreTags = useMemo(() => collectGenreTags(liveArtist, release), [liveArtist, release])
+  const bio = liveArtist?.bio?.trim()
 
   const copyLink = () => {
     void navigator.clipboard?.writeText(window.location.href)
@@ -74,7 +81,7 @@ export function ReleaseAside({
         </header>
 
         <div className="rel-aside__device-body">
-          {artist ? (
+          {liveArtist ? (
             <section className="rel-aside__module ios-mh-surface" aria-label="Artist profile">
               <span className="rel-aside__module-corner rel-aside__module-corner--tl" aria-hidden />
               <span className="rel-aside__module-corner rel-aside__module-corner--tr" aria-hidden />
@@ -83,20 +90,20 @@ export function ReleaseAside({
 
               <div className="rel-aside__profile">
                 <div className="rel-aside__avatar-shell">
-                  {artist.avatarUrl ? (
-                    <img src={artist.avatarUrl} alt="" className="rel-aside__avatar" />
+                  {liveArtist.avatarUrl ? (
+                    <img src={liveArtist.avatarUrl} alt="" className="rel-aside__avatar" />
                   ) : (
                     <span className="rel-aside__avatar rel-aside__avatar--fb" aria-hidden>
-                      {artistInitials(artist.displayName)}
+                      {artistInitials(liveArtist.displayName)}
                     </span>
                   )}
                   <span className="rel-aside__avatar-ring" aria-hidden />
                 </div>
                 <div className="rel-aside__identity">
                   <p className="rel-aside__kicker ios-mh-kicker">Artist</p>
-                  <p className="rel-aside__name">{artist.displayName}</p>
-                  {artist.labelName ? (
-                    <p className="rel-aside__label">{artist.labelName}</p>
+                  <p className="rel-aside__name">{liveArtist.displayName}</p>
+                  {liveArtist.labelName ? (
+                    <p className="rel-aside__label">{liveArtist.labelName}</p>
                   ) : null}
                 </div>
               </div>
@@ -135,7 +142,7 @@ export function ReleaseAside({
               ) : null}
 
               <Link
-                to={`/profile/${artist.userId}`}
+                to={`/profile/${liveArtist.userId}`}
                 className="rel-aside__studio ios-mh-btn ios-mh-btn--fill"
               >
                 View studio

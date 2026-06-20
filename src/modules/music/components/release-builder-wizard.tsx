@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
+import { invalidateArtistSurfaceQueries } from '@/modules/explore/lib/invalidate-artist-surface'
 import { createRelease, updateArtistTrack } from '@/modules/music/api/music.api'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
@@ -169,7 +170,7 @@ export function ReleaseBuilderWizard() {
       toast.success('Release launched into the nebula')
       void queryClient.invalidateQueries({ queryKey: ['artist-releases'] })
       void queryClient.invalidateQueries({ queryKey: ['artist-tracks'] })
-      void queryClient.invalidateQueries({ queryKey: ['profile-discography'] })
+      invalidateArtistSurfaceQueries(queryClient)
       uploadQueue.resetQueue()
       navigate('/artist/releases')
     },

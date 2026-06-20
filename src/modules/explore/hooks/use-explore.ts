@@ -5,7 +5,9 @@ export function useExplore() {
   return useQuery({
     queryKey: ['explore'],
     queryFn: getExplore,
-    staleTime: 60_000,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
   })
 }
 

@@ -58,6 +58,9 @@ export function ReleasePage() {
     queryFn: () => getReleaseDetail(id),
     enabled: Boolean(id),
     retry: false,
+    staleTime: 15_000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,
   })
   const playTrack = usePlayerStore((s) => s.playTrack)
   const [saved, setSaved] = useState(false)
