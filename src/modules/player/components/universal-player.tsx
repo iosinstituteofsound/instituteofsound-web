@@ -19,6 +19,12 @@ import {
 } from 'lucide-react'
 import { PlayerSlider } from '@/modules/player/components/player-slider'
 import { formatPlayerTime } from '@/modules/player/lib/format-time'
+import {
+  cancelAudioFade,
+  createFadeHandle,
+  fadeAudioVolume,
+  PLAYER_FADE_MS,
+} from '@/modules/player/lib/audio-fade'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/player/styles/universal-player.css'
@@ -61,6 +67,8 @@ function PlayerControlButton({
 
 export function UniversalPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const fadeHandleRef = useRef(createFadeHandle())
+  const targetVolumeRef = useRef(0.85)
   const currentTrack = usePlayerStore((s) => s.currentTrack)
   const queue = usePlayerStore((s) => s.queue)
   const isPlaying = usePlayerStore((s) => s.isPlaying)
@@ -91,6 +99,45 @@ export function UniversalPlayer() {
       ? `${Math.min(100, (currentTime / effectiveDuration) * 100)}%`
       : '0%'
 
+  const getTargetVolume = useCallback(() => {
+    const { volume: storeVolume, muted: storeMuted } = usePlayerStore.getState()
+    return storeMuted ? 0 : storeVolume
+  }, [])
+
+  const fadeInPlay = useCallback(async () => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const target = getTargetVolume()
+    targetVolumeRef.current = target
+    cancelAudioFade(fadeHandleRef.current)
+    audio.volume = 0
+
+    try {
+      await audio.play()
+    } catch {
+      setPlaybackState({ isPlaying: false })
+      return
+    }
+
+    await fadeAudioVolume(audio, target, PLAYER_FADE_MS, fadeHandleRef.current)
+  }, [getTargetVolume, setPlaybackState])
+
+  const fadeOutPause = useCallback(async () => {
+    const audio = audioRef.current
+    if (!audio || audio.paused) return
+
+    const target = getTargetVolume()
+    targetVolumeRef.current = target
+    await fadeAudioVolume(audio, 0, PLAYER_FADE_MS, fadeHandleRef.current)
+    audio.pause()
+    audio.volume = target
+  }, [getTargetVolume])
+
+  useEffect(() => {
+    return () => cancelAudioFade(fadeHandleRef.current)
+  }, [])
+
   useEffect(() => {
     document.body.dataset.playerActive = visible ? 'true' : 'false'
     return () => {
@@ -102,32 +149,44 @@ export function UniversalPlayer() {
     const audio = audioRef.current
     if (!audio || !currentTrack) return
 
+    cancelAudioFade(fadeHandleRef.current)
     audio.src = currentTrack.audioUrl
     audio.load()
+    audio.volume = 0
     setPlaybackState({ currentTime: 0, duration: currentTrack.durationSec ?? 0 })
 
-    if (isPlaying) {
-      void audio.play().catch(() => setPlaybackState({ isPlaying: false }))
+    if (usePlayerStore.getState().isPlaying) {
+      void fadeInPlay()
     }
-  }, [currentTrack?.id, currentTrack?.audioUrl, currentTrack?.durationSec])
+  }, [currentTrack?.id, currentTrack?.audioUrl, currentTrack?.durationSec, fadeInPlay, setPlaybackState])
 
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
-    audio.volume = muted ? 0 : volume
-  }, [volume, muted])
+
+    targetVolumeRef.current = getTargetVolume()
+    if (fadeHandleRef.current.frameId != null) return
+    if (!audio.paused) {
+      audio.volume = targetVolumeRef.current
+    }
+  }, [volume, muted, getTargetVolume])
 
   useEffect(() => {
     const audio = audioRef.current
-    if (!audio || !currentTrack) return
+    const track = usePlayerStore.getState().currentTrack
+    if (!audio || !track) return
 
     if (isPlaying) {
-      void audio.play().catch(() => setPlaybackState({ isPlaying: false }))
+      if (audio.paused) {
+        void fadeInPlay()
+      }
       return
     }
 
-    audio.pause()
-  }, [isPlaying, currentTrack?.id])
+    if (!audio.paused) {
+      void fadeOutPause()
+    }
+  }, [isPlaying, fadeInPlay, fadeOutPause])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -144,7 +203,7 @@ export function UniversalPlayer() {
     const handleEnded = () => {
       if (repeat === 'one') {
         audio.currentTime = 0
-        void audio.play()
+        void fadeInPlay()
         return
       }
 
@@ -175,7 +234,7 @@ export function UniversalPlayer() {
       audio.removeEventListener('play', handlePlay)
       audio.removeEventListener('pause', handlePause)
     }
-  }, [next, queue.length, repeat, setPlaybackState])
+  }, [fadeInPlay, next, queue.length, repeat, setPlaybackState])
 
   useEffect(() => {
     const audio = audioRef.current
