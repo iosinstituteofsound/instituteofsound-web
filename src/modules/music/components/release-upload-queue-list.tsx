@@ -10,8 +10,11 @@ import {
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { FileAudio, GripVertical, RotateCcw, X } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { getArtistProfile } from '@/modules/music/api/music.api'
 import type { useAudioUploadQueue } from '@/modules/music/hooks/use-audio-upload-queue'
 import { ProcessingStatus } from '@/modules/music/components/processing-status'
+import { formatArtistTrackTitle } from '@/modules/music/lib/track-title-format'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
 import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/cn'
@@ -37,11 +40,13 @@ function SortableQueueItem({
   index,
   queue,
   reorderEnabled,
+  artistName,
 }: {
   item: QueuedUpload
   index: number
   queue: UploadQueue
   reorderEnabled: boolean
+  artistName: string
 }) {
   const draggable = reorderEnabled && canReorderItem(item)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -106,12 +111,20 @@ function SortableQueueItem({
 
           {item.status === 'pending' ? (
             <div className="rbl-field">
-              <span className="rbl-field__label">Track title</span>
+              <label htmlFor={`song-name-${item.id}`}>Song name</label>
               <Input
-                placeholder="Track title"
+                id={`song-name-${item.id}`}
+                placeholder="e.g. Chal"
                 value={item.title}
                 onChange={(e) => queue.updateTitle(item.id, e.target.value)}
               />
+              {item.title.trim() ? (
+                <p className="rbl-field__hint">
+                  Publishes as {formatArtistTrackTitle(artistName, item.title)}
+                </p>
+              ) : (
+                <p className="rbl-field__hint">Artist name is added automatically on publish.</p>
+              )}
             </div>
           ) : null}
 
@@ -144,6 +157,11 @@ function SortableQueueItem({
 export function ReleaseUploadQueueList({ queue }: ReleaseUploadQueueListProps) {
   const reorderEnabled = queue.queue.length > 1
   const itemIds = queue.queue.map((item) => item.id)
+  const { data: profile } = useQuery({
+    queryKey: ['artist-profile'],
+    queryFn: getArtistProfile,
+  })
+  const artistName = profile?.displayName ?? 'Artist'
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -161,7 +179,14 @@ export function ReleaseUploadQueueList({ queue }: ReleaseUploadQueueListProps) {
       <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
         <div className="rbl-queue">
           {queue.queue.map((item, index) => (
-            <SortableQueueItem key={item.id} item={item} index={index} queue={queue} reorderEnabled={reorderEnabled} />
+            <SortableQueueItem
+              key={item.id}
+              item={item}
+              index={index}
+              queue={queue}
+              reorderEnabled={reorderEnabled}
+              artistName={artistName}
+            />
           ))}
         </div>
       </SortableContext>

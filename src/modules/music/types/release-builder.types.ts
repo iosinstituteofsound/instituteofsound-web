@@ -6,6 +6,7 @@ export interface QueuedUpload {
   id: string
   file: File
   title: string
+  /** Song name only — formatted as "Artist - Song" on publish. */
   jobId?: string
   trackId?: string
   status: QueueItemStatus

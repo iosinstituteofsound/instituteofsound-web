@@ -105,7 +105,7 @@ export function AudioUploadWizard({ onComplete }: AudioUploadWizardProps) {
         />
       </div>
 
-      <Input placeholder="Track title" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <Input placeholder="Song name" value={title} onChange={(e) => setTitle(e.target.value)} />
 
       {uploadProgress > 0 && uploadProgress < 100 ? (
         <p className="text-sm text-muted-foreground">Uploading: {uploadProgress}%</p>

@@ -114,7 +114,7 @@ export function ReleaseBuilderWizard() {
     if (!uploadQueue.hasReadyTracks) errors.push('Upload at least one track')
     if (!releaseTitle.trim()) errors.push('Release title is required')
     if (!genre.trim()) errors.push('Primary genre is required')
-    if (readyTracks.some((track) => !track.title.trim())) errors.push('Each track needs a title')
+    if (readyTracks.some((track) => !track.title.trim())) errors.push('Each track needs a song name')
     if (!releaseDate) errors.push('Release date is required')
     return errors
   }, [uploadQueue.hasReadyTracks, releaseTitle, genre, releaseDate, readyTracks])
@@ -145,8 +145,8 @@ export function ReleaseBuilderWizard() {
 
       for (const item of readyTracks) {
         if (!item.trackId) continue
-        const trackTitle = item.title.trim() || titleFromFilename(item.file.name)
-        await updateArtistTrack(item.trackId, { title: trackTitle })
+        const songName = item.title.trim() || titleFromFilename(item.file.name)
+        await updateArtistTrack(item.trackId, { title: songName })
       }
 
       return createRelease({

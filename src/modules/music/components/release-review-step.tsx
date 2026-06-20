@@ -2,6 +2,7 @@ import { AlertTriangle, Disc3, Lock, Music2, Rocket } from 'lucide-react'
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getArtistProfile, listArtistTracks } from '@/modules/music/api/music.api'
+import { formatArtistTrackTitle } from '@/modules/music/lib/track-title-format'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
 import { formatDuration } from '@/modules/music/types/release-builder.types'
 
@@ -71,6 +72,7 @@ export function ReleaseReviewStep({
   const readyTracks = queue.filter((item) => item.status === 'ready')
   const canPublish = validationErrors.length === 0 && readyTracks.length > 0
   const combinedGenre = [genre.trim(), secondaryGenre.trim()].filter(Boolean).join(' / ')
+  const artistName = profile?.displayName ?? 'Artist'
 
   const trackDurations = useMemo(() => {
     const map: Record<string, number | undefined> = {}
@@ -178,8 +180,14 @@ export function ReleaseReviewStep({
                   <span className="rbl-track-row__num">{String(index + 1).padStart(2, '0')}</span>
                   <Music2 className="rbl-text-accent size-4" />
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium">{track.title.trim() || 'Untitled track'}</p>
-                    <p className="rbl-track-card__meta">{track.file.name}</p>
+                    <p className="font-medium">
+                      {track.title.trim()
+                        ? formatArtistTrackTitle(artistName, track.title)
+                        : 'Untitled track'}
+                    </p>
+                    <p className="rbl-track-card__meta">
+                      Song: {track.title.trim() || '—'} · {track.file.name}
+                    </p>
                   </div>
                   {trackDurations[track.id] ? (
                     <span className="rbl-track-card__duration">{formatDuration(trackDurations[track.id]!)}</span>

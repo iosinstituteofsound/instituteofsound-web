@@ -10,6 +10,7 @@ import {
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Clock3, FileAudio, GripVertical } from 'lucide-react'
+import { formatArtistTrackTitle } from '@/modules/music/lib/track-title-format'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
 import { formatDuration } from '@/modules/music/types/release-builder.types'
 import { Input } from '@/shared/components/ui/input'
@@ -18,6 +19,7 @@ import { cn } from '@/shared/lib/cn'
 interface ReleaseTrackDetailsListProps {
   tracks: QueuedUpload[]
   trackDurations: Record<string, number | undefined>
+  artistName: string
   onTrackTitleChange: (id: string, title: string) => void
   onReorder: (activeId: string, overId: string) => void
 }
@@ -28,12 +30,14 @@ function SortableTrackCard({
   durationSec,
   onTrackTitleChange,
   reorderEnabled,
+  artistName,
 }: {
   track: QueuedUpload
   index: number
   durationSec?: number
   onTrackTitleChange: (id: string, title: string) => void
   reorderEnabled: boolean
+  artistName: string
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: track.id,
@@ -79,13 +83,20 @@ function SortableTrackCard({
 
       <div className="rbl-track-card__body">
         <div className="rbl-field">
-          <label htmlFor={`track-title-${track.id}`}>Track title</label>
+          <label htmlFor={`song-name-${track.id}`}>Song name</label>
           <Input
-            id={`track-title-${track.id}`}
-            placeholder="Enter track title"
+            id={`song-name-${track.id}`}
+            placeholder="e.g. Chal"
             value={track.title}
             onChange={(e) => onTrackTitleChange(track.id, e.target.value)}
           />
+          {track.title.trim() ? (
+            <p className="rbl-field__hint">
+              Publishes as {formatArtistTrackTitle(artistName, track.title)}
+            </p>
+          ) : (
+            <p className="rbl-field__hint">Only the song name — your artist name is added automatically.</p>
+          )}
         </div>
       </div>
     </article>
@@ -95,6 +106,7 @@ function SortableTrackCard({
 export function ReleaseTrackDetailsList({
   tracks,
   trackDurations,
+  artistName,
   onTrackTitleChange,
   onReorder,
 }: ReleaseTrackDetailsListProps) {
@@ -124,6 +136,7 @@ export function ReleaseTrackDetailsList({
               durationSec={trackDurations[track.id]}
               onTrackTitleChange={onTrackTitleChange}
               reorderEnabled={reorderEnabled}
+              artistName={artistName}
             />
           ))}
         </div>

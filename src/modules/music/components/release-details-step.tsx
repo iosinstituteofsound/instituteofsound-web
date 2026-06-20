@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { getArtistProfile, listArtistTracks } from '@/modules/music/api/music.api'
 import { ReleaseTrackDetailsList } from '@/modules/music/components/release-track-details-list'
+import { formatArtistTrackTitle } from '@/modules/music/lib/track-title-format'
 import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
 import { Input } from '@/shared/components/ui/input'
@@ -103,8 +104,8 @@ export function ReleaseDetailsStep({
           <p className="rbl-section-head__kicker">Phase 02 · Metadata matrix</p>
           <h2 className="rbl-section-head__title">Release &amp; Track Details</h2>
           <p className="rbl-section-head__desc">
-            Fill in your {isMultiTrack ? 'album or EP' : 'release'} information first, then set each track title
-            individually before scheduling the launch.
+            Fill in your {isMultiTrack ? 'album or EP' : 'release'} information first, then enter each song name
+            individually. Tracks publish as Artist Name - Song Name across the site.
           </p>
         </header>
 
@@ -222,7 +223,8 @@ export function ReleaseDetailsStep({
           <div className="rbl-panel__header">
             <h3 className="rbl-panel__title">Track details</h3>
             <p className="rbl-panel__meta">
-              {readyTracks.length} track{readyTracks.length === 1 ? '' : 's'}
+              {readyTracks.length} track{readyTracks.length === 1 ? '' : 's'} · song names only · publishes as{' '}
+              {profile?.displayName ?? 'Artist'} - Song Name
               {readyTracks.length > 1 ? ' · drag to reorder' : ''}
             </p>
           </div>
@@ -233,6 +235,7 @@ export function ReleaseDetailsStep({
               <ReleaseTrackDetailsList
                 tracks={readyTracks}
                 trackDurations={trackDurations}
+                artistName={profile?.displayName ?? 'Artist'}
                 onTrackTitleChange={onTrackTitleChange}
                 onReorder={onTrackReorder}
               />
@@ -264,7 +267,11 @@ export function ReleaseDetailsStep({
               {readyTracks.map((track, index) => (
                 <li key={track.id}>
                   <span>{String(index + 1).padStart(2, '0')}</span>
-                  <span>{track.title.trim() || 'Untitled track'}</span>
+                  <span>
+                    {track.title.trim()
+                      ? formatArtistTrackTitle(profile?.displayName ?? 'Artist', track.title)
+                      : 'Untitled track'}
+                  </span>
                 </li>
               ))}
             </ol>
