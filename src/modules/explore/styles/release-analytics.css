@@ -1,0 +1,289 @@
+.ios-release-analytics {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--background) 92%, var(--foreground) 8%);
+}
+
+.ios-release-analytics__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ios-release-analytics__like {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 20%, transparent);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+}
+
+.ios-release-analytics__like.is-active {
+  color: var(--destructive, #ef4444);
+  border-color: currentColor;
+}
+
+.ios-release-analytics__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.ios-release-analytics__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--background) 88%, var(--foreground) 12%);
+}
+
+.ios-release-analytics__stat-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.ios-release-analytics__stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ios-release-analytics__section {
+  margin-top: 1rem;
+}
+
+.ios-release-analytics__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ios-release-analytics__section-head h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.ios-release-analytics__range button {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+}
+
+.ios-release-analytics__range button.is-active {
+  border-color: currentColor;
+}
+
+.ios-release-analytics__chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  min-height: 6rem;
+  padding: 0.5rem 0;
+}
+
+.ios-release-analytics__chart-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  height: 6rem;
+  justify-content: flex-end;
+}
+
+.ios-release-analytics__chart-bar {
+  width: 100%;
+  max-width: 1.25rem;
+  border-radius: 0.25rem 0.25rem 0 0;
+  background: color-mix(in srgb, var(--primary, #e11) 75%, white);
+}
+
+.ios-release-analytics__chart-label {
+  font-size: 0.625rem;
+  opacity: 0.6;
+}
+
+.ios-release-analytics__split {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .ios-release-analytics__split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.ios-release-analytics__listeners {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ios-release-listener-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  text-decoration: none;
+  color: inherit;
+}
+
+.ios-release-listener-card:hover {
+  border-color: color-mix(in srgb, var(--foreground) 25%, transparent);
+}
+
+.ios-release-listener-card__avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--foreground) 12%, transparent);
+  font-weight: 700;
+}
+
+.ios-release-listener-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ios-release-listener-card__name {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.ios-release-listener-card__username,
+.ios-release-listener-card__stats {
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.ios-release-listener-card__rank {
+  font-size: 0.75rem;
+  opacity: 0.55;
+}
+
+.ios-release-analytics__locations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ios-release-analytics__loc-head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  justify-content: space-between;
+}
+
+.ios-release-analytics__loc-bar {
+  height: 0.25rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+  overflow: hidden;
+}
+
+.ios-release-analytics__loc-bar span {
+  display: block;
+  height: 100%;
+  background: color-mix(in srgb, var(--primary, #e11) 70%, white);
+}
+
+.ios-release-analytics__more,
+.ios-release-analytics__likes-link {
+  font-size: 0.8125rem;
+  text-decoration: underline;
+}
+
+.ios-release-analytics__empty {
+  margin: 0;
+  font-size: 0.8125rem;
+  opacity: 0.65;
+}
+
+.ios-release-analytics__likes-row {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.ios-release-directory {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.ios-release-directory__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.ios-release-directory__toolbar input,
+.ios-release-directory__toolbar select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 15%, transparent);
+  background: transparent;
+}
+
+.ios-release-directory__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ios-release-directory__pager {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.ios-artist-analytics table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.ios-artist-analytics th,
+.ios-artist-analytics td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  text-align: left;
+}
+
+.ios-artist-analytics__overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 1.5rem;
+}

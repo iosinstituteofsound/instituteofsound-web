@@ -8,6 +8,9 @@ export interface PlayerTrack {
   sourceId?: string
   spotifyUrl?: string
   youtubeUrl?: string
+  trackId?: string
+  releaseId?: string
+  artistProfileId?: string
 }
 
 export type RepeatMode = 'off' | 'all' | 'one'

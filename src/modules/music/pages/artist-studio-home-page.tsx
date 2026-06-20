@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Disc3, ListMusic, Upload, User } from 'lucide-react'
+import { Disc3, BarChart3, ListMusic, Upload, User } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { listArtistReleases, listArtistTracks } from '@/modules/music/api/music.api'
 import { Page, PageHeader, PageTitle, PageSection } from '@/shared/components/layout/page-shell'
@@ -39,6 +39,12 @@ export function ArtistStudioHomePage() {
             <Link to="/artist/playlists">
               <ListMusic className="size-6" />
               Playlists
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
+            <Link to="/artist/analytics">
+              <BarChart3 className="size-6" />
+              Analytics
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">

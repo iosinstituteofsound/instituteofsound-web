@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { ArtistStudioHomePage } from '@/modules/music/pages/artist-studio-home-page'
+import { ArtistAnalyticsPage } from '@/modules/music/pages/artist-analytics-page'
 import { MusicUploadPage } from '@/modules/music/pages/music-upload-page'
 import { MusicReleasesPage } from '@/modules/music/pages/music-releases-page'
 import { MusicReleaseEditPage } from '@/modules/music/pages/music-release-edit-page'
@@ -17,6 +18,7 @@ export function ArtistDashboardPage() {
   if (/\/artist\/releases\/[^/]+\/edit\/?$/.test(path)) return <MusicReleaseEditPage />
   if (path.includes('/artist/releases')) return <MusicReleasesPage />
   if (path.includes('/artist/playlists')) return <MusicPlaylistsPage />
+  if (path.includes('/artist/analytics')) return <ArtistAnalyticsPage />
   if (path.includes('/artist/profile')) return <ArtistProfileEditorPage />
 
   return <ArtistStudioHomePage />

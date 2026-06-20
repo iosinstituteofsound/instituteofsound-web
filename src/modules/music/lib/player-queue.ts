@@ -18,11 +18,14 @@ export function tracksToPlayerQueue(
     .filter((t) => t.audioUrl || t.streamUrl)
     .map((t) => ({
       id: t.id ?? t.trackId ?? `${t.title}-${t.audioUrl ?? t.streamUrl}`,
+      trackId: t.trackId ?? t.id,
       title: t.title,
       artist: t.artistName ?? t.artist ?? 'Unknown',
       audioUrl: (t.audioUrl ?? t.streamUrl)!,
       durationSec: t.durationSec,
       artworkUrl,
+      releaseId: (t as { releaseId?: string }).releaseId,
+      artistProfileId: (t as { artistProfileId?: string }).artistProfileId,
     }))
 }
 
@@ -31,24 +34,32 @@ export function releaseToPlayerQueue(release: ReleaseDetailDto): PlayerTrack[] {
     return tracksToPlayerQueue(
       release.tracks.map((t) => ({
         id: t.id,
+        trackId: t.id,
         title: t.title,
         artist: release.artistName,
         audioUrl: t.audioUrl,
         durationSec: t.durationSec,
+        releaseId: release.id,
+        artistProfileId: release.artistProfileId,
       })),
       release.coverUrl,
     )
   }
   if (release.streamUrl) {
+    const primaryTrack = release.tracks[0]
     const durationSec = release.tracks.reduce((sum, track) => sum + (track.durationSec ?? 0), 0)
     return [
       {
-        id: release.id,
-        title: release.title,
+        id: primaryTrack?.id ?? release.id,
+        trackId: primaryTrack?.id,
+        releaseId: release.id,
+        artistProfileId: release.artistProfileId,
+        title: primaryTrack?.title ?? release.title,
         artist: release.artistName ?? 'Unknown',
-        audioUrl: release.streamUrl,
+        audioUrl: primaryTrack?.audioUrl ?? release.streamUrl,
         artworkUrl: release.coverUrl,
-        durationSec: durationSec > 0 ? durationSec : undefined,
+        durationSec:
+          primaryTrack?.durationSec ?? (durationSec > 0 ? durationSec : undefined),
       },
     ]
   }

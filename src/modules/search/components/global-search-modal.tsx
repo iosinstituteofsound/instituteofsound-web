@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, X } from 'lucide-react'
+import { Disc3, ListMusic, Music2, Search, X } from 'lucide-react'
 import { useGlobalSearch } from '@/modules/search/hooks/use-global-search'
-import type { DiscoverableRoleDto, SearchProfileDto } from '@/modules/search/api/search.api'
+import type {
+  DiscoverableRoleDto,
+  MusicSearchPlaylistDto,
+  MusicSearchReleaseDto,
+  MusicSearchTrackDto,
+  SearchProfileDto,
+} from '@/modules/search/api/search.api'
 import { Dialog, DialogContent } from '@/shared/components/ui/dialog'
 import {
   ROLE_DISCOVER_CATEGORIES,
@@ -163,12 +169,95 @@ function ProfileCard({ profile, onNavigate }: { profile: SearchProfileDto; onNav
   )
 }
 
+function MusicArt({ coverUrl, fallback }: { coverUrl?: string; fallback: React.ReactNode }) {
+  if (coverUrl) {
+    return (
+      <img
+        src={coverUrl}
+        alt=""
+        className="global-search-role-thumb h-10 w-10 rounded-md object-cover"
+      />
+    )
+  }
+  return <span className="global-search-role-thumb rounded-md">{fallback}</span>
+}
+
+function ReleaseRow({ item, onNavigate }: { item: MusicSearchReleaseDto; onNavigate: () => void }) {
+  return (
+    <Link to={item.href} onClick={onNavigate} className="global-search-role-row w-full text-left">
+      <MusicArt coverUrl={item.coverUrl} fallback={<Disc3 size={16} aria-hidden />} />
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-medium">{item.title}</span>
+        <span className="block truncate text-xs text-muted-foreground">
+          Release{item.artistName ? ` · ${item.artistName}` : ''}
+          {item.type ? ` · ${item.type}` : ''}
+        </span>
+      </span>
+    </Link>
+  )
+}
+
+function TrackRow({ item, onNavigate }: { item: MusicSearchTrackDto; onNavigate: () => void }) {
+  return (
+    <Link to={item.href} onClick={onNavigate} className="global-search-role-row w-full text-left">
+      <MusicArt coverUrl={undefined} fallback={<Music2 size={16} aria-hidden />} />
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-medium">{item.title}</span>
+        <span className="block truncate text-xs text-muted-foreground">
+          Track{item.artistName ? ` · ${item.artistName}` : ''}
+          {item.releaseTitle ? ` · ${item.releaseTitle}` : ''}
+        </span>
+      </span>
+    </Link>
+  )
+}
+
+function PlaylistRow({ item, onNavigate }: { item: MusicSearchPlaylistDto; onNavigate: () => void }) {
+  return (
+    <Link to={item.href} onClick={onNavigate} className="global-search-role-row w-full text-left">
+      <MusicArt coverUrl={item.coverUrl} fallback={<ListMusic size={16} aria-hidden />} />
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-medium">{item.title}</span>
+        <span className="block truncate text-xs text-muted-foreground">Playlist</span>
+      </span>
+    </Link>
+  )
+}
+
+function MusicCard({
+  title,
+  subtitle,
+  coverUrl,
+  href,
+  onNavigate,
+  fallback,
+}: {
+  title: string
+  subtitle: string
+  coverUrl?: string
+  href: string
+  onNavigate: () => void
+  fallback: React.ReactNode
+}) {
+  return (
+    <Link to={href} onClick={onNavigate} className="global-search-category-card">
+      {coverUrl ? (
+        <img src={coverUrl} alt="" className="global-search-category-avatar h-28 w-28 rounded-md object-cover" />
+      ) : (
+        <span className="global-search-category-avatar rounded-md">{fallback}</span>
+      )}
+      <span className="block w-full truncate text-sm font-semibold">{title}</span>
+      <span className="block text-xs text-muted-foreground">{subtitle}</span>
+    </Link>
+  )
+}
+
 export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<SearchCategoryFilter>('all')
 
-  const { roles: roleData, users: userData, isLoading, isFetching } = useGlobalSearch(
+  const { roles: roleData, users: userData, music: musicData, isLoading, isFetching } = useGlobalSearch(
     { q: query, category, limit: 32 },
     open,
   )
@@ -185,6 +274,9 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
 
   const roles = roleData?.roles ?? []
   const profiles = userData?.users ?? []
+  const releases = musicData?.releases ?? []
+  const tracks = musicData?.tracks ?? []
+  const playlists = musicData?.playlists ?? []
   const hasQuery = Boolean(query.trim())
   const topResult = useMemo(
     () => pickTopResult(profiles, roles, query),
@@ -212,12 +304,20 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
       items.push({ id: 'profiles', label: 'Profiles' })
     }
 
+    if (releases.length > 0 || tracks.length > 0 || (hasQuery && category === 'releases')) {
+      items.push({ id: 'releases', label: 'Releases & tracks' })
+    }
+
+    if (playlists.length > 0 || (hasQuery && category === 'playlists')) {
+      items.push({ id: 'playlists', label: 'Playlists' })
+    }
+
     for (const item of visibleRoleCategories) {
       items.push({ id: item.id, label: item.label })
     }
 
     return items
-  }, [roleData?.categories, profiles.length, hasQuery, category])
+  }, [roleData?.categories, profiles.length, releases.length, tracks.length, playlists.length, hasQuery, category])
 
   const groupedByCategory = useMemo(() => {
     if (category !== 'all') return []
@@ -238,8 +338,38 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
 
   const showTopGrid = hasQuery && category === 'all' && topResult !== null
   const busy = isLoading || isFetching
-  const hasResults = roles.length > 0 || profiles.length > 0
+  const hasMusic = releases.length > 0 || tracks.length > 0 || playlists.length > 0
+  const hasResults = roles.length > 0 || profiles.length > 0 || hasMusic
   const closeModal = () => onOpenChange(false)
+
+  const musicSections = (
+    <>
+      {(category === 'all' || category === 'releases') && (releases.length > 0 || tracks.length > 0) ? (
+        <section className="global-search-section">
+          <h3 className="global-search-section-title">Releases & tracks</h3>
+          <div className="global-search-role-list">
+            {releases.map((item) => (
+              <ReleaseRow key={`release-${item.id}`} item={item} onNavigate={closeModal} />
+            ))}
+            {tracks.map((item) => (
+              <TrackRow key={`track-${item.id}`} item={item} onNavigate={closeModal} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {(category === 'all' || category === 'playlists') && playlists.length > 0 ? (
+        <section className="global-search-section">
+          <h3 className="global-search-section-title">Playlists</h3>
+          <div className="global-search-role-list">
+            {playlists.map((item) => (
+              <PlaylistRow key={item.id} item={item} onNavigate={closeModal} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+    </>
+  )
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -258,7 +388,7 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
               autoComplete="off"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search artists, tribes, curators, editors and more"
+              placeholder="Search releases, tracks, playlists, people, and more"
               className="global-search-modal-input"
               aria-label="Search"
             />
@@ -295,7 +425,7 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
 
         <div className="global-search-modal-body">
           {!hasQuery ? (
-            <p className="global-search-empty text-sm">Type to search people, roles, and more.</p>
+            <p className="global-search-empty text-sm">Type to search releases, playlists, people, and more.</p>
           ) : busy && !hasResults ? (
             <p className="global-search-empty text-sm">Searching…</p>
           ) : !hasResults ? (
@@ -309,6 +439,62 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
                 ))}
               </div>
             </section>
+          ) : category === 'releases' ? (
+            <>
+              {releases.length > 0 || tracks.length > 0 ? (
+                <section>
+                  <h3 className="global-search-section-title">Releases & tracks</h3>
+                  <div className="global-search-category-row">
+                    {releases.map((item) => (
+                      <MusicCard
+                        key={`release-${item.id}`}
+                        title={item.title}
+                        subtitle={`Release${item.artistName ? ` · ${item.artistName}` : ''}`}
+                        coverUrl={item.coverUrl}
+                        href={item.href}
+                        onNavigate={closeModal}
+                        fallback={<Disc3 size={28} aria-hidden />}
+                      />
+                    ))}
+                    {tracks.map((item) => (
+                      <MusicCard
+                        key={`track-${item.id}`}
+                        title={item.title}
+                        subtitle={`Track${item.releaseTitle ? ` · ${item.releaseTitle}` : ''}`}
+                        href={item.href}
+                        onNavigate={closeModal}
+                        fallback={<Music2 size={28} aria-hidden />}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ) : (
+                <p className="global-search-empty text-sm">No releases or tracks found.</p>
+              )}
+            </>
+          ) : category === 'playlists' ? (
+            <>
+              {playlists.length > 0 ? (
+                <section>
+                  <h3 className="global-search-section-title">Playlists</h3>
+                  <div className="global-search-category-row">
+                    {playlists.map((item) => (
+                      <MusicCard
+                        key={item.id}
+                        title={item.title}
+                        subtitle="Playlist"
+                        coverUrl={item.coverUrl}
+                        href={item.href}
+                        onNavigate={closeModal}
+                        fallback={<ListMusic size={28} aria-hidden />}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ) : (
+                <p className="global-search-empty text-sm">No playlists found.</p>
+              )}
+            </>
           ) : showTopGrid ? (
             <div className="global-search-grid-top">
               <section>
@@ -397,6 +583,31 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
                     </div>
                   </div>
                 ) : null}
+
+                {releases.length > 0 || tracks.length > 0 ? (
+                  <div>
+                    <h3 className="mb-2 text-sm font-semibold text-muted-foreground">Releases & tracks</h3>
+                    <div className="global-search-role-list">
+                      {releases.slice(0, 5).map((item) => (
+                        <ReleaseRow key={`release-${item.id}`} item={item} onNavigate={closeModal} />
+                      ))}
+                      {tracks.slice(0, 5).map((item) => (
+                        <TrackRow key={`track-${item.id}`} item={item} onNavigate={closeModal} />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {playlists.length > 0 ? (
+                  <div>
+                    <h3 className="mb-2 text-sm font-semibold text-muted-foreground">Playlists</h3>
+                    <div className="global-search-role-list">
+                      {playlists.slice(0, 5).map((item) => (
+                        <PlaylistRow key={item.id} item={item} onNavigate={closeModal} />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </section>
             </div>
           ) : category !== 'all' ? (
@@ -433,6 +644,8 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
                   </div>
                 </section>
               ))}
+
+              {musicSections}
             </>
           )}
         </div>

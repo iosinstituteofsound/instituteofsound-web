@@ -107,6 +107,21 @@ const ReleasesPage = lazy(() =>
 const ReleasePage = lazy(() =>
   import('@/modules/explore/pages/release-page').then((m) => ({ default: m.ReleasePage })),
 )
+const ReleaseListenersPage = lazy(() =>
+  import('@/modules/explore/pages/release-listeners-page').then((m) => ({
+    default: m.ReleaseListenersPage,
+  })),
+)
+const ReleaseLikesPage = lazy(() =>
+  import('@/modules/explore/pages/release-likes-page').then((m) => ({
+    default: m.ReleaseLikesPage,
+  })),
+)
+const TrackReleaseRedirectPage = lazy(() =>
+  import('@/modules/explore/pages/track-release-redirect-page').then((m) => ({
+    default: m.TrackReleaseRedirectPage,
+  })),
+)
 const ArticleEditorPage = lazy(() =>
   import('@/modules/editor/pages/article-editor-page').then((m) => ({
     default: m.ArticleEditorPage,
@@ -201,6 +216,36 @@ export const router = createBrowserRouter([
           <ExplorePageGuard>
             <Lazy>
               <ReleasePage />
+            </Lazy>
+          </ExplorePageGuard>
+        ),
+      },
+      {
+        path: 'releases/:id/listeners',
+        element: (
+          <ExplorePageGuard>
+            <Lazy>
+              <ReleaseListenersPage />
+            </Lazy>
+          </ExplorePageGuard>
+        ),
+      },
+      {
+        path: 'releases/:id/likes',
+        element: (
+          <ExplorePageGuard>
+            <Lazy>
+              <ReleaseLikesPage />
+            </Lazy>
+          </ExplorePageGuard>
+        ),
+      },
+      {
+        path: 'tracks/:trackId',
+        element: (
+          <ExplorePageGuard>
+            <Lazy>
+              <TrackReleaseRedirectPage />
             </Lazy>
           </ExplorePageGuard>
         ),
@@ -617,6 +662,16 @@ export const router = createBrowserRouter([
       },
       {
         path: 'artist/profile',
+        element: (
+          <ResourceGuard name="ArtistDashboardPage">
+            <Lazy>
+              <ArtistDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'artist/analytics',
         element: (
           <ResourceGuard name="ArtistDashboardPage">
             <Lazy>

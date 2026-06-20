@@ -77,6 +77,7 @@ export type ReleasesPageFilter = 'all' | 'album' | 'epsingles' | 'hot' | 'new' |
 
 export interface ReleaseDto {
   id: string
+  slug?: string
   artistProfileId?: string
   title: string
   coverUrl?: string

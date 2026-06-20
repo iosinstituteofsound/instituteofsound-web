@@ -19,7 +19,7 @@ export interface DiscoverRoleSearchResult {
 
 export interface DiscoverRoleSearchParams {
   q?: string
-  category?: 'all' | 'profiles' | RoleDiscoverCategoryId
+  category?: 'all' | 'profiles' | 'releases' | 'playlists' | RoleDiscoverCategoryId
   limit?: number
 }
 
@@ -39,6 +39,44 @@ export interface SearchUsersResult {
   total: number
 }
 
+export interface MusicSearchReleaseDto {
+  kind: 'release'
+  id: string
+  title: string
+  artistName?: string
+  coverUrl?: string
+  type?: string
+  href: string
+}
+
+export interface MusicSearchTrackDto {
+  kind: 'track'
+  id: string
+  title: string
+  artistName?: string
+  releaseId: string
+  releaseTitle?: string
+  href: string
+}
+
+export interface MusicSearchPlaylistDto {
+  kind: 'playlist'
+  id: string
+  title: string
+  slug: string
+  coverUrl?: string
+  href: string
+}
+
+export interface MusicSearchResult {
+  releases: MusicSearchReleaseDto[]
+  tracks: MusicSearchTrackDto[]
+  playlists: MusicSearchPlaylistDto[]
+  total: number
+}
+
+export type MusicSearchCategory = 'all' | 'releases' | 'playlists'
+
 export async function searchDiscoverableRoles(params: DiscoverRoleSearchParams = {}) {
   const { category, ...rest } = params
   const roleCategory = category === 'profiles' ? 'all' : category
@@ -54,6 +92,17 @@ export async function searchProfiles(q: string, limit = 24) {
   const { data } = await apiClient.get<ApiSuccessResponse<SearchUsersResult>>(
     `${API_V1}/search/users`,
     { params: { q, limit } },
+  )
+  return data.data
+}
+
+export async function searchMusic(
+  q: string,
+  opts?: { limit?: number; category?: MusicSearchCategory },
+) {
+  const { data } = await apiClient.get<ApiSuccessResponse<MusicSearchResult>>(
+    `${API_V1}/search/music`,
+    { params: { q, limit: opts?.limit, category: opts?.category ?? 'all' } },
   )
   return data.data
 }

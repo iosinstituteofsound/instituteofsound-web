@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Compass, Home, Play } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
+import { ReleaseAnalyticsPanel } from '@/modules/explore/components/release-analytics-panel'
 import { ReleaseAside } from '@/modules/explore/components/release-aside'
 import { ReleaseRelatedRail } from '@/modules/explore/components/release-related-rail'
 import { ReleaseOptionsMenu } from '@/modules/explore/components/release-options-menu'
@@ -31,6 +32,7 @@ import '@/modules/explore/styles/explore.css'
 import '@/modules/explore/styles/explore-mh-chrome.css'
 import '@/modules/explore/styles/release-vinyl-art.css'
 import '@/modules/explore/styles/release-related-rail.css'
+import '@/modules/explore/styles/release-analytics.css'
 import '@/modules/explore/styles/release-page-mh.css'
 
 const SAVED_KEY = 'ios_saved_releases'
@@ -59,7 +61,7 @@ export function ReleasePage() {
   const [saved, setSaved] = useState(false)
 
   const release = useMemo(() => {
-    const fromExplore = explore?.releases.find((item) => item.id === id)
+    const fromExplore = explore?.releases.find((item) => item.id === id || item.slug === id)
     const detailDurationSec = releaseDetail?.tracks.reduce(
       (sum, track) => sum + (track.durationSec ?? 0),
       0,
@@ -150,6 +152,8 @@ export function ReleasePage() {
     if (!release?.streamUrl) return
     playTrack({
       id: release.id,
+      releaseId: release.id,
+      artistProfileId: release.artistProfileId,
       title: release.title,
       artist: release.artistName ?? 'Unknown',
       audioUrl: release.streamUrl,
@@ -250,7 +254,31 @@ export function ReleasePage() {
                 <ReleaseOptionsMenu release={release} artist={artist} />
               </div>
 
-              <ReleasePlayerBar release={release} />
+              <ReleasePlayerBar
+                release={release}
+                playback={
+                  releaseDetail
+                    ? {
+                        trackId: detailTracks[0]?.id,
+                        releaseId: releaseDetail.id,
+                        artistProfileId: releaseDetail.artistProfileId,
+                        audioUrl: detailTracks[0]?.audioUrl ?? releaseDetail.streamUrl ?? release.streamUrl,
+                        durationSec:
+                          detailTracks[0]?.durationSec ??
+                          (release.durationSec && release.durationSec > 0
+                            ? release.durationSec
+                            : undefined),
+                      }
+                    : release.streamUrl
+                      ? {
+                          releaseId: release.id,
+                          artistProfileId: release.artistProfileId,
+                          audioUrl: release.streamUrl,
+                          durationSec: release.durationSec,
+                        }
+                      : undefined
+                }
+              />
 
               {detailTracks.length > 0 ? (
                 <ol className="mt-4 divide-y rounded-lg border">
@@ -334,6 +362,13 @@ export function ReleasePage() {
               </div>
             </div>
           </section>
+
+          {releaseDetail?.status === 'published' ? (
+            <ReleaseAnalyticsPanel
+              releaseId={releaseDetail.id}
+              primaryTrackId={detailTracks[0]?.id}
+            />
+          ) : null}
 
           <ReleaseRelatedRail
             id="explore-release-more"

@@ -1,4 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTrackListenReporter } from '@/modules/player/hooks/use-track-listen-reporter'
+import { getReleaseAnalytics, toggleTrackLike } from '@/modules/music/api/music.api'
+import { tokenStorage } from '@/shared/services/api/token-storage'
 import {
   Heart,
   ListMusic,
@@ -90,6 +94,38 @@ export function UniversalPlayer() {
   const close = usePlayerStore((s) => s.close)
   const setExpanded = usePlayerStore((s) => s.setExpanded)
   const setPlaybackState = usePlayerStore((s) => s.setPlaybackState)
+
+  const getCurrentTime = useCallback(
+    () => audioRef.current?.currentTime ?? usePlayerStore.getState().currentTime,
+    [],
+  )
+
+  const { reportCompleted, reportPause } = useTrackListenReporter(
+    currentTrack,
+    isPlaying,
+    getCurrentTime,
+  )
+
+  const queryClient = useQueryClient()
+  const releaseId = currentTrack?.releaseId
+  const trackId =
+    currentTrack?.trackId ??
+    (currentTrack?.id && /^[a-f0-9]{24}$/i.test(currentTrack.id) ? currentTrack.id : undefined)
+  const canLike = Boolean(releaseId && trackId && tokenStorage.getAccessToken())
+
+  const { data: releaseAnalytics } = useQuery({
+    queryKey: ['release-analytics', releaseId],
+    queryFn: () => getReleaseAnalytics(releaseId!),
+    enabled: Boolean(releaseId && trackId && canLike),
+    staleTime: 20_000,
+  })
+
+  const likeMutation = useMutation({
+    mutationFn: () => toggleTrackLike(trackId!),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['release-analytics', releaseId] })
+    },
+  })
 
   const visible = Boolean(currentTrack)
   const effectiveDuration =
@@ -201,6 +237,7 @@ export function UniversalPlayer() {
     const handleDurationChange = () => syncDuration()
     const handleLoadedData = () => syncDuration()
     const handleEnded = () => {
+      reportCompleted()
       if (repeat === 'one') {
         audio.currentTime = 0
         void fadeInPlay()
@@ -215,7 +252,10 @@ export function UniversalPlayer() {
       setPlaybackState({ isPlaying: false, currentTime: 0 })
     }
     const handlePlay = () => setPlaybackState({ isPlaying: true })
-    const handlePause = () => setPlaybackState({ isPlaying: false })
+    const handlePause = () => {
+      setPlaybackState({ isPlaying: false })
+      reportPause(audio.currentTime)
+    }
 
     audio.addEventListener('timeupdate', handleTimeUpdate)
     audio.addEventListener('loadedmetadata', handleLoadedMetadata)
@@ -234,7 +274,7 @@ export function UniversalPlayer() {
       audio.removeEventListener('play', handlePlay)
       audio.removeEventListener('pause', handlePause)
     }
-  }, [fadeInPlay, next, queue.length, repeat, setPlaybackState])
+  }, [fadeInPlay, next, queue.length, repeat, reportCompleted, reportPause, setPlaybackState])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -351,11 +391,27 @@ export function UniversalPlayer() {
             </div>
 
             <PlayerControlButton
-              label="Save to library"
-              disabled
-              className="ios-universal-player__control--like"
+              label={
+                !canLike
+                  ? 'Like (sign in to a release track)'
+                  : releaseAnalytics?.userLiked
+                    ? 'Unlike track'
+                    : 'Like track'
+              }
+              active={Boolean(releaseAnalytics?.userLiked)}
+              disabled={!canLike || likeMutation.isPending}
+              className={cn(
+                'ios-universal-player__control--like',
+                releaseAnalytics?.userLiked && 'ios-universal-player__control--active',
+              )}
+              onClick={() => {
+                if (!canLike) return
+                likeMutation.mutate()
+              }}
             >
-              <Heart className="h-4 w-4" />
+              <Heart
+                className={cn('h-4 w-4', releaseAnalytics?.userLiked && 'fill-current text-red-400')}
+              />
             </PlayerControlButton>
           </div>
 

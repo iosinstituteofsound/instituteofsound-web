@@ -8,6 +8,14 @@ import type {
   ReleaseDetailDto,
   TrackDto,
 } from '@/modules/music/types/music.types'
+import type {
+  ArtistAnalyticsDashboardDto,
+  AnalyticsTrendPointDto,
+  LikeToggleResultDto,
+  PaginatedLikersDto,
+  PaginatedListenersDto,
+  ReleaseAnalyticsSummaryDto,
+} from '@/modules/music/types/analytics.types'
 
 export async function createAudioUploadJob() {
   const { data } = await apiClient.post<ApiSuccessResponse<AudioUploadJobDto>>(`${API_V1}/music/uploads`)
@@ -240,4 +248,69 @@ export async function getPlaylistDetail(slug: string) {
 
 export async function recordTrackPlay(trackId: string) {
   await apiClient.post(`${API_V1}/music/tracks/${trackId}/play`)
+}
+
+export async function getReleaseAnalytics(releaseId: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<ReleaseAnalyticsSummaryDto>>(
+    `${API_V1}/music/releases/${releaseId}/analytics`,
+  )
+  return data.data
+}
+
+export async function getReleaseAnalyticsTrends(releaseId: string, range: '7d' | '30d' = '7d') {
+  const { data } = await apiClient.get<ApiSuccessResponse<AnalyticsTrendPointDto[]>>(
+    `${API_V1}/music/releases/${releaseId}/analytics/trends`,
+    { params: { range } },
+  )
+  return data.data
+}
+
+export async function getReleaseListeners(
+  releaseId: string,
+  params?: { page?: number; pageSize?: number; sort?: string; q?: string },
+) {
+  const { data } = await apiClient.get<ApiSuccessResponse<PaginatedListenersDto>>(
+    `${API_V1}/music/releases/${releaseId}/listeners`,
+    { params },
+  )
+  return data.data
+}
+
+export async function getReleaseLikes(
+  releaseId: string,
+  params?: { page?: number; pageSize?: number; sort?: string; q?: string },
+) {
+  const { data } = await apiClient.get<ApiSuccessResponse<PaginatedLikersDto>>(
+    `${API_V1}/music/releases/${releaseId}/likes`,
+    { params },
+  )
+  return data.data
+}
+
+export async function toggleTrackLike(trackId: string) {
+  const { data } = await apiClient.post<ApiSuccessResponse<LikeToggleResultDto>>(
+    `${API_V1}/music/tracks/${trackId}/like`,
+  )
+  return data.data
+}
+
+export async function getArtistAnalyticsDashboard() {
+  const { data } = await apiClient.get<ApiSuccessResponse<ArtistAnalyticsDashboardDto>>(
+    `${API_V1}/artist/analytics`,
+  )
+  return data.data
+}
+
+export async function downloadArtistAnalyticsCsv() {
+  const { data } = await apiClient.get<string>(`${API_V1}/artist/analytics/export`, {
+    responseType: 'text',
+  })
+  return data
+}
+
+export async function getTrackReleaseRedirect(trackId: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<{ releaseId: string }>>(
+    `${API_V1}/music/tracks/${trackId}`,
+  )
+  return data.data
 }

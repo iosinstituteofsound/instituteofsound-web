@@ -11,7 +11,7 @@ export const ROLE_DISCOVER_CATEGORIES = [
 
 export type RoleDiscoverCategoryId = (typeof ROLE_DISCOVER_CATEGORIES)[number]['id']
 
-export type SearchCategoryFilter = 'all' | 'profiles' | RoleDiscoverCategoryId
+export type SearchCategoryFilter = 'all' | 'profiles' | 'releases' | 'playlists' | RoleDiscoverCategoryId
 
 export function getRoleDiscoverCategoryLabel(id: string): string {
   return ROLE_DISCOVER_CATEGORIES.find((category) => category.id === id)?.label ?? 'Other'

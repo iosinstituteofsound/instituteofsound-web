@@ -5,11 +5,20 @@ import { releaseDurationSec } from '@/modules/explore/lib/release-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { cn } from '@/shared/lib/cn'
 
-interface ReleasePlayerBarProps {
-  release: ReleaseDto
+export type ReleasePlaybackMeta = {
+  trackId?: string
+  releaseId: string
+  artistProfileId?: string
+  audioUrl?: string
+  durationSec?: number
 }
 
-export function ReleasePlayerBar({ release }: ReleasePlayerBarProps) {
+interface ReleasePlayerBarProps {
+  release: ReleaseDto
+  playback?: ReleasePlaybackMeta
+}
+
+export function ReleasePlayerBar({ release, playback }: ReleasePlayerBarProps) {
   const playTrack = usePlayerStore((s) => s.playTrack)
   const togglePlay = usePlayerStore((s) => s.togglePlay)
   const seek = usePlayerStore((s) => s.seek)
@@ -22,31 +31,41 @@ export function ReleasePlayerBar({ release }: ReleasePlayerBarProps) {
   const volume = usePlayerStore((s) => s.volume)
   const muted = usePlayerStore((s) => s.muted)
 
-  const isActive = currentTrack?.id === release.id
+  const releaseId = playback?.releaseId ?? release.id
+  const trackId = playback?.trackId
+  const audioUrl = playback?.audioUrl ?? release.streamUrl
+  const activeKey = trackId ?? releaseId
+
+  const isActive =
+    currentTrack?.releaseId === releaseId ||
+    currentTrack?.trackId === trackId ||
+    currentTrack?.id === activeKey
   const playing = isActive && isPlaying
-  const fallbackDuration = releaseDurationSec(release)
+  const fallbackDuration = playback?.durationSec ?? releaseDurationSec(release)
   const totalDuration =
     isActive && duration > 0
       ? duration
       : release.durationSec && release.durationSec > 0
         ? release.durationSec
         : fallbackDuration
-  const disabled = !release.streamUrl
-  const volumeLevel = muted ? 0 : volume
+  const disabled = !audioUrl
 
   const handleToggle = () => {
-    if (disabled) return
+    if (disabled || !audioUrl) return
     if (isActive) {
       togglePlay()
       return
     }
     playTrack({
-      id: release.id,
+      id: trackId ?? releaseId,
+      trackId,
+      releaseId,
+      artistProfileId: playback?.artistProfileId ?? release.artistProfileId,
       title: release.title,
       artist: release.artistName ?? 'Unknown',
-      audioUrl: release.streamUrl!,
+      audioUrl,
       artworkUrl: release.coverUrl,
-      durationSec: release.durationSec,
+      durationSec: playback?.durationSec ?? release.durationSec,
     })
   }
 
@@ -91,7 +110,7 @@ export function ReleasePlayerBar({ release }: ReleasePlayerBarProps) {
           aria-label={muted ? 'Unmute' : 'Mute'}
           onClick={toggleMute}
         >
-          {muted || volumeLevel === 0 ? (
+          {muted || volume === 0 ? (
             <VolumeX size={14} strokeWidth={2} aria-hidden />
           ) : (
             <Volume2 size={14} strokeWidth={2} aria-hidden />
@@ -100,14 +119,14 @@ export function ReleasePlayerBar({ release }: ReleasePlayerBarProps) {
 
         <div
           className="explore-release-player__volume"
-          style={{ '--explore-release-volume': `${volumeLevel * 100}%` } as React.CSSProperties}
+          style={{ '--explore-release-volume': `${(muted ? 0 : volume) * 100}%` } as React.CSSProperties}
         >
           <input
             type="range"
             min={0}
             max={1}
             step={0.01}
-            value={volumeLevel}
+            value={muted ? 0 : volume}
             aria-label="Volume"
             className="explore-release-player__volume-input"
             onChange={(event) => setVolume(Number(event.target.value))}
