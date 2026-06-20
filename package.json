@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev:test": "asdfasdfasdf",
+    "dev:test:2": "asdfasdfasdf",
     "dev": "vite",
     "start": "vite",
     "build": "tsc -b && vite build",
