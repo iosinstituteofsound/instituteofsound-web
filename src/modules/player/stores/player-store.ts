@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import { fisherYatesShuffle } from '@/modules/music/lib/player-queue'
 import type { PlayTrackOptions, PlayerTrack, QueueSource, RepeatMode } from '@/modules/player/types/player.types'
 
@@ -23,6 +22,7 @@ interface PlayerState {
   isPlaylistModalOpen: boolean
   isShuffling: boolean
   shuffleAnimationKey: number
+  sessionReady: boolean
   playTrack: (track: PlayerTrack, options?: PlayTrackOptions) => void
   togglePlay: () => void
   pause: () => void
@@ -110,46 +110,7 @@ function wait(ms: number) {
   })
 }
 
-type PersistedPlayerState = Pick<
-  PlayerState,
-  | 'volume'
-  | 'muted'
-  | 'shuffle'
-  | 'repeat'
-  | 'currentTrack'
-  | 'queue'
-  | 'queueIndex'
-  | 'queueSource'
-  | 'currentTime'
->
-
-function mergePersistedPlayerState(
-  persisted: unknown,
-  current: PlayerState,
-): PlayerState {
-  const saved = (persisted ?? {}) as Partial<PersistedPlayerState>
-  const next: PlayerState = { ...current, ...saved }
-
-  if (!saved.currentTrack) return next
-
-  return {
-    ...next,
-    displayQueue: saved.queue ?? [],
-    duration: saved.currentTrack.durationSec ?? 0,
-    isPlaying: false,
-    isBarOpen: false,
-    isExpanded: false,
-    mobileView: 'mini',
-    isQueueOpen: false,
-    isPlaylistModalOpen: false,
-    isShuffling: false,
-    shuffleAnimationKey: 0,
-  }
-}
-
-export const usePlayerStore = create<PlayerState>()(
-  persist(
-    (set, get) => ({
+export const usePlayerStore = create<PlayerState>()((set, get) => ({
       currentTrack: null,
       queue: [],
       displayQueue: [],
@@ -169,6 +130,7 @@ export const usePlayerStore = create<PlayerState>()(
       isPlaylistModalOpen: false,
       isShuffling: false,
       shuffleAnimationKey: 0,
+      sessionReady: false,
 
       playTrack: (track, options) => {
         const queue = options?.queue?.length ? options.queue : [track]
@@ -451,30 +413,7 @@ export const usePlayerStore = create<PlayerState>()(
       closeNowPlaying: () => set({ mobileView: 'mini' }),
 
       setPlaybackState: (playback) => set(playback),
-    }),
-    {
-      name: 'ios-player',
-      merge: mergePersistedPlayerState,
-      partialize: (state) => {
-        const base = {
-          volume: state.volume,
-          muted: state.muted,
-          shuffle: state.shuffle,
-          repeat: state.repeat,
-        }
-        if (!state.currentTrack) return base
-        return {
-          ...base,
-          currentTrack: state.currentTrack,
-          queue: state.queue,
-          queueIndex: state.queueIndex,
-          queueSource: state.queueSource,
-          currentTime: state.currentTime,
-        }
-      },
-    },
-  ),
-)
+    }))
 
 export function useActiveQueue() {
   const queue = usePlayerStore((s) => s.queue)

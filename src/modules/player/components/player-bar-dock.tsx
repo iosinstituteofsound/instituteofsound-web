@@ -1,14 +1,13 @@
 import { ChevronUp, Music2, Pause, Play } from 'lucide-react'
 import { useEffect } from 'react'
 import { formatPlayerTime } from '@/modules/player/lib/format-time'
-import { usePlayerHydrated } from '@/modules/player/hooks/use-player-hydrated'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/player/styles/player-bar-dock.css'
 
 export function PlayerBarDock() {
-  const hydrated = usePlayerHydrated()
+  const sessionReady = usePlayerStore((s) => s.sessionReady)
   const isMobile = useIsMobile()
   const currentTrack = usePlayerStore((s) => s.currentTrack)
   const isPlaying = usePlayerStore((s) => s.isPlaying)
@@ -79,7 +78,7 @@ export function PlayerBarDock() {
             {hasTrack ? (isPlaying ? 'Now playing' : 'Paused') : 'Player'}
           </span>
           <span className="ios-player-dock__title">
-            {!hydrated
+            {!sessionReady
               ? 'Loading session…'
               : hasTrack
                 ? currentTrack!.title
