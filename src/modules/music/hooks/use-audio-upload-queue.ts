@@ -8,6 +8,7 @@ import {
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
 import { MAX_AUDIO_UPLOAD_MB, titleFromFilename } from '@/modules/music/types/release-builder.types'
 import type { NormalizedApiError } from '@/shared/types/api.types'
+import { randomUUID } from '@/shared/lib/random-uuid'
 
 function apiErrorMessage(err: unknown, fallback: string): string {
   if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
@@ -19,7 +20,7 @@ function apiErrorMessage(err: unknown, fallback: string): string {
 
 function createQueueItem(file: File): QueuedUpload {
   return {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     file,
     title: titleFromFilename(file.name),
     status: 'pending',

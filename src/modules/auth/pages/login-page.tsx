@@ -12,6 +12,7 @@ import { Separator } from '@/shared/components/ui/separator'
 import { useLayoutStore } from '@/app/stores/layout-store'
 import { getLayoutHomeRouteFromLayout } from '@/shared/lib/layout-home-route'
 import { apiUrl, env } from '@/shared/config/env'
+import { isPrivateLanHost } from '@/shared/lib/oauth-origin'
 import { toast } from '@/shared/components/ui/sonner'
 import { premiumSurfaceSoftClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
@@ -44,17 +45,23 @@ export function LoginPage() {
   const devLogin = useDevLogin()
   const navigate = useNavigate()
   const [oauthRedirectUri, setOauthRedirectUri] = useState<string | null>(null)
+  const [oauthRedirectUris, setOauthRedirectUris] = useState<string[]>([])
+
+  const isLanDev = typeof window !== 'undefined' && isPrivateLanHost(window.location.hostname)
 
   useEffect(() => {
     if (!env.isDev) return
     const returnTo = `${window.location.origin}/auth/callback`
     fetch(apiUrl(`/api/auth/oauth-setup?return_to=${encodeURIComponent(returnTo)}`))
       .then((r) => r.json())
-      .then((data: { redirectUri?: string }) => {
+      .then((data: { redirectUri?: string; redirectUris?: string[] }) => {
         if (data.redirectUri) setOauthRedirectUri(data.redirectUri)
+        if (data.redirectUris?.length) setOauthRedirectUris(data.redirectUris)
       })
       .catch(() => {
-        setOauthRedirectUri('http://localhost:4000/api/auth/callback')
+        const fallback = `${window.location.origin}/api/auth/callback`
+        setOauthRedirectUri(fallback)
+        setOauthRedirectUris([fallback])
       })
   }, [])
 
@@ -86,6 +93,18 @@ export function LoginPage() {
           <p className="text-sm text-muted-foreground">Continue with your Google account.</p>
         </div>
 
+        {isLanDev ? (
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100/90">
+            <p className="font-medium text-amber-50">Mobile LAN testing</p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-100/80">
+              Google login cannot use <code className="text-[11px]">192.168.x.x</code> — Google
+              blocks private IPs in redirect URIs. Use <strong>Dev login</strong> below, or run{' '}
+              <code className="text-[11px]">npx ngrok http 5173</code> and open the ngrok HTTPS URL
+              on your phone (add that URL to Google Console).
+            </p>
+          </div>
+        ) : null}
+
         <Button
           type="button"
           variant="outline"
@@ -93,7 +112,14 @@ export function LoginPage() {
             'h-11 w-full rounded-xl border-border/80 bg-background text-[15px] font-medium',
             'hover:bg-muted/50',
           )}
-          onClick={() => googleLogin()}
+          onClick={() => {
+            try {
+              googleLogin()
+            } catch (err) {
+              const message = err instanceof Error ? err.message : 'Google sign-in is not available'
+              toast.error(message, { duration: 8000 })
+            }
+          }}
         >
           <GoogleIcon className="h-5 w-5" />
           Continue with Google
@@ -109,12 +135,33 @@ export function LoginPage() {
         {env.isDev ? (
           <>
             <Separator />
-            <details className="group rounded-xl border border-dashed border-border/70 bg-muted/20 px-4 py-3 text-sm">
+            <details className="group rounded-xl border border-dashed border-border/70 bg-muted/20 px-4 py-3 text-sm" open={isLanDev}>
               <summary className="cursor-pointer list-none font-medium text-muted-foreground marker:content-none [&::-webkit-details-marker]:hidden">
                 Developer options
               </summary>
               <div className="mt-4 space-y-4">
-                {oauthRedirectUri ? (
+                {oauthRedirectUris.length > 0 ? (
+                  <div className="space-y-2 text-xs text-muted-foreground">
+                    <p className="font-medium text-foreground/80">
+                      Google Console → Authorized redirect URIs (desktop):
+                    </p>
+                    <ul className="space-y-1.5">
+                      {oauthRedirectUris.map((uri) => (
+                        <li key={uri}>
+                          <code className="block break-all rounded-md bg-background/80 px-2 py-1.5 text-[11px] text-foreground/90 ring-1 ring-border/50">
+                            {uri}
+                          </code>
+                        </li>
+                      ))}
+                    </ul>
+                    {oauthRedirectUri ? (
+                      <p className="text-[11px]">
+                        Active for this browser:{' '}
+                        <span className="font-medium text-foreground/90">{oauthRedirectUri}</span>
+                      </p>
+                    ) : null}
+                  </div>
+                ) : oauthRedirectUri ? (
                   <div className="space-y-1.5 text-xs text-muted-foreground">
                     <p className="font-medium text-foreground/80">Google OAuth redirect URI</p>
                     <code className="block break-all rounded-md bg-background/80 px-2 py-1.5 text-[11px] text-foreground/90 ring-1 ring-border/50">

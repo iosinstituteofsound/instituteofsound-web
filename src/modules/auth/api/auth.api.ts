@@ -1,4 +1,5 @@
 import { env, apiUrl } from '@/shared/config/env'
+import { getGoogleOAuthBlockedReason } from '@/shared/lib/oauth-origin'
 import { apiClient } from '@/shared/services/api/api-client'
 import type { ApiSuccessResponse } from '@/shared/types/api.types'
 
@@ -24,8 +25,15 @@ export function buildGoogleAuthUrl(): string {
   return apiUrl(`/api/auth/google?${params.toString()}`)
 }
 
-export function redirectToGoogleAuth(): void {
+export function redirectToGoogleAuth(): boolean {
+  if (typeof window !== 'undefined') {
+    const blocked = getGoogleOAuthBlockedReason(window.location.hostname)
+    if (blocked) {
+      throw new Error(blocked)
+    }
+  }
   window.location.href = buildGoogleAuthUrl()
+  return true
 }
 
 export function parseAuthHash(hash: string): { accessToken: string; refreshToken: string } | null {

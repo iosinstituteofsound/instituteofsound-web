@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "mobile:adb": "node scripts/adb-reverse-mobile.mjs",
+    "dev:mobile": "node scripts/adb-reverse-mobile.mjs && vite",
     "start": "vite",
     "build": "tsc -b && vite build",
     "ci": "tsc -b && vite build",

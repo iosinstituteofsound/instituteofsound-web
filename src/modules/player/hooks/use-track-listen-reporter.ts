@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { API_V1 } from '@/shared/config/env'
 import { apiClient } from '@/shared/services/api/api-client'
+import { randomUUID } from '@/shared/lib/random-uuid'
 import type { PlayerTrack } from '@/modules/player/types/player.types'
 import { getListenerGeoHint, type ListenerGeoHint } from '@/modules/player/lib/listener-geo'
 
@@ -13,17 +14,17 @@ function getAnonymousId(): string {
   try {
     let id = sessionStorage.getItem(ANON_KEY)
     if (!id) {
-      id = crypto.randomUUID()
+      id = randomUUID()
       sessionStorage.setItem(ANON_KEY, id)
     }
     return id
   } catch {
-    return crypto.randomUUID()
+    return randomUUID()
   }
 }
 
 function newSessionId(): string {
-  return crypto.randomUUID()
+  return randomUUID()
 }
 
 function isMongoId(value?: string) {

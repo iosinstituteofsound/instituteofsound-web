@@ -36,6 +36,18 @@
         } catch (e) {}
       })();
     </script>
+    <script>
+      (function () {
+        if (typeof crypto === 'undefined' || typeof crypto.randomUUID === 'function') return;
+        crypto.randomUUID = function () {
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (char) {
+            var random = (Math.random() * 16) | 0;
+            var value = char === 'x' ? random : (random & 0x3) | 0x8;
+            return value.toString(16);
+          });
+        };
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
