@@ -14,6 +14,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { FEED_COLUMN_CLASS } from '@/shared/lib/layout-config'
 import { cn } from '@/shared/lib/cn'
+import '@/modules/feed/styles/feed-page.css'
 
 export function FeedPage() {
   const { data: me } = useMe()
@@ -37,7 +38,7 @@ export function FeedPage() {
   }
 
   return (
-    <div className={cn(FEED_COLUMN_CLASS, 'pb-8')}>
+    <div className={cn(FEED_COLUMN_CLASS, 'pb-4 md:pb-8')}>
       <PermissionGate resource="feed" action="create">
         <div ref={composerAnchorRef} className="sticky top-0 z-50 bg-background">
           <FeedComposer collapseProgress={collapseProgress} />

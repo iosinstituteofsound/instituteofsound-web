@@ -34,6 +34,7 @@ import '@/modules/explore/styles/release-vinyl-art.css'
 import '@/modules/explore/styles/release-related-rail.css'
 import '@/modules/explore/styles/release-analytics.css'
 import '@/modules/explore/styles/release-page-mh.css'
+import '@/modules/explore/styles/release-page-mobile.css'
 
 const SAVED_KEY = 'ios_saved_releases'
 
@@ -281,9 +282,9 @@ export function ReleasePage() {
               />
 
               {detailTracks.length > 0 ? (
-                <ol className="mt-4 divide-y rounded-lg border">
+                <ol className="explore-release-tracklist mt-4 divide-y rounded-lg border">
                   {detailTracks.map((track) => (
-                    <li key={track.id} className="flex items-center justify-between px-4 py-3">
+                    <li key={track.id} className="flex items-center justify-between gap-2 px-4 py-3">
                       <div>
                         <p className="font-medium">
                           {track.trackNumber}. {track.title}

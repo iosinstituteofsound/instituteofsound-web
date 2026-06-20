@@ -32,9 +32,9 @@ export function normalizeLayoutConfig(raw: unknown): LayoutConfig {
 
 export const MAIN_PADDING_CLASS: Record<LayoutConfig['dashboard']['main']['padding'], string> = {
   none: 'p-0',
-  sm: 'px-5 py-4',
-  md: 'px-6 py-7 sm:px-8',
-  lg: 'px-8 py-9 sm:px-10',
+  sm: 'px-0 py-3 md:px-5 md:py-4',
+  md: 'px-0 py-4 md:px-6 md:py-7 lg:px-8',
+  lg: 'px-0 py-5 md:px-8 md:py-9 lg:px-10',
 }
 
 export const MAIN_MAX_WIDTH_CLASS: Record<LayoutConfig['dashboard']['main']['maxWidth'], string> = {
@@ -51,4 +51,4 @@ export const SIDEBAR_WIDTH_CLASS: Record<LayoutConfig['dashboard']['sidebar']['w
 /** Matches centered feed / home column width */
 export const FEED_COLUMN_MAX_WIDTH_PX = 680
 
-export const FEED_COLUMN_CLASS = 'mx-auto w-full max-w-full px-3 sm:max-w-[680px] sm:px-0'
+export const FEED_COLUMN_CLASS = 'feed-page mx-auto w-full max-w-[680px]'

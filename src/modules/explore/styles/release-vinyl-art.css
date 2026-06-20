@@ -303,3 +303,15 @@
     6px 16px 42px color-mix(in oklch, var(--background) 65%, transparent),
     0 0 40px color-mix(in oklch, var(--primary) 20%, transparent);
 }
+
+@media (max-width: 767px) {
+  .explore-rel-vinyl-stack--mh {
+    width: min(100%, 14rem);
+    --explore-rel-vinyl-offset: 22%;
+    overflow: hidden;
+  }
+
+  .explore-rel-vinyl-stack__mh-glow {
+    inset: -8% -4%;
+  }
+}
