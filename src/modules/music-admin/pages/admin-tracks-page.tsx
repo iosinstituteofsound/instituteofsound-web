@@ -343,7 +343,7 @@ export function AdminTracksPage() {
             {probeResult ? (
               <div className="space-y-3 text-sm">
                 <p className="text-muted-foreground">
-                  {probeResult.segmentCount} fingerprint segments · {Math.round(probeResult.durationSec)}s
+                  {probeResult.hashCount} landmark hashes · {Math.round(probeResult.durationSec)}s
                   · thresholds: exact {probeResult.thresholds.exact}% / likely{' '}
                   {probeResult.thresholds.likely}%
                 </p>
@@ -361,6 +361,10 @@ export function AdminTracksPage() {
                           <TableHead>Track</TableHead>
                           <TableHead>Artist</TableHead>
                           <TableHead>Score</TableHead>
+                          <TableHead>Matched</TableHead>
+                          <TableHead>Total</TableHead>
+                          <TableHead>Aligned</TableHead>
+                          <TableHead>Offset</TableHead>
                           <TableHead>Flag</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -370,6 +374,10 @@ export function AdminTracksPage() {
                             <TableCell className="max-w-[200px] truncate">{row.title}</TableCell>
                             <TableCell>{row.artistName}</TableCell>
                             <TableCell>{Math.round(row.score)}%</TableCell>
+                            <TableCell className="text-muted-foreground">{row.matchedHashes}</TableCell>
+                            <TableCell className="text-muted-foreground">{row.totalQueryHashes}</TableCell>
+                            <TableCell className="text-muted-foreground">{row.alignedHits}</TableCell>
+                            <TableCell className="text-muted-foreground">{row.offsetConsensus}</TableCell>
                             <TableCell>
                               {row.wouldFlag ? (
                                 <Badge variant={row.matchConfidence === 'confirmed' ? 'default' : 'secondary'}>

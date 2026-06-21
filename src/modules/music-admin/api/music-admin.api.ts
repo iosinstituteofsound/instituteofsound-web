@@ -50,13 +50,17 @@ export interface DuplicateProbeMatch {
   title: string
   artistName: string
   score: number
+  matchedHashes: number
+  totalQueryHashes: number
+  alignedHits: number
+  offsetConsensus: number
   matchConfidence: 'confirmed' | 'likely' | null
   wouldFlag: boolean
 }
 
 export interface DuplicateProbeResult {
   fingerprintVersion: number
-  segmentCount: number
+  hashCount: number
   durationSec: number
   thresholds: { exact: number; likely: number }
   matches: DuplicateProbeMatch[]
