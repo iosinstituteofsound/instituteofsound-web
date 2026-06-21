@@ -18,6 +18,7 @@ import type {
   EditorialPickDto,
   EventDto,
   LabelOverviewDto,
+  CuratorOverviewDto,
   ReleaseDto,
 } from '@/modules/explore/types/explore.types'
 
@@ -253,6 +254,13 @@ export async function getProfileEditorialDesk(userId: string) {
 export async function getProfileLabelOverview(userId: string) {
   const { data } = await apiClient.get<ApiSuccessResponse<LabelOverviewDto | null>>(
     `${API_V1}/explore/label-overview/${userId}`,
+  )
+  return data.data
+}
+
+export async function getProfileCuratorOverview(userId: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<CuratorOverviewDto | null>>(
+    `${API_V1}/explore/curator-overview/${userId}`,
   )
   return data.data
 }

@@ -71,6 +71,99 @@ export interface LabelOverviewDto {
   stats: LabelOverviewStatsDto
 }
 
+export interface CuratorStatsDto {
+  followers: number
+  playlists: number
+  artistsDiscovered: number
+  playlistSpins: number
+  featuredPicks: number
+}
+
+export interface CuratorScoreDto {
+  taste: number
+  discovery: number
+  influence: number
+  accuracy: number
+}
+
+export interface CuratorGenreSliceDto {
+  genre: string
+  percent: number
+  color?: string
+}
+
+export interface CuratorFeaturedPlaylistDto extends PlaylistDto {
+  followerCount?: number
+  playCount?: number
+}
+
+export interface CuratorDiscoveryArtistDto {
+  id: string
+  artistName: string
+  slug?: string
+  coverUrl?: string
+  subGenre?: string
+  growthPercent: number
+  firstFeaturedAt: string
+  listenerCount: number
+}
+
+export interface CuratorRecentPickDto {
+  id: string
+  pickNumber: number
+  artistName: string
+  note: string
+  coverUrl?: string
+  publishedAt: string
+  reviewSlug?: string
+}
+
+export interface CuratorEditorialArticleDto {
+  id: string
+  title: string
+  slug: string
+  publishedAt: string
+  readTimeMin: number
+}
+
+export interface CuratorSupportedArtistDto {
+  id: string
+  displayName: string
+  avatarUrl?: string
+  monthlyListeners: number
+  slug?: string
+  userId?: string
+  isVerified?: boolean
+}
+
+export interface CuratorReputationStatDto {
+  key: string
+  label: string
+  value: number | string
+}
+
+export interface CuratorActivityItemDto {
+  id: string
+  type: 'playlist_add' | 'article' | 'review' | 'signal_pick' | 'follow'
+  text: string
+  date: string
+}
+
+export interface CuratorOverviewDto {
+  stats: CuratorStatsDto
+  scores: CuratorScoreDto
+  tasteMap: CuratorGenreSliceDto[]
+  genreTags: string[]
+  featuredPlaylists: CuratorFeaturedPlaylistDto[]
+  discoveryWall: CuratorDiscoveryArtistDto[]
+  recentPicks: CuratorRecentPickDto[]
+  editorialContributions: CuratorEditorialArticleDto[]
+  topSupportedArtists: CuratorSupportedArtistDto[]
+  communityReputation: CuratorReputationStatDto[]
+  followersAlsoListen: CuratorSupportedArtistDto[]
+  activityFeed: CuratorActivityItemDto[]
+}
+
 export type ReleaseType = 'single' | 'ep' | 'album'
 export type ReleaseFilter = 'all' | 'album' | 'ep' | 'single' | 'archive'
 export type ReleasesPageFilter = 'all' | 'album' | 'epsingles' | 'hot' | 'new' | 'undiscovered'

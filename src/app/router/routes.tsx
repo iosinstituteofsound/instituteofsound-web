@@ -143,6 +143,11 @@ const LabelDashboardPage = lazy(() =>
     default: m.LabelDashboardPage,
   })),
 )
+const CuratorDashboardPage = lazy(() =>
+  import('@/modules/curator/pages/curator-dashboard-page').then((m) => ({
+    default: m.CuratorDashboardPage,
+  })),
+)
 const PlaylistDetailPage = lazy(() =>
   import('@/modules/music/pages/playlist-detail-page').then((m) => ({
     default: m.PlaylistDetailPage,
@@ -755,6 +760,36 @@ export const router = createBrowserRouter([
           <ResourceGuard name="LabelDashboardPage">
             <Lazy>
               <LabelDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'curator',
+        element: (
+          <ResourceGuard name="CuratorDashboardPage">
+            <Lazy>
+              <CuratorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'curator/playlists',
+        element: (
+          <ResourceGuard name="CuratorDashboardPage">
+            <Lazy>
+              <CuratorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'curator/picks',
+        element: (
+          <ResourceGuard name="CuratorDashboardPage">
+            <Lazy>
+              <CuratorDashboardPage />
             </Lazy>
           </ResourceGuard>
         ),

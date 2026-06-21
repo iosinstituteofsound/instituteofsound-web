@@ -43,6 +43,7 @@ const PANEL_KEYS: Array<{ id: ProfileTabPanelKey; label: string }> = [
   { id: 'editor-drafts', label: 'Editor Drafts' },
   { id: 'editor-wire', label: 'Editor Wire' },
   { id: 'editor-submissions', label: 'Editor Submissions' },
+  { id: 'curator-overview', label: 'Curator Overview' },
 ]
 
 export function ProfileTabsPage() {

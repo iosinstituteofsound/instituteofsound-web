@@ -20,6 +20,7 @@ export const createProfileTabSchema = z.object({
     'editor-drafts',
     'editor-wire',
     'editor-submissions',
+    'curator-overview',
   ]),
   sortOrder: z.coerce.number().int().min(0).optional(),
 })

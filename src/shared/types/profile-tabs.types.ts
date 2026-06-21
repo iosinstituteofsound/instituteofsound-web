@@ -10,6 +10,7 @@ export type ProfileTabPanelKey =
   | 'editor-drafts'
   | 'editor-wire'
   | 'editor-submissions'
+  | 'curator-overview'
 
 export interface ProfileTabDto {
   id: string
