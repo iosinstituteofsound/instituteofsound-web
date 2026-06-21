@@ -3,8 +3,10 @@ import { useAuthStore } from '@/app/stores/auth-store'
 import { useLayoutStore } from '@/app/stores/layout-store'
 import { usePermissionStore } from '@/app/stores/permission-store'
 import * as authApi from '@/modules/auth/api/auth.api'
+import type { DevLoginInput } from '@/modules/auth/api/auth.api'
 import * as userApi from '@/modules/users/api/user.api'
 import { tokenStorage } from '@/shared/services/api/token-storage'
+import type { MeResponse } from '@/shared/types/auth.types'
 
 export const meQueryKey = ['me'] as const
 
@@ -44,15 +46,16 @@ export function useDevLogin() {
   const hydrate = usePermissionStore((s) => s.hydrate)
   const hydrateLayout = useLayoutStore((s) => s.hydrateActiveLayout)
 
-  return useMutation({
-    mutationFn: authApi.devLogin,
-    onSuccess: async (data) => {
+  return useMutation<MeResponse, Error, DevLoginInput>({
+    mutationFn: async (input) => {
+      const data = await authApi.devLogin(input)
       tokenStorage.setTokens(data.access_token, data.refresh_token)
       setSession(data.userId, data.email)
       const me = await userApi.getMe()
       hydrate(me.authorization)
       hydrateLayout(me.authorization.activeLayout)
       await queryClient.invalidateQueries({ queryKey: meQueryKey })
+      return me
     },
   })
 }

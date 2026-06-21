@@ -26,7 +26,7 @@ export function useSetActiveRole() {
 
   return useMutation({
     mutationFn: userApi.setActiveRole,
-    onSuccess: async (access) => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: meQueryKey })
       await queryClient.invalidateQueries({ queryKey: ['sidebar'] })
 

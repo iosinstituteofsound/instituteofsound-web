@@ -100,11 +100,11 @@ interface SuperAdminGuardProps {
 }
 
 export function SuperAdminGuard({ children }: SuperAdminGuardProps) {
-  const { hydrated, isSuperAdmin, permissions } = usePermission()
+  const { hydrated, isSuperAdmin } = usePermission()
 
   if (!hydrated) return <PageLoader />
 
-  if (isSuperAdmin || permissions.includes('*.*')) {
+  if (isSuperAdmin) {
     return <>{children}</>
   }
 
