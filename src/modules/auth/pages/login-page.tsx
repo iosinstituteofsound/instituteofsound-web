@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/shared/components/ui/input'
 import { Separator } from '@/shared/components/ui/separator'
 import { useLayoutStore } from '@/app/stores/layout-store'
+import { usePermissionStore } from '@/app/stores/permission-store'
 import { getLayoutHomeRouteFromLayout } from '@/shared/lib/layout-home-route'
 import { apiUrl, env } from '@/shared/config/env'
 import { isPrivateLanHost } from '@/shared/lib/oauth-origin'
@@ -75,7 +76,16 @@ export function LoginPage() {
       const email = values.email?.trim()
       await devLogin.mutateAsync(email ? { email } : {})
       toast.success('Signed in successfully')
-      navigate(getLayoutHomeRouteFromLayout(useLayoutStore.getState().activeLayout))
+      const activeLayout = useLayoutStore.getState().activeLayout
+      const { resourceNames, isSuperAdmin, permissions } = usePermissionStore.getState()
+      navigate(
+        getLayoutHomeRouteFromLayout(activeLayout, {
+          resourceNames,
+          isSuperAdmin,
+          permissions,
+          activeLayout,
+        }),
+      )
     } catch (err) {
       const message =
         err && typeof err === 'object' && 'message' in err
