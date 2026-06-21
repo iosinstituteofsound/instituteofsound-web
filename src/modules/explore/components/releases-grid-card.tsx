@@ -12,6 +12,7 @@ import {
   releasePlaysFormatted,
 } from '@/modules/explore/lib/release-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { releaseCardPath } from '@/modules/explore/lib/track-paths'
 import { cn } from '@/shared/lib/cn'
 
 interface ReleasesGridCardProps {
@@ -39,7 +40,7 @@ export function ReleasesGridCard({ release, className }: ReleasesGridCardProps) 
 
   return (
     <Link
-      to={`/releases/${release.parentReleaseId ?? release.id}`}
+      to={releaseCardPath(release)}
       className={cn('rel-grid-card', className)}
       aria-label={`Open ${release.title}`}
     >

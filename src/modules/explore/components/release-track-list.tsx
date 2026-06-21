@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { Play } from 'lucide-react'
 import type { ReleaseDetailDto, TrackDto } from '@/modules/music/types/music.types'
 import { trackPagePath } from '@/modules/explore/lib/track-paths'
-import { DuplicateTrackBadge } from '@/modules/music/components/duplicate-track-alert'
 import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
 import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
 import { cn } from '@/shared/lib/cn'
@@ -44,7 +43,6 @@ export function ReleaseTrackList({
             >
               <p className="font-medium">
                 {track.trackNumber}. {track.title}
-                <DuplicateTrackBadge duplicateInfo={track.duplicateInfo} className="ml-2 align-middle" />
               </p>
             </Link>
             <div className="flex shrink-0 items-center gap-1">

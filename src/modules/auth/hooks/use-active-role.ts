@@ -7,9 +7,10 @@ import * as sidebarApi from '@/modules/sidebar/api/sidebar.api'
 import * as userApi from '@/modules/users/api/user.api'
 
 import { getLayoutHomeRoute } from '@/shared/lib/layout-home-route'
+import { resolveIsSuperAdmin } from '@/shared/services/permission/super-admin'
 
-function canAccessPath(pathname: string, sidebarPaths: string[], isSuperAdmin: boolean) {
-  if (isSuperAdmin) return true
+function canAccessPath(pathname: string, sidebarPaths: string[], authorizationIsSuperAdmin: boolean) {
+  if (authorizationIsSuperAdmin) return true
   return sidebarPaths.some(
     (itemPath) => pathname === itemPath || pathname.startsWith(`${itemPath}/`),
   )
@@ -37,7 +38,7 @@ export function useSetActiveRole() {
       syncFromSidebarItems(sidebarItems)
 
       const sidebarPaths = sidebarItems.map((item) => item.path)
-      if (!canAccessPath(location.pathname, sidebarPaths, access.isSuperAdmin)) {
+      if (!canAccessPath(location.pathname, sidebarPaths, resolveIsSuperAdmin(me.authorization))) {
         navigate(getLayoutHomeRoute(me.authorization), { replace: true })
       }
     },

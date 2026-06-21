@@ -71,7 +71,9 @@ export function ReleaseReviewStep({
   })
 
   const readyTracks = queue.filter((item) => item.status === 'ready')
-  const flaggedTracks = readyTracks.filter((item) => item.duplicateCheck?.status === 'flagged')
+  const rejectedDuplicates = queue.filter(
+    (item) => item.status === 'failed' && item.duplicateCheck?.status === 'flagged',
+  )
   const canPublish = validationErrors.length === 0 && readyTracks.length > 0
   const combinedGenre = [genre.trim(), secondaryGenre.trim()].filter(Boolean).join(' / ')
   const artistName = profile?.displayName ?? 'Artist'
@@ -133,20 +135,22 @@ export function ReleaseReviewStep({
         </div>
       ) : null}
 
-      {flaggedTracks.length > 0 ? (
+      {rejectedDuplicates.length > 0 ? (
         <div className="space-y-3">
           <div className="rbl-alert">
             <AlertTriangle className="rbl-text-warn mt-0.5 size-5 shrink-0" />
             <div>
               <p className="rbl-alert__title">
-                {flaggedTracks.length} republished track{flaggedTracks.length > 1 ? 's' : ''} detected
+                {rejectedDuplicates.length} duplicate upload{rejectedDuplicates.length > 1 ? 's' : ''}{' '}
+                blocked
               </p>
               <p className="text-sm text-muted-foreground">
-                You can still publish, but listeners will see a duplicate warning on these tracks.
+                These files were not saved to the platform. Remove them or upload different audio to
+                continue.
               </p>
             </div>
           </div>
-          {flaggedTracks.map((track) => (
+          {rejectedDuplicates.map((track) => (
             <DuplicateTrackAlert key={track.id} duplicateCheck={track.duplicateCheck} variant="banner" />
           ))}
         </div>

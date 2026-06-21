@@ -6,8 +6,8 @@ export function hasResource(
   name: string,
   type: ResourceType = 'PAGE',
 ): boolean {
-  if (!isRegisteredResource(name, type)) return false
   if (isSuperAdmin) return true
+  if (!isRegisteredResource(name, type)) return false
   return resourceNames.includes(name)
 }
 

@@ -13,10 +13,11 @@ import {
   releaseTypeLabel,
 } from '@/modules/explore/lib/release-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { releaseCardPath } from '@/modules/explore/lib/track-paths'
 
 function releaseHref(release: ReleaseDto): string {
   if (release.id.startsWith('demo-')) return '/explore/releases'
-  return `/releases/${release.id}`
+  return releaseCardPath(release)
 }
 
 function ReleaseCover({ release }: { release: ReleaseDto }) {

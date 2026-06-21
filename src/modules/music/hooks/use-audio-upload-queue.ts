@@ -162,7 +162,7 @@ export function useAudioUploadQueue() {
             duplicateCheck: job.duplicateCheck,
           })
 
-          if (job.status === 'ready' && job.trackId) {
+          if (job.status === 'ready' && job.trackId && job.duplicateCheck?.status !== 'flagged') {
             stopPollingJob(jobId)
             updateItem(itemId, {
               status: 'ready',
@@ -179,7 +179,9 @@ export function useAudioUploadQueue() {
             updateItem(itemId, {
               status: 'failed',
               processingStatus: 'failed',
+              processingProgress: job.progress ?? 100,
               errorMessage: job.errorMessage ?? 'Processing failed. Try again.',
+              duplicateCheck: job.duplicateCheck,
             })
           }
         } catch {
@@ -315,6 +317,7 @@ export function useAudioUploadQueue() {
         processingProgress: 0,
         processingStatus: 'created',
         errorMessage: undefined,
+        duplicateCheck: undefined,
         jobId: undefined,
         trackId: undefined,
       })
@@ -335,6 +338,7 @@ export function useAudioUploadQueue() {
         processingProgress: 0,
         processingStatus: 'created',
         errorMessage: undefined,
+        duplicateCheck: undefined,
         jobId: undefined,
         trackId: undefined,
       })

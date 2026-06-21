@@ -5,6 +5,7 @@ import { cn } from '@/shared/lib/cn'
 
 type DuplicateTrackAlertProps = {
   matchScore?: number
+  matchConfidence?: TrackDuplicateInfo['matchConfidence']
   original?: DuplicateOriginalRef
   duplicateInfo?: TrackDuplicateInfo
   duplicateCheck?: UploadDuplicateCheck
@@ -16,6 +17,7 @@ function resolveDuplicatePayload(props: DuplicateTrackAlertProps) {
   if (props.duplicateInfo?.isDuplicate) {
     return {
       matchScore: props.duplicateInfo.matchScore ?? props.matchScore,
+      matchConfidence: props.duplicateInfo.matchConfidence,
       original: props.duplicateInfo.original ?? props.original,
     }
   }
@@ -23,6 +25,7 @@ function resolveDuplicatePayload(props: DuplicateTrackAlertProps) {
   if (props.duplicateCheck?.status === 'flagged') {
     return {
       matchScore: props.duplicateCheck.matchScore ?? props.matchScore,
+      matchConfidence: props.duplicateCheck.matchConfidence,
       original: props.duplicateCheck.original ?? props.original,
     }
   }
@@ -30,6 +33,7 @@ function resolveDuplicatePayload(props: DuplicateTrackAlertProps) {
   if (props.original) {
     return {
       matchScore: props.matchScore,
+      matchConfidence: props.matchConfidence,
       original: props.original,
     }
   }
@@ -57,10 +61,15 @@ export function DuplicateTrackAlert({
   const scoreLabel =
     payload.matchScore != null ? `${Math.round(payload.matchScore)}% similarity` : 'high similarity'
 
+  const confidenceLabel =
+    payload.matchConfidence === 'likely'
+      ? 'Likely remaster/republish'
+      : 'Republished duplicate'
+
   if (variant === 'inline') {
     return (
       <p className={cn('text-xs text-amber-600 dark:text-amber-400', className)}>
-        Republished duplicate ({scoreLabel}).{' '}
+        {confidenceLabel} ({scoreLabel}). Upload blocked.{' '}
         <Link to={`/tracks/${payload.original.trackId}`} className="underline underline-offset-2">
           View original
         </Link>
@@ -78,10 +87,12 @@ export function DuplicateTrackAlert({
     >
       <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
       <div className="min-w-0 space-y-1">
-        <p className="font-semibold">Republished track</p>
+        <p className="font-semibold">{confidenceLabel}</p>
         <p className="text-sm opacity-90">
-          This audio matches an existing track ({scoreLabel}). It may be removed at any time, even if
-          the title or metadata differ.
+          This audio matches an existing track ({scoreLabel}).
+          {payload.matchConfidence === 'likely'
+            ? ' The audio appears remastered or heavily processed but is likely the same recording.'
+            : ' Upload was blocked and nothing was saved to storage.'}
         </p>
         <p className="text-sm">
           Original:{' '}
@@ -103,6 +114,8 @@ export function DuplicateTrackBadge({
 }) {
   if (!duplicateInfo?.isDuplicate) return null
 
+  const label = duplicateInfo.matchConfidence === 'likely' ? 'Likely duplicate' : 'Duplicate'
+
   return (
     <span
       className={cn(
@@ -110,7 +123,7 @@ export function DuplicateTrackBadge({
         className,
       )}
     >
-      Duplicate
+      {label}
     </span>
   )
 }

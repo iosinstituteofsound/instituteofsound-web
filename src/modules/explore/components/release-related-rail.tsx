@@ -6,6 +6,7 @@ import {
   releaseInitials,
   releaseTypeLabel,
 } from '@/modules/explore/lib/release-meta'
+import { releaseCardPath } from '@/modules/explore/lib/track-paths'
 
 function ReleaseRailCover({ release }: { release: ReleaseDto }) {
   if (release.coverUrl) {
@@ -29,7 +30,7 @@ function ReleaseRailCover({ release }: { release: ReleaseDto }) {
 function ReleaseRailCard({ release, index }: { release: ReleaseDto; index: number }) {
   return (
     <Link
-      to={`/releases/${release.id}`}
+      to={releaseCardPath(release)}
       className="explore-rel-page-rail__card"
       style={{ '--explore-rel-page-rail-delay': `${60 + index * 55}ms` } as React.CSSProperties}
       aria-label={`Open ${release.title}`}

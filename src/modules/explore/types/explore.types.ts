@@ -185,6 +185,7 @@ export interface ReleaseDto {
   durationSec?: number
   trackCount?: number
   parentReleaseId?: string
+  primaryTrackId?: string
 }
 
 export interface ReleaseGenreDto {

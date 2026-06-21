@@ -5,7 +5,7 @@ import { PublicLayout } from '@/app/layouts/public-layout'
 import { AuthLayout } from '@/app/layouts/auth-layout'
 import { DashboardLayout } from '@/app/layouts/dashboard-layout'
 import { ExploreLayoutRoute } from '@/app/layouts/explore-layout-route'
-import { AuthGuard, ExplorePageGuard, GuestGuard, PermissionGuard, ReleasesPageGuard, ResourceGuard } from '@/app/guards'
+import { AuthGuard, ExplorePageGuard, GuestGuard, PermissionGuard, ReleasesPageGuard, ResourceGuard, SuperAdminGuard } from '@/app/guards'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorPage, ForbiddenPage, NotFoundPage } from '@/shared/pages/fallback-pages'
 
@@ -50,6 +50,9 @@ const BadgeThemesPage = lazy(() =>
 )
 const AchievementsPage = lazy(() =>
   import('@/modules/achievements/pages/achievements-page').then((m) => ({ default: m.AchievementsPage })),
+)
+const AdminTracksPage = lazy(() =>
+  import('@/modules/music-admin/pages/admin-tracks-page').then((m) => ({ default: m.AdminTracksPage })),
 )
 const SidebarMenuItemsPage = lazy(() =>
   import('@/modules/sidebar/pages/sidebar-menu-items-page').then((m) => ({
@@ -166,6 +169,16 @@ const MyPlaylistDetailPage = lazy(() =>
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>
+}
+
+function AdminTracksRoute() {
+  return (
+    <SuperAdminGuard>
+      <Lazy>
+        <AdminTracksPage />
+      </Lazy>
+    </SuperAdminGuard>
+  )
 }
 
 function ExploreReleaseRedirect() {
@@ -351,6 +364,10 @@ export const router = createBrowserRouter([
             </Lazy>
           </ResourceGuard>
         ),
+      },
+      {
+        path: 'dashboard/music/tracks',
+        element: <AdminTracksRoute />,
       },
       {
         path: 'feed',
@@ -565,6 +582,10 @@ export const router = createBrowserRouter([
             </Lazy>
           </ResourceGuard>
         ),
+      },
+      {
+        path: 'music/tracks',
+        element: <AdminTracksRoute />,
       },
       {
         path: 'editor/write',

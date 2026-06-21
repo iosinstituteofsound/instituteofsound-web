@@ -1,6 +1,7 @@
 export type TrackStatus = 'processing' | 'ready' | 'failed'
 
 export type DuplicateCheckStatus = 'pending' | 'clear' | 'flagged'
+export type DuplicateMatchConfidence = 'confirmed' | 'likely'
 
 export interface DuplicateOriginalRef {
   trackId: string
@@ -12,12 +13,14 @@ export interface DuplicateOriginalRef {
 export interface TrackDuplicateInfo {
   isDuplicate: boolean
   matchScore?: number
+  matchConfidence?: DuplicateMatchConfidence
   original?: DuplicateOriginalRef
 }
 
 export interface UploadDuplicateCheck {
   status: DuplicateCheckStatus
   matchScore?: number
+  matchConfidence?: DuplicateMatchConfidence
   original?: DuplicateOriginalRef
 }
 
@@ -32,6 +35,21 @@ export interface TrackDto {
   status: TrackStatus
   playCount: number
   duplicateInfo?: TrackDuplicateInfo
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface AdminTrackDto extends TrackDto {
+  artistName: string
+  releaseTitle?: string
+}
+
+export interface AdminTrackListResult {
+  tracks: AdminTrackDto[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
 }
 
 export interface AudioUploadJobDto {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Compass, Home, Play } from 'lucide-react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import { ReleaseAnalyticsPanel } from '@/modules/explore/components/release-analytics-panel'
 import { ReleaseAside } from '@/modules/explore/components/release-aside'
 import { ReleaseRelatedRail } from '@/modules/explore/components/release-related-rail'
@@ -28,6 +28,7 @@ import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import { getReleaseDetail } from '@/modules/music/api/music.api'
 import { playReleaseFromDetail } from '@/modules/music/lib/player-queue'
+import { trackPagePath } from '@/modules/explore/lib/track-paths'
 import { ReleaseTrackList } from '@/modules/explore/components/release-track-list'
 import '@/modules/explore/styles/explore.css'
 import '@/modules/explore/styles/explore-mh-chrome.css'
@@ -53,7 +54,7 @@ export function ReleasePage() {
   const { id = '' } = useParams()
   const homeHref = useBreadcrumbHomeHref()
   const { data: explore, isLoading } = useExplore()
-  const { data: releaseDetail } = useQuery({
+  const { data: releaseDetail, isLoading: releaseDetailLoading } = useQuery({
     queryKey: ['release-detail', id],
     queryFn: () => getReleaseDetail(id),
     enabled: Boolean(id),
@@ -174,7 +175,15 @@ export function ReleasePage() {
     [playTrack, releaseDetail],
   )
 
-  if (isLoading) return <Loader className="min-h-screen bg-background" />
+  if (isLoading || releaseDetailLoading) return <Loader className="min-h-screen bg-background" />
+
+  if (
+    releaseDetail?.type === 'single' &&
+    releaseDetail.tracks.length === 1 &&
+    releaseDetail.tracks[0]?.id
+  ) {
+    return <Navigate to={trackPagePath(releaseDetail.tracks[0].id)} replace />
+  }
 
   if (!release) {
     return (

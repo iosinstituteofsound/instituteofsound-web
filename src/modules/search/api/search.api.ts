@@ -56,6 +56,7 @@ export interface MusicSearchTrackDto {
   artistName?: string
   releaseId: string
   releaseTitle?: string
+  coverUrl?: string
   href: string
 }
 

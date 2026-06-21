@@ -73,10 +73,16 @@ interface ResourceGuardProps {
 
 export function ResourceGuard({ children, name, type = 'PAGE' }: ResourceGuardProps) {
   const location = useLocation()
-  const { hasResource, canAccessPath, hydrated, sidebarSynced } = usePermission()
+  const { hasResource, canAccessPath, hydrated, sidebarSynced, isSuperAdmin } = usePermission()
   const { isLoading: sidebarLoading } = useSidebar()
 
-  if (!hydrated || sidebarLoading || !sidebarSynced) return <PageLoader />
+  if (!hydrated) return <PageLoader />
+
+  if (isSuperAdmin) {
+    return <>{children}</>
+  }
+
+  if (sidebarLoading || !sidebarSynced) return <PageLoader />
 
   const allowed =
     hasResource(name, type) ||
@@ -89,6 +95,22 @@ export function ResourceGuard({ children, name, type = 'PAGE' }: ResourceGuardPr
   return <>{children}</>
 }
 
+interface SuperAdminGuardProps {
+  children: ReactNode
+}
+
+export function SuperAdminGuard({ children }: SuperAdminGuardProps) {
+  const { hydrated, isSuperAdmin, permissions } = usePermission()
+
+  if (!hydrated) return <PageLoader />
+
+  if (isSuperAdmin || permissions.includes('*.*')) {
+    return <>{children}</>
+  }
+
+  return <Navigate to="/403" replace />
+}
+
 interface PermissionGuardProps {
   children: ReactNode
   resource: string
@@ -96,16 +118,22 @@ interface PermissionGuardProps {
 }
 
 export function PermissionGuard({ children, resource, action }: PermissionGuardProps) {
-  const { can, hydrated, sidebarSynced } = usePermission()
+  const { can, hydrated, sidebarSynced, isSuperAdmin } = usePermission()
   const { isLoading: sidebarLoading } = useSidebar()
 
-  if (!hydrated || sidebarLoading || !sidebarSynced) return <PageLoader />
+  if (!hydrated) return <PageLoader />
 
-  if (!can(resource, action)) {
-    return <Navigate to="/403" replace />
+  if (isSuperAdmin) {
+    return <>{children}</>
   }
 
-  return <>{children}</>
+  if (sidebarLoading || !sidebarSynced) return <PageLoader />
+
+  if (can(resource, action)) {
+    return <>{children}</>
+  }
+
+  return <Navigate to="/403" replace />
 }
 
 interface ExplorePageGuardProps {

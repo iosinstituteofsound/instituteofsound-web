@@ -200,7 +200,7 @@ function ReleaseRow({ item, onNavigate }: { item: MusicSearchReleaseDto; onNavig
 function TrackRow({ item, onNavigate }: { item: MusicSearchTrackDto; onNavigate: () => void }) {
   return (
     <Link to={item.href} onClick={onNavigate} className="global-search-role-row w-full text-left">
-      <MusicArt coverUrl={undefined} fallback={<Music2 size={16} aria-hidden />} />
+      <MusicArt coverUrl={item.coverUrl} fallback={<Music2 size={16} aria-hidden />} />
       <span className="min-w-0">
         <span className="block truncate text-sm font-medium">{item.title}</span>
         <span className="block truncate text-xs text-muted-foreground">
@@ -460,7 +460,8 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
                       <MusicCard
                         key={`track-${item.id}`}
                         title={item.title}
-                        subtitle={`Track${item.releaseTitle ? ` · ${item.releaseTitle}` : ''}`}
+                        subtitle={`Track${item.artistName ? ` · ${item.artistName}` : ''}${item.releaseTitle ? ` · ${item.releaseTitle}` : ''}`}
+                        coverUrl={item.coverUrl}
                         href={item.href}
                         onNavigate={closeModal}
                         fallback={<Music2 size={28} aria-hidden />}

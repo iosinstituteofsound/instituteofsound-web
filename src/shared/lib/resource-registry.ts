@@ -25,6 +25,7 @@ export const REGISTERED_PAGES = [
   'ArtistDashboardPage',
   'LabelDashboardPage',
   'CuratorDashboardPage',
+  'AdminTracksPage',
 ] as const
 
 export const REGISTERED_COMPONENTS = [] as const

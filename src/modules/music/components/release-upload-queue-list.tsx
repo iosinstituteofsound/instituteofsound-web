@@ -32,8 +32,24 @@ function statusClass(status: string) {
   return ''
 }
 
+function isDuplicateRejected(item: QueuedUpload) {
+  return item.status === 'failed' && item.duplicateCheck?.status === 'flagged'
+}
+
+function queueStatusLabel(item: QueuedUpload, isProcessing: boolean) {
+  if (isDuplicateRejected(item)) return 'rejected'
+  if (item.status === 'pending' && isProcessing) return 'queued'
+  return item.status
+}
+
 function canReorderItem(item: QueuedUpload) {
   return item.status !== 'uploading' && item.status !== 'processing'
+}
+
+function matchScoreLabel(item: QueuedUpload) {
+  const score = item.duplicateCheck?.matchScore
+  if (score == null) return null
+  return `${Math.round(score)}% match`
 }
 
 function SortableQueueItem({
@@ -57,6 +73,9 @@ function SortableQueueItem({
 
   const isActive = item.status === 'uploading' || item.status === 'processing'
 
+  const rejected = isDuplicateRejected(item)
+  const scoreLabel = matchScoreLabel(item)
+
   return (
     <div
       ref={setNodeRef}
@@ -66,6 +85,7 @@ function SortableQueueItem({
         isActive && 'rbl-queue__item--active',
         item.status === 'ready' && 'rbl-queue__item--ready',
         item.status === 'failed' && 'rbl-queue__item--failed',
+        rejected && 'rbl-queue__item--failed',
         isDragging && 'rbl-queue__item--dragging',
       )}
     >
@@ -95,14 +115,19 @@ function SortableQueueItem({
                 {(item.file.size / (1024 * 1024)).toFixed(1)} MB · track {index + 1}
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              {item.duplicateCheck?.status === 'flagged' ? (
-                <span className="rounded-full border border-amber-500/50 bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-300">
-                  Duplicate
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {scoreLabel ? (
+                <span className="rounded-full border border-red-500/50 bg-red-500/15 px-2.5 py-0.5 text-[11px] font-bold tabular-nums text-red-600 dark:text-red-300">
+                  {scoreLabel}
+                </span>
+              ) : null}
+              {rejected ? (
+                <span className="rounded-full border border-red-500/50 bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-600 dark:text-red-300">
+                  Blocked
                 </span>
               ) : null}
               <span className={cn('rbl-queue__status', statusClass(item.status))}>
-                {item.status === 'pending' && queue.isProcessing ? 'queued' : item.status}
+                {queueStatusLabel(item, queue.isProcessing)}
               </span>
               {item.status === 'pending' || item.status === 'failed' ? (
                 <button
@@ -140,24 +165,33 @@ function SortableQueueItem({
             <ProcessingStatus variant="scifi" status="uploaded" progress={item.uploadProgress} />
           ) : null}
 
-          {(item.status === 'processing' || item.status === 'ready' || item.status === 'failed') &&
+          {(item.status === 'processing' || item.status === 'failed') &&
           item.processingStatus !== 'created' ? (
+            <ProcessingStatus
+              variant="scifi"
+              status={rejected ? 'failed' : item.processingStatus}
+              progress={item.processingProgress}
+              errorMessage={item.errorMessage}
+              matchScore={item.duplicateCheck?.matchScore}
+            />
+          ) : null}
+
+          {item.status === 'ready' && item.processingStatus !== 'created' ? (
             <ProcessingStatus
               variant="scifi"
               status={item.processingStatus}
               progress={item.processingProgress}
-              errorMessage={item.errorMessage}
             />
           ) : null}
 
-          {item.duplicateCheck?.status === 'flagged' ? (
+          {rejected && item.duplicateCheck ? (
             <DuplicateTrackAlert duplicateCheck={item.duplicateCheck} variant="banner" />
           ) : null}
 
           {item.status === 'failed' ? (
             <button type="button" className="rbl-btn" onClick={() => queue.retryItem(item.id)}>
               <RotateCcw className="size-3.5" />
-              Retry upload
+              {rejected ? 'Upload different audio' : 'Retry upload'}
             </button>
           ) : null}
         </div>

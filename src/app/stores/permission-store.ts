@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { UserAuthorization } from '@/shared/types/auth.types'
 import type { SidebarMenuItemDto } from '@/shared/types/sidebar.types'
+import { resolveIsSuperAdmin } from '@/shared/services/permission/super-admin'
 import { toPermissionSlug, type PermissionAction } from '@/shared/services/permission/permission.service'
 
 interface PermissionState {
@@ -31,7 +32,7 @@ export const usePermissionStore = create<PermissionState>((set) => ({
       permissions: authorization.permissions ?? [],
       resourceNames: authorization.resourceNames ?? [],
       sidebarPaths: [],
-      isSuperAdmin: authorization.isSuperAdmin ?? false,
+      isSuperAdmin: resolveIsSuperAdmin(authorization),
       hydrated: true,
       sidebarSynced: false,
     }),

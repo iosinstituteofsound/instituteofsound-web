@@ -33,7 +33,6 @@ import {
 } from '@/modules/player/lib/audio-fade'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
-import { DuplicateTrackAlert } from '@/modules/music/components/duplicate-track-alert'
 import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
 import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import { cn } from '@/shared/lib/cn'
@@ -504,13 +503,6 @@ export function UniversalPlayer() {
               }
             >
               <p className="ios-universal-player__title">{currentTrack.title}</p>
-              {currentTrack.duplicateInfo?.isDuplicate ? (
-                <DuplicateTrackAlert
-                  duplicateInfo={currentTrack.duplicateInfo}
-                  variant="inline"
-                  className="mt-1"
-                />
-              ) : null}
               {currentTrack.artist ? (
                 <p className="ios-universal-player__artist">{currentTrack.artist}</p>
               ) : null}

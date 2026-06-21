@@ -14,6 +14,7 @@ interface ProcessingStatusProps {
   status: string
   progress: number
   errorMessage?: string
+  matchScore?: number
   variant?: 'default' | 'scifi'
 }
 
@@ -21,11 +22,18 @@ export function ProcessingStatus({
   status,
   progress,
   errorMessage,
+  matchScore,
   variant = 'default',
 }: ProcessingStatusProps) {
   const label = STAGE_LABELS[status] ?? status
   const isFailed = status === 'failed'
   const isReady = status === 'ready'
+  const matchLabel =
+    matchScore != null && status === 'fingerprinting'
+      ? `${Math.round(matchScore)}% similarity detected`
+      : matchScore != null && isFailed
+        ? `${Math.round(matchScore)}% match with existing track`
+        : null
 
   if (variant === 'scifi') {
     return (
@@ -37,6 +45,7 @@ export function ProcessingStatus({
         <div className="rbl-proc__track">
           <div className="rbl-proc__beam" style={{ width: `${Math.min(100, progress)}%` }} />
         </div>
+        {matchLabel ? <p className="rbl-proc__error text-amber-600 dark:text-amber-400">{matchLabel}</p> : null}
         {errorMessage ? <p className="rbl-proc__error">{errorMessage}</p> : null}
       </div>
     )

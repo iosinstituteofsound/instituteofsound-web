@@ -1,4 +1,5 @@
 import type { LayoutSummary, UserAuthorization } from '@/shared/types/auth.types'
+import { resolveIsSuperAdmin } from '@/shared/services/permission/super-admin'
 
 const ROUTE_BY_RESOURCE: Record<string, string> = {
   FeedPage: '/home',
@@ -8,6 +9,7 @@ const ROUTE_BY_RESOURCE: Record<string, string> = {
   EditorDashboardPage: '/editor',
   ArtistDashboardPage: '/artist',
   LabelDashboardPage: '/label',
+  AdminTracksPage: '/music/tracks',
 }
 
 function routeForResource(name: string, authorization?: UserAuthorization | null): string | undefined {
@@ -16,7 +18,7 @@ function routeForResource(name: string, authorization?: UserAuthorization | null
 }
 
 function canAccessRoute(route: string, authorization?: UserAuthorization | null): boolean {
-  if (!authorization || authorization.isSuperAdmin) return true
+  if (!authorization || resolveIsSuperAdmin(authorization)) return true
 
   const resourceNames = new Set(authorization.resourceNames ?? [])
   const resourceForRoute = authorization.resources?.find((resource) => resource.path === route)
