@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getArtistProfile, listArtistTracks } from '@/modules/music/api/music.api'
 import { formatArtistTrackTitle } from '@/modules/music/lib/track-title-format'
+import { DuplicateTrackAlert } from '@/modules/music/components/duplicate-track-alert'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
 import { formatDuration } from '@/modules/music/types/release-builder.types'
 
@@ -70,6 +71,7 @@ export function ReleaseReviewStep({
   })
 
   const readyTracks = queue.filter((item) => item.status === 'ready')
+  const flaggedTracks = readyTracks.filter((item) => item.duplicateCheck?.status === 'flagged')
   const canPublish = validationErrors.length === 0 && readyTracks.length > 0
   const combinedGenre = [genre.trim(), secondaryGenre.trim()].filter(Boolean).join(' / ')
   const artistName = profile?.displayName ?? 'Artist'
@@ -128,6 +130,25 @@ export function ReleaseReviewStep({
               ))}
             </ul>
           </div>
+        </div>
+      ) : null}
+
+      {flaggedTracks.length > 0 ? (
+        <div className="space-y-3">
+          <div className="rbl-alert">
+            <AlertTriangle className="rbl-text-warn mt-0.5 size-5 shrink-0" />
+            <div>
+              <p className="rbl-alert__title">
+                {flaggedTracks.length} republished track{flaggedTracks.length > 1 ? 's' : ''} detected
+              </p>
+              <p className="text-sm text-muted-foreground">
+                You can still publish, but listeners will see a duplicate warning on these tracks.
+              </p>
+            </div>
+          </div>
+          {flaggedTracks.map((track) => (
+            <DuplicateTrackAlert key={track.id} duplicateCheck={track.duplicateCheck} variant="banner" />
+          ))}
         </div>
       ) : null}
 

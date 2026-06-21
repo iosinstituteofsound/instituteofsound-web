@@ -159,6 +159,7 @@ export function useAudioUploadQueue() {
             processingStatus: job.status,
             processingProgress: job.progress,
             errorMessage: job.errorMessage,
+            duplicateCheck: job.duplicateCheck,
           })
 
           if (job.status === 'ready' && job.trackId) {
@@ -168,6 +169,7 @@ export function useAudioUploadQueue() {
               trackId: job.trackId,
               processingStatus: 'ready',
               processingProgress: 100,
+              duplicateCheck: job.duplicateCheck,
             })
             return
           }

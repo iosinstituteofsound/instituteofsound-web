@@ -11,6 +11,16 @@ export interface PlayerTrack {
   trackId?: string
   releaseId?: string
   artistProfileId?: string
+  duplicateInfo?: {
+    isDuplicate: boolean
+    matchScore?: number
+    original?: {
+      trackId: string
+      title: string
+      artistName: string
+      releaseId?: string
+    }
+  }
 }
 
 export type RepeatMode = 'off' | 'all' | 'one'

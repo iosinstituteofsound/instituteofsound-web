@@ -1,5 +1,5 @@
 import type { PlayTrackOptions, PlayerTrack, PlayPlaylistOptions, QueueSource } from '@/modules/player/types/player.types'
-import type { PlaylistDetailDto, PlaylistTrackRefDto, ReleaseDetailDto } from '@/modules/music/types/music.types'
+import type { PlaylistDetailDto, PlaylistTrackRefDto, ReleaseDetailDto, TrackDto } from '@/modules/music/types/music.types'
 import type { PlaylistDto } from '@/modules/explore/types/explore.types'
 
 export function fisherYatesShuffle<T>(items: T[]): T[] {
@@ -24,6 +24,7 @@ export function trackToPlayerTrack(
     releaseId?: string
     artistProfileId?: string
     coverUrl?: string
+    duplicateInfo?: TrackDto['duplicateInfo']
   },
   artworkUrl?: string,
 ): PlayerTrack | null {
@@ -39,6 +40,7 @@ export function trackToPlayerTrack(
     artworkUrl: track.coverUrl ?? artworkUrl,
     releaseId: track.releaseId,
     artistProfileId: track.artistProfileId,
+    duplicateInfo: track.duplicateInfo,
   }
 }
 
@@ -74,6 +76,7 @@ export function releaseToPlayerQueue(release: ReleaseDetailDto): PlayerTrack[] {
         durationSec: t.durationSec,
         releaseId: release.id,
         artistProfileId: release.artistProfileId,
+        duplicateInfo: t.duplicateInfo,
       })),
       release.coverUrl,
     )

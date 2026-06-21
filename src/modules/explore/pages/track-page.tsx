@@ -7,6 +7,7 @@ import { ReleaseOptionsMenu } from '@/modules/explore/components/release-options
 import { ReleasePlayerBar } from '@/modules/explore/components/release-player-bar'
 import { ReleaseRelatedRail } from '@/modules/explore/components/release-related-rail'
 import { ReleaseTrackList } from '@/modules/explore/components/release-track-list'
+import { DuplicateTrackAlert } from '@/modules/music/components/duplicate-track-alert'
 import { ReleaseVinylArt } from '@/modules/explore/components/release-vinyl-art'
 import { useExplore } from '@/modules/explore/hooks/use-explore'
 import {
@@ -187,6 +188,9 @@ export function TrackPage() {
             <div className="explore-release-hero__body">
               <span className="explore-release-hero__tag ios-mh-kicker">Track</span>
               <h1 className="explore-release-hero__title">{track.title}</h1>
+              {track.duplicateInfo?.isDuplicate ? (
+                <DuplicateTrackAlert duplicateInfo={track.duplicateInfo} variant="banner" className="mt-4" />
+              ) : null}
               {release.artistName ? (
                 <p className="explore-release-hero__artist">{release.artistName}</p>
               ) : null}

@@ -1,6 +1,7 @@
 const STAGE_LABELS: Record<string, string> = {
   created: 'Initializing uplink',
   uploaded: 'Signal received',
+  fingerprinting: 'Fingerprint scan',
   analyzing: 'Spectral analysis',
   normalizing: 'Calibrating loudness',
   transcoding: 'Encoding stream matrix',

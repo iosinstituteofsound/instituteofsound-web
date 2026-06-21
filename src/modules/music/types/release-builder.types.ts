@@ -1,3 +1,5 @@
+import type { UploadDuplicateCheck } from '@/modules/music/types/music.types'
+
 export type ReleaseBuilderStep = 'upload' | 'details' | 'schedule' | 'review'
 
 export type QueueItemStatus = 'pending' | 'uploading' | 'processing' | 'ready' | 'failed'
@@ -14,6 +16,7 @@ export interface QueuedUpload {
   processingProgress: number
   processingStatus: string
   errorMessage?: string
+  duplicateCheck?: UploadDuplicateCheck
 }
 
 export interface ReleaseBuilderState {

@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getArtistProfile } from '@/modules/music/api/music.api'
 import type { useAudioUploadQueue } from '@/modules/music/hooks/use-audio-upload-queue'
 import { ProcessingStatus } from '@/modules/music/components/processing-status'
+import { DuplicateTrackAlert } from '@/modules/music/components/duplicate-track-alert'
 import { formatArtistTrackTitle } from '@/modules/music/lib/track-title-format'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
 import { Input } from '@/shared/components/ui/input'
@@ -142,6 +143,10 @@ function SortableQueueItem({
               progress={item.processingProgress}
               errorMessage={item.errorMessage}
             />
+          ) : null}
+
+          {item.duplicateCheck?.status === 'flagged' ? (
+            <DuplicateTrackAlert duplicateCheck={item.duplicateCheck} variant="banner" />
           ) : null}
 
           {item.status === 'failed' ? (

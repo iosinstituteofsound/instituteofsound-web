@@ -1,5 +1,26 @@
 export type TrackStatus = 'processing' | 'ready' | 'failed'
 
+export type DuplicateCheckStatus = 'pending' | 'clear' | 'flagged'
+
+export interface DuplicateOriginalRef {
+  trackId: string
+  title: string
+  artistName: string
+  releaseId?: string
+}
+
+export interface TrackDuplicateInfo {
+  isDuplicate: boolean
+  matchScore?: number
+  original?: DuplicateOriginalRef
+}
+
+export interface UploadDuplicateCheck {
+  status: DuplicateCheckStatus
+  matchScore?: number
+  original?: DuplicateOriginalRef
+}
+
 export interface TrackDto {
   id: string
   artistProfileId: string
@@ -10,6 +31,7 @@ export interface TrackDto {
   audioUrl?: string
   status: TrackStatus
   playCount: number
+  duplicateInfo?: TrackDuplicateInfo
 }
 
 export interface AudioUploadJobDto {
@@ -20,6 +42,7 @@ export interface AudioUploadJobDto {
   trackId?: string
   title?: string
   originalFilename: string
+  duplicateCheck?: UploadDuplicateCheck
 }
 
 export interface ReleaseDetailDto {
