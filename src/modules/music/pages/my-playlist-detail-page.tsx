@@ -3,11 +3,5 @@ import { PlaylistOwnerDetailView } from '@/modules/music/components/playlists/pl
 
 export function MyPlaylistDetailPage() {
   const { slug = '' } = useParams()
-  return (
-    <PlaylistOwnerDetailView
-      mode="listener"
-      slug={slug}
-      basePath="/library/playlists"
-    />
-  )
+  return <PlaylistOwnerDetailView slug={slug} />
 }

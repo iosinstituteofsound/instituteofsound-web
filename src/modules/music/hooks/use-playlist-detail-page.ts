@@ -3,35 +3,36 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
+  PLAYLIST_BASE_PATH,
   playlistApi,
   playlistDetailQueryKey,
   playlistListQueryKey,
-  type PlaylistOwnerMode,
   type PlaylistUpdateInput,
 } from '@/modules/music/lib/playlist-api'
 import { playlistCapabilities } from '@/modules/music/lib/playlist-capabilities'
-import { searchArtistPlaylistTracks } from '@/modules/music/api/music.api'
 import { searchListenerPlaylistTracks } from '@/modules/music/lib/listener-playlist-search'
 import { playPlaylistFromDetail } from '@/modules/music/lib/player-queue'
 import type { PlaylistTrackSearchResultDto } from '@/modules/music/types/music.types'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 
 type UsePlaylistDetailPageOptions = {
-  mode: PlaylistOwnerMode
   slug: string
-  basePath: string
+  basePath?: string
 }
 
-export function usePlaylistDetailPage({ mode, slug, basePath }: UsePlaylistDetailPageOptions) {
+export function usePlaylistDetailPage({
+  slug,
+  basePath = PLAYLIST_BASE_PATH,
+}: UsePlaylistDetailPageOptions) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const playTrack = usePlayerStore((s) => s.playTrack)
   const shuffleQueueAnimated = usePlayerStore((s) => s.shuffleQueueAnimated)
-  const capabilities = playlistCapabilities(mode)
+  const capabilities = playlistCapabilities()
 
   const { data: playlist, isLoading, isError } = useQuery({
-    queryKey: playlistDetailQueryKey(mode, slug),
-    queryFn: () => playlistApi.get(mode, slug),
+    queryKey: playlistDetailQueryKey(slug),
+    queryFn: () => playlistApi.get(slug),
     enabled: Boolean(slug),
   })
 
@@ -41,13 +42,13 @@ export function usePlaylistDetailPage({ mode, slug, basePath }: UsePlaylistDetai
   )
 
   const searchTracks = async (q: string, limit = 10): Promise<PlaylistTrackSearchResultDto> =>
-    mode === 'artist' ? searchArtistPlaylistTracks(q, limit) : searchListenerPlaylistTracks(q, limit)
+    searchListenerPlaylistTracks(q, limit)
 
   const invalidatePlaylist = async (nextSlug?: string) => {
-    await queryClient.invalidateQueries({ queryKey: playlistListQueryKey(mode) })
-    await queryClient.invalidateQueries({ queryKey: playlistDetailQueryKey(mode, slug) })
+    await queryClient.invalidateQueries({ queryKey: playlistListQueryKey() })
+    await queryClient.invalidateQueries({ queryKey: playlistDetailQueryKey(slug) })
     if (nextSlug && nextSlug !== slug) {
-      await queryClient.invalidateQueries({ queryKey: playlistDetailQueryKey(mode, nextSlug) })
+      await queryClient.invalidateQueries({ queryKey: playlistDetailQueryKey(nextSlug) })
       navigate(`${basePath}/${nextSlug}`, { replace: true })
     }
   }
@@ -55,7 +56,7 @@ export function usePlaylistDetailPage({ mode, slug, basePath }: UsePlaylistDetai
   const updateMutation = useMutation({
     mutationFn: (input: PlaylistUpdateInput) => {
       if (!playlist) throw new Error('Playlist not found')
-      return playlistApi.update(mode, playlist.id, input)
+      return playlistApi.update(playlist.id, input)
     },
     onSuccess: async (updated) => {
       toast.success('Playlist updated')
@@ -66,7 +67,7 @@ export function usePlaylistDetailPage({ mode, slug, basePath }: UsePlaylistDetai
   const addTrackMutation = useMutation({
     mutationFn: (trackId: string) => {
       if (!playlist) throw new Error('Playlist not found')
-      return playlistApi.addTrack(mode, playlist.id, trackId)
+      return playlistApi.addTrack(playlist.id, trackId)
     },
     onSuccess: async () => {
       toast.success('Track added')
@@ -77,7 +78,7 @@ export function usePlaylistDetailPage({ mode, slug, basePath }: UsePlaylistDetai
   const removeTrackMutation = useMutation({
     mutationFn: (trackId: string) => {
       if (!playlist) throw new Error('Playlist not found')
-      return playlistApi.removeTrack(mode, playlist.id, trackId)
+      return playlistApi.removeTrack(playlist.id, trackId)
     },
     onSuccess: async () => {
       toast.success('Track removed')
@@ -88,7 +89,7 @@ export function usePlaylistDetailPage({ mode, slug, basePath }: UsePlaylistDetai
   const reorderMutation = useMutation({
     mutationFn: (trackIds: string[]) => {
       if (!playlist) throw new Error('Playlist not found')
-      return playlistApi.reorderTracks(mode, playlist.id, trackIds)
+      return playlistApi.reorderTracks(playlist.id, trackIds)
     },
     onSuccess: async () => {
       await invalidatePlaylist()
@@ -101,30 +102,30 @@ export function usePlaylistDetailPage({ mode, slug, basePath }: UsePlaylistDetai
   const deleteMutation = useMutation({
     mutationFn: () => {
       if (!playlist) throw new Error('Playlist not found')
-      return playlistApi.delete(mode, playlist.id)
+      return playlistApi.delete(playlist.id)
     },
     onSuccess: async () => {
       toast.success('Playlist deleted')
-      await queryClient.invalidateQueries({ queryKey: playlistListQueryKey(mode) })
+      await queryClient.invalidateQueries({ queryKey: playlistListQueryKey() })
       navigate(basePath)
     },
   })
 
   const playAtIndex = (index: number) => {
     if (!playlist) return
-    playPlaylistFromDetail(playlist, playTrack, { startIndex: index, isOwn: mode === 'listener' })
+    playPlaylistFromDetail(playlist, playTrack, { startIndex: index, isOwn: true })
   }
 
   const handlePlayAll = () => {
     if (!playlist) return
-    playPlaylistFromDetail(playlist, playTrack, { isOwn: mode === 'listener' })
+    playPlaylistFromDetail(playlist, playTrack, { isOwn: true })
   }
 
   const handleShufflePlay = async () => {
     if (!playlist) return
     playPlaylistFromDetail(playlist, playTrack, {
       shuffled: true,
-      isOwn: mode === 'listener',
+      isOwn: true,
     })
     await shuffleQueueAnimated()
   }

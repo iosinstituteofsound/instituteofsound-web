@@ -5,6 +5,7 @@ import { getArtistProfile, listArtistTracks } from '@/modules/music/api/music.ap
 import { formatArtistTrackTitle } from '@/modules/music/lib/track-title-format'
 import { DuplicateTrackAlert } from '@/modules/music/components/duplicate-track-alert'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
+import { formatReleaseGoLivePreview } from '@/modules/music/lib/release-schedule'
 import { formatDuration } from '@/modules/music/types/release-builder.types'
 
 interface ReleaseReviewStepProps {
@@ -20,6 +21,7 @@ interface ReleaseReviewStepProps {
   releaseHour: string
   releaseMinute: string
   releasePeriod: 'AM' | 'PM'
+  releaseTimezone: string
   validationErrors: string[]
   isPublishing: boolean
   onPublish: () => void
@@ -31,16 +33,10 @@ function formatReleaseDateTime(
   hour: string,
   minute: string,
   period: 'AM' | 'PM',
+  timeZone: string,
 ): string {
   if (!date) return 'Not set'
-  const formatted = new Date(`${date}T12:00:00`).toLocaleDateString(undefined, {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-  if (!timeEnabled) return formatted
-  return `${formatted} at ${hour}:${minute} ${period}`
+  return formatReleaseGoLivePreview(date, timeEnabled, hour, minute, period, timeZone)
 }
 
 export function ReleaseReviewStep({
@@ -56,6 +52,7 @@ export function ReleaseReviewStep({
   releaseHour,
   releaseMinute,
   releasePeriod,
+  releaseTimezone,
   validationErrors,
   isPublishing,
   onPublish,
@@ -94,7 +91,7 @@ export function ReleaseReviewStep({
     { label: 'Language', value: language || '—' },
     {
       label: 'Release Date',
-      value: formatReleaseDateTime(releaseDate, releaseTimeEnabled, releaseHour, releaseMinute, releasePeriod),
+      value: formatReleaseDateTime(releaseDate, releaseTimeEnabled, releaseHour, releaseMinute, releasePeriod, releaseTimezone),
       error: !releaseDate,
     },
     { label: 'Artist', value: profile?.displayName ?? '—' },
@@ -104,10 +101,10 @@ export function ReleaseReviewStep({
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <header className="rbl-section-head">
-          <p className="rbl-section-head__kicker">Phase 04 · Final verification</p>
-          <h2 className="rbl-section-head__title">Review Your Release</h2>
+          <p className="rbl-section-head__kicker ios-mh-kicker">Review</p>
+          <h2 className="rbl-section-head__title">Review your release</h2>
           <p className="rbl-section-head__desc">
-            Scan all transmission data before initiating planetary deployment.
+            Check everything looks right before you publish or schedule.
           </p>
         </header>
         <button
@@ -117,7 +114,7 @@ export function ReleaseReviewStep({
           onClick={onPublish}
         >
           {!canPublish ? <Lock className="size-4" /> : <Rocket className="size-4" />}
-          {isPublishing ? 'Launching…' : 'Publish Release'}
+          {isPublishing ? 'Creating…' : 'Create release'}
         </button>
       </div>
 
@@ -125,7 +122,7 @@ export function ReleaseReviewStep({
         <div className="rbl-alert">
           <AlertTriangle className="rbl-text-warn mt-0.5 size-5 shrink-0" />
           <div>
-            <p className="rbl-alert__title">Calibration incomplete — resolve before launch</p>
+            <p className="rbl-alert__title">Fix these items before creating your release</p>
             <ul className="rbl-alert__list">
               {validationErrors.map((err) => (
                 <li key={err}>{err}</li>
@@ -232,7 +229,7 @@ export function ReleaseReviewStep({
           onClick={onPublish}
         >
           {!canPublish ? <Lock className="size-4" /> : <Rocket className="size-4" />}
-          {isPublishing ? 'Launching…' : 'Publish Release'}
+          {isPublishing ? 'Creating…' : 'Create release'}
         </button>
       </div>
     </div>

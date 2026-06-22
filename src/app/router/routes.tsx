@@ -673,10 +673,14 @@ export const router = createBrowserRouter([
       },
       {
         path: 'artist/submit',
-        element: <Navigate to="/artist/upload" replace />,
+        element: <Navigate to="/artist/releases/new" replace />,
       },
       {
         path: 'artist/upload',
+        element: <Navigate to="/artist/releases/new" replace />,
+      },
+      {
+        path: 'artist/releases/new',
         element: (
           <ResourceGuard name="ArtistDashboardPage">
             <Lazy>
@@ -706,17 +710,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'artist/playlists/:slug',
-        element: (
-          <ResourceGuard name="ArtistDashboardPage">
-            <Lazy>
-              <ArtistDashboardPage />
-            </Lazy>
-          </ResourceGuard>
-        ),
-      },
-      {
-        path: 'artist/playlists',
+        path: 'artist/playlists/*',
         element: (
           <ResourceGuard name="ArtistDashboardPage">
             <Lazy>
@@ -727,13 +721,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'artist/profile',
-        element: (
-          <ResourceGuard name="ArtistDashboardPage">
-            <Lazy>
-              <ArtistDashboardPage />
-            </Lazy>
-          </ResourceGuard>
-        ),
+        element: <Navigate to="/profile/edit" replace />,
       },
       {
         path: 'artist/analytics',

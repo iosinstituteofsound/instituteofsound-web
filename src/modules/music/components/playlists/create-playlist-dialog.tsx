@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
-import type { PlaylistCreateInput, PlaylistOwnerMode } from '@/modules/music/lib/playlist-api'
+import type { PlaylistCreateInput } from '@/modules/music/lib/playlist-api'
 import { playlistCapabilities } from '@/modules/music/lib/playlist-capabilities'
 import { ProfileImageUpload } from '@/modules/profile/components/profile-image-upload'
 import { Button } from '@/shared/components/ui/button'
@@ -19,7 +19,6 @@ import { Textarea } from '@/shared/components/ui/textarea'
 type CreatePlaylistDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  mode: PlaylistOwnerMode
   onSubmit: (input: PlaylistCreateInput) => void
   isSubmitting?: boolean
 }
@@ -27,11 +26,10 @@ type CreatePlaylistDialogProps = {
 export function CreatePlaylistDialog({
   open,
   onOpenChange,
-  mode,
   onSubmit,
   isSubmitting,
 }: CreatePlaylistDialogProps) {
-  const { hasRichMetadata } = playlistCapabilities(mode)
+  const { hasRichMetadata } = playlistCapabilities()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [coverUrl, setCoverUrl] = useState('')
@@ -68,7 +66,7 @@ export function CreatePlaylistDialog({
             <DialogTitle>New playlist</DialogTitle>
             <DialogDescription>
               {hasRichMetadata
-                ? 'Add a title, cover, and description for your artist playlist.'
+                ? 'Add a title, cover, and description for your playlist.'
                 : 'Give your playlist a name and choose who can see it.'}
             </DialogDescription>
           </DialogHeader>

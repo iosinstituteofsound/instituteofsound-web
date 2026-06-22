@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2, Plus, Search } from 'lucide-react'
-import { searchArtistPlaylistTracks } from '@/modules/music/api/music.api'
+import { searchListenerPlaylistTracks } from '@/modules/music/lib/listener-playlist-search'
 import type { PlaylistTrackSearchItemDto, PlaylistTrackSearchResultDto } from '@/modules/music/types/music.types'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
@@ -133,8 +133,8 @@ export function PlaylistTrackSearchPanel({
   isAdding,
   variant = 'default',
   hideHeader = false,
-  searchFn = searchArtistPlaylistTracks,
-  searchHint = 'Search across your releases, other releases, and site tracks.',
+  searchFn = searchListenerPlaylistTracks,
+  searchHint = 'Search the site catalog to add tracks.',
 }: PlaylistTrackSearchPanelProps) {
   const [trackQuery, setTrackQuery] = useState('')
   const debouncedQuery = useDebouncedValue(trackQuery, 300)

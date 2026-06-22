@@ -1,52 +1,36 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { invalidateArtistSurfaceQueries } from '@/modules/explore/lib/invalidate-artist-surface'
-import {
-  createRelease,
-  deleteRelease,
-  listArtistReleases,
-  listArtistTracks,
-} from '@/modules/music/api/music.api'
-import { Page, PageHeader, PageTitle, PageSection } from '@/shared/components/layout/page-shell'
-import { Button } from '@/shared/components/ui/button'
-import { Input } from '@/shared/components/ui/input'
+import { filterReleases } from '@/modules/explore/lib/release-meta'
+import type { ReleaseFilter } from '@/modules/explore/types/explore.types'
+import { deleteRelease, listArtistReleases } from '@/modules/music/api/music.api'
+import { ArtistReleasesGrid } from '@/modules/music/components/artist-releases-grid'
+import { artistReleaseBreadcrumbs } from '@/modules/music/lib/artist-breadcrumb'
+import { toReleaseDto } from '@/modules/music/lib/release-map'
+import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
 import { Loader } from '@/shared/components/feedback/loader'
-import { Badge } from '@/shared/components/ui/badge'
+import { Page, PageSection } from '@/shared/components/layout/page-shell'
+import { cn } from '@/shared/lib/cn'
+import '@/modules/explore/styles/releases-page.css'
+import '@/modules/music/styles/artist-dashboard-home.css'
+import '@/modules/music/styles/artist-releases-page.css'
+
+const TYPE_FILTERS: { value: ReleaseFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'album', label: 'Albums' },
+  { value: 'ep', label: 'EPs' },
+  { value: 'single', label: 'Singles' },
+]
 
 export function MusicReleasesPage() {
   const queryClient = useQueryClient()
+  const [filter, setFilter] = useState<ReleaseFilter>('all')
+
   const { data: releases, isLoading } = useQuery({
     queryKey: ['artist-releases'],
     queryFn: listArtistReleases,
-  })
-  const { data: tracks } = useQuery({
-    queryKey: ['artist-tracks'],
-    queryFn: listArtistTracks,
-  })
-
-  const [showCreate, setShowCreate] = useState(false)
-  const [title, setTitle] = useState('')
-  const [type, setType] = useState<'single' | 'ep' | 'album'>('album')
-  const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>([])
-
-  const createMutation = useMutation({
-    mutationFn: () =>
-      createRelease({
-        title,
-        type,
-        trackIds: selectedTrackIds,
-      }),
-    onSuccess: () => {
-      toast.success('Release created')
-      void queryClient.invalidateQueries({ queryKey: ['artist-releases'] })
-      invalidateArtistSurfaceQueries(queryClient)
-      setShowCreate(false)
-      setTitle('')
-      setSelectedTrackIds([])
-    },
   })
 
   const deleteMutation = useMutation({
@@ -58,110 +42,105 @@ export function MusicReleasesPage() {
     },
   })
 
-  const toggleTrack = (id: string) => {
-    setSelectedTrackIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    )
-  }
+  const filtered = useMemo(() => {
+    const items = releases ?? []
+    const dtos = items.map(toReleaseDto)
+    const filteredDtos = filterReleases(dtos, filter)
+    const ids = new Set(filteredDtos.map((item) => item.id))
+    return items.filter((item) => ids.has(item.id))
+  }, [releases, filter])
+
+  const albumsAndEps = useMemo(
+    () => filtered.filter((item) => item.type === 'album' || item.type === 'ep'),
+    [filtered],
+  )
+  const singles = useMemo(() => filtered.filter((item) => item.type === 'single'), [filtered])
+  const showGrouped = filter === 'all' && albumsAndEps.length > 0 && singles.length > 0
+
+  const filterCounts = useMemo(() => {
+    const items = releases ?? []
+    const dtos = items.map(toReleaseDto)
+    return TYPE_FILTERS.map((option) => ({
+      ...option,
+      count: filterReleases(dtos, option.value).length,
+    }))
+  }, [releases])
 
   return (
     <Page>
-      <PageHeader>
-        <PageTitle>Releases</PageTitle>
-      </PageHeader>
-      <PageSection className="space-y-6">
-        <div className="flex gap-3">
-          <Button onClick={() => setShowCreate(!showCreate)}>New Release</Button>
-          <Button variant="outline" asChild>
-            <Link to="/artist/upload">Upload tracks</Link>
-          </Button>
+      <PageSection className="artist-releases-page releases-page releases-page--embed">
+        <AppBreadcrumb
+          surface
+          className="app-breadcrumb--dashboard"
+          items={artistReleaseBreadcrumbs.releases()}
+          description="Your published and scheduled releases."
+          actions={
+            <Link to="/artist/releases/new" className="ios-artist-dashboard__upload-btn">
+              New Release
+            </Link>
+          }
+        />
+
+        <div className="artist-releases-page__filters releases-page__filters" role="tablist" aria-label="Release type filters">
+          {filterCounts.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="tab"
+              aria-selected={filter === option.value ? 'true' : 'false'}
+              className={cn(
+                'releases-page__filter',
+                filter === option.value && 'releases-page__filter--on',
+              )}
+              onClick={() => setFilter(option.value)}
+            >
+              {option.label}
+              {option.count > 0 ? ` (${option.count})` : ''}
+            </button>
+          ))}
         </div>
 
-        {showCreate ? (
-          <div className="space-y-4 rounded-lg border p-4">
-            <Input placeholder="Release title" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <select
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-              value={type}
-              onChange={(e) => setType(e.target.value as 'single' | 'ep' | 'album')}
-            >
-              <option value="single">Single</option>
-              <option value="ep">EP</option>
-              <option value="album">Album</option>
-            </select>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Attach tracks</p>
-              {(tracks ?? [])
-                .filter((t) => t.status === 'ready')
-                .map((t) => (
-                  <label key={t.id} className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={selectedTrackIds.includes(t.id)}
-                      onChange={() => toggleTrack(t.id)}
-                    />
-                    {t.title}
-                  </label>
-                ))}
-            </div>
-            <Button
-              onClick={() => createMutation.mutate()}
-              disabled={!title || !selectedTrackIds.length || createMutation.isPending}
-            >
-              Create & Publish
-            </Button>
+        {isLoading ? <Loader className="py-12" /> : null}
+
+        {!isLoading && showGrouped ? (
+          <div className="space-y-8">
+            <section className="artist-releases-page__section" aria-labelledby="artist-albums-heading">
+              <header className="artist-releases-page__section-head">
+                <p className="ios-mh-kicker">:: Catalog</p>
+                <h2 id="artist-albums-heading" className="artist-releases-page__section-title">
+                  Albums / EP
+                </h2>
+              </header>
+              <ArtistReleasesGrid
+                releases={albumsAndEps}
+                onDelete={(id) => deleteMutation.mutate(id)}
+                isDeleting={deleteMutation.isPending}
+              />
+            </section>
+
+            <section className="artist-releases-page__section" aria-labelledby="artist-singles-heading">
+              <header className="artist-releases-page__section-head">
+                <p className="ios-mh-kicker">:: Singles</p>
+                <h2 id="artist-singles-heading" className="artist-releases-page__section-title">
+                  Singles
+                </h2>
+              </header>
+              <ArtistReleasesGrid
+                releases={singles}
+                onDelete={(id) => deleteMutation.mutate(id)}
+                isDeleting={deleteMutation.isPending}
+              />
+            </section>
           </div>
         ) : null}
 
-        {isLoading ? <Loader /> : null}
-
-        <div className="space-y-3">
-          {(releases ?? []).map((release) => (
-            <div key={release.id} className="flex items-start gap-4 rounded-lg border p-4">
-              <div className="size-16 shrink-0 overflow-hidden rounded-md border bg-muted">
-                {release.coverUrl ? (
-                  <img src={release.coverUrl} alt="" className="size-full object-cover" />
-                ) : (
-                  <div className="flex size-full items-center justify-center text-xs font-semibold uppercase text-muted-foreground">
-                    {release.title.slice(0, 2)}
-                  </div>
-                )}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold">{release.title}</p>
-                <p className="text-sm capitalize text-muted-foreground">
-                  {release.type} · {release.tracks.length} track{release.tracks.length === 1 ? '' : 's'}
-                  {release.genre ? ` · ${release.genre}` : ''}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {release.tracks.map((t) => (
-                    <Badge key={t.id} variant="secondary">
-                      {t.trackNumber}. {t.title}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex shrink-0 gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={`/artist/releases/${release.id}/edit`}>
-                    <Pencil className="size-3.5" />
-                    Edit
-                  </Link>
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => deleteMutation.mutate(release.id)}
-                  disabled={deleteMutation.isPending}
-                >
-                  Delete
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+        {!isLoading && !showGrouped ? (
+          <ArtistReleasesGrid
+            releases={filtered}
+            onDelete={(id) => deleteMutation.mutate(id)}
+            isDeleting={deleteMutation.isPending}
+          />
+        ) : null}
       </PageSection>
     </Page>
   )

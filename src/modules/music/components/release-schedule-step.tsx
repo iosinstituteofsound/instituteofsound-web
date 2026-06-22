@@ -8,6 +8,11 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select'
 import { ReleaseDatePicker } from '@/modules/music/components/release-date-picker'
+import {
+  COMMON_RELEASE_TIMEZONES,
+  formatReleaseGoLivePreview,
+  getDefaultReleaseTimezone,
+} from '@/modules/music/lib/release-schedule'
 
 interface ReleaseScheduleStepProps {
   releaseDate: string
@@ -20,6 +25,8 @@ interface ReleaseScheduleStepProps {
   onReleaseMinuteChange: (value: string) => void
   releasePeriod: 'AM' | 'PM'
   onReleasePeriodChange: (value: 'AM' | 'PM') => void
+  releaseTimezone: string
+  onReleaseTimezoneChange: (value: string) => void
 }
 
 export function ReleaseScheduleStep({
@@ -33,22 +40,32 @@ export function ReleaseScheduleStep({
   onReleaseMinuteChange,
   releasePeriod,
   onReleasePeriodChange,
+  releaseTimezone,
+  onReleaseTimezoneChange,
 }: ReleaseScheduleStepProps) {
   const today = new Date().toISOString().slice(0, 10)
+  const preview = formatReleaseGoLivePreview(
+    releaseDate,
+    releaseTimeEnabled,
+    releaseHour,
+    releaseMinute,
+    releasePeriod,
+    releaseTimezone || getDefaultReleaseTimezone(),
+  )
 
   return (
     <div className="space-y-8">
       <header className="rbl-section-head">
-        <p className="rbl-section-head__kicker">Phase 03 · Orbital schedule</p>
-        <h2 className="rbl-section-head__title">Plan Your Release</h2>
+        <p className="rbl-section-head__kicker ios-mh-kicker">Schedule</p>
+        <h2 className="rbl-section-head__title">Plan your release</h2>
         <p className="rbl-section-head__desc">
-          Lock in your launch coordinates. Scheduled releases deploy automatically on the selected stellar date.
+          Choose when your release goes live. It stays private until the scheduled date and time.
         </p>
       </header>
 
       <section className="rbl-panel">
         <div className="rbl-panel__header">
-          <h3 className="rbl-panel__title">Launch window</h3>
+          <h3 className="rbl-panel__title">Release date</h3>
           <p className="rbl-panel__meta">Pick a date on or after today</p>
         </div>
         <div className="rbl-panel__body">
@@ -59,8 +76,8 @@ export function ReleaseScheduleStep({
       <div className="rbl-toggle-panel">
         <div className="rbl-toggle-panel__head">
           <div>
-            <p className="rbl-toggle-panel__title">Set a Release Time</p>
-            <p className="rbl-toggle-panel__desc">Pinpoint the exact moment your signal goes live</p>
+            <p className="rbl-toggle-panel__title">Set a release time</p>
+            <p className="rbl-toggle-panel__desc">Pinpoint the exact moment your release goes public</p>
           </div>
           <Switch checked={releaseTimeEnabled} onCheckedChange={onReleaseTimeEnabledChange} />
         </div>
@@ -104,12 +121,33 @@ export function ReleaseScheduleStep({
         ) : null}
       </div>
 
+      <section className="rbl-panel">
+        <div className="rbl-panel__header">
+          <h3 className="rbl-panel__title">Timezone</h3>
+        </div>
+        <div className="rbl-panel__body space-y-3">
+          <Select value={releaseTimezone} onValueChange={onReleaseTimezoneChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select timezone" />
+            </SelectTrigger>
+            <SelectContent>
+              {COMMON_RELEASE_TIMEZONES.map((zone) => (
+                <SelectItem key={zone} value={zone}>
+                  {zone}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </section>
+
       <div className="rbl-panel">
         <div className="rbl-panel__body flex items-start gap-3">
           <Rocket className="rbl-text-accent mt-0.5 size-5 shrink-0" />
           <p className="rbl-text-muted text-sm leading-relaxed">
-            Your release will go live on the selected date. If you enable a release time, it will publish at that exact
-            moment in your local timezone.
+            {preview
+              ? `Goes live: ${preview} (${releaseTimezone})`
+              : 'Your release will become public at the scheduled moment in the selected timezone.'}
           </p>
         </div>
       </div>

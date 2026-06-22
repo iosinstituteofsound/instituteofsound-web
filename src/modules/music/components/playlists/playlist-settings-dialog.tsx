@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import type { PlaylistDetailDto } from '@/modules/music/types/music.types'
-import type { PlaylistOwnerMode, PlaylistUpdateInput } from '@/modules/music/lib/playlist-api'
+import type { PlaylistUpdateInput } from '@/modules/music/lib/playlist-api'
 import { playlistCapabilities } from '@/modules/music/lib/playlist-capabilities'
 import { ProfileImageUpload } from '@/modules/profile/components/profile-image-upload'
 import { Button } from '@/shared/components/ui/button'
@@ -21,7 +21,6 @@ type PlaylistSettingsDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   playlist: PlaylistDetailDto
-  mode: PlaylistOwnerMode
   onSave: (input: PlaylistUpdateInput) => void
   isSaving?: boolean
 }
@@ -30,11 +29,10 @@ export function PlaylistSettingsDialog({
   open,
   onOpenChange,
   playlist,
-  mode,
   onSave,
   isSaving,
 }: PlaylistSettingsDialogProps) {
-  const { hasRichMetadata } = playlistCapabilities(mode)
+  const { hasRichMetadata } = playlistCapabilities()
   const [title, setTitle] = useState(playlist.title)
   const [description, setDescription] = useState(playlist.description ?? '')
   const [coverUrl, setCoverUrl] = useState(playlist.coverUrl ?? '')

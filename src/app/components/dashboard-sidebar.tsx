@@ -14,6 +14,13 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import type { SidebarMenuItemDto } from '@/shared/types/sidebar.types'
 import '@/styles/dashboard-sidebar.css'
 
+const HIDDEN_SIDEBAR_PATHS = new Set([
+  '/artist/upload',
+  '/artist/submit',
+  '/artist/playlists',
+  '/artist/profile',
+])
+
 function groupSidebarItems(items: SidebarMenuItemDto[]) {
   const groups: { title?: string; items: SidebarMenuItemDto[] }[] = []
   const indexByTitle = new Map<string, number>()
@@ -35,6 +42,9 @@ function groupSidebarItems(items: SidebarMenuItemDto[]) {
 
 function isSidebarItemActive(pathname: string, itemPath: string) {
   if (pathname === itemPath) return true
+  if (itemPath === '/artist') {
+    return pathname === '/artist' || pathname === '/artist/'
+  }
   if (itemPath !== '/' && pathname.startsWith(`${itemPath}/`)) return true
   return false
 }
@@ -63,6 +73,7 @@ export function DashboardSidebar({
     () =>
       (sidebarItems ?? []).filter(
         (item) =>
+          !HIDDEN_SIDEBAR_PATHS.has(item.path) &&
           !HEADER_NAV_PATHS.has(item.path) &&
           (!item.resourceName ||
             isRegisteredResource(item.resourceName, item.resourceType ?? 'PAGE')),

@@ -2,25 +2,20 @@ import { useState } from 'react'
 import { CreatePlaylistDialog } from '@/modules/music/components/playlists/create-playlist-dialog'
 import { PlaylistGrid } from '@/modules/music/components/playlists/playlist-grid'
 import { usePlaylistsIndex } from '@/modules/music/hooks/use-playlists-index'
-import type { PlaylistOwnerMode } from '@/modules/music/lib/playlist-api'
 import { Loader } from '@/shared/components/feedback/loader'
 import { Page, PageDescription, PageHeader, PageSection, PageTitle } from '@/shared/components/layout/page-shell'
 
 type PlaylistIndexViewProps = {
-  mode: PlaylistOwnerMode
   title?: string
   description?: string
 }
 
 export function PlaylistIndexView({
-  mode,
-  title = mode === 'artist' ? 'Artist Playlists' : 'My Playlists',
-  description = mode === 'artist'
-    ? 'Create and manage playlists for your artist profile.'
-    : 'Your personal collections — add tracks from anywhere and play them in the player.',
+  title = 'My Playlists',
+  description = 'Your personal collections — add tracks from anywhere and play them in the player.',
 }: PlaylistIndexViewProps) {
   const [createOpen, setCreateOpen] = useState(false)
-  const { playlists, isLoading, basePath, createMutation, deleteMutation } = usePlaylistsIndex({ mode })
+  const { playlists, isLoading, basePath, createMutation, deleteMutation } = usePlaylistsIndex()
 
   return (
     <Page>
@@ -62,7 +57,6 @@ export function PlaylistIndexView({
       <CreatePlaylistDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        mode={mode}
         isSubmitting={createMutation.isPending}
         onSubmit={(input) => createMutation.mutate(input)}
       />

@@ -1,18 +1,18 @@
 /* Release Builder — theme-token sci-fi console (no hardcoded colors) */
 
 .rbl-scene {
-  --rbl-accent: var(--primary);
-  --rbl-accent-bright: var(--ios-accent-bright, var(--primary));
-  --rbl-accent-soft: var(--ios-accent-soft, color-mix(in oklch, var(--primary) 22%, transparent));
-  --rbl-accent-deep: var(--ios-accent-deep, color-mix(in oklch, var(--primary) 82%, var(--background)));
+  --rbl-accent: var(--ios-dashboard-primary, var(--primary));
+  --rbl-accent-bright: var(--ios-dashboard-primary, var(--primary));
+  --rbl-accent-soft: color-mix(in oklch, var(--ios-dashboard-primary, var(--primary)) 18%, transparent);
+  --rbl-accent-deep: color-mix(in oklch, var(--ios-dashboard-primary, var(--primary)) 82%, var(--background));
   --rbl-secondary: var(--accent);
   --rbl-surface: var(--background);
   --rbl-surface-raised: var(--card);
   --rbl-surface-muted: var(--muted);
-  --rbl-chassis: color-mix(in oklch, var(--card) 72%, var(--background));
-  --rbl-deep: color-mix(in oklch, var(--background) 90%, var(--foreground) 10%);
-  --rbl-border: color-mix(in oklch, var(--primary) 28%, var(--border));
-  --rbl-border-soft: var(--ios-line-soft, color-mix(in oklch, var(--border) 70%, transparent));
+  --rbl-chassis: color-mix(in oklch, var(--card) 88%, var(--background));
+  --rbl-deep: color-mix(in oklch, var(--background) 94%, var(--foreground) 6%);
+  --rbl-border: color-mix(in oklch, var(--border) 85%, var(--ios-dashboard-primary, var(--primary)) 15%);
+  --rbl-border-soft: var(--border);
   --rbl-muted: var(--muted-foreground);
   --rbl-ink: var(--foreground);
   --rbl-ink-on-accent: var(--primary-foreground);
@@ -22,7 +22,7 @@
   --rbl-ease: cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   min-height: calc(100dvh - 8rem);
-  margin: -1rem -0.5rem;
+  margin: 0;
   padding: 0;
   color: var(--rbl-ink);
   font-family: var(--font-sans);
@@ -70,10 +70,6 @@
 }
 
 @media (min-width: 768px) {
-  .rbl-scene {
-    margin: -1.25rem -1rem;
-  }
-
   .rbl-scene__content {
     padding: 1.5rem 1.25rem 7rem;
   }
@@ -1087,9 +1083,10 @@
   position: fixed;
   inset-inline: 0;
   bottom: 0;
-  z-index: 30;
+  z-index: 60;
   border-top: 1px solid var(--rbl-border);
   background: color-mix(in oklch, var(--rbl-surface) 96%, var(--rbl-accent) 4%);
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .rbl-deck__inner {
@@ -1141,14 +1138,19 @@
 }
 
 .rbl-btn--primary {
-  border-color: color-mix(in oklch, var(--rbl-accent) 55%, transparent);
-  color: var(--rbl-ink-on-accent);
-  background: var(--rbl-accent);
+  border-color: transparent;
+  color: var(--primary-foreground);
+  background: linear-gradient(
+    135deg,
+    var(--ios-dashboard-primary, var(--primary)) 0%,
+    color-mix(in oklch, var(--ios-dashboard-primary, var(--primary)) 72%, var(--ios-dashboard-info, var(--accent))) 100%
+  );
+  box-shadow: 0 4px 18px color-mix(in oklch, var(--ios-dashboard-primary, var(--primary)) 28%, transparent);
 }
 
 .rbl-btn--primary:hover:not(:disabled) {
-  color: var(--rbl-ink-on-accent);
-  background: var(--rbl-accent-bright);
+  color: var(--primary-foreground);
+  opacity: 0.92;
 }
 
 .rbl-btn--icon {

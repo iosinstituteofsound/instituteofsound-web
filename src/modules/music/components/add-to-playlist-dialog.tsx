@@ -25,13 +25,13 @@ export function AddToPlaylistDialog() {
   const [newTitle, setNewTitle] = useState('')
 
   const { data: playlists, isLoading } = useQuery({
-    queryKey: playlistListQueryKey('listener'),
+    queryKey: playlistListQueryKey(),
     queryFn: listMyPlaylists,
     enabled: isOpen && isAuthenticated,
   })
 
   const invalidate = () => {
-    void queryClient.invalidateQueries({ queryKey: playlistListQueryKey('listener') })
+    void queryClient.invalidateQueries({ queryKey: playlistListQueryKey() })
   }
 
   const addMutation = useMutation({

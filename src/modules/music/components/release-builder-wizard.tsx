@@ -14,27 +14,15 @@ import { ReleaseReviewStep } from '@/modules/music/components/release-review-ste
 import { ReleaseScheduleStep } from '@/modules/music/components/release-schedule-step'
 import { ReleaseUploadStep } from '@/modules/music/components/release-upload-step'
 import { useAudioUploadQueue } from '@/modules/music/hooks/use-audio-upload-queue'
+import { artistReleaseBreadcrumbs } from '@/modules/music/lib/artist-breadcrumb'
+import { buildReleaseDateIso, getDefaultReleaseTimezone } from '@/modules/music/lib/release-schedule'
 import type { ReleaseBuilderStep } from '@/modules/music/types/release-builder.types'
 import {
   RELEASE_BUILDER_STEPS,
   inferReleaseType,
   titleFromFilename,
 } from '@/modules/music/types/release-builder.types'
-
-function buildReleaseDateIso(
-  date: string,
-  timeEnabled: boolean,
-  hour: string,
-  minute: string,
-  period: 'AM' | 'PM',
-): string {
-  if (!date) return new Date().toISOString()
-  let h = parseInt(hour, 10)
-  if (period === 'PM' && h < 12) h += 12
-  if (period === 'AM' && h === 12) h = 0
-  const time = timeEnabled ? `${String(h).padStart(2, '0')}:${minute}:00` : '12:00:00'
-  return new Date(`${date}T${time}`).toISOString()
-}
+import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
 
 async function resolveCoverUrlForPublish(coverUrl: string, coverPreviewUrl: string): Promise<string | undefined> {
   const normalizedExisting = normalizeMediaUrl(coverUrl)
@@ -69,6 +57,7 @@ export function ReleaseBuilderWizard() {
   const [releaseHour, setReleaseHour] = useState('12')
   const [releaseMinute, setReleaseMinute] = useState('00')
   const [releasePeriod, setReleasePeriod] = useState<'AM' | 'PM'>('AM')
+  const [releaseTimezone, setReleaseTimezone] = useState(getDefaultReleaseTimezone)
 
   const readyCount = uploadQueue.queue.filter((item) => item.status === 'ready').length
 
@@ -162,19 +151,21 @@ export function ReleaseBuilderWizard() {
           releaseHour,
           releaseMinute,
           releasePeriod,
+          releaseTimezone,
         ),
+        releaseTimezone,
         status: 'published',
       })
     },
     onSuccess: () => {
-      toast.success('Release launched into the nebula')
+      toast.success('Release created successfully')
       void queryClient.invalidateQueries({ queryKey: ['artist-releases'] })
       void queryClient.invalidateQueries({ queryKey: ['artist-tracks'] })
       invalidateArtistSurfaceQueries(queryClient)
       uploadQueue.resetQueue()
       navigate('/artist/releases')
     },
-    onError: () => toast.error('Launch sequence aborted'),
+    onError: () => toast.error('Could not create release'),
   })
 
   const canGoNext = useCallback(() => {
@@ -212,25 +203,12 @@ export function ReleaseBuilderWizard() {
   return (
     <ReleaseBuilderScene>
       <div className="rbl-stack">
-        <header className="rbl-hero">
-          <p className="rbl-hero__kicker">Artist transmission console · v2.0</p>
-          <h1 className="rbl-hero__title">Upload Music</h1>
-          <p className="rbl-hero__desc">
-            Upload your tracks, add release details, schedule the launch, and publish to your catalog.
-          </p>
-          <div className="rbl-hero__status-row">
-            <span className="rbl-hero__status">
-              <span
-                className={`rbl-hero__status-dot${uploadQueue.isProcessing ? ' rbl-hero__status-dot--live' : ''}`}
-                aria-hidden
-              />
-              Uplink {uploadQueue.isProcessing ? 'active' : 'standby'}
-            </span>
-            <span className="rbl-hero__status">
-              {uploadQueue.readyTrackIds.length} track{uploadQueue.readyTrackIds.length === 1 ? '' : 's'} synced
-            </span>
-          </div>
-        </header>
+        <AppBreadcrumb
+          surface
+          className="app-breadcrumb--dashboard"
+          items={artistReleaseBreadcrumbs.newRelease()}
+          description="Upload tracks, add release details, and schedule your go-live."
+        />
 
         <ReleaseBuilderStepper
           currentStep={step}
@@ -272,6 +250,8 @@ export function ReleaseBuilderWizard() {
               onReleaseMinuteChange={setReleaseMinute}
               releasePeriod={releasePeriod}
               onReleasePeriodChange={setReleasePeriod}
+              releaseTimezone={releaseTimezone}
+              onReleaseTimezoneChange={setReleaseTimezone}
             />
           ) : null}
           {step === 'review' ? (
@@ -288,6 +268,7 @@ export function ReleaseBuilderWizard() {
               releaseHour={releaseHour}
               releaseMinute={releaseMinute}
               releasePeriod={releasePeriod}
+              releaseTimezone={releaseTimezone}
               validationErrors={validationErrors}
               isPublishing={publishMutation.isPending}
               onPublish={() => publishMutation.mutate()}
@@ -308,9 +289,7 @@ export function ReleaseBuilderWizard() {
               <ChevronRight className="size-4" />
             </button>
           ) : (
-            <span className="rbl-deck__hint">
-              Launch from review panel
-            </span>
+            <span className="rbl-deck__hint">Confirm from the review panel</span>
           )}
         </div>
       </footer>

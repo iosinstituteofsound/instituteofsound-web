@@ -5,7 +5,6 @@ import type {
   ArtistPublicDto,
   AudioUploadJobDto,
   PlaylistDetailDto,
-  PlaylistTrackSearchResultDto,
   ReleaseDetailDto,
   TrackDto,
 } from '@/modules/music/types/music.types'
@@ -70,20 +69,6 @@ export async function getArtistProfile() {
   return data.data
 }
 
-export async function updateArtistProfile(input: {
-  displayName?: string
-  bio?: string
-  avatarUrl?: string
-  coverUrl?: string
-  genres?: string[]
-}) {
-  const { data } = await apiClient.patch<ApiSuccessResponse<ArtistPublicDto['profile']>>(
-    `${API_V1}/artist/profile`,
-    input,
-  )
-  return data.data
-}
-
 export async function listArtistTracks() {
   const { data } = await apiClient.get<ApiSuccessResponse<TrackDto[]>>(`${API_V1}/artist/tracks`)
   return data.data
@@ -106,6 +91,7 @@ export async function createRelease(input: {
   coverUrl?: string
   trackIds?: string[]
   releaseDate?: string
+  releaseTimezone?: string
   status?: 'draft' | 'published'
 }) {
   const { data } = await apiClient.post<ApiSuccessResponse<ReleaseDetailDto>>(
@@ -124,6 +110,7 @@ export async function updateRelease(
     coverUrl?: string
     trackIds?: string[]
     releaseDate?: string
+    releaseTimezone?: string
     status?: 'draft' | 'published'
   },
 ) {
@@ -137,81 +124,6 @@ export async function updateRelease(
 export async function deleteRelease(id: string) {
   const { data } = await apiClient.delete<ApiSuccessResponse<{ deleted: boolean }>>(
     `${API_V1}/artist/releases/${id}`,
-  )
-  return data.data
-}
-
-export async function listArtistPlaylists() {
-  const { data } = await apiClient.get<ApiSuccessResponse<PlaylistDetailDto[]>>(
-    `${API_V1}/artist/playlists`,
-  )
-  return data.data
-}
-
-export async function createArtistPlaylist(input: {
-  title: string
-  description?: string
-  coverUrl?: string
-  visibility?: 'public' | 'private'
-  trackIds?: string[]
-}) {
-  const { data } = await apiClient.post<ApiSuccessResponse<PlaylistDetailDto>>(
-    `${API_V1}/artist/playlists`,
-    input,
-  )
-  return data.data
-}
-
-export async function updateArtistPlaylist(
-  id: string,
-  input: {
-    title?: string
-    description?: string
-    coverUrl?: string
-    visibility?: 'public' | 'private'
-    trackIds?: string[]
-  },
-) {
-  const { data } = await apiClient.patch<ApiSuccessResponse<PlaylistDetailDto>>(
-    `${API_V1}/artist/playlists/${id}`,
-    input,
-  )
-  return data.data
-}
-
-export async function deleteArtistPlaylist(id: string) {
-  const { data } = await apiClient.delete<ApiSuccessResponse<{ deleted: boolean }>>(
-    `${API_V1}/artist/playlists/${id}`,
-  )
-  return data.data
-}
-
-export async function getArtistPlaylist(idOrSlug: string) {
-  const { data } = await apiClient.get<ApiSuccessResponse<PlaylistDetailDto>>(
-    `${API_V1}/artist/playlists/${idOrSlug}`,
-  )
-  return data.data
-}
-
-export async function addTrackToArtistPlaylist(playlistId: string, trackId: string) {
-  const { data } = await apiClient.post<ApiSuccessResponse<PlaylistDetailDto>>(
-    `${API_V1}/artist/playlists/${playlistId}/tracks`,
-    { trackId },
-  )
-  return data.data
-}
-
-export async function removeTrackFromArtistPlaylist(playlistId: string, trackId: string) {
-  const { data } = await apiClient.delete<ApiSuccessResponse<PlaylistDetailDto>>(
-    `${API_V1}/artist/playlists/${playlistId}/tracks/${trackId}`,
-  )
-  return data.data
-}
-
-export async function searchArtistPlaylistTracks(q: string, limit = 10) {
-  const { data } = await apiClient.get<ApiSuccessResponse<PlaylistTrackSearchResultDto>>(
-    `${API_V1}/artist/playlists/search/tracks`,
-    { params: { q, limit } },
   )
   return data.data
 }

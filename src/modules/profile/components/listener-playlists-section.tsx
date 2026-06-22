@@ -16,7 +16,6 @@ type ListenerPlaylistsSectionProps = {
 export function ListenerPlaylistsSection({ isOwnProfile }: ListenerPlaylistsSectionProps) {
   const [createOpen, setCreateOpen] = useState(false)
   const { playlists, isLoading, basePath, createMutation } = usePlaylistsIndex({
-    mode: 'listener',
     navigateOnCreate: false,
   })
 
@@ -64,7 +63,6 @@ export function ListenerPlaylistsSection({ isOwnProfile }: ListenerPlaylistsSect
       <CreatePlaylistDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        mode="listener"
         isSubmitting={createMutation.isPending}
         onSubmit={(input) =>
           createMutation.mutate(input, {

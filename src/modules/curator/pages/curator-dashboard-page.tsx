@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import { CuratorStudioHomePage } from '@/modules/curator/pages/curator-studio-home-page'
-import { MusicPlaylistsPage } from '@/modules/music/pages/music-playlists-page'
+import { MyPlaylistsPage } from '@/modules/music/pages/my-playlists-page'
 import { Page, PageDescription, PageHeader, PageSection, PageTitle } from '@/shared/components/layout/page-shell'
 import { Button } from '@/shared/components/ui/button'
 
@@ -31,7 +31,7 @@ export function CuratorDashboardPage() {
   const location = useLocation()
   const path = location.pathname
 
-  if (path.includes('/curator/playlists')) return <MusicPlaylistsPage />
+  if (path.includes('/curator/playlists')) return <MyPlaylistsPage />
   if (path.includes('/curator/picks')) return <CuratorPicksPage />
 
   return <CuratorStudioHomePage />

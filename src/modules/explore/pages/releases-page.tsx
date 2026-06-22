@@ -98,7 +98,7 @@ export function ReleasesPage() {
               </p>
             </div>
           </div>
-          <Link to="/artist/submit" className="releases-page__submit">
+          <Link to="/artist/releases/new" className="releases-page__submit">
             Submit release
           </Link>
         </header>
@@ -274,7 +274,7 @@ export function ReleasesPage() {
               Submit your track — once approved by the desk, it goes live on this catalog for everyone.
             </p>
           </div>
-          <Link to="/artist/submit" className="ios-mh-btn ios-mh-btn--fill releases-page__btn">
+          <Link to="/artist/releases/new" className="ios-mh-btn ios-mh-btn--fill releases-page__btn">
             Submit your release
           </Link>
         </section>

@@ -9,7 +9,7 @@ import { usePlaylistDetailPage } from '@/modules/music/hooks/use-playlist-detail
 import {
   formatPlaylistTotalDuration,
 } from '@/modules/music/lib/playlist-detail-format'
-import type { PlaylistOwnerMode } from '@/modules/music/lib/playlist-api'
+import { PLAYLIST_BASE_PATH } from '@/modules/music/lib/playlist-api'
 import { playlistCapabilities } from '@/modules/music/lib/playlist-capabilities'
 import { Page, PageSection } from '@/shared/components/layout/page-shell'
 import { Loader } from '@/shared/components/feedback/loader'
@@ -17,14 +17,16 @@ import { Button } from '@/shared/components/ui/button'
 import '@/modules/music/styles/playlist.css'
 
 type PlaylistOwnerDetailViewProps = {
-  mode: PlaylistOwnerMode
   slug: string
-  basePath: string
+  basePath?: string
 }
 
-export function PlaylistOwnerDetailView({ mode, slug, basePath }: PlaylistOwnerDetailViewProps) {
+export function PlaylistOwnerDetailView({
+  slug,
+  basePath = PLAYLIST_BASE_PATH,
+}: PlaylistOwnerDetailViewProps) {
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const { hasRichMetadata } = playlistCapabilities(mode)
+  const { hasRichMetadata } = playlistCapabilities()
 
   const {
     playlist,
@@ -40,7 +42,7 @@ export function PlaylistOwnerDetailView({ mode, slug, basePath }: PlaylistOwnerD
     deleteMutation,
     playAtIndex,
     handlePlayAll,
-  } = usePlaylistDetailPage({ mode, slug, basePath })
+  } = usePlaylistDetailPage({ slug, basePath })
 
   if (isLoading) return <Loader />
 
@@ -179,11 +181,7 @@ export function PlaylistOwnerDetailView({ mode, slug, basePath }: PlaylistOwnerD
               onAddTrack={(trackId) => addTrackMutation.mutate(trackId)}
               isAdding={addTrackMutation.isPending}
               searchTracks={searchTracks}
-              searchHint={
-                mode === 'listener'
-                  ? 'Search the site catalog to add tracks.'
-                  : undefined
-              }
+              searchHint="Search the site catalog to add tracks."
             />
           </PageSection>
         ) : null}
@@ -193,7 +191,6 @@ export function PlaylistOwnerDetailView({ mode, slug, basePath }: PlaylistOwnerD
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
         playlist={playlist}
-        mode={mode}
         isSaving={updateMutation.isPending}
         onSave={(input) => {
           updateMutation.mutate(input, {

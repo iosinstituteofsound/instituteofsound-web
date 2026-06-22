@@ -71,6 +71,7 @@ export interface ReleaseDetailDto {
   title: string
   coverUrl?: string
   releaseDate?: string
+  releaseTimezone?: string
   type: 'single' | 'ep' | 'album'
   genre?: string
   status: 'draft' | 'published'
@@ -78,6 +79,7 @@ export interface ReleaseDetailDto {
   playCount: number
   tracks: TrackDto[]
   isFeatured: boolean
+  isLive: boolean
 }
 
 export interface PlaylistTrackRefDto {

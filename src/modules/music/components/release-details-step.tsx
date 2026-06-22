@@ -101,8 +101,8 @@ export function ReleaseDetailsStep({
     <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
       <div className="space-y-8">
         <header className="rbl-section-head">
-          <p className="rbl-section-head__kicker">Phase 02 · Metadata matrix</p>
-          <h2 className="rbl-section-head__title">Release &amp; Track Details</h2>
+          <p className="rbl-section-head__kicker ios-mh-kicker">Details</p>
+          <h2 className="rbl-section-head__title">Release &amp; track details</h2>
           <p className="rbl-section-head__desc">
             Fill in your {isMultiTrack ? 'album or EP' : 'release'} information first, then enter each song name
             individually. Tracks publish as Artist Name - Song Name across the site.

@@ -330,7 +330,7 @@ export function ArtistDashboardHome() {
   return (
     <div className="ios-artist-dashboard">
       <div className="ios-artist-dashboard__header">
-        <Link to="/artist/upload" className="ios-artist-dashboard__upload-btn">
+        <Link to="/artist/releases/new" className="ios-artist-dashboard__upload-btn">
           <Upload size={16} aria-hidden />
           Upload New Release
           <ChevronDown size={14} aria-hidden />
@@ -464,7 +464,7 @@ export function ArtistDashboardHome() {
             ) : (
               <p className="ios-artist-dashboard__empty">
                 No published releases yet.{' '}
-                <Link to="/artist/upload" className="ios-artist-dashboard__link" onClick={(e) => e.stopPropagation()}>
+                <Link to="/artist/releases/new" className="ios-artist-dashboard__link" onClick={(e) => e.stopPropagation()}>
                   Upload your first release
                 </Link>
               </p>
@@ -473,7 +473,7 @@ export function ArtistDashboardHome() {
           </section>
 
           <section className="ios-artist-dashboard__actions" aria-label="Quick actions">
-            <Link to="/artist/upload" className="ios-artist-dashboard__action" data-accent="primary">
+            <Link to="/artist/releases/new" className="ios-artist-dashboard__action" data-accent="primary">
               <span className="ios-artist-dashboard__action-icon">
                 <Upload size={18} aria-hidden />
               </span>
@@ -502,7 +502,7 @@ export function ArtistDashboardHome() {
               <span className="ios-artist-dashboard__action-hint">Full listening data</span>
             </Link>
             <Link
-              to={profile?.slug ? `/artist/${profile.slug}` : '/artist/profile'}
+              to={profile?.userId ? `/profile/${profile.userId}` : '/profile/edit'}
               className="ios-artist-dashboard__action"
               data-accent="info"
             >

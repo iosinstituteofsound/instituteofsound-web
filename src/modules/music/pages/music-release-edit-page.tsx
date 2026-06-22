@@ -1,18 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Disc3 } from 'lucide-react'
+import { Disc3 } from 'lucide-react'
 import { toast } from 'sonner'
 import { invalidateArtistSurfaceQueries } from '@/modules/explore/lib/invalidate-artist-surface'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
 import { listArtistReleases, listArtistTracks, updateRelease } from '@/modules/music/api/music.api'
-import { ReleaseDatePicker } from '@/modules/music/components/release-date-picker'
-import { Page, PageHeader, PageSection, PageTitle } from '@/shared/components/layout/page-shell'
+import { ReleaseScheduleStep } from '@/modules/music/components/release-schedule-step'
+import { artistReleaseBreadcrumbs } from '@/modules/music/lib/artist-breadcrumb'
+import { buildReleaseDateIso, getDefaultReleaseTimezone } from '@/modules/music/lib/release-schedule'
+import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
+import { Loader } from '@/shared/components/feedback/loader'
+import { Page, PageSection } from '@/shared/components/layout/page-shell'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
-import { Loader } from '@/shared/components/feedback/loader'
 import '@/modules/music/styles/release-builder.css'
+import '@/modules/music/styles/artist-dashboard-home.css'
 
 async function resolveCoverUrl(coverUrl: string, coverPreviewUrl: string): Promise<string | undefined> {
   const normalizedExisting = normalizeMediaUrl(coverUrl)
@@ -27,6 +31,42 @@ async function resolveCoverUrl(coverUrl: string, coverPreviewUrl: string): Promi
   const extension = blob.type.split('/')[1] || 'jpg'
   const result = await uploadMediaFile(blob, `cover-${Date.now()}.${extension}`)
   return normalizeMediaUrl(result.absoluteUrl ?? result.url)
+}
+
+function parseReleaseTime(releaseDate?: string) {
+  if (!releaseDate) {
+    return {
+      date: new Date().toISOString().slice(0, 10),
+      timeEnabled: false,
+      hour: '12',
+      minute: '00',
+      period: 'AM' as const,
+    }
+  }
+
+  const parsed = new Date(releaseDate)
+  if (Number.isNaN(parsed.getTime())) {
+    return {
+      date: new Date().toISOString().slice(0, 10),
+      timeEnabled: false,
+      hour: '12',
+      minute: '00',
+      period: 'AM' as const,
+    }
+  }
+
+  const hours = parsed.getHours()
+  const period = hours >= 12 ? 'PM' : 'AM'
+  const hour12 = hours % 12 || 12
+  const minute = String(parsed.getMinutes()).padStart(2, '0')
+
+  return {
+    date: parsed.toISOString().slice(0, 10),
+    timeEnabled: parsed.getMinutes() !== 0 || hours !== 12,
+    hour: String(hour12),
+    minute,
+    period: period as 'AM' | 'PM',
+  }
 }
 
 export function MusicReleaseEditPage() {
@@ -52,6 +92,11 @@ export function MusicReleaseEditPage() {
   const [type, setType] = useState<'single' | 'ep' | 'album'>('single')
   const [genre, setGenre] = useState('')
   const [releaseDate, setReleaseDate] = useState('')
+  const [releaseTimeEnabled, setReleaseTimeEnabled] = useState(false)
+  const [releaseHour, setReleaseHour] = useState('12')
+  const [releaseMinute, setReleaseMinute] = useState('00')
+  const [releasePeriod, setReleasePeriod] = useState<'AM' | 'PM'>('AM')
+  const [releaseTimezone, setReleaseTimezone] = useState(getDefaultReleaseTimezone)
   const [coverUrl, setCoverUrl] = useState('')
   const [coverPreviewUrl, setCoverPreviewUrl] = useState('')
   const [coverFileName, setCoverFileName] = useState('')
@@ -61,10 +106,16 @@ export function MusicReleaseEditPage() {
 
   useEffect(() => {
     if (!release || initialized) return
+    const parsedTime = parseReleaseTime(release.releaseDate)
     setTitle(release.title)
     setType(release.type)
     setGenre(release.genre ?? '')
-    setReleaseDate(release.releaseDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10))
+    setReleaseDate(parsedTime.date)
+    setReleaseTimeEnabled(parsedTime.timeEnabled)
+    setReleaseHour(parsedTime.hour)
+    setReleaseMinute(parsedTime.minute)
+    setReleasePeriod(parsedTime.period)
+    setReleaseTimezone(release.releaseTimezone ?? getDefaultReleaseTimezone())
     setCoverUrl(release.coverUrl ?? '')
     setSelectedTrackIds(release.tracks.map((track) => track.id))
     setInitialized(true)
@@ -78,7 +129,6 @@ export function MusicReleaseEditPage() {
   )
 
   const coverImageSrc = coverUrl || coverPreviewUrl
-  const today = new Date().toISOString().slice(0, 10)
 
   const availableTracks = useMemo(() => {
     return (tracks ?? []).filter(
@@ -113,7 +163,15 @@ export function MusicReleaseEditPage() {
         type,
         genre: genre.trim() || undefined,
         coverUrl: resolvedCoverUrl,
-        releaseDate: new Date(`${releaseDate}T12:00:00`).toISOString(),
+        releaseDate: buildReleaseDateIso(
+          releaseDate,
+          releaseTimeEnabled,
+          releaseHour,
+          releaseMinute,
+          releasePeriod,
+          releaseTimezone,
+        ),
+        releaseTimezone,
         trackIds: selectedTrackIds,
       })
     },
@@ -153,19 +211,14 @@ export function MusicReleaseEditPage() {
 
   return (
     <Page>
-      <PageHeader>
-        <div className="space-y-2">
-          <Button variant="ghost" size="sm" className="-ml-2 w-fit" asChild>
-            <Link to="/artist/releases">
-              <ArrowLeft className="size-4" />
-              Back to releases
-            </Link>
-          </Button>
-          <PageTitle>Edit Release</PageTitle>
-        </div>
-      </PageHeader>
-
       <PageSection className="rbl-scene mx-0 max-w-3xl space-y-6 border-0 bg-transparent p-0">
+        <AppBreadcrumb
+          surface
+          className="app-breadcrumb--dashboard"
+          items={artistReleaseBreadcrumbs.editRelease(release.title)}
+          description="Update release details, schedule, and track list."
+        />
+
         <div className="rbl-panel">
           <div className="rbl-panel__header">
             <h3 className="rbl-panel__title">Release details</h3>
@@ -240,14 +293,20 @@ export function MusicReleaseEditPage() {
           </div>
         </div>
 
-        <div className="rbl-panel">
-          <div className="rbl-panel__header">
-            <h3 className="rbl-panel__title">Launch window</h3>
-          </div>
-          <div className="rbl-panel__body">
-            <ReleaseDatePicker value={releaseDate} onChange={setReleaseDate} minDate={today} />
-          </div>
-        </div>
+        <ReleaseScheduleStep
+          releaseDate={releaseDate}
+          onReleaseDateChange={setReleaseDate}
+          releaseTimeEnabled={releaseTimeEnabled}
+          onReleaseTimeEnabledChange={setReleaseTimeEnabled}
+          releaseHour={releaseHour}
+          onReleaseHourChange={setReleaseHour}
+          releaseMinute={releaseMinute}
+          onReleaseMinuteChange={setReleaseMinute}
+          releasePeriod={releasePeriod}
+          onReleasePeriodChange={setReleasePeriod}
+          releaseTimezone={releaseTimezone}
+          onReleaseTimezoneChange={setReleaseTimezone}
+        />
 
         <div className="rbl-panel">
           <div className="rbl-panel__header">
@@ -273,7 +332,7 @@ export function MusicReleaseEditPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 pb-8">
           <Button
             onClick={() => saveMutation.mutate()}
             disabled={!title.trim() || !selectedTrackIds.length || saveMutation.isPending}

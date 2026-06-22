@@ -1,5 +1,3 @@
-import type { PlaylistOwnerMode } from '@/modules/music/lib/playlist-api'
-
 export type PlaylistCapabilities = {
   canReorder: boolean
   canRemove: boolean
@@ -9,14 +7,14 @@ export type PlaylistCapabilities = {
   hasRichMetadata: boolean
 }
 
-export function playlistCapabilities(mode: PlaylistOwnerMode): PlaylistCapabilities {
+export function playlistCapabilities(): PlaylistCapabilities {
   return {
     canReorder: true,
     canRemove: true,
     canAddTracks: true,
     canEditSettings: true,
     canDelete: true,
-    hasRichMetadata: mode === 'artist',
+    hasRichMetadata: false,
   }
 }
 

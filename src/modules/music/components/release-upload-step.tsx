@@ -40,7 +40,7 @@ export function ReleaseUploadStep({ queue }: ReleaseUploadStepProps) {
   return (
     <div className="space-y-6">
       <header className="rbl-section-head">
-        <p className="rbl-section-head__kicker">Phase 01 · Signal intake</p>
+        <p className="rbl-section-head__kicker ios-mh-kicker">Upload</p>
         <h2 className="rbl-section-head__title">Select your audio files</h2>
         <p className="rbl-section-head__desc">
           High quality audio recommended — 16-bit, 44.1 kHz stereo. Max {MAX_AUDIO_UPLOAD_MB}MB per file. Large

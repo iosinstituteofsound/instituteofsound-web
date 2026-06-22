@@ -87,7 +87,7 @@ export function ProfileDiscographyTab({ user, isOwnProfile }: ProfileDiscography
             to replace every demo slot with your own catalog.
           </p>
           <Button asChild size="sm" variant="outline" className="mt-2">
-            <Link to="/artist/upload">Upload track</Link>
+            <Link to="/artist/releases/new">Upload track</Link>
           </Button>
         </div>
       ) : null}

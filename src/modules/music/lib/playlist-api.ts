@@ -1,22 +1,15 @@
 import {
-  addTrackToArtistPlaylist,
   addTrackToMyPlaylist,
-  createArtistPlaylist,
   createMyPlaylist,
-  deleteArtistPlaylist,
   deleteMyPlaylist,
-  getArtistPlaylist,
   getMyPlaylist,
-  listArtistPlaylists,
   listMyPlaylists,
-  removeTrackFromArtistPlaylist,
   removeTrackFromMyPlaylist,
-  updateArtistPlaylist,
   updateMyPlaylist,
 } from '@/modules/music/api/music.api'
 import type { PlaylistDetailDto } from '@/modules/music/types/music.types'
 
-export type PlaylistOwnerMode = 'listener' | 'artist'
+export const PLAYLIST_BASE_PATH = '/library/playlists'
 
 export type PlaylistCreateInput = {
   title: string
@@ -34,56 +27,44 @@ export type PlaylistUpdateInput = {
   trackIds?: string[]
 }
 
-export function playlistListQueryKey(mode: PlaylistOwnerMode) {
-  return mode === 'artist' ? ['artist-playlists'] : ['my-playlists']
+export function playlistListQueryKey() {
+  return ['my-playlists'] as const
 }
 
-export function playlistDetailQueryKey(mode: PlaylistOwnerMode, slug: string) {
-  return mode === 'artist' ? ['artist-playlist', slug] : ['my-playlist', slug]
+export function playlistDetailQueryKey(slug: string) {
+  return ['my-playlist', slug] as const
 }
 
 export const playlistApi = {
-  list(mode: PlaylistOwnerMode): Promise<PlaylistDetailDto[]> {
-    return mode === 'artist' ? listArtistPlaylists() : listMyPlaylists()
+  list(): Promise<PlaylistDetailDto[]> {
+    return listMyPlaylists()
   },
 
-  get(mode: PlaylistOwnerMode, idOrSlug: string): Promise<PlaylistDetailDto> {
-    return mode === 'artist' ? getArtistPlaylist(idOrSlug) : getMyPlaylist(idOrSlug)
+  get(idOrSlug: string): Promise<PlaylistDetailDto> {
+    return getMyPlaylist(idOrSlug)
   },
 
-  create(mode: PlaylistOwnerMode, input: PlaylistCreateInput): Promise<PlaylistDetailDto> {
-    return mode === 'artist' ? createArtistPlaylist(input) : createMyPlaylist(input)
+  create(input: PlaylistCreateInput): Promise<PlaylistDetailDto> {
+    return createMyPlaylist(input)
   },
 
-  update(
-    mode: PlaylistOwnerMode,
-    id: string,
-    input: PlaylistUpdateInput,
-  ): Promise<PlaylistDetailDto> {
-    return mode === 'artist' ? updateArtistPlaylist(id, input) : updateMyPlaylist(id, input)
+  update(id: string, input: PlaylistUpdateInput): Promise<PlaylistDetailDto> {
+    return updateMyPlaylist(id, input)
   },
 
-  delete(mode: PlaylistOwnerMode, id: string) {
-    return mode === 'artist' ? deleteArtistPlaylist(id) : deleteMyPlaylist(id)
+  delete(id: string) {
+    return deleteMyPlaylist(id)
   },
 
-  addTrack(mode: PlaylistOwnerMode, playlistId: string, trackId: string) {
-    return mode === 'artist'
-      ? addTrackToArtistPlaylist(playlistId, trackId)
-      : addTrackToMyPlaylist(playlistId, trackId)
+  addTrack(playlistId: string, trackId: string) {
+    return addTrackToMyPlaylist(playlistId, trackId)
   },
 
-  removeTrack(mode: PlaylistOwnerMode, playlistId: string, trackId: string) {
-    return mode === 'artist'
-      ? removeTrackFromArtistPlaylist(playlistId, trackId)
-      : removeTrackFromMyPlaylist(playlistId, trackId)
+  removeTrack(playlistId: string, trackId: string) {
+    return removeTrackFromMyPlaylist(playlistId, trackId)
   },
 
-  reorderTracks(mode: PlaylistOwnerMode, id: string, trackIds: string[]) {
-    return this.update(mode, id, { trackIds })
+  reorderTracks(id: string, trackIds: string[]) {
+    return updateMyPlaylist(id, { trackIds })
   },
-}
-
-export function playlistBasePath(mode: PlaylistOwnerMode): string {
-  return mode === 'artist' ? '/artist/playlists' : '/library/playlists'
 }
