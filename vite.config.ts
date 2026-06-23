@@ -27,7 +27,9 @@ export default defineConfig(({ mode }) => {
     changeOrigin: true,
   }
 
-  const useDexDist = mode === 'production' && fs.existsSync(path.join(dexDist, 'index.js'))
+  const hasDexSrc = fs.existsSync(path.join(dexSrc, 'index.ts'))
+  const hasDexDist = fs.existsSync(path.join(dexDist, 'index.js'))
+  const useDexDist = hasDexDist && (!hasDexSrc || mode === 'production')
 
   return {
     envDir: webRoot,
