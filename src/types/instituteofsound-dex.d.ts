@@ -33,6 +33,7 @@ declare module '@instituteofsound/dex' {
     config?: DexConfig
   }): ReactNode
   export function openDexForPlayback(module?: DexModuleId): void
+  export function closeDex(): void
 }
 
 declare module '@instituteofsound/dex/styles/dex.css' {
