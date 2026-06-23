@@ -147,6 +147,7 @@ export const usePlayerStore = create<PlayerState>()((set, get) => ({
           currentTime: 0,
           duration: 0,
         })
+
       },
 
       togglePlay: () => set((state) => ({ isPlaying: state.currentTrack ? !state.isPlaying : false })),

@@ -166,6 +166,11 @@ const MyPlaylistDetailPage = lazy(() =>
     default: m.MyPlaylistDetailPage,
   })),
 )
+const IdentityPage = lazy(() =>
+  import('@/modules/identity/pages/identity-page').then((m) => ({
+    default: m.IdentityPage,
+  })),
+)
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>
@@ -415,6 +420,16 @@ export const router = createBrowserRouter([
           <Lazy>
             <ProfileSettingsPage />
           </Lazy>
+        ),
+      },
+      {
+        path: 'identity',
+        element: (
+          <ResourceGuard name="IdentityPage">
+            <Lazy>
+              <IdentityPage />
+            </Lazy>
+          </ResourceGuard>
         ),
       },
       {
