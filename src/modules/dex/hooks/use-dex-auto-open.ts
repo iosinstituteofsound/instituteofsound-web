@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { openDexForPlayback } from '@/modules/dex/dex-runtime'
+import { openDexForPlayback } from '@instituteofsound/dex'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 

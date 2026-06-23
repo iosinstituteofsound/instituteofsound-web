@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { closeDex, DexShell } from '@/modules/dex/dex-runtime'
-import '@/modules/dex/dex-runtime.css'
+import { closeDex, DexShell } from '@instituteofsound/dex'
+import '@instituteofsound/dex/styles/dex.css'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { env } from '@/shared/config/env'
 import { tokenStorage } from '@/shared/services/api/token-storage'
