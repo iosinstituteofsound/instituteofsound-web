@@ -24,6 +24,9 @@ export function trackToPlayerTrack(
     releaseId?: string
     artistProfileId?: string
     coverUrl?: string
+    lyrics?: string
+    syncedLyrics?: TrackDto['syncedLyrics']
+    syncedLyricsStatus?: TrackDto['syncedLyricsStatus']
     duplicateInfo?: TrackDto['duplicateInfo']
   },
   artworkUrl?: string,
@@ -38,6 +41,9 @@ export function trackToPlayerTrack(
     audioUrl,
     durationSec: track.durationSec,
     artworkUrl: track.coverUrl ?? artworkUrl,
+    lyrics: track.lyrics,
+    syncedLyrics: track.syncedLyrics,
+    syncedLyricsStatus: track.syncedLyricsStatus,
     releaseId: track.releaseId,
     artistProfileId: track.artistProfileId,
     duplicateInfo: track.duplicateInfo,
@@ -74,6 +80,9 @@ export function releaseToPlayerQueue(release: ReleaseDetailDto): PlayerTrack[] {
         artist: release.artistName,
         audioUrl: t.audioUrl,
         durationSec: t.durationSec,
+        lyrics: t.lyrics,
+        syncedLyrics: t.syncedLyrics,
+        syncedLyricsStatus: t.syncedLyricsStatus,
         releaseId: release.id,
         artistProfileId: release.artistProfileId,
         duplicateInfo: t.duplicateInfo,

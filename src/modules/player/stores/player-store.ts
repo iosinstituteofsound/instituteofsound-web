@@ -20,6 +20,7 @@ interface PlayerState {
   mobileView: 'mini' | 'sheet'
   isQueueOpen: boolean
   isPlaylistModalOpen: boolean
+  isLyricsOpen: boolean
   isShuffling: boolean
   shuffleAnimationKey: number
   sessionReady: boolean
@@ -46,6 +47,9 @@ interface PlayerState {
   closeQueue: () => void
   openPlaylistModal: () => void
   closePlaylistModal: () => void
+  openLyrics: () => void
+  closeLyrics: () => void
+  toggleLyrics: () => void
   close: () => void
   setExpanded: (expanded: boolean) => void
   toggleBarOpen: () => void
@@ -128,6 +132,7 @@ export const usePlayerStore = create<PlayerState>()((set, get) => ({
       mobileView: 'mini',
       isQueueOpen: false,
       isPlaylistModalOpen: false,
+      isLyricsOpen: false,
       isShuffling: false,
       shuffleAnimationKey: 0,
       sessionReady: false,
@@ -376,12 +381,22 @@ export const usePlayerStore = create<PlayerState>()((set, get) => ({
         set({ queue, displayQueue: queue })
       },
 
-      openQueue: () => set({ isQueueOpen: true }),
+      openQueue: () => set({ isQueueOpen: true, isLyricsOpen: false }),
       closeQueue: () => set({ isQueueOpen: false }),
 
-      openPlaylistModal: () => set({ isQueueOpen: true }),
+      openPlaylistModal: () => set({ isQueueOpen: true, isLyricsOpen: false }),
 
       closePlaylistModal: () => set({ isQueueOpen: false }),
+
+      openLyrics: () => set({ isLyricsOpen: true, isQueueOpen: false }),
+
+      closeLyrics: () => set({ isLyricsOpen: false }),
+
+      toggleLyrics: () =>
+        set((state) => ({
+          isLyricsOpen: !state.isLyricsOpen,
+          isQueueOpen: false,
+        })),
 
       close: () =>
         set({
@@ -398,6 +413,7 @@ export const usePlayerStore = create<PlayerState>()((set, get) => ({
           mobileView: 'mini',
           isQueueOpen: false,
           isPlaylistModalOpen: false,
+          isLyricsOpen: false,
           isShuffling: false,
         }),
 

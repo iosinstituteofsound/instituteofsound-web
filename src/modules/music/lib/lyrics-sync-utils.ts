@@ -1,5 +1,47 @@
 import { randomUUID } from '@/shared/lib/random-uuid'
-import type { SyncedLyricLine, SyncedLyricLineDto } from '@/modules/music/types/lyrics-sync.types'
+import type {
+  SyncedLyricLine,
+  SyncedLyricLineDto,
+  SyncedLyricsStatus,
+} from '@/modules/music/types/lyrics-sync.types'
+
+export function hasAnyLyrics(lyrics?: string, syncedLyrics?: SyncedLyricLineDto[]): boolean {
+  if (lyrics?.trim()) return true
+  return Boolean(syncedLyrics?.some((line) => line.text.trim()))
+}
+
+export function hasSyncedLyricsForPlayback(
+  syncedLyrics?: SyncedLyricLineDto[],
+  status?: SyncedLyricsStatus,
+): boolean {
+  if (!syncedLyrics?.length) return false
+  if (status && status !== 'approved' && status !== 'pending_review') return false
+  return syncedLyrics.some((line) => line.text.trim() && Number.isFinite(line.timeMs))
+}
+
+export function resolveActiveSyncedLineIndex(
+  syncedLyrics: SyncedLyricLineDto[],
+  currentTimeMs: number,
+): number {
+  let activeIndex = -1
+  for (let index = 0; index < syncedLyrics.length; index += 1) {
+    const line = syncedLyrics[index]
+    if (!line?.text.trim() || !Number.isFinite(line.timeMs)) continue
+    if (currentTimeMs >= line.timeMs) activeIndex = index
+    else break
+  }
+  return activeIndex
+}
+
+export function getActiveSyncedLyricText(
+  syncedLyrics: SyncedLyricLineDto[] | undefined,
+  currentTimeMs: number,
+): string | null {
+  if (!syncedLyrics?.length) return null
+  const activeIndex = resolveActiveSyncedLineIndex(syncedLyrics, currentTimeMs)
+  if (activeIndex < 0) return null
+  return syncedLyrics[activeIndex]?.text.trim() || null
+}
 
 export function formatSyncTime(ms: number): string {
   const totalSec = ms / 1000

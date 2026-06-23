@@ -1,3 +1,5 @@
+import type { SyncedLyricLineDto, SyncedLyricsStatus } from '@/modules/music/types/lyrics-sync.types'
+
 export interface PlayerTrack {
   id: string
   title: string
@@ -5,6 +7,9 @@ export interface PlayerTrack {
   artworkUrl?: string
   audioUrl: string
   durationSec?: number
+  lyrics?: string
+  syncedLyrics?: SyncedLyricLineDto[]
+  syncedLyricsStatus?: SyncedLyricsStatus
   sourceId?: string
   spotifyUrl?: string
   youtubeUrl?: string

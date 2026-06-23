@@ -193,6 +193,22 @@ body[data-mobile-nav='true'] .ios-player-dock {
   text-overflow: ellipsis;
 }
 
+.ios-player-dock__title--lyric {
+  animation: ios-player-dock-lyric-in 0.28s var(--ios-player-dock-ease);
+}
+
+@keyframes ios-player-dock-lyric-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .ios-player-dock__eq {
   display: inline-flex;
   align-items: flex-end;

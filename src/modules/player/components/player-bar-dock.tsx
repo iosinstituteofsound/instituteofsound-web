@@ -1,6 +1,7 @@
 import { ChevronUp, Music2, Pause, Play } from 'lucide-react'
 import { useEffect } from 'react'
 import { formatPlayerTime } from '@/modules/player/lib/format-time'
+import { useActiveSyncedLyricLine } from '@/modules/player/hooks/use-track-lyrics'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import { cn } from '@/shared/lib/cn'
@@ -17,6 +18,7 @@ export function PlayerBarDock() {
   const duration = usePlayerStore((s) => s.duration)
   const openBar = usePlayerStore((s) => s.openBar)
   const togglePlay = usePlayerStore((s) => s.togglePlay)
+  const activeLyricLine = useActiveSyncedLyricLine(currentTrack, currentTime)
 
   const showDock = !isBarOpen && !(isMobile && mobileView === 'sheet')
   const hasTrack = Boolean(currentTrack)
@@ -77,11 +79,17 @@ export function PlayerBarDock() {
           <span className="ios-player-dock__label">
             {hasTrack ? (isPlaying ? 'Now playing' : 'Paused') : 'Player'}
           </span>
-          <span className="ios-player-dock__title">
+          <span
+            key={activeLyricLine ?? currentTrack?.title ?? 'idle'}
+            className={cn(
+              'ios-player-dock__title',
+              activeLyricLine && 'ios-player-dock__title--lyric',
+            )}
+          >
             {!sessionReady
               ? 'Loading session…'
               : hasTrack
-                ? currentTrack!.title
+                ? activeLyricLine ?? currentTrack!.title
                 : 'Play something to begin'}
           </span>
         </span>

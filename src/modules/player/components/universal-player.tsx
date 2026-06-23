@@ -34,6 +34,7 @@ import {
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
 import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
+import { useActiveSyncedLyricLine, useTrackLyrics } from '@/modules/player/hooks/use-track-lyrics'
 import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/player/styles/universal-player.css'
@@ -107,6 +108,11 @@ export function UniversalPlayer() {
   const setPlaybackState = usePlayerStore((s) => s.setPlaybackState)
   const openQueue = usePlayerStore((s) => s.openQueue)
   const openPlaylistModal = usePlayerStore((s) => s.openPlaylistModal)
+  const isLyricsOpen = usePlayerStore((s) => s.isLyricsOpen)
+  const toggleLyrics = usePlayerStore((s) => s.toggleLyrics)
+
+  const { hasLyrics, isLoading: lyricsLoading } = useTrackLyrics(currentTrack)
+  const activeLyricLine = useActiveSyncedLyricLine(currentTrack, currentTime)
 
   const canOpenSourceModal =
     queueSource?.kind === 'playlist' || queueSource?.kind === 'release'
@@ -502,7 +508,15 @@ export function UniversalPlayer() {
                   : undefined
               }
             >
-              <p className="ios-universal-player__title">{currentTrack.title}</p>
+              <p
+                key={showMobileMini && activeLyricLine ? activeLyricLine : currentTrack.title}
+                className={cn(
+                  'ios-universal-player__title',
+                  showMobileMini && activeLyricLine && 'ios-universal-player__title--lyric',
+                )}
+              >
+                {showMobileMini && activeLyricLine ? activeLyricLine : currentTrack.title}
+              </p>
               {currentTrack.artist ? (
                 <p className="ios-universal-player__artist">{currentTrack.artist}</p>
               ) : null}
@@ -635,7 +649,16 @@ export function UniversalPlayer() {
           </div>
 
           <div className={cn('ios-universal-player__extras', showMobileMini && 'ios-universal-player__extras--mobile')}>
-            <PlayerControlButton label="Lyrics" disabled className={showMobileMini ? 'ios-universal-player__control--mobile-hidden' : undefined}>
+            <PlayerControlButton
+              label={hasLyrics ? (isLyricsOpen ? 'Close lyrics' : 'Show lyrics') : 'Lyrics unavailable'}
+              active={isLyricsOpen}
+              disabled={!hasLyrics && !lyricsLoading}
+              className={showMobileMini ? 'ios-universal-player__control--mobile-hidden' : undefined}
+              onClick={(event) => {
+                event.stopPropagation()
+                toggleLyrics()
+              }}
+            >
               <Mic2 className="h-4 w-4" strokeWidth={2.25} />
             </PlayerControlButton>
             {canOpenSourceModal ? (

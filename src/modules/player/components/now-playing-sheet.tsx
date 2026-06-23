@@ -5,6 +5,7 @@ import {
   Heart,
   ListMusic,
   ListEnd,
+  Mic2,
   Music2,
   Pause,
   Play,
@@ -20,6 +21,8 @@ import {
 import { PlayerSlider } from '@/modules/player/components/player-slider'
 import { formatPlayerTime } from '@/modules/player/lib/format-time'
 import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
+import { PlayerLyricsContent } from '@/modules/player/components/player-lyrics-content'
+import { useTrackLyrics } from '@/modules/player/hooks/use-track-lyrics'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { getReleaseAnalytics, toggleTrackLike } from '@/modules/music/api/music.api'
 import { tokenStorage } from '@/shared/services/api/token-storage'
@@ -82,6 +85,10 @@ export function NowPlayingSheet() {
   const closeNowPlaying = usePlayerStore((s) => s.closeNowPlaying)
   const openQueue = usePlayerStore((s) => s.openQueue)
   const openPlaylistModal = usePlayerStore((s) => s.openPlaylistModal)
+  const isLyricsOpen = usePlayerStore((s) => s.isLyricsOpen)
+  const toggleLyrics = usePlayerStore((s) => s.toggleLyrics)
+
+  const { hasLyrics, isLoading: lyricsLoading } = useTrackLyrics(currentTrack)
 
   const canOpenSourceModal =
     queueSource?.kind === 'playlist' || queueSource?.kind === 'release'
@@ -171,6 +178,12 @@ export function NowPlayingSheet() {
             ) : null}
           </div>
 
+          {isLyricsOpen ? (
+            <div className="now-playing-sheet__lyrics">
+              <PlayerLyricsContent />
+            </div>
+          ) : null}
+
           <div className="now-playing-sheet__progress">
             <span className="now-playing-sheet__time">{formatPlayerTime(currentTime)}</span>
             <PlayerSlider
@@ -258,6 +271,15 @@ export function NowPlayingSheet() {
               className="now-playing-sheet__add-playlist"
               size="md"
             />
+
+            <SheetControlButton
+              label={hasLyrics ? (isLyricsOpen ? 'Hide lyrics' : 'Show lyrics') : 'Lyrics unavailable'}
+              active={isLyricsOpen}
+              disabled={!hasLyrics && !lyricsLoading}
+              onClick={toggleLyrics}
+            >
+              <Mic2 className="h-5 w-5" strokeWidth={2.25} />
+            </SheetControlButton>
 
             <div className="now-playing-sheet__volume">
               <SheetControlButton

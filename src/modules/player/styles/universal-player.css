@@ -645,6 +645,10 @@
   cursor: pointer;
 }
 
+.ios-universal-player--mobile-mini .ios-universal-player__title--lyric {
+  animation: ios-player-dock-lyric-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .ios-universal-player--mobile-mini .ios-universal-player__mobile-progress--interactive {
   height: 0.35rem;
   pointer-events: auto;
