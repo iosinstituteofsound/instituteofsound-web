@@ -55,12 +55,19 @@ export default defineConfig(({ mode }) => {
           find: '@instituteofsound/dex',
           replacement: useDexDist ? path.join(dexDist, 'index.js') : path.join(dexSrc, 'index.ts'),
         },
-        { find: '@dex', replacement: path.join(dexSrc) },
-        { find: '@dex/', replacement: `${path.join(dexSrc)}/` },
+        ...(hasDexSrc
+          ? [
+              { find: '@dex', replacement: path.join(dexRoot, 'src') },
+              { find: '@dex/', replacement: `${path.join(dexRoot, 'src')}/` },
+            ]
+          : []),
         { find: /^@\/(.*)$/, replacement: path.resolve(__dirname, './src/$1') },
         { find: 'react', replacement: path.resolve(__dirname, './node_modules/react') },
         { find: 'react-dom', replacement: path.resolve(__dirname, './node_modules/react-dom') },
       ],
+    },
+    optimizeDeps: {
+      exclude: ['@instituteofsound/dex'],
     },
     server: {
       host: true,
