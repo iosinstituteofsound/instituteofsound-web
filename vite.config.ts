@@ -5,7 +5,11 @@ import path from 'path'
 import fs from 'fs'
 
 const webRoot = path.resolve(__dirname, '.')
-const dexRoot = path.resolve(__dirname, '../instituteofsound-dex')
+const siblingDexRoot = path.resolve(__dirname, '../instituteofsound-dex')
+const packageDexRoot = path.resolve(__dirname, 'node_modules/@instituteofsound/dex')
+const dexRoot = fs.existsSync(path.join(siblingDexRoot, 'package.json'))
+  ? siblingDexRoot
+  : packageDexRoot
 const dexSrc = path.join(dexRoot, 'src')
 const dexDist = path.join(dexRoot, 'dist')
 
