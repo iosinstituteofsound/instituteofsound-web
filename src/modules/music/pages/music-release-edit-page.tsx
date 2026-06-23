@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Disc3 } from 'lucide-react'
 import { toast } from 'sonner'
 import { invalidateArtistSurfaceQueries } from '@/modules/explore/lib/invalidate-artist-surface'
+import { invalidateTrackLyricsQueries } from '@/modules/music/lib/invalidate-track-lyrics'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
 import { getArtistProfile, listArtistReleases, listArtistTracks, updateArtistTrack, updateRelease } from '@/modules/music/api/music.api'
@@ -465,6 +466,10 @@ export function MusicReleaseEditPage() {
                   lyrics: payload.lyrics,
                   syncedLyrics: payload.syncedLyrics,
                   syncedLyricsStatus: 'pending_review',
+                })
+                invalidateTrackLyricsQueries(queryClient, {
+                  trackId: apiTrackId,
+                  releaseId: releaseId ?? undefined,
                 })
               }}
             />

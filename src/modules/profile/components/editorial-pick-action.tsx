@@ -6,6 +6,7 @@ import {
   resolveEditorialPickAction,
 } from '@/modules/profile/lib/editorial-pick-action'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { releaseDtoToPlayerTrack } from '@/modules/music/lib/player-track-builders'
 import { cn } from '@/shared/lib/cn'
 
 type EditorialPickActionControlProps = {
@@ -28,13 +29,15 @@ export function EditorialPickActionControl({ pick, className }: EditorialPickAct
         onClick={(event) => {
           event.preventDefault()
           event.stopPropagation()
-          playTrack({
-            id: pick.id,
+          const track = releaseDtoToPlayerTrack({
+            id: pick.releaseId ?? pick.id,
             title: pick.title,
-            artist: pick.artistName ?? 'IOS Editorial',
-            audioUrl: pick.streamUrl!,
-            artworkUrl: pick.coverUrl,
+            artistName: pick.artistName ?? 'IOS Editorial',
+            coverUrl: pick.coverUrl,
+            streamUrl: pick.streamUrl,
           })
+          if (!track) return
+          playTrack(track)
         }}
       >
         <Play size={14} strokeWidth={2} fill="currentColor" aria-hidden />

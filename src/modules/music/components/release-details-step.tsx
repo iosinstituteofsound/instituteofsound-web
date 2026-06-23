@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Disc3, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { getArtistProfile, listArtistTracks, updateArtistTrack } from '@/modules/music/api/music.api'
+import { invalidateTrackLyricsQueries } from '@/modules/music/lib/invalidate-track-lyrics'
 import { ReleaseTrackDetailsList } from '@/modules/music/components/release-track-details-list'
 import { TrackLyricsPanel } from '@/modules/music/components/track-lyrics-panel'
 import { formatArtistTrackTitle } from '@/modules/music/lib/track-title-format'
@@ -63,6 +64,7 @@ export function ReleaseDetailsStep({
   onTrackSyncedLyricsChange,
   onTrackReorder,
 }: ReleaseDetailsStepProps) {
+  const queryClient = useQueryClient()
   const [coverFileName, setCoverFileName] = useState('')
   const [coverUploading, setCoverUploading] = useState(false)
   const [activeLyricsTrackId, setActiveLyricsTrackId] = useState<string | null>(null)
@@ -313,6 +315,7 @@ export function ReleaseDetailsStep({
               syncedLyrics: payload.syncedLyrics,
               syncedLyricsStatus: 'pending_review',
             })
+            invalidateTrackLyricsQueries(queryClient, { trackId: queueItem.trackId })
           }}
         />
 

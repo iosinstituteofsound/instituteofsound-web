@@ -74,6 +74,11 @@ export async function listArtistTracks() {
   return data.data
 }
 
+export async function getArtistTrack(id: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<TrackDto>>(`${API_V1}/artist/tracks/${id}`)
+  return data.data
+}
+
 export async function updateArtistTrack(
   id: string,
   input: {
@@ -302,6 +307,20 @@ export async function downloadArtistAnalyticsCsv() {
     responseType: 'text',
   })
   return data
+}
+
+export interface TrackLyricsDto {
+  releaseId: string
+  lyrics?: string
+  syncedLyrics?: Array<{ text: string; timeMs: number }>
+  syncedLyricsStatus?: 'draft' | 'pending_review' | 'approved'
+}
+
+export async function getTrackLyrics(trackId: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<TrackLyricsDto>>(
+    `${API_V1}/music/tracks/${trackId}`,
+  )
+  return data.data
 }
 
 export async function getTrackReleaseRedirect(trackId: string) {

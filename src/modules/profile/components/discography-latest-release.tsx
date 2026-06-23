@@ -3,6 +3,7 @@ import { Play } from 'lucide-react'
 import { ReleaseVinylArt } from '@/modules/explore/components/release-vinyl-art'
 import type { ReleaseDto } from '@/modules/explore/types/explore.types'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { releaseDtoToPlayerTrack } from '@/modules/music/lib/player-track-builders'
 import {
   discographyReleaseDate,
   discographyReleaseType,
@@ -87,16 +88,11 @@ export function DiscographyLatestRelease({ release }: DiscographyLatestReleasePr
               <button
                 type="button"
                 className="disc-spot__btn disc-spot__btn--fill ios-mh-btn ios-mh-btn--fill"
-                onClick={() =>
-                  playTrack({
-                    id: release.id,
-                    title: release.title,
-                    artist: release.artistName ?? 'Unknown',
-                    audioUrl: release.streamUrl!,
-                    artworkUrl: release.coverUrl,
-                    durationSec: release.durationSec,
-                  })
-                }
+                onClick={() => {
+                  const track = releaseDtoToPlayerTrack(release)
+                  if (!track) return
+                  playTrack(track)
+                }}
               >
                 <Play size={11} strokeWidth={2.5} fill="currentColor" aria-hidden />
                 Listen

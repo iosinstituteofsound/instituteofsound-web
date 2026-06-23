@@ -10,6 +10,7 @@ import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import type { ReleasesPageFilter } from '@/modules/explore/types/explore.types'
 import { releaseDateLabel } from '@/modules/explore/lib/release-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { releaseDtoToPlayerTrack } from '@/modules/music/lib/player-track-builders'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/explore/styles/explore.css'
 import '@/modules/explore/styles/explore-mh-chrome.css'
@@ -56,14 +57,9 @@ export function ReleasesPage() {
   const { featured, rail, upcoming, genres, filters, stats } = catalog
 
   const handleFeaturedPlay = (release: NonNullable<typeof featured>) => {
-    if (!release.streamUrl) return
-    playTrack({
-      id: release.id,
-      title: release.title,
-      artist: release.artistName ?? 'Unknown',
-      audioUrl: release.streamUrl,
-      artworkUrl: release.coverUrl,
-    })
+    const track = releaseDtoToPlayerTrack(release)
+    if (!track) return
+    playTrack(track)
   }
 
   return (

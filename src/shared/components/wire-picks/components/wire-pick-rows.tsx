@@ -11,6 +11,7 @@ import {
 import type { ReleaseDto, WirePickItem } from '@/modules/explore/types/explore.types'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { releaseDtoToPlayerTrack } from '@/modules/music/lib/player-track-builders'
 import {
   feedItemArtist,
   feedItemStreamUrl,
@@ -94,8 +95,22 @@ export function WireLineupRow({
 
   const handlePlay = () => {
     if (!resolved.streamUrl) return
+    if (item.releaseId) {
+      const track = releaseDtoToPlayerTrack({
+        id: item.releaseId,
+        title: resolved.title,
+        artistName: resolved.subtitle,
+        coverUrl: resolved.coverUrl,
+        streamUrl: resolved.streamUrl,
+      })
+      if (track) {
+        playTrack(track)
+        return
+      }
+    }
     playTrack({
       id: item.releaseId ?? item.feedItemId ?? resolved.key,
+      releaseId: item.releaseId,
       title: resolved.title,
       artist: resolved.subtitle,
       audioUrl: resolved.streamUrl,
@@ -173,14 +188,9 @@ export function WireCandidateReleaseRow({
 
   const handlePlay = (event: React.MouseEvent) => {
     event.stopPropagation()
-    if (!release.streamUrl) return
-    playTrack({
-      id: release.id,
-      title: release.title,
-      artist: release.artistName ?? 'Unknown',
-      audioUrl: release.streamUrl,
-      artworkUrl: release.coverUrl,
-    })
+    const track = releaseDtoToPlayerTrack(release)
+    if (!track) return
+    playTrack(track)
   }
 
   return (

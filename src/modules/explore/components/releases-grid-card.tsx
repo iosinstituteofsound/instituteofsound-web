@@ -12,6 +12,7 @@ import {
   releasePlaysFormatted,
 } from '@/modules/explore/lib/release-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { releaseDtoToPlayerTrack } from '@/modules/music/lib/player-track-builders'
 import { releaseCardPath } from '@/modules/explore/lib/track-paths'
 import { cn } from '@/shared/lib/cn'
 
@@ -28,14 +29,9 @@ export function ReleasesGridCard({ release, className }: ReleasesGridCardProps) 
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!release.streamUrl) return
-    playTrack({
-      id: release.id,
-      title: release.title,
-      artist: release.artistName ?? 'Unknown',
-      audioUrl: release.streamUrl,
-      artworkUrl: release.coverUrl,
-    })
+    const track = releaseDtoToPlayerTrack(release)
+    if (!track) return
+    playTrack(track)
   }
 
   return (

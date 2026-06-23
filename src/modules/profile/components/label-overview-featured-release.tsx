@@ -10,6 +10,7 @@ import {
   labelOverviewReleaseTagline,
 } from '@/modules/profile/lib/label-overview-format'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { releaseDtoToPlayerTrack } from '@/modules/music/lib/player-track-builders'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { toast } from '@/shared/components/ui/sonner'
@@ -244,15 +245,11 @@ export function LabelOverviewFeaturedRelease({
                   <button
                     type="button"
                     className="lbl-ov-featured__listen"
-                    onClick={() =>
-                      playTrack({
-                        id: release.id,
-                        title: release.title,
-                        artist: release.artistName ?? 'IOS Release',
-                        audioUrl: release.streamUrl!,
-                        artworkUrl: release.coverUrl,
-                      })
-                    }
+                    onClick={() => {
+                      const track = releaseDtoToPlayerTrack(release)
+                      if (!track) return
+                      playTrack(track)
+                    }}
                   >
                     <Play size={12} strokeWidth={2.5} fill="currentColor" aria-hidden />
                     Listen Now

@@ -248,6 +248,9 @@ export function playerTrackFromCurrent(track: {
   durationSec?: number
   releaseId?: string
   artistProfileId?: string
+  lyrics?: string
+  syncedLyrics?: TrackDto['syncedLyrics']
+  syncedLyricsStatus?: TrackDto['syncedLyricsStatus']
 }): PlayerTrack | null {
   return trackToPlayerTrack(
     {
@@ -259,6 +262,9 @@ export function playerTrackFromCurrent(track: {
       releaseId: track.releaseId,
       artistProfileId: track.artistProfileId,
       coverUrl: track.coverUrl,
+      lyrics: track.lyrics,
+      syncedLyrics: track.syncedLyrics,
+      syncedLyricsStatus: track.syncedLyricsStatus,
     },
     track.artworkUrl ?? track.coverUrl,
   )

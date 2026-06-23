@@ -3,6 +3,7 @@ import type { DiscographyTrackDto } from '@/modules/explore/types/explore.types'
 import { releaseInitials } from '@/modules/explore/lib/release-meta'
 import type { PlayerTrack } from '@/modules/player/types/player.types'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
+import { discographyTrackToPlayerTrack } from '@/modules/music/lib/player-track-builders'
 import {
   formatDiscographyPlays,
   fillPopularPreview,
@@ -35,12 +36,17 @@ function trackStreamUrl(track: DiscographyTrackDto, index: number): string | und
 
 function popularTracksToPlayerQueue(tracks: DiscographyTrackDto[], artistName?: string): PlayerTrack[] {
   return tracks.flatMap((track, index) => {
+    const playerTrack = discographyTrackToPlayerTrack(track, artistName)
+    if (playerTrack) return [playerTrack]
+
     const audioUrl = trackStreamUrl(track, index)
     if (!audioUrl) return []
 
     return [
       {
         id: track.id,
+        trackId: track.id,
+        releaseId: track.releaseId,
         title: track.title,
         artist: track.artistName ?? artistName ?? 'Unknown',
         audioUrl,

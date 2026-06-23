@@ -28,6 +28,7 @@ import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import { getReleaseDetail } from '@/modules/music/api/music.api'
 import { playReleaseFromDetail } from '@/modules/music/lib/player-queue'
+import { releaseDtoToPlayerTrack } from '@/modules/music/lib/player-track-builders'
 import { trackPagePath } from '@/modules/explore/lib/track-paths'
 import { ReleaseTrackList } from '@/modules/explore/components/release-track-list'
 import '@/modules/explore/styles/explore.css'
@@ -155,16 +156,9 @@ export function ReleasePage() {
       return
     }
     if (!release?.streamUrl) return
-    playTrack({
-      id: release.id,
-      releaseId: release.id,
-      artistProfileId: release.artistProfileId,
-      title: release.title,
-      artist: release.artistName ?? 'Unknown',
-      audioUrl: release.streamUrl,
-      artworkUrl: release.coverUrl,
-      durationSec: release.durationSec,
-    })
+    const track = releaseDtoToPlayerTrack(release)
+    if (!track) return
+    playTrack(track)
   }, [playTrack, release, releaseDetail])
 
   const handlePlayTrack = useCallback(
