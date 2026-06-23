@@ -1,7 +1,7 @@
 import { useMemo, useSyncExternalStore } from 'react'
 import { router } from '@/app/router/routes'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
-import type { DexContext } from '@instituteofsound/dex'
+import type { DexContext } from '@/modules/dex/types/dex.types'
 
 function subscribeToRouter(onChange: () => void) {
   return router.subscribe(onChange)

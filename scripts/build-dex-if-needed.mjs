@@ -21,9 +21,9 @@ if (!dexRoot) {
     process.exit(0)
   }
 
-  console.error('[build:dex] @instituteofsound/dex is not installed and no local sibling was found.')
-  process.exit(1)
+  console.log('[build:dex] No local instituteofsound-dex found — web will use built-in DEX stub.')
+  process.exit(0)
 }
 
-console.log(`[build:dex] Building @instituteofsound/dex from ${dexRoot}`)
+console.log(`[build:dex] Building instituteofsound-dex from ${dexRoot}`)
 execSync('npm run build:lib', { cwd: dexRoot, stdio: 'inherit' })

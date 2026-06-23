@@ -5,13 +5,20 @@ import path from 'path'
 import fs from 'fs'
 
 const webRoot = path.resolve(__dirname, '.')
+const dexRuntimeStub = path.resolve(__dirname, 'src/modules/dex/dex-runtime.ts')
+const dexCssStub = path.resolve(__dirname, 'src/modules/dex/dex-runtime.css')
 const siblingDexRoot = path.resolve(__dirname, '../instituteofsound-dex')
 const packageDexRoot = path.resolve(__dirname, 'node_modules/@instituteofsound/dex')
-const dexRoot = fs.existsSync(path.join(siblingDexRoot, 'package.json'))
-  ? siblingDexRoot
-  : packageDexRoot
-const dexSrc = path.join(dexRoot, 'src')
-const dexDist = path.join(dexRoot, 'dist')
+
+function resolveDexRoot() {
+  if (fs.existsSync(path.join(siblingDexRoot, 'package.json'))) return siblingDexRoot
+  if (fs.existsSync(path.join(packageDexRoot, 'package.json'))) return packageDexRoot
+  return null
+}
+
+const dexRoot = resolveDexRoot()
+const dexSrc = dexRoot ? path.join(dexRoot, 'src') : null
+const dexDist = dexRoot ? path.join(dexRoot, 'dist') : null
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, webRoot, '')
@@ -27,9 +34,22 @@ export default defineConfig(({ mode }) => {
     changeOrigin: true,
   }
 
-  const hasDexSrc = fs.existsSync(path.join(dexSrc, 'index.ts'))
-  const hasDexDist = fs.existsSync(path.join(dexDist, 'index.js'))
+  const hasDexSrc = Boolean(dexSrc && fs.existsSync(path.join(dexSrc, 'index.ts')))
+  const hasDexDist = Boolean(dexDist && fs.existsSync(path.join(dexDist, 'index.js')))
   const useDexDist = hasDexDist && (!hasDexSrc || mode === 'production')
+  const hasDexPackage = hasDexSrc || hasDexDist
+
+  const dexRuntimeAlias = hasDexPackage
+    ? useDexDist
+      ? path.join(dexDist!, 'index.js')
+      : path.join(dexSrc!, 'index.ts')
+    : dexRuntimeStub
+
+  const dexCssAlias = hasDexPackage
+    ? useDexDist
+      ? path.join(dexDist!, 'index.css')
+      : path.join(dexSrc!, 'styles/dex.css')
+    : dexCssStub
 
   return {
     envDir: webRoot,
@@ -48,14 +68,14 @@ export default defineConfig(({ mode }) => {
       ],
       alias: [
         {
-          find: '@instituteofsound/dex/styles/dex.css',
-          replacement: useDexDist ? path.join(dexDist, 'index.css') : path.join(dexSrc, 'styles/dex.css'),
+          find: '@/modules/dex/dex-runtime.css',
+          replacement: dexCssAlias,
         },
         {
-          find: '@instituteofsound/dex',
-          replacement: useDexDist ? path.join(dexDist, 'index.js') : path.join(dexSrc, 'index.ts'),
+          find: '@/modules/dex/dex-runtime',
+          replacement: dexRuntimeAlias,
         },
-        ...(hasDexSrc
+        ...(hasDexSrc && dexRoot
           ? [
               { find: '@dex', replacement: path.join(dexRoot, 'src') },
               { find: '@dex/', replacement: `${path.join(dexRoot, 'src')}/` },
@@ -67,7 +87,7 @@ export default defineConfig(({ mode }) => {
       ],
     },
     optimizeDeps: {
-      exclude: ['@instituteofsound/dex'],
+      exclude: hasDexPackage ? ['@/modules/dex/dex-runtime'] : [],
     },
     server: {
       host: true,
