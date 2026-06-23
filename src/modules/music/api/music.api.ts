@@ -74,7 +74,15 @@ export async function listArtistTracks() {
   return data.data
 }
 
-export async function updateArtistTrack(id: string, input: { title: string }) {
+export async function updateArtistTrack(
+  id: string,
+  input: {
+    title: string
+    lyrics?: string
+    syncedLyrics?: Array<{ text: string; timeMs: number }>
+    syncedLyricsStatus?: 'none' | 'draft' | 'pending_review' | 'approved'
+  },
+) {
   const { data } = await apiClient.patch<ApiSuccessResponse<TrackDto>>(`${API_V1}/artist/tracks/${id}`, input)
   return data.data
 }

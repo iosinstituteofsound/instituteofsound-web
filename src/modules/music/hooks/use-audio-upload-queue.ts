@@ -74,6 +74,7 @@ function createQueueItem(file: File): QueuedUpload {
     id: randomUUID(),
     file,
     title: titleFromFilename(file.name),
+    lyrics: '',
     status: 'pending',
     uploadProgress: 0,
     processingProgress: 0,
@@ -350,6 +351,28 @@ export function useAudioUploadQueue() {
     updateItem(id, { title })
   }, [updateItem])
 
+  const updateLyrics = useCallback((id: string, lyrics: string) => {
+    updateItem(id, { lyrics })
+  }, [updateItem])
+
+  const updateSyncedLyrics = useCallback(
+    (
+      id: string,
+      payload: {
+        lyrics: string
+        syncedLyrics: QueuedUpload['syncedLyrics']
+        syncedLyricsStatus?: QueuedUpload['syncedLyricsStatus']
+      },
+    ) => {
+      updateItem(id, {
+        lyrics: payload.lyrics,
+        syncedLyrics: payload.syncedLyrics,
+        syncedLyricsStatus: payload.syncedLyricsStatus ?? 'pending_review',
+      })
+    },
+    [updateItem],
+  )
+
   const reorderQueue = useCallback(
     (activeId: string, overId: string) => {
       const items = queueRef.current
@@ -400,6 +423,8 @@ export function useAudioUploadQueue() {
     retryItem,
     retryAllFailed,
     updateTitle,
+    updateLyrics,
+    updateSyncedLyrics,
     reorderQueue,
     reorderReadyTracks,
     resetQueue,

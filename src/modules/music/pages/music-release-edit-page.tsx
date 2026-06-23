@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Disc3 } from 'lucide-react'
@@ -6,9 +6,11 @@ import { toast } from 'sonner'
 import { invalidateArtistSurfaceQueries } from '@/modules/explore/lib/invalidate-artist-surface'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
-import { listArtistReleases, listArtistTracks, updateRelease } from '@/modules/music/api/music.api'
+import { getArtistProfile, listArtistReleases, listArtistTracks, updateArtistTrack, updateRelease } from '@/modules/music/api/music.api'
 import { ReleaseScheduleStep } from '@/modules/music/components/release-schedule-step'
+import { TrackLyricsPanel } from '@/modules/music/components/track-lyrics-panel'
 import { artistReleaseBreadcrumbs } from '@/modules/music/lib/artist-breadcrumb'
+import { stripArtistTrackPrefix } from '@/modules/music/lib/track-title-format'
 import { buildReleaseDateIso, getDefaultReleaseTimezone } from '@/modules/music/lib/release-schedule'
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
 import { Loader } from '@/shared/components/feedback/loader'
@@ -17,6 +19,8 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import '@/modules/music/styles/release-builder.css'
 import '@/modules/music/styles/artist-dashboard-home.css'
+import '@/modules/music/styles/lyrics-sync-modal.css'
+import type { SyncedLyricLineDto, SyncedLyricsStatus } from '@/modules/music/types/lyrics-sync.types'
 
 async function resolveCoverUrl(coverUrl: string, coverPreviewUrl: string): Promise<string | undefined> {
   const normalizedExisting = normalizeMediaUrl(coverUrl)
@@ -82,6 +86,10 @@ export function MusicReleaseEditPage() {
     queryKey: ['artist-tracks'],
     queryFn: listArtistTracks,
   })
+  const { data: profile } = useQuery({
+    queryKey: ['artist-profile'],
+    queryFn: getArtistProfile,
+  })
 
   const release = useMemo(
     () => (releases ?? []).find((item) => item.id === releaseId),
@@ -102,7 +110,12 @@ export function MusicReleaseEditPage() {
   const [coverFileName, setCoverFileName] = useState('')
   const [coverUploading, setCoverUploading] = useState(false)
   const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>([])
+  const [trackLyrics, setTrackLyrics] = useState<Record<string, string>>({})
+  const [trackSyncedLyrics, setTrackSyncedLyrics] = useState<Record<string, SyncedLyricLineDto[]>>({})
+  const [trackSyncedLyricsStatus, setTrackSyncedLyricsStatus] = useState<Record<string, SyncedLyricsStatus>>({})
+  const [activeLyricsTrackId, setActiveLyricsTrackId] = useState<string | null>(null)
   const [initialized, setInitialized] = useState(false)
+  const lyricsHydratedRef = useRef(false)
 
   useEffect(() => {
     if (!release || initialized) return
@@ -118,8 +131,26 @@ export function MusicReleaseEditPage() {
     setReleaseTimezone(release.releaseTimezone ?? getDefaultReleaseTimezone())
     setCoverUrl(release.coverUrl ?? '')
     setSelectedTrackIds(release.tracks.map((track) => track.id))
+    setActiveLyricsTrackId(release.tracks[0]?.id ?? null)
     setInitialized(true)
   }, [release, initialized])
+
+  useEffect(() => {
+    if (!release?.tracks.length || !tracks || lyricsHydratedRef.current) return
+    lyricsHydratedRef.current = true
+    const lyricsMap: Record<string, string> = {}
+    const syncedMap: Record<string, SyncedLyricLineDto[]> = {}
+    const syncedStatusMap: Record<string, SyncedLyricsStatus> = {}
+    for (const track of release.tracks) {
+      const full = tracks.find((entry) => entry.id === track.id)
+      lyricsMap[track.id] = full?.lyrics ?? track.lyrics ?? ''
+      if (full?.syncedLyrics?.length) syncedMap[track.id] = full.syncedLyrics
+      if (full?.syncedLyricsStatus) syncedStatusMap[track.id] = full.syncedLyricsStatus
+    }
+    setTrackLyrics(lyricsMap)
+    setTrackSyncedLyrics(syncedMap)
+    setTrackSyncedLyricsStatus(syncedStatusMap)
+  }, [release, tracks])
 
   useEffect(
     () => () => {
@@ -128,7 +159,36 @@ export function MusicReleaseEditPage() {
     [coverPreviewUrl],
   )
 
+  const lyricsTracks = useMemo(() => {
+    const artistName = profile?.displayName ?? 'Artist'
+    return selectedTrackIds
+      .map((id) => {
+        const track = tracks?.find((entry) => entry.id === id) ?? release?.tracks.find((entry) => entry.id === id)
+        const fullTrack = tracks?.find((entry) => entry.id === id)
+        if (!track) return null
+        return {
+          id: track.id,
+          title: stripArtistTrackPrefix(artistName, track.title),
+          lyrics: trackLyrics[track.id] ?? '',
+          syncedLyrics: trackSyncedLyrics[track.id],
+          syncedLyricsStatus: trackSyncedLyricsStatus[track.id],
+          audioUrl: fullTrack?.audioUrl,
+          durationSec: fullTrack?.durationSec,
+          apiTrackId: track.id,
+        }
+      })
+      .filter((track): track is NonNullable<typeof track> => Boolean(track))
+  }, [selectedTrackIds, tracks, release?.tracks, profile?.displayName, trackLyrics, trackSyncedLyrics, trackSyncedLyricsStatus])
+
+  const activeLyricsTrackIdResolved = activeLyricsTrackId ?? lyricsTracks[0]?.id ?? null
+
   const coverImageSrc = coverUrl || coverPreviewUrl
+
+  useEffect(() => {
+    if (!activeLyricsTrackIdResolved) return
+    if (lyricsTracks.some((track) => track.id === activeLyricsTrackIdResolved)) return
+    setActiveLyricsTrackId(lyricsTracks[0]?.id ?? null)
+  }, [activeLyricsTrackIdResolved, lyricsTracks])
 
   const availableTracks = useMemo(() => {
     return (tracks ?? []).filter(
@@ -158,6 +218,20 @@ export function MusicReleaseEditPage() {
     mutationFn: async () => {
       if (!releaseId) throw new Error('Missing release id')
       const resolvedCoverUrl = await resolveCoverUrl(coverUrl, coverPreviewUrl)
+      const artistName = profile?.displayName ?? 'Artist'
+
+      for (const trackId of selectedTrackIds) {
+        const track = tracks?.find((entry) => entry.id === trackId)
+        if (!track) continue
+        const songName = stripArtistTrackPrefix(artistName, track.title)
+        await updateArtistTrack(trackId, {
+          title: songName,
+          lyrics: trackLyrics[trackId]?.trim() || undefined,
+          syncedLyrics: trackSyncedLyrics[trackId]?.length ? trackSyncedLyrics[trackId] : undefined,
+          syncedLyricsStatus: trackSyncedLyrics[trackId]?.length ? 'pending_review' : undefined,
+        })
+      }
+
       return updateRelease(releaseId, {
         title: title.trim(),
         type,
@@ -178,6 +252,7 @@ export function MusicReleaseEditPage() {
     onSuccess: () => {
       toast.success('Release updated')
       void queryClient.invalidateQueries({ queryKey: ['artist-releases'] })
+      void queryClient.invalidateQueries({ queryKey: ['artist-tracks'] })
       invalidateArtistSurfaceQueries(queryClient)
       navigate('/artist/releases')
     },
@@ -185,7 +260,25 @@ export function MusicReleaseEditPage() {
   })
 
   const toggleTrack = (id: string) => {
-    setSelectedTrackIds((prev) => (prev.includes(id) ? prev.filter((trackId) => trackId !== id) : [...prev, id]))
+    setSelectedTrackIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((trackId) => trackId !== id)
+      }
+      const track = tracks?.find((entry) => entry.id === id)
+      if (track && trackLyrics[id] === undefined) {
+        setTrackLyrics((current) => ({
+          ...current,
+          [id]: track.lyrics ?? '',
+        }))
+        if (track.syncedLyrics?.length) {
+          setTrackSyncedLyrics((current) => ({ ...current, [id]: track.syncedLyrics! }))
+        }
+        if (track.syncedLyricsStatus) {
+          setTrackSyncedLyricsStatus((current) => ({ ...current, [id]: track.syncedLyricsStatus! }))
+        }
+      }
+      return [...prev, id]
+    })
   }
 
   if (releasesLoading) {
@@ -211,7 +304,7 @@ export function MusicReleaseEditPage() {
 
   return (
     <Page>
-      <PageSection className="rbl-scene mx-0 max-w-3xl space-y-6 border-0 bg-transparent p-0">
+      <PageSection className="rbl-scene mx-0 max-w-none space-y-6 border-0 bg-transparent p-0">
         <AppBreadcrumb
           surface
           className="app-breadcrumb--dashboard"
@@ -219,6 +312,8 @@ export function MusicReleaseEditPage() {
           description="Update release details, schedule, and track list."
         />
 
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="space-y-6">
         <div className="rbl-panel">
           <div className="rbl-panel__header">
             <h3 className="rbl-panel__title">Release details</h3>
@@ -342,6 +437,38 @@ export function MusicReleaseEditPage() {
           <Button variant="outline" asChild>
             <Link to="/artist/releases">Cancel</Link>
           </Button>
+        </div>
+          </div>
+
+          <aside className="lg:sticky lg:top-6 lg:self-start">
+            <TrackLyricsPanel
+              tracks={lyricsTracks}
+              activeTrackId={activeLyricsTrackIdResolved}
+              onActiveTrackChange={setActiveLyricsTrackId}
+              lyrics={activeLyricsTrackIdResolved ? trackLyrics[activeLyricsTrackIdResolved] ?? '' : ''}
+              onLyricsChange={(value) => {
+                if (!activeLyricsTrackIdResolved) return
+                setTrackLyrics((current) => ({ ...current, [activeLyricsTrackIdResolved]: value }))
+              }}
+              artistName={profile?.displayName ?? 'Artist'}
+              genre={genre.trim() || undefined}
+              coverUrl={coverImageSrc || undefined}
+              onSyncedLyricsSave={async (trackId, payload) => {
+                setTrackLyrics((current) => ({ ...current, [trackId]: payload.lyrics }))
+                setTrackSyncedLyrics((current) => ({ ...current, [trackId]: payload.syncedLyrics }))
+                setTrackSyncedLyricsStatus((current) => ({ ...current, [trackId]: 'pending_review' }))
+                const apiTrackId = lyricsTracks.find((track) => track.id === trackId)?.apiTrackId
+                if (!apiTrackId) return
+                const songName = stripArtistTrackPrefix(profile?.displayName ?? 'Artist', tracks?.find((t) => t.id === apiTrackId)?.title ?? '')
+                await updateArtistTrack(apiTrackId, {
+                  title: songName,
+                  lyrics: payload.lyrics,
+                  syncedLyrics: payload.syncedLyrics,
+                  syncedLyricsStatus: 'pending_review',
+                })
+              }}
+            />
+          </aside>
         </div>
       </PageSection>
     </Page>

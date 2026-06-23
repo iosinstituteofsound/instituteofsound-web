@@ -136,7 +136,12 @@ export function ReleaseBuilderWizard() {
       for (const item of readyTracks) {
         if (!item.trackId) continue
         const songName = item.title.trim() || titleFromFilename(item.file.name)
-        await updateArtistTrack(item.trackId, { title: songName })
+        await updateArtistTrack(item.trackId, {
+          title: songName,
+          lyrics: item.lyrics.trim() || undefined,
+          syncedLyrics: item.syncedLyrics?.length ? item.syncedLyrics : undefined,
+          syncedLyricsStatus: item.syncedLyrics?.length ? 'pending_review' : undefined,
+        })
       }
 
       return createRelease({
@@ -235,6 +240,8 @@ export function ReleaseBuilderWizard() {
               releaseType={releaseType}
               onReleaseTypeChange={setReleaseType}
               onTrackTitleChange={uploadQueue.updateTitle}
+              onTrackLyricsChange={uploadQueue.updateLyrics}
+              onTrackSyncedLyricsChange={uploadQueue.updateSyncedLyrics}
               onTrackReorder={uploadQueue.reorderReadyTracks}
             />
           ) : null}

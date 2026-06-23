@@ -1,4 +1,5 @@
 import type { UploadDuplicateCheck } from '@/modules/music/types/music.types'
+import type { SyncedLyricLineDto, SyncedLyricsStatus } from '@/modules/music/types/lyrics-sync.types'
 
 export type ReleaseBuilderStep = 'upload' | 'details' | 'schedule' | 'review'
 
@@ -8,6 +9,9 @@ export interface QueuedUpload {
   id: string
   file: File
   title: string
+  lyrics: string
+  syncedLyrics?: SyncedLyricLineDto[]
+  syncedLyricsStatus?: SyncedLyricsStatus
   /** Song name only — formatted as "Artist - Song" on publish. */
   jobId?: string
   trackId?: string

@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source "../../instituteofsound-dex/src/**/*.{ts,tsx}";
 @import './theme-aliases.css';
 @import './metal-hammer.css';
 @import './premium-surface.css';

@@ -852,6 +852,58 @@
   background: var(--rbl-deep);
 }
 
+.rbl-lyrics {
+  padding: 1.125rem;
+  border: 1px solid var(--rbl-border);
+  border-radius: var(--radius-lg);
+  background: var(--rbl-chassis);
+  contain: content;
+}
+
+.rbl-lyrics__kicker {
+  margin: 0 0 0.875rem;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rbl-accent-bright);
+}
+
+.rbl-lyrics__selector {
+  margin-bottom: 0.75rem;
+}
+
+.rbl-lyrics__track-name {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--rbl-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rbl-lyrics__input {
+  min-height: 18rem;
+  resize: vertical;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.rbl-lyrics__hint {
+  margin: 0.625rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--rbl-muted);
+  line-height: 1.4;
+}
+
+.rbl-lyrics__empty {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--rbl-muted);
+  line-height: 1.5;
+}
+
 .rbl-holo {
   padding: 1.125rem;
   border: 1px solid var(--rbl-border);

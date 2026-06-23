@@ -24,11 +24,18 @@ export interface UploadDuplicateCheck {
   original?: DuplicateOriginalRef
 }
 
+import type { SyncedLyricLineDto, SyncedLyricsStatus } from '@/modules/music/types/lyrics-sync.types'
+
+export type { SyncedLyricLineDto, SyncedLyricsStatus }
+
 export interface TrackDto {
   id: string
   artistProfileId: string
   releaseId?: string
   title: string
+  lyrics?: string
+  syncedLyrics?: SyncedLyricLineDto[]
+  syncedLyricsStatus?: SyncedLyricsStatus
   trackNumber: number
   durationSec?: number
   audioUrl?: string
