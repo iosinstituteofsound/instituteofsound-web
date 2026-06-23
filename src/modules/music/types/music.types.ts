@@ -39,6 +39,7 @@ export interface TrackDto {
   trackNumber: number
   durationSec?: number
   audioUrl?: string
+  waveformPeaks?: number[]
   status: TrackStatus
   playCount: number
   duplicateInfo?: TrackDuplicateInfo

@@ -29,7 +29,7 @@ export function ProfileArtistSubmissionsTab({ isOwnProfile }: ProfileArtistSubmi
       <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
         <CardTitle className="text-base">My Submissions</CardTitle>
         <Button asChild size="sm">
-          <Link to="/artist/releases/new">Submit track</Link>
+          <Link to="/artist/submissions/new">New Submission</Link>
         </Button>
       </CardHeader>
       <CardContent className="space-y-3">
