@@ -72,13 +72,13 @@ export function tracksToPlayerQueue(
 
 export function releaseToPlayerQueue(release: ReleaseDetailDto): PlayerTrack[] {
   if (release.tracks.length) {
-    return tracksToPlayerQueue(
+    const queue = tracksToPlayerQueue(
       release.tracks.map((t) => ({
         id: t.id,
         trackId: t.id,
         title: t.title,
         artist: release.artistName,
-        audioUrl: t.audioUrl,
+        audioUrl: t.audioUrl ?? release.streamUrl,
         durationSec: t.durationSec,
         lyrics: t.lyrics,
         syncedLyrics: t.syncedLyrics,
@@ -89,6 +89,7 @@ export function releaseToPlayerQueue(release: ReleaseDetailDto): PlayerTrack[] {
       })),
       release.coverUrl,
     )
+    if (queue.length > 0) return queue
   }
   if (release.streamUrl) {
     const primaryTrack = release.tracks[0]

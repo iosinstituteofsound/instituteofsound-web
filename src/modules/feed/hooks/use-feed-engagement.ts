@@ -55,6 +55,11 @@ function updateEngagementInFeedCaches(
   queryClient.setQueryData(feedItemQueryKey(feedItemId), (old: FeedItemDto | undefined) =>
     old ? { ...old, engagement } : old,
   )
+
+  queryClient.setQueriesData<FeedItemDto | null>(
+    { queryKey: ['release-feed-item'] },
+    (old) => (old?.id === feedItemId ? { ...old, engagement } : old),
+  )
 }
 
 export function useSetFeedReaction() {
@@ -134,6 +139,20 @@ export function useAddFeedComment() {
           },
         }
       })
+
+      queryClient.setQueriesData<FeedItemDto | null>(
+        { queryKey: ['release-feed-item'] },
+        (old) => {
+          if (!old || old.id !== feedItemId || !old.engagement) return old
+          return {
+            ...old,
+            engagement: {
+              ...old.engagement,
+              commentCount: old.engagement.commentCount + 1,
+            },
+          }
+        },
+      )
 
       queryClient.setQueryData(feedItemQueryKey(feedItemId), (old: FeedItemDto | undefined) => {
         if (!old?.engagement) return old

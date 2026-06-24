@@ -1,0 +1,130 @@
+/* Release hero — play overlay only on hover */
+
+.explore-release-hero-play {
+  position: relative;
+  display: inline-flex;
+  width: min(100%, clamp(14rem, 30vw, 18.5rem));
+  max-width: 100%;
+  isolation: isolate;
+}
+
+.explore-release-hero-play .explore-rel-vinyl-stack--mh {
+  width: 100%;
+}
+
+.explore-release-hero-play__btn {
+  position: absolute;
+  z-index: 50;
+  top: 0.55rem;
+  left: 0.55rem;
+  bottom: 0.55rem;
+  width: calc(100% - 1.1rem);
+  max-width: calc(100% - 1.1rem);
+  aspect-ratio: 1;
+  margin: 0;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  background: color-mix(in oklch, var(--background) 48%, transparent);
+  border-radius: 2px;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  transition:
+    opacity 0.22s ease,
+    visibility 0.22s ease,
+    background 0.22s ease;
+}
+
+.explore-release-hero-play:hover .explore-release-hero-play__btn,
+.explore-release-hero-play:focus-within .explore-release-hero-play__btn,
+.explore-release-hero__art:hover .explore-release-hero-play__btn,
+.explore-release-hero__art:focus-within .explore-release-hero-play__btn {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.explore-release-hero-play__btn:hover,
+.explore-release-hero-play__btn:focus-visible {
+  background: color-mix(in oklch, var(--background) 58%, transparent);
+}
+
+.explore-release-hero-play__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(3.1rem, 36%, 4.75rem);
+  height: clamp(3.1rem, 36%, 4.75rem);
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklch, var(--foreground) 24%, transparent);
+  background: color-mix(in oklch, var(--background) 82%, transparent);
+  color: var(--foreground);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 14px 36px color-mix(in oklch, var(--background) 62%, transparent);
+  opacity: 0;
+  transform: scale(0.88);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.explore-release-hero-play:hover .explore-release-hero-play__icon,
+.explore-release-hero__art:hover .explore-release-hero-play__icon,
+.explore-release-hero-play:focus-within .explore-release-hero-play__icon,
+.explore-release-hero-play__btn:focus-visible .explore-release-hero-play__icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.explore-release-hero-play__btn:hover .explore-release-hero-play__icon,
+.explore-release-hero-play__btn:focus-visible .explore-release-hero-play__icon {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+@media (max-width: 767px) {
+  .explore-release-hero-play {
+    width: min(100%, 14rem);
+    margin-inline: auto;
+  }
+
+  .explore-release-hero-play__btn {
+    top: 0.5rem;
+    left: 0.5rem;
+    bottom: 0.5rem;
+    width: calc(100% - 1rem);
+    max-width: calc(100% - 1rem);
+  }
+}
+
+@media (hover: none) {
+  .explore-release-hero-play:active .explore-release-hero-play__btn,
+  .explore-release-hero-play:focus-within .explore-release-hero-play__btn {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .explore-release-hero-play:active .explore-release-hero-play__icon,
+  .explore-release-hero-play:focus-within .explore-release-hero-play__icon {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explore-release-hero-play__btn,
+  .explore-release-hero-play__icon {
+    transition: none;
+  }
+}

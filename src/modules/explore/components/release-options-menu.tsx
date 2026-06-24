@@ -125,8 +125,8 @@ export function ReleaseOptionsMenu({ release, artist, triggerClassName }: Releas
         <button
           type="button"
           className={cn(
-            'ios-mh-btn ios-mh-btn--line explore-release-hero__btn explore-release-hero__btn--icon',
-            triggerClassName,
+            triggerClassName ??
+              'ios-mh-btn ios-mh-btn--line explore-release-hero__btn explore-release-hero__btn--icon',
           )}
           aria-label="Release options"
         >

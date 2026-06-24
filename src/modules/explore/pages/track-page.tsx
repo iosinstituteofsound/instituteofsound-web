@@ -1,14 +1,15 @@
 import { useCallback, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Compass, Home, Play } from 'lucide-react'
+import { Compass, Home } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { ReleaseAside } from '@/modules/explore/components/release-aside'
+import { ReleaseHeroDescription } from '@/modules/explore/components/release-hero-description'
+import { ReleaseHeroEngagement, OPTIONS_TRIGGER_CLASS } from '@/modules/explore/components/release-hero-engagement'
+import { ReleaseHeroPlayArt } from '@/modules/explore/components/release-hero-play-art'
 import { ReleaseOptionsMenu } from '@/modules/explore/components/release-options-menu'
-import { ReleasePlayerBar } from '@/modules/explore/components/release-player-bar'
 import { ReleaseRelatedRail } from '@/modules/explore/components/release-related-rail'
 import { ReleaseTrackList } from '@/modules/explore/components/release-track-list'
 import { DuplicateTrackAlert } from '@/modules/music/components/duplicate-track-alert'
-import { ReleaseVinylArt } from '@/modules/explore/components/release-vinyl-art'
 import { useExplore } from '@/modules/explore/hooks/use-explore'
 import {
   findArtistForRelease,
@@ -26,11 +27,13 @@ import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import { getReleaseDetail, getTrackReleaseRedirect } from '@/modules/music/api/music.api'
 import { formatTrackDuration } from '@/modules/music/lib/playlist-detail-format'
 import { playReleaseFromDetail } from '@/modules/music/lib/player-queue'
+import { playReleaseHero } from '@/modules/explore/lib/release-playback'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import '@/modules/explore/styles/explore.css'
 import '@/modules/explore/styles/explore-mh-chrome.css'
 import '@/modules/explore/styles/release-vinyl-art.css'
 import '@/modules/explore/styles/release-related-rail.css'
+import '@/modules/explore/styles/release-hero-play-art.css'
 import '@/modules/explore/styles/release-page-mh.css'
 import '@/modules/explore/styles/release-page-mobile.css'
 
@@ -38,6 +41,9 @@ export function TrackPage() {
   const { trackId = '' } = useParams()
   const homeHref = useBreadcrumbHomeHref()
   const playTrack = usePlayerStore((s) => s.playTrack)
+  const togglePlay = usePlayerStore((s) => s.togglePlay)
+  const currentTrack = usePlayerStore((s) => s.currentTrack)
+  const isPlaying = usePlayerStore((s) => s.isPlaying)
   const { data: explore, isLoading: exploreLoading } = useExplore()
 
   const { data: redirect, isLoading: redirectLoading, isError: redirectError } = useQuery({
@@ -131,11 +137,11 @@ export function TrackPage() {
   }, [release, explore])
 
   const handlePlay = useCallback(() => {
-    if (!releaseDetail || !track?.audioUrl) return
-    playReleaseFromDetail(releaseDetail, playTrack, {
-      startIndex: releaseDetail.tracks.findIndex((item) => item.id === track.id),
+    if (!release) return
+    playReleaseHero(release, releaseDetail, playTrack, togglePlay, currentTrack, isPlaying, {
+      trackId: track?.id,
     })
-  }, [playTrack, releaseDetail, track])
+  }, [playTrack, togglePlay, currentTrack, isPlaying, release, releaseDetail, track?.id])
 
   const handlePlayTrack = useCallback(
     (index: number) => {
@@ -182,7 +188,13 @@ export function TrackPage() {
         <main className="explore-release-page__main">
           <section className="explore-release-hero explore-release-hero--mh">
             <div className="explore-release-hero__art">
-              <ReleaseVinylArt release={release} variant="hero" metalHammer />
+              <ReleaseHeroPlayArt
+                release={release}
+                releaseId={releaseDetail.id}
+                trackId={track.id}
+                onPlay={handlePlay}
+                playLabel="Play track"
+              />
             </div>
 
             <div className="explore-release-hero__body">
@@ -222,34 +234,23 @@ export function TrackPage() {
                 <span>{releaseTypeLabel(release.type)}</span>
               </div>
 
-              <div className="explore-release-hero__actions">
-                <button
-                  type="button"
-                  className="ios-mh-btn ios-mh-btn--fill explore-release-hero__btn explore-release-hero__btn--fill"
-                  onClick={handlePlay}
-                  disabled={!track.audioUrl}
-                >
-                  <Play size={12} strokeWidth={2} fill="currentColor" aria-hidden />
-                  Play track
-                </button>
-                <Link
-                  to={`/releases/${release.id}`}
-                  className="ios-mh-btn ios-mh-btn--line explore-release-hero__btn explore-release-hero__btn--line"
-                >
-                  View release
-                </Link>
-                <ReleaseOptionsMenu release={release} artist={artist} />
+              <div className="explore-release-hero__actions explore-release-hero__actions--social">
+                <ReleaseHeroEngagement
+                  releaseId={release.id}
+                  releaseTitle={track.title}
+                  menu={
+                    <ReleaseOptionsMenu
+                      release={release}
+                      artist={artist}
+                      triggerClassName={OPTIONS_TRIGGER_CLASS}
+                    />
+                  }
+                />
               </div>
 
-              <ReleasePlayerBar
-                release={release}
-                playback={{
-                  trackId: track.id,
-                  releaseId: releaseDetail.id,
-                  artistProfileId: releaseDetail.artistProfileId,
-                  audioUrl: track.audioUrl ?? releaseDetail.streamUrl ?? release.streamUrl,
-                  durationSec: track.durationSec,
-                }}
+              <ReleaseHeroDescription
+                description={releaseDetail?.description}
+                releaseArtistProfileId={releaseDetail?.artistProfileId}
               />
 
               {releaseDetail.tracks.length > 1 ? (

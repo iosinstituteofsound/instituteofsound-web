@@ -82,6 +82,7 @@ export interface ReleaseDetailDto {
   releaseTimezone?: string
   type: 'single' | 'ep' | 'album'
   genre?: string
+  description?: string
   status: 'draft' | 'published'
   streamUrl?: string
   playCount: number

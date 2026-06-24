@@ -71,6 +71,10 @@ export function feedItemQueryKey(id: string) {
   return [...feedQueryKey, 'item', id] as const
 }
 
+export function releaseFeedItemQueryKey(releaseId: string) {
+  return ['release-feed-item', releaseId] as const
+}
+
 export function feedCommentsQueryKey(feedItemId: string) {
   return [...feedQueryKey, 'comments', feedItemId] as const
 }

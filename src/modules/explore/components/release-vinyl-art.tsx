@@ -2,10 +2,14 @@ import type { ReleaseDto } from '@/modules/explore/types/explore.types'
 import { releaseInitials } from '@/modules/explore/lib/release-meta'
 import { cn } from '@/shared/lib/cn'
 
+export type ReleaseVinylPlaybackSpin = 'off' | 'play' | 'pause'
+
 interface ReleaseVinylArtProps {
   release: ReleaseDto
   variant?: 'hero' | 'card'
   spinning?: boolean
+  /** When set, overrides default hero spin — off idle, play while playing, pause freezes angle. */
+  playbackSpin?: ReleaseVinylPlaybackSpin
   metalHammer?: boolean
   className?: string
 }
@@ -16,10 +20,16 @@ export function ReleaseVinylArt({
   release,
   variant = 'hero',
   spinning,
+  playbackSpin,
   metalHammer,
   className,
 }: ReleaseVinylArtProps) {
-  const shouldSpin = spinning ?? variant === 'hero'
+  const mountSpin =
+    playbackSpin !== undefined
+      ? playbackSpin !== 'off'
+      : (spinning ?? variant === 'hero')
+  const runSpin =
+    playbackSpin !== undefined ? playbackSpin === 'play' : mountSpin
 
   return (
     <div
@@ -50,7 +60,8 @@ export function ReleaseVinylArt({
         className={cn(
           'explore-rel-vinyl',
           metalHammer && 'ios-vinyl-disc',
-          shouldSpin && 'explore-rel-vinyl--spin',
+          mountSpin && 'explore-rel-vinyl--spin',
+          mountSpin && !runSpin && 'explore-rel-vinyl--spin-paused',
         )}
         aria-hidden
       />

@@ -46,6 +46,7 @@ export function ReleaseBuilderWizard() {
 
   const [step, setStep] = useState<ReleaseBuilderStep>('upload')
   const [releaseTitle, setReleaseTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [genre, setGenre] = useState('')
   const [secondaryGenre, setSecondaryGenre] = useState('')
   const [language, setLanguage] = useState('English')
@@ -148,6 +149,7 @@ export function ReleaseBuilderWizard() {
         title: releaseTitle.trim(),
         type: releaseType,
         genre: combinedGenre || undefined,
+        description: description.trim() || undefined,
         coverUrl: resolvedCoverUrl,
         trackIds: uploadQueue.readyTrackIds,
         releaseDate: buildReleaseDateIso(
@@ -228,6 +230,8 @@ export function ReleaseBuilderWizard() {
               queue={uploadQueue.queue}
               releaseTitle={releaseTitle}
               onReleaseTitleChange={setReleaseTitle}
+              description={description}
+              onDescriptionChange={setDescription}
               genre={genre}
               onGenreChange={setGenre}
               secondaryGenre={secondaryGenre}

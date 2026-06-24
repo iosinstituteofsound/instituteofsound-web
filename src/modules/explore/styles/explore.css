@@ -8338,6 +8338,10 @@
   will-change: transform;
 }
 
+.explore-rel-vinyl--spin-paused {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .explore-rel-vinyl--spin {
     animation: none;

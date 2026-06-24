@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { MessageCircle, Share2, ThumbsUp } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
@@ -18,6 +18,7 @@ interface FeedEngagementProps {
   item: FeedItemDto
   defaultCommentsOpen?: boolean
   variant?: 'default' | 'social'
+  trailingAction?: ReactNode
 }
 
 const REACTION_STATE_CLASS: Record<FeedReactionKind, string> = {
@@ -29,7 +30,12 @@ const REACTION_STATE_CLASS: Record<FeedReactionKind, string> = {
   angry: 'is-angry',
 }
 
-export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'default' }: FeedEngagementProps) {
+export function FeedEngagement({
+  item,
+  defaultCommentsOpen = false,
+  variant = 'default',
+  trailingAction,
+}: FeedEngagementProps) {
   const userId = useAuthStore((s) => s.userId)
   const engagement = getEngagement(item)
   const [commentDialogOpen, setCommentDialogOpen] = useState(defaultCommentsOpen)
@@ -45,7 +51,6 @@ export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'd
     (a, b) => engagement.reactions[b.kind] - engagement.reactions[a.kind],
   )
   const myReaction = engagement.myReaction ? feedReactionMeta(engagement.myReaction) : null
-  const showStats = engagement.reactionTotal > 0 || engagement.commentCount > 0
 
   const clearCloseTimer = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
@@ -113,37 +118,31 @@ export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'd
     return (
       <>
         <div className="feed-social-card__engagement">
-          {showStats ? (
-            <div className="feed-social-card__stats">
-              <div className="feed-social-card__stats-left">
-                {engagement.reactionTotal > 0 ? (
-                  <>
-                    <span className="feed-social-card__reaction-stack" aria-hidden>
-                      {activeKinds.slice(0, 3).map((reaction) => (
-                        <span key={reaction.kind} className="feed-social-card__reaction-bubble">
-                          <ReactionPickerIcon kind={reaction.kind} label={reaction.label} size="inline" />
-                        </span>
-                      ))}
+          <div className="feed-social-card__stats">
+            <div className="feed-social-card__stats-left">
+              {engagement.reactionTotal > 0 ? (
+                <span className="feed-social-card__reaction-stack" aria-hidden>
+                  {activeKinds.slice(0, 3).map((reaction) => (
+                    <span key={reaction.kind} className="feed-social-card__reaction-bubble">
+                      <ReactionPickerIcon kind={reaction.kind} label={reaction.label} size="inline" />
                     </span>
-                    <span className="feed-social-card__stats-count">
-                      {formatEngagementCount(engagement.reactionTotal)}
-                    </span>
-                  </>
-                ) : null}
-              </div>
-              <div className="feed-social-card__stats-right">
-                {engagement.commentCount > 0 ? (
-                  <button
-                    type="button"
-                    className="feed-social-card__stats-link"
-                    onClick={openComments}
-                  >
-                    {formatEngagementCount(engagement.commentCount)} comments
-                  </button>
-                ) : null}
-              </div>
+                  ))}
+                </span>
+              ) : null}
+              <span className="feed-social-card__stats-count">
+                {formatEngagementCount(engagement.reactionTotal)}
+              </span>
             </div>
-          ) : null}
+            <div className="feed-social-card__stats-right">
+              <button
+                type="button"
+                className="feed-social-card__stats-link"
+                onClick={openComments}
+              >
+                {formatEngagementCount(engagement.commentCount)} comments
+              </button>
+            </div>
+          </div>
 
           <div className="feed-social-card__divider" />
 
@@ -191,6 +190,12 @@ export function FeedEngagement({ item, defaultCommentsOpen = false, variant = 'd
                 <span>Share</span>
               </button>
             </div>
+
+            {trailingAction ? (
+              <div className="feed-social-card__action-slot feed-social-card__action-slot--trailing">
+                {trailingAction}
+              </div>
+            ) : null}
           </div>
         </div>
 

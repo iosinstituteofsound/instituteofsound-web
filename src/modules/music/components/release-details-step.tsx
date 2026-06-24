@@ -12,6 +12,7 @@ import { normalizeMediaUrl } from '@/modules/editor/lib/normalize-media-url'
 import type { QueuedUpload } from '@/modules/music/types/release-builder.types'
 import type { SyncedLyricLineDto } from '@/modules/music/types/lyrics-sync.types'
 import { Input } from '@/shared/components/ui/input'
+import { Textarea } from '@/shared/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -24,6 +25,8 @@ interface ReleaseDetailsStepProps {
   queue: QueuedUpload[]
   releaseTitle: string
   onReleaseTitleChange: (value: string) => void
+  description: string
+  onDescriptionChange: (value: string) => void
   genre: string
   onGenreChange: (value: string) => void
   secondaryGenre: string
@@ -48,6 +51,8 @@ export function ReleaseDetailsStep({
   queue,
   releaseTitle,
   onReleaseTitleChange,
+  description,
+  onDescriptionChange,
   genre,
   onGenreChange,
   secondaryGenre,
@@ -162,6 +167,19 @@ export function ReleaseDetailsStep({
                 value={releaseTitle}
                 onChange={(e) => onReleaseTitleChange(e.target.value)}
               />
+            </div>
+
+            <div className="rbl-field">
+              <label htmlFor="release-description">Description</label>
+              <Textarea
+                id="release-description"
+                placeholder="Tell listeners about this release — credits, story, or context."
+                value={description}
+                maxLength={1000}
+                rows={4}
+                onChange={(e) => onDescriptionChange(e.target.value)}
+              />
+              <p className="rbl-field__hint">Optional · shown on your release page below Like, Comment, and Share.</p>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">

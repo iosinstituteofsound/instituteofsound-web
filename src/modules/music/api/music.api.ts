@@ -101,6 +101,7 @@ export async function createRelease(input: {
   title: string
   type: 'single' | 'ep' | 'album'
   genre?: string
+  description?: string
   coverUrl?: string
   trackIds?: string[]
   releaseDate?: string
@@ -120,6 +121,7 @@ export async function updateRelease(
     title?: string
     type?: 'single' | 'ep' | 'album'
     genre?: string
+    description?: string
     coverUrl?: string
     trackIds?: string[]
     releaseDate?: string

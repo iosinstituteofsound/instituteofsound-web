@@ -18,6 +18,7 @@ import { Loader } from '@/shared/components/feedback/loader'
 import { Page, PageSection } from '@/shared/components/layout/page-shell'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
+import { Textarea } from '@/shared/components/ui/textarea'
 import '@/modules/music/styles/release-builder.css'
 import '@/modules/music/styles/artist-dashboard-home.css'
 import '@/modules/music/styles/lyrics-sync-modal.css'
@@ -98,6 +99,7 @@ export function MusicReleaseEditPage() {
   )
 
   const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [type, setType] = useState<'single' | 'ep' | 'album'>('single')
   const [genre, setGenre] = useState('')
   const [releaseDate, setReleaseDate] = useState('')
@@ -122,6 +124,7 @@ export function MusicReleaseEditPage() {
     if (!release || initialized) return
     const parsedTime = parseReleaseTime(release.releaseDate)
     setTitle(release.title)
+    setDescription(release.description ?? '')
     setType(release.type)
     setGenre(release.genre ?? '')
     setReleaseDate(parsedTime.date)
@@ -237,6 +240,7 @@ export function MusicReleaseEditPage() {
         title: title.trim(),
         type,
         genre: genre.trim() || undefined,
+        description: description.trim() || undefined,
         coverUrl: resolvedCoverUrl,
         releaseDate: buildReleaseDateIso(
           releaseDate,
@@ -327,6 +331,19 @@ export function MusicReleaseEditPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
+            </div>
+
+            <div className="rbl-field">
+              <label htmlFor="edit-release-description">Description</label>
+              <Textarea
+                id="edit-release-description"
+                placeholder="Tell listeners about this release — credits, story, or context."
+                value={description}
+                maxLength={1000}
+                rows={4}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <p className="rbl-field__hint">Optional · shown on your release page below Like, Comment, and Share.</p>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">

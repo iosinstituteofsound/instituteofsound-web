@@ -145,6 +145,10 @@
     margin-top: 0.85rem;
   }
 
+  .explore-release-hero__actions--social {
+    display: block;
+  }
+
   .explore-release-hero__actions > :first-child {
     grid-column: 1 / -1;
   }
