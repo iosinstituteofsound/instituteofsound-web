@@ -15,6 +15,7 @@ import { feedItemHasAttachedAudio, FeedPostSoundToggle } from '@/modules/feed/co
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 import { formatAttachedAudioLabel } from '@/modules/feed/lib/attached-audio-label'
+import { FeedAudioTag } from '@/modules/feed/components/feed-audio-tag'
 import './feed-card.css'
 
 export function FeedCardShell({
@@ -24,7 +25,6 @@ export function FeedCardShell({
   className,
   bodyClassName,
   defaultCommentsOpen = false,
-  headerContext,
   headerAudioLabel,
   compact = false,
 }: {
@@ -34,7 +34,6 @@ export function FeedCardShell({
   className?: string
   bodyClassName?: string
   defaultCommentsOpen?: boolean
-  headerContext?: React.ReactNode
   headerAudioLabel?: string
   compact?: boolean
 }) {
@@ -96,10 +95,8 @@ export function FeedCardShell({
                     </p>
                   </div>
 
-                  {headerContext ? (
-                    <div className="feed-social-card__audio-tag" title={headerAudioLabel}>
-                      {headerContext}
-                    </div>
+                  {headerAudioLabel ? (
+                    <FeedAudioTag label={headerAudioLabel} className="feed-social-card__audio-tag" />
                   ) : null}
                 </div>
               </div>

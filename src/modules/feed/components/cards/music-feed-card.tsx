@@ -12,18 +12,6 @@ import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 
-function musicHeaderContext(trackTitle?: string, artistName?: string) {
-  const trackLine = formatAttachedAudioLabel(artistName, trackTitle)
-  if (!trackLine) return null
-
-  return (
-    <>
-      <Music2 aria-hidden />
-      <span>{trackLine}</span>
-    </>
-  )
-}
-
 export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {
   const enrichedItem = useEnrichedMusicFeedItem(item)
 
@@ -38,7 +26,6 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardPr
         defaultCommentsOpen={defaultCommentsOpen}
         compact={compact}
         bodyClassName="feed-social-card__body--release"
-        headerContext={musicHeaderContext(trackTitle, artistName)}
         headerAudioLabel={audioHeaderLine || undefined}
       >
         <ReleaseSharePreview item={enrichedItem} compact={compact} />
@@ -63,7 +50,6 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardPr
       item={item}
       defaultCommentsOpen={defaultCommentsOpen}
       compact={compact}
-      headerContext={musicHeaderContext(trackTitle, artistName)}
       headerAudioLabel={audioHeaderLine || undefined}
     >
       <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">

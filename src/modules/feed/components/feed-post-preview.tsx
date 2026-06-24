@@ -1,6 +1,7 @@
-import { Globe, Music2, ExternalLink, Pause, Play } from 'lucide-react'
+import { Globe, ExternalLink, Pause, Play } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options-menu'
+import { FeedAudioTag } from '@/modules/feed/components/feed-audio-tag'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
 import { LinkPreviewCard } from '@/modules/feed/components/link-preview-card'
@@ -225,10 +226,7 @@ export function FeedPostPreview({ item, menuPortalContainer }: FeedPostPreviewPr
               </p>
             </div>
             {musicContextLine ? (
-              <div className="feed-post-preview__audio-tag" title={musicContextLine}>
-                <Music2 aria-hidden />
-                <span className="truncate">{musicContextLine}</span>
-              </div>
+              <FeedAudioTag label={musicContextLine} className="feed-post-preview__audio-tag" />
             ) : null}
           </div>
         </div>
