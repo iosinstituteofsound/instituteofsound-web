@@ -1,9 +1,8 @@
-import { Render } from '@measured/puck'
+import { lazy, Suspense } from 'react'
 import { Monitor, Smartphone, Tablet, X } from 'lucide-react'
 import { ArticleComposedArticlePreview } from '@/modules/editor/components/article-composed-article-preview'
 import { ArticleCanvasArtifactLayer } from '@/modules/editor/components/article-canvas-artifact-layer'
 import { ArticleCanvasEffectsOverlay } from '@/modules/editor/components/article-canvas-effects-overlay'
-import { articlePuckConfig } from '@/modules/editor/lib/article-puck-config'
 import {
   canvasBackgroundToStyle,
   readCanvasBackground,
@@ -27,6 +26,12 @@ import {
 import { cn } from '@/shared/lib/cn'
 import '@/modules/explore/styles/explore.css'
 import '@/modules/editor/styles/article-editor.css'
+
+const ArticlePuckRender = lazy(() =>
+  import('@/modules/editor/components/article-puck-render').then((mod) => ({
+    default: mod.ArticlePuckRender,
+  })),
+)
 
 export type PreviewDevice = 'desktop' | 'tablet' | 'mobile'
 
@@ -142,7 +147,11 @@ export function ArticlePreviewDialog({
                       <p className="text-sm text-muted-foreground">By {authorName}</p>
                     </header>
                     <div className="article-editor-preview space-y-8">
-                      <Render config={articlePuckConfig} data={puckData} />
+                      {open ? (
+                        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading preview…</p>}>
+                          <ArticlePuckRender data={puckData} />
+                        </Suspense>
+                      ) : null}
                     </div>
                   </div>
                 </div>

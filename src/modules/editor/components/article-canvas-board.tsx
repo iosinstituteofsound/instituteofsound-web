@@ -83,6 +83,8 @@ type BoardInteraction =
       startY: number
       startLayout: CanvasBlockLayout
       startFontSize: number
+      startScaleX: number
+      startScaleY: number
       preserveAspectRatio: boolean
     }
   | {
@@ -126,6 +128,10 @@ export function ArticleCanvasBoard({
 }: ArticleCanvasBoardProps) {
   const boardRef = useRef<HTMLDivElement>(null)
   const interactionRef = useRef<BoardInteraction | null>(null)
+  const dataRef = useRef(data)
+  const onChangeRef = useRef(onChange)
+  dataRef.current = data
+  onChangeRef.current = onChange
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [dragLayouts, setDragLayouts] = useState<Record<string, { x: number; y: number }> | null>(
     null,
@@ -328,6 +334,8 @@ export function ArticleCanvasBoard({
         startY: clientY,
         startLayout: layout,
         startFontSize: style.fontSize,
+        startScaleX: style.scaleX ?? 100,
+        startScaleY: style.scaleY,
         preserveAspectRatio: style.preserveAspectRatio,
       }
       setDraggingId(blockId)
@@ -367,7 +375,7 @@ export function ArticleCanvasBoard({
     const interaction = interactionRef.current
     if (!interaction || !boardRef.current) return
     const boardRect = boardRef.current.getBoundingClientRect()
-    const current = ensureCanvasLayouts(data)
+    const current = ensureCanvasLayouts(dataRef.current)
 
     if (interaction.kind === 'marquee') {
       const rect = normalizeMarqueeRect(
@@ -418,28 +426,37 @@ export function ArticleCanvasBoard({
       )
       const delta = pointer - interaction.startPointerAngle
       const angle = Math.round((interaction.startAngle + delta + 360) % 360)
-      onChange(updateCanvasBlockStyle(current, interaction.blockId, { angle }))
+      onChangeRef.current(updateCanvasBlockStyle(current, interaction.blockId, { angle }))
       return
     }
 
+    if (interaction.kind !== 'resize') return
+
     const dx = ((event.clientX - interaction.startX) / boardRect.width) * 100
     const dy = ((event.clientY - interaction.startY) / boardRect.height) * 100
-    const { startLayout, handle, startFontSize, preserveAspectRatio } = interaction
+    const { startLayout, handle, startFontSize, startScaleX, startScaleY, preserveAspectRatio } = interaction
 
-    const { layout: layoutPatch, fontSize: nextFontSize } = computeTextBlockResize({
-      handle,
-      startLayout,
-      startFontSize,
-      dx,
-      dy,
-      preserveAspectRatio,
-    })
+    const { layout: layoutPatch, fontSize: nextFontSize, scaleX: nextScaleX, scaleY: nextScaleY } =
+      computeTextBlockResize({
+        handle,
+        startLayout,
+        startFontSize,
+        startScaleX,
+        startScaleY,
+        dx,
+        dy,
+        preserveAspectRatio,
+      })
 
     let nextData = updateCanvasBlockLayout(current, interaction.blockId, layoutPatch)
-    if (nextFontSize !== undefined) {
-      nextData = updateCanvasBlockStyle(nextData, interaction.blockId, { fontSize: nextFontSize })
+    const stylePatch: Record<string, unknown> = {}
+    if (nextFontSize !== undefined) stylePatch.fontSize = nextFontSize
+    if (nextScaleX !== undefined) stylePatch.scaleX = nextScaleX
+    if (nextScaleY !== undefined) stylePatch.scaleY = nextScaleY
+    if (Object.keys(stylePatch).length > 0) {
+      nextData = updateCanvasBlockStyle(nextData, interaction.blockId, stylePatch)
     }
-    onChange(nextData)
+    onChangeRef.current(nextData)
   }
 
   const endInteraction = useCallback(
@@ -498,6 +515,14 @@ export function ArticleCanvasBoard({
     onSelectBlocks([blockId])
   }
 
+  const handleInteractionPointerMove = (clientX: number, clientY: number) => {
+    onPointerMove({ clientX, clientY } as React.PointerEvent)
+  }
+
+  const handleInteractionPointerEnd = () => {
+    endInteraction({ clientX: 0, clientY: 0 } as React.PointerEvent)
+  }
+
   const marqueeStyle = marqueeRect && boardRef.current
     ? (() => {
         const boardRect = boardRef.current!.getBoundingClientRect()
@@ -549,6 +574,14 @@ export function ArticleCanvasBoard({
           onRotateStart={(x, y) => {
             if (readOnly) return
             startRotate(blockId, x, y)
+          }}
+          onInteractionPointerMove={(x, y) => {
+            if (readOnly) return
+            handleInteractionPointerMove(x, y)
+          }}
+          onInteractionPointerEnd={() => {
+            if (readOnly) return
+            handleInteractionPointerEnd()
           }}
         />
       )

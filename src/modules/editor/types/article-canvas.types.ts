@@ -60,6 +60,10 @@ export interface CanvasBlockStyle {
   angle: number
   blendMode: BlendMode
   scale: number
+  /** Horizontal stretch for text (100 = normal). Used when preserve aspect ratio is off. */
+  scaleX: number
+  /** Vertical stretch for text (100 = normal). Used when preserve aspect ratio is off. */
+  scaleY: number
   imageShape: ImageShapeType
   roundness: number
   letterSpacing: number
@@ -104,6 +108,8 @@ export const DEFAULT_CANVAS_BLOCK_STYLE: CanvasBlockStyle = {
   angle: 0,
   blendMode: 'normal',
   scale: 100,
+  scaleX: 100,
+  scaleY: 100,
   imageShape: 'rectangle',
   roundness: 20,
   letterSpacing: 0,

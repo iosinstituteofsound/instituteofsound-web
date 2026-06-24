@@ -81,7 +81,7 @@ export function UserIdentityBadges({
   const assignedRoles = authorization?.assignedRoles ?? authorization?.roles ?? []
   const activeRoleId = authorization?.activeRoleId
   const activeRole =
-    assignedRoles.find((role) => role.id === activeRoleId) ?? assignedRoles[0] ?? authorization?.roles[0]
+    assignedRoles.find((role) => role.id === activeRoleId) ?? assignedRoles[0] ?? authorization?.roles?.[0]
   const badge = themeState?.source === 'badge' ? themeState.badge : null
 
   if (!activeRole && !badge) return null

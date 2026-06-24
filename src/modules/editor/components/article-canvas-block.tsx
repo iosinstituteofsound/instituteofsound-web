@@ -13,6 +13,7 @@ import {
 import { readText2dEffectFromStyle } from '@/modules/editor/lib/canvas-text-2d-effects-utils'
 import { readText3dEffectFromStyle } from '@/modules/editor/lib/canvas-text-3d-effects-utils'
 import { parseBlockLayout, parseBlockStyle } from '@/modules/editor/lib/canvas-block-utils'
+import { beginPointerDrag } from '@/modules/editor/lib/canvas-pointer-drag'
 import { hasText2dEffect } from '@/modules/editor/types/article-text-2d-effect.types'
 import { hasText3dEffect } from '@/modules/editor/types/article-text-3d-effect.types'
 import { useCanvasTextFit } from '@/modules/editor/hooks/use-canvas-text-fit'
@@ -36,6 +37,8 @@ interface ArticleCanvasBlockProps {
   onMoveStart: (clientX: number, clientY: number) => void
   onResizeStart: (handle: ResizeHandle, clientX: number, clientY: number) => void
   onRotateStart: (clientX: number, clientY: number) => void
+  onInteractionPointerMove: (clientX: number, clientY: number) => void
+  onInteractionPointerEnd: () => void
 }
 
 function isInteractiveCanvasTarget(target: EventTarget | null) {
@@ -67,6 +70,8 @@ export function ArticleCanvasBlock({
   onMoveStart,
   onResizeStart,
   onRotateStart,
+  onInteractionPointerMove,
+  onInteractionPointerEnd,
 }: ArticleCanvasBlockProps) {
   const type = block.type as CanvasBlockType
   const props = block.props as Record<string, unknown>
@@ -168,15 +173,21 @@ export function ArticleCanvasBlock({
         onPointerDown={(e) => {
           if (isInteractiveCanvasTarget(e.target)) return
           if (selected && !showSelectionChrome) {
-            e.stopPropagation()
-            e.currentTarget.setPointerCapture(e.pointerId)
-            onMoveStart(e.clientX, e.clientY)
+            beginPointerDrag(
+              e,
+              () => onMoveStart(e.clientX, e.clientY),
+              (clientX, clientY) => onInteractionPointerMove(clientX, clientY),
+              () => onInteractionPointerEnd(),
+            )
             return
           }
           if (!showSelectionChrome) return
-          e.stopPropagation()
-          e.currentTarget.setPointerCapture(e.pointerId)
-          onMoveStart(e.clientX, e.clientY)
+          beginPointerDrag(
+            e,
+            () => onMoveStart(e.clientX, e.clientY),
+            (clientX, clientY) => onInteractionPointerMove(clientX, clientY),
+            () => onInteractionPointerEnd(),
+          )
         }}
       >
         {showSelectionChrome ? (
@@ -185,6 +196,8 @@ export function ArticleCanvasBlock({
             onMoveStart={onMoveStart}
             onResizeStart={onResizeStart}
             onRotateStart={onRotateStart}
+            onInteractionPointerMove={onInteractionPointerMove}
+            onInteractionPointerEnd={onInteractionPointerEnd}
           />
         ) : null}
 

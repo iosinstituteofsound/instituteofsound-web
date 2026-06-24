@@ -71,6 +71,13 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       exclude: ['@instituteofsound/dex'],
+      include: ['@measured/puck'],
+      esbuildOptions: {
+        alias: {
+          react: path.resolve(__dirname, 'node_modules/react'),
+          'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
+        },
+      },
     },
     server: {
       host: true,

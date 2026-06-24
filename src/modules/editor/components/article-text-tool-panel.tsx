@@ -462,7 +462,12 @@ export function ArticleTextToolPanel({
         <label className="article-text-tool__checkbox">
           <Checkbox
             checked={style.preserveAspectRatio}
-            onCheckedChange={(checked) => applyStyle({ preserveAspectRatio: Boolean(checked) })}
+            onCheckedChange={(checked) =>
+              applyStyle({
+                preserveAspectRatio: Boolean(checked),
+                ...(checked ? { scaleX: 100, scaleY: 100 } : {}),
+              })
+            }
           />
           <span>Preserve aspect ratio</span>
         </label>

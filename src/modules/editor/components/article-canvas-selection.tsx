@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { RotateCw, X } from 'lucide-react'
+import { beginPointerDrag } from '@/modules/editor/lib/canvas-pointer-drag'
 import { cn } from '@/shared/lib/cn'
 
 export type ResizeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
@@ -19,6 +21,8 @@ interface ArticleCanvasSelectionProps {
   onMoveStart: (clientX: number, clientY: number) => void
   onResizeStart: (handle: ResizeHandle, clientX: number, clientY: number) => void
   onRotateStart: (clientX: number, clientY: number) => void
+  onInteractionPointerMove: (clientX: number, clientY: number) => void
+  onInteractionPointerEnd: () => void
 }
 
 export function ArticleCanvasSelection({
@@ -26,10 +30,21 @@ export function ArticleCanvasSelection({
   onMoveStart,
   onResizeStart,
   onRotateStart,
+  onInteractionPointerMove,
+  onInteractionPointerEnd,
 }: ArticleCanvasSelectionProps) {
-  const capturePointer = (event: React.PointerEvent) => {
-    event.stopPropagation()
-    event.currentTarget.setPointerCapture(event.pointerId)
+  const moveRef = useRef(onInteractionPointerMove)
+  const endRef = useRef(onInteractionPointerEnd)
+  moveRef.current = onInteractionPointerMove
+  endRef.current = onInteractionPointerEnd
+
+  const startDrag = (event: React.PointerEvent, onStart: () => void) => {
+    beginPointerDrag(
+      event,
+      onStart,
+      (clientX, clientY) => moveRef.current(clientX, clientY),
+      () => endRef.current(),
+    )
   }
 
   return (
@@ -40,9 +55,8 @@ export function ArticleCanvasSelection({
         <div
           key={edge}
           className={cn('article-canvas-selection__edge', `article-canvas-selection__edge--${edge}`)}
-          onPointerDown={(e) => {
-            capturePointer(e)
-            onMoveStart(e.clientX, e.clientY)
+          onPointerDown={(event) => {
+            startDrag(event, () => onMoveStart(event.clientX, event.clientY))
           }}
         />
       ))}
@@ -53,9 +67,9 @@ export function ArticleCanvasSelection({
           type="button"
           aria-label={`Resize ${handle.id}`}
           className={cn('article-canvas-selection__handle', handle.className)}
-          onPointerDown={(e) => {
-            capturePointer(e)
-            onResizeStart(handle.id, e.clientX, e.clientY)
+          onPointerDown={(event) => {
+            event.stopPropagation()
+            startDrag(event, () => onResizeStart(handle.id, event.clientX, event.clientY))
           }}
         />
       ))}
@@ -64,9 +78,8 @@ export function ArticleCanvasSelection({
         type="button"
         className="article-canvas-selection__rotate"
         aria-label="Rotate"
-        onPointerDown={(e) => {
-          capturePointer(e)
-          onRotateStart(e.clientX, e.clientY)
+        onPointerDown={(event) => {
+          startDrag(event, () => onRotateStart(event.clientX, event.clientY))
         }}
       >
         <RotateCw className="h-3 w-3" strokeWidth={2.25} />
@@ -76,9 +89,9 @@ export function ArticleCanvasSelection({
         type="button"
         className="article-canvas-selection__close"
         aria-label="Delete block"
-        onPointerDown={(e) => {
-          e.stopPropagation()
-          e.preventDefault()
+        onPointerDown={(event) => {
+          event.stopPropagation()
+          event.preventDefault()
           onDelete()
         }}
       >

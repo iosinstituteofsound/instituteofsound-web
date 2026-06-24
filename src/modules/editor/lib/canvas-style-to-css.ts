@@ -97,10 +97,20 @@ function buildTextFill(style: CanvasBlockStyle): React.CSSProperties {
 }
 
 export function buildCanvasTextFrameCss(style: CanvasBlockStyle): React.CSSProperties {
+  const scaleX = style.scaleX ?? 100
+  const scaleY = style.scaleY ?? 100
+  const hasScale = scaleX !== 100 || scaleY !== 100
+
   return {
     backgroundColor: style.backgroundEnabled ? colorTokenToCss(style.backgroundColorToken) : undefined,
     padding: style.backgroundEnabled ? '0.25rem 0.5rem' : undefined,
     borderRadius: style.backgroundEnabled ? '0.25rem' : undefined,
+    ...(hasScale
+      ? {
+          transform: `scale(${scaleX / 100}, ${scaleY / 100})`,
+          transformOrigin: 'center center',
+        }
+      : {}),
   }
 }
 

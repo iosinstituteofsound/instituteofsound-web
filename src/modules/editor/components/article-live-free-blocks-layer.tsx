@@ -42,6 +42,8 @@ type FreeBlockInteraction =
       startY: number
       startLayout: CanvasBlockLayout
       startFontSize: number
+      startScaleX: number
+      startScaleY: number
       preserveAspectRatio: boolean
     }
   | {
@@ -120,6 +122,8 @@ export function ArticleLiveFreeBlocksLayer({
         startY: clientY,
         startLayout: layout,
         startFontSize: style.fontSize,
+        startScaleX: style.scaleX ?? 100,
+        startScaleY: style.scaleY,
         preserveAspectRatio: style.preserveAspectRatio,
       }
       setDraggingId(blockId)
@@ -191,18 +195,25 @@ export function ArticleLiveFreeBlocksLayer({
       const dx = ((event.clientX - interaction.startX) / boardRect.width) * 100
       const dy = ((event.clientY - interaction.startY) / boardRect.height) * 100
 
-      const { layout: layoutPatch, fontSize: nextFontSize } = computeTextBlockResize({
-        handle: interaction.handle,
-        startLayout: interaction.startLayout,
-        startFontSize: interaction.startFontSize,
-        dx,
-        dy,
-        preserveAspectRatio: interaction.preserveAspectRatio,
-      })
+      const { layout: layoutPatch, fontSize: nextFontSize, scaleX: nextScaleX, scaleY: nextScaleY } =
+        computeTextBlockResize({
+          handle: interaction.handle,
+          startLayout: interaction.startLayout,
+          startFontSize: interaction.startFontSize,
+          startScaleX: interaction.startScaleX,
+          startScaleY: interaction.startScaleY,
+          dx,
+          dy,
+          preserveAspectRatio: interaction.preserveAspectRatio,
+        })
 
       let nextData = updateCanvasBlockLayout(ensureCanvasLayouts(data), interaction.blockId, layoutPatch)
-      if (nextFontSize !== undefined) {
-        nextData = updateCanvasBlockStyle(nextData, interaction.blockId, { fontSize: nextFontSize })
+      const stylePatch: Record<string, unknown> = {}
+      if (nextFontSize !== undefined) stylePatch.fontSize = nextFontSize
+      if (nextScaleX !== undefined) stylePatch.scaleX = nextScaleX
+      if (nextScaleY !== undefined) stylePatch.scaleY = nextScaleY
+      if (Object.keys(stylePatch).length > 0) {
+        nextData = updateCanvasBlockStyle(nextData, interaction.blockId, stylePatch)
       }
       onChange(nextData)
     }
@@ -220,6 +231,14 @@ export function ArticleLiveFreeBlocksLayer({
     interactionRef.current = null
     setDraggingId(null)
     setDragLayouts(null)
+  }
+
+  const handleInteractionPointerMove = (clientX: number, clientY: number) => {
+    onPointerMove({ clientX, clientY } as React.PointerEvent)
+  }
+
+  const handleInteractionPointerEnd = () => {
+    onPointerUp()
   }
 
   if (!freeBlocks.length) return null
@@ -241,6 +260,8 @@ export function ArticleLiveFreeBlocksLayer({
             onMoveStart={() => undefined}
             onResizeStart={() => undefined}
             onRotateStart={() => undefined}
+            onInteractionPointerMove={() => undefined}
+            onInteractionPointerEnd={() => undefined}
           />
         ))}
       </div>
@@ -286,6 +307,8 @@ export function ArticleLiveFreeBlocksLayer({
             onMoveStart={(x, y) => startMove(blockId, x, y)}
             onResizeStart={(handle, x, y) => startResize(blockId, handle, x, y)}
             onRotateStart={(x, y) => startRotate(blockId, x, y)}
+            onInteractionPointerMove={handleInteractionPointerMove}
+            onInteractionPointerEnd={handleInteractionPointerEnd}
           />
         )
       })}

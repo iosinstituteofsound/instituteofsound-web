@@ -38,8 +38,11 @@ export function UserProfileMenu() {
   const { mode, setMode } = useTheme()
 
   const user = me?.user
-  const activeRoleId = me?.authorization.activeRoleId
-  const activeRole = me?.authorization.roles.find((role) => role.id === activeRoleId)
+  const authorization = me?.authorization
+  const assignedRoles = authorization?.assignedRoles ?? authorization?.roles ?? []
+  const activeRoleId = authorization?.activeRoleId
+  const activeRole =
+    assignedRoles.find((role) => role.id === activeRoleId) ?? assignedRoles[0]
   const profilePath = getProfilePath(activeRole?.slug)
   const avatarDisplay = getUserAvatarDisplay(user ?? {})
 
