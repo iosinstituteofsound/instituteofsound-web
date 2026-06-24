@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query'
 import * as feedApi from '@/modules/feed/api/feed.api'
+import { removeFeedItemFromAllListCaches } from '@/modules/feed/lib/feed-engagement'
 import { sortFeedItemsLatest } from '@/modules/feed/lib/feed-sort'
 import type { CreateFeedItemInput, FeedListResponse } from '@/modules/feed/types/feed.types'
 
@@ -23,7 +24,13 @@ export function useCreateFeedItem() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: CreateFeedItemInput) => feedApi.createFeedItem(input),
-    onSuccess: (item) => {
+    onSuccess: (item, variables) => {
+      const audience = variables.payload?.audience
+      const normalizedItem =
+        audience && !item.payload?.audience
+          ? { ...item, payload: { ...item.payload, audience } }
+          : item
+
       queryClient.setQueriesData<InfiniteData<FeedListResponse, string | undefined>>(
         { queryKey: feedQueryKey },
         (current) => {
@@ -32,22 +39,37 @@ export function useCreateFeedItem() {
           const pages = current.pages
           if (!pages.length) {
             return {
-              pages: [{ items: [item], nextCursor: null }],
+              pages: [{ items: [normalizedItem], nextCursor: null }],
               pageParams: current.pageParams.length ? current.pageParams : [undefined],
             }
           }
 
           const [firstPage, ...rest] = pages
           const existingItems = firstPage?.items ?? []
-          const alreadyListed = existingItems.some((entry) => entry.id === item.id)
+          const alreadyListed = existingItems.some((entry) => entry.id === normalizedItem.id)
           if (alreadyListed) return current
 
           return {
-            pages: [{ ...firstPage, items: sortFeedItemsLatest([item, ...existingItems]) }, ...rest],
+            pages: [
+              { ...firstPage, items: sortFeedItemsLatest([normalizedItem, ...existingItems]) },
+              ...rest,
+            ],
             pageParams: current.pageParams,
           }
         },
       )
+      void queryClient.invalidateQueries({ queryKey: feedQueryKey })
+      void queryClient.invalidateQueries({ queryKey: ['profile-posts'] })
+    },
+  })
+}
+
+export function useDeleteFeedItem() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => feedApi.deleteFeedItem(id),
+    onSuccess: (_result, id) => {
+      removeFeedItemFromAllListCaches(queryClient, id)
       void queryClient.invalidateQueries({ queryKey: feedQueryKey })
       void queryClient.invalidateQueries({ queryKey: ['profile-posts'] })
     },

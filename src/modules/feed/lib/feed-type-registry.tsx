@@ -19,7 +19,14 @@ export const FEED_RENDERERS: Record<FeedItemDto['type'], ComponentType<FeedCardP
   model: ModelFeedCard,
 }
 
-export function FeedItemCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {
+export function FeedItemCard({ item, defaultCommentsOpen, compact, onPostDeleted }: FeedCardProps) {
   const Renderer = FEED_RENDERERS[item.type] ?? TextFeedCard
-  return <Renderer item={item} defaultCommentsOpen={defaultCommentsOpen} compact={compact} />
+  return (
+    <Renderer
+      item={item}
+      defaultCommentsOpen={defaultCommentsOpen}
+      compact={compact}
+      onPostDeleted={onPostDeleted}
+    />
+  )
 }

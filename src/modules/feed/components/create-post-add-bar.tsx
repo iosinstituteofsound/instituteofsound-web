@@ -1,7 +1,6 @@
 import {
   Box,
   FileText,
-  Globe,
   ImageIcon,
   Mic,
   MoreHorizontal,
@@ -9,7 +8,14 @@ import {
   Scissors,
   Smile,
   Video,
+  type LucideIcon,
 } from 'lucide-react'
+import {
+  postAudienceIcon,
+  postAudienceLabel,
+  type PostAudienceSelection,
+  type PostAudienceType,
+} from '@/modules/feed/lib/post-audience'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -142,12 +148,38 @@ export function CreatePostAddBar({
   )
 }
 
-export function CreatePostPrivacyBadge() {
+const AUDIENCE_ICONS: Record<PostAudienceType, LucideIcon> = {
+  public: postAudienceIcon('public'),
+  friends: postAudienceIcon('friends'),
+  close_friends: postAudienceIcon('close_friends'),
+  exclude: postAudienceIcon('exclude'),
+  include: postAudienceIcon('include'),
+}
+
+interface CreatePostPrivacyBadgeProps {
+  audience: PostAudienceSelection
+  disabled?: boolean
+  onClick: () => void
+}
+
+export function CreatePostPrivacyBadge({
+  audience,
+  disabled = false,
+  onClick,
+}: CreatePostPrivacyBadgeProps) {
+  const Icon = AUDIENCE_ICONS[audience.type]
+
   return (
-    <span className="feed-create-post__privacy">
-      <Globe className="h-3 w-3" />
-      Public
-    </span>
+    <button
+      type="button"
+      title="Choose post audience"
+      disabled={disabled}
+      onClick={onClick}
+      className="feed-create-post__privacy feed-create-post__privacy-btn feed-create-post__privacy-btn--audience"
+    >
+      <Icon className="h-3 w-3 shrink-0" />
+      <span className="feed-create-post__privacy-btn-label">{postAudienceLabel(audience)}</span>
+    </button>
   )
 }
 

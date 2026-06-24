@@ -17,6 +17,14 @@ import {
   CreatePostPrivacyBadge,
   type PostAddAction,
 } from '@/modules/feed/components/create-post-add-bar'
+import { PostAudiencePicker } from '@/modules/feed/components/post-audience-picker'
+import {
+  defaultPostAudience,
+  postAudienceToPayload,
+  readDefaultPostAudience,
+  writeDefaultPostAudience,
+  type PostAudienceSelection,
+} from '@/modules/feed/lib/post-audience'
 import { ArticleAudioSearchPicker } from '@/modules/editor/components/article-audio-search-picker'
 import type { SiteAudioTrack } from '@/modules/editor/lib/site-audio-library'
 import {
@@ -46,6 +54,8 @@ import {
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { toast } from '@/shared/components/ui/sonner'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft, MoreHorizontal } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import './create-post-dialog.css'
 
@@ -116,9 +126,14 @@ export function CreatePostDialog({
   const [releasePayload, setReleasePayload] = useState<Record<string, unknown> | null>(null)
   const [librarySound, setLibrarySound] = useState<SiteAudioTrack | null>(null)
   const [libraryOpen, setLibraryOpen] = useState(false)
+  const [audienceOpen, setAudienceOpen] = useState(false)
+  const [audience, setAudience] = useState<PostAudienceSelection>(defaultPostAudience)
+  const [setAudienceAsDefault, setSetAudienceAsDefault] = useState(true)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mediaPanelRef = useRef<MediaAttachPanelHandle>(null)
   const modelPanelRef = useRef<ModelAttachPanelHandle>(null)
+  const composePanelRef = useRef<HTMLDivElement>(null)
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null)
 
   const linkPreviewEnabled =
     !mediaAttachment && !modelAttachment && !showArticleFields && !linkPreviewDismissed
@@ -151,6 +166,10 @@ export function CreatePostDialog({
     setShowArticleFields(initialType === 'article')
     setBody(initialBody)
     setReleasePayload(initialPayload && isReleaseSharePayload(initialPayload) ? initialPayload : null)
+    setAudienceOpen(false)
+    setAudience(readDefaultPostAudience())
+    setSetAudienceAsDefault(true)
+    setViewportHeight(null)
   }, [open, initialType, initialBody, initialPayload])
 
   const reset = () => {
@@ -170,6 +189,10 @@ export function CreatePostDialog({
     setReleasePayload(null)
     setLibrarySound(null)
     setLibraryOpen(false)
+    setAudienceOpen(false)
+    setAudience(defaultPostAudience())
+    setSetAudienceAsDefault(true)
+    setViewportHeight(null)
     mediaPanelRef.current?.clearPendingPreview()
     modelPanelRef.current?.clearPendingPreview()
   }
@@ -286,7 +309,10 @@ export function CreatePostDialog({
     }
 
     const type = inferPostType(attachment, model)
-    const payload: Record<string, unknown> = releasePayload ? { ...releasePayload } : {}
+    const payload: Record<string, unknown> = {
+      ...postAudienceToPayload(audience),
+      ...(releasePayload ? releasePayload : {}),
+    }
 
     if (type === 'text') {
       const postText = activeLinkPreview ? stripUrlFromText(body, activeLinkPreview.url) : body.trim()
@@ -365,6 +391,7 @@ export function CreatePostDialog({
         body: postBody,
         payload,
       })
+      if (setAudienceAsDefault) writeDefaultPostAudience(audience)
       toast.success('Posted to feed')
       handleClose(false)
     } catch (err) {
@@ -374,6 +401,17 @@ export function CreatePostDialog({
           : 'Could not post'
       toast.error(message)
     }
+  }
+
+  const openAudiencePicker = () => {
+    if (composePanelRef.current) {
+      setViewportHeight(composePanelRef.current.getBoundingClientRect().height)
+    }
+    setAudienceOpen(true)
+  }
+
+  const closeAudiencePicker = () => {
+    setAudienceOpen(false)
   }
 
   const releasePreviewItem = useMemo<FeedItemDto | null>(() => {
@@ -394,7 +432,10 @@ export function CreatePostDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="feed-create-post z-[100] bg-card p-0 sm:max-w-[500px] sm:rounded-2xl"
+        className={cn(
+          'feed-create-post !flex !flex-col !gap-0 z-[100] bg-card p-0 sm:max-w-[500px] sm:rounded-2xl',
+          audienceOpen && 'feed-create-post--audience',
+        )}
         hideCloseButton
         onPointerDownOutside={(event) => {
           if (isEmojiPickerTarget(getRadixOutsideEventTarget(event))) event.preventDefault()
@@ -407,19 +448,57 @@ export function CreatePostDialog({
         }}
       >
         <DialogHeader className="feed-create-post__header">
-          <DialogTitle className="feed-create-post__title">Create post</DialogTitle>
-          <DialogClose className="feed-create-post__close" aria-label="Close">
-            <span aria-hidden>×</span>
-          </DialogClose>
+          <div className="feed-create-post__header-stack">
+            <div
+              className={cn(
+                'feed-create-post__header-view feed-create-post__header-view--compose',
+                audienceOpen && 'is-hidden',
+              )}
+            >
+              <DialogTitle className="feed-create-post__title">Create post</DialogTitle>
+              <DialogClose className="feed-create-post__close" aria-label="Close">
+                <span aria-hidden>×</span>
+              </DialogClose>
+            </div>
+
+            <div
+              className={cn(
+                'feed-create-post__header-view feed-create-post__header-view--audience',
+                !audienceOpen && 'is-hidden',
+              )}
+            >
+              <button
+                type="button"
+                className="feed-create-post__header-back"
+                onClick={closeAudiencePicker}
+                aria-label="Back to create post"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <h2 className="feed-create-post__title">Post audience</h2>
+              <button type="button" className="feed-create-post__header-more" aria-label="More options">
+                <MoreHorizontal className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="feed-create-post__body feed-create-post__stack">
+        <div
+          className="feed-create-post__viewport"
+          style={viewportHeight ? { minHeight: viewportHeight } : undefined}
+        >
+          <div ref={composePanelRef} className="feed-create-post__viewport-compose">
+            <div className="feed-create-post__body feed-create-post__stack">
           <div className="feed-create-post__author">
             <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10" />
             <div className="min-w-0">
               <p className="feed-create-post__author-name">{userName}</p>
               <div className="feed-create-post__author-badges">
-                <CreatePostPrivacyBadge />
+                <CreatePostPrivacyBadge
+                  audience={audience}
+                  disabled={createFeed.isPending || isUploading}
+                  onClick={openAudiencePicker}
+                />
                 <CreatePostAddAudioBadge
                   artistName={librarySound?.artistName}
                   trackTitle={librarySound?.title}
@@ -606,6 +685,29 @@ export function CreatePostDialog({
                   : 'Uploading…'
                 : 'Post'}
           </button>
+        </div>
+          </div>
+
+          <AnimatePresence>
+            {audienceOpen ? (
+              <motion.div
+                key="post-audience-sheet"
+                className="feed-create-post__viewport-audience"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <PostAudiencePicker
+                  value={audience}
+                  onChange={setAudience}
+                  setAsDefault={setAudienceAsDefault}
+                  onSetAsDefaultChange={setSetAudienceAsDefault}
+                  onDone={closeAudiencePicker}
+                />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
       </DialogContent>
     </Dialog>

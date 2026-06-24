@@ -1,7 +1,17 @@
 'use client'
 
 import type { LucideIcon } from 'lucide-react'
-import { Bell, Bookmark, Clock, MessageCircleWarning, MoreHorizontal, UserX } from 'lucide-react'
+import {
+  Bell,
+  Bookmark,
+  Clock,
+  MessageCircleWarning,
+  MoreHorizontal,
+  Trash2,
+  UserX,
+} from 'lucide-react'
+import { useAuthStore } from '@/app/stores/auth-store'
+import { useDeleteFeedItem } from '@/modules/feed/hooks/use-feed'
 import type { FeedAuthorDto } from '@/modules/feed/types/feed.types'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -20,6 +30,7 @@ type FeedPostOptionsMenuProps = {
   triggerClassName?: string
   portalContainer?: HTMLElement | null
   contentClassName?: string
+  onDeleted?: () => void
 }
 
 function PostMenuOption({
@@ -27,22 +38,42 @@ function PostMenuOption({
   title,
   subtitle,
   onClick,
+  destructive = false,
+  disabled = false,
 }: {
   icon: LucideIcon
   title: string
   subtitle?: string
   onClick: () => void
+  destructive?: boolean
+  disabled?: boolean
 }) {
   return (
     <DropdownMenuItem
-      className="cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 focus:bg-accent"
+      className={cn(
+        'cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 focus:bg-accent',
+        destructive && 'text-destructive focus:text-destructive',
+      )}
+      disabled={disabled}
       onClick={onClick}
     >
-      <Icon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+      <Icon
+        className={cn(
+          'mt-0.5 h-5 w-5 shrink-0',
+          destructive ? 'text-destructive' : 'text-muted-foreground',
+        )}
+      />
       <div className="min-w-0 text-left">
         <p className="text-[15px] font-semibold leading-snug">{title}</p>
         {subtitle ? (
-          <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{subtitle}</p>
+          <p
+            className={cn(
+              'mt-0.5 text-xs leading-snug',
+              destructive ? 'text-destructive/80' : 'text-muted-foreground',
+            )}
+          >
+            {subtitle}
+          </p>
         ) : null}
       </div>
     </DropdownMenuItem>
@@ -51,12 +82,31 @@ function PostMenuOption({
 
 export function FeedPostOptionsMenu({
   author,
+  postId,
   triggerClassName,
   portalContainer,
   contentClassName,
+  onDeleted,
 }: FeedPostOptionsMenuProps) {
   const authorName = author.name
   const inDialog = Boolean(portalContainer)
+  const userId = useAuthStore((s) => s.userId)
+  const isOwner = Boolean(userId && userId === author.id)
+  const deletePost = useDeleteFeedItem()
+
+  const handleDelete = () => {
+    if (!window.confirm('Delete this post? This cannot be undone.')) return
+
+    deletePost.mutate(postId, {
+      onSuccess: () => {
+        toast.success('Post deleted')
+        onDeleted?.()
+      },
+      onError: () => {
+        toast.error('Could not delete post. Please try again.')
+      },
+    })
+  }
 
   return (
     <DropdownMenu modal={!inDialog}>
@@ -80,6 +130,19 @@ export function FeedPostOptionsMenu({
           contentClassName,
         )}
       >
+        {isOwner ? (
+          <>
+            <PostMenuOption
+              icon={Trash2}
+              title="Delete post"
+              subtitle="Remove this post permanently."
+              destructive
+              disabled={deletePost.isPending}
+              onClick={handleDelete}
+            />
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
         <PostMenuOption
           icon={Bookmark}
           title="Save Post"

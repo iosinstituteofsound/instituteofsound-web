@@ -3,7 +3,7 @@ import type { FeedCardProps } from '@/modules/feed/lib/feed-card-props'
 import { FeedCardShell, FeedMediaFrame, payloadNumber, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { Button } from '@/shared/components/ui/button'
 
-export function ArticleFeedCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {
+export function ArticleFeedCard({ item, defaultCommentsOpen, compact, onPostDeleted }: FeedCardProps) {
   const excerpt = payloadString(item.payload, 'excerpt')
   const articleUrl = payloadString(item.payload, 'articleUrl')
   const coverUrl = payloadString(item.payload, 'coverUrl')
@@ -14,6 +14,7 @@ export function ArticleFeedCard({ item, defaultCommentsOpen, compact }: FeedCard
       item={item}
       defaultCommentsOpen={defaultCommentsOpen}
       compact={compact}
+      onPostDeleted={onPostDeleted}
       media={
         coverUrl ? (
           <FeedMediaFrame>

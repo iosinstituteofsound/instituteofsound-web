@@ -4,7 +4,7 @@ import { FeedCardShell, FeedMediaFrame, payloadString } from '@/modules/feed/com
 import { resolveFeedAssetUrl } from '@/modules/feed/lib/feed-media-url'
 import { modelFormatLabel } from '@/modules/feed/lib/media-utils'
 
-export function ModelFeedCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {
+export function ModelFeedCard({ item, defaultCommentsOpen, compact, onPostDeleted }: FeedCardProps) {
   const modelUrl = resolveFeedAssetUrl(payloadString(item.payload, 'modelUrl'))
   const posterUrl = resolveFeedAssetUrl(payloadString(item.payload, 'posterUrl'))
   const sourceFormat = payloadString(item.payload, 'sourceFormat')
@@ -18,6 +18,7 @@ export function ModelFeedCard({ item, defaultCommentsOpen, compact }: FeedCardPr
       item={item}
       defaultCommentsOpen={defaultCommentsOpen}
       compact={compact}
+      onPostDeleted={onPostDeleted}
       media={
         modelUrl ? (
           <FeedMediaFrame className="feed-model-viewer-frame">

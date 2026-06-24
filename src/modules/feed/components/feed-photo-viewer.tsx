@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Globe, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
+import { FeedPostAudienceIcon } from '@/modules/feed/components/feed-post-audience-icon'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
 import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
@@ -62,7 +63,7 @@ export function FeedPhotoViewer({ open, onOpenChange, item, imageUrl, alt }: Fee
               <span className="feed-photo-viewer__meta-dot" aria-hidden>
                 ·
               </span>
-              <Globe className="feed-photo-viewer__globe" aria-label="Public" />
+              <FeedPostAudienceIcon payload={item.payload} className="feed-photo-viewer__globe" />
             </p>
           </div>
         </div>

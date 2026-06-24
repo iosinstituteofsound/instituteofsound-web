@@ -42,6 +42,47 @@ export function patchFeedItemInCache(
 
 export const profilePostsQueryKeyPrefix = ['profile-posts'] as const
 
+export function removeFeedItemFromCache(
+  data: InfiniteData<FeedListResponse> | undefined,
+  feedItemId: string,
+): InfiniteData<FeedListResponse> | undefined {
+  if (!data || !Array.isArray(data.pages)) return data
+
+  return {
+    ...data,
+    pages: data.pages.map((page) => ({
+      ...page,
+      items: page.items.filter((item) => item.id !== feedItemId),
+    })),
+  }
+}
+
+export function removeFeedItemFromAllListCaches(
+  queryClient: {
+    setQueriesData: <T>(
+      filters: { queryKey: readonly unknown[] },
+      updater: (old: T | undefined) => T | undefined,
+    ) => void
+    removeQueries: (filters: { queryKey: readonly unknown[] }) => void
+  },
+  feedItemId: string,
+) {
+  const removeFromList = (old: InfiniteData<FeedListResponse> | undefined) =>
+    removeFeedItemFromCache(old, feedItemId)
+
+  queryClient.setQueriesData<InfiniteData<FeedListResponse>>(
+    { queryKey: feedQueryKey },
+    removeFromList,
+  )
+
+  queryClient.setQueriesData<InfiniteData<FeedListResponse>>(
+    { queryKey: profilePostsQueryKeyPrefix },
+    removeFromList,
+  )
+
+  queryClient.removeQueries({ queryKey: feedItemQueryKey(feedItemId) })
+}
+
 export function patchFeedItemInAllListCaches(
   queryClient: {
     setQueriesData: <T>(

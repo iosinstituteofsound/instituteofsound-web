@@ -1,5 +1,6 @@
-import { Globe, ExternalLink, Pause, Play } from 'lucide-react'
+import { ExternalLink, Pause, Play } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { FeedPostAudienceIcon } from '@/modules/feed/components/feed-post-audience-icon'
 import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options-menu'
 import { FeedAudioTag } from '@/modules/feed/components/feed-audio-tag'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
@@ -222,7 +223,7 @@ export function FeedPostPreview({ item, menuPortalContainer }: FeedPostPreviewPr
                 <span className="feed-post-preview__meta-dot" aria-hidden>
                   ·
                 </span>
-                <Globe className="feed-post-preview__globe" aria-label="Public" />
+                <FeedPostAudienceIcon payload={item.payload} className="feed-post-preview__globe" />
               </p>
             </div>
             {musicContextLine ? (

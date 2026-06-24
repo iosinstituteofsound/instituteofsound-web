@@ -23,4 +23,8 @@ export async function createFeedItem(input: CreateFeedItemInput) {
   return data.data.item
 }
 
+export async function deleteFeedItem(id: string) {
+  await apiClient.delete(`${API_V1}/feed/${id}`)
+}
+
 export type { FeedItemDto, FeedListResponse, CreateFeedItemInput }

@@ -12,7 +12,7 @@ import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 
-export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardProps) {
+export function MusicFeedCard({ item, defaultCommentsOpen, compact, onPostDeleted }: FeedCardProps) {
   const enrichedItem = useEnrichedMusicFeedItem(item)
 
   if (isReleaseShareItem(enrichedItem)) {
@@ -25,6 +25,7 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardPr
         item={item}
         defaultCommentsOpen={defaultCommentsOpen}
         compact={compact}
+        onPostDeleted={onPostDeleted}
         bodyClassName="feed-social-card__body--release"
         headerAudioLabel={audioHeaderLine || undefined}
       >
@@ -50,6 +51,7 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardPr
       item={item}
       defaultCommentsOpen={defaultCommentsOpen}
       compact={compact}
+      onPostDeleted={onPostDeleted}
       headerAudioLabel={audioHeaderLine || undefined}
     >
       <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">

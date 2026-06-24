@@ -1,6 +1,7 @@
 import { useState, type KeyboardEvent } from 'react'
-import { Globe, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
+import { FeedPostAudienceIcon } from '@/modules/feed/components/feed-post-audience-icon'
 import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
 import { FeedPhotoViewer } from '@/modules/feed/components/feed-photo-viewer'
 import { FeedPostHiddenState } from '@/modules/feed/components/feed-post-hidden-state'
@@ -27,6 +28,7 @@ export function FeedCardShell({
   defaultCommentsOpen = false,
   headerAudioLabel,
   compact = false,
+  onPostDeleted,
 }: {
   item: FeedItemDto
   children?: React.ReactNode
@@ -36,6 +38,7 @@ export function FeedCardShell({
   defaultCommentsOpen?: boolean
   headerAudioLabel?: string
   compact?: boolean
+  onPostDeleted?: () => void
 }) {
   const [isHidden, setIsHidden] = useState(false)
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false)
@@ -91,7 +94,10 @@ export function FeedCardShell({
                       <span className="feed-social-card__meta-dot" aria-hidden>
                         ·
                       </span>
-                      <Globe className="feed-social-card__globe" aria-label="Public" />
+                      <FeedPostAudienceIcon
+                        payload={item.payload}
+                        className="feed-social-card__globe"
+                      />
                     </p>
                   </div>
 
@@ -102,7 +108,11 @@ export function FeedCardShell({
               </div>
 
               <div className="feed-social-card__header-actions">
-                <FeedPostOptionsMenu author={item.author} postId={item.id} />
+                <FeedPostOptionsMenu
+                  author={item.author}
+                  postId={item.id}
+                  onDeleted={onPostDeleted}
+                />
                 <Button
                   type="button"
                   variant="ghost"

@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { FeedItemCard } from '@/modules/feed/lib/feed-type-registry'
 import { useFeedItem } from '@/modules/feed/hooks/use-feed-engagement'
@@ -10,6 +10,7 @@ import { usePageMeta } from '@/shared/hooks/use-page-meta'
 
 export function FeedPostPage() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
   const { data: item, isLoading, isError, refetch } = useFeedItem(id)
   const pageMeta = useFeedPostPageMeta(item)
   usePageMeta(pageMeta)
@@ -49,7 +50,11 @@ export function FeedPostPage() {
         </Link>
       </Button>
 
-      <FeedItemCard item={item} defaultCommentsOpen />
+      <FeedItemCard
+        item={item}
+        defaultCommentsOpen
+        onPostDeleted={() => navigate('/home', { replace: true })}
+      />
     </div>
   )
 }

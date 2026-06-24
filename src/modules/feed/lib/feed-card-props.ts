@@ -4,4 +4,5 @@ export interface FeedCardProps {
   item: FeedItemDto
   defaultCommentsOpen?: boolean
   compact?: boolean
+  onPostDeleted?: () => void
 }
