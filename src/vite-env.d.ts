@@ -25,3 +25,25 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+declare namespace JSX {
+  interface IntrinsicElements {
+    'model-viewer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+      src?: string
+      alt?: string
+      poster?: string
+      'ios-src'?: string
+      crossorigin?: string
+      'environment-image'?: string
+      'shadow-intensity'?: string
+      exposure?: string
+      'camera-controls'?: boolean | ''
+      'auto-rotate'?: boolean | ''
+      'interaction-prompt'?: string
+      'touch-action'?: string
+      loading?: string
+      reveal?: string
+      bounds?: string
+    }
+  }
+}

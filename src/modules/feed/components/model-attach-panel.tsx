@@ -188,7 +188,7 @@ export const ModelAttachPanel = forwardRef<ModelAttachPanelHandle, ModelAttachPa
                 <div>
                   <p className="text-sm font-medium">Drag a 3D model</p>
                   <p className="text-xs text-muted-foreground">
-                    GLB, GLTF, OBJ, FBX, STL, DAE, PLY, USDZ and more — auto-converts to GLB
+                    GLB, GLTF, OBJ, FBX, STL, DAE, PLY, USDZ and more — auto-converts and compresses for upload
                   </p>
                 </div>
                 {!embedded ? (
@@ -249,7 +249,7 @@ export const ModelAttachPanel = forwardRef<ModelAttachPanelHandle, ModelAttachPa
 
                 {embedded ? (
                   <p className="text-xs text-muted-foreground">
-                    Converts and uploads when you post (may take a moment for large files)
+                    Converts, compresses, and uploads when you post (large files may take a moment)
                   </p>
                 ) : (
                   <Button type="button" className="w-full" onClick={uploadPreview} disabled={disabled || busy}>

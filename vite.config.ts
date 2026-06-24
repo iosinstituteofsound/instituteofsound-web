@@ -45,6 +45,9 @@ export default defineConfig(({ mode }) => {
         '@tanstack/react-query',
         'zustand',
         'framer-motion',
+        'three',
+        '@react-three/fiber',
+        '@react-three/drei',
       ],
       alias: [
         {

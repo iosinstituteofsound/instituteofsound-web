@@ -109,11 +109,14 @@
   }
 
   .feed-page .feed-model-viewer-frame {
+    display: block;
+    width: 100%;
     min-height: 220px;
     max-height: min(55vh, 400px);
   }
 
   .feed-page .feed-model-viewer-wrap {
+    width: 100%;
     min-height: 220px;
     height: min(55vh, 400px);
   }

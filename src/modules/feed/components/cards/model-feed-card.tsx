@@ -21,7 +21,7 @@ export function ModelFeedCard({ item, defaultCommentsOpen, compact }: FeedCardPr
       media={
         modelUrl ? (
           <FeedMediaFrame className="feed-model-viewer-frame">
-            <div className="relative">
+            <div className="relative w-full min-w-0">
               <FeedModelViewer
                 src={modelUrl}
                 iosSrc={convertedFormat === 'usdz' ? modelUrl : undefined}
