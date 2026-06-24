@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowRight, Bookmark, Pause, Play } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Bookmark, Pause, Play } from 'lucide-react'
 import { useExplore } from '@/modules/explore/hooks/use-explore'
 import { ReleaseVinylArt } from '@/modules/explore/components/release-vinyl-art'
-import { artistInitials } from '@/modules/explore/lib/artist-meta'
 import {
   parseReleaseSharePayload,
   releaseSharePayloadToReleaseDto,
   resolveReleaseShareFromCatalog,
-  type ReleaseShareArtistSnapshot,
 } from '@/modules/feed/lib/feed-release-payload'
 import { payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
@@ -27,34 +24,6 @@ function readSaved(): Set<string> {
   } catch {
     return new Set()
   }
-}
-
-function ArtistLocation({ artist }: { artist: ReleaseShareArtistSnapshot }) {
-  const parts = [artist.labelName].filter(Boolean)
-  if (parts.length === 0) return null
-  return <p className="feed-release-preview__artist-location">{parts.join(' • ')}</p>
-}
-
-function ArtistStats({ artist }: { artist: ReleaseShareArtistSnapshot }) {
-  const stats = [
-    { label: 'Tracks', value: artist.trackCount },
-    { label: 'Plays', value: artist.totalPlays },
-    { label: 'Releases', value: artist.releaseCount },
-    { label: 'Listeners', value: artist.listeners },
-  ].filter((entry) => entry.value !== undefined && entry.value !== null)
-
-  if (stats.length === 0) return null
-
-  return (
-    <dl className="feed-release-preview__stats">
-      {stats.map((entry) => (
-        <div key={entry.label}>
-          <dt>{entry.label}</dt>
-          <dd>{entry.value}</dd>
-        </div>
-      ))}
-    </dl>
-  )
 }
 
 interface ReleaseSharePreviewProps {
@@ -102,7 +71,6 @@ export function ReleaseSharePreview({ item, compact = false }: ReleaseSharePrevi
   if (!share || !release) return null
 
   const artistName = share.artistName ?? artist?.displayName ?? 'Unknown artist'
-  const releaseUrl = share.releaseUrl ?? `/releases/${share.releaseId}`
 
   return (
     <div
@@ -152,53 +120,6 @@ export function ReleaseSharePreview({ item, compact = false }: ReleaseSharePrevi
           </div>
         </div>
       </div>
-
-      {artist ? (
-        <div className="feed-release-preview__artist-card">
-          <div className="feed-release-preview__artist-left">
-            {artist.avatarUrl ? (
-              <img src={artist.avatarUrl} alt="" className="feed-release-preview__artist-avatar" />
-            ) : (
-              <span className="feed-release-preview__artist-avatar feed-release-preview__artist-avatar--fb" aria-hidden>
-                {artistInitials(artist.displayName)}
-              </span>
-            )}
-
-            <div className="feed-release-preview__artist-copy">
-              <div className="feed-release-preview__artist-head">
-                <span className="feed-release-preview__artist-kicker ios-mh-kicker">Artist</span>
-                <span className="feed-release-preview__artist-card-name">{artist.displayName}</span>
-                <ArtistLocation artist={artist} />
-              </div>
-              {artist.bio ? <p className="feed-release-preview__bio">{artist.bio}</p> : null}
-              {artist.genres.length > 0 ? (
-                <div className="feed-release-preview__tags" aria-label="Artist genres">
-                  {artist.genres.slice(0, 2).map((genre) => (
-                    <span key={genre} className="feed-release-preview__tag">
-                      {genre}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="feed-release-preview__artist-right">
-            <ArtistStats artist={artist} />
-            {artist.userId ? (
-              <Link to={`/profile/${artist.userId}`} className="feed-release-preview__studio-btn">
-                <span>View studio</span>
-                <ArrowRight size={13} strokeWidth={2.5} aria-hidden />
-              </Link>
-            ) : (
-              <Link to={releaseUrl} className="feed-release-preview__studio-btn">
-                <span>View release</span>
-                <ArrowRight size={13} strokeWidth={2.5} aria-hidden />
-              </Link>
-            )}
-          </div>
-        </div>
-      ) : null}
     </div>
   )
 }

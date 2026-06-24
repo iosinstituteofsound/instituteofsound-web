@@ -300,6 +300,19 @@
   margin-top: 10px;
 }
 
+.feed-post-preview__release {
+  margin-top: 10px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.feed-post-preview__release .feed-release-preview {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 /* Stats bar */
 .feed-engagement-stats-bar {
   display: flex;

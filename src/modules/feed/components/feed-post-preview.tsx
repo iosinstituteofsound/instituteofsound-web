@@ -73,7 +73,11 @@ function MusicFeedPreviewBlock({ item }: { item: FeedItemDto }) {
   const enrichedItem = useEnrichedMusicFeedItem(item)
 
   if (isReleaseShareItem(enrichedItem)) {
-    return <ReleaseSharePreview item={enrichedItem} compact />
+    return (
+      <div className="feed-post-preview__release">
+        <ReleaseSharePreview item={enrichedItem} compact />
+      </div>
+    )
   }
 
   const payload = item.payload
@@ -180,6 +184,7 @@ interface FeedPostPreviewProps {
 }
 
 export function FeedPostPreview({ item, menuPortalContainer }: FeedPostPreviewProps) {
+  const enrichedMusicItem = useEnrichedMusicFeedItem(item)
   const captionText =
     item.type === 'text'
       ? buildPostCaptionText(undefined, payloadString(item.payload, 'text') ?? item.body)
@@ -187,7 +192,7 @@ export function FeedPostPreview({ item, menuPortalContainer }: FeedPostPreviewPr
 
   const musicContextLine =
     item.type === 'music' || item.type === 'image' || item.type === 'video'
-      ? musicTrackContextLine(item.payload)
+      ? musicTrackContextLine(item.type === 'music' ? enrichedMusicItem.payload : item.payload)
       : ''
 
   const media = <FeedPostMedia item={item} />

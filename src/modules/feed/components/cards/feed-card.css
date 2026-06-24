@@ -26,8 +26,13 @@
   overflow: hidden;
 }
 
+.feed-social-card__layer--post .feed-social-card__layer-inner {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 .feed-social-card:not(.feed-social-card--hidden) .feed-social-card__layer--post {
-  overflow: visible;
+  overflow: clip;
 }
 
 .feed-social-card--hidden .feed-social-card__layer--post {
@@ -431,7 +436,98 @@
 }
 
 .feed-social-card__body {
+  min-width: 0;
+  max-width: 100%;
   padding: 8px var(--feed-card-pad-x) 4px;
+}
+
+.feed-social-card__body--release {
+  padding: 0;
+  overflow: hidden;
+  container-type: inline-size;
+  container-name: feed-release-body;
+}
+
+.feed-social-card__body--release .feed-release-preview {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border-inline: none;
+}
+
+.feed-social-card .feed-release-preview__main {
+  min-width: 0;
+}
+
+.feed-social-card .feed-release-preview__artist-card {
+  flex-wrap: wrap;
+}
+
+.feed-social-card .feed-release-preview__artist-right {
+  min-width: 0;
+  max-width: 100%;
+  flex-shrink: 1;
+  width: 100%;
+  padding-left: 0;
+  border-left: none;
+  border-top: 1px solid color-mix(in oklch, var(--border) 88%, transparent);
+  padding-top: 0.5rem;
+  justify-content: space-between;
+}
+
+.feed-social-card .feed-release-preview__stats {
+  flex: 1;
+  min-width: 0;
+  justify-content: space-between;
+}
+
+.feed-social-card .feed-release-preview__stats > div {
+  min-width: 0;
+  flex: 1;
+}
+
+@container feed-release-body (max-width: 640px) {
+  .feed-social-card .feed-release-preview__main {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.85rem;
+    padding: 1rem 0.75rem 0.9rem;
+  }
+
+  .feed-social-card .feed-release-preview__art {
+    flex: 0 0 auto;
+    width: var(--feed-release-art-slot);
+    margin-inline: auto;
+  }
+
+  .feed-social-card .feed-release-preview__info {
+    width: 100%;
+    align-items: center;
+  }
+
+  .feed-social-card .feed-release-preview__title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    word-break: break-word;
+    line-height: 1.05;
+  }
+
+  .feed-social-card .feed-release-preview__artist-line {
+    align-items: center;
+  }
+
+  .feed-social-card .feed-release-preview__artist-name {
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+  }
+
+  .feed-social-card .feed-release-preview__actions {
+    justify-content: center;
+    width: 100%;
+  }
 }
 
 /* ── Engagement ── */

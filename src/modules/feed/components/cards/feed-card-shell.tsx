@@ -22,6 +22,7 @@ export function FeedCardShell({
   children,
   media,
   className,
+  bodyClassName,
   defaultCommentsOpen = false,
   headerContext,
   headerAudioLabel,
@@ -31,6 +32,7 @@ export function FeedCardShell({
   children?: React.ReactNode
   media?: React.ReactNode
   className?: string
+  bodyClassName?: string
   defaultCommentsOpen?: boolean
   headerContext?: React.ReactNode
   headerAudioLabel?: string
@@ -142,7 +144,9 @@ export function FeedCardShell({
               </div>
             ) : null}
 
-            {children ? <div className="feed-social-card__body">{children}</div> : null}
+            {children ? (
+              <div className={cn('feed-social-card__body', bodyClassName)}>{children}</div>
+            ) : null}
           </div>
         </div>
 

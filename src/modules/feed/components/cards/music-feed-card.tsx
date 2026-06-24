@@ -28,8 +28,19 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardPr
   const enrichedItem = useEnrichedMusicFeedItem(item)
 
   if (isReleaseShareItem(enrichedItem)) {
+    const trackTitle = payloadString(enrichedItem.payload, 'trackTitle')
+    const artistName = payloadString(enrichedItem.payload, 'artistName')
+    const audioHeaderLine = formatAttachedAudioLabel(artistName, trackTitle)
+
     return (
-      <FeedCardShell item={item} defaultCommentsOpen={defaultCommentsOpen} compact={compact}>
+      <FeedCardShell
+        item={item}
+        defaultCommentsOpen={defaultCommentsOpen}
+        compact={compact}
+        bodyClassName="feed-social-card__body--release"
+        headerContext={musicHeaderContext(trackTitle, artistName)}
+        headerAudioLabel={audioHeaderLine || undefined}
+      >
         <ReleaseSharePreview item={enrichedItem} compact={compact} />
       </FeedCardShell>
     )

@@ -107,7 +107,6 @@
   align-items: center;
   gap: 1.55rem;
   padding: 1.5rem 1.4rem 1.2rem;
-  border-bottom: 1px solid color-mix(in oklch, var(--feed-release-line) 88%, transparent);
 }
 
 .feed-release-preview__main::before {
