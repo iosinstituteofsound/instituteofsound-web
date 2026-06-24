@@ -33,10 +33,10 @@ export function FeedAudioTag({ label, className }: FeedAudioTagProps) {
   }, [label])
 
   const marqueeStyle: CSSProperties | undefined = overflows
-    ? {
+    ? ({
         '--feed-audio-tag-scroll': `${scrollDistance}px`,
         '--feed-audio-tag-duration': `${Math.max(4, Math.min(12, scrollDistance / 16))}s`,
-      }
+      } as CSSProperties)
     : undefined
 
   return (
