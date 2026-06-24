@@ -1,4 +1,5 @@
 import { Globe, Music2, ExternalLink, Pause, Play } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options-menu'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
@@ -12,48 +13,60 @@ import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'
 import { ReleaseSharePreview } from '@/modules/feed/components/release-share-preview'
 import { isReleaseShareItem } from '@/modules/feed/lib/feed-release-payload'
 import { useEnrichedMusicFeedItem } from '@/modules/feed/hooks/use-enriched-music-feed-item'
+import { feedItemHasAttachedAudio, FeedPostSoundToggle } from '@/modules/feed/components/feed-post-sound-toggle'
 import { feedItemToPlayerTrack } from '@/modules/player/lib/feed-track'
 import { usePlayer } from '@/modules/player/hooks/use-player'
 import { Button } from '@/shared/components/ui/button'
 
 function FeedPostMedia({ item }: { item: FeedItemDto }) {
   const payload = item.payload
+  let content: ReactNode = null
 
   switch (item.type) {
     case 'image': {
       const imageUrl = payloadString(payload, 'imageUrl')
       const alt = payloadString(payload, 'alt') ?? item.title ?? 'Feed image'
       if (!imageUrl) return null
-      return (
+      content = (
         <FeedMediaFrame>
           <img src={imageUrl} alt={alt} />
         </FeedMediaFrame>
       )
+      break
     }
     case 'video': {
       const videoUrl = payloadString(payload, 'videoUrl')
       const posterUrl = payloadString(payload, 'posterUrl')
       if (!videoUrl) return null
-      return (
+      content = (
         <FeedMediaFrame>
           <video controls poster={posterUrl}>
             <source src={videoUrl} />
           </video>
         </FeedMediaFrame>
       )
+      break
     }
     case 'article': {
       const coverUrl = payloadString(payload, 'coverUrl')
       if (!coverUrl) return null
-      return (
+      content = (
         <FeedMediaFrame>
           <img src={coverUrl} alt={item.title ?? 'Article'} />
         </FeedMediaFrame>
       )
+      break
     }
     default:
       return null
   }
+
+  return (
+    <div className="feed-post-preview__media-stage">
+      {content}
+      {feedItemHasAttachedAudio(item) ? <FeedPostSoundToggle item={item} /> : null}
+    </div>
+  )
 }
 
 function MusicFeedPreviewBlock({ item }: { item: FeedItemDto }) {
@@ -172,7 +185,10 @@ export function FeedPostPreview({ item, menuPortalContainer }: FeedPostPreviewPr
       ? buildPostCaptionText(undefined, payloadString(item.payload, 'text') ?? item.body)
       : buildPostCaptionText(item.title, item.body)
 
-  const musicContextLine = item.type === 'music' ? musicTrackContextLine(item.payload) : ''
+  const musicContextLine =
+    item.type === 'music' || item.type === 'image' || item.type === 'video'
+      ? musicTrackContextLine(item.payload)
+      : ''
 
   const media = <FeedPostMedia item={item} />
   const extra = <FeedPostExtra item={item} />
@@ -183,27 +199,33 @@ export function FeedPostPreview({ item, menuPortalContainer }: FeedPostPreviewPr
         <FeedAuthorProfileLink author={item.author} variant="avatar" className="shrink-0">
           <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
         </FeedAuthorProfileLink>
-        <div className="feed-post-preview__meta">
-          <p className="feed-post-preview__name-line">
-            <FeedAuthorProfileLink author={item.author} variant="name">
-              <VerifiedUserName
-                name={item.author.name}
-                isVerified={item.author.isVerified}
-                nameClassName="feed-post-preview__name"
-              />
-            </FeedAuthorProfileLink>
-          </p>
-          <p className="feed-post-preview__meta-line">
-            <FeedPostTimestamp value={item.createdAt} />
-            <span aria-hidden> · </span>
-            <Globe className="feed-post-preview__globe" aria-label="Public" />
-          </p>
-          {musicContextLine ? (
-            <p className="feed-post-preview__context-line">
-              <Music2 aria-hidden />
-              <span className="truncate">{musicContextLine}</span>
-            </p>
-          ) : null}
+        <div className="feed-post-preview__header-body">
+          <div className="feed-post-preview__title-row">
+            <div className="feed-post-preview__identity">
+              <p className="feed-post-preview__name-line">
+                <FeedAuthorProfileLink author={item.author} variant="name">
+                  <VerifiedUserName
+                    name={item.author.name}
+                    isVerified={item.author.isVerified}
+                    nameClassName="feed-post-preview__name"
+                  />
+                </FeedAuthorProfileLink>
+              </p>
+              <p className="feed-post-preview__meta-line">
+                <FeedPostTimestamp value={item.createdAt} />
+                <span className="feed-post-preview__meta-dot" aria-hidden>
+                  ·
+                </span>
+                <Globe className="feed-post-preview__globe" aria-label="Public" />
+              </p>
+            </div>
+            {musicContextLine ? (
+              <div className="feed-post-preview__audio-tag" title={musicContextLine}>
+                <Music2 aria-hidden />
+                <span className="truncate">{musicContextLine}</span>
+              </div>
+            ) : null}
+          </div>
         </div>
         <FeedPostOptionsMenu
           author={item.author}

@@ -47,10 +47,10 @@ export async function uploadAudioFile(
   return data.data
 }
 
-export async function finalizeAudioUpload(jobId: string, title?: string) {
+export async function finalizeAudioUpload(jobId: string, title?: string, ugcEnabled?: boolean) {
   const { data } = await apiClient.post<ApiSuccessResponse<AudioUploadJobDto>>(
     `${API_V1}/music/uploads/${jobId}/finalize`,
-    { title },
+    { title, ugcEnabled },
   )
   return data.data
 }
@@ -86,6 +86,7 @@ export async function updateArtistTrack(
     lyrics?: string
     syncedLyrics?: Array<{ text: string; timeMs: number }>
     syncedLyricsStatus?: 'none' | 'draft' | 'pending_review' | 'approved'
+    ugcEnabled?: boolean
   },
 ) {
   const { data } = await apiClient.patch<ApiSuccessResponse<TrackDto>>(`${API_V1}/artist/tracks/${id}`, input)

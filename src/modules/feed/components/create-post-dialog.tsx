@@ -12,10 +12,13 @@ import {
 } from '@/modules/feed/components/animated-emoji-picker'
 import { insertAtCursor } from '@/modules/feed/lib/animated-emoji'
 import {
+  CreatePostAddAudioBadge,
   CreatePostAddBar,
   CreatePostPrivacyBadge,
   type PostAddAction,
 } from '@/modules/feed/components/create-post-add-bar'
+import { ArticleAudioSearchPicker } from '@/modules/editor/components/article-audio-search-picker'
+import type { SiteAudioTrack } from '@/modules/editor/lib/site-audio-library'
 import {
   MediaAttachPanel,
   type MediaAttachment,
@@ -111,6 +114,8 @@ export function CreatePostDialog({
   const [mediaUploadState, setMediaUploadState] = useState({ uploading: false, hasPreview: false })
   const [modelUploadState, setModelUploadState] = useState({ uploading: false, hasPreview: false })
   const [releasePayload, setReleasePayload] = useState<Record<string, unknown> | null>(null)
+  const [librarySound, setLibrarySound] = useState<SiteAudioTrack | null>(null)
+  const [libraryOpen, setLibraryOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mediaPanelRef = useRef<MediaAttachPanelHandle>(null)
   const modelPanelRef = useRef<ModelAttachPanelHandle>(null)
@@ -163,6 +168,8 @@ export function CreatePostDialog({
     setMediaUploadState({ uploading: false, hasPreview: false })
     setModelUploadState({ uploading: false, hasPreview: false })
     setReleasePayload(null)
+    setLibrarySound(null)
+    setLibraryOpen(false)
     mediaPanelRef.current?.clearPendingPreview()
     modelPanelRef.current?.clearPendingPreview()
   }
@@ -173,6 +180,10 @@ export function CreatePostDialog({
   }
 
   const handleAddAction = (action: PostAddAction) => {
+    if (action === 'library-sound') {
+      setLibraryOpen(true)
+      return
+    }
     if (action === 'article') {
       setShowArticleFields(true)
       setActiveAction(action)
@@ -203,6 +214,7 @@ export function CreatePostDialog({
     if (showArticleFields && articleUrl.trim()) return true
     if (modelAttachment || modelUploadState.hasPreview) return true
     if (mediaAttachment || mediaUploadState.hasPreview) return true
+    if (librarySound) return true
     if (activeLinkPreview) return true
     if (body.trim()) return true
     return false
@@ -216,6 +228,7 @@ export function CreatePostDialog({
     mediaUploadState,
     modelUploadState,
     releasePayload,
+    librarySound,
     isUploading,
   ])
 
@@ -231,6 +244,7 @@ export function CreatePostDialog({
       if (resolvedMediaKind === 'audio') return 'music'
       return 'image'
     }
+    if (librarySound) return 'music'
     return 'text'
   }
 
@@ -324,6 +338,22 @@ export function CreatePostDialog({
       if (type === 'music') payload.audioUrl = attachment.url
     }
 
+    if (librarySound) {
+      if (type === 'image' || type === 'video') {
+        payload.audioUrl = librarySound.streamUrl
+        payload.trackTitle = librarySound.title
+        payload.artistName = librarySound.artistName
+        if (librarySound.durationSec) payload.durationSec = librarySound.durationSec
+        if (librarySound.releaseId) payload.releaseId = librarySound.releaseId
+      } else if (type === 'music' && !attachment) {
+        payload.audioUrl = librarySound.streamUrl
+        payload.trackTitle = librarySound.title
+        payload.artistName = librarySound.artistName
+        if (librarySound.durationSec) payload.durationSec = librarySound.durationSec
+        if (librarySound.releaseId) payload.releaseId = librarySound.releaseId
+      }
+    }
+
     try {
       const postBody =
         type === 'text'
@@ -388,7 +418,15 @@ export function CreatePostDialog({
             <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10" />
             <div className="min-w-0">
               <p className="feed-create-post__author-name">{userName}</p>
-              <CreatePostPrivacyBadge />
+              <div className="feed-create-post__author-badges">
+                <CreatePostPrivacyBadge />
+                <CreatePostAddAudioBadge
+                  artistName={librarySound?.artistName}
+                  trackTitle={librarySound?.title}
+                  disabled={createFeed.isPending || isUploading}
+                  onClick={() => setLibraryOpen(true)}
+                />
+              </div>
             </div>
           </div>
 
@@ -440,6 +478,7 @@ export function CreatePostDialog({
                 onClick={() => {
                   setMediaAttachment(null)
                   setResolvedMediaKind(null)
+                  setLibrarySound(null)
                 }}
               >
                 Remove
@@ -498,6 +537,21 @@ export function CreatePostDialog({
             />
           ) : null}
 
+          <Dialog open={libraryOpen} onOpenChange={setLibraryOpen}>
+            <DialogContent elevated className="feed-create-post__sound-dialog">
+              <DialogHeader>
+                <DialogTitle>Choose sound</DialogTitle>
+              </DialogHeader>
+              <ArticleAudioSearchPicker
+                selectedTrackId={librarySound?.id ?? null}
+                onSelect={(track) => {
+                  setLibrarySound(track)
+                  setLibraryOpen(false)
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+
           {showArticleFields ? (
             <div className="feed-create-post__article-fields">
               <Input
@@ -525,6 +579,7 @@ export function CreatePostDialog({
               Boolean(modelAttachment) ||
               modelUploadState.hasPreview
             }
+            canAttachSound
             disabled={createFeed.isPending || isUploading}
           />
         </div>

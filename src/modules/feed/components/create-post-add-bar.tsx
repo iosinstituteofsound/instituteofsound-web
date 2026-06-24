@@ -5,6 +5,7 @@ import {
   ImageIcon,
   Mic,
   MoreHorizontal,
+  Music2,
   Scissors,
   Smile,
   Video,
@@ -16,8 +17,17 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
 import { cn } from '@/shared/lib/cn'
+import { formatAttachedAudioLabel } from '@/modules/feed/lib/attached-audio-label'
 
-export type PostAddAction = 'photo-video' | 'audio' | 'model' | 'record-video' | 'record-audio' | 'clip' | 'article'
+export type PostAddAction =
+  | 'photo-video'
+  | 'audio'
+  | 'model'
+  | 'record-video'
+  | 'record-audio'
+  | 'clip'
+  | 'article'
+  | 'library-sound'
 
 interface CreatePostAddBarProps {
   activeAction: PostAddAction | null
@@ -25,6 +35,7 @@ interface CreatePostAddBarProps {
   onEmojiClick?: (anchor: HTMLElement) => void
   emojiActive?: boolean
   hasMedia: boolean
+  canAttachSound?: boolean
   disabled?: boolean
 }
 
@@ -34,6 +45,7 @@ export function CreatePostAddBar({
   onEmojiClick,
   emojiActive = false,
   hasMedia,
+  canAttachSound = false,
   disabled = false,
 }: CreatePostAddBarProps) {
   return (
@@ -98,7 +110,7 @@ export function CreatePostAddBar({
               <MoreHorizontal className="h-6 w-6 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="z-[120] w-52">
             <DropdownMenuItem onClick={() => onAction('record-video')}>
               <Video className="mr-2 h-4 w-4 text-pink-500" />
               Record video
@@ -107,6 +119,12 @@ export function CreatePostAddBar({
               <Mic className="mr-2 h-4 w-4 text-red-500" />
               Record audio
             </DropdownMenuItem>
+            {canAttachSound ? (
+              <DropdownMenuItem onClick={() => onAction('library-sound')}>
+                <Music2 className="mr-2 h-4 w-4 text-amber-500" />
+                Choose from library
+              </DropdownMenuItem>
+            ) : null}
             {hasMedia ? (
               <DropdownMenuItem onClick={() => onAction('clip')}>
                 <Scissors className="mr-2 h-4 w-4" />
@@ -130,5 +148,38 @@ export function CreatePostPrivacyBadge() {
       <Globe className="h-3 w-3" />
       Public
     </span>
+  )
+}
+
+interface CreatePostAddAudioBadgeProps {
+  artistName?: string | null
+  trackTitle?: string | null
+  disabled?: boolean
+  onClick: () => void
+}
+
+export function CreatePostAddAudioBadge({
+  artistName,
+  trackTitle,
+  disabled = false,
+  onClick,
+}: CreatePostAddAudioBadgeProps) {
+  const trackLabel = formatAttachedAudioLabel(artistName, trackTitle)
+  const hasSound = Boolean(trackLabel)
+
+  return (
+    <button
+      type="button"
+      title={hasSound ? `Change audio: ${trackLabel}` : 'Add audio from library'}
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        'feed-create-post__privacy feed-create-post__privacy-btn',
+        hasSound && 'feed-create-post__privacy-btn--track is-active',
+      )}
+    >
+      <Music2 className="h-3 w-3 shrink-0" />
+      <span className="feed-create-post__privacy-btn-label">{trackLabel || 'Add audio'}</span>
+    </button>
   )
 }

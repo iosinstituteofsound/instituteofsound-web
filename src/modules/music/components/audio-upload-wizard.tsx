@@ -8,6 +8,7 @@ import {
   getAudioUploadJob,
   uploadAudioFile,
 } from '@/modules/music/api/music.api'
+import { AudioLibraryConsentToggle } from '@/modules/music/components/audio-library-consent-toggle'
 import { ProcessingStatus } from '@/modules/music/components/processing-status'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
@@ -25,6 +26,7 @@ export function AudioUploadWizard({ onComplete }: AudioUploadWizardProps) {
   const [errorMessage, setErrorMessage] = useState<string>()
   const [title, setTitle] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [ugcEnabled, setUgcEnabled] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const startJobMutation = useMutation({
@@ -78,7 +80,7 @@ export function AudioUploadWizard({ onComplete }: AudioUploadWizardProps) {
     }
     await uploadAudioFile(id, selectedFile, setUploadProgress)
     const trackTitle = title.trim() || selectedFile.name.replace(/\.[^.]+$/, '')
-    await finalizeAudioUpload(id, trackTitle)
+    await finalizeAudioUpload(id, trackTitle, ugcEnabled)
     setProcessingStatus('analyzing')
     pollJob(id)
   }
@@ -106,6 +108,11 @@ export function AudioUploadWizard({ onComplete }: AudioUploadWizardProps) {
       </div>
 
       <Input placeholder="Song name" value={title} onChange={(e) => setTitle(e.target.value)} />
+
+      <AudioLibraryConsentToggle
+        checked={ugcEnabled}
+        onCheckedChange={setUgcEnabled}
+      />
 
       {uploadProgress > 0 && uploadProgress < 100 ? (
         <p className="text-sm text-muted-foreground">Uploading: {uploadProgress}%</p>

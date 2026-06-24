@@ -16,6 +16,7 @@ import { buildReleaseDateIso, getDefaultReleaseTimezone } from '@/modules/music/
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
 import { Loader } from '@/shared/components/feedback/loader'
 import { Page, PageSection } from '@/shared/components/layout/page-shell'
+import { AudioLibraryConsentToggle } from '@/modules/music/components/audio-library-consent-toggle'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
@@ -118,6 +119,7 @@ export function MusicReleaseEditPage() {
   const [trackSyncedLyricsStatus, setTrackSyncedLyricsStatus] = useState<Record<string, SyncedLyricsStatus>>({})
   const [activeLyricsTrackId, setActiveLyricsTrackId] = useState<string | null>(null)
   const [initialized, setInitialized] = useState(false)
+  const [consentSaving, setConsentSaving] = useState<Record<string, boolean>>({})
   const lyricsHydratedRef = useRef(false)
 
   useEffect(() => {
@@ -215,6 +217,24 @@ export function MusicReleaseEditPage() {
       setCoverUrl('')
     } finally {
       setCoverUploading(false)
+    }
+  }
+
+  const toggleAudioLibraryConsent = async (trackId: string, enabled: boolean) => {
+    if (consentSaving[trackId]) return
+    const artistName = profile?.displayName ?? 'Artist'
+    const track = tracks?.find((entry) => entry.id === trackId)
+    if (!track) return
+    const songName = stripArtistTrackPrefix(artistName, track.title)
+    setConsentSaving((current) => ({ ...current, [trackId]: true }))
+    try {
+      await updateArtistTrack(trackId, { title: songName, ugcEnabled: enabled })
+      toast.success(enabled ? 'Added to audio library' : 'Removed from audio library')
+      void queryClient.invalidateQueries({ queryKey: ['artist-tracks'] })
+    } catch {
+      toast.error('Could not update audio library consent')
+    } finally {
+      setConsentSaving((current) => ({ ...current, [trackId]: false }))
     }
   }
 
@@ -426,20 +446,33 @@ export function MusicReleaseEditPage() {
             <h3 className="rbl-panel__title">Tracks</h3>
             <p className="rbl-panel__meta">{selectedTrackIds.length} selected</p>
           </div>
-          <div className="rbl-panel__body space-y-2">
+          <div className="rbl-panel__body space-y-3">
+            <p className="rbl-field__hint">
+              Select tracks for this release. Use the Audio Library consent box on each track if you want
+              fans to attach your sound to their posts.
+            </p>
             {availableTracks.length === 0 ? (
               <p className="rbl-text-muted text-sm">No ready tracks available.</p>
             ) : (
               availableTracks.map((track) => (
-                <label key={track.id} className="rbl-track-row cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedTrackIds.includes(track.id)}
-                    onChange={() => toggleTrack(track.id)}
-                    className="size-4 accent-[var(--primary)]"
+                <div key={track.id} className="space-y-0">
+                  <label className="rbl-track-row cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedTrackIds.includes(track.id)}
+                      onChange={() => toggleTrack(track.id)}
+                      className="size-4 accent-[var(--primary)]"
+                    />
+                    <span className="min-w-0 flex-1 truncate font-medium">{track.title}</span>
+                  </label>
+                  <AudioLibraryConsentToggle
+                    checked={Boolean(track.ugcEnabled)}
+                    saving={Boolean(consentSaving[track.id])}
+                    onCheckedChange={(enabled) => {
+                      void toggleAudioLibraryConsent(track.id, enabled)
+                    }}
                   />
-                  <span className="font-medium">{track.title}</span>
-                </label>
+                </div>
               ))
             )}
           </div>

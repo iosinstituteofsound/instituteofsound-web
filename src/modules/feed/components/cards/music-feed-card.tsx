@@ -1,6 +1,7 @@
 import { ExternalLink, Music2, Pause, Play } from 'lucide-react'
 import type { FeedCardProps } from '@/modules/feed/lib/feed-card-props'
 import { FeedCardShell, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
+import { formatAttachedAudioLabel } from '@/modules/feed/lib/attached-audio-label'
 import { ReleaseSharePreview } from '@/modules/feed/components/release-share-preview'
 import { isReleaseShareItem } from '@/modules/feed/lib/feed-release-payload'
 import { useEnrichedMusicFeedItem } from '@/modules/feed/hooks/use-enriched-music-feed-item'
@@ -12,13 +13,13 @@ import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 
 function musicHeaderContext(trackTitle?: string, artistName?: string) {
-  const trackLine = [trackTitle, artistName].filter(Boolean).join(' · ')
+  const trackLine = formatAttachedAudioLabel(artistName, trackTitle)
   if (!trackLine) return null
 
   return (
     <>
       <Music2 aria-hidden />
-      <span className="truncate">{trackLine}</span>
+      <span>{trackLine}</span>
     </>
   )
 }
@@ -36,6 +37,7 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardPr
 
   const trackTitle = payloadString(item.payload, 'trackTitle')
   const artistName = payloadString(item.payload, 'artistName')
+  const audioHeaderLine = formatAttachedAudioLabel(artistName, trackTitle)
   const youtubeUrl = payloadString(item.payload, 'youtubeUrl')
   const spotifyUrl = payloadString(item.payload, 'spotifyUrl')
   const audioUrl = payloadString(item.payload, 'audioUrl')
@@ -51,6 +53,7 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact }: FeedCardPr
       defaultCommentsOpen={defaultCommentsOpen}
       compact={compact}
       headerContext={musicHeaderContext(trackTitle, artistName)}
+      headerAudioLabel={audioHeaderLine || undefined}
     >
       <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
         <button

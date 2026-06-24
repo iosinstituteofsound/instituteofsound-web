@@ -14,6 +14,8 @@
   --rbl-border: color-mix(in oklch, var(--border) 85%, var(--ios-dashboard-primary, var(--primary)) 15%);
   --rbl-border-soft: var(--border);
   --rbl-muted: var(--muted-foreground);
+  --rbl-hint: color-mix(in oklch, var(--foreground) 74%, var(--muted-foreground));
+  --rbl-hint-strong: color-mix(in oklch, var(--foreground) 88%, var(--muted-foreground));
   --rbl-ink: var(--foreground);
   --rbl-ink-on-accent: var(--primary-foreground);
   --rbl-warn: var(--destructive);
@@ -40,7 +42,7 @@
 }
 
 .rbl-text-muted {
-  color: var(--rbl-muted);
+  color: color-mix(in oklch, var(--foreground) 62%, var(--muted-foreground));
 }
 
 .rbl-text-warn {
@@ -346,7 +348,7 @@
   font-size: 0.625rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--rbl-muted);
+  color: color-mix(in oklch, var(--foreground) 68%, var(--muted-foreground));
 }
 
 .rbl-portal {
@@ -716,10 +718,21 @@
 
 .rbl-field__hint {
   margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.08em;
-  color: var(--rbl-secondary);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--rbl-hint);
+}
+
+.rbl-callout {
+  margin: 0;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklch, var(--foreground) 14%, transparent);
+  background: color-mix(in oklch, var(--foreground) 5%, transparent);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--rbl-hint-strong);
 }
 
 .rbl-cover-drop {

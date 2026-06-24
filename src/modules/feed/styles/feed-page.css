@@ -84,8 +84,16 @@
   }
 
   .feed-page .feed-social-card__meta-line,
-  .feed-page .feed-social-card__context-line {
+  .feed-page .feed-social-card__audio-tag {
     font-size: 0.75rem;
+  }
+
+  .feed-page .feed-social-card__audio-tag {
+    max-width: min(9.5rem, 36vw);
+  }
+
+  .feed-page .feed-social-card__title-row {
+    gap: 0.375rem;
   }
 
   .feed-page .feed-social-card__caption-text {

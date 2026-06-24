@@ -3,8 +3,6 @@ import { payloadNumber, payloadString } from '@/modules/feed/components/cards/fe
 import type { PlayerTrack } from '@/modules/player/types/player.types'
 
 export function feedItemToPlayerTrack(item: FeedItemDto): PlayerTrack | null {
-  if (item.type !== 'music') return null
-
   const audioUrl = payloadString(item.payload, 'audioUrl')
   if (!audioUrl) return null
 

@@ -11,8 +11,10 @@ import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { getFeedItemPhotoUrl } from '@/modules/feed/lib/feed-post-meta'
+import { feedItemHasAttachedAudio, FeedPostSoundToggle } from '@/modules/feed/components/feed-post-sound-toggle'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
+import { formatAttachedAudioLabel } from '@/modules/feed/lib/attached-audio-label'
 import './feed-card.css'
 
 export function FeedCardShell({
@@ -22,6 +24,7 @@ export function FeedCardShell({
   className,
   defaultCommentsOpen = false,
   headerContext,
+  headerAudioLabel,
   compact = false,
 }: {
   item: FeedItemDto
@@ -30,6 +33,7 @@ export function FeedCardShell({
   className?: string
   defaultCommentsOpen?: boolean
   headerContext?: React.ReactNode
+  headerAudioLabel?: string
   compact?: boolean
 }) {
   const [isHidden, setIsHidden] = useState(false)
@@ -37,6 +41,7 @@ export function FeedCardShell({
   const captionText = buildPostCaptionText(item.title, item.body)
   const photoUrl = getFeedItemPhotoUrl(item)
   const mediaIsInteractive = Boolean(photoUrl)
+  const showSoundToggle = feedItemHasAttachedAudio(item)
 
   const openPhotoViewer = () => {
     if (!photoUrl) return
@@ -68,22 +73,33 @@ export function FeedCardShell({
                 <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
               </FeedAuthorProfileLink>
 
-              <div className="feed-social-card__meta">
-                <p className="feed-social-card__name-line">
-                  <FeedAuthorProfileLink author={item.author} variant="name">
-                    <VerifiedUserName
-                      name={item.author.name}
-                      isVerified={item.author.isVerified}
-                      nameClassName="feed-social-card__name"
-                    />
-                  </FeedAuthorProfileLink>
-                </p>
-                <p className="feed-social-card__meta-line">
-                  <FeedPostTimestamp value={item.createdAt} />
-                  <span className="feed-social-card__meta-dot" aria-hidden> · </span>
-                  <Globe className="feed-social-card__globe" aria-label="Public" />
-                </p>
-                {headerContext ? <div className="feed-social-card__context-line">{headerContext}</div> : null}
+              <div className="feed-social-card__header-body">
+                <div className="feed-social-card__title-row">
+                  <div className="feed-social-card__identity">
+                    <p className="feed-social-card__name-line">
+                      <FeedAuthorProfileLink author={item.author} variant="name">
+                        <VerifiedUserName
+                          name={item.author.name}
+                          isVerified={item.author.isVerified}
+                          nameClassName="feed-social-card__name"
+                        />
+                      </FeedAuthorProfileLink>
+                    </p>
+                    <p className="feed-social-card__meta-line">
+                      <FeedPostTimestamp value={item.createdAt} />
+                      <span className="feed-social-card__meta-dot" aria-hidden>
+                        ·
+                      </span>
+                      <Globe className="feed-social-card__globe" aria-label="Public" />
+                    </p>
+                  </div>
+
+                  {headerContext ? (
+                    <div className="feed-social-card__audio-tag" title={headerAudioLabel}>
+                      {headerContext}
+                    </div>
+                  ) : null}
+                </div>
               </div>
 
               <div className="feed-social-card__header-actions">
@@ -119,7 +135,10 @@ export function FeedCardShell({
                     }
                   : {})}
               >
-                {media}
+                <div className="feed-social-card__media-stage">
+                  {media}
+                  {showSoundToggle ? <FeedPostSoundToggle item={item} /> : null}
+                </div>
               </div>
             ) : null}
 
@@ -167,7 +186,9 @@ export function payloadNumber(payload: Record<string, unknown>, key: string) {
 export function musicTrackContextLine(payload: Record<string, unknown>) {
   const trackTitle = payloadString(payload, 'trackTitle')
   const artistName = payloadString(payload, 'artistName')
-  return [trackTitle, artistName].filter(Boolean).join(' · ')
+  const audioUrl = payloadString(payload, 'audioUrl')
+  if (!audioUrl && !trackTitle) return ''
+  return formatAttachedAudioLabel(artistName, trackTitle)
 }
 
 export function FeedMediaFrame({ children, className }: { children: React.ReactNode; className?: string }) {

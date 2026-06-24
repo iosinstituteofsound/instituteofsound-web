@@ -46,6 +46,7 @@ export interface TrackDto {
   audioUrl?: string
   waveformPeaks?: number[]
   status: TrackStatus
+  ugcEnabled?: boolean
   playCount: number
   duplicateInfo?: TrackDuplicateInfo
   createdAt?: string

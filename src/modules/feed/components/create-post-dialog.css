@@ -116,11 +116,18 @@ body:has(.feed-create-post[data-state='open']) [data-radix-dialog-overlay] {
   line-height: 1.3;
 }
 
+.feed-create-post__author-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
 .feed-create-post__privacy {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  margin-top: 0.125rem;
   padding: 0.125rem 0.5rem;
   border-radius: 0.25rem;
   border: 1px solid color-mix(in oklch, var(--primary) 18%, var(--border));
@@ -130,6 +137,44 @@ body:has(.feed-create-post[data-state='open']) [data-radix-dialog-overlay] {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: color-mix(in oklch, var(--foreground) 90%, var(--primary));
+}
+
+.feed-create-post__privacy-btn {
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.feed-create-post__privacy-btn:hover:not(:disabled) {
+  border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+  background: color-mix(in oklch, var(--primary) 12%, transparent);
+}
+
+.feed-create-post__privacy-btn.is-active {
+  border-color: color-mix(in oklch, var(--primary) 40%, var(--border));
+  background: color-mix(in oklch, var(--primary) 14%, transparent);
+  color: var(--foreground);
+}
+
+.feed-create-post__privacy-btn--track {
+  max-width: min(100%, 15rem);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.feed-create-post__privacy-btn-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-create-post__privacy-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .feed-create-post__composer {
@@ -197,6 +242,102 @@ body:has(.feed-create-post[data-state='open']) [data-radix-dialog-overlay] {
   background: transparent;
   cursor: pointer;
   transition: background-color 0.15s ease;
+}
+
+.feed-create-post__sound {
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+  background: color-mix(in oklch, var(--muted) 18%, transparent);
+  padding: 0.75rem;
+}
+
+.feed-create-post__sound-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.feed-create-post__sound-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--muted-foreground) 85%, transparent);
+}
+
+.feed-create-post__sound-title {
+  margin: 0.25rem 0 0;
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.feed-create-post__sound-dot {
+  opacity: 0.65;
+}
+
+.feed-create-post__sound-muted {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: var(--muted-foreground);
+}
+
+.feed-create-post__sound-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.feed-create-post__sound-btn {
+  height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--primary) 25%, var(--border));
+  background: color-mix(in oklch, var(--primary) 8%, transparent);
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.feed-create-post__sound-btn:hover {
+  border-color: color-mix(in oklch, var(--primary) 40%, var(--border));
+  background: color-mix(in oklch, var(--primary) 12%, transparent);
+}
+
+.feed-create-post__sound-btn--ghost {
+  background: transparent;
+  border-color: color-mix(in oklch, var(--foreground) 10%, transparent);
+}
+
+.feed-create-post__sound-dialog {
+  display: flex;
+  max-height: min(80vh, 680px);
+  width: min(92vw, 480px);
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  padding: 1rem 1.125rem 1.125rem;
+}
+
+.feed-create-post__sound-dialog > [data-radix-dialog-close] {
+  top: 0.875rem;
+  right: 0.875rem;
+}
+
+.feed-create-post__sound-dialog .article-audio-search {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .feed-create-post__add-btn:hover:not(:disabled) {

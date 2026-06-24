@@ -9,6 +9,7 @@ import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
 import { Button } from '@/shared/components/ui/button'
+import { feedItemHasAttachedAudio, FeedPostSoundToggle } from '@/modules/feed/components/feed-post-sound-toggle'
 import './feed-photo-viewer.css'
 
 type FeedPhotoViewerProps = {
@@ -58,7 +59,9 @@ export function FeedPhotoViewer({ open, onOpenChange, item, imageUrl, alt }: Fee
             </p>
             <p className="feed-photo-viewer__meta-line">
               <FeedPostTimestamp value={item.createdAt} />
-              <span aria-hidden> · </span>
+              <span className="feed-photo-viewer__meta-dot" aria-hidden>
+                ·
+              </span>
               <Globe className="feed-photo-viewer__globe" aria-label="Public" />
             </p>
           </div>
@@ -78,6 +81,7 @@ export function FeedPhotoViewer({ open, onOpenChange, item, imageUrl, alt }: Fee
       <div className="feed-photo-viewer__body">
         <div className="feed-photo-viewer__stage">
           <img src={imageUrl} alt={alt ?? 'Post photo'} className="feed-photo-viewer__image" />
+          {feedItemHasAttachedAudio(item) ? <FeedPostSoundToggle item={item} /> : null}
         </div>
 
         <aside className="feed-photo-viewer__panel">
