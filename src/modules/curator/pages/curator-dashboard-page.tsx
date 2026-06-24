@@ -4,6 +4,7 @@ import { CuratorStudioHomePage } from '@/modules/curator/pages/curator-studio-ho
 import { MyPlaylistsPage } from '@/modules/music/pages/my-playlists-page'
 import { Page, PageDescription, PageHeader, PageSection, PageTitle } from '@/shared/components/layout/page-shell'
 import { Button } from '@/shared/components/ui/button'
+import { SubmissionsDeskPage } from '@/modules/submissions-desk/pages/submissions-desk-page'
 
 function CuratorPicksPage() {
   return (
@@ -31,6 +32,9 @@ export function CuratorDashboardPage() {
   const location = useLocation()
   const path = location.pathname
 
+  if (path.includes('/curator/submissions')) {
+    return <SubmissionsDeskPage title="Submissions" description="Review submissions routed to curator playlists." />
+  }
   if (path.includes('/curator/playlists')) return <MyPlaylistsPage />
   if (path.includes('/curator/picks')) return <CuratorPicksPage />
 

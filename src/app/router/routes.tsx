@@ -21,6 +21,11 @@ const AuthCallbackPage = lazy(() =>
 const DashboardPage = lazy(() =>
   import('@/modules/dashboard/pages/dashboard-page').then((m) => ({ default: m.DashboardPage })),
 )
+const SubmissionsDeskPage = lazy(() =>
+  import('@/modules/submissions-desk/pages/submissions-desk-page').then((m) => ({
+    default: m.SubmissionsDeskPage,
+  })),
+)
 const UsersListPage = lazy(() =>
   import('@/modules/users/pages/users-list-page').then((m) => ({ default: m.UsersListPage })),
 )
@@ -366,6 +371,16 @@ export const router = createBrowserRouter([
           <ResourceGuard name="DashboardPage">
             <Lazy>
               <DashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'submissions',
+        element: (
+          <ResourceGuard name="SubmissionsDeskPage">
+            <Lazy>
+              <SubmissionsDeskPage title="All Submissions" description="Review submissions across the network." />
             </Lazy>
           </ResourceGuard>
         ),
@@ -799,6 +814,16 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'label/submissions',
+        element: (
+          <ResourceGuard name="LabelDashboardPage">
+            <Lazy>
+              <LabelDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
         path: 'curator',
         element: (
           <ResourceGuard name="CuratorDashboardPage">
@@ -820,6 +845,16 @@ export const router = createBrowserRouter([
       },
       {
         path: 'curator/picks',
+        element: (
+          <ResourceGuard name="CuratorDashboardPage">
+            <Lazy>
+              <CuratorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'curator/submissions',
         element: (
           <ResourceGuard name="CuratorDashboardPage">
             <Lazy>

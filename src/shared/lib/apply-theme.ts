@@ -1,6 +1,9 @@
 import {
   CSS_COLOR_VARS,
+  CSS_STATUS_VARS,
   SEMANTIC_COLOR_KEYS,
+  SUBMISSION_STATUS_KEYS,
+  statusKeyToCssVar,
   type ThemeMode,
   type ThemeTokens,
   normalizeThemeTokens,
@@ -16,9 +19,16 @@ export function applyThemeTokens(
   const tokens = normalizeThemeTokens(rawTokens)
   const root = document.documentElement
   const colors = tokens.colors[mode]
+  const statusColors = tokens.statusColors?.[mode]
 
   for (const key of SEMANTIC_COLOR_KEYS) {
     root.style.setProperty(`--${key}`, colors[key])
+  }
+
+  if (statusColors) {
+    for (const key of SUBMISSION_STATUS_KEYS) {
+      root.style.setProperty(statusKeyToCssVar(key), statusColors[key])
+    }
   }
 
   root.dataset.badgeTheme = 'active'
@@ -35,6 +45,9 @@ export function resetThemeOverrides() {
 
   const root = document.documentElement
   for (const cssVar of CSS_COLOR_VARS) {
+    root.style.removeProperty(cssVar)
+  }
+  for (const cssVar of CSS_STATUS_VARS) {
     root.style.removeProperty(cssVar)
   }
   delete root.dataset.badgeTheme

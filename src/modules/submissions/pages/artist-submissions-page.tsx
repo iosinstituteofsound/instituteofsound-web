@@ -54,12 +54,20 @@ export function ArtistSubmissionsPage() {
                 <p className="sub-list-item__meta">
                   {sub.projectName} · {sub.genre}
                 </p>
+                {sub.targets && sub.targets.length > 0 ? (
+                  <p className="sub-list-item__meta">
+                    Submitted to {sub.targets.map((t) => t.destinationTitle).join(', ')}
+                  </p>
+                ) : null}
                 <p className="sub-list-item__meta">
                   Submitted {new Date(sub.createdAt).toLocaleDateString()}
                 </p>
-                {sub.status === 'rejected' && sub.editorNotes ? (
-                  <p className="sub-list-item__notes">{sub.editorNotes}</p>
-                ) : null}
+                {(() => {
+                  const note =
+                    sub.targets?.find((t) => t.status === 'rejected' && t.reviewerNotes)?.reviewerNotes ??
+                    sub.editorNotes
+                  return sub.status === 'rejected' && note ? <p className="sub-list-item__notes">{note}</p> : null
+                })()}
               </div>
               <SubmissionStatusBadge status={sub.status} />
             </article>

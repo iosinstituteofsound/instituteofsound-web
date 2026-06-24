@@ -13,17 +13,19 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { Loader } from '@/shared/components/feedback/loader'
+import { SubmissionsDeskPage } from '@/modules/submissions-desk/pages/submissions-desk-page'
 
 export function LabelDashboardPage() {
   const location = useLocation()
   const isRoster = location.pathname.includes('/roster')
   const isReleases = location.pathname.includes('/releases')
+  const isSubmissions = location.pathname.includes('/submissions')
 
   const queryClient = useQueryClient()
   const { data: profile, isLoading } = useQuery({
     queryKey: ['label-profile'],
     queryFn: getLabelProfile,
-    enabled: !isRoster && !isReleases,
+    enabled: !isRoster && !isReleases && !isSubmissions,
   })
 
   const { data: roster, isLoading: rosterLoading } = useQuery({
@@ -37,6 +39,10 @@ export function LabelDashboardPage() {
     queryFn: getLabelReleases,
     enabled: isReleases,
   })
+
+  if (isSubmissions) {
+    return <SubmissionsDeskPage title="Submissions" description="Review submissions routed to label partners." />
+  }
 
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')

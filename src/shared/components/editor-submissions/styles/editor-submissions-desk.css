@@ -307,27 +307,27 @@
 }
 
 .sub-desk__status--pending {
-  color: color-mix(in oklch, #fbbf24 88%, white);
-  border-color: color-mix(in oklch, #fbbf24 35%, var(--border));
-  background: color-mix(in oklch, #fbbf24 10%, transparent);
+  color: color-mix(in oklch, var(--status-new) 88%, white);
+  border-color: color-mix(in oklch, var(--status-new) 35%, var(--border));
+  background: color-mix(in oklch, var(--status-new) 10%, transparent);
 }
 
 .sub-desk__status--in_review {
-  color: color-mix(in oklch, #38bdf8 88%, white);
-  border-color: color-mix(in oklch, #38bdf8 35%, var(--border));
-  background: color-mix(in oklch, #38bdf8 10%, transparent);
+  color: color-mix(in oklch, var(--status-in-review) 88%, white);
+  border-color: color-mix(in oklch, var(--status-in-review) 35%, var(--border));
+  background: color-mix(in oklch, var(--status-in-review) 10%, transparent);
 }
 
 .sub-desk__status--approved {
-  color: color-mix(in oklch, #34d399 88%, white);
-  border-color: color-mix(in oklch, #34d399 35%, var(--border));
-  background: color-mix(in oklch, #34d399 10%, transparent);
+  color: color-mix(in oklch, var(--status-approved) 88%, white);
+  border-color: color-mix(in oklch, var(--status-approved) 35%, var(--border));
+  background: color-mix(in oklch, var(--status-approved) 10%, transparent);
 }
 
 .sub-desk__status--rejected {
-  color: color-mix(in oklch, var(--sub-muted) 92%, white);
-  border-color: color-mix(in oklch, var(--foreground) 18%, var(--border));
-  background: color-mix(in oklch, var(--foreground) 6%, transparent);
+  color: color-mix(in oklch, var(--status-rejected) 88%, white);
+  border-color: color-mix(in oklch, var(--status-rejected) 35%, var(--border));
+  background: color-mix(in oklch, var(--status-rejected) 10%, transparent);
 }
 
 .sub-desk__review {

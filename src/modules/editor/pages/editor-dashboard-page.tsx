@@ -8,9 +8,9 @@ import {
   publishEditorArticle,
 } from '@/modules/explore/api/explore.api'
 import { EditorDeskGrid } from '@/modules/editor/components/editor-desk-grid'
-import { EditorSubmissionsEditor } from '@/shared/components/editor-submissions'
 import { EditorEventsEditor } from '@/shared/components/editor-events'
 import { WirePicksEditor } from '@/shared/components/wire-picks'
+import { SubmissionsDeskPage } from '@/modules/submissions-desk/pages/submissions-desk-page'
 import { Page, PageHeader, PageTitle, PageDescription, PageSection } from '@/shared/components/layout/page-shell'
 import { Loader } from '@/shared/components/feedback/loader'
 
@@ -140,11 +140,10 @@ export function EditorDashboardPage() {
 
       {tab === 'submissions' ? (
         <PageSection>
-          <EditorSubmissionsEditor enabled={tab === 'submissions'}>
-            <PageDescription>
-              Review artist submissions — listen, annotate, and move tracks through the editorial pipeline.
-            </PageDescription>
-          </EditorSubmissionsEditor>
+          <SubmissionsDeskPage
+            title="Submissions"
+            description="Review artist submissions routed to your editorial desk."
+          />
         </PageSection>
       ) : null}
 

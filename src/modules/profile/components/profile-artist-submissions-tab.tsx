@@ -43,6 +43,11 @@ export function ProfileArtistSubmissionsTab({ isOwnProfile }: ProfileArtistSubmi
                 <p className="text-sm text-muted-foreground">
                   {sub.projectName} · {sub.genre}
                 </p>
+                {sub.targets && sub.targets.length > 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Submitted to {sub.targets.map((t) => t.destinationTitle).join(', ')}
+                  </p>
+                ) : null}
               </div>
               <Badge variant="outline">{sub.status}</Badge>
             </div>

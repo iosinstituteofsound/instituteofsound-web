@@ -390,12 +390,46 @@ export interface TrackSubmissionDto {
   streamUrl: string
   coverUrl?: string
   status: 'pending' | 'in_review' | 'approved' | 'rejected'
+  targets?: Array<{
+    id: string
+    destinationId: string
+    destinationTitle: string
+    reviewerRoleSlug: string
+    status: 'new' | 'in_review' | 'shortlisted' | 'approved' | 'rejected' | 'archived'
+    reviewerNotes?: string
+    reviewedById?: string
+    reviewedAt?: string
+  }>
   editorNotes?: string
   reviewedById?: string
   reviewedByName?: string
   reviewedAt?: string
   createdAt: string
   updatedAt?: string
+}
+
+export interface SubmissionInboxRowDto {
+  id: string
+  submissionId: string
+  targetId: string
+  trackTitle: string
+  artistName: string
+  coverUrl?: string
+  genre: string
+  submittedTo: { id: string; title: string; reviewerRoleSlug: string }
+  submittedAt: string
+  status: 'new' | 'in_review' | 'shortlisted' | 'approved' | 'rejected' | 'archived'
+  reviewerNotes?: string
+  reviewedById?: string
+  reviewedByName?: string
+  reviewedAt?: string
+}
+
+export interface SubmissionInboxPageDto {
+  items: SubmissionInboxRowDto[]
+  total: number
+  page: number
+  limit: number
 }
 
 export interface WirePickItem {

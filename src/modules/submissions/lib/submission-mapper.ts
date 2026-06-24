@@ -9,13 +9,10 @@ export function buildSubmissionDescription(
 ): string {
   const parts: string[] = []
   if (baseDescription.trim()) parts.push(baseDescription.trim())
-  if (destinations.length > 0) {
-    parts.push(`Destinations: ${destinations.map((d) => d.title).join(', ')}`)
-  }
   if (boosts.length > 0) {
     parts.push(`Boost (preview): ${boosts.map((b) => b.title).join(', ')}`)
   }
-  return parts.join('\n\n') || 'Editorial submission'
+  return parts.join('\n\n')
 }
 
 export function mapReleaseToSubmissionPayload(
@@ -30,10 +27,12 @@ export function mapReleaseToSubmissionPayload(
   }
 
   return {
+    releaseId: release.id,
     projectName: release.title,
     genre: release.genre?.trim() || 'Unknown',
     trackTitle: track?.title?.trim() || release.title,
-    description: buildSubmissionDescription(destinations, boosts),
+    artistNote: buildSubmissionDescription(destinations, boosts),
+    destinationIds: destinations.map((d) => d.id),
     streamUrl,
     coverUrl: release.coverUrl,
   }

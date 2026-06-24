@@ -57,4 +57,12 @@
   --ios-dashboard-chart-line: var(--primary);
   --ios-dashboard-chart-glow: color-mix(in oklch, var(--primary) 35%, transparent);
   --ios-dashboard-chart-fill: color-mix(in oklch, var(--primary) 12%, transparent);
+
+  /* Submission status colors — overridden by badge theme tokens when active */
+  --status-new: var(--ios-dashboard-info);
+  --status-in-review: var(--primary);
+  --status-shortlisted: var(--ios-dashboard-warning);
+  --status-approved: var(--ios-dashboard-success);
+  --status-rejected: var(--destructive);
+  --status-archived: var(--muted-foreground);
 }

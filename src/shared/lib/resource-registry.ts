@@ -3,6 +3,7 @@ export const REGISTERED_PAGES = [
   'LoginPage',
   'AuthCallbackPage',
   'DashboardPage',
+  'SubmissionsDeskPage',
   'UsersListPage',
   'UserDetailPage',
   'RolesListPage',

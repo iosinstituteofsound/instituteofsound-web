@@ -9,6 +9,7 @@ export const SUBMISSION_DESTINATIONS: SubmissionDestination[] = [
     reachValue: 50000,
     acceptance: 'Medium',
     icon: 'editorial',
+    reviewerRoleSlug: 'editor',
     suggested: true,
   },
   {
@@ -19,6 +20,7 @@ export const SUBMISSION_DESTINATIONS: SubmissionDestination[] = [
     reachValue: 120000,
     acceptance: 'Low',
     icon: 'playlist',
+    reviewerRoleSlug: 'curator',
     suggested: true,
   },
   {
@@ -29,6 +31,7 @@ export const SUBMISSION_DESTINATIONS: SubmissionDestination[] = [
     reachValue: 35000,
     acceptance: 'Varies',
     icon: 'curators',
+    reviewerRoleSlug: 'curator',
     suggested: true,
   },
   {
@@ -39,6 +42,7 @@ export const SUBMISSION_DESTINATIONS: SubmissionDestination[] = [
     reachValue: 18000,
     acceptance: 'Medium',
     icon: 'wire',
+    reviewerRoleSlug: 'editor',
   },
   {
     id: 'live-events',
@@ -48,6 +52,17 @@ export const SUBMISSION_DESTINATIONS: SubmissionDestination[] = [
     reachValue: 12000,
     acceptance: 'Low',
     icon: 'events',
+    reviewerRoleSlug: 'editor',
+  },
+  {
+    id: 'label-partners',
+    title: 'Label Partners',
+    description: 'Submit to label A&R partners for signing and distribution consideration.',
+    reach: '—',
+    reachValue: 0,
+    acceptance: 'Varies',
+    icon: 'editorial',
+    reviewerRoleSlug: 'label',
   },
 ]
 

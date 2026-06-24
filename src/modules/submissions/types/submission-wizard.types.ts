@@ -12,6 +12,7 @@ export interface SubmissionDestination {
   reachValue: number
   acceptance: 'Low' | 'Medium' | 'High' | 'Varies'
   icon: 'editorial' | 'playlist' | 'curators' | 'wire' | 'events'
+  reviewerRoleSlug?: 'editor' | 'curator' | 'label'
   suggested?: boolean
 }
 

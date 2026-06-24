@@ -36,8 +36,21 @@ export type SemanticColorKey = (typeof SEMANTIC_COLOR_KEYS)[number]
 export type SemanticColors = Record<SemanticColorKey, string>
 export type ThemeMode = 'light' | 'dark'
 
+export const SUBMISSION_STATUS_KEYS = [
+  'new',
+  'in_review',
+  'shortlisted',
+  'approved',
+  'rejected',
+  'archived',
+] as const
+
+export type SubmissionStatusKey = (typeof SUBMISSION_STATUS_KEYS)[number]
+export type SubmissionStatusColors = Record<SubmissionStatusKey, string>
+
 export interface ThemeTokens {
   colors: Record<ThemeMode, SemanticColors>
+  statusColors?: Record<ThemeMode, SubmissionStatusColors>
   /** Visual effect variant — e.g. `liquid-webgl` for animated shader backgrounds */
   badgeVariant?: string
   /** PavelDoGreat fluid simulation settings (super-admin configurable) */
@@ -85,6 +98,18 @@ export const COLOR_GROUPS: Array<{ label: string; description: string; keys: Sem
     label: 'Borders & focus',
     description: 'Borders, inputs, and focus rings',
     keys: ['border', 'input', 'ring'],
+  },
+]
+
+export const STATUS_COLOR_GROUPS: Array<{
+  label: string
+  description: string
+  keys: SubmissionStatusKey[]
+}> = [
+  {
+    label: 'Submission statuses',
+    description: 'Colors for submission inbox status labels and badges',
+    keys: [...SUBMISSION_STATUS_KEYS],
   },
 ]
 
@@ -138,6 +163,25 @@ export const DEFAULT_LIGHT_COLORS: SemanticColors = METAL_HAMMER_LIGHT_COLORS
 
 export const DEFAULT_DARK_COLORS: SemanticColors = METAL_HAMMER_DARK_COLORS
 
+/** Default submission status colors — aligned with ios-dashboard semantic aliases. */
+export const DEFAULT_LIGHT_STATUS_COLORS: SubmissionStatusColors = {
+  new: 'oklch(0.48 0.12 250)',
+  in_review: DEFAULT_LIGHT_COLORS.primary,
+  shortlisted: 'oklch(0.62 0.18 55)',
+  approved: 'oklch(0.58 0.16 150)',
+  rejected: DEFAULT_LIGHT_COLORS.destructive,
+  archived: DEFAULT_LIGHT_COLORS['muted-foreground'],
+}
+
+export const DEFAULT_DARK_STATUS_COLORS: SubmissionStatusColors = {
+  new: 'oklch(0.72 0.12 250)',
+  in_review: DEFAULT_DARK_COLORS.primary,
+  shortlisted: 'oklch(0.78 0.16 55)',
+  approved: 'oklch(0.72 0.16 150)',
+  rejected: DEFAULT_DARK_COLORS.destructive,
+  archived: DEFAULT_DARK_COLORS['muted-foreground'],
+}
+
 export const METAL_HAMMER_THEME_TOKENS: ThemeTokens = {
   colors: {
     light: METAL_HAMMER_LIGHT_COLORS,
@@ -150,18 +194,31 @@ export const DEFAULT_THEME_TOKENS: ThemeTokens = {
     light: DEFAULT_LIGHT_COLORS,
     dark: DEFAULT_DARK_COLORS,
   },
+  statusColors: {
+    light: DEFAULT_LIGHT_STATUS_COLORS,
+    dark: DEFAULT_DARK_STATUS_COLORS,
+  },
 }
 
 export const CSS_COLOR_VARS = SEMANTIC_COLOR_KEYS.map((key) => `--${key}` as const)
 
+export const CSS_STATUS_VARS = SUBMISSION_STATUS_KEYS.map(
+  (key) => `--status-${key.replace(/_/g, '-')}` as const,
+)
+
 export function cloneThemeTokens(tokens: ThemeTokens): ThemeTokens {
+  const normalized = normalizeThemeTokens(tokens)
   return {
     colors: {
-      light: { ...tokens.colors.light },
-      dark: { ...tokens.colors.dark },
+      light: { ...normalized.colors.light },
+      dark: { ...normalized.colors.dark },
     },
-    ...(tokens.badgeVariant ? { badgeVariant: tokens.badgeVariant } : {}),
-    ...(tokens.fluidConfig ? { fluidConfig: cloneFluidConfig(tokens.fluidConfig) } : {}),
+    statusColors: {
+      light: { ...normalized.statusColors!.light },
+      dark: { ...normalized.statusColors!.dark },
+    },
+    ...(normalized.badgeVariant ? { badgeVariant: normalized.badgeVariant } : {}),
+    ...(normalized.fluidConfig ? { fluidConfig: cloneFluidConfig(normalized.fluidConfig) } : {}),
   }
 }
 
@@ -173,6 +230,20 @@ export function mergeSemanticColors(
   if (!overrides) return merged
 
   for (const key of SEMANTIC_COLOR_KEYS) {
+    const value = overrides[key]
+    if (typeof value === 'string' && value.trim()) merged[key] = value.trim()
+  }
+  return merged
+}
+
+export function mergeStatusColors(
+  base: SubmissionStatusColors,
+  overrides?: Partial<SubmissionStatusColors> | Record<string, string>,
+): SubmissionStatusColors {
+  const merged = { ...base }
+  if (!overrides) return merged
+
+  for (const key of SUBMISSION_STATUS_KEYS) {
     const value = overrides[key]
     if (typeof value === 'string' && value.trim()) merged[key] = value.trim()
   }
@@ -211,10 +282,35 @@ export function normalizeThemeTokens(raw?: unknown): ThemeTokens {
       ? normalizeFluidConfig(tokens.fluidConfig, TRANSLUCENT_FLUID_CONFIG)
       : undefined
 
+  const lightColors = mergeSemanticColors(DEFAULT_LIGHT_COLORS, lightOverrides)
+  const darkColors = mergeSemanticColors(DEFAULT_DARK_COLORS, darkOverrides)
+
+  const statusRaw = (tokens.statusColors ?? {}) as Record<string, unknown>
+  let lightStatusOverrides: Record<string, string> = {}
+  let darkStatusOverrides: Record<string, string> = {}
+
+  if (statusRaw.light && typeof statusRaw.light === 'object') {
+    lightStatusOverrides = statusRaw.light as Record<string, string>
+  }
+  if (statusRaw.dark && typeof statusRaw.dark === 'object') {
+    darkStatusOverrides = statusRaw.dark as Record<string, string>
+  }
+
+  const hasStatusModeSplit = Boolean(statusRaw.light || statusRaw.dark)
+  if (!hasStatusModeSplit && Object.keys(statusRaw).length > 0) {
+    const flat = statusRaw as Record<string, string>
+    lightStatusOverrides = flat
+    darkStatusOverrides = flat
+  }
+
   return {
     colors: {
-      light: mergeSemanticColors(DEFAULT_LIGHT_COLORS, lightOverrides),
-      dark: mergeSemanticColors(DEFAULT_DARK_COLORS, darkOverrides),
+      light: lightColors,
+      dark: darkColors,
+    },
+    statusColors: {
+      light: mergeStatusColors(DEFAULT_LIGHT_STATUS_COLORS, lightStatusOverrides),
+      dark: mergeStatusColors(DEFAULT_DARK_STATUS_COLORS, darkStatusOverrides),
     },
     ...(badgeVariant ? { badgeVariant } : {}),
     ...(fluidConfig ? { fluidConfig } : {}),
@@ -293,8 +389,28 @@ export function formatColorLabel(key: SemanticColorKey): string {
     .join(' ')
 }
 
+export function formatStatusColorLabel(key: SubmissionStatusKey): string {
+  const labels: Record<SubmissionStatusKey, string> = {
+    new: 'New',
+    in_review: 'Under Review',
+    shortlisted: 'Shortlisted',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    archived: 'Archived',
+  }
+  return labels[key]
+}
+
+export function statusKeyToCssVar(key: SubmissionStatusKey): string {
+  return `--status-${key.replace(/_/g, '-')}`
+}
+
 export function getThemeTokenFieldId(mode: ThemeMode, key: SemanticColorKey): string {
   return `theme-token-field-${mode}-${key}`
+}
+
+export function getThemeStatusFieldId(mode: ThemeMode, key: SubmissionStatusKey): string {
+  return `theme-status-field-${mode}-${key}`
 }
 
 export function themeTokensToCssProperties(
@@ -307,6 +423,13 @@ export function themeTokensToCssProperties(
 
   for (const key of SEMANTIC_COLOR_KEYS) {
     style[`--${key}`] = colors[key]
+  }
+
+  const statusColors = resolved.statusColors?.[mode]
+  if (statusColors) {
+    for (const key of SUBMISSION_STATUS_KEYS) {
+      style[statusKeyToCssVar(key)] = statusColors[key]
+    }
   }
 
   return style

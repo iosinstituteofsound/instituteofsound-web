@@ -2,10 +2,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui
 import { ThemeColorField } from '@/modules/badge-themes/components/theme-color-field'
 import {
   COLOR_GROUPS,
+  STATUS_COLOR_GROUPS,
   cloneThemeTokens,
   formatColorLabel,
+  formatStatusColorLabel,
+  getThemeStatusFieldId,
   getThemeTokenFieldId,
   type SemanticColorKey,
+  type SubmissionStatusKey,
   type ThemeMode,
   type ThemeTokens,
 } from '@/shared/design-tokens/theme-tokens'
@@ -25,9 +29,23 @@ export function ThemeTokensEditor({
   onModeChange,
   focusedToken = null,
 }: ThemeTokensEditorProps) {
+  const normalized = cloneThemeTokens(value)
+
   const updateColor = (mode: ThemeMode, key: SemanticColorKey, color: string) => {
     const next = cloneThemeTokens(value)
     next.colors[mode][key] = color
+    onChange(next)
+  }
+
+  const updateStatusColor = (mode: ThemeMode, key: SubmissionStatusKey, color: string) => {
+    const next = cloneThemeTokens(value)
+    if (!next.statusColors) {
+      next.statusColors = {
+        light: { ...normalized.statusColors!.light },
+        dark: { ...normalized.statusColors!.dark },
+      }
+    }
+    next.statusColors[mode][key] = color
     onChange(next)
   }
 
@@ -55,6 +73,26 @@ export function ThemeTokensEditor({
                     value={value.colors[tabMode][key]}
                     onChange={(color) => updateColor(tabMode, key, color)}
                     highlighted={focusedToken === key && mode === tabMode}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {STATUS_COLOR_GROUPS.map((group) => (
+            <div key={`${tabMode}-status-${group.label}`} className="space-y-3 rounded-lg border p-3">
+              <div>
+                <p className="text-sm font-medium">{group.label}</p>
+                <p className="text-xs text-muted-foreground">{group.description}</p>
+              </div>
+              <div className="space-y-3">
+                {group.keys.map((key) => (
+                  <ThemeColorField
+                    key={`${tabMode}-status-${key}`}
+                    id={getThemeStatusFieldId(tabMode, key)}
+                    label={formatStatusColorLabel(key)}
+                    value={normalized.statusColors![tabMode][key]}
+                    onChange={(color) => updateStatusColor(tabMode, key, color)}
                   />
                 ))}
               </div>
