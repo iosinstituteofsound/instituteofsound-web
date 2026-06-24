@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { AlignLeft, AudioLines } from 'lucide-react'
+import { AlignLeft, AudioLines, Sparkles } from 'lucide-react'
 import { LyricsSyncModal } from '@/modules/music/components/lyrics-sync-modal'
+import { useLyricsGeneration } from '@/modules/music/hooks/use-lyrics-generation'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
@@ -52,8 +53,19 @@ export function TrackLyricsPanel({
   const activeTrack = tracks.find((track) => track.id === activeTrackId) ?? tracks[0]
   const showSelector = tracks.length > 1
 
+  const { isGenerating, generate, error: generationError, progress, statusLabel } = useLyricsGeneration({
+    trackId: activeTrack?.apiTrackId,
+    onLyricsChange,
+    onSyncedLyricsSave: activeTrack
+      ? async (payload) => {
+          await onSyncedLyricsSave?.(activeTrack.id, payload)
+        }
+      : undefined,
+  })
+
   const syncedCount = activeTrack?.syncedLyrics?.length ?? 0
   const canSync = Boolean(lyrics.trim() && activeTrack?.audioUrl)
+  const canGenerate = Boolean(activeTrack?.audioUrl && activeTrack?.apiTrackId && !isGenerating)
 
   const syncStatusLabel = useMemo(() => {
     if (!syncedCount) return null
@@ -118,20 +130,50 @@ export function TrackLyricsPanel({
           : 'Optional — fans can read lyrics on track pages and in DEX'}
       </p>
 
-      <Button
-        type="button"
-        variant="outline"
-        className="rbl-lyrics__sync-btn"
-        disabled={!canSync}
-        onClick={() => setSyncOpen(true)}
-      >
-        <AudioLines className="mr-2 size-4" />
-        Sync lyrics
-      </Button>
+      <div className="rbl-lyrics__actions">
+        <Button
+          type="button"
+          variant="outline"
+          className="rbl-lyrics__sync-btn"
+          disabled={!canGenerate}
+          onClick={() => void generate()}
+        >
+          <Sparkles className="mr-2 size-4" />
+          {isGenerating ? `Generating… ${progress > 0 ? `${progress}%` : ''}`.trim() : 'Generate with AI'}
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="rbl-lyrics__sync-btn"
+          disabled={!canSync || isGenerating}
+          onClick={() => setSyncOpen(true)}
+        >
+          <AudioLines className="mr-2 size-4" />
+          Sync lyrics
+        </Button>
+      </div>
       {!activeTrack?.audioUrl ? (
-        <p className="rbl-lyrics__sync-status">Sync unlocks once track audio is ready.</p>
+        <p className="rbl-lyrics__sync-status">AI generation unlocks once track audio is ready.</p>
+      ) : !activeTrack?.apiTrackId ? (
+        <p className="rbl-lyrics__sync-status">Finish uploading the track before generating lyrics.</p>
+      ) : isGenerating ? (
+        <div className="rbl-lyrics__progress-wrap" aria-live="polite">
+          <div className="rbl-lyrics__progress-track">
+            <div
+              className="rbl-lyrics__progress-fill"
+              style={{ width: `${Math.max(8, Math.min(100, progress || 8))}%` }}
+            />
+          </div>
+          <p className="rbl-lyrics__sync-status">{statusLabel}</p>
+          <p className="rbl-lyrics__sync-status rbl-lyrics__sync-status--muted">
+            {progress > 0 ? `${progress}%` : 'Please wait…'}
+          </p>
+        </div>
+      ) : generationError ? (
+        <p className="rbl-lyrics__sync-status">{generationError}</p>
       ) : !lyrics.trim() ? (
-        <p className="rbl-lyrics__sync-status">Add lyrics above before syncing timestamps.</p>
+        <p className="rbl-lyrics__sync-status">Generate with AI or add lyrics manually before syncing timestamps.</p>
       ) : syncStatusLabel ? (
         <p className="rbl-lyrics__sync-status rbl-lyrics__sync-status--synced">{syncStatusLabel}</p>
       ) : null}

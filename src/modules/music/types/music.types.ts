@@ -28,6 +28,8 @@ import type { SyncedLyricLineDto, SyncedLyricsStatus } from '@/modules/music/typ
 
 export type { SyncedLyricLineDto, SyncedLyricsStatus }
 
+export type LyricsGenerationStatus = 'idle' | 'queued' | 'processing' | 'completed' | 'failed'
+
 export interface TrackDto {
   id: string
   artistProfileId: string
@@ -36,6 +38,9 @@ export interface TrackDto {
   lyrics?: string
   syncedLyrics?: SyncedLyricLineDto[]
   syncedLyricsStatus?: SyncedLyricsStatus
+  lyricsGenerationStatus?: LyricsGenerationStatus
+  lyricsGenerationError?: string
+  lyricsGeneratedAt?: string
   trackNumber: number
   durationSec?: number
   audioUrl?: string
