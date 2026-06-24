@@ -3,7 +3,7 @@ import type { SubmissionBoostOption, SubmissionDestination } from '@/modules/sub
 import type { EvaluationMetric } from '@/modules/submissions/types/submission-wizard.types'
 
 export function buildSubmissionDescription(
-  destinations: SubmissionDestination[],
+  _destinations: SubmissionDestination[],
   boosts: SubmissionBoostOption[],
   baseDescription = '',
 ): string {
