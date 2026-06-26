@@ -8,6 +8,7 @@ export type NotificationKind =
   | 'post_comment'
   | 'comment_reply'
   | 'mention'
+  | 'dm_message'
 
 export type NotificationDto = {
   id: string
@@ -28,6 +29,8 @@ export type NotificationDto = {
     trackTitle?: string
     feedItemId?: string
     commentId?: string
+    threadId?: string
+    messageId?: string
   }
 }
 
