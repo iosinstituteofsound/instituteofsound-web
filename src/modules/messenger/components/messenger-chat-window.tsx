@@ -120,7 +120,10 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
           </span>
         </Link>
 
-        <div className="messenger-chat-window__actions">
+        <div
+          className="messenger-chat-window__actions"
+          onMouseDown={(event) => event.stopPropagation()}
+        >
           <button type="button" className="messenger-chat-window__icon" aria-label="Voice call">
             <Phone className="h-3.5 w-3.5" />
           </button>
