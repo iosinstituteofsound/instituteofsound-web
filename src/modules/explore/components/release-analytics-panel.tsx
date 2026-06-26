@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Heart, MapPin, TrendingUp, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -17,6 +17,8 @@ import { ReleaseLocationMap } from '@/modules/explore/components/release-locatio
 import { ReleaseListenerCard } from '@/modules/explore/components/release-listener-card'
 import '@/modules/explore/styles/release-analytics.css'
 
+import { useAnalyticsRealtime } from '@/modules/music/hooks/use-analytics-realtime'
+
 type Props = {
   releaseId: string
   primaryTrackId?: string
@@ -24,29 +26,14 @@ type Props = {
 
 export function ReleaseAnalyticsPanel({ releaseId, primaryTrackId }: Props) {
   const queryClient = useQueryClient()
-  const refreshTimerRef = useRef<number | undefined>(undefined)
   const [range, setRange] = useState<'7d' | '30d'>('7d')
+
+  useAnalyticsRealtime({ releaseId })
 
   const { data: analytics, isLoading } = useQuery({
     queryKey: ['release-analytics', releaseId],
     queryFn: () => getReleaseAnalytics(releaseId),
   })
-
-  useEffect(() => {
-    const refresh = (event: Event) => {
-      const detail = (event as CustomEvent<{ releaseId: string }>).detail
-      if (detail?.releaseId !== releaseId) return
-      window.clearTimeout(refreshTimerRef.current)
-      refreshTimerRef.current = window.setTimeout(() => {
-        void queryClient.invalidateQueries({ queryKey: ['release-analytics', releaseId] })
-      }, 5000)
-    }
-    window.addEventListener('ios:listen-flushed', refresh)
-    return () => {
-      window.removeEventListener('ios:listen-flushed', refresh)
-      window.clearTimeout(refreshTimerRef.current)
-    }
-  }, [queryClient, releaseId])
 
   const { data: trends } = useQuery({
     queryKey: ['release-analytics-trends', releaseId, range],

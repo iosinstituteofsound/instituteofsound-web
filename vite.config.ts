@@ -89,6 +89,7 @@ export default defineConfig(({ mode }) => {
         '/api/v1': expressApiProxy,
         '/api/v2': expressApiProxy,
         '/uploads': expressApiProxy,
+        '/socket.io': { ...expressApiProxy, ws: true },
       },
     },
     preview: {
@@ -100,6 +101,7 @@ export default defineConfig(({ mode }) => {
         '/api/v1': expressApiProxy,
         '/api/v2': expressApiProxy,
         '/uploads': expressApiProxy,
+        '/socket.io': { ...expressApiProxy, ws: true },
       },
     },
     test: {

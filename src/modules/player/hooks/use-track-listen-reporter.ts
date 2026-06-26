@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { randomUUID } from '@/shared/lib/random-uuid'
-import { API_V1 } from '@/shared/config/env'
+import { API_V1, env } from '@/shared/config/env'
 import { apiClient } from '@/shared/services/api/api-client'
 import type { PlayerTrack } from '@/modules/player/types/player.types'
 import { getListenerGeoHint, type ListenerGeoHint } from '@/modules/player/lib/listener-geo'
@@ -48,7 +48,7 @@ async function postListen(trackId: string, payload: FlushPayload, releaseId?: st
       payload,
     )
     const accepted = data?.data?.accepted !== false
-    if (accepted && releaseId) {
+    if (accepted && releaseId && !env.wsEnabled) {
       window.dispatchEvent(new CustomEvent('ios:listen-flushed', { detail: { releaseId } }))
     }
     return accepted

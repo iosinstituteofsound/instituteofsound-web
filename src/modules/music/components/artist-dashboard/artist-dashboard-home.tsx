@@ -49,6 +49,7 @@ import {
   useArtistReleasePerformanceCard,
 } from '@/modules/music/components/artist-dashboard/artist-dashboard-releases-modal'
 import type { AnalyticsRangePreset } from '@/modules/music/lib/artist-dashboard-utils'
+import { useAnalyticsRealtime } from '@/modules/music/hooks/use-analytics-realtime'
 
 type MetricCardProps = {
   accent: DashboardAccent
@@ -172,6 +173,12 @@ export function ArtistDashboardHome() {
     queryKey: ['artist-profile'],
     queryFn: getArtistProfile,
   })
+
+  useAnalyticsRealtime({
+    artistMode: true,
+    artistProfileId: profile?.id,
+  })
+
   const { data: releasePerformance } = useArtistReleasePerformanceCard(
     releasePeriodPreset,
     releaseCustomFrom,
