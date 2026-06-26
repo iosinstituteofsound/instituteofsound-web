@@ -65,10 +65,14 @@ export function NotificationBell() {
     minHeight: 180,
   })
 
-  const { data, isLoading, markRead, markAllRead, isMarkingRead } = useNotifications()
+  const { data, isLoading, markRead, markAllRead, isMarkingRead, refetch } = useNotifications()
 
   const unreadCount = data?.unreadCount ?? 0
   const items = data?.items ?? []
+
+  useEffect(() => {
+    if (open) void refetch()
+  }, [open, refetch])
 
   useEffect(() => {
     if (!open) return

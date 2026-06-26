@@ -37,14 +37,34 @@ export function useNotifications(enabled = true) {
           }
         },
       )
+      // Reconcile with API so an in-flight fetch cannot overwrite the socket update.
+      void queryClient.invalidateQueries({ queryKey: notificationsQueryKey })
     },
     [queryClient],
   )
 
   useEffect(() => {
     if (!enabled || !tokenStorage.hasSession()) return undefined
-    return realtimeSocketClient.onNotification(handleIncoming)
-  }, [enabled, handleIncoming])
+
+    const refresh = () => {
+      void queryClient.invalidateQueries({ queryKey: notificationsQueryKey })
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') refresh()
+    }
+
+    document.addEventListener('visibilitychange', onVisibility)
+    const pollId = window.setInterval(refresh, 60_000)
+
+    const unsubscribe = realtimeSocketClient.onNotification(handleIncoming)
+
+    return () => {
+      unsubscribe()
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.clearInterval(pollId)
+    }
+  }, [enabled, handleIncoming, queryClient])
 
   const markReadMutation = useMutation({
     mutationFn: markNotificationRead,
