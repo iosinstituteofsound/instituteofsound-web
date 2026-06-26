@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Bell, Music2 } from 'lucide-react'
+import { AtSign, Bell, MessageCircle, Music2, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useNotifications } from '@/modules/notifications/hooks/use-notifications'
-import type { NotificationDto } from '@/modules/notifications/types/notification.types'
+import type { NotificationDto, NotificationKind } from '@/modules/notifications/types/notification.types'
 import { useHeaderPopoverPosition } from '@/shared/hooks/use-header-popover-position'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/notifications/styles/notification-bell.css'
@@ -20,13 +20,38 @@ function formatRelativeTime(iso: string): string {
 }
 
 function notificationHref(notification: NotificationDto): string | undefined {
+  if (notification.data.feedItemId) {
+    const base = `/feed/${notification.data.feedItemId}`
+    return notification.data.commentId ? `${base}#comment-${notification.data.commentId}` : base
+  }
+
+  if (notification.kind === 'follow' && notification.data.actorUserId) {
+    return `/profile/${notification.data.actorUserId}`
+  }
+
   if (notification.data.releaseId) {
     return `/releases/${notification.data.releaseId}`
   }
+
   if (notification.kind.startsWith('track_')) {
     return '/artist/analytics'
   }
+
   return undefined
+}
+
+function notificationIcon(kind: NotificationKind) {
+  switch (kind) {
+    case 'follow':
+      return UserPlus
+    case 'post_comment':
+    case 'comment_reply':
+      return MessageCircle
+    case 'mention':
+      return AtSign
+    default:
+      return Music2
+  }
 }
 
 export function NotificationBell() {
@@ -97,11 +122,23 @@ export function NotificationBell() {
       <ul className="ios-notification-bell__list">
         {items.map((item) => {
           const href = notificationHref(item)
+          const Icon = notificationIcon(item.kind)
+          const avatarUrl = item.data.actorAvatarUrl
           const content = (
             <>
-              <span className="ios-notification-bell__icon" aria-hidden>
-                <Music2 size={16} />
-              </span>
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  className="ios-notification-bell__avatar"
+                  width={32}
+                  height={32}
+                />
+              ) : (
+                <span className="ios-notification-bell__icon" aria-hidden>
+                  <Icon size={16} />
+                </span>
+              )}
               <span className="ios-notification-bell__copy">
                 <span className="ios-notification-bell__item-title">{item.title}</span>
                 <span className="ios-notification-bell__item-body">{item.body}</span>

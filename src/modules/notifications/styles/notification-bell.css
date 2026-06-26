@@ -116,6 +116,14 @@
   flex-shrink: 0;
 }
 
+.ios-notification-bell__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .ios-notification-bell__copy {
   display: flex;
   flex-direction: column;

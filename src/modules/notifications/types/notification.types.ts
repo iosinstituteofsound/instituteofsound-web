@@ -1,6 +1,13 @@
 /** Mirror instituteofsound-api notification types — keep in sync. */
 
-export type NotificationKind = 'track_listen' | 'track_like' | 'track_qualified'
+export type NotificationKind =
+  | 'track_listen'
+  | 'track_like'
+  | 'track_qualified'
+  | 'follow'
+  | 'post_comment'
+  | 'comment_reply'
+  | 'mention'
 
 export type NotificationDto = {
   id: string
@@ -16,7 +23,11 @@ export type NotificationDto = {
     artistProfileId?: string
     actorUserId?: string
     actorName?: string
+    actorUsername?: string
+    actorAvatarUrl?: string
     trackTitle?: string
+    feedItemId?: string
+    commentId?: string
   }
 }
 
