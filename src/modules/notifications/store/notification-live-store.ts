@@ -1,6 +1,14 @@
 import { create } from 'zustand'
 import type { NotificationDto } from '@/modules/notifications/types/notification.types'
 
+function isBellNotification(notification: NotificationDto): boolean {
+  return notification.kind !== 'dm_message'
+}
+
+function countUnread(items: NotificationDto[]): number {
+  return items.filter((item) => isBellNotification(item) && !item.readAt).length
+}
+
 type NotificationLiveState = {
   unreadCount: number
   items: NotificationDto[]
@@ -16,13 +24,16 @@ export const useNotificationLiveStore = create<NotificationLiveState>((set, get)
   unreadCount: 0,
   items: [],
   ready: false,
-  syncFromApi: (data) =>
+  syncFromApi: (data) => {
+    const items = data.items.filter(isBellNotification)
     set({
-      items: data.items,
-      unreadCount: data.unreadCount,
+      items,
+      unreadCount: countUnread(items),
       ready: true,
-    }),
+    })
+  },
   pushLive: (notification) => {
+    if (!isBellNotification(notification)) return
     const state = get()
     if (state.items.some((item) => item.id === notification.id)) return
     set({

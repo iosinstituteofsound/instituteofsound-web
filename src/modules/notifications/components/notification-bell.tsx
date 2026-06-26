@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { AtSign, Bell, MessageCircle, MessageSquare, Music2, UserPlus } from 'lucide-react'
+import { AtSign, Bell, MessageCircle, Music2, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useNotifications } from '@/modules/notifications/hooks/use-notifications'
 import { useNotificationLiveStore } from '@/modules/notifications/store/notification-live-store'
@@ -21,10 +21,6 @@ function formatRelativeTime(iso: string): string {
 }
 
 function notificationHref(notification: NotificationDto): string | undefined {
-  if (notification.kind === 'dm_message' && notification.data.threadId) {
-    return `/messenger?t=${notification.data.threadId}`
-  }
-
   if (notification.data.feedItemId) {
     const base = `/feed/${notification.data.feedItemId}`
     return notification.data.commentId ? `${base}#comment-${notification.data.commentId}` : base
@@ -49,8 +45,6 @@ function notificationIcon(kind: NotificationKind) {
   switch (kind) {
     case 'follow':
       return UserPlus
-    case 'dm_message':
-      return MessageSquare
     case 'post_comment':
     case 'comment_reply':
       return MessageCircle

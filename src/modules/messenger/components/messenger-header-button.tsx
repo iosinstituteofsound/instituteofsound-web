@@ -19,6 +19,7 @@ import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { MessengerIcon } from '@/modules/messenger/components/messenger-icon'
 import * as messengerApi from '@/modules/messenger/api/messenger.api'
 import { messengerThreadsQueryKey, useMessengerUnread } from '@/modules/messenger/hooks/use-messenger-threads'
+import { useMessengerLiveStore } from '@/modules/messenger/store/messenger-live-store'
 import { formatMessengerTime } from '@/modules/messenger/lib/messenger-utils'
 import type { DmThreadSummary, MessengerFilter } from '@/modules/messenger/types/messenger.types'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
@@ -165,7 +166,10 @@ export function MessengerHeaderButton() {
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearch = useDeferredValue(searchQuery)
 
-  const { data: unreadCount = 0 } = useMessengerUnread()
+  const unreadCount = useMessengerLiveStore((s) => s.unreadCount)
+  const liveReady = useMessengerLiveStore((s) => s.ready)
+  const { data: apiUnread = 0 } = useMessengerUnread()
+  const displayUnread = liveReady ? unreadCount : apiUnread
   const { data: meData } = useMe()
   const viewerId = meData?.user.id
   const viewerAvatar = meData?.user ? getUserAvatarThumbnailUrl(meData.user) : undefined
@@ -344,14 +348,14 @@ export function MessengerHeaderButton() {
           'dashboard-header-utility ios-messenger-header-btn ios-messenger-popover__trigger',
           (open || isMessengerRoute) && 'is-open',
         )}
-        aria-label={unreadCount > 0 ? `Messenger, ${unreadCount} unread` : 'Messenger'}
+        aria-label={displayUnread > 0 ? `Messenger, ${displayUnread} unread` : 'Messenger'}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
         <MessengerIcon className="h-[22px] w-[22px]" />
-        {unreadCount > 0 ? (
+        {displayUnread > 0 ? (
           <span className="ios-messenger-header-btn__badge">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {displayUnread > 9 ? '9+' : displayUnread}
           </span>
         ) : null}
       </button>

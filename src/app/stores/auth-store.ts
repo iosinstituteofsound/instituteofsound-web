@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { tokenStorage } from '@/shared/services/api/token-storage'
 import { resetNotificationsRealtime } from '@/modules/notifications/lib/init-notifications-realtime'
+import { resetMessengerRealtime } from '@/modules/messenger/lib/init-messenger-realtime'
 
 interface AuthState {
   userId: string | null
@@ -20,6 +21,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   clearSession: () => {
     tokenStorage.clear()
     resetNotificationsRealtime()
+    resetMessengerRealtime()
     set({ userId: null, email: null, isAuthenticated: false })
   },
   syncFromStorage: () =>

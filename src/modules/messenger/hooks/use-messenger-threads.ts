@@ -1,7 +1,9 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import * as messengerApi from '@/modules/messenger/api/messenger.api'
+import { useMessengerLiveStore } from '@/modules/messenger/store/messenger-live-store'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
+import { tokenStorage } from '@/shared/services/api/token-storage'
 import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
 
 export const messengerThreadsQueryKey = ['messenger', 'threads'] as const
@@ -45,11 +47,27 @@ export function useMessengerThreads() {
 }
 
 export function useMessengerUnread() {
-  return useQuery({
+  const setUnreadCount = useMessengerLiveStore((s) => s.setUnreadCount)
+  const liveUnread = useMessengerLiveStore((s) => s.unreadCount)
+  const liveReady = useMessengerLiveStore((s) => s.ready)
+
+  const query = useQuery({
     queryKey: messengerUnreadQueryKey,
     queryFn: messengerApi.getUnreadCount,
     staleTime: 20_000,
+    enabled: tokenStorage.hasSession(),
   })
+
+  useEffect(() => {
+    if (query.data !== undefined) {
+      setUnreadCount(query.data)
+    }
+  }, [query.data, setUnreadCount])
+
+  return {
+    ...query,
+    data: liveReady ? liveUnread : query.data,
+  }
 }
 
 export function upsertThreadInCache(
