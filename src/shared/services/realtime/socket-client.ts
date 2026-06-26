@@ -1,5 +1,6 @@
 import { io, type Socket } from 'socket.io-client'
 import { env, realtimeServerUrl } from '@/shared/config/env'
+import { ensureAccessToken } from '@/shared/services/api/ensure-access-token'
 import { tokenStorage } from '@/shared/services/api/token-storage'
 import {
   REALTIME_ANALYTICS_EVENT,
@@ -49,106 +50,23 @@ class RealtimeSocketClient {
   private subscribedThreadIds = new Set<string>()
   private subscribedArtistProfileId: string | null = null
   private connectListeners = new Set<() => void>()
-  private connectPromise: Promise<Socket> | null = null
+  private connectPromise: Promise<Socket | null> | null = null
+  private handlersBound = false
 
   get isConnected(): boolean {
     return this.socket?.connected ?? false
   }
 
   connect(): void {
-    if (!env.wsEnabled) return
-    if (this.socket?.connected) return
-    if (this.connectPromise) return
-
-    const token = tokenStorage.getAccessToken()
-    if (this.socket && !this.socket.connected) {
-      this.socket.auth = token ? { token } : {}
-      this.socket.connect()
-      this.connectPromise = this.waitForSocket(this.socket).finally(() => {
-        this.connectPromise = null
-      })
-      return
-    }
-
-    this.socket = io(`${realtimeServerUrl()}${REALTIME_NAMESPACE}`, {
-      path: '/socket.io',
-      transports: ['websocket', 'polling'],
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 10000,
-      withCredentials: true,
-      auth: token ? { token } : {},
-    })
-
-    this.socket.on('connect', () => {
-      if (env.isDev) {
-        console.info('[realtime] connected', this.socket?.id)
-      }
-      void this.resubscribeAll()
-      for (const listener of this.connectListeners) {
-        listener()
-      }
-    })
-
-    this.socket.on('connect_error', (err) => {
-      if (env.isDev) {
-        console.warn('[realtime] connect_error', err.message)
-      }
-    })
-
-    this.socket.on(REALTIME_ANALYTICS_EVENT, (envelope: RealtimeAnalyticsEnvelope) => {
-      if (env.isDev) {
-        console.debug('[realtime] analytics:updated', envelope)
-      }
-      for (const listener of this.listeners) {
-        listener(envelope)
-      }
-    })
-
-    this.socket.on(REALTIME_NOTIFICATION_EVENT, (notification: NotificationDto) => {
-      if (env.isDev) {
-        console.debug('[realtime] notification:new', notification)
-      }
-      for (const listener of this.notificationListeners) {
-        listener(notification)
-      }
-    })
-
-    this.socket.on(MESSENGER_MESSAGE_EVENT, (message: DmMessage) => {
-      for (const listener of this.messengerMessageListeners) listener(message)
-    })
-
-    this.socket.on(MESSENGER_MESSAGE_UPDATED_EVENT, (message: DmMessage) => {
-      for (const listener of this.messengerMessageUpdatedListeners) listener(message)
-    })
-
-    this.socket.on(MESSENGER_THREAD_EVENT, (thread: DmThreadSummary) => {
-      for (const listener of this.messengerThreadListeners) listener(thread)
-    })
-
-    this.socket.on(MESSENGER_TYPING_EVENT, (payload: MessengerTypingPayload) => {
-      for (const listener of this.messengerTypingListeners) listener(payload)
-    })
-
-    this.socket.on(MESSENGER_READ_EVENT, (payload: MessengerReadPayload) => {
-      for (const listener of this.messengerReadListeners) listener(payload)
-    })
-
-    this.socket.on(MESSENGER_PRESENCE_EVENT, (payload: MessengerPresencePayload) => {
-      for (const listener of this.messengerPresenceListeners) listener(payload)
-    })
-
-    this.connectPromise = this.waitForSocket(this.socket).finally(() => {
-      this.connectPromise = null
-    })
+    if (!env.wsEnabled || !tokenStorage.hasSession()) return
+    void this.connectAuthenticated()
   }
 
   disconnect(): void {
     this.socket?.disconnect()
     this.socket = null
     this.connectPromise = null
+    this.handlersBound = false
   }
 
   onAnalyticsUpdated(listener: AnalyticsListener): () => void {
@@ -175,6 +93,7 @@ class RealtimeSocketClient {
 
   onMessengerMessage(listener: MessengerMessageListener): () => void {
     this.messengerMessageListeners.add(listener)
+    this.connect()
     return () => this.messengerMessageListeners.delete(listener)
   }
 
@@ -207,6 +126,7 @@ class RealtimeSocketClient {
     if (!env.wsEnabled) return
     this.subscribedThreadIds.add(threadId)
     const socket = await this.ensureConnected()
+    if (!socket) return
     await this.emitAck(socket, 'subscribe:thread', { threadId })
   }
 
@@ -230,6 +150,7 @@ class RealtimeSocketClient {
     if (!env.wsEnabled) return
     this.subscribedReleaseIds.add(releaseId)
     const socket = await this.ensureConnected()
+    if (!socket) return
     await this.emitAck(socket, 'subscribe:release', { releaseId })
   }
 
@@ -243,6 +164,7 @@ class RealtimeSocketClient {
     if (!env.wsEnabled) return
     this.subscribedArtistProfileId = artistProfileId
     const socket = await this.ensureConnected()
+    if (!socket) return
     await this.emitAck(socket, 'subscribe:artist', { artistProfileId })
   }
 
@@ -255,32 +177,127 @@ class RealtimeSocketClient {
   }
 
   refreshAuth(): void {
-    const token = tokenStorage.getAccessToken()
-    if (!this.socket) {
-      this.connect()
-      return
-    }
-    this.socket.auth = token ? { token } : {}
-    if (this.socket.connected) {
-      this.socket.disconnect().connect()
-    }
+    this.disconnect()
+    this.connect()
   }
 
-  private async ensureConnected(): Promise<Socket> {
+  private async connectAuthenticated(): Promise<Socket | null> {
+    if (!env.wsEnabled || !tokenStorage.hasSession()) return null
+    if (this.socket?.connected) return this.socket
+    if (this.connectPromise) return this.connectPromise
+
+    this.connectPromise = this.doConnect().finally(() => {
+      this.connectPromise = null
+    })
+
+    return this.connectPromise
+  }
+
+  private async doConnect(): Promise<Socket | null> {
+    const token = await ensureAccessToken()
+    if (!token) return null
+
+    if (this.socket && !this.socket.connected) {
+      this.socket.auth = { token }
+      if (!this.handlersBound) {
+        this.bindSocketHandlers(this.socket)
+      }
+      this.socket.connect()
+      return this.waitForSocket(this.socket)
+    }
+
+    if (!this.socket) {
+      this.socket = io(`${realtimeServerUrl()}${REALTIME_NAMESPACE}`, {
+        path: '/socket.io',
+        transports: ['websocket', 'polling'],
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 10000,
+        withCredentials: true,
+        auth: { token },
+      })
+      this.bindSocketHandlers(this.socket)
+    }
+
+    return this.waitForSocket(this.socket)
+  }
+
+  private bindSocketHandlers(socket: Socket): void {
+    if (this.handlersBound) return
+    this.handlersBound = true
+
+    socket.io.on('reconnect_attempt', () => {
+      void ensureAccessToken().then((token) => {
+        if (token) socket.auth = { token }
+      })
+    })
+
+    socket.on('connect', () => {
+      if (env.isDev) {
+        console.info('[realtime] connected', socket.id)
+      }
+      void this.resubscribeAll()
+      for (const listener of this.connectListeners) {
+        listener()
+      }
+    })
+
+    socket.on('connect_error', (err) => {
+      if (env.isDev) {
+        console.warn('[realtime] connect_error', err.message)
+      }
+    })
+
+    socket.on(REALTIME_ANALYTICS_EVENT, (envelope: RealtimeAnalyticsEnvelope) => {
+      if (env.isDev) {
+        console.debug('[realtime] analytics:updated', envelope)
+      }
+      for (const listener of this.listeners) {
+        listener(envelope)
+      }
+    })
+
+    socket.on(REALTIME_NOTIFICATION_EVENT, (notification: NotificationDto) => {
+      if (env.isDev) {
+        console.debug('[realtime] notification:new', notification)
+      }
+      for (const listener of this.notificationListeners) {
+        listener(notification)
+      }
+    })
+
+    socket.on(MESSENGER_MESSAGE_EVENT, (message: DmMessage) => {
+      for (const listener of this.messengerMessageListeners) listener(message)
+    })
+
+    socket.on(MESSENGER_MESSAGE_UPDATED_EVENT, (message: DmMessage) => {
+      for (const listener of this.messengerMessageUpdatedListeners) listener(message)
+    })
+
+    socket.on(MESSENGER_THREAD_EVENT, (thread: DmThreadSummary) => {
+      for (const listener of this.messengerThreadListeners) listener(thread)
+    })
+
+    socket.on(MESSENGER_TYPING_EVENT, (payload: MessengerTypingPayload) => {
+      for (const listener of this.messengerTypingListeners) listener(payload)
+    })
+
+    socket.on(MESSENGER_READ_EVENT, (payload: MessengerReadPayload) => {
+      for (const listener of this.messengerReadListeners) listener(payload)
+    })
+
+    socket.on(MESSENGER_PRESENCE_EVENT, (payload: MessengerPresencePayload) => {
+      for (const listener of this.messengerPresenceListeners) listener(payload)
+    })
+  }
+
+  private async ensureConnected(): Promise<Socket | null> {
     if (!env.wsEnabled) {
       throw new Error('Realtime disabled (VITE_WS_ENABLED=false)')
     }
-    this.connect()
-    if (this.connectPromise) {
-      return this.connectPromise
-    }
-    if (this.socket?.connected) {
-      return this.socket
-    }
-    if (!this.socket) {
-      throw new Error('Realtime socket not initialized')
-    }
-    return this.waitForSocket(this.socket)
+    return this.connectAuthenticated()
   }
 
   private waitForSocket(socket: Socket): Promise<Socket> {

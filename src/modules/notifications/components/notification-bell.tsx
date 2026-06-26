@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { AtSign, Bell, MessageCircle, MessageSquare, Music2, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useNotifications } from '@/modules/notifications/hooks/use-notifications'
+import { useNotificationLiveStore } from '@/modules/notifications/store/notification-live-store'
 import type { NotificationDto, NotificationKind } from '@/modules/notifications/types/notification.types'
 import { useHeaderPopoverPosition } from '@/shared/hooks/use-header-popover-position'
 import { cn } from '@/shared/lib/cn'
@@ -71,10 +72,10 @@ export function NotificationBell() {
     minHeight: 180,
   })
 
-  const { data, isLoading, markRead, markAllRead, isMarkingRead, refetch } = useNotifications()
-
-  const unreadCount = data?.unreadCount ?? 0
-  const items = data?.items ?? []
+  const { isLoading, markRead, markAllRead, isMarkingRead, refetch } = useNotifications()
+  const unreadCount = useNotificationLiveStore((s) => s.unreadCount)
+  const items = useNotificationLiveStore((s) => s.items)
+  const liveReady = useNotificationLiveStore((s) => s.ready)
 
   useEffect(() => {
     if (open) void refetch()
@@ -123,9 +124,9 @@ export function NotificationBell() {
         ) : null}
       </div>
 
-      {isLoading ? <p className="ios-notification-bell__empty">Loading…</p> : null}
+      {isLoading && !liveReady ? <p className="ios-notification-bell__empty">Loading…</p> : null}
 
-      {!isLoading && items.length === 0 ? (
+      {!isLoading && liveReady && items.length === 0 ? (
         <p className="ios-notification-bell__empty">No notifications yet.</p>
       ) : null}
 
