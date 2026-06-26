@@ -2,6 +2,8 @@ import type { Point } from '@/modules/illustrator/components/studio/studio-canva
 
 export type BrushPoint = Point & { pressure: number }
 
+export type BrushSegment = { from: BrushPoint; to: BrushPoint }
+
 export function pressureFromEvent(e: PointerEvent | React.PointerEvent) {
   if (e.pressure > 0 && e.pressure < 1) return e.pressure
   return 0.5
@@ -27,7 +29,7 @@ function hexToRgba(hex: string, alpha: number) {
 }
 
 const stampCache = new Map<string, HTMLCanvasElement>()
-const STAMP_CACHE_LIMIT = 96
+const STAMP_CACHE_LIMIT = 192
 
 function getBrushStamp(size: number, hardness: number, color: string, opacity: number, erase?: boolean): HTMLCanvasElement {
   const rounded = Math.max(1, Math.round(size))
@@ -69,6 +71,71 @@ function getBrushStamp(size: number, hardness: number, color: string, opacity: n
   return stamp
 }
 
+function divisor(hardness: number) {
+  return 0.12 + hardness * 0.1
+}
+
+function dabRadius(size: number) {
+  return Math.max(1, size) / 2
+}
+
+function applyBrushComposite(
+  ctx: CanvasRenderingContext2D,
+  opacity: number,
+  erase?: boolean,
+) {
+  if (erase) {
+    ctx.globalCompositeOperation = 'destination-out'
+    ctx.globalAlpha = opacity
+  } else {
+    ctx.globalCompositeOperation = 'source-over'
+    ctx.globalAlpha = 1
+  }
+}
+
+function paintBrushSegmentCore(
+  ctx: CanvasRenderingContext2D,
+  from: BrushPoint,
+  to: BrushPoint,
+  color: string,
+  baseSize: number,
+  opacity: number,
+  hardness: number,
+  erase?: boolean,
+): number {
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+  const dist = Math.hypot(dx, dy)
+  const avgPressure = (from.pressure + to.pressure) / 2
+  const size = baseSize * (0.35 + avgPressure * 0.95)
+  const spacing = Math.max(0.8, size * divisor(hardness))
+
+  if (dist <= spacing) {
+    const dabSize = baseSize * (0.35 + to.pressure * 0.95)
+    const stamp = getBrushStamp(dabSize, hardness, color, opacity, erase)
+    const half = stamp.width / 2
+    ctx.drawImage(stamp, to.x - half, to.y - half)
+    return dabRadius(dabSize)
+  }
+
+  const steps = Math.min(Math.ceil(dist / spacing), 64)
+  let maxRadius = 0
+
+  for (let i = 0; i <= steps; i += 1) {
+    const t = i / steps
+    const pressure = from.pressure + (to.pressure - from.pressure) * t
+    const dabSize = baseSize * (0.35 + pressure * 0.95)
+    const stamp = getBrushStamp(dabSize, hardness, color, opacity, erase)
+    const half = stamp.width / 2
+    const x = from.x + dx * t
+    const y = from.y + dy * t
+    ctx.drawImage(stamp, x - half, y - half)
+    maxRadius = Math.max(maxRadius, dabRadius(dabSize))
+  }
+
+  return maxRadius
+}
+
 export function paintDab(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -83,15 +150,10 @@ export function paintDab(
   const half = stamp.width / 2
 
   ctx.save()
-  if (erase) {
-    ctx.globalCompositeOperation = 'destination-out'
-    ctx.globalAlpha = opacity
-  } else {
-    ctx.globalCompositeOperation = 'source-over'
-    ctx.globalAlpha = 1
-  }
+  applyBrushComposite(ctx, opacity, erase)
   ctx.drawImage(stamp, x - half, y - half)
   ctx.restore()
+  return dabRadius(size)
 }
 
 export function paintBrushSegment(
@@ -104,45 +166,55 @@ export function paintBrushSegment(
   hardness: number,
   erase?: boolean,
 ) {
-  const dx = to.x - from.x
-  const dy = to.y - from.y
-  const dist = Math.hypot(dx, dy)
-  const avgPressure = (from.pressure + to.pressure) / 2
-  const size = baseSize * (0.35 + avgPressure * 0.95)
-  const spacing = Math.max(0.8, size * divisor(hardness))
-
-  if (dist <= spacing) {
-    paintDab(ctx, to.x, to.y, size, color, opacity, hardness, erase)
-    return
-  }
-
-  const steps = Math.min(Math.ceil(dist / spacing), 64)
-
   ctx.save()
-  if (erase) {
-    ctx.globalCompositeOperation = 'destination-out'
-    ctx.globalAlpha = opacity
-  } else {
-    ctx.globalCompositeOperation = 'source-over'
-    ctx.globalAlpha = 1
-  }
-
-  for (let i = 0; i <= steps; i += 1) {
-    const t = i / steps
-    const pressure = from.pressure + (to.pressure - from.pressure) * t
-    const dabSize = baseSize * (0.35 + pressure * 0.95)
-    const stamp = getBrushStamp(dabSize, hardness, color, opacity, erase)
-    const half = stamp.width / 2
-    const x = from.x + dx * t
-    const y = from.y + dy * t
-    ctx.drawImage(stamp, x - half, y - half)
-  }
-
+  applyBrushComposite(ctx, opacity, erase)
+  const radius = paintBrushSegmentCore(ctx, from, to, color, baseSize, opacity, hardness, erase)
   ctx.restore()
+  return radius
 }
 
-function divisor(hardness: number) {
-  return 0.12 + hardness * 0.1
+export function paintBrushSegmentsBatch(
+  ctx: CanvasRenderingContext2D,
+  segments: BrushSegment[],
+  color: string,
+  baseSize: number,
+  opacity: number,
+  hardness: number,
+  erase?: boolean,
+  smudge?: boolean,
+): number {
+  if (!segments.length) return 0
+  let maxRadius = 0
+
+  if (smudge) {
+    ctx.save()
+    ctx.globalCompositeOperation = 'source-over'
+    ctx.globalAlpha = opacity
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.lineWidth = baseSize * 1.2
+    ctx.strokeStyle = color
+    ctx.beginPath()
+    ctx.moveTo(segments[0].from.x, segments[0].from.y)
+    for (const segment of segments) {
+      ctx.lineTo(segment.to.x, segment.to.y)
+      maxRadius = Math.max(maxRadius, dabRadius(baseSize))
+    }
+    ctx.stroke()
+    ctx.restore()
+    return maxRadius
+  }
+
+  ctx.save()
+  applyBrushComposite(ctx, opacity, erase)
+  for (const segment of segments) {
+    maxRadius = Math.max(
+      maxRadius,
+      paintBrushSegmentCore(ctx, segment.from, segment.to, color, baseSize, opacity, hardness, erase),
+    )
+  }
+  ctx.restore()
+  return maxRadius
 }
 
 export function paintSmoothStroke(
@@ -161,18 +233,16 @@ export function paintSmoothStroke(
   }
 
   if (smudge) {
-    ctx.save()
-    ctx.globalCompositeOperation = 'source-over'
-    ctx.globalAlpha = opacity
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    ctx.lineWidth = baseSize * 1.2
-    ctx.strokeStyle = color
-    ctx.beginPath()
-    ctx.moveTo(points[0].x, points[0].y)
-    for (let i = 1; i < points.length; i += 1) ctx.lineTo(points[i].x, points[i].y)
-    ctx.stroke()
-    ctx.restore()
+    paintBrushSegmentsBatch(
+      ctx,
+      points.slice(1).map((point, index) => ({ from: points[index], to: point })),
+      color,
+      baseSize,
+      opacity,
+      hardness,
+      erase,
+      true,
+    )
     return
   }
 

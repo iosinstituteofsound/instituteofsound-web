@@ -37,7 +37,7 @@ export function StudioCanvasStage({
     canvasWidth,
     canvasHeight,
     textPrompt,
-    brushPreview,
+    brushPreviewRef,
     cursorClass,
     submitText,
     deleteSelected,
@@ -113,20 +113,12 @@ export function StudioCanvasStage({
               {...handlers}
             />
 
-            {brushPreview ? (
-              <div
-                className="mas-brush-preview"
-                style={{
-                  left: `${(brushPreview.x / canvasWidth) * 100}%`,
-                  top: `${(brushPreview.y / canvasHeight) * 100}%`,
-                  width: `${(brushPreview.size / canvasWidth) * 100}%`,
-                  height: `${(brushPreview.size / canvasHeight) * 100}%`,
-                  background: brushPreview.color,
-                  opacity: brushPreview.opacity,
-                }}
-                aria-hidden
-              />
-            ) : null}
+            <div
+              ref={brushPreviewRef}
+              className="mas-brush-preview"
+              style={{ display: 'none' }}
+              aria-hidden
+            />
 
             {textPrompt ? (
               <div

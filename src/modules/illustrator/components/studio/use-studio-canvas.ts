@@ -2,11 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { StudioToolId } from '@/modules/illustrator/components/studio/studio-types'
 import {
   paintBrushSegment,
+  paintBrushSegmentsBatch,
   paintDab,
-  paintSmoothStroke,
   pressureFromEvent,
   stabilizePoint,
   type BrushPoint,
+  type BrushSegment,
 } from '@/modules/illustrator/components/studio/studio-brush-engine'
 import {
   DEFAULT_TOOL_SETTINGS,
@@ -19,12 +20,15 @@ import {
   type Point,
   type ToolSettings,
 } from '@/modules/illustrator/components/studio/studio-canvas-model'
+import type { OnionSkinPreview } from '@/modules/illustrator/components/studio/studio-animation.types'
 import {
   floodFillCanvas,
   loadBaseImage,
   renderScene,
   buildPaintFrameCache,
   blitPaintFrame,
+  expandBlitDirtyRect,
+  type BlitDirtyRect,
   type PaintFrameCache,
 } from '@/modules/illustrator/components/studio/studio-canvas-render'
 import {
@@ -34,8 +38,11 @@ import {
   layerThumbnailDataUrl,
   nextLayerName,
   resizePaintLayers,
-  restoreLayerSnapshot,
-  snapshotLayers,
+  restoreActiveLayerFromCanvas,
+  restoreLayerCanvasSnapshot,
+  snapshotLayerCanvas,
+  snapshotLayersCanvas,
+  type LayerCanvasSnapshot,
   type PaintLayer,
 } from '@/modules/illustrator/components/studio/studio-layer-engine'
 import type { InitialStudioDocument } from '@/modules/illustrator/lib/studio-document-persistence'
@@ -43,6 +50,7 @@ import { applyTransformPatchToElement } from '@/modules/illustrator/components/s
 import type { StudioSelection, StudioTransformFields } from '@/modules/illustrator/components/studio/studio-layer-panel.types'
 import { useSmoothViewport, VIEWPORT_MAX_ZOOM, VIEWPORT_MIN_ZOOM } from '@/modules/illustrator/components/studio/use-smooth-viewport'
 import { clientToCanvasPoint } from '@/modules/illustrator/components/studio/viewport-coords'
+import { consumeWithinBudget, PAINT_FRAME_BUDGET_MS } from '@/modules/illustrator/lib/studio-paint-scheduler'
 
 type UseStudioCanvasOptions = {
   activeTool: StudioToolId
@@ -60,7 +68,6 @@ type UseStudioCanvasOptions = {
 }
 
 type DragState =
-  | { mode: 'paint'; points: BrushPoint[]; snapshot: ReturnType<typeof snapshotLayers> }
   | { mode: 'shape'; start: Point; current: Point }
   | { mode: 'gradient'; start: Point; current: Point }
   | { mode: 'frame'; start: Point; current: Point }
@@ -68,6 +75,32 @@ type DragState =
   | { mode: 'zoom-scrub'; startClient: Point; startZoom: number; moved: boolean }
   | { mode: 'marquee'; start: Point; current: Point }
   | { mode: 'move'; start: Point; elementIds: string[] }
+
+const MAX_UNDO_HISTORY = 20
+const THUMBNAIL_DEBOUNCE_MS = 450
+
+type BrushPreviewState = {
+  x: number
+  y: number
+  size: number
+  color: string
+  opacity: number
+}
+
+function applyBrushPreview(el: HTMLDivElement | null, preview: BrushPreviewState | null, canvasW: number, canvasH: number) {
+  if (!el) return
+  if (!preview) {
+    el.style.display = 'none'
+    return
+  }
+  el.style.display = 'block'
+  el.style.left = `${(preview.x / canvasW) * 100}%`
+  el.style.top = `${(preview.y / canvasH) * 100}%`
+  el.style.width = `${(preview.size / canvasW) * 100}%`
+  el.style.height = `${(preview.size / canvasH) * 100}%`
+  el.style.background = preview.color
+  el.style.opacity = String(preview.opacity)
+}
 
 function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -110,6 +143,7 @@ export function useStudioCanvas({
     return resolveWorkingCanvasSize(documentWidth, documentHeight)
   }, [documentHeight, documentWidth, initialDocument?.layers])
   const workingSizeRef = useRef(workingSize)
+  workingSizeRef.current = workingSize
   const documentReadyRef = useRef(false)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -140,33 +174,41 @@ export function useStudioCanvas({
   const [drag, setDrag] = useState<DragState | null>(null)
   const lastPaintPoint = useRef<Point | null>(null)
   const repaintRef = useRef<() => void>(() => {})
-  const paintDragRef = useRef<{ points: BrushPoint[]; snapshot: ReturnType<typeof snapshotLayers> } | null>(null)
+  const paintDragRef = useRef<{ points: BrushPoint[]; snapshot: LayerCanvasSnapshot; dirty: BlitDirtyRect | null } | null>(null)
   const paintFrameCacheRef = useRef<PaintFrameCache | null>(null)
-  const [brushPreview, setBrushPreview] = useState<{
-    x: number
-    y: number
-    size: number
-    color: string
-    opacity: number
-  } | null>(null)
+  const paintRafRef = useRef<number | null>(null)
+  const pendingPaintSamplesRef = useRef<Array<{ point: Point; pressure: number }>>([])
+  const brushPreviewRef = useRef<HTMLDivElement | null>(null)
+  const brushPreviewStateRef = useRef<BrushPreviewState | null>(null)
+  const [isPainting, setIsPainting] = useState(false)
+  const skipNextLayersEffectRef = useRef(false)
+  const thumbDebounceRef = useRef<number | null>(null)
+  const elementsRef = useRef(elements)
+  elementsRef.current = elements
+  const layerSaveVersionRef = useRef<Record<string, number>>({})
+  const renderElementsRef = useRef<CanvasElement[] | null>(null)
+  const foregroundRef = useRef(foreground)
+  foregroundRef.current = foreground
+  const onionSkinRef = useRef<OnionSkinPreview | null>(null)
 
   const cancelForGesture = useCallback(() => {
+    if (paintRafRef.current !== null) {
+      cancelAnimationFrame(paintRafRef.current)
+      paintRafRef.current = null
+    }
+    pendingPaintSamplesRef.current = []
     if (paintDragRef.current) {
-      restoreLayerSnapshot(layersRef.current, paintDragRef.current.snapshot)
+      restoreActiveLayerFromCanvas(layersRef.current, paintDragRef.current.snapshot)
       paintDragRef.current = null
       paintFrameCacheRef.current = null
+      setIsPainting(false)
       repaintRef.current()
     }
-    setDrag((current) => {
-      if (current?.mode === 'paint') {
-        restoreLayerSnapshot(layersRef.current, current.snapshot)
-        repaintRef.current()
-      }
-      return null
-    })
+    setDrag(null)
     setDraft(null)
     lastPaintPoint.current = null
-    setBrushPreview(null)
+    brushPreviewStateRef.current = null
+    applyBrushPreview(brushPreviewRef.current, null, workingSizeRef.current.width, workingSizeRef.current.height)
   }, [])
 
   const {
@@ -188,8 +230,8 @@ export function useStudioCanvas({
     onGestureStart: cancelForGesture,
   })
   const [spaceHeld, setSpaceHeld] = useState(false)
-  const historyRef = useRef<Array<{ layers: ReturnType<typeof snapshotLayers>; elements: CanvasElement[] }>>([
-    { layers: snapshotLayers(layersRef.current), elements: initialDocument?.elements ?? [] },
+  const historyRef = useRef<Array<{ layers: LayerCanvasSnapshot[]; elements: CanvasElement[] }>>([
+    { layers: snapshotLayersCanvas(layersRef.current), elements: initialDocument?.elements ?? [] },
   ])
   const historyIndexRef = useRef(0)
   const [canUndo, setCanUndo] = useState(false)
@@ -218,7 +260,10 @@ export function useStudioCanvas({
     setLayers(nextLayers)
     setElements(nextElements)
     const trimmed = historyRef.current.slice(0, historyIndexRef.current + 1)
-    const updated = [...trimmed, { layers: snapshotLayers(nextLayers), elements: nextElements }]
+    let updated = [...trimmed, { layers: snapshotLayersCanvas(nextLayers), elements: nextElements }]
+    if (updated.length > MAX_UNDO_HISTORY) {
+      updated = updated.slice(updated.length - MAX_UNDO_HISTORY)
+    }
     historyRef.current = updated
     historyIndexRef.current = updated.length - 1
     syncHistoryFlags()
@@ -229,7 +274,7 @@ export function useStudioCanvas({
     if (historyIndexRef.current <= 0) return
     historyIndexRef.current -= 1
     const entry = historyRef.current[historyIndexRef.current]
-    const restored = restoreLayerSnapshot(layersRef.current, entry.layers)
+    const restored = restoreLayerCanvasSnapshot(layersRef.current, entry.layers)
     layersRef.current = restored
     setLayers(restored)
     setElements(entry.elements)
@@ -241,7 +286,7 @@ export function useStudioCanvas({
     if (historyIndexRef.current >= historyRef.current.length - 1) return
     historyIndexRef.current += 1
     const entry = historyRef.current[historyIndexRef.current]
-    const restored = restoreLayerSnapshot(layersRef.current, entry.layers)
+    const restored = restoreLayerCanvasSnapshot(layersRef.current, entry.layers)
     layersRef.current = restored
     setLayers(restored)
     setElements(entry.elements)
@@ -253,15 +298,40 @@ export function useStudioCanvas({
     return layersRef.current.find((l) => l.id === activeLayerId) ?? layersRef.current[layersRef.current.length - 1]
   }, [activeLayerId])
 
+  const commitPaintStroke = useCallback(() => {
+    const active = getActiveLayer()
+    const afterLayerSnap = snapshotLayerCanvas(active)
+    const prev = historyRef.current[historyIndexRef.current]
+    const nextLayerSnaps = prev.layers.map((snap) => (snap.id === afterLayerSnap.id ? afterLayerSnap : snap))
+    const nextElements = elementsRef.current
+
+    setLayers([...layersRef.current])
+    setElements(nextElements)
+
+    const trimmed = historyRef.current.slice(0, historyIndexRef.current + 1)
+    let updated = [...trimmed, { layers: nextLayerSnaps, elements: nextElements }]
+    if (updated.length > MAX_UNDO_HISTORY) {
+      updated = updated.slice(updated.length - MAX_UNDO_HISTORY)
+    }
+    historyRef.current = updated
+    historyIndexRef.current = updated.length - 1
+    layerSaveVersionRef.current[afterLayerSnap.id] = (layerSaveVersionRef.current[afterLayerSnap.id] ?? 0) + 1
+    syncHistoryFlags()
+    onDocumentCommitRef.current?.()
+  }, [getActiveLayer, syncHistoryFlags])
+
   const selection = useMemo((): StudioSelection => {
     if (selectedIds[0]) return { kind: 'element', elementId: selectedIds[0] }
     if (activeLayerId) return { kind: 'layer', layerId: activeLayerId }
     return null
   }, [activeLayerId, selectedIds])
 
-  const refreshLayerThumbnails = useCallback(() => {
+  const refreshLayerThumbnails = useCallback((layerIds?: string[]) => {
+    const targets = layerIds
+      ? layersRef.current.filter((layer) => layerIds.includes(layer.id))
+      : layersRef.current
     const next: Record<string, string> = {}
-    for (const layer of layersRef.current) {
+    for (const layer of targets) {
       try {
         next[layer.id] = layerThumbnailDataUrl(layer)
       } catch {
@@ -269,13 +339,24 @@ export function useStudioCanvas({
       }
     }
     setLayerThumbnails((prev) => {
-      const keys = Object.keys(next)
-      if (keys.length === Object.keys(prev).length && keys.every((key) => prev[key] === next[key])) {
+      const merged = { ...prev, ...next }
+      const keys = Object.keys(merged)
+      if (keys.length === Object.keys(prev).length && keys.every((key) => prev[key] === merged[key])) {
         return prev
       }
-      return next
+      return merged
     })
   }, [])
+
+  const scheduleLayerThumbnails = useCallback((layerIds?: string[]) => {
+    if (thumbDebounceRef.current !== null) {
+      window.clearTimeout(thumbDebounceRef.current)
+    }
+    thumbDebounceRef.current = window.setTimeout(() => {
+      thumbDebounceRef.current = null
+      refreshLayerThumbnails(layerIds)
+    }, THUMBNAIL_DEBOUNCE_MS)
+  }, [refreshLayerThumbnails])
 
   const selectLayer = useCallback((layerId: string) => {
     setActiveLayerId(layerId)
@@ -396,13 +477,14 @@ export function useStudioCanvas({
     onDocumentSizeChange?.(Math.max(1, width), Math.max(1, height))
   }, [onDocumentSizeChange])
 
-  const blitPaintFrameToDisplay = useCallback(() => {
+  const blitPaintFrameToDisplay = useCallback((dirty?: BlitDirtyRect | null) => {
     const canvas = canvasRef.current
     const cache = paintFrameCacheRef.current
     if (!canvas || !cache) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { desynchronized: true })
     if (!ctx) return
-    blitPaintFrame(ctx, cache, layersRef.current)
+    const rect = dirty ?? paintDragRef.current?.dirty ?? null
+    blitPaintFrame(ctx, cache, layersRef.current, rect)
   }, [])
 
   const repaint = useCallback(() => {
@@ -413,14 +495,15 @@ export function useStudioCanvas({
     renderScene(
       ctx,
       layersRef.current,
-      elements,
+      renderElementsRef.current ?? elements,
       baseImageRef.current,
       draft,
       selectedIds,
-      drag?.mode === 'paint' ? activeLayerId : null,
+      paintDragRef.current ? activeLayerId : null,
       repaint,
+      onionSkinRef.current,
     )
-  }, [activeLayerId, drag, draft, elements, selectedIds])
+  }, [activeLayerId, draft, elements, selectedIds])
 
   repaintRef.current = repaint
 
@@ -441,6 +524,7 @@ export function useStudioCanvas({
     if (canvas) {
       canvas.width = workingSize.width
       canvas.height = workingSize.height
+      canvas.getContext('2d', { alpha: true, desynchronized: true })
     }
 
     workingSizeRef.current = workingSize
@@ -455,6 +539,7 @@ export function useStudioCanvas({
     if (canvas.width === workingSize.width && canvas.height === workingSize.height) return
     canvas.width = workingSize.width
     canvas.height = workingSize.height
+    canvas.getContext('2d', { alpha: true, desynchronized: true })
     workingSizeRef.current = workingSize
     repaintRef.current()
   }, [workingSize.height, workingSize.width])
@@ -493,9 +578,13 @@ export function useStudioCanvas({
 
   useEffect(() => {
     if (paintDragRef.current) return
+    if (skipNextLayersEffectRef.current) {
+      skipNextLayersEffectRef.current = false
+      return
+    }
     repaint()
-    refreshLayerThumbnails()
-  }, [layers, elements, draft, selectedIds, repaint, refreshLayerThumbnails])
+    scheduleLayerThumbnails()
+  }, [layers, elements, draft, selectedIds, repaint, scheduleLayerThumbnails])
 
   useEffect(() => {
     const bgLayer = layersRef.current.find((layer) => layer.name === 'Background')
@@ -514,7 +603,7 @@ export function useStudioCanvas({
     setActiveLayerId(resolveActiveLayerId(initialDocument.layers, initialDocument.activeLayerId))
 
     historyRef.current = [
-      { layers: snapshotLayers(initialDocument.layers), elements: initialDocument.elements },
+      { layers: snapshotLayersCanvas(initialDocument.layers), elements: initialDocument.elements },
     ]
     historyIndexRef.current = 0
     syncHistoryFlags()
@@ -555,38 +644,128 @@ export function useStudioCanvas({
     commitDocument(layersRef.current, [...elements, el])
   }, [commitDocument, elements])
 
-  const paintOnLayer = useCallback((points: BrushPoint[], erase?: boolean, smudge?: boolean, flushDisplay = true) => {
+  const paintOnLayer = useCallback((points: BrushPoint[], erase?: boolean, smudge?: boolean, flushDisplay = true): number => {
     const layer = getActiveLayer()
-    if (layer.locked) return
-    const ctx = layer.canvas.getContext('2d')
-    if (!ctx || points.length < 1) return
+    if (layer.locked) return 0
+    const ctx = layer.canvas.getContext('2d', { desynchronized: true })
+    if (!ctx || points.length < 1) return 0
 
     const size = erase ? toolSettings.eraserSize : toolSettings.brushSize
     const opacity = erase ? 1 : smudge ? toolSettings.smudgeStrength : toolSettings.brushOpacity
     const color = smudge ? foreground : erase ? '#000000' : foreground
+    let dabRadius = size
 
     if (points.length === 1) {
-      paintDab(ctx, points[0].x, points[0].y, size * (0.35 + points[0].pressure * 0.95), color, opacity, toolSettings.brushHardness, erase)
+      dabRadius = paintDab(ctx, points[0].x, points[0].y, size * (0.35 + points[0].pressure * 0.95), color, opacity, toolSettings.brushHardness, erase)
     } else {
       const last = points[points.length - 2]
       const next = points[points.length - 1]
       if (smudge) {
-        paintSmoothStroke(ctx, [last, next], color, size, opacity, toolSettings.brushHardness, false, true)
+        dabRadius = paintBrushSegmentsBatch(ctx, [{ from: last, to: next }], color, size, opacity, toolSettings.brushHardness, false, true)
       } else {
-        paintBrushSegment(ctx, last, next, color, size, opacity, toolSettings.brushHardness, erase)
+        dabRadius = paintBrushSegment(ctx, last, next, color, size, opacity, toolSettings.brushHardness, erase)
       }
     }
 
-    if (!flushDisplay) return
+    if (!flushDisplay) return dabRadius
 
     if (paintFrameCacheRef.current) {
       blitPaintFrameToDisplay()
     } else {
       repaint()
     }
+    return dabRadius
   }, [blitPaintFrameToDisplay, foreground, getActiveLayer, repaint, toolSettings])
 
+  const flushPendingPaint = useCallback(() => {
+    paintRafRef.current = null
+    const drag = paintDragRef.current
+    if (!drag) {
+      pendingPaintSamplesRef.current = []
+      return
+    }
+
+    if (!paintFrameCacheRef.current) {
+      paintFrameCacheRef.current = buildPaintFrameCache(
+        layersRef.current,
+        activeLayerId,
+        elementsRef.current,
+        baseImageRef.current,
+        draft,
+        selectedIds,
+      )
+    }
+
+    const incoming = pendingPaintSamplesRef.current
+    pendingPaintSamplesRef.current = []
+
+    const erase = effectiveToolRef.current === 'erase'
+    const smudge = effectiveToolRef.current === 'smudge'
+    const settings = toolSettingsRef.current
+    const size = erase ? settings.eraserSize : settings.brushSize
+    const opacity = erase ? 1 : smudge ? settings.smudgeStrength : settings.brushOpacity
+    const color = smudge ? foregroundRef.current : erase ? '#000000' : foregroundRef.current
+    const hardness = settings.brushHardness
+  const canvasSize = workingSizeRef.current
+
+    let prevPoint = lastPaintPoint.current
+    let segmentStart = drag.points[drag.points.length - 1]
+    const segments: BrushSegment[] = []
+
+    const remaining = consumeWithinBudget(incoming, PAINT_FRAME_BUDGET_MS, (sample) => {
+      const stabilized = stabilizePoint(prevPoint, sample.point, settings.streamline)
+      const brushPoint: BrushPoint = { ...stabilized, pressure: sample.pressure }
+      segments.push({ from: segmentStart, to: brushPoint })
+      drag.points.push(brushPoint)
+      segmentStart = brushPoint
+      prevPoint = stabilized
+      drag.dirty = expandBlitDirtyRect(
+        drag.dirty,
+        brushPoint.x,
+        brushPoint.y,
+        size,
+        canvasSize.width,
+        canvasSize.height,
+      )
+    })
+
+    if (remaining.length) {
+      pendingPaintSamplesRef.current = remaining.concat(pendingPaintSamplesRef.current)
+    }
+
+    if (segments.length) {
+      const layer = getActiveLayer()
+      if (!layer.locked) {
+        const ctx = layer.canvas.getContext('2d', { desynchronized: true })
+        if (ctx) {
+          const maxRadius = paintBrushSegmentsBatch(ctx, segments, color, size, opacity, hardness, erase, smudge)
+          const last = segments[segments.length - 1]?.to
+          if (last) {
+            drag.dirty = expandBlitDirtyRect(
+              drag.dirty,
+              last.x,
+              last.y,
+              maxRadius,
+              canvasSize.width,
+              canvasSize.height,
+            )
+          }
+        }
+      }
+      lastPaintPoint.current = prevPoint
+      blitPaintFrameToDisplay(drag.dirty)
+    }
+
+    if (pendingPaintSamplesRef.current.length) {
+      paintRafRef.current = requestAnimationFrame(flushPendingPaint)
+    }
+  }, [activeLayerId, blitPaintFrameToDisplay, draft, getActiveLayer, selectedIds])
+
   const effectiveTool = spaceHeld || activeTool === 'hand' ? 'hand' : activeTool
+  const effectiveToolRef = useRef(effectiveTool)
+  const toolSettingsRef = useRef(toolSettings)
+  effectiveToolRef.current = effectiveTool
+  toolSettingsRef.current = toolSettings
 
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
@@ -622,20 +801,39 @@ export function useStudioCanvas({
     }
 
     if (isPaintTool(effectiveTool)) {
+      const layer = getActiveLayer()
+      if (layer.locked) return
       const stabilized = stabilizePoint(lastPaintPoint.current, point, toolSettings.streamline)
       const brushPoint: BrushPoint = { ...stabilized, pressure: pressureFromEvent(e) }
       lastPaintPoint.current = stabilized
-      const snapshot = snapshotLayers(layersRef.current)
-      paintDragRef.current = { points: [brushPoint], snapshot }
-      paintFrameCacheRef.current = buildPaintFrameCache(
-        layersRef.current,
-        activeLayerId,
-        elements,
-        baseImageRef.current,
-        draft,
-        selectedIds,
-      )
-      paintOnLayer([brushPoint], effectiveTool === 'erase', effectiveTool === 'smudge')
+      const snapshot = snapshotLayerCanvas(layer)
+      const dabRadius = (effectiveTool === 'erase' ? toolSettings.eraserSize : toolSettings.brushSize) * 0.65
+      paintDragRef.current = {
+        points: [brushPoint],
+        snapshot,
+        dirty: expandBlitDirtyRect(
+          null,
+          brushPoint.x,
+          brushPoint.y,
+          dabRadius,
+          workingSizeRef.current.width,
+          workingSizeRef.current.height,
+        ),
+      }
+      setIsPainting(true)
+      paintOnLayer([brushPoint], effectiveTool === 'erase', effectiveTool === 'smudge', false)
+      requestAnimationFrame(() => {
+        if (!paintDragRef.current) return
+        paintFrameCacheRef.current = buildPaintFrameCache(
+          layersRef.current,
+          activeLayerId,
+          elementsRef.current,
+          baseImageRef.current,
+          draft,
+          selectedIds,
+        )
+        blitPaintFrameToDisplay(paintDragRef.current.dirty)
+      })
       return
     }
 
@@ -714,37 +912,36 @@ export function useStudioCanvas({
     if (!canvas) return
     const point = getCanvasPoint(e.clientX, e.clientY)
     const paintingStroke = Boolean(paintDragRef.current)
+    const size = workingSizeRef.current
 
     if (isPaintTool(effectiveTool) && !paintingStroke) {
-      const size = effectiveTool === 'erase' ? toolSettings.eraserSize : toolSettings.brushSize
+      const brushSize = effectiveTool === 'erase' ? toolSettings.eraserSize : toolSettings.brushSize
       const color = effectiveTool === 'erase' ? '#ffffff' : foreground
       const opacity =
         effectiveTool === 'brush' ? toolSettings.brushOpacity : effectiveTool === 'smudge' ? toolSettings.smudgeStrength : 1
-      setBrushPreview({ x: point.x, y: point.y, size, color, opacity })
+      const preview = { x: point.x, y: point.y, size: brushSize, color, opacity }
+      brushPreviewStateRef.current = preview
+      applyBrushPreview(brushPreviewRef.current, preview, size.width, size.height)
     } else if (!paintingStroke) {
-      setBrushPreview(null)
+      brushPreviewStateRef.current = null
+      applyBrushPreview(brushPreviewRef.current, null, size.width, size.height)
     }
 
     if (paintDragRef.current) {
-      const erase = effectiveTool === 'erase'
-      const smudge = effectiveTool === 'smudge'
       const coalesced =
         typeof e.nativeEvent.getCoalescedEvents === 'function' ? e.nativeEvent.getCoalescedEvents() : [e.nativeEvent]
-      let prevPoint = lastPaintPoint.current
-      let segmentStart = paintDragRef.current.points[paintDragRef.current.points.length - 1]
 
       for (const event of coalesced) {
         const sample = getCanvasPoint(event.clientX, event.clientY)
-        const stabilized = stabilizePoint(prevPoint, sample, toolSettings.streamline)
-        const brushPoint: BrushPoint = { ...stabilized, pressure: pressureFromEvent(event) }
-        paintOnLayer([segmentStart, brushPoint], erase, smudge, false)
-        paintDragRef.current.points.push(brushPoint)
-        segmentStart = brushPoint
-        prevPoint = stabilized
+        pendingPaintSamplesRef.current.push({
+          point: sample,
+          pressure: pressureFromEvent(event),
+        })
       }
 
-      lastPaintPoint.current = prevPoint
-      blitPaintFrameToDisplay()
+      if (paintRafRef.current === null) {
+        paintRafRef.current = requestAnimationFrame(flushPendingPaint)
+      }
       return
     }
 
@@ -791,19 +988,19 @@ export function useStudioCanvas({
     if (drag.mode === 'move') {
       const dx = point.x - drag.start.x
       const dy = point.y - drag.start.y
-      setElements((prev) =>
-        prev.map((el) => {
-          if (!drag.elementIds.includes(el.id)) return el
-          if (el.kind === 'stroke') {
-            return { ...el, points: el.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) }
-          }
-          if ('x' in el && 'y' in el && typeof el.x === 'number') return { ...el, x: el.x + dx, y: el.y + dy }
-          if (el.kind === 'gradient') {
-            return { ...el, x1: el.x1 + dx, y1: el.y1 + dy, x2: el.x2 + dx, y2: el.y2 + dy }
-          }
-          return el
-        }),
-      )
+      const moved = elementsRef.current.map((el) => {
+        if (!drag.elementIds.includes(el.id)) return el
+        if (el.kind === 'stroke') {
+          return { ...el, points: el.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) }
+        }
+        if ('x' in el && 'y' in el && typeof el.x === 'number') return { ...el, x: el.x + dx, y: el.y + dy }
+        if (el.kind === 'gradient') {
+          return { ...el, x1: el.x1 + dx, y1: el.y1 + dy, x2: el.x2 + dx, y2: el.y2 + dy }
+        }
+        return el
+      })
+      renderElementsRef.current = moved
+      repaintRef.current()
       setDrag({ ...drag, start: point })
       return
     }
@@ -859,16 +1056,23 @@ export function useStudioCanvas({
       })
       setDrag({ ...drag, current: point })
     }
-  }, [background, blitPaintFrameToDisplay, drag, effectiveTool, foreground, getCanvasPoint, getZoom, paintOnLayer, setPanImmediate, toolSettings, viewportRef, zoomAt])
+  }, [background, drag, effectiveTool, flushPendingPaint, foreground, getCanvasPoint, getZoom, repaint, setPanImmediate, toolSettings, viewportRef, zoomAt])
 
   const handlePointerUp = useCallback((e?: React.PointerEvent<HTMLCanvasElement>) => {
     if (paintDragRef.current) {
-      commitDocument(layersRef.current, elements)
+      if (paintRafRef.current !== null) {
+        cancelAnimationFrame(paintRafRef.current)
+        paintRafRef.current = null
+        flushPendingPaint()
+      }
+      skipNextLayersEffectRef.current = true
+      commitPaintStroke()
       paintDragRef.current = null
       paintFrameCacheRef.current = null
       lastPaintPoint.current = null
+      setIsPainting(false)
       repaintRef.current()
-      refreshLayerThumbnails()
+      scheduleLayerThumbnails([activeLayerId])
       return
     }
 
@@ -905,13 +1109,15 @@ export function useStudioCanvas({
     }
 
     if (drag.mode === 'move') {
-      commitDocument(layersRef.current, elements)
+      const nextElements = renderElementsRef.current ?? elementsRef.current
+      renderElementsRef.current = null
+      commitDocument(layersRef.current, nextElements)
     }
 
     lastPaintPoint.current = null
     setDrag(null)
     setDraft(null)
-  }, [commitDocument, draft, drag, elements, pushElement, refreshLayerThumbnails, zoomAt])
+  }, [activeLayerId, commitPaintStroke, draft, drag, elements, flushPendingPaint, pushElement, scheduleLayerThumbnails, zoomAt])
 
   const submitText = useCallback((text: string) => {
     if (!textPrompt || !text.trim()) {
@@ -937,13 +1143,31 @@ export function useStudioCanvas({
   }, [commitDocument, elements, selectedIds])
 
   const cursorClass = `mas-canvas-viewport--tool-${effectiveTool}${spaceHeld ? ' mas-canvas-viewport--space-pan' : ''}`
-  const isPainting = drag?.mode === 'paint'
 
   const getDocumentSnapshot = useCallback(() => ({
     layers: layersRef.current,
     elements,
     activeLayerId,
   }), [activeLayerId, elements])
+
+  const getLayerSaveVersions = useCallback(() => ({ ...layerSaveVersionRef.current }), [])
+
+  const captureAnimationFrame = useCallback(() => ({
+    layers: snapshotLayersCanvas(layersRef.current),
+    elements: [...elementsRef.current],
+  }), [])
+
+  const applyAnimationFrame = useCallback((layerSnaps: LayerCanvasSnapshot[], nextElements: CanvasElement[]) => {
+    const restored = restoreLayerCanvasSnapshot(layersRef.current, layerSnaps)
+    layersRef.current = restored
+    setLayers(restored)
+    setElements(nextElements)
+  }, [])
+
+  const setOnionSkinPreview = useCallback((preview: OnionSkinPreview | null) => {
+    onionSkinRef.current = preview
+    repaintRef.current()
+  }, [])
 
   return {
     canvasRef,
@@ -961,7 +1185,7 @@ export function useStudioCanvas({
     layerThumbnails,
     selectedIds,
     textPrompt,
-    brushPreview,
+    brushPreviewRef,
     cursorClass,
     isPainting,
     canUndo,
@@ -981,6 +1205,10 @@ export function useStudioCanvas({
     updateTransform,
     updateDocumentSize,
     getDocumentSnapshot,
+    getLayerSaveVersions,
+    captureAnimationFrame,
+    applyAnimationFrame,
+    setOnionSkinPreview,
     zoomByStep,
     fitToView,
     resetView,
@@ -990,7 +1218,8 @@ export function useStudioCanvas({
       onPointerMove: handlePointerMove,
       onPointerUp: handlePointerUp,
       onPointerLeave: (e: React.PointerEvent<HTMLCanvasElement>) => {
-        setBrushPreview(null)
+        brushPreviewStateRef.current = null
+        applyBrushPreview(brushPreviewRef.current, null, workingSizeRef.current.width, workingSizeRef.current.height)
         handlePointerUp(e)
       },
     },

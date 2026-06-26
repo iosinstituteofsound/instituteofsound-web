@@ -24,8 +24,9 @@ type UseStudioAutosaveOptions = {
   enabled: boolean
   isPainting: boolean
   getDocument: () => PersistedStudioDocument | null
+  buildDocumentAsync?: () => Promise<PersistedStudioDocument | null>
   getPreviewDataUrl?: () => string | undefined
-  onSaved?: () => void
+  onSaved?: (doc: PersistedStudioDocument) => void
 }
 
 function scheduleIdle(task: () => void) {
@@ -40,11 +41,13 @@ export function useStudioAutosave({
   enabled,
   isPainting,
   getDocument,
+  buildDocumentAsync,
   getPreviewDataUrl,
   onSaved,
 }: UseStudioAutosaveOptions) {
   const [status, setStatus] = useState<StudioSaveStatus>('saved')
   const getDocumentRef = useRef(getDocument)
+  const buildDocumentAsyncRef = useRef(buildDocumentAsync)
   const getPreviewDataUrlRef = useRef(getPreviewDataUrl)
   const onSavedRef = useRef(onSaved)
   const lastFingerprintRef = useRef<string | null>(null)
@@ -54,13 +57,21 @@ export function useStudioAutosave({
   const queuedRef = useRef(false)
 
   getDocumentRef.current = getDocument
+  buildDocumentAsyncRef.current = buildDocumentAsync
   getPreviewDataUrlRef.current = getPreviewDataUrl
   onSavedRef.current = onSaved
+
+  const resolveDocument = useCallback(async () => {
+    if (buildDocumentAsyncRef.current) {
+      return buildDocumentAsyncRef.current()
+    }
+    return getDocumentRef.current()
+  }, [])
 
   const flushSave = useCallback(async (options?: FlushSaveOptions) => {
     if (!enabled) return
 
-    const doc = getDocumentRef.current()
+    const doc = await resolveDocument()
     if (!doc) return
 
     if (!options?.forcePreview && serverHadPaintRef.current && !documentHasPaintedContent(doc)) {
@@ -100,7 +111,7 @@ export function useStudioAutosave({
       lastFingerprintRef.current = fingerprint
       serverHadPaintRef.current = hasPaint
       setStatus('saved')
-      onSavedRef.current?.()
+      onSavedRef.current?.(doc)
     } catch {
       setStatus('dirty')
     } finally {
@@ -110,7 +121,7 @@ export function useStudioAutosave({
         void flushSave(options)
       }
     }
-  }, [enabled])
+  }, [enabled, resolveDocument])
 
   const queueSave = useCallback(
     (immediate = false) => {

@@ -19,10 +19,11 @@ import { loadPersistedStudioDocument } from '@/modules/illustrator/lib/studio-au
 import {
   mergeStudioDocuments,
   serializeStudioDocument,
+  serializeStudioDocumentAsync,
   toInitialStudioDocument,
   type PersistedStudioDocument,
+  type SerializedLayerSnapshot,
 } from '@/modules/illustrator/lib/studio-document-persistence'
-import { savePersistedStudioDocument } from '@/modules/illustrator/lib/studio-autosave-db'
 import { createStudioPreviewDataUrl } from '@/modules/illustrator/lib/studio-preview'
 import { usePanelResize } from '@/modules/illustrator/components/studio/use-panel-resize'
 import '@/modules/illustrator/styles/illustrator-studio.css'
@@ -157,7 +158,7 @@ function StudioWorkspaceInner({
 
   const assets = usePanelResize(280, 200, 440)
   const right = usePanelResize(280, 220, 400)
-  const timeline = usePanelResize(176, 120, 320)
+  const timeline = usePanelResize(200, 140, 360)
   const layers = usePanelResize(200, 120, 480)
   const props = usePanelResize(180, 100, 400)
 
@@ -176,6 +177,8 @@ function StudioWorkspaceInner({
 
   const autosaveMarkDirtyRef = useRef<(options?: { immediate?: boolean }) => void>(() => {})
   const buildPersistedDocumentRef = useRef<() => PersistedStudioDocument | null>(() => null)
+  const savedLayerVersionsRef = useRef<Record<string, number>>({})
+  const cachedSavedLayersRef = useRef<SerializedLayerSnapshot[]>([])
 
   const canvas = useStudioCanvas({
     activeTool,
@@ -188,9 +191,7 @@ function StudioWorkspaceInner({
     documentHeight: doc.height,
     initialDocument,
     onDocumentCommit: () => {
-      const snapshotDoc = buildPersistedDocumentRef.current()
-      if (snapshotDoc) void savePersistedStudioDocument(snapshotDoc)
-      autosaveMarkDirtyRef.current({ immediate: true })
+      autosaveMarkDirtyRef.current()
     },
     onZoomChange: setZoom,
     onDocumentSizeChange: (width, height) => setDocSize((prev) => ({ ...prev, width, height })),
@@ -231,23 +232,75 @@ function StudioWorkspaceInner({
     toolSettings,
   ])
 
+  const buildPersistedDocumentAsync = useCallback(async () => {
+    if (!artwork?.id) return null
+    const snapshot = canvas.getDocumentSnapshot()
+    return serializeStudioDocumentAsync(
+      {
+        artwork: {
+          ...artwork,
+          title: doc.title,
+          status: doc.status,
+        },
+        document: {
+          width: doc.width,
+          height: doc.height,
+          dpi: doc.dpi,
+          colorProfile: doc.colorProfile,
+        },
+        colors: { foreground, background },
+        toolSettings,
+        activeLayerId: snapshot.activeLayerId,
+        layers: snapshot.layers,
+        elements: snapshot.elements,
+      },
+      {
+        layerVersions: canvas.getLayerSaveVersions(),
+        savedLayerVersions: savedLayerVersionsRef.current,
+        cachedLayers: cachedSavedLayersRef.current,
+      },
+    )
+  }, [
+    artwork,
+    background,
+    canvas.getDocumentSnapshot,
+    canvas.getLayerSaveVersions,
+    doc.colorProfile,
+    doc.dpi,
+    doc.height,
+    doc.status,
+    doc.title,
+    doc.width,
+    foreground,
+    toolSettings,
+  ])
+
   buildPersistedDocumentRef.current = buildPersistedDocument
 
   const { status: saveStatus, markDirty, flushSave, seedFingerprint } = useStudioAutosave({
     enabled: Boolean(artwork?.id && artwork.source !== 'feed'),
     isPainting: canvas.isPainting,
     getDocument: buildPersistedDocument,
+    buildDocumentAsync: buildPersistedDocumentAsync,
     getPreviewDataUrl: () => {
       const snapshot = canvas.getDocumentSnapshot()
       return createStudioPreviewDataUrl(snapshot.layers, snapshot.activeLayerId, snapshot.elements)
     },
-    onSaved: onPortfolioChange,
+    onSaved: (savedDoc) => {
+      cachedSavedLayersRef.current = savedDoc.layers
+      savedLayerVersionsRef.current = canvas.getLayerSaveVersions()
+      onPortfolioChange?.()
+    },
   })
 
   autosaveMarkDirtyRef.current = markDirty
 
   useEffect(() => {
     seedFingerprint(persisted)
+    if (persisted?.layers?.length) {
+      cachedSavedLayersRef.current = persisted.layers
+      savedLayerVersionsRef.current = Object.fromEntries(persisted.layers.map((layer) => [layer.id, 0]))
+    }
   }, [persisted, seedFingerprint])
 
   useEffect(() => {
@@ -555,8 +608,12 @@ function StudioWorkspaceInner({
         </div>
 
         <div className="mas-zone mas-zone--timeline">
-          <StudioResizeHandle edge="n" onDelta={(d) => timeline.setSize((s) => Math.min(320, Math.max(120, s - d)))} />
-          <StudioTimeline />
+          <StudioResizeHandle edge="n" onDelta={(d) => timeline.setSize((s) => Math.min(360, Math.max(140, s + d)))} />
+          <StudioTimeline
+            captureSnapshot={canvas.captureAnimationFrame}
+            applySnapshot={canvas.applyAnimationFrame}
+            onOnionSkinPreviewChange={canvas.setOnionSkinPreview}
+          />
         </div>
       </div>
     </StudioDocumentContext.Provider>
@@ -602,6 +659,14 @@ export function IllustratorStudioShell({
         onEscapeKeyDown={(e) => {
           e.preventDefault()
           void requestClose()
+        }}
+        onPointerDownOutside={(event) => {
+          const target = event.target as HTMLElement
+          if (target.closest('[data-studio-overlay]')) event.preventDefault()
+        }}
+        onInteractOutside={(event) => {
+          const target = event.target as HTMLElement
+          if (target.closest('[data-studio-overlay]')) event.preventDefault()
         }}
       >
         <DialogTitle className="sr-only">{artwork?.title?.trim() || 'Untitled Artwork'} — Creative Studio</DialogTitle>

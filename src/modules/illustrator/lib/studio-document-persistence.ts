@@ -3,6 +3,7 @@ import type { ToolSettings } from '@/modules/illustrator/components/studio/studi
 import type { StudioArtworkDraft } from '@/modules/illustrator/components/studio/studio-types'
 import type { PaintLayer } from '@/modules/illustrator/components/studio/studio-layer-engine'
 import { restoreLayerSnapshot, snapshotLayers } from '@/modules/illustrator/components/studio/studio-layer-engine'
+import { encodeLayerBuffersAsync, extractLayerPixelPayloads } from '@/modules/illustrator/lib/studio-layer-encode'
 
 export const STUDIO_AUTOSAVE_VERSION = 1 as const
 
@@ -195,6 +196,88 @@ export function serializeStudioDocument(input: {
       locked: layer.locked ?? false,
       imageData: serializeImageData(layer.imageData),
     })),
+    elements: input.elements.map(serializeCanvasElement),
+  }
+}
+
+export async function serializeStudioDocumentAsync(
+  input: {
+    artwork: StudioArtworkDraft
+    document: PersistedStudioDocument['document']
+    colors: PersistedStudioDocument['colors']
+    toolSettings: ToolSettings
+    activeLayerId: string
+    layers: PaintLayer[]
+    elements: CanvasElement[]
+  },
+  options?: {
+    layerVersions?: Record<string, number>
+    savedLayerVersions?: Record<string, number>
+    cachedLayers?: SerializedLayerSnapshot[]
+  },
+): Promise<PersistedStudioDocument> {
+  const payloads = extractLayerPixelPayloads(input.layers)
+  const encodeIndexes: number[] = []
+  const buffers: ArrayBuffer[] = []
+  const cachedById = new Map((options?.cachedLayers ?? []).map((layer) => [layer.id, layer]))
+  const layerVersions = options?.layerVersions ?? {}
+  const savedLayerVersions = options?.savedLayerVersions ?? {}
+
+  const serializedLayers: SerializedLayerSnapshot[] = payloads.map((payload, index) => {
+    const cached = cachedById.get(payload.id)
+    const version = layerVersions[payload.id] ?? 0
+    const savedVersion = savedLayerVersions[payload.id]
+    if (cached && savedVersion !== undefined && version === savedVersion) {
+      return cached
+    }
+    if (!payload.buffer.byteLength) {
+      return {
+        id: payload.id,
+        name: payload.name,
+        visible: payload.visible,
+        locked: payload.locked,
+        opacity: payload.opacity,
+        imageData: { width: payload.width, height: payload.height },
+      }
+    }
+    encodeIndexes.push(index)
+    buffers.push(payload.buffer)
+    return {
+      id: payload.id,
+      name: payload.name,
+      visible: payload.visible,
+      locked: payload.locked,
+      opacity: payload.opacity,
+      imageData: { width: payload.width, height: payload.height },
+    }
+  })
+
+  if (buffers.length) {
+    const encoded = await encodeLayerBuffersAsync(buffers)
+    encoded.forEach((dataBase64, encodedIndex) => {
+      const layerIndex = encodeIndexes[encodedIndex]
+      serializedLayers[layerIndex] = {
+        ...serializedLayers[layerIndex],
+        imageData: {
+          ...serializedLayers[layerIndex].imageData,
+          dataBase64,
+        },
+      }
+    })
+  }
+
+  return {
+    version: STUDIO_AUTOSAVE_VERSION,
+    artworkId: input.artwork.id,
+    savedAt: new Date().toISOString(),
+    title: input.artwork.title?.trim() || 'Untitled Artwork',
+    status: input.artwork.status ?? 'draft',
+    document: input.document,
+    colors: input.colors,
+    toolSettings: input.toolSettings,
+    activeLayerId: input.activeLayerId,
+    hasPaintedContent: input.layers.some(layerHasPaintedPixels),
+    layers: serializedLayers,
     elements: input.elements.map(serializeCanvasElement),
   }
 }

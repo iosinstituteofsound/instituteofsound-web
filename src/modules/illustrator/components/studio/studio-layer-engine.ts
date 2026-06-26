@@ -26,7 +26,7 @@ export function createLayer(
   canvas.width = size.width
   canvas.height = size.height
   if (fill) {
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true })
     if (ctx) {
       ctx.fillStyle = fill
       ctx.fillRect(0, 0, size.width, size.height)
@@ -63,8 +63,59 @@ export function nextLayerName(layers: PaintLayer[]) {
   return `Layer ${nums.length ? Math.max(...nums) + 1 : 1}`
 }
 
-export function snapshotLayers(layers: PaintLayer[]) {
-  return layers.map((layer) => ({
+export type LayerSnapshot = {
+  id: string
+  name: string
+  visible: boolean
+  locked: boolean
+  opacity: number
+  imageData: ImageData
+}
+
+export type LayerCanvasSnapshot = {
+  id: string
+  name: string
+  visible: boolean
+  locked: boolean
+  opacity: number
+  pixelCanvas: HTMLCanvasElement
+}
+
+function copyLayerCanvas(layer: PaintLayer): HTMLCanvasElement {
+  const copy = document.createElement('canvas')
+  copy.width = layer.canvas.width
+  copy.height = layer.canvas.height
+  const ctx = copy.getContext('2d')
+  if (ctx) ctx.drawImage(layer.canvas, 0, 0)
+  return copy
+}
+
+export function snapshotLayerCanvas(layer: PaintLayer): LayerCanvasSnapshot {
+  return {
+    id: layer.id,
+    name: layer.name,
+    visible: layer.visible,
+    locked: layer.locked,
+    opacity: layer.opacity,
+    pixelCanvas: copyLayerCanvas(layer),
+  }
+}
+
+export function snapshotLayersCanvas(layers: PaintLayer[]): LayerCanvasSnapshot[] {
+  return layers.map(snapshotLayerCanvas)
+}
+
+export function restoreActiveLayerFromCanvas(layers: PaintLayer[], snapshot: LayerCanvasSnapshot) {
+  const layer = layers.find((item) => item.id === snapshot.id)
+  if (!layer) return
+  const ctx = layer.canvas.getContext('2d')
+  if (!ctx) return
+  ctx.clearRect(0, 0, layer.canvas.width, layer.canvas.height)
+  ctx.drawImage(snapshot.pixelCanvas, 0, 0)
+}
+
+export function snapshotLayer(layer: PaintLayer): LayerSnapshot {
+  return {
     id: layer.id,
     name: layer.name,
     visible: layer.visible,
@@ -73,24 +124,66 @@ export function snapshotLayers(layers: PaintLayer[]) {
     imageData: layer.canvas
       .getContext('2d')!
       .getImageData(0, 0, layer.canvas.width, layer.canvas.height),
-  }))
+  }
 }
 
+export function snapshotLayers(layers: PaintLayer[]): LayerSnapshot[] {
+  return layers.map(snapshotLayer)
+}
+
+export function restoreActiveLayerPixels(layers: PaintLayer[], snapshot: LayerSnapshot) {
+  const layer = layers.find((item) => item.id === snapshot.id)
+  if (!layer) return
+  const ctx = layer.canvas.getContext('2d')
+  if (!ctx) return
+  ctx.putImageData(snapshot.imageData, 0, 0)
+}
+
+export function restoreLayerCanvasSnapshot(
+  layers: PaintLayer[],
+  snapshot: LayerCanvasSnapshot[],
+): PaintLayer[] {
+  return snapshot.map((snap) => {
+    const existing = layers.find((item) => item.id === snap.id)
+    const canvas = existing?.canvas ?? document.createElement('canvas')
+    canvas.width = snap.pixelCanvas.width
+    canvas.height = snap.pixelCanvas.height
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(snap.pixelCanvas, 0, 0)
+    }
+    return {
+      id: snap.id,
+      name: snap.name,
+      visible: snap.visible,
+      locked: snap.locked ?? false,
+      opacity: snap.opacity,
+      canvas,
+    }
+  })
+}
+
+const thumbCanvasCache = document.createElement('canvas')
+thumbCanvasCache.width = 28
+thumbCanvasCache.height = 28
+
 export function layerThumbnailDataUrl(layer: PaintLayer, size = 28): string {
-  const thumb = document.createElement('canvas')
-  thumb.width = size
-  thumb.height = size
-  const ctx = thumb.getContext('2d')
+  if (thumbCanvasCache.width !== size || thumbCanvasCache.height !== size) {
+    thumbCanvasCache.width = size
+    thumbCanvasCache.height = size
+  }
+  const ctx = thumbCanvasCache.getContext('2d')
   if (!ctx) return ''
   ctx.fillStyle = DOCUMENT_BG
   ctx.fillRect(0, 0, size, size)
   ctx.drawImage(layer.canvas, 0, 0, size, size)
-  return thumb.toDataURL('image/png')
+  return thumbCanvasCache.toDataURL('image/png')
 }
 
 export function restoreLayerSnapshot(
   layers: PaintLayer[],
-  snapshot: ReturnType<typeof snapshotLayers>,
+  snapshot: LayerSnapshot[],
 ): PaintLayer[] {
   return snapshot.map((snap) => {
     const existing = layers.find((l) => l.id === snap.id)
@@ -133,8 +226,9 @@ export function compositeLayers(
   ctx: CanvasRenderingContext2D,
   layers: PaintLayer[],
   draftLayerId?: string | null,
+  options?: { skipClear?: boolean },
 ) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+  if (!options?.skipClear) ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
   for (const layer of layers) {
     if (!layer.visible) continue

@@ -1,7 +1,8 @@
 import type { CanvasElement, Point, ShapeKind } from '@/modules/illustrator/components/studio/studio-canvas-model'
 import { CANVAS_SIZE, DOCUMENT_BG, elementBounds } from '@/modules/illustrator/components/studio/studio-canvas-model'
-import type { PaintLayer } from '@/modules/illustrator/components/studio/studio-layer-engine'
+import type { LayerCanvasSnapshot, PaintLayer } from '@/modules/illustrator/components/studio/studio-layer-engine'
 import { compositeLayers } from '@/modules/illustrator/components/studio/studio-layer-engine'
+import type { OnionSkinPreview } from '@/modules/illustrator/components/studio/studio-animation.types'
 import { paintSmoothStroke } from '@/modules/illustrator/components/studio/studio-brush-engine'
 import type { BrushPoint } from '@/modules/illustrator/components/studio/studio-brush-engine'
 
@@ -226,9 +227,39 @@ export async function loadBaseImage(src: string) {
 }
 
 export type PaintFrameCache = {
-  underlay: HTMLCanvasElement
-  overlay: HTMLCanvasElement
+  base: HTMLCanvasElement
   activeLayerId: string
+  width: number
+  height: number
+}
+
+export type BlitDirtyRect = {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+export function expandBlitDirtyRect(
+  rect: BlitDirtyRect | null,
+  x: number,
+  y: number,
+  radius: number,
+  canvasW: number,
+  canvasH: number,
+): BlitDirtyRect {
+  const pad = Math.ceil(radius) + 6
+  const minX = Math.max(0, Math.floor(x - pad))
+  const minY = Math.max(0, Math.floor(y - pad))
+  const maxX = Math.min(canvasW, Math.ceil(x + pad))
+  const maxY = Math.min(canvasH, Math.ceil(y + pad))
+  const next = { x: minX, y: minY, w: maxX - minX, h: maxY - minY }
+  if (!rect) return next
+  const x2 = Math.min(rect.x, next.x)
+  const y2 = Math.min(rect.y, next.y)
+  const x3 = Math.max(rect.x + rect.w, next.x + next.w)
+  const y3 = Math.max(rect.y + rect.h, next.y + next.h)
+  return { x: x2, y: y2, w: x3 - x2, h: y3 - y2 }
 }
 
 function createOffscreenCanvas(width: number, height: number) {
@@ -300,34 +331,77 @@ export function buildPaintFrameCache(
 
   const width = layers[0]?.canvas.width ?? CANVAS_SIZE
   const height = layers[0]?.canvas.height ?? CANVAS_SIZE
-  const underlay = createOffscreenCanvas(width, height)
-  const overlay = createOffscreenCanvas(width, height)
-  const underlayCtx = underlay.getContext('2d')
-  const overlayCtx = overlay.getContext('2d')
-  if (!underlayCtx || !overlayCtx) return null
+  const base = createOffscreenCanvas(width, height)
+  const baseCtx = base.getContext('2d')
+  if (!baseCtx) return null
 
-  compositeLayerRange(underlayCtx, layers, 0, activeIndex)
-  drawSceneOverlay(overlayCtx, layers, elements, baseImage, draft, selectedIds, activeIndex + 1)
+  compositeLayerRange(baseCtx, layers, 0, activeIndex)
+  drawSceneOverlay(baseCtx, layers, elements, baseImage, draft, selectedIds, activeIndex + 1)
 
-  return { underlay, overlay, activeLayerId }
+  return { base, activeLayerId, width, height }
 }
 
 export function blitPaintFrame(
   ctx: CanvasRenderingContext2D,
   cache: PaintFrameCache,
   layers: PaintLayer[],
+  dirty?: BlitDirtyRect | null,
 ) {
   const activeLayer = layers.find((layer) => layer.id === cache.activeLayerId)
   const { width, height } = ctx.canvas
-  ctx.clearRect(0, 0, width, height)
-  ctx.drawImage(cache.underlay, 0, 0)
+  const useDirty = dirty && dirty.w > 0 && dirty.h > 0 && dirty.w * dirty.h < width * height * 0.45
+
+  if (!useDirty) {
+    ctx.clearRect(0, 0, width, height)
+    ctx.drawImage(cache.base, 0, 0)
+    if (activeLayer?.visible) {
+      ctx.save()
+      ctx.globalAlpha = activeLayer.opacity
+      ctx.drawImage(activeLayer.canvas, 0, 0)
+      ctx.restore()
+    }
+    return
+  }
+
+  const { x, y, w, h } = dirty!
+  ctx.clearRect(x, y, w, h)
+  ctx.drawImage(cache.base, x, y, w, h, x, y, w, h)
   if (activeLayer?.visible) {
     ctx.save()
     ctx.globalAlpha = activeLayer.opacity
-    ctx.drawImage(activeLayer.canvas, 0, 0)
+    ctx.drawImage(activeLayer.canvas, x, y, w, h, x, y, w, h)
     ctx.restore()
   }
-  ctx.drawImage(cache.overlay, 0, 0)
+}
+
+function drawOnionSkinLayerSet(
+  ctx: CanvasRenderingContext2D,
+  layerSnaps: LayerCanvasSnapshot[],
+  opacity: number,
+  tint: string,
+) {
+  for (const snap of layerSnaps) {
+    if (!snap.visible) continue
+    ctx.save()
+    ctx.globalAlpha = snap.opacity * opacity
+    ctx.drawImage(snap.pixelCanvas, 0, 0)
+    ctx.globalCompositeOperation = 'source-atop'
+    ctx.fillStyle = tint
+    ctx.globalAlpha = opacity * 0.45
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    ctx.restore()
+  }
+}
+
+export function drawOnionSkinPreview(ctx: CanvasRenderingContext2D, preview: OnionSkinPreview) {
+  preview.before.forEach((layers, index) => {
+    const fade = preview.opacity * Math.max(0.2, 1 - index * 0.08)
+    drawOnionSkinLayerSet(ctx, layers, fade, preview.colorBefore)
+  })
+  preview.after.forEach((layers, index) => {
+    const fade = preview.opacity * Math.max(0.2, 1 - index * 0.08)
+    drawOnionSkinLayerSet(ctx, layers, fade, preview.colorAfter)
+  })
 }
 
 export function renderScene(
@@ -339,8 +413,15 @@ export function renderScene(
   selectedIds: string[],
   activeLayerId: string | null,
   onImageLoad?: () => void,
+  onionSkin?: OnionSkinPreview | null,
 ) {
-  compositeLayers(ctx, layers, activeLayerId)
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+  if (onionSkin) drawOnionSkinPreview(ctx, onionSkin)
+
+  ctx.save()
+  if (onionSkin?.blendPrimary) ctx.globalAlpha = 0.78
+  compositeLayers(ctx, layers, activeLayerId, { skipClear: true })
+  ctx.restore()
 
   const { width, height } = ctx.canvas
   if (baseImage) {
