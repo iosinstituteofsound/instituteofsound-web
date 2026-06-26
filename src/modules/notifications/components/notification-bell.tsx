@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Bell, Music2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useNotifications } from '@/modules/notifications/hooks/use-notifications'
 import type { NotificationDto } from '@/modules/notifications/types/notification.types'
+import { useHeaderPopoverPosition } from '@/shared/hooks/use-header-popover-position'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/notifications/styles/notification-bell.css'
 
@@ -29,7 +31,15 @@ function notificationHref(notification: NotificationDto): string | undefined {
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const panelStyle = useHeaderPopoverPosition(open, triggerRef, {
+    width: 360,
+    maxHeight: 420,
+    minHeight: 180,
+  })
+
   const { data, isLoading, markRead, markAllRead, isMarkingRead } = useNotifications()
 
   const unreadCount = data?.unreadCount ?? 0
@@ -39,9 +49,9 @@ export function NotificationBell() {
     if (!open) return
 
     const onPointerDown = (event: MouseEvent) => {
-      if (!panelRef.current?.contains(event.target as Node)) {
-        setOpen(false)
-      }
+      const target = event.target as Node
+      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) return
+      setOpen(false)
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -56,11 +66,87 @@ export function NotificationBell() {
     }
   }, [open])
 
+  const panel = open ? (
+    <div
+      ref={panelRef}
+      className="ios-notification-bell__panel"
+      style={panelStyle}
+      role="dialog"
+      aria-label="Notifications"
+    >
+      <div className="ios-notification-bell__head">
+        <p className="ios-notification-bell__title">Notifications</p>
+        {unreadCount > 0 ? (
+          <button
+            type="button"
+            className="ios-notification-bell__mark-all"
+            disabled={isMarkingRead}
+            onClick={() => markAllRead()}
+          >
+            Mark all read
+          </button>
+        ) : null}
+      </div>
+
+      {isLoading ? <p className="ios-notification-bell__empty">Loading…</p> : null}
+
+      {!isLoading && items.length === 0 ? (
+        <p className="ios-notification-bell__empty">No notifications yet.</p>
+      ) : null}
+
+      <ul className="ios-notification-bell__list">
+        {items.map((item) => {
+          const href = notificationHref(item)
+          const content = (
+            <>
+              <span className="ios-notification-bell__icon" aria-hidden>
+                <Music2 size={16} />
+              </span>
+              <span className="ios-notification-bell__copy">
+                <span className="ios-notification-bell__item-title">{item.title}</span>
+                <span className="ios-notification-bell__item-body">{item.body}</span>
+                <span className="ios-notification-bell__item-time">{formatRelativeTime(item.createdAt)}</span>
+              </span>
+            </>
+          )
+
+          return (
+            <li key={item.id}>
+              {href ? (
+                <Link
+                  to={href}
+                  className={cn('ios-notification-bell__item', !item.readAt && 'is-unread')}
+                  onClick={() => {
+                    if (!item.readAt) markRead(item.id)
+                    setOpen(false)
+                  }}
+                >
+                  {content}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className={cn('ios-notification-bell__item', !item.readAt && 'is-unread')}
+                  onClick={() => {
+                    if (!item.readAt) markRead(item.id)
+                  }}
+                >
+                  {content}
+                </button>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  ) : null
+
   return (
-    <div className="ios-notification-bell" ref={panelRef}>
+    <div className="ios-notification-bell" ref={rootRef}>
       <button
+        ref={triggerRef}
         type="button"
-        className="dashboard-header-utility ios-notification-bell__trigger"
+        className={cn('dashboard-header-utility ios-notification-bell__trigger', open && 'is-open')}
         aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
@@ -71,74 +157,7 @@ export function NotificationBell() {
         ) : null}
       </button>
 
-      {open ? (
-        <div className="ios-notification-bell__panel" role="dialog" aria-label="Notifications">
-          <div className="ios-notification-bell__head">
-            <p className="ios-notification-bell__title">Notifications</p>
-            {unreadCount > 0 ? (
-              <button
-                type="button"
-                className="ios-notification-bell__mark-all"
-                disabled={isMarkingRead}
-                onClick={() => markAllRead()}
-              >
-                Mark all read
-              </button>
-            ) : null}
-          </div>
-
-          {isLoading ? <p className="ios-notification-bell__empty">Loading…</p> : null}
-
-          {!isLoading && items.length === 0 ? (
-            <p className="ios-notification-bell__empty">No notifications yet.</p>
-          ) : null}
-
-          <ul className="ios-notification-bell__list">
-            {items.map((item) => {
-              const href = notificationHref(item)
-              const content = (
-                <>
-                  <span className="ios-notification-bell__icon" aria-hidden>
-                    <Music2 size={16} />
-                  </span>
-                  <span className="ios-notification-bell__copy">
-                    <span className="ios-notification-bell__item-title">{item.title}</span>
-                    <span className="ios-notification-bell__item-body">{item.body}</span>
-                    <span className="ios-notification-bell__item-time">{formatRelativeTime(item.createdAt)}</span>
-                  </span>
-                </>
-              )
-
-              return (
-                <li key={item.id}>
-                  {href ? (
-                    <Link
-                      to={href}
-                      className={cn('ios-notification-bell__item', !item.readAt && 'is-unread')}
-                      onClick={() => {
-                        if (!item.readAt) markRead(item.id)
-                        setOpen(false)
-                      }}
-                    >
-                      {content}
-                    </Link>
-                  ) : (
-                    <button
-                      type="button"
-                      className={cn('ios-notification-bell__item', !item.readAt && 'is-unread')}
-                      onClick={() => {
-                        if (!item.readAt) markRead(item.id)
-                      }}
-                    >
-                      {content}
-                    </button>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      ) : null}
+      {panel ? createPortal(panel, document.body) : null}
     </div>
   )
 }

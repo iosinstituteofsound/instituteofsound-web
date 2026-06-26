@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { useDeleteFeedItem } from '@/modules/feed/hooks/use-feed'
+import { useFollowStatus, useToggleFollow } from '@/modules/social/hooks/use-follow'
 import type { FeedAuthorDto } from '@/modules/feed/types/feed.types'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -93,6 +94,9 @@ export function FeedPostOptionsMenu({
   const userId = useAuthStore((s) => s.userId)
   const isOwner = Boolean(userId && userId === author.id)
   const deletePost = useDeleteFeedItem()
+  const { data: followStatus } = useFollowStatus(!isOwner ? author.id : undefined)
+  const toggleFollow = useToggleFollow(author.id)
+  const isFollowing = followStatus?.following ?? false
 
   const handleDelete = () => {
     if (!window.confirm('Delete this post? This cannot be undone.')) return
@@ -163,9 +167,25 @@ export function FeedPostOptionsMenu({
         />
         <PostMenuOption
           icon={UserX}
-          title={`Unfollow ${authorName}`}
-          subtitle={`Stop seeing posts from this Page. They won't be notified that you unfollowed.`}
-          onClick={() => toast.success(`Unfollowed ${authorName}`)}
+          title={isFollowing ? `Unfollow ${authorName}` : `Follow ${authorName}`}
+          subtitle={
+            isFollowing
+              ? `Stop seeing posts from ${authorName}. They won't be notified that you unfollowed.`
+              : `See posts from ${authorName} in your following feed.`
+          }
+          onClick={() => {
+            toggleFollow.mutate(isFollowing, {
+              onSuccess: (result) => {
+                toast.success(
+                  result.following ? `Following ${authorName}` : `Unfollowed ${authorName}`,
+                )
+              },
+              onError: () => {
+                toast.error('Could not update follow status. Please try again.')
+              },
+            })
+          }}
+          disabled={toggleFollow.isPending}
         />
         <PostMenuOption
           icon={MessageCircleWarning}

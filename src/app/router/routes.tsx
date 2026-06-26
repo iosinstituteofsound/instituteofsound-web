@@ -80,6 +80,11 @@ const FeedPage = lazy(() =>
     default: m.FeedPage,
   })),
 )
+const MessengerPage = lazy(() =>
+  import('@/modules/messenger/pages/messenger-page').then((m) => ({
+    default: m.MessengerPage,
+  })),
+)
 const FeedPostPage = lazy(() =>
   import('@/modules/feed/pages/feed-post-page').then((m) => ({
     default: m.FeedPostPage,
@@ -364,6 +369,14 @@ export const router = createBrowserRouter([
               </Lazy>
             </PermissionGuard>
           </ResourceGuard>
+        ),
+      },
+      {
+        path: 'messenger',
+        element: (
+          <Lazy>
+            <MessengerPage />
+          </Lazy>
         ),
       },
       {

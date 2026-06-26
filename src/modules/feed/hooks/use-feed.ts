@@ -5,12 +5,15 @@ import { sortFeedItemsLatest } from '@/modules/feed/lib/feed-sort'
 import type { CreateFeedItemInput, FeedListResponse } from '@/modules/feed/types/feed.types'
 
 export const feedQueryKey = ['feed'] as const
-const FEED_PAGE_SIZE = 20
+export const FEED_PAGE_SIZE = 20
 
-export function useFeedList(limit = FEED_PAGE_SIZE) {
+export type FeedScope = 'all' | 'following'
+
+export function useFeedList(limit = FEED_PAGE_SIZE, scope: FeedScope = 'all') {
   return useInfiniteQuery({
-    queryKey: [...feedQueryKey, limit],
-    queryFn: ({ pageParam }) => feedApi.listFeed({ limit, cursor: pageParam as string | undefined }),
+    queryKey: [...feedQueryKey, limit, scope],
+    queryFn: ({ pageParam }) =>
+      feedApi.listFeed({ limit, cursor: pageParam as string | undefined, scope }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   })

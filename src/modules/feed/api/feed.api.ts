@@ -8,6 +8,7 @@ export async function listFeed(params?: {
   cursor?: string
   authorId?: string
   type?: FeedItemDto['type']
+  scope?: 'all' | 'following'
 }) {
   const { data } = await apiClient.get<ApiSuccessResponse<FeedListResponse>>(`${API_V1}/feed`, {
     params,

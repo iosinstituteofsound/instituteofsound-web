@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { ArrowLeft, Check, Search } from 'lucide-react'
-import { useFeedList } from '@/modules/feed/hooks/use-feed'
+import { useAuthStore } from '@/app/stores/auth-store'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { useFollowingUsers } from '@/modules/social/hooks/use-following-users'
 import { cn } from '@/shared/lib/cn'
 
 interface AudienceFriend {
@@ -26,25 +27,16 @@ export function PostAudienceFriendsPicker({
   onDone,
 }: PostAudienceFriendsPickerProps) {
   const [query, setQuery] = useState('')
-  const feed = useFeedList(40)
+  const viewerId = useAuthStore((s) => s.userId)
+  const followingQuery = useFollowingUsers(viewerId ?? undefined)
 
   const friends = useMemo<AudienceFriend[]>(() => {
-    const seen = new Set<string>()
-    const items = feed.data?.pages.flatMap((page) => page.items) ?? []
-
-    return items
-      .map((item) => item.author)
-      .filter((author) => {
-        if (!author?.id || seen.has(author.id)) return false
-        seen.add(author.id)
-        return true
-      })
-      .map((author) => ({
-        id: author.id,
-        name: author.name,
-        avatarUrl: author.avatarUrl,
-      }))
-  }, [feed.data])
+    return (followingQuery.data ?? []).map((user) => ({
+      id: user.id,
+      name: user.name,
+      avatarUrl: user.avatarThumbnailUrl ?? user.avatarUrl,
+    }))
+  }, [followingQuery.data])
 
   const filteredFriends = useMemo(() => {
     const needle = query.trim().toLowerCase()
@@ -83,8 +75,8 @@ export function PostAudienceFriendsPicker({
       </div>
 
       <div className="feed-post-audience-friends__list">
-        {feed.isLoading ? (
-          <p className="feed-post-audience-friends__empty">Loading people from your feed…</p>
+        {followingQuery.isLoading ? (
+          <p className="feed-post-audience-friends__empty">Loading people you follow…</p>
         ) : filteredFriends.length ? (
           filteredFriends.map((friend) => {
             const selected = selectedIds.includes(friend.id)
@@ -105,7 +97,7 @@ export function PostAudienceFriendsPicker({
           })
         ) : (
           <p className="feed-post-audience-friends__empty">
-            {query.trim() ? 'No matches found.' : 'No suggested people yet. Try again after your feed loads.'}
+            {query.trim() ? 'No matches found.' : 'Follow people to choose them for post audience.'}
           </p>
         )}
       </div>

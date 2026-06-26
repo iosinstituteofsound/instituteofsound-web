@@ -22,6 +22,7 @@ export function DashboardLayout() {
   const showSidebar = dashboardConfig.sidebar.visible
   const showHeader = dashboardConfig.header.visible
   const showMobileNav = showSidebar && isMobile
+  const isMessengerRoute = location.pathname.startsWith('/messenger')
 
   useBodyScrollLock(showSidebar && mobileOpen && isMobile)
 
@@ -76,12 +77,16 @@ export function DashboardLayout() {
 
         <main
           ref={mainScrollRef}
-          className="ios-dashboard-main min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+          className={cn(
+            'ios-dashboard-main min-h-0 flex-1 overflow-x-hidden',
+            isMessengerRoute ? 'flex flex-col overflow-hidden' : 'overflow-y-auto',
+          )}
         >
           <div
             className={cn(
               MAIN_PADDING_CLASS[dashboardConfig.main.padding],
               MAIN_MAX_WIDTH_CLASS[dashboardConfig.main.maxWidth],
+              isMessengerRoute && 'flex min-h-0 flex-1 flex-col',
             )}
           >
             <Outlet />

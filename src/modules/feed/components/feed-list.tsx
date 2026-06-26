@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react'
 import { FeedItemCard } from '@/modules/feed/lib/feed-type-registry'
-import { useFeedList } from '@/modules/feed/hooks/use-feed'
+import { useFeedList, type FeedScope, FEED_PAGE_SIZE } from '@/modules/feed/hooks/use-feed'
 import { sortFeedItemsLatest } from '@/modules/feed/lib/feed-sort'
 import { isStoryItem } from '@/modules/feed/lib/story-utils'
 import { PageLoader } from '@/shared/components/feedback/loader'
@@ -8,8 +8,8 @@ import { ErrorState } from '@/shared/components/feedback/states'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { useInfiniteScroll } from '@/shared/hooks/use-infinite-scroll'
 
-export function useFeedListItems() {
-  const query = useFeedList()
+export function useFeedListItems(scope: FeedScope = 'all') {
+  const query = useFeedList(FEED_PAGE_SIZE, scope)
   const items = useMemo(
     () => sortFeedItemsLatest(query.data?.pages.flatMap((page) => page.items) ?? []),
     [query.data?.pages],
@@ -19,10 +19,13 @@ export function useFeedListItems() {
 
 interface FeedListProps {
   compactLoader?: boolean
+  scope?: FeedScope
+  emptyMessage?: string
 }
 
-export function FeedList({ compactLoader }: FeedListProps) {
-  const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeedList()
+export function FeedList({ compactLoader, scope = 'all', emptyMessage }: FeedListProps) {
+  const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useFeedList(FEED_PAGE_SIZE, scope)
 
   const items = useMemo(
     () => sortFeedItemsLatest(data?.pages.flatMap((page) => page.items) ?? []).filter((item) => !isStoryItem(item)),
@@ -76,8 +79,13 @@ export function FeedList({ compactLoader }: FeedListProps) {
   if (!items.length) {
     return (
       <div className="rounded-lg border border-dashed bg-card p-10 text-center shadow-sm">
-        <p className="font-medium">No posts yet</p>
-        <p className="mt-1 text-sm text-muted-foreground">Be the first to share something with the community.</p>
+        <p className="font-medium">{scope === 'following' ? 'No posts from people you follow' : 'No posts yet'}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {emptyMessage ??
+            (scope === 'following'
+              ? 'Follow artists and operators to see their posts here.'
+              : 'Be the first to share something with the community.')}
+        </p>
       </div>
     )
   }

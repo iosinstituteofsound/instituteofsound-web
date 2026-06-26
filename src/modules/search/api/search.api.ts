@@ -133,6 +133,9 @@ export interface PublicProfileDto {
     showListeningActivity: boolean
     allowDirectMessages: boolean
   }
+  followerCount?: number
+  followingCount?: number
+  isFollowing?: boolean
 }
 
 export async function getPublicProfile(userId: string) {

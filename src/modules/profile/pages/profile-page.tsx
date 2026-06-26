@@ -15,6 +15,7 @@ import { ProfileLabelOverviewTab } from '@/modules/profile/components/profile-la
 import { ProfileCuratorOverviewTab } from '@/modules/profile/components/profile-curator-overview-tab'
 import { ProfilePostsPanel } from '@/modules/profile/components/profile-posts-panel'
 import { usePublicProfile } from '@/modules/profile/hooks/use-public-profile'
+import { useFollowStats } from '@/modules/social/hooks/use-follow'
 import { useSlidingIndicator } from '@/modules/profile/lib/use-sliding-indicator'
 import type { PublicProfileDto } from '@/modules/search/api/search.api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
@@ -75,6 +76,15 @@ export function ProfilePage() {
       ? mapPublicProfileToUser(publicProfile)
       : undefined
 
+  const { data: ownFollowStats } = useFollowStats(isOwnProfile ? user?.id : undefined)
+  const followerCount = isOwnProfile
+    ? (ownFollowStats?.followerCount ?? 0)
+    : (publicProfile?.followerCount ?? 0)
+  const followingCount = isOwnProfile
+    ? (ownFollowStats?.followingCount ?? 0)
+    : (publicProfile?.followingCount ?? 0)
+  const isFollowing = isOwnProfile ? undefined : publicProfile?.isFollowing
+
   const dynamicTabs =
     (isOwnProfile
       ? meData?.authorization.activeLayout?.profileTabs
@@ -109,7 +119,13 @@ export function ProfilePage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-0">
-      <ProfileCoverSection user={user} editable={isOwnProfile} />
+      <ProfileCoverSection
+        user={user}
+        editable={isOwnProfile}
+        followerCount={followerCount}
+        followingCount={followingCount}
+        isFollowing={isFollowing}
+      />
 
       <div className="mt-1 border-b">
         <nav ref={tabNavRef} className="relative -mb-px flex gap-1 overflow-x-auto px-1">

@@ -15,6 +15,9 @@ import { CoverPhotoRepositionDialog } from '@/modules/profile/components/cover-p
 import { CroppedCover } from '@/modules/profile/components/cropped-cover'
 import { ProfileAvatarMenu } from '@/modules/profile/components/profile-avatar-menu'
 import { SelectPhotoDialog } from '@/modules/profile/components/select-photo-dialog'
+import { FollowStats } from '@/modules/social/components/follow-stats'
+import { ProfileFollowButton } from '@/modules/social/components/profile-follow-button'
+import { ProfileMessageButton } from '@/modules/messenger/components/profile-message-button'
 import { useUpdateProfile } from '@/modules/profile/hooks/use-profile'
 import {
   addStoredUpload,
@@ -37,10 +40,20 @@ import { toast } from '@/shared/components/ui/sonner'
 type ProfileCoverSectionProps = {
   user: UserDto
   editable?: boolean
+  followerCount?: number
+  followingCount?: number
+  isFollowing?: boolean
   className?: string
 }
 
-export function ProfileCoverSection({ user, editable = true, className }: ProfileCoverSectionProps) {
+export function ProfileCoverSection({
+  user,
+  editable = true,
+  followerCount = 0,
+  followingCount = 0,
+  isFollowing,
+  className,
+}: ProfileCoverSectionProps) {
   const updateProfile = useUpdateProfile()
   const uploadInputRef = useRef<HTMLInputElement>(null)
   const objectUrlRef = useRef<string | null>(null)
@@ -234,6 +247,12 @@ export function ProfileCoverSection({ user, editable = true, className }: Profil
                 {user.username ? (
                   <p className="text-[13px] font-medium tracking-wide text-white/65">@{user.username}</p>
                 ) : null}
+                <FollowStats
+                  userId={user.id}
+                  followerCount={followerCount}
+                  followingCount={followingCount}
+                  className="pt-1"
+                />
                 {user.bio ? (
                   <p className="max-w-xl pt-0.5 text-[15px] leading-relaxed text-white/85 drop-shadow-[0_1px_10px_rgba(0,0,0,0.7)]">
                     {user.bio}
@@ -263,7 +282,16 @@ export function ProfileCoverSection({ user, editable = true, className }: Profil
                   </Link>
                 </Button>
               </div>
-            ) : null}
+            ) : (
+              <div className="flex flex-wrap gap-2.5 sm:pb-0.5">
+                <ProfileFollowButton
+                  userId={user.id}
+                  userName={user.name}
+                  initialFollowing={isFollowing}
+                />
+                <ProfileMessageButton userId={user.id} />
+              </div>
+            )}
           </div>
         </div>
       </div>

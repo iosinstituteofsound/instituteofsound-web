@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { LayoutGrid, PanelLeft, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { NotificationBell } from '@/modules/notifications/components/notification-bell'
+import { MessengerHeaderButton } from '@/modules/messenger/components/messenger-header-button'
 import { UserProfileMenu } from '@/app/components/user-profile-menu'
 import { useLayoutStore } from '@/app/stores/layout-store'
 import { GlobalSearchModal } from '@/modules/search/components/global-search-modal'
@@ -80,6 +81,7 @@ export function DashboardHeader({ onOpenMenu }: DashboardHeaderProps) {
               <Search className="h-5 w-5" />
             </Button>
 
+            <MessengerHeaderButton />
             <NotificationBell />
 
             {dashboardConfig.header.showProfileMenu ? <UserProfileMenu /> : null}
@@ -136,6 +138,7 @@ export function DashboardHeader({ onOpenMenu }: DashboardHeaderProps) {
           <button type="button" className="dashboard-header-utility hidden sm:inline-flex" aria-label="Apps">
             <LayoutGrid className="h-5 w-5" />
           </button>
+          <MessengerHeaderButton />
           <NotificationBell />
 
           {dashboardConfig.header.showProfileMenu ? <UserProfileMenu /> : null}

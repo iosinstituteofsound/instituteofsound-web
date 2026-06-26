@@ -10,9 +10,28 @@ import {
   REALTIME_NOTIFICATION_EVENT,
   type NotificationDto,
 } from '@/modules/notifications/types/notification.types'
+import {
+  MESSENGER_MESSAGE_EVENT,
+  MESSENGER_MESSAGE_UPDATED_EVENT,
+  MESSENGER_PRESENCE_EVENT,
+  MESSENGER_READ_EVENT,
+  MESSENGER_THREAD_EVENT,
+  MESSENGER_TYPING_EVENT,
+  type DmMessage,
+  type DmThreadSummary,
+  type MessengerPresencePayload,
+  type MessengerReadPayload,
+  type MessengerTypingPayload,
+} from '@/modules/messenger/types/messenger.types'
 
 type AnalyticsListener = (envelope: RealtimeAnalyticsEnvelope) => void
 type NotificationListener = (notification: NotificationDto) => void
+type MessengerMessageListener = (message: DmMessage) => void
+type MessengerMessageUpdatedListener = (message: DmMessage) => void
+type MessengerThreadListener = (thread: DmThreadSummary) => void
+type MessengerTypingListener = (payload: MessengerTypingPayload) => void
+type MessengerReadListener = (payload: MessengerReadPayload) => void
+type MessengerPresenceListener = (payload: MessengerPresencePayload) => void
 
 const CONNECT_TIMEOUT_MS = 15_000
 
@@ -20,7 +39,14 @@ class RealtimeSocketClient {
   private socket: Socket | null = null
   private listeners = new Set<AnalyticsListener>()
   private notificationListeners = new Set<NotificationListener>()
+  private messengerMessageListeners = new Set<MessengerMessageListener>()
+  private messengerMessageUpdatedListeners = new Set<MessengerMessageUpdatedListener>()
+  private messengerThreadListeners = new Set<MessengerThreadListener>()
+  private messengerTypingListeners = new Set<MessengerTypingListener>()
+  private messengerReadListeners = new Set<MessengerReadListener>()
+  private messengerPresenceListeners = new Set<MessengerPresenceListener>()
   private subscribedReleaseIds = new Set<string>()
+  private subscribedThreadIds = new Set<string>()
   private subscribedArtistProfileId: string | null = null
   private connectPromise: Promise<Socket> | null = null
 
@@ -77,6 +103,30 @@ class RealtimeSocketClient {
       }
     })
 
+    this.socket.on(MESSENGER_MESSAGE_EVENT, (message: DmMessage) => {
+      for (const listener of this.messengerMessageListeners) listener(message)
+    })
+
+    this.socket.on(MESSENGER_MESSAGE_UPDATED_EVENT, (message: DmMessage) => {
+      for (const listener of this.messengerMessageUpdatedListeners) listener(message)
+    })
+
+    this.socket.on(MESSENGER_THREAD_EVENT, (thread: DmThreadSummary) => {
+      for (const listener of this.messengerThreadListeners) listener(thread)
+    })
+
+    this.socket.on(MESSENGER_TYPING_EVENT, (payload: MessengerTypingPayload) => {
+      for (const listener of this.messengerTypingListeners) listener(payload)
+    })
+
+    this.socket.on(MESSENGER_READ_EVENT, (payload: MessengerReadPayload) => {
+      for (const listener of this.messengerReadListeners) listener(payload)
+    })
+
+    this.socket.on(MESSENGER_PRESENCE_EVENT, (payload: MessengerPresencePayload) => {
+      for (const listener of this.messengerPresenceListeners) listener(payload)
+    })
+
     this.connectPromise = this.waitForSocket(this.socket).finally(() => {
       this.connectPromise = null
     })
@@ -100,6 +150,59 @@ class RealtimeSocketClient {
     return () => {
       this.notificationListeners.delete(listener)
     }
+  }
+
+  onMessengerMessage(listener: MessengerMessageListener): () => void {
+    this.messengerMessageListeners.add(listener)
+    return () => this.messengerMessageListeners.delete(listener)
+  }
+
+  onMessengerMessageUpdated(listener: MessengerMessageUpdatedListener): () => void {
+    this.messengerMessageUpdatedListeners.add(listener)
+    return () => this.messengerMessageUpdatedListeners.delete(listener)
+  }
+
+  onMessengerThread(listener: MessengerThreadListener): () => void {
+    this.messengerThreadListeners.add(listener)
+    return () => this.messengerThreadListeners.delete(listener)
+  }
+
+  onMessengerTyping(listener: MessengerTypingListener): () => void {
+    this.messengerTypingListeners.add(listener)
+    return () => this.messengerTypingListeners.delete(listener)
+  }
+
+  onMessengerRead(listener: MessengerReadListener): () => void {
+    this.messengerReadListeners.add(listener)
+    return () => this.messengerReadListeners.delete(listener)
+  }
+
+  onMessengerPresence(listener: MessengerPresenceListener): () => void {
+    this.messengerPresenceListeners.add(listener)
+    return () => this.messengerPresenceListeners.delete(listener)
+  }
+
+  async subscribeThread(threadId: string): Promise<void> {
+    if (!env.wsEnabled) return
+    this.subscribedThreadIds.add(threadId)
+    const socket = await this.ensureConnected()
+    await this.emitAck(socket, 'subscribe:thread', { threadId })
+  }
+
+  async unsubscribeThread(threadId: string): Promise<void> {
+    this.subscribedThreadIds.delete(threadId)
+    if (!this.socket?.connected) return
+    await this.emitAck(this.socket, 'unsubscribe', { room: `thread:${threadId}` })
+  }
+
+  emitTypingStart(threadId: string): void {
+    if (!this.socket?.connected) return
+    this.socket.emit('typing:start', { threadId })
+  }
+
+  emitTypingStop(threadId: string): void {
+    if (!this.socket?.connected) return
+    this.socket.emit('typing:stop', { threadId })
   }
 
   async subscribeRelease(releaseId: string): Promise<void> {
@@ -189,6 +292,9 @@ class RealtimeSocketClient {
     await Promise.all([
       ...[...this.subscribedReleaseIds].map((releaseId) =>
         this.emitAck(this.socket!, 'subscribe:release', { releaseId }),
+      ),
+      ...[...this.subscribedThreadIds].map((threadId) =>
+        this.emitAck(this.socket!, 'subscribe:thread', { threadId }),
       ),
       this.subscribedArtistProfileId
         ? this.emitAck(this.socket!, 'subscribe:artist', {

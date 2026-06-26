@@ -5,9 +5,11 @@ import { CreateStoryDialog } from '@/modules/feed/components/create-story-dialog
 import { CreateTextStoryDialog } from '@/modules/feed/components/create-text-story-dialog'
 import { FeedComposer } from '@/modules/feed/components/feed-composer'
 import { FeedList, useFeedListItems } from '@/modules/feed/components/feed-list'
+import { FeedScopeToggle } from '@/modules/feed/components/feed-scope-toggle'
 import { FeedStoriesRow } from '@/modules/feed/components/feed-stories-row'
 import { StoryViewer } from '@/modules/feed/components/story-viewer'
 import { useScrollCollapse } from '@/modules/feed/hooks/use-scroll-collapse'
+import type { FeedScope } from '@/modules/feed/hooks/use-feed'
 import { getStoryItems } from '@/modules/feed/lib/story-content'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -18,7 +20,8 @@ import '@/modules/feed/styles/feed-page.css'
 
 export function FeedPage() {
   const { data: me } = useMe()
-  const { items, isLoading } = useFeedListItems()
+  const [feedScope, setFeedScope] = useState<FeedScope>('all')
+  const { items, isLoading } = useFeedListItems(feedScope)
   const [storyPickerOpen, setStoryPickerOpen] = useState(false)
   const [mediaStoryOpen, setMediaStoryOpen] = useState(false)
   const [textStoryOpen, setTextStoryOpen] = useState(false)
@@ -73,7 +76,12 @@ export function FeedPage() {
           />
         )}
 
-        <FeedList compactLoader />
+        <div className="flex items-center justify-between gap-3 px-1">
+          <p className="text-sm font-semibold text-foreground">Feed</p>
+          <FeedScopeToggle value={feedScope} onChange={setFeedScope} />
+        </div>
+
+        <FeedList compactLoader scope={feedScope} />
       </div>
 
       <CreateStoryDialog

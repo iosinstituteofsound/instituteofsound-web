@@ -1,0 +1,38 @@
+.ios-messenger-header-btn {
+  position: relative;
+  --ios-messenger-bolt: color-mix(in srgb, var(--foreground) 6%, var(--background));
+  transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.ios-messenger-header-btn:hover {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  --ios-messenger-bolt: color-mix(in srgb, var(--primary) 14%, var(--background));
+}
+
+.ios-messenger-header-btn--active {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  --ios-messenger-bolt: color-mix(in srgb, var(--primary) 18%, var(--background));
+}
+
+.ios-messenger-header-btn:active {
+  transform: scale(0.96);
+}
+
+.ios-messenger-header-btn__badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--background);
+}
