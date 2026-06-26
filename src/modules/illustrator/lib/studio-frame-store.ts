@@ -21,7 +21,6 @@ type FrameKeyframe = {
 export class StudioFrameStore {
   private keyframes = new Map<number, FrameKeyframe>()
   private totalFrames = 1
-  private lastKeyframeIndex = 0
 
   constructor(initial?: FrameDocumentState) {
     if (initial) {
@@ -53,7 +52,6 @@ export class StudioFrameStore {
     })
     const state: FrameDocumentState = { layers: nextLayers, elements: [...elements] }
     this.keyframes.set(index, { index, state, changedLayerIds: [...changedLayerIds] })
-    this.lastKeyframeIndex = index
     return state
   }
 

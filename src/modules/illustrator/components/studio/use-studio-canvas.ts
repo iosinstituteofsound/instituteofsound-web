@@ -976,10 +976,6 @@ export function useStudioCanvas({
       return
     }
 
-    if (drag.mode === 'paint') {
-      return
-    }
-
     if (drag.mode === 'marquee') {
       setDrag({ ...drag, current: point })
       return
