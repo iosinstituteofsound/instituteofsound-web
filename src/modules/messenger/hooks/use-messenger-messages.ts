@@ -73,7 +73,7 @@ export function useSendMessengerMessage(threadId: string) {
       })
       void queryClient.invalidateQueries({ queryKey: messengerThreadsQueryKey })
     },
-    onError: (_error, input, context) => {
+    onError: (_error, _input, context) => {
       queryClient.setQueryData(messengerMessagesQueryKey(threadId), (current: unknown) => {
         if (!current || typeof current !== 'object' || !('pages' in current)) return current
         const data = current as { pages: Array<{ messages: DmMessage[]; nextCursor: string | null }>; pageParams: unknown[] }

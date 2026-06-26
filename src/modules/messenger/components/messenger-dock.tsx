@@ -8,7 +8,6 @@ import {
   messengerThreadsQueryKey,
   messengerUnreadQueryKey,
 } from '@/modules/messenger/hooks/use-messenger-threads'
-import { openMessengerPopup } from '@/modules/messenger/lib/messenger-popup-open'
 import {
   MESSENGER_OPEN_EVENT,
   selectDockedWindows,

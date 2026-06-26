@@ -2,7 +2,6 @@ import { memo } from 'react'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { useMessengerThreads } from '@/modules/messenger/hooks/use-messenger-threads'
 import { useMessengerPopupStore } from '@/modules/messenger/store/messenger-popup-store'
-import { cn } from '@/shared/lib/cn'
 
 type MessengerDockStackProps = {
   threadIds: string[]
