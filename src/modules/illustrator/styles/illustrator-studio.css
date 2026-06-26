@@ -1645,6 +1645,25 @@
   overflow: auto;
 }
 
+.mas-timeline__labels--virtual {
+  overflow: hidden;
+  gap: 0;
+}
+
+.mas-timeline__labels-rail {
+  position: relative;
+  width: 100%;
+}
+
+.mas-timeline__labels--virtual .mas-timeline__label-btn {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding-inline: 4px;
+}
+
 .mas-timeline__label-btn {
   border: none;
   background: transparent;
@@ -1669,8 +1688,7 @@
 }
 
 .mas-timeline__tracks--virtual {
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: auto;
 }
 
 .mas-timeline__virtual-rail {

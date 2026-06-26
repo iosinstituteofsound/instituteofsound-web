@@ -10,6 +10,12 @@ import {
 import { useAnimationAssist } from '@/modules/illustrator/components/studio/use-animation-assist'
 import { useStudioDocument } from '@/modules/illustrator/components/studio/studio-document-context'
 import { useVirtualTimeline } from '@/modules/illustrator/components/studio/use-virtual-timeline'
+import {
+  TIMELINE_TRACK_HEIGHT,
+  timelineTrackIndexFromY,
+  timelineTrackTop,
+  useVirtualTracks,
+} from '@/modules/illustrator/components/studio/use-virtual-tracks'
 import type { FrameDocumentState } from '@/modules/illustrator/lib/studio-frame-store'
 import type { OnionSkinPreview } from '@/modules/illustrator/components/studio/studio-animation.types'
 import { cn } from '@/shared/lib/cn'
@@ -36,7 +42,6 @@ type ClipDragState = {
   startX: number
   startY: number
   trackHeight: number
-  trackOrder: string[]
 }
 
 const PLAYBACK_MODES: Array<{ id: PlaybackMode; label: string }> = [
@@ -62,6 +67,9 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
   const timeline = useVirtualTimeline(assist.totalFrames, assist.pixelsPerFrame)
   const playheadX = timeline.frameToX(assist.currentFrame)
   const trackAreaRef = useRef<HTMLDivElement | null>(null)
+  const labelsRef = useRef<HTMLDivElement | null>(null)
+  const [trackScrollEl, setTrackScrollEl] = useState<HTMLDivElement | null>(null)
+  const virtualTracks = useVirtualTracks(assist.tracks.length, trackScrollEl)
   const settingsBtnRef = useRef<HTMLButtonElement | null>(null)
   const settingsPanelRef = useRef<HTMLDivElement | null>(null)
   const [settingsAnchor, setSettingsAnchor] = useState<{ top: number; right: number } | null>(null)
@@ -71,16 +79,14 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
   const [dragClip, setDragClip] = useState<{ id: string; trackId: string; startFrame: number } | null>(null)
   const [dropTargetTrackId, setDropTargetTrackId] = useState<string | null>(null)
 
-  const trackOrder = assist.tracks.map((track) => track.id)
-
   const resolveTrackFromY = useCallback(
     (clientY: number) => {
       const area = trackAreaRef.current
-      if (!area) return assist.tracks[0]?.id ?? ''
+      if (!area || !assist.tracks.length) return assist.tracks[0]?.id ?? ''
       const rect = area.getBoundingClientRect()
-      const y = clientY - rect.top + area.scrollTop
-      const index = Math.max(0, Math.min(assist.tracks.length - 1, Math.floor((y - 8) / 28)))
-      return assist.tracks[index]?.id ?? assist.tracks[0]?.id ?? ''
+      const index = timelineTrackIndexFromY(area.scrollTop, clientY, rect.top)
+      const clamped = Math.min(index, assist.tracks.length - 1)
+      return assist.tracks[clamped]?.id ?? assist.tracks[0]?.id ?? ''
     },
     [assist.tracks],
   )
@@ -96,13 +102,12 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
         originTrackId: clip.trackId,
         startX: event.clientX,
         startY: event.clientY,
-        trackHeight: 28,
-        trackOrder,
+        trackHeight: TIMELINE_TRACK_HEIGHT,
       }
       setDragClip({ id: clip.id, trackId: clip.trackId, startFrame: clip.startFrame })
       event.currentTarget.setPointerCapture(event.pointerId)
     },
-    [assist, trackOrder],
+    [assist],
   )
 
   const handleClipPointerMove = useCallback(
@@ -220,11 +225,21 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
     [assist, timeline],
   )
 
+  const handleTrackScroll = useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      timeline.onTrackScroll(event)
+      if (labelsRef.current) {
+        labelsRef.current.scrollTop = event.currentTarget.scrollTop
+      }
+    },
+    [timeline],
+  )
+
   const renderClip = (clip: TimelineClip, isGhost = false) => {
     const active = dragClip?.id === clip.id
     const frame = active && dragClip ? dragClip.startFrame : clip.startFrame
     const trackId = active && dragClip ? dragClip.trackId : clip.trackId
-    const trackIndex = assist.tracks.findIndex((track) => track.id === trackId)
+    const trackIndex = assist.trackIndexById.get(trackId) ?? -1
     if (trackIndex < 0) return null
     const left = timeline.frameToX(frame)
     const width = Math.max(assist.pixelsPerFrame * clip.durationFrames, 18)
@@ -241,7 +256,7 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
         style={{
           left,
           width,
-          top: 8 + trackIndex * 28,
+          top: timelineTrackTop(trackIndex),
         }}
         draggable={!isGhost}
         onDragStart={(event) => {
@@ -263,7 +278,12 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
 
   const visibleClips = assist.clips.filter((clip) => {
     const end = clip.startFrame + clip.durationFrames
-    return end >= timeline.visibleRange.start && clip.startFrame <= timeline.visibleRange.end
+    const horizontallyVisible = end >= timeline.visibleRange.start && clip.startFrame <= timeline.visibleRange.end
+    if (!horizontallyVisible) return false
+    if (dragClip?.id === clip.id) return true
+    const trackIndex = assist.trackIndexById.get(clip.trackId)
+    if (trackIndex === undefined) return false
+    return virtualTracks.visibleTrackIndices.has(trackIndex)
   })
 
   return (
@@ -297,27 +317,38 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
       </div>
 
       <div className="mas-timeline__body">
-        <div className="mas-timeline__labels">
-          {assist.tracks.map((track) => (
-            <button
-              key={track.id}
-              type="button"
-              className="mas-timeline__label-btn truncate py-1"
-              title={`Add clip on ${track.label}`}
-              onDoubleClick={() => assist.addLibraryClip(track.id, assist.currentFrame, track.label)}
-            >
-              {track.label}
-            </button>
-          ))}
+        <div ref={labelsRef} className="mas-timeline__labels mas-timeline__labels--virtual">
+          <div className="mas-timeline__labels-rail" style={{ height: virtualTracks.totalHeight }}>
+            {virtualTracks.virtualItems.map((item) => {
+              const track = assist.tracks[item.index]
+              if (!track) return null
+              return (
+                <button
+                  key={track.id}
+                  type="button"
+                  className="mas-timeline__label-btn truncate"
+                  style={{
+                    top: item.start,
+                    height: item.size,
+                  }}
+                  title={`Add clip on ${track.label}`}
+                  onDoubleClick={() => assist.addLibraryClip(track.id, assist.currentFrame, track.label)}
+                >
+                  {track.label}
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         <div
           ref={(node) => {
             timeline.setTrackEl(node)
             trackAreaRef.current = node
+            setTrackScrollEl(node)
           }}
           className="mas-timeline__tracks mas-timeline__tracks--virtual"
-          onScroll={timeline.onTrackScroll}
+          onScroll={handleTrackScroll}
           onPointerDown={(event) => {
             if ((event.target as HTMLElement).closest('.mas-timeline__virtual-clip')) return
             scrubbingRef.current = true
@@ -347,23 +378,27 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
         >
           <div
             className="mas-timeline__virtual-rail"
-            style={{ width: timeline.contentWidth, height: Math.max(88, assist.tracks.length * 28 + 16) }}
+            style={{ width: timeline.contentWidth, height: virtualTracks.totalHeight }}
           >
             <div className="mas-timeline__playhead" style={{ left: playheadX }} aria-hidden />
 
-            {assist.tracks.map((track, trackIndex) => (
-              <div
-                key={track.id}
-                className={cn(
-                  'mas-timeline__virtual-track',
-                  dropTargetTrackId === track.id && 'mas-timeline__virtual-track--drop',
-                )}
-                style={{ top: 8 + trackIndex * 28 }}
-                onDragOver={(event) => handleTrackDragOver(event, track.id)}
-                onDragLeave={() => setDropTargetTrackId(null)}
-                onDrop={(event) => handleTrackDrop(event, track.id)}
-              />
-            ))}
+            {virtualTracks.virtualItems.map((item) => {
+              const track = assist.tracks[item.index]
+              if (!track) return null
+              return (
+                <div
+                  key={track.id}
+                  className={cn(
+                    'mas-timeline__virtual-track',
+                    dropTargetTrackId === track.id && 'mas-timeline__virtual-track--drop',
+                  )}
+                  style={{ top: item.start }}
+                  onDragOver={(event) => handleTrackDragOver(event, track.id)}
+                  onDragLeave={() => setDropTargetTrackId(null)}
+                  onDrop={(event) => handleTrackDrop(event, track.id)}
+                />
+              )
+            })}
 
             {visibleClips.map((clip) => renderClip(clip))}
           </div>

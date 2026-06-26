@@ -45,6 +45,27 @@ function mergeTracks(prev: TimelineTrack[], layers: PaintLayer[]): TimelineTrack
   return merged
 }
 
+function layerTracksMatch(tracks: TimelineTrack[], layers: PaintLayer[]) {
+  if (tracks.length < layers.length) return false
+  for (let index = 0; index < layers.length; index += 1) {
+    const track = tracks[index]
+    const layer = layers[index]
+    if (!track || track.layerId !== layer.id || track.label !== layer.name) return false
+  }
+  return true
+}
+
+function mergeTracksIfChanged(prev: TimelineTrack[], layers: PaintLayer[]): TimelineTrack[] {
+  if (layerTracksMatch(prev, layers)) {
+    const layerIds = new Set(layers.map((layer) => layer.id))
+    const extras = prev.slice(layers.length).filter((track) => !track.layerId || !layerIds.has(track.layerId))
+    if (extras.length === prev.length - layers.length) return prev
+  }
+  return mergeTracks(prev, layers)
+}
+
+const MAX_AUTO_SEED_CLIPS = 48
+
 export function useAnimationAssist({
   layers,
   layerThumbnails,
@@ -73,7 +94,7 @@ export function useAnimationAssist({
   const [totalFrames, setTotalFrames] = useState(120)
 
   useEffect(() => {
-    setTracks((prev) => mergeTracks(prev, layers))
+    setTracks((prev) => mergeTracksIfChanged(prev, layers))
   }, [layers])
 
   useEffect(() => {
@@ -98,17 +119,22 @@ export function useAnimationAssist({
 
   useEffect(() => {
     if (clips.length) return
-    const seed = layers
-      .filter((layer) => layer.name !== 'Background')
-      .map((layer, index) => ({
+    const seed: TimelineClip[] = []
+    let seedIndex = 0
+    for (let layerIndex = 0; layerIndex < layers.length && seed.length < MAX_AUTO_SEED_CLIPS; layerIndex += 1) {
+      const layer = layers[layerIndex]
+      if (layer.name === 'Background') continue
+      seed.push({
         id: uid(),
         trackId: layer.id,
-        startFrame: index * 24,
+        startFrame: seedIndex * 24,
         durationFrames: 24,
         label: layer.name,
         thumbUrl: layerThumbnails[layer.id],
-        source: 'layer' as const,
-      }))
+        source: 'layer',
+      })
+      seedIndex += 1
+    }
     if (seed.length) setClips(seed)
   }, [clips.length, layerThumbnails, layers])
 
@@ -337,14 +363,21 @@ export function useAnimationAssist({
 
   const clipsByTrack = useMemo(() => {
     const map = new Map<string, TimelineClip[]>()
-    for (const track of tracks) map.set(track.id, [])
     for (const clip of clips) {
-      const list = map.get(clip.trackId) ?? []
-      list.push(clip)
-      map.set(clip.trackId, list)
+      const list = map.get(clip.trackId)
+      if (list) list.push(clip)
+      else map.set(clip.trackId, [clip])
     }
     return map
-  }, [clips, tracks])
+  }, [clips])
+
+  const trackIndexById = useMemo(() => {
+    const map = new Map<string, number>()
+    for (let index = 0; index < tracks.length; index += 1) {
+      map.set(tracks[index].id, index)
+    }
+    return map
+  }, [tracks])
 
   return {
     settings,
@@ -357,6 +390,7 @@ export function useAnimationAssist({
     tracks,
     clips,
     clipsByTrack,
+    trackIndexById,
     frameThumbs,
     currentFrame,
     totalFrames,
