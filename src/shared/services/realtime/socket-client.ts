@@ -48,6 +48,7 @@ class RealtimeSocketClient {
   private subscribedReleaseIds = new Set<string>()
   private subscribedThreadIds = new Set<string>()
   private subscribedArtistProfileId: string | null = null
+  private connectListeners = new Set<() => void>()
   private connectPromise: Promise<Socket> | null = null
 
   get isConnected(): boolean {
@@ -60,6 +61,15 @@ class RealtimeSocketClient {
     if (this.connectPromise) return
 
     const token = tokenStorage.getAccessToken()
+    if (this.socket && !this.socket.connected) {
+      this.socket.auth = token ? { token } : {}
+      this.socket.connect()
+      this.connectPromise = this.waitForSocket(this.socket).finally(() => {
+        this.connectPromise = null
+      })
+      return
+    }
+
     this.socket = io(`${realtimeServerUrl()}${REALTIME_NAMESPACE}`, {
       path: '/socket.io',
       transports: ['websocket', 'polling'],
@@ -77,6 +87,9 @@ class RealtimeSocketClient {
         console.info('[realtime] connected', this.socket?.id)
       }
       void this.resubscribeAll()
+      for (const listener of this.connectListeners) {
+        listener()
+      }
     })
 
     this.socket.on('connect_error', (err) => {
@@ -145,8 +158,16 @@ class RealtimeSocketClient {
     }
   }
 
+  onConnect(listener: () => void): () => void {
+    this.connectListeners.add(listener)
+    return () => {
+      this.connectListeners.delete(listener)
+    }
+  }
+
   onNotification(listener: NotificationListener): () => void {
     this.notificationListeners.add(listener)
+    this.connect()
     return () => {
       this.notificationListeners.delete(listener)
     }
@@ -234,8 +255,11 @@ class RealtimeSocketClient {
   }
 
   refreshAuth(): void {
-    if (!this.socket) return
     const token = tokenStorage.getAccessToken()
+    if (!this.socket) {
+      this.connect()
+      return
+    }
     this.socket.auth = token ? { token } : {}
     if (this.socket.connected) {
       this.socket.disconnect().connect()
