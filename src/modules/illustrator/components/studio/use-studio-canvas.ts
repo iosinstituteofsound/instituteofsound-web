@@ -121,16 +121,17 @@ export function useStudioCanvas({
   if (!defaultLayers.current) {
     defaultLayers.current = initialDocument?.layers ?? createDefaultLayers(background, workingSize)
   }
-  const layersRef = useRef<PaintLayer[]>(defaultLayers.current)
+  const seedLayers = defaultLayers.current
+  const layersRef = useRef<PaintLayer[]>(seedLayers)
   const [layers, setLayers] = useState<PaintLayer[]>(layersRef.current)
-  const moonLayer = defaultLayers.current.find((l) => l.name === 'Layer 1')
+  const moonLayer = seedLayers.find((l) => l.name === 'Layer 1')
   const [activeLayerId, setActiveLayerId] = useState(() => {
     const preferred =
       initialDocument?.activeLayerId ??
       moonLayer?.id ??
-      defaultLayers.current[1]?.id ??
-      defaultLayers.current[0].id
-    return resolveActiveLayerId(defaultLayers.current, preferred)
+      seedLayers[1]?.id ??
+      seedLayers[0].id
+    return resolveActiveLayerId(seedLayers, preferred)
   })
   const [elements, setElements] = useState<CanvasElement[]>(initialDocument?.elements ?? [])
   const [selectedIds, setSelectedIds] = useState<string[]>([])

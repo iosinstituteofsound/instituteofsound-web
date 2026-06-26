@@ -88,7 +88,8 @@ function serializeImageData(imageData: ImageData): SerializedImageData {
 
 function deserializeImageData(payload: SerializedImageData): ImageData {
   if (payload.dataBase64) {
-    return new ImageData(base64ToBytes(payload.dataBase64), payload.width, payload.height)
+    const bytes = base64ToBytes(payload.dataBase64)
+    return new ImageData(new Uint8ClampedArray(bytes), payload.width, payload.height)
   }
   if (payload.data?.length) {
     return new ImageData(new Uint8ClampedArray(payload.data), payload.width, payload.height)
