@@ -14,6 +14,8 @@ import { cn } from '@/shared/lib/cn'
 
 export function MusicFeedCard({ item, defaultCommentsOpen, compact, onPostDeleted }: FeedCardProps) {
   const enrichedItem = useEnrichedMusicFeedItem(item)
+  const playerTrack = feedItemToPlayerTrack(item)
+  const { isCurrentTrack, isPlaying, play, togglePlay } = usePlayer()
 
   if (isReleaseShareItem(enrichedItem)) {
     const trackTitle = payloadString(enrichedItem.payload, 'trackTitle')
@@ -41,8 +43,6 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact, onPostDelete
   const spotifyUrl = payloadString(item.payload, 'spotifyUrl')
   const audioUrl = payloadString(item.payload, 'audioUrl')
   const link = spotifyUrl ?? youtubeUrl
-  const playerTrack = feedItemToPlayerTrack(item)
-  const { isCurrentTrack, isPlaying, play, togglePlay } = usePlayer()
   const isActive = playerTrack ? isCurrentTrack(playerTrack.id) : false
   const showPause = isActive && isPlaying
 

@@ -49,6 +49,12 @@ export function LabelOverviewFeaturedRelease({
 
   const displayReleases = releases
 
+  const searchResults = useMemo(() => {
+    const results = search.data ?? []
+    const selected = new Set(draftReleases.map((release) => release.id))
+    return results.filter((release) => !selected.has(release.id))
+  }, [draftReleases, search.data])
+
   if (!editable && displayReleases.length === 0) return null
 
   const startEdit = () => {
@@ -86,12 +92,6 @@ export function LabelOverviewFeaturedRelease({
       toast.error(message)
     }
   }
-
-  const searchResults = useMemo(() => {
-    const results = search.data ?? []
-    const selected = new Set(draftReleases.map((release) => release.id))
-    return results.filter((release) => !selected.has(release.id))
-  }, [draftReleases, search.data])
 
   const release = displayReleases[Math.min(activeIndex, Math.max(displayReleases.length - 1, 0))]
   const canPlay = Boolean(release?.streamUrl)

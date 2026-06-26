@@ -40,10 +40,6 @@ export function LabelDashboardPage() {
     enabled: isReleases,
   })
 
-  if (isSubmissions) {
-    return <SubmissionsDeskPage title="Submissions" description="Review submissions routed to label partners." />
-  }
-
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
@@ -71,6 +67,10 @@ export function LabelDashboardPage() {
       void queryClient.invalidateQueries({ queryKey: ['label-profile'] })
     },
   })
+
+  if (isSubmissions) {
+    return <SubmissionsDeskPage title="Submissions" description="Review submissions routed to label partners." />
+  }
 
   if (isRoster) {
     return (

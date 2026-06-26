@@ -1,0 +1,104 @@
+.ios-illustrator-canvas-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+
+.ios-illustrator-canvas-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
+  background: color-mix(in oklch, var(--card) 88%, transparent);
+  text-align: left;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ios-illustrator-canvas-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklch, var(--primary) 40%, var(--border));
+  box-shadow: 0 12px 32px color-mix(in oklch, var(--primary) 12%, transparent);
+}
+
+.ios-illustrator-canvas-card--create {
+  min-height: 16.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in oklch, var(--primary) 16%, transparent), transparent 58%),
+    color-mix(in oklch, var(--card) 90%, var(--primary) 2%);
+}
+
+.ios-illustrator-canvas-card__create-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1rem;
+  color: var(--primary-foreground);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--primary) 92%, white),
+    var(--primary)
+  );
+  box-shadow: 0 10px 28px color-mix(in oklch, var(--primary) 30%, transparent);
+}
+
+.ios-illustrator-canvas-card__create-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.ios-illustrator-canvas-card__create-hint {
+  max-width: 14rem;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+
+.ios-illustrator-canvas-card__preview {
+  aspect-ratio: 1;
+  background: color-mix(in oklch, var(--muted) 35%, transparent);
+}
+
+.ios-illustrator-canvas-card__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ios-illustrator-canvas-card__preview-empty {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+}
+
+.ios-illustrator-canvas-card__body {
+  padding: 0.9rem 1rem 1rem;
+}
+
+.ios-illustrator-canvas-card__body h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.ios-illustrator-canvas-card__meta {
+  display: flex;
+  gap: 0.85rem;
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+}
+
+.ios-illustrator-canvas-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}

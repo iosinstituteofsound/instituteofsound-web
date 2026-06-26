@@ -35,6 +35,12 @@ export function EditorialPicks({ picks, editable, userId }: EditorialPicksProps)
 
   const displayPicks = picks
 
+  const searchResults = useMemo(() => {
+    const results = search.data ?? []
+    const selected = new Set(draftPicks.map((pick) => pick.id))
+    return results.filter((pick) => !selected.has(pick.id))
+  }, [draftPicks, search.data])
+
   if (!editable && displayPicks.length === 0) return null
 
   const startEdit = () => {
@@ -74,12 +80,6 @@ export function EditorialPicks({ picks, editable, userId }: EditorialPicksProps)
       toast.error(message)
     }
   }
-
-  const searchResults = useMemo(() => {
-    const results = search.data ?? []
-    const selected = new Set(draftPicks.map((pick) => pick.id))
-    return results.filter((pick) => !selected.has(pick.id))
-  }, [draftPicks, search.data])
 
   const visibleSlots = editing
     ? Array.from({ length: PICKS_MAX }, (_, index) => draftPicks[index] ?? null)

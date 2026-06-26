@@ -8,6 +8,7 @@ import { ExploreLayoutRoute } from '@/app/layouts/explore-layout-route'
 import { AuthGuard, ExplorePageGuard, GuestGuard, PermissionGuard, ReleasesPageGuard, ResourceGuard, SuperAdminGuard } from '@/app/guards'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorPage, ForbiddenPage, NotFoundPage } from '@/shared/pages/fallback-pages'
+import { ArticleEditorPage } from '@/modules/editor/pages/article-editor-page'
 
 const HomePage = lazy(() =>
   import('@/modules/public/pages/home-page').then((m) => ({ default: m.HomePage })),
@@ -131,11 +132,6 @@ const TrackPage = lazy(() =>
     default: m.TrackPage,
   })),
 )
-const ArticleEditorPage = lazy(() =>
-  import('@/modules/editor/pages/article-editor-page').then((m) => ({
-    default: m.ArticleEditorPage,
-  })),
-)
 const EditorDashboardPage = lazy(() =>
   import('@/modules/editor/pages/editor-dashboard-page').then((m) => ({
     default: m.EditorDashboardPage,
@@ -154,6 +150,11 @@ const LabelDashboardPage = lazy(() =>
 const CuratorDashboardPage = lazy(() =>
   import('@/modules/curator/pages/curator-dashboard-page').then((m) => ({
     default: m.CuratorDashboardPage,
+  })),
+)
+const IllustratorDashboardPage = lazy(() =>
+  import('@/modules/illustrator/pages/illustrator-dashboard-page').then((m) => ({
+    default: m.IllustratorDashboardPage,
   })),
 )
 const PlaylistDetailPage = lazy(() =>
@@ -621,9 +622,7 @@ export const router = createBrowserRouter([
         path: 'editor/write',
         element: (
           <ResourceGuard name="EditorDashboardPage">
-            <Lazy>
-              <ArticleEditorPage />
-            </Lazy>
+            <ArticleEditorPage />
           </ResourceGuard>
         ),
       },
@@ -631,9 +630,7 @@ export const router = createBrowserRouter([
         path: 'editor/write/:articleId',
         element: (
           <ResourceGuard name="EditorDashboardPage">
-            <Lazy>
-              <ArticleEditorPage />
-            </Lazy>
+            <ArticleEditorPage />
           </ResourceGuard>
         ),
       },
@@ -859,6 +856,46 @@ export const router = createBrowserRouter([
           <ResourceGuard name="CuratorDashboardPage">
             <Lazy>
               <CuratorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'illustrator',
+        element: (
+          <ResourceGuard name="IllustratorDashboardPage">
+            <Lazy>
+              <IllustratorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'illustrator/canvas',
+        element: (
+          <ResourceGuard name="IllustratorDashboardPage">
+            <Lazy>
+              <IllustratorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'illustrator/portfolio',
+        element: (
+          <ResourceGuard name="IllustratorDashboardPage">
+            <Lazy>
+              <IllustratorDashboardPage />
+            </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'illustrator/analytics',
+        element: (
+          <ResourceGuard name="IllustratorDashboardPage">
+            <Lazy>
+              <IllustratorDashboardPage />
             </Lazy>
           </ResourceGuard>
         ),

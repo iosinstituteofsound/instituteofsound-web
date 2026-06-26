@@ -1,0 +1,223 @@
+.ios-new-canvas {
+  width: min(24rem, calc(100vw - 2rem));
+  max-width: none;
+  gap: 0;
+  padding: 1.1rem 1rem 1rem;
+  border: 1px solid color-mix(in oklch, var(--primary) 28%, var(--border));
+  border-radius: 1.15rem;
+  background:
+    radial-gradient(
+      ellipse 120% 80% at 100% 0%,
+      color-mix(in oklch, var(--primary) 10%, transparent),
+      transparent 62%
+    ),
+    color-mix(in oklch, var(--card) 94%, transparent);
+  color: var(--foreground);
+  box-shadow:
+    0 24px 64px color-mix(in oklch, var(--foreground) 18%, transparent),
+    0 2px 8px color-mix(in oklch, var(--foreground) 8%, transparent);
+}
+
+.ios-new-canvas__header {
+  margin-bottom: 0.85rem;
+  padding: 0 0.15rem;
+  padding-right: 1.75rem;
+}
+
+.ios-new-canvas__title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+
+.ios-new-canvas__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ios-new-canvas__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.ios-new-canvas__row--featured,
+.ios-new-canvas__row--active {
+  border-radius: 0.85rem;
+  background: color-mix(in oklch, var(--muted) 42%, transparent);
+}
+
+.ios-new-canvas__row--divider {
+  border-top: 1px solid color-mix(in oklch, var(--border) 75%, transparent);
+}
+
+.ios-new-canvas__row:hover,
+.ios-new-canvas__row:focus-visible {
+  background: color-mix(in oklch, var(--muted) 30%, transparent);
+  outline: none;
+}
+
+.ios-new-canvas__row--featured:hover,
+.ios-new-canvas__row--featured:focus-visible,
+.ios-new-canvas__row--active:hover,
+.ios-new-canvas__row--active:focus-visible {
+  background: color-mix(in oklch, var(--muted) 52%, transparent);
+}
+
+.ios-new-canvas__row-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.ios-new-canvas__row-tags {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.ios-new-canvas__tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.55rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  background: color-mix(in oklch, var(--muted) 58%, transparent);
+  color: var(--muted-foreground);
+}
+
+.ios-new-canvas__tag--profile {
+  min-width: 3.1rem;
+}
+
+.ios-new-canvas__tag--size {
+  font-variant-numeric: tabular-nums;
+}
+
+.ios-new-canvas__custom {
+  margin-top: 0.85rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid color-mix(in oklch, var(--border) 75%, transparent);
+}
+
+.ios-new-canvas__custom-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.ios-new-canvas__custom-grid--compact {
+  margin-top: 0.65rem;
+}
+
+.ios-new-canvas__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.ios-new-canvas__input {
+  height: 2.35rem;
+  border-color: color-mix(in oklch, var(--border) 80%, transparent);
+  background: color-mix(in oklch, var(--background) 88%, var(--card));
+  color: var(--foreground);
+}
+
+.ios-new-canvas__input:focus-visible {
+  border-color: color-mix(in oklch, var(--primary) 45%, var(--border));
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 18%, transparent);
+}
+
+.ios-new-canvas__segmented {
+  display: inline-flex;
+  width: 100%;
+  padding: 0.2rem;
+  border-radius: 0.65rem;
+  border: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+  background: color-mix(in oklch, var(--background) 86%, var(--card));
+}
+
+.ios-new-canvas__segment {
+  flex: 1 1 0;
+  min-height: 1.95rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.ios-new-canvas__segment.is-active {
+  background: color-mix(in oklch, var(--primary) 18%, var(--card));
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--primary) 24%, transparent);
+}
+
+.ios-new-canvas__custom-hint {
+  margin: 0.7rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+
+.ios-new-canvas__custom-hint--error {
+  color: color-mix(in oklch, var(--destructive) 82%, var(--foreground));
+}
+
+.ios-new-canvas__create-btn {
+  width: 100%;
+  margin-top: 0.8rem;
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--primary) 92%, white),
+    var(--primary)
+  );
+  color: var(--primary-foreground);
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.ios-new-canvas__create-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.ios-new-canvas__create-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

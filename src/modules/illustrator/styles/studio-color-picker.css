@@ -1,0 +1,799 @@
+/* Procreate Colours — wide panel, compact height (image 2) */
+
+.mas-color-pop--pro {
+  --cp-bg: #2c2c2e;
+  --cp-bg-elevated: #3a3a3c;
+  --cp-bg-track: #1c1c1e;
+  --cp-disc-gutter: #1a1a1c;
+  --cp-accent: #0a84ff;
+  --cp-text: #ffffff;
+  --cp-text-secondary: rgba(235, 235, 245, 0.55);
+  --cp-radius: 14px;
+  --cp-beak-top: 24px;
+  --cp-pad: 20px;
+
+  width: 400px;
+  min-width: 400px;
+  max-width: 400px;
+  max-height: calc(100dvh - 32px);
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: none;
+  border-radius: var(--cp-radius);
+  background: #2c2c2e;
+  background: var(--cp-bg);
+  isolation: isolate;
+  color: var(--cp-text);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.55),
+    0 0 0 0.5px rgba(255, 255, 255, 0.1);
+}
+
+.mas-color-pop--overlay {
+  position: fixed;
+  z-index: 500;
+  pointer-events: auto;
+}
+
+.mas-color-pop--pro::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 32px;
+  width: 12px;
+  height: 12px;
+  background: var(--cp-bg);
+  transform: rotate(45deg);
+  box-shadow: -1px -1px 0 rgba(255, 255, 255, 0.06);
+  z-index: -1;
+}
+
+.mas-cp {
+  --cp-bg: #2c2c2e;
+  --cp-bg-elevated: #3a3a3c;
+  --cp-bg-track: #1c1c1e;
+  --cp-disc-gutter: #1a1a1c;
+  --cp-accent: #0a84ff;
+  --cp-text: #ffffff;
+  --cp-text-secondary: rgba(235, 235, 245, 0.55);
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background: #2c2c2e;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mas-cp__grabber {
+  width: 36px;
+  height: 5px;
+  margin: 8px auto 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+}
+
+.mas-cp__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px var(--cp-pad) 10px;
+  flex-shrink: 0;
+}
+
+.mas-cp__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--cp-text);
+}
+
+.mas-cp__swatches {
+  display: flex;
+  gap: 8px;
+}
+
+.mas-cp__swatch {
+  width: 44px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.15);
+}
+
+.mas-cp__swatch--active {
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.2),
+    0 0 0 2px var(--cp-accent);
+}
+
+.mas-cp__subhead {
+  padding: 0 var(--cp-pad) 6px;
+  margin: 0;
+  font-size: 15px;
+  color: var(--cp-text-secondary);
+  flex-shrink: 0;
+}
+
+.mas-cp__subhead-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.mas-cp__body {
+  padding: 0 var(--cp-pad) 4px;
+  flex-shrink: 0;
+}
+
+.mas-cp__body--scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.mas-cp__body--scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.mas-cp__body--scroll::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.mas-cp__section-label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--cp-text-secondary);
+}
+
+/* ── Disc — Procreate: hue ring + gutter + inner canvas ── */
+.mas-cp-disc {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.mas-cp-disc__wheel {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.mas-cp-disc__wheel-hit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  cursor: crosshair;
+  z-index: 5;
+  touch-action: none;
+}
+
+.mas-cp-disc__hue,
+.mas-cp-disc__gutter,
+.mas-cp-disc__inner,
+.mas-cp-disc__canvas,
+.mas-cp-disc__marker {
+  pointer-events: none;
+}
+
+/* full conic gradient — visible only in the outer ring band */
+.mas-cp-disc__hue {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #ff0000,
+    #ffff00,
+    #00ff00,
+    #00ffff,
+    #0000ff,
+    #ff00ff,
+    #ff0000
+  );
+  pointer-events: none;
+}
+
+/* panel-colour donut — masks hue to a thin ring */
+.mas-cp-disc__gutter {
+  position: absolute;
+  inset: 6.5%;
+  border-radius: 50%;
+  background: #1a1a1c;
+  background: var(--cp-disc-gutter);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mas-cp-disc__inner {
+  position: absolute;
+  inset: 11%;
+  border-radius: 50%;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.mas-cp-disc__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.mas-cp-disc__marker {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  background: transparent;
+}
+
+.mas-cp-disc__marker--ring {
+  width: 15px;
+  height: 15px;
+  margin: -7.5px 0 0 -7.5px;
+  z-index: 6;
+}
+
+.mas-cp-disc__marker--inner {
+  width: 17px;
+  height: 17px;
+  margin: -8.5px 0 0 -8.5px;
+  z-index: 6;
+}
+
+.mas-cp-disc__value {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  padding: 0 4px;
+}
+
+/* ── Classic — Procreate square field + 3 dot sliders ── */
+.mas-cp-classic {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.mas-cp-classic__field {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.mas-cp-classic__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mas-cp-classic__marker {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  background: transparent;
+}
+
+.mas-cp-classic__slider {
+  position: relative;
+  width: 100%;
+  height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.mas-cp-classic__slider-track-wrap {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  overflow: visible;
+}
+
+.mas-cp-classic__slider-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+}
+
+.mas-cp-classic__slider input[type='range'] {
+  position: absolute;
+  inset: -10px 0;
+  width: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  height: 28px;
+}
+
+.mas-cp-classic__slider-thumb {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+/* ── Harmony — Procreate: full canvas wheel + linked markers ── */
+.mas-cp-harmony {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.mas-cp-harmony__wheel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  flex-shrink: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.12),
+    0 2px 12px rgba(0, 0, 0, 0.28);
+}
+
+.mas-cp-harmony__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.mas-cp-harmony__hit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  cursor: crosshair;
+  z-index: 2;
+  touch-action: none;
+}
+
+.mas-cp-harmony__marker {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.45),
+    0 1px 4px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+  z-index: 3;
+  background: transparent;
+}
+
+.mas-cp-harmony__marker--primary {
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border-width: 3px;
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+.mas-cp-harmony__slider {
+  position: relative;
+  width: 100%;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.mas-cp-harmony__slider-track-wrap {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.mas-cp-harmony__slider-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: linear-gradient(to right, #000, #fff);
+}
+
+.mas-cp-harmony__slider input[type='range'] {
+  position: absolute;
+  inset: -12px 0;
+  width: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  height: 32px;
+  touch-action: none;
+}
+
+.mas-cp-harmony__slider-thumb {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+/* ── Sliders ── */
+.mas-cp-bar {
+  position: relative;
+  width: 100%;
+  height: 22px;
+  display: flex;
+  align-items: center;
+}
+
+.mas-cp-bar__track-wrap {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mas-cp-bar__track {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+}
+
+.mas-cp-bar input[type='range'] {
+  position: absolute;
+  inset: -8px 0;
+  width: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  height: 22px;
+}
+
+.mas-cp-bar__thumb {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.mas-cp-bar__thumb--line {
+  width: 3px;
+  height: 18px;
+  margin: -9px 0 0 -1.5px;
+  border-radius: 2px;
+}
+
+/* ── Value tab ── */
+.mas-cp-value {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mas-cp-value__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mas-cp-value__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.mas-cp-value__label {
+  font-size: 16px;
+  color: var(--cp-text);
+}
+
+.mas-cp-value__num {
+  font-size: 16px;
+  color: var(--cp-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.mas-cp-hex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.mas-cp-hex label {
+  font-size: 16px;
+  color: var(--cp-text);
+}
+
+.mas-cp-hex input {
+  width: 116px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--cp-bg-elevated);
+  color: var(--cp-text);
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 14px;
+  text-align: right;
+}
+
+.mas-cp-hex input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--cp-accent);
+}
+
+/* ── Palettes tab ── */
+.mas-cp-palettes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mas-cp-palettes__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-bottom: 4px;
+  background: var(--cp-bg);
+}
+
+.mas-cp-palettes__toggle {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--cp-bg-track);
+}
+
+.mas-cp-palettes__toggle-btn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--cp-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mas-cp-palettes__toggle-btn--active {
+  background: var(--cp-accent);
+  color: #fff;
+}
+
+.mas-cp-palette-card {
+  border-radius: 12px;
+  background: var(--cp-bg-elevated);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mas-cp-palette-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+}
+
+.mas-cp-palette-card__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cp-text);
+}
+
+.mas-cp-palette-card__check {
+  color: var(--cp-accent);
+}
+
+.mas-cp-palette-card__menu {
+  border: none;
+  background: transparent;
+  color: var(--cp-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 0;
+}
+
+.mas-cp-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 1px;
+  padding: 0 8px 8px;
+}
+
+.mas-cp-palette-grid--cards {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 0 10px 10px;
+}
+
+.mas-cp-palette-swatch {
+  height: 24px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.mas-cp-palette-grid--cards .mas-cp-palette-swatch {
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+}
+
+.mas-cp-palette-swatch__label {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  padding: 4px 5px;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+/* ── History — fixed row height ── */
+.mas-cp-history {
+  padding: 10px var(--cp-pad) 0;
+  flex-shrink: 0;
+}
+
+.mas-cp-history__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mas-cp-history__clear {
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: none;
+  background: var(--cp-bg-elevated);
+  color: var(--cp-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mas-cp-history__row {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 5px;
+}
+
+.mas-cp-history__swatch {
+  height: 26px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.mas-cp-history__swatch--empty {
+  background: var(--cp-bg-elevated);
+  cursor: default;
+}
+
+/* ── Ascend palette strip — 3 short rows ── */
+.mas-cp-palette-strip {
+  padding: 10px var(--cp-pad) 8px;
+  flex-shrink: 0;
+}
+
+.mas-cp-palette-strip .mas-cp__section-label {
+  margin-bottom: 8px;
+}
+
+.mas-cp-palette-strip__grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mas-cp-palette-strip__swatch {
+  height: 22px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ── Bottom nav ── */
+.mas-cp-nav {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 6px 8px 10px;
+  border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.mas-cp-nav__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 2px;
+  border: none;
+  background: transparent;
+  color: var(--cp-text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mas-cp-nav__btn--active {
+  color: var(--cp-accent);
+}
+
+.mas-cp-nav__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+}
