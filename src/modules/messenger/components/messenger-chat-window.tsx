@@ -216,7 +216,12 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
                 </div>
               ) : null}
 
-              {grouped.map((row, index) => {
+              {(() => {
+                const chatMessages = grouped
+                  .filter((row): row is { kind: 'message'; message: DmMessage } => row.kind === 'message')
+                  .map((row) => row.message)
+
+                return grouped.map((row, index) => {
                 if (row.kind === 'day') {
                   return (
                     <p key={`day-${row.label}-${index}`} className="messenger-chat-window__day">
@@ -227,6 +232,12 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
 
                 const mine = row.message.senderId === viewerId
                 const isLastOutgoing = mine && row.message.id === lastOutgoingId
+                const msgIndex = chatMessages.findIndex((m) => m.id === row.message.id)
+                const prev = msgIndex > 0 ? chatMessages[msgIndex - 1] : null
+                const next = msgIndex >= 0 && msgIndex < chatMessages.length - 1 ? chatMessages[msgIndex + 1] : null
+                const isStacked = Boolean(prev && prev.senderId === row.message.senderId)
+                const isTail = !next || next.senderId !== row.message.senderId
+                const showAvatar = !mine && !isStacked
 
                 if (row.message.type === 'system') {
                   return (
@@ -237,19 +248,28 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
                 }
 
                 return (
-                  <div key={row.message.id}>
+                  <div
+                    key={row.message.id}
+                    className={cn('messenger-chat-window__message-wrap', mine && 'is-mine', isStacked && 'is-stacked')}
+                  >
                     <MessageBubble
                       message={row.message}
                       threadId={threadId}
                       isOutgoing={mine}
                       compact
+                      showAvatar={showAvatar}
+                      isTail={isTail}
+                      isStacked={isStacked}
+                      senderName={displayName}
+                      senderAvatar={getThreadAvatarUrl(thread)}
                     />
-                    {isLastOutgoing ? (
+                    {isLastOutgoing && isTail ? (
                       <p className="messenger-chat-window__receipt">{receiptLabel(row.message)}</p>
                     ) : null}
                   </div>
                 )
-              })}
+              })
+              })()}
             </div>
 
             {typingUsers.length ? (
