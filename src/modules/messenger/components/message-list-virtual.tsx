@@ -3,6 +3,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { MessageBubble } from '@/modules/messenger/components/message-bubble'
 import { formatMessageDaySeparator } from '@/modules/messenger/lib/messenger-utils'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
+import { cn } from '@/shared/lib/cn'
 
 type FlatItem =
   | { kind: 'day'; id: string; label: string }
@@ -61,7 +62,8 @@ export const MessageListVirtual = memo(function MessageListVirtual({
         prev &&
           prev.type !== 'system' &&
           prev.senderId === message.senderId &&
-          prev.createdAt.slice(0, 10) === dayKey,
+          prev.createdAt.slice(0, 10) === dayKey &&
+          prev.reactions.length === 0,
       )
       const isTail =
         !next ||
@@ -136,7 +138,12 @@ export const MessageListVirtual = memo(function MessageListVirtual({
               ) : item.kind === 'system' ? (
                 <p className="messenger-system-message">{item.body}</p>
               ) : (
-                <div className="messenger-message-block">
+                <div
+                  className={cn(
+                    'messenger-message-block',
+                    item.message.reactions.length > 0 && 'has-reactions',
+                  )}
+                >
                   <MessageBubble
                     message={item.message}
                     threadId={threadId}

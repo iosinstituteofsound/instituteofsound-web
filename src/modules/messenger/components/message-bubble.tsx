@@ -66,8 +66,10 @@ export const MessageBubble = memo(function MessageBubble({
         'messenger-bubble text-left',
         isOutgoing ? 'is-outgoing' : 'is-incoming',
         compact && 'messenger-bubble--compact',
-        isTail && (isOutgoing ? 'is-tail-out' : 'is-tail-in'),
-        isStacked && 'is-stacked',
+        compact && isTail && (isOutgoing ? 'is-tail-out' : 'is-tail-in'),
+        compact && isStacked && 'is-stacked',
+        !compact && isTail && (isOutgoing ? 'is-tail-out' : 'is-tail-in'),
+        !compact && isStacked && 'is-stacked',
         message.reactions.length > 0 && 'has-reaction',
       )}
       onDoubleClick={onReply}
@@ -77,53 +79,51 @@ export const MessageBubble = memo(function MessageBubble({
         <div className="messenger-bubble__sender">{senderName}</div>
       ) : null}
 
-      <div className="messenger-bubble__content">
-        {message.replyPreview ? (
-          <div className="messenger-bubble__reply">
-            <div className="font-semibold">Reply</div>
-            <div>{message.replyPreview.body || 'Attachment'}</div>
-          </div>
-        ) : null}
+      {message.replyPreview ? (
+        <div className="messenger-bubble__reply">
+          <div className="font-semibold">Reply</div>
+          <div>{message.replyPreview.body || 'Attachment'}</div>
+        </div>
+      ) : null}
 
-        {message.forwardFromId ? (
-          <div className="messenger-bubble__reply mb-1 text-[11px] opacity-80">Forwarded</div>
-        ) : null}
+      {message.forwardFromId ? (
+        <div className="messenger-bubble__reply mb-1 text-[11px] opacity-80">Forwarded</div>
+      ) : null}
 
-        {message.type === 'share_card' && message.shareData ? (
-          <Link to={message.shareData.href ?? '#'} className="messenger-share-card block">
-            {message.shareData.imageUrl ? (
-              <img src={message.shareData.imageUrl} alt="" className="messenger-share-card__img" />
-            ) : null}
-            <div className="messenger-share-card__title">{message.shareData.title ?? 'Shared link'}</div>
-          </Link>
-        ) : null}
+      {message.type === 'share_card' && message.shareData ? (
+        <Link to={message.shareData.href ?? '#'} className="messenger-share-card block">
+          {message.shareData.imageUrl ? (
+            <img src={message.shareData.imageUrl} alt="" className="messenger-share-card__img" />
+          ) : null}
+          <div className="messenger-share-card__title">{message.shareData.title ?? 'Shared link'}</div>
+        </Link>
+      ) : null}
 
-        {message.linkPreview ? (
-          <a href={message.linkPreview.url} target="_blank" rel="noreferrer" className="messenger-link-preview block">
-            {message.linkPreview.title ?? message.linkPreview.url}
-          </a>
-        ) : null}
+      {message.linkPreview ? (
+        <a href={message.linkPreview.url} target="_blank" rel="noreferrer" className="messenger-link-preview block">
+          {message.linkPreview.title ?? message.linkPreview.url}
+        </a>
+      ) : null}
 
-        {message.type === 'image' && message.mediaUrl ? (
-          <a href={message.mediaUrl} target="_blank" rel="noreferrer">
-            <img src={message.mediaUrl} alt="" className="messenger-bubble__media" loading="lazy" />
-          </a>
-        ) : null}
+      {message.type === 'image' && message.mediaUrl ? (
+        <a href={message.mediaUrl} target="_blank" rel="noreferrer">
+          <img src={message.mediaUrl} alt="" className="messenger-bubble__media" loading="lazy" />
+        </a>
+      ) : null}
 
-        {message.type === 'video' && message.mediaUrl ? (
-          <video src={message.mediaUrl} controls className="messenger-bubble__media" preload="metadata" />
-        ) : null}
+      {message.type === 'video' && message.mediaUrl ? (
+        <video src={message.mediaUrl} controls className="messenger-bubble__media" preload="metadata" />
+      ) : null}
 
-        {message.type === 'file' && message.mediaUrl ? (
-          <a href={message.mediaUrl} target="_blank" rel="noreferrer" className="underline">
-            {message.mediaFileName ?? 'Download file'}
-          </a>
-        ) : null}
+      {message.type === 'file' && message.mediaUrl ? (
+        <a href={message.mediaUrl} target="_blank" rel="noreferrer" className="underline">
+          {message.mediaFileName ?? 'Download file'}
+        </a>
+      ) : null}
 
-        {message.body && message.type !== 'share_card' ? (
-          <div className="messenger-bubble__text">{message.body}</div>
-        ) : null}
-      </div>
+      {message.body && message.type !== 'share_card' ? (
+        <div className={cn(!compact && 'messenger-bubble__text')}>{message.body}</div>
+      ) : null}
     </div>
   )
 
@@ -150,7 +150,7 @@ export const MessageBubble = memo(function MessageBubble({
           showAvatar ? (
             <FeedUserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 shrink-0 self-end" />
           ) : (
-            <span className="messenger-message-row__avatar-spacer" aria-hidden />
+            <span className="h-7 w-7 shrink-0" aria-hidden />
           )
         ) : null}
 
