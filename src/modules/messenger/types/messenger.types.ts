@@ -1,18 +1,46 @@
+/** Mirror instituteofsound-api messaging types — keep in sync. */
+
 export type DmThreadStatus = 'pending' | 'accepted' | 'declined'
 
-export type DmMessageType = 'text' | 'image' | 'video' | 'file' | 'system'
+export type ThreadKind = 'direct' | 'group' | 'community'
 
-export type MessengerFilter = 'all' | 'unread' | 'groups' | 'communities'
+export type DmMessageType = 'text' | 'image' | 'video' | 'file' | 'system' | 'share_card'
+
+export type MessengerFilter = 'all' | 'unread' | 'groups' | 'communities' | 'requests'
 
 export type DmReaction = {
   userId: string
   emoji: string
 }
 
+export type DmLinkPreview = {
+  url: string
+  title?: string
+  imageUrl?: string
+  description?: string
+}
+
+export type DmShareData = {
+  releaseId?: string
+  trackId?: string
+  profileId?: string
+  title?: string
+  imageUrl?: string
+  href?: string
+}
+
+export type ThreadMemberPreview = {
+  userId: string
+  name: string
+  avatarUrl?: string
+  avatarThumbnailUrl?: string
+}
+
 export type DmMessage = {
   id: string
   threadId: string
   senderId: string
+  senderName?: string
   type: DmMessageType
   body: string
   mediaUrl?: string
@@ -26,6 +54,8 @@ export type DmMessage = {
     type: DmMessageType
   }
   forwardFromId?: string
+  linkPreview?: DmLinkPreview
+  shareData?: DmShareData
   reactions: DmReaction[]
   clientMessageId?: string
   deliveredAt?: string
@@ -39,31 +69,78 @@ export type DmMessage = {
 
 export type DmThreadSummary = {
   threadId: string
-  status: DmThreadStatus
-  isRequester: boolean
-  otherUserId: string
-  otherName: string
+  kind: ThreadKind
+  title: string
+  subtitle?: string
+  avatarUrl?: string
+  memberPreview?: ThreadMemberPreview[]
+  memberCount?: number
+  unreadCount: number
+  lastMessageBody?: string
+  lastMessageAt?: string
+  lastSenderId?: string
+  lastSenderName?: string
+  isPendingRequest?: boolean
+  isArchived?: boolean
+  isMuted?: boolean
+  isGroup: boolean
+  status?: DmThreadStatus
+  isRequester?: boolean
+  otherUserId?: string
+  otherName?: string
   otherHandle?: string
   otherAvatarUrl?: string
   otherAvatarThumbnailUrl?: string
   otherIsOnline?: boolean
-  lastMessageBody?: string
-  lastMessageAt?: string
-  lastSenderId?: string
-  unreadCount: number
-  isGroup: boolean
+  communitySlug?: string
 }
 
 export type DmThreadHeader = {
   threadId: string
-  status: DmThreadStatus
-  isRequester: boolean
-  otherUserId: string
-  otherName: string
+  kind: ThreadKind
+  title: string
+  subtitle?: string
+  avatarUrl?: string
+  memberPreview?: ThreadMemberPreview[]
+  memberCount?: number
+  status?: DmThreadStatus
+  isRequester?: boolean
+  isPendingRequest?: boolean
+  otherUserId?: string
+  otherName?: string
   otherHandle?: string
   otherAvatarUrl?: string
   otherAvatarThumbnailUrl?: string
   otherIsOnline?: boolean
+  communitySlug?: string
+  isAdmin?: boolean
+}
+
+export type CommunityListItem = {
+  slug: string
+  name: string
+  memberCount: number
+  threadId?: string
+  joined: boolean
+}
+
+export type GroupMember = {
+  userId: string
+  name: string
+  handle?: string
+  avatarUrl?: string
+  avatarThumbnailUrl?: string
+  role: 'member' | 'admin'
+  joinedAt?: string
+}
+
+export type BlockedUser = {
+  userId: string
+  name: string
+  handle?: string
+  avatarUrl?: string
+  avatarThumbnailUrl?: string
+  blockedAt: string
 }
 
 export const MESSENGER_MESSAGE_EVENT = 'messenger:message'
@@ -90,3 +167,5 @@ export type MessengerPresencePayload = {
   userId: string
   isOnline: boolean
 }
+
+export type DmThreadListBucket = 'inbox' | 'requests' | 'archived'

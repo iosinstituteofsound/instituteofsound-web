@@ -34,6 +34,10 @@ function notificationHref(notification: NotificationDto): string | undefined {
     return `/releases/${notification.data.releaseId}`
   }
 
+  if (notification.data.threadId) {
+    return `/messenger?t=${notification.data.threadId}`
+  }
+
   if (notification.kind.startsWith('track_')) {
     return '/artist/analytics'
   }
@@ -50,6 +54,10 @@ function notificationIcon(kind: NotificationKind) {
       return MessageCircle
     case 'mention':
       return AtSign
+    case 'dm_message':
+    case 'dm_request':
+    case 'dm_request_accepted':
+      return MessageCircle
     default:
       return Music2
   }

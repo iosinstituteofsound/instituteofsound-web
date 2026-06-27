@@ -9,6 +9,8 @@ export type NotificationKind =
   | 'comment_reply'
   | 'mention'
   | 'dm_message'
+  | 'dm_request'
+  | 'dm_request_accepted'
 
 export type NotificationDto = {
   id: string

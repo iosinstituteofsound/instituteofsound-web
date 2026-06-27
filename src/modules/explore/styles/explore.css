@@ -7461,6 +7461,31 @@
 
 .explore-com-tribes__item {
   min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.explore-com-tribe__chat {
+  flex-shrink: 0;
+  border: 1px solid color-mix(in oklch, var(--primary) 35%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--primary) 12%, transparent);
+  color: var(--foreground);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+}
+
+.explore-com-tribe__chat:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.explore-com-tribe__chat:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--primary) 20%, transparent);
 }
 
 .explore-com-tribe {

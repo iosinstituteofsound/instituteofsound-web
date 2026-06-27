@@ -38,7 +38,10 @@ export function initMessengerRealtime(queryClient: QueryClient): void {
     appendMessageToCache(queryClient, message)
 
     if (!viewerId || message.senderId === viewerId) return
-    if (isThreadOpen(message.threadId)) return
+    if (isThreadOpen(message.threadId)) {
+      void messengerApi.markThreadRead(message.threadId, message.id)
+      return
+    }
 
     useMessengerLiveStore.getState().incrementUnread()
     void queryClient.invalidateQueries({ queryKey: messengerThreadsQueryKey })

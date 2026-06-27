@@ -22,10 +22,21 @@ export function MessengerPage() {
   useEffect(() => {
     const threadFromUrl = searchParams.get('t')
     const userFromUrl = searchParams.get('u')
+    const slugFromUrl = searchParams.get('slug')
+
     if (threadFromUrl) {
       setActiveThreadId(threadFromUrl)
       return
     }
+
+    if (slugFromUrl) {
+      void messengerApi.joinCommunity(slugFromUrl).then((thread) => {
+        setActiveThreadId(thread.threadId)
+        setSearchParams({ t: thread.threadId }, { replace: true })
+      })
+      return
+    }
+
     if (userFromUrl) {
       void messengerApi.createThread(userFromUrl).then((thread) => {
         setActiveThreadId(thread.threadId)
@@ -54,8 +65,12 @@ export function MessengerPage() {
         <ConversationPanel
           thread={activeThread}
           className={cn('messenger-panel', !activeThreadId && 'is-hidden-mobile')}
+          showBack={Boolean(activeThreadId)}
+          onBack={() => setActiveThreadId(null)}
         />
-        {showInfoPanel ? <ThreadInfoPanel thread={activeThread} /> : null}
+        {showInfoPanel ? (
+          <ThreadInfoPanel thread={activeThread} onLeave={() => setActiveThreadId(null)} />
+        ) : null}
       </div>
     </div>
   )

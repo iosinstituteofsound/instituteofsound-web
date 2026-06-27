@@ -14,6 +14,8 @@ import { openMessengerPopup } from '@/modules/messenger/lib/messenger-popup-open
 import { useQuery } from '@tanstack/react-query'
 import { Maximize2, MoreHorizontal, PenSquare, Search } from 'lucide-react'
 import { MessengerChatSettings } from '@/modules/messenger/components/messenger-chat-settings'
+import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
+import { NewMessageModal } from '@/modules/messenger/components/new-message-modal'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { MessengerIcon } from '@/modules/messenger/components/messenger-icon'
@@ -30,6 +32,7 @@ import '@/modules/messenger/styles/messenger-dropdown.css'
 const FILTERS: Array<{ id: MessengerFilter; label: string }> = [
   { id: 'all', label: 'All' },
   { id: 'unread', label: 'Unread' },
+  { id: 'requests', label: 'Requests' },
   { id: 'groups', label: 'Groups' },
   { id: 'communities', label: 'Communities' },
 ]
@@ -45,15 +48,19 @@ function filterThreads(
   if (filter === 'unread') {
     list = list.filter((thread) => thread.unreadCount > 0)
   } else if (filter === 'groups') {
-    list = list.filter((thread) => thread.isGroup)
+    list = list.filter((thread) => thread.kind === 'group')
   } else if (filter === 'communities') {
-    list = []
+    list = list.filter((thread) => thread.kind === 'community')
+  } else if (filter === 'requests') {
+    list = list.filter((thread) => thread.isPendingRequest)
   }
 
   if (needle) {
     list = list.filter(
       (thread) =>
-        thread.otherName.toLowerCase().includes(needle) ||
+        thread.title.toLowerCase().includes(needle) ||
+        thread.subtitle?.toLowerCase().includes(needle) ||
+        thread.otherName?.toLowerCase().includes(needle) ||
         thread.otherHandle?.toLowerCase().includes(needle) ||
         thread.lastMessageBody?.toLowerCase().includes(needle),
     )
@@ -74,6 +81,7 @@ const PopoverThreadItem = memo(function PopoverThreadItem({
   onSelect: (threadId: string) => void
 }) {
   const sentByViewer = Boolean(viewerId && thread.lastSenderId === viewerId)
+  const isDirect = thread.kind === 'direct'
 
   return (
     <li>
@@ -82,13 +90,22 @@ const PopoverThreadItem = memo(function PopoverThreadItem({
         className={cn('ios-messenger-popover__item', thread.unreadCount > 0 && 'is-unread')}
         onClick={() => onSelect(thread.threadId)}
       >
-        <FeedUserAvatar
-          name={thread.otherName}
-          avatarUrl={thread.otherAvatarThumbnailUrl ?? thread.otherAvatarUrl}
-          className="h-[52px] w-[52px]"
-        />
+        {isDirect ? (
+          <FeedUserAvatar
+            name={thread.title}
+            avatarUrl={thread.otherAvatarThumbnailUrl ?? thread.otherAvatarUrl ?? thread.avatarUrl}
+            className="h-[52px] w-[52px]"
+          />
+        ) : (
+          <GroupAvatarStack
+            members={thread.memberPreview}
+            title={thread.title}
+            avatarUrl={thread.avatarUrl}
+            size="md"
+          />
+        )}
         <div className="ios-messenger-popover__copy">
-          <div className="ios-messenger-popover__name">{thread.otherName}</div>
+          <div className="ios-messenger-popover__name">{thread.title}</div>
           <div className="ios-messenger-popover__preview-row">
             <span className="ios-messenger-popover__preview">
               {thread.lastMessageBody || 'Start a conversation'}
@@ -163,6 +180,7 @@ export function MessengerHeaderButton() {
   const [open, setOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [filter, setFilter] = useState<MessengerFilter>('all')
+  const [newMessageOpen, setNewMessageOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearch = useDeferredValue(searchQuery)
 
@@ -176,7 +194,7 @@ export function MessengerHeaderButton() {
 
   const { data: threads = [], isLoading, refetch } = useQuery({
     queryKey: messengerThreadsQueryKey,
-    queryFn: messengerApi.listThreads,
+    queryFn: () => messengerApi.listThreads(),
     staleTime: 15_000,
     enabled: open,
   })
@@ -260,14 +278,17 @@ export function MessengerHeaderButton() {
               >
                 <Maximize2 className="h-4 w-4" />
               </Link>
-              <Link
-                to="/messenger"
+              <button
+                type="button"
                 className="ios-messenger-popover__action"
                 aria-label="New message"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false)
+                  setNewMessageOpen(true)
+                }}
               >
                 <PenSquare className="h-4 w-4" />
-              </Link>
+              </button>
             </div>
           </div>
 
@@ -361,6 +382,7 @@ export function MessengerHeaderButton() {
       </button>
 
       {panel ? createPortal(panel, document.body) : null}
+      <NewMessageModal open={newMessageOpen} onClose={() => setNewMessageOpen(false)} />
     </div>
   )
 }

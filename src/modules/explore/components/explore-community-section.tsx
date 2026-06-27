@@ -24,6 +24,7 @@ import {
   ExploreSectionHead,
   ExploreSectionHeadAction,
 } from '@/modules/explore/components/explore-section-head'
+import { useTribeCommunityChat } from '@/modules/explore/hooks/use-tribe-community-chat'
 
 interface ExploreCommunitySectionProps {
   community: ExplorePayload['community']
@@ -70,7 +71,19 @@ function CommunityWaveform({
   )
 }
 
-function TribeRow({ tribe, rank, leaderDb }: { tribe: ExploreTribeRow; rank: number; leaderDb: number }) {
+function TribeRow({
+  tribe,
+  rank,
+  leaderDb,
+  onChat,
+  chatBusy,
+}: {
+  tribe: ExploreTribeRow
+  rank: number
+  leaderDb: number
+  onChat: (slug: string) => void
+  chatBusy: boolean
+}) {
   const lead = rank === 1
   const pct = tribeBarPercent(tribe.totalDb, leaderDb)
 
@@ -104,6 +117,18 @@ function TribeRow({ tribe, rank, leaderDb }: { tribe: ExploreTribeRow; rank: num
           </p>
         )}
       </Link>
+      <button
+        type="button"
+        className="explore-com-tribe__chat"
+        disabled={chatBusy}
+        onClick={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          onChat(tribe.slug)
+        }}
+      >
+        Chat
+      </button>
     </li>
   )
 }
@@ -219,6 +244,7 @@ function CrewScene({ crew }: { crew: ExploreCrewRow }) {
 }
 
 export function ExploreCommunitySection({ community }: ExploreCommunitySectionProps) {
+  const { busySlug, openTribeChat } = useTribeCommunityChat()
   const tribes = listExploreTribes(community)
   const spins = listExploreSpins(community).slice(0, 5)
   const crews = listExploreCrews(community)
@@ -250,7 +276,14 @@ export function ExploreCommunitySection({ community }: ExploreCommunitySectionPr
 
           <ol className="explore-com-tribes">
             {tribes.map((tribe, i) => (
-              <TribeRow key={tribe.id} tribe={tribe} rank={i + 1} leaderDb={leaderDb} />
+              <TribeRow
+                key={tribe.id}
+                tribe={tribe}
+                rank={i + 1}
+                leaderDb={leaderDb}
+                onChat={(slug) => void openTribeChat(slug)}
+                chatBusy={busySlug === tribe.slug}
+              />
             ))}
           </ol>
 

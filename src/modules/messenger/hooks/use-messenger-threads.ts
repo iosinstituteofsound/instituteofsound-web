@@ -1,86 +1,108 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import * as messengerApi from '@/modules/messenger/api/messenger.api'
-import { useMessengerLiveStore } from '@/modules/messenger/store/messenger-live-store'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
-import { tokenStorage } from '@/shared/services/api/token-storage'
-import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
+import type { DmThreadSummary, MessengerFilter } from '@/modules/messenger/types/messenger.types'
 
 export const messengerThreadsQueryKey = ['messenger', 'threads'] as const
 export const messengerUnreadQueryKey = ['messenger', 'unread'] as const
+
+function filterThreads(threads: DmThreadSummary[], filter: MessengerFilter, search: string) {
+  let list = threads
+  const needle = search.trim().toLowerCase()
+
+  if (filter === 'unread') {
+    list = list.filter((thread) => thread.unreadCount > 0)
+  } else if (filter === 'groups') {
+    list = list.filter((thread) => thread.kind === 'group')
+  } else if (filter === 'communities') {
+    list = list.filter((thread) => thread.kind === 'community')
+  } else if (filter === 'requests') {
+    list = list.filter((thread) => thread.isPendingRequest)
+  }
+
+  if (needle) {
+    list = list.filter(
+      (thread) =>
+        thread.title.toLowerCase().includes(needle) ||
+        thread.subtitle?.toLowerCase().includes(needle) ||
+        thread.otherName?.toLowerCase().includes(needle) ||
+        thread.otherHandle?.toLowerCase().includes(needle) ||
+        thread.lastMessageBody?.toLowerCase().includes(needle),
+    )
+  }
+
+  return list
+}
 
 export function useMessengerThreads() {
   const filter = useMessengerUiStore((s) => s.filter)
   const searchQuery = useMessengerUiStore((s) => s.searchQuery)
 
+  const bucket = filter === 'requests' ? 'requests' : undefined
+
   const query = useQuery({
-    queryKey: messengerThreadsQueryKey,
-    queryFn: messengerApi.listThreads,
+    queryKey: [...messengerThreadsQueryKey, bucket],
+    queryFn: () => messengerApi.listThreads({ bucket }),
     staleTime: 15_000,
   })
 
-  const filteredThreads = useMemo(() => {
-    let threads = query.data ?? []
-    const needle = searchQuery.trim().toLowerCase()
+  const allThreadsQuery = useQuery({
+    queryKey: [...messengerThreadsQueryKey, 'all'],
+    queryFn: () => messengerApi.listThreads({ includeArchived: true }),
+    staleTime: 15_000,
+    enabled: filter === 'unread' || filter === 'groups' || filter === 'communities' || filter === 'all',
+  })
 
-    if (filter === 'unread') {
-      threads = threads.filter((thread) => thread.unreadCount > 0)
-    } else if (filter === 'groups') {
-      threads = threads.filter((thread) => thread.isGroup)
-    } else if (filter === 'communities') {
-      threads = []
-    }
+  const source = filter === 'requests' ? query.data : allThreadsQuery.data ?? query.data
 
-    if (needle) {
-      threads = threads.filter(
-        (thread) =>
-          thread.otherName.toLowerCase().includes(needle) ||
-          thread.otherHandle?.toLowerCase().includes(needle) ||
-          thread.lastMessageBody?.toLowerCase().includes(needle),
-      )
-    }
+  const filteredThreads = useMemo(
+    () => filterThreads(source ?? [], filter, searchQuery),
+    [filter, searchQuery, source],
+  )
 
-    return threads
-  }, [filter, query.data, searchQuery])
+  const requestCount = useMemo(
+    () => (allThreadsQuery.data ?? []).filter((t) => t.isPendingRequest).length,
+    [allThreadsQuery.data],
+  )
 
-  return { ...query, threads: filteredThreads }
+  return {
+    ...query,
+    threads: filteredThreads,
+    requestCount,
+    isLoading: query.isLoading || allThreadsQuery.isLoading,
+  }
 }
 
 export function useMessengerUnread() {
-  const setUnreadCount = useMessengerLiveStore((s) => s.setUnreadCount)
-  const liveUnread = useMessengerLiveStore((s) => s.unreadCount)
-  const liveReady = useMessengerLiveStore((s) => s.ready)
-
   const query = useQuery({
     queryKey: messengerUnreadQueryKey,
     queryFn: messengerApi.getUnreadCount,
     staleTime: 20_000,
-    enabled: tokenStorage.hasSession(),
   })
-
-  useEffect(() => {
-    if (query.data !== undefined) {
-      setUnreadCount(query.data)
-    }
-  }, [query.data, setUnreadCount])
-
-  return {
-    ...query,
-    data: liveReady ? liveUnread : query.data,
-  }
+  return query
 }
 
 export function upsertThreadInCache(
   queryClient: ReturnType<typeof useQueryClient>,
   thread: DmThreadSummary,
 ) {
-  queryClient.setQueryData<DmThreadSummary[]>(messengerThreadsQueryKey, (current) => {
-    const list = current ?? []
-    const without = list.filter((entry) => entry.threadId !== thread.threadId)
-    return [thread, ...without].sort((a, b) => {
-      const aTime = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0
-      const bTime = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0
-      return bTime - aTime
+  const keys = [
+    messengerThreadsQueryKey,
+    [...messengerThreadsQueryKey, 'inbox'],
+    [...messengerThreadsQueryKey, 'requests'],
+    [...messengerThreadsQueryKey, 'all'],
+  ]
+
+  for (const key of keys) {
+    queryClient.setQueryData<DmThreadSummary[]>(key, (current) => {
+      const list = current ?? []
+      const without = list.filter((entry) => entry.threadId !== thread.threadId)
+      return [thread, ...without].sort((a, b) => {
+        const aTime = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0
+        const bTime = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0
+        return bTime - aTime
+      })
     })
-  })
+  }
 }
