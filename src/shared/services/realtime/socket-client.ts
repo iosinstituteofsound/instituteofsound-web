@@ -216,7 +216,7 @@ class RealtimeSocketClient {
     if (!env.wsEnabled) return false
     try {
       const socket = await this.ensureConnected()
-      if (!socket.connected) return false
+      if (!socket?.connected) return false
       socket.emit(event, payload)
       return true
     } catch {
