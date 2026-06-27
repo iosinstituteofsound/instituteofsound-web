@@ -67,6 +67,7 @@ export const MessageBubble = memo(function MessageBubble({
         compact && 'messenger-bubble--compact',
         compact && isTail && (isOutgoing ? 'is-tail-out' : 'is-tail-in'),
         compact && isStacked && 'is-stacked',
+        message.reactions.length > 0 && 'has-reaction',
       )}
       onDoubleClick={onReply}
       role="presentation"

@@ -256,7 +256,7 @@
 }
 
 .messenger-chat-window__scroll .messenger-message-row--compact.has-reactions {
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.85rem;
 }
 
 .messenger-chat-window__scroll .messenger-reaction-badge {
@@ -271,10 +271,29 @@
   width: auto;
   max-width: 100%;
   border-radius: 18px;
-  padding: 0.55rem 0.8rem;
+  padding: 0.6rem 0.95rem;
   font-size: 0.9375rem;
   line-height: 1.35;
   word-break: break-word;
+}
+
+.messenger-chat-window__scroll .messenger-bubble--compact.has-reaction {
+  padding-bottom: 0.75rem;
+  min-width: 3rem;
+}
+
+.messenger-chat-window__scroll .messenger-bubble--compact.has-reaction.is-outgoing,
+.messenger-chat-window__scroll .messenger-bubble--compact.has-reaction.is-incoming {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.messenger-chat-window__scroll .messenger-reaction-badge:not(.is-outgoing) {
+  transform: translate(40%, 40%);
+}
+
+.messenger-chat-window__scroll .messenger-reaction-badge.is-outgoing {
+  transform: translate(-40%, 40%);
 }
 
 .messenger-chat-window__scroll .messenger-bubble--compact.is-incoming {

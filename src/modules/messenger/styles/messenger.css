@@ -565,29 +565,37 @@
 
 .messenger-reaction-badge {
   position: absolute;
-  bottom: -0.45rem;
-  right: -0.35rem;
   z-index: 3;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.1rem;
-  min-width: 1.45rem;
-  height: 1.45rem;
-  padding: 0 0.3rem;
+  gap: 0.08rem;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.22rem;
   border-radius: 999px;
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
   box-shadow:
-    0 1px 3px rgb(0 0 0 / 28%),
-    0 0 0 1px rgb(0 0 0 / 12%);
-  font-size: 0.82rem;
+    0 2px 5px rgb(0 0 0 / 32%),
+    0 0 0 1px rgb(0 0 0 / 10%);
+  font-size: 0.75rem;
   line-height: 1;
+  pointer-events: auto;
 }
 
+/* Incoming: bottom-right corner, pushed outside so text is never clipped */
+.messenger-reaction-badge:not(.is-outgoing) {
+  right: 0;
+  bottom: 0;
+  transform: translate(38%, 38%);
+}
+
+/* Outgoing: bottom-left corner, pushed outside */
 .messenger-reaction-badge.is-outgoing {
-  right: auto;
-  left: -0.35rem;
+  left: 0;
+  bottom: 0;
+  transform: translate(-38%, 38%);
 }
 
 .messenger-reaction-badge__emoji {
@@ -597,14 +605,33 @@
   border: 0;
   background: transparent;
   padding: 0;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   line-height: 1;
   cursor: pointer;
 }
 
 .messenger-reaction-badge__count {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 600;
   color: var(--messenger-muted, var(--muted-foreground));
-  margin-left: 0.05rem;
+  margin-left: 0.04rem;
+}
+
+.messenger-bubble.has-reaction {
+  padding-bottom: 0.65rem;
+}
+
+.messenger-bubble--compact.has-reaction {
+  padding-bottom: 0.7rem;
+  min-width: 2.75rem;
+}
+
+.messenger-bubble--compact.has-reaction.is-outgoing {
+  padding-left: 0.95rem;
+  padding-right: 0.95rem;
+}
+
+.messenger-bubble--compact.has-reaction.is-incoming {
+  padding-left: 0.95rem;
+  padding-right: 0.95rem;
 }
