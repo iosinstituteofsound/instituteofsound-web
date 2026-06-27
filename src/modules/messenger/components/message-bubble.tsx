@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
+import '@/modules/messenger/styles/messenger.css'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { MessageActionsMenu } from '@/modules/messenger/components/message-actions-menu'
 import { useMessageBubbleActions } from '@/modules/messenger/hooks/use-message-bubble-actions'
@@ -13,6 +14,7 @@ type MessageBubbleProps = {
   isOutgoing: boolean
   senderName?: string
   senderAvatar?: string
+  compact?: boolean
 }
 
 export const MessageBubble = memo(function MessageBubble({
@@ -21,6 +23,7 @@ export const MessageBubble = memo(function MessageBubble({
   isOutgoing,
   senderName,
   senderAvatar,
+  compact = false,
 }: MessageBubbleProps) {
   const { onReply, onForward, onEdit, onDelete, onReact } = useMessageBubbleActions(message, threadId)
 
@@ -38,7 +41,7 @@ export const MessageBubble = memo(function MessageBubble({
 
   return (
     <div className={cn('messenger-message-row group', isOutgoing && 'is-outgoing')}>
-      {!isOutgoing ? (
+      {!isOutgoing && !compact ? (
         <FeedUserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 self-end" />
       ) : null}
 
@@ -48,7 +51,7 @@ export const MessageBubble = memo(function MessageBubble({
           onDoubleClick={onReply}
           role="presentation"
         >
-          {!isOutgoing && senderName ? (
+          {!isOutgoing && !compact && senderName ? (
             <div className="mb-0.5 text-[11px] font-semibold opacity-80">{senderName}</div>
           ) : null}
 

@@ -242,8 +242,7 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
                       message={row.message}
                       threadId={threadId}
                       isOutgoing={mine}
-                      senderName={row.message.senderName ?? displayName}
-                      senderAvatar={getThreadAvatarUrl(thread)}
+                      compact
                     />
                     {isLastOutgoing ? (
                       <p className="messenger-chat-window__receipt">{receiptLabel(row.message)}</p>
