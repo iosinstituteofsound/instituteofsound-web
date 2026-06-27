@@ -821,3 +821,50 @@
   margin: 0.75rem 0;
   font-size: 0.6875rem;
 }
+
+.messenger-messages .messenger-reply-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  max-width: 100%;
+}
+
+.messenger-messages .messenger-reply-stack.is-outgoing {
+  align-items: flex-end;
+}
+
+.messenger-messages .messenger-reply-stack__header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 0.2rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--messenger-muted);
+}
+
+.messenger-messages .messenger-reply-stack__quoted {
+  max-width: min(100%, 320px);
+  padding: 0.55rem 0.9rem;
+  border-radius: 18px;
+  border-bottom-left-radius: 6px;
+  background: var(--messenger-incoming);
+  color: var(--messenger-text);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.messenger-messages .messenger-reply-stack.is-outgoing .messenger-reply-stack__quoted {
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 6px;
+}
+
+.messenger-messages .messenger-reply-stack .messenger-bubble {
+  margin-top: 0.1rem;
+}

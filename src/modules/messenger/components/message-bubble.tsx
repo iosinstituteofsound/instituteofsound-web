@@ -1,10 +1,12 @@
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
+import { Reply } from 'lucide-react'
 import '@/modules/messenger/styles/messenger.css'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { MessageActionsMenu } from '@/modules/messenger/components/message-actions-menu'
 import { MessageReactionBadge } from '@/modules/messenger/components/message-reaction-badge'
 import { useMessageBubbleActions } from '@/modules/messenger/hooks/use-message-bubble-actions'
+import { getReplyHeaderLabel, getReplyPreviewText } from '@/modules/messenger/lib/messenger-utils'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 import { cn } from '@/shared/lib/cn'
 
@@ -12,6 +14,8 @@ type MessageBubbleProps = {
   message: DmMessage
   threadId: string
   isOutgoing: boolean
+  viewerId?: string | null
+  otherName?: string
   senderName?: string
   senderAvatar?: string
   compact?: boolean
@@ -25,6 +29,8 @@ export const MessageBubble = memo(function MessageBubble({
   message,
   threadId,
   isOutgoing,
+  viewerId,
+  otherName,
   senderName,
   senderAvatar,
   compact = false,
@@ -34,6 +40,15 @@ export const MessageBubble = memo(function MessageBubble({
   isStacked = false,
 }: MessageBubbleProps) {
   const { onReply, onForward, onEdit, onDelete, onReact } = useMessageBubbleActions(message, threadId)
+  const useReplyStack = Boolean(message.replyPreview && !compact)
+  const replyHeaderLabel = getReplyHeaderLabel({
+    isOutgoing,
+    viewerId,
+    otherName,
+    senderName,
+    quotedSenderId: message.replyPreview?.senderId,
+  })
+  const quotedPreviewText = message.replyPreview ? getReplyPreviewText(message.replyPreview) : ''
 
   if (message.type === 'system') {
     return <p className="messenger-system-message">{message.body}</p>
@@ -79,10 +94,10 @@ export const MessageBubble = memo(function MessageBubble({
         <div className="messenger-bubble__sender">{senderName}</div>
       ) : null}
 
-      {message.replyPreview ? (
+      {message.replyPreview && compact ? (
         <div className="messenger-bubble__reply">
           <div className="font-semibold">Reply</div>
-          <div>{message.replyPreview.body || 'Attachment'}</div>
+          <div>{quotedPreviewText}</div>
         </div>
       ) : null}
 
@@ -185,7 +200,18 @@ export const MessageBubble = memo(function MessageBubble({
       <div className="messenger-message-row__content">
         {isOutgoing ? actions : null}
         <div className="messenger-message-row__bubble-wrap">
-          {bubble}
+          {useReplyStack ? (
+            <div className={cn('messenger-reply-stack', isOutgoing && 'is-outgoing')}>
+              <div className="messenger-reply-stack__header">
+                <Reply className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <span>{replyHeaderLabel}</span>
+              </div>
+              <div className="messenger-reply-stack__quoted">{quotedPreviewText}</div>
+              {bubble}
+            </div>
+          ) : (
+            bubble
+          )}
           {reactionBadge}
         </div>
         {!isOutgoing ? actions : null}

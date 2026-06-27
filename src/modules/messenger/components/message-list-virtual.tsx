@@ -148,6 +148,8 @@ export const MessageListVirtual = memo(function MessageListVirtual({
                     message={item.message}
                     threadId={threadId}
                     isOutgoing={item.message.senderId === viewerId}
+                    viewerId={viewerId}
+                    otherName={otherName}
                     senderName={item.message.senderName ?? otherName}
                     senderAvatar={otherAvatar}
                     showAvatar={item.showAvatar}

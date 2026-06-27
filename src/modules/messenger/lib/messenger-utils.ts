@@ -83,3 +83,32 @@ export function groupMessagesByDate<T extends { createdAt: string }>(messages: T
 export function createClientMessageId() {
   return crypto.randomUUID()
 }
+
+export function getReplyPreviewText(preview: { body: string; type: string }) {
+  if (preview.type === 'image') return 'Photo'
+  if (preview.type === 'video') return 'Video'
+  if (preview.type === 'file') return 'Attachment'
+  return preview.body || 'Message'
+}
+
+export function getReplyHeaderLabel(options: {
+  isOutgoing: boolean
+  viewerId?: string | null
+  otherName?: string
+  senderName?: string
+  quotedSenderId?: string
+}) {
+  const { isOutgoing, viewerId, otherName, senderName, quotedSenderId } = options
+  if (!quotedSenderId) return 'Reply'
+
+  const otherLabel = otherName ?? 'them'
+  const senderLabel = senderName ?? otherName ?? 'User'
+
+  if (isOutgoing) {
+    if (quotedSenderId === viewerId) return 'You replied to yourself'
+    return `You replied to ${otherLabel}`
+  }
+
+  if (quotedSenderId === viewerId) return `${senderLabel} replied to you`
+  return `${senderLabel} replied to ${otherLabel}`
+}
