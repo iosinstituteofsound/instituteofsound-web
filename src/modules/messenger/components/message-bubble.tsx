@@ -183,11 +183,12 @@ export const MessageBubble = memo(function MessageBubble({
       ) : null}
 
       <div className="messenger-message-row__content">
+        {isOutgoing ? actions : null}
         <div className="messenger-message-row__bubble-wrap">
           {bubble}
           {reactionBadge}
         </div>
-        {actions}
+        {!isOutgoing ? actions : null}
       </div>
     </div>
   )

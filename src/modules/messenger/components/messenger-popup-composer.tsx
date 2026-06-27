@@ -1,5 +1,5 @@
-import { memo, useCallback, useRef, useState } from 'react'
-import { ImageIcon, Mic, Smile, Square, Sticker, ThumbsUp } from 'lucide-react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { ImageIcon, Mic, Plus, Send, Smile, Square, Sticker, ThumbsUp } from 'lucide-react'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { useSendMessengerMessage } from '@/modules/messenger/hooks/use-messenger-messages'
 import { createClientMessageId } from '@/modules/messenger/lib/messenger-utils'
@@ -10,13 +10,33 @@ type MessengerPopupComposerProps = {
   threadId: string
 }
 
+const MAX_INPUT_HEIGHT = 120
+
 export const MessengerPopupComposer = memo(function MessengerPopupComposer({
   threadId,
 }: MessengerPopupComposerProps) {
   const sendMessage = useSendMessengerMessage(threadId)
   const [text, setText] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
+  const [isMultiline, setIsMultiline] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const typingTimeoutRef = useRef<number | null>(null)
+
+  const isActive = isFocused || text.length > 0
+
+  const resizeTextarea = useCallback(() => {
+    const node = textareaRef.current
+    if (!node) return
+    node.style.height = '0px'
+    const nextHeight = Math.min(node.scrollHeight, MAX_INPUT_HEIGHT)
+    node.style.height = `${nextHeight}px`
+    setIsMultiline(nextHeight > 34)
+  }, [])
+
+  useEffect(() => {
+    resizeTextarea()
+  }, [text, resizeTextarea])
 
   const notifyTyping = useCallback(() => {
     realtimeSocketClient.emitTypingStart(threadId)
@@ -41,6 +61,8 @@ export const MessengerPopupComposer = memo(function MessengerPopupComposer({
         clientMessageId: createClientMessageId(),
       })
       setText('')
+      setIsMultiline(false)
+      if (textareaRef.current) textareaRef.current.style.height = '0px'
       realtimeSocketClient.emitTypingStop(threadId)
     },
     [sendMessage, threadId],
@@ -59,8 +81,18 @@ export const MessengerPopupComposer = memo(function MessengerPopupComposer({
 
   return (
     <div className="messenger-chat-window__composer">
-      <div className="messenger-chat-window__composer-row">
-        <div className="messenger-chat-window__tools">
+      <div
+        className={cn(
+          'messenger-chat-window__composer-row',
+          isActive && 'is-active',
+          isMultiline && 'is-multiline',
+        )}
+      >
+        <button type="button" className="messenger-chat-window__tool messenger-chat-window__tool--plus" aria-label="More">
+          <Plus className="h-4 w-4" />
+        </button>
+
+        <div className="messenger-chat-window__tools-extra" aria-hidden={isActive || undefined}>
           <button type="button" className="messenger-chat-window__tool" aria-label="Voice message">
             <Mic className="h-4 w-4" />
           </button>
@@ -81,12 +113,15 @@ export const MessengerPopupComposer = memo(function MessengerPopupComposer({
           </button>
         </div>
 
-        <div className="messenger-chat-window__input-wrap">
+        <div className={cn('messenger-chat-window__input-wrap', isMultiline && 'is-multiline')}>
           <textarea
+            ref={textareaRef}
             className="messenger-chat-window__input"
             rows={1}
             value={text}
             placeholder="Aa"
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             onChange={(event) => {
               setText(event.target.value)
               notifyTyping()
@@ -98,7 +133,7 @@ export const MessengerPopupComposer = memo(function MessengerPopupComposer({
               }
             }}
           />
-          <button type="button" className="messenger-chat-window__tool" aria-label="Emoji">
+          <button type="button" className="messenger-chat-window__tool messenger-chat-window__tool--emoji" aria-label="Emoji">
             <Smile className="h-4 w-4" />
           </button>
         </div>
@@ -106,16 +141,16 @@ export const MessengerPopupComposer = memo(function MessengerPopupComposer({
         {text.trim() ? (
           <button
             type="button"
-            className={cn('messenger-chat-window__tool', sendMessage.isPending && 'opacity-60')}
+            className={cn('messenger-chat-window__tool messenger-chat-window__tool--send', sendMessage.isPending && 'opacity-60')}
             aria-label="Send"
             onClick={() => void submit(text)}
           >
-            <span className="text-xs font-semibold">Send</span>
+            <Send className="h-4 w-4" />
           </button>
         ) : (
           <button
             type="button"
-            className="messenger-chat-window__tool"
+            className="messenger-chat-window__tool messenger-chat-window__tool--like"
             aria-label="Send like"
             onClick={() => void submit('👍')}
           >
@@ -129,6 +164,7 @@ export const MessengerPopupComposer = memo(function MessengerPopupComposer({
         type="file"
         accept="image/*"
         className="hidden"
+        aria-label="Upload image"
         onChange={(event) => void onImageSelected(event.target.files)}
       />
     </div>

@@ -45,95 +45,49 @@ export const MessageActionsMenu = memo(function MessageActionsMenu({
 
   if (message.type === 'system' || message.deletedAt) return null
 
-  if (compact) {
-    return (
-      <div
-        className={cn('messenger-message-actions messenger-message-actions--compact', isOutgoing && 'is-outgoing')}
-        ref={rootRef}
-      >
-        {showReactions ? (
-          <div className="messenger-message-actions__reactions is-visible">
-            {REACTION_EMOJIS.map((emoji) => (
-              <button
-                key={emoji}
-                type="button"
-                className="messenger-message-actions__emoji"
-                aria-label={`React ${emoji}`}
-                onClick={() => {
-                  onReact(emoji)
-                  setShowReactions(false)
-                }}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-        ) : null}
-
-        <button
-          type="button"
-          className="messenger-message-actions__compact-btn"
-          aria-label="React"
-          onClick={() => setShowReactions((value) => !value)}
-        >
-          <Smile className="h-4 w-4" />
-        </button>
-        <button type="button" className="messenger-message-actions__compact-btn" aria-label="Reply" onClick={onReply}>
-          <Reply className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          className="messenger-message-actions__compact-btn"
-          aria-label="More actions"
-          onClick={() => setOpen((value) => !value)}
-        >
-          <MoreHorizontal className="h-4 w-4" />
-        </button>
-
-        {open ? (
-          <div className="messenger-message-actions__menu" role="menu">
-            <button type="button" role="menuitem" onClick={() => { onForward(); setOpen(false) }}>
-              <Forward className="h-4 w-4" /> Forward
-            </button>
-            {canEdit ? (
-              <button type="button" role="menuitem" onClick={() => { onEdit(); setOpen(false) }}>
-                <Pencil className="h-4 w-4" /> Edit
-              </button>
-            ) : null}
-            {canDelete ? (
-              <button type="button" role="menuitem" onClick={() => { void onDelete(); setOpen(false) }}>
-                <Trash2 className="h-4 w-4" /> Delete
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-    )
-  }
+  const variantClass = compact
+    ? 'messenger-message-actions--compact'
+    : 'messenger-message-actions--inline'
 
   return (
-    <div className="messenger-message-actions" ref={rootRef}>
-      <div className={cn('messenger-message-actions__reactions', open && 'is-visible')}>
-        {REACTION_EMOJIS.map((emoji) => (
-          <button
-            key={emoji}
-            type="button"
-            className="messenger-message-actions__emoji"
-            aria-label={`React ${emoji}`}
-            onClick={() => {
-              onReact(emoji)
-              setOpen(false)
-            }}
-          >
-            {emoji}
-          </button>
-        ))}
-      </div>
+    <div
+      className={cn('messenger-message-actions', variantClass, isOutgoing && 'is-outgoing')}
+      ref={rootRef}
+    >
+      {showReactions ? (
+        <div className="messenger-message-actions__reactions is-visible">
+          {REACTION_EMOJIS.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              className="messenger-message-actions__emoji"
+              aria-label={`React ${emoji}`}
+              onClick={() => {
+                onReact(emoji)
+                setShowReactions(false)
+              }}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <button
         type="button"
-        className="messenger-message-actions__toggle"
-        aria-label="Message actions"
+        className="messenger-message-actions__compact-btn"
+        aria-label="React"
+        onClick={() => setShowReactions((value) => !value)}
+      >
+        <Smile className="h-4 w-4" />
+      </button>
+      <button type="button" className="messenger-message-actions__compact-btn" aria-label="Reply" onClick={onReply}>
+        <Reply className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className="messenger-message-actions__compact-btn"
+        aria-label="More actions"
         onClick={() => setOpen((value) => !value)}
       >
         <MoreHorizontal className="h-4 w-4" />
@@ -141,9 +95,6 @@ export const MessageActionsMenu = memo(function MessageActionsMenu({
 
       {open ? (
         <div className="messenger-message-actions__menu" role="menu">
-          <button type="button" role="menuitem" onClick={() => { onReply(); setOpen(false) }}>
-            <Reply className="h-4 w-4" /> Reply
-          </button>
           <button type="button" role="menuitem" onClick={() => { onForward(); setOpen(false) }}>
             <Forward className="h-4 w-4" /> Forward
           </button>

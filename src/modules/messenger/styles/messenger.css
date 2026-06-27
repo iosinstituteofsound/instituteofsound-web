@@ -8,17 +8,20 @@
 }
 
 .messenger-shell {
-  --messenger-bg: var(--background);
-  --messenger-panel: var(--card);
-  --messenger-panel-2: color-mix(in srgb, var(--foreground) 5%, var(--card));
-  --messenger-border: color-mix(in srgb, var(--foreground) 8%, transparent);
-  --messenger-text: var(--foreground);
-  --messenger-muted: var(--muted-foreground);
+  --messenger-bg: var(--ios-surface-base);
+  --messenger-panel: var(--ios-surface-raised);
+  --messenger-panel-2: var(--ios-surface-elevated);
+  --messenger-conversation-bg: var(--ios-surface-raised);
+  --messenger-messages-bg: color-mix(in oklch, var(--ios-surface-base) 94%, var(--foreground) 6%);
+  --messenger-border: var(--ios-line-soft);
+  --messenger-text: var(--ios-ink);
+  --messenger-muted: var(--ios-ink-muted);
   --messenger-accent: var(--primary);
-  --messenger-incoming: color-mix(in srgb, var(--foreground) 12%, var(--card));
+  --messenger-incoming: var(--ios-surface-hover);
   --messenger-outgoing: var(--primary);
-  --messenger-hover: color-mix(in srgb, var(--foreground) 6%, transparent);
-  --messenger-active: color-mix(in srgb, var(--primary) 16%, transparent);
+  --messenger-hover: color-mix(in oklch, var(--foreground) 6%, transparent);
+  --messenger-active: color-mix(in oklch, var(--primary) 16%, transparent);
+  --messenger-online: var(--ios-dashboard-success);
 
   display: grid;
   grid-template-columns: 360px minmax(0, 1fr) 320px;
@@ -180,7 +183,7 @@
   flex-direction: column;
   min-height: 0;
   height: 100%;
-  background: color-mix(in srgb, var(--foreground) 3%, var(--background));
+  background: var(--messenger-conversation-bg);
 }
 
 .messenger-conversation__header,
@@ -195,7 +198,7 @@
   gap: 1rem;
   padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--messenger-border);
-  background: color-mix(in srgb, var(--card) 92%, transparent);
+  background: var(--messenger-panel);
   backdrop-filter: blur(12px);
 }
 
@@ -286,7 +289,7 @@
 
 .messenger-composer {
   border-top: 1px solid var(--messenger-border);
-  background: color-mix(in srgb, var(--card) 96%, transparent);
+  background: var(--messenger-panel);
   padding: 0.75rem 1rem 1rem;
 }
 
@@ -423,8 +426,8 @@
   width: 12px;
   height: 12px;
   border-radius: 999px;
-  background: #31a24c;
-  border: 2px solid var(--background);
+  background: var(--messenger-online);
+  border: 2px solid var(--messenger-panel);
 }
 
 .messenger-system-message {
@@ -639,11 +642,7 @@
 /* Full /messenger page only — do not affect popup (.messenger-chat-window) */
 .messenger-messages {
   padding: 0.75rem 0 1rem;
-  background: color-mix(in srgb, var(--foreground) 5%, var(--background));
-}
-
-.messenger-conversation {
-  background: color-mix(in srgb, var(--foreground) 5%, var(--background));
+  background: var(--messenger-messages-bg);
 }
 
 .messenger-message-block {
@@ -678,8 +677,85 @@
 
 .messenger-messages .messenger-message-row__content {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   min-width: 0;
   max-width: min(70%, 520px);
+}
+
+.messenger-messages .messenger-message-actions--inline {
+  position: static;
+  top: auto;
+  right: auto;
+  left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  opacity: 0;
+  pointer-events: none;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.messenger-messages .messenger-message-row:hover .messenger-message-actions--inline,
+.messenger-messages .messenger-message-actions--inline:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.messenger-messages .messenger-message-actions--inline.is-outgoing {
+  order: -1;
+}
+
+.messenger-messages .messenger-message-actions--inline .messenger-message-actions__compact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-foreground);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.messenger-messages .messenger-message-actions--inline .messenger-message-actions__compact-btn:hover {
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+  color: var(--primary);
+}
+
+.messenger-messages .messenger-message-actions--inline .messenger-message-actions__reactions {
+  position: absolute;
+  bottom: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 6;
+  display: flex;
+  gap: 0.15rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--messenger-border);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+}
+
+.messenger-messages .messenger-message-row.is-outgoing .messenger-message-actions--inline .messenger-message-actions__reactions {
+  right: auto;
+  left: 0;
+}
+
+.messenger-messages .messenger-message-actions--inline .messenger-message-actions__menu {
+  position: absolute;
+  top: auto;
+  bottom: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 6;
+}
+
+.messenger-messages .messenger-message-row.is-outgoing .messenger-message-actions--inline .messenger-message-actions__menu {
+  right: auto;
+  left: 0;
 }
 
 .messenger-messages .messenger-message-row.is-outgoing .messenger-message-row__content {
@@ -725,7 +801,7 @@
 }
 
 .messenger-messages .messenger-bubble:not(.messenger-bubble--compact).is-incoming {
-  background: color-mix(in srgb, var(--foreground) 18%, #3e4042);
+  background: var(--messenger-incoming);
   border-bottom-left-radius: 6px;
 }
 
