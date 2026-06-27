@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import '@/modules/messenger/styles/messenger.css'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { MessageActionsMenu } from '@/modules/messenger/components/message-actions-menu'
+import { MessageReactionBadge } from '@/modules/messenger/components/message-reaction-badge'
 import { useMessageBubbleActions } from '@/modules/messenger/hooks/use-message-bubble-actions'
 import { formatMessageClockTime } from '@/modules/messenger/lib/messenger-utils'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
@@ -118,21 +119,6 @@ export const MessageBubble = memo(function MessageBubble({
 
       {message.body && message.type !== 'share_card' ? <div>{message.body}</div> : null}
 
-      {message.reactions.length ? (
-        <div className={cn('flex flex-wrap gap-1 text-sm', compact ? 'mt-0.5' : 'mt-1')}>
-          {message.reactions.map((reaction) => (
-            <button
-              key={`${reaction.userId}-${reaction.emoji}`}
-              type="button"
-              className="rounded-full bg-black/10 px-1.5 py-0.5"
-              onClick={() => void onReact(reaction.emoji)}
-            >
-              {reaction.emoji}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
       {!compact ? (
         <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] opacity-70">
           <time dateTime={message.createdAt}>{formatMessageClockTime(message.createdAt)}</time>
@@ -144,6 +130,15 @@ export const MessageBubble = memo(function MessageBubble({
     </div>
   )
 
+  const reactionBadge =
+    message.reactions.length > 0 ? (
+      <MessageReactionBadge
+        reactions={message.reactions}
+        isOutgoing={isOutgoing}
+        onReact={(emoji) => void onReact(emoji)}
+      />
+    ) : null
+
   if (compact) {
     return (
       <div
@@ -151,6 +146,7 @@ export const MessageBubble = memo(function MessageBubble({
           'messenger-message-row messenger-message-row--compact group',
           isOutgoing && 'is-outgoing',
           isStacked && 'is-stacked',
+          message.reactions.length > 0 && 'has-reactions',
         )}
       >
         {!isOutgoing ? (
@@ -161,7 +157,10 @@ export const MessageBubble = memo(function MessageBubble({
           )
         ) : null}
 
-        <div className="messenger-message-row__bubble-wrap">{bubble}</div>
+        <div className="messenger-message-row__bubble-wrap">
+          {bubble}
+          {reactionBadge}
+        </div>
 
         {!isOutgoing ? actions : null}
         {isOutgoing ? actions : null}
@@ -170,13 +169,16 @@ export const MessageBubble = memo(function MessageBubble({
   }
 
   return (
-    <div className={cn('messenger-message-row group', isOutgoing && 'is-outgoing')}>
+    <div className={cn('messenger-message-row group', isOutgoing && 'is-outgoing', message.reactions.length > 0 && 'has-reactions')}>
       {!isOutgoing ? (
         <FeedUserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 self-end" />
       ) : null}
 
       <div className="relative min-w-0 max-w-[min(100%,520px)]">
-        {bubble}
+        <div className="messenger-message-row__bubble-wrap">
+          {bubble}
+          {reactionBadge}
+        </div>
         {actions}
       </div>
     </div>
