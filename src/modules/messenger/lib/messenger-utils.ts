@@ -1,3 +1,13 @@
+import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
+
+export function getThreadDisplayName(thread?: Pick<DmThreadSummary, 'title' | 'otherName'> | null) {
+  return thread?.title ?? thread?.otherName ?? 'Chat'
+}
+
+export function getThreadAvatarUrl(thread?: Pick<DmThreadSummary, 'avatarUrl' | 'otherAvatarThumbnailUrl' | 'otherAvatarUrl'> | null) {
+  return thread?.otherAvatarThumbnailUrl ?? thread?.otherAvatarUrl ?? thread?.avatarUrl
+}
+
 export function formatMessengerTime(iso?: string) {
   if (!iso) return ''
   const date = new Date(iso)

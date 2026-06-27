@@ -12,7 +12,6 @@ import {
 } from 'lucide-react'
 import { Switch } from '@/shared/components/ui/switch'
 import { useMessengerSettings } from '@/modules/messenger/hooks/use-messenger-settings'
-import { useMessengerPrivacySettings } from '@/modules/messenger/hooks/use-messenger-privacy-settings'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/messenger/styles/messenger-chat-settings.css'
 
@@ -22,17 +21,6 @@ type MessengerChatSettingsProps = {
 
 export function MessengerChatSettings({ className }: MessengerChatSettingsProps) {
   const { settings, updateSetting } = useMessengerSettings()
-  const {
-    showBlocked,
-    setShowBlocked,
-    showArchived,
-    setShowArchived,
-    blockedUsers,
-    archivedThreads,
-    unblock,
-    isLoadingBlocked,
-    isLoadingArchived,
-  } = useMessengerPrivacySettings()
 
   return (
     <div className={cn('ios-messenger-settings', className)}>
@@ -111,27 +99,12 @@ export function MessengerChatSettings({ className }: MessengerChatSettingsProps)
           </span>
         </button>
 
-        <button type="button" className="ios-messenger-settings__link-row" onClick={() => setShowArchived((v) => !v)}>
+        <button type="button" className="ios-messenger-settings__link-row">
           <span className="ios-messenger-settings__row-main">
             <Archive className="ios-messenger-settings__icon" aria-hidden />
             <span className="ios-messenger-settings__label">Archived chats</span>
           </span>
         </button>
-        {showArchived ? (
-          <div className="ios-messenger-settings__nested">
-            {isLoadingArchived ? (
-              <p className="ios-messenger-settings__hint px-4 py-2">Loading…</p>
-            ) : archivedThreads.length ? (
-              archivedThreads.map((thread) => (
-                <p key={thread.threadId} className="ios-messenger-settings__hint px-4 py-1">
-                  {thread.title}
-                </p>
-              ))
-            ) : (
-              <p className="ios-messenger-settings__hint px-4 py-2">No archived chats.</p>
-            )}
-          </div>
-        ) : null}
 
         <button type="button" className="ios-messenger-settings__link-row">
           <span className="ios-messenger-settings__row-main">
@@ -149,33 +122,12 @@ export function MessengerChatSettings({ className }: MessengerChatSettingsProps)
           </span>
         </button>
 
-        <button type="button" className="ios-messenger-settings__link-row" onClick={() => setShowBlocked((v) => !v)}>
+        <button type="button" className="ios-messenger-settings__link-row">
           <span className="ios-messenger-settings__row-main">
             <Ban className="ios-messenger-settings__icon" aria-hidden />
             <span className="ios-messenger-settings__label">Block Settings</span>
           </span>
         </button>
-        {showBlocked ? (
-          <div className="ios-messenger-settings__nested">
-            {isLoadingBlocked ? (
-              <p className="ios-messenger-settings__hint px-4 py-2">Loading…</p>
-            ) : blockedUsers.length ? (
-              blockedUsers.map((user) => (
-                <button
-                  key={user.userId}
-                  type="button"
-                  className="ios-messenger-settings__link-row"
-                  onClick={() => void unblock(user.userId)}
-                >
-                  <span>{user.name}</span>
-                  <span className="ios-messenger-settings__hint">Unblock</span>
-                </button>
-              ))
-            ) : (
-              <p className="ios-messenger-settings__hint px-4 py-2">No blocked accounts.</p>
-            )}
-          </div>
-        ) : null}
       </div>
     </div>
   )

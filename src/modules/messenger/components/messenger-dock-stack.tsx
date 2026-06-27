@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { useMessengerThreads } from '@/modules/messenger/hooks/use-messenger-threads'
+import { getThreadAvatarUrl, getThreadDisplayName } from '@/modules/messenger/lib/messenger-utils'
 import { useMessengerPopupStore } from '@/modules/messenger/store/messenger-popup-store'
 
 type MessengerDockStackProps = {
@@ -18,8 +19,8 @@ export const MessengerDockStack = memo(function MessengerDockStack({ threadIds }
     <div className="messenger-dock-stack" aria-label="More conversations">
       {threadIds.map((threadId, index) => {
         const thread = threads.find((entry) => entry.threadId === threadId)
-        const name = thread?.otherName ?? 'Chat'
-        const avatar = thread?.otherAvatarThumbnailUrl ?? thread?.otherAvatarUrl
+        const name = getThreadDisplayName(thread)
+        const avatar = getThreadAvatarUrl(thread)
 
         return (
           <button

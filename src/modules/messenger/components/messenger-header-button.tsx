@@ -14,15 +14,13 @@ import { openMessengerPopup } from '@/modules/messenger/lib/messenger-popup-open
 import { useQuery } from '@tanstack/react-query'
 import { Maximize2, MoreHorizontal, PenSquare, Search } from 'lucide-react'
 import { MessengerChatSettings } from '@/modules/messenger/components/messenger-chat-settings'
-import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
-import { NewMessageModal } from '@/modules/messenger/components/new-message-modal'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { MessengerIcon } from '@/modules/messenger/components/messenger-icon'
 import * as messengerApi from '@/modules/messenger/api/messenger.api'
 import { messengerThreadsQueryKey, useMessengerUnread } from '@/modules/messenger/hooks/use-messenger-threads'
 import { useMessengerLiveStore } from '@/modules/messenger/store/messenger-live-store'
-import { formatMessengerTime } from '@/modules/messenger/lib/messenger-utils'
+import { formatMessengerTime, getThreadAvatarUrl, getThreadDisplayName } from '@/modules/messenger/lib/messenger-utils'
 import type { DmThreadSummary, MessengerFilter } from '@/modules/messenger/types/messenger.types'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { cn } from '@/shared/lib/cn'
@@ -48,7 +46,7 @@ function filterThreads(
   if (filter === 'unread') {
     list = list.filter((thread) => thread.unreadCount > 0)
   } else if (filter === 'groups') {
-    list = list.filter((thread) => thread.kind === 'group')
+    list = list.filter((thread) => thread.kind === 'group' || thread.isGroup)
   } else if (filter === 'communities') {
     list = list.filter((thread) => thread.kind === 'community')
   } else if (filter === 'requests') {
@@ -58,9 +56,8 @@ function filterThreads(
   if (needle) {
     list = list.filter(
       (thread) =>
-        thread.title.toLowerCase().includes(needle) ||
+        getThreadDisplayName(thread).toLowerCase().includes(needle) ||
         thread.subtitle?.toLowerCase().includes(needle) ||
-        thread.otherName?.toLowerCase().includes(needle) ||
         thread.otherHandle?.toLowerCase().includes(needle) ||
         thread.lastMessageBody?.toLowerCase().includes(needle),
     )
@@ -81,7 +78,6 @@ const PopoverThreadItem = memo(function PopoverThreadItem({
   onSelect: (threadId: string) => void
 }) {
   const sentByViewer = Boolean(viewerId && thread.lastSenderId === viewerId)
-  const isDirect = thread.kind === 'direct'
 
   return (
     <li>
@@ -90,22 +86,13 @@ const PopoverThreadItem = memo(function PopoverThreadItem({
         className={cn('ios-messenger-popover__item', thread.unreadCount > 0 && 'is-unread')}
         onClick={() => onSelect(thread.threadId)}
       >
-        {isDirect ? (
-          <FeedUserAvatar
-            name={thread.title}
-            avatarUrl={thread.otherAvatarThumbnailUrl ?? thread.otherAvatarUrl ?? thread.avatarUrl}
-            className="h-[52px] w-[52px]"
-          />
-        ) : (
-          <GroupAvatarStack
-            members={thread.memberPreview}
-            title={thread.title}
-            avatarUrl={thread.avatarUrl}
-            size="md"
-          />
-        )}
+        <FeedUserAvatar
+          name={getThreadDisplayName(thread)}
+          avatarUrl={getThreadAvatarUrl(thread)}
+          className="h-[52px] w-[52px]"
+        />
         <div className="ios-messenger-popover__copy">
-          <div className="ios-messenger-popover__name">{thread.title}</div>
+          <div className="ios-messenger-popover__name">{getThreadDisplayName(thread)}</div>
           <div className="ios-messenger-popover__preview-row">
             <span className="ios-messenger-popover__preview">
               {thread.lastMessageBody || 'Start a conversation'}
@@ -180,7 +167,6 @@ export function MessengerHeaderButton() {
   const [open, setOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [filter, setFilter] = useState<MessengerFilter>('all')
-  const [newMessageOpen, setNewMessageOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearch = useDeferredValue(searchQuery)
 
@@ -278,17 +264,14 @@ export function MessengerHeaderButton() {
               >
                 <Maximize2 className="h-4 w-4" />
               </Link>
-              <button
-                type="button"
+              <Link
+                to="/messenger"
                 className="ios-messenger-popover__action"
                 aria-label="New message"
-                onClick={() => {
-                  setOpen(false)
-                  setNewMessageOpen(true)
-                }}
+                onClick={() => setOpen(false)}
               >
                 <PenSquare className="h-4 w-4" />
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -382,7 +365,6 @@ export function MessengerHeaderButton() {
       </button>
 
       {panel ? createPortal(panel, document.body) : null}
-      <NewMessageModal open={newMessageOpen} onClose={() => setNewMessageOpen(false)} />
     </div>
   )
 }

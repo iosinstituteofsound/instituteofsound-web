@@ -1,6 +1,5 @@
-import { memo, useState } from 'react'
+import { memo, useDeferredValue, useMemo } from 'react'
 import { MoreHorizontal, PenSquare, Search } from 'lucide-react'
-import { NewMessageModal } from '@/modules/messenger/components/new-message-modal'
 import { ThreadListItem } from '@/modules/messenger/components/thread-list-item'
 import { useMessengerThreads } from '@/modules/messenger/hooks/use-messenger-threads'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
@@ -10,7 +9,6 @@ import { cn } from '@/shared/lib/cn'
 const FILTERS: Array<{ id: MessengerFilter; label: string }> = [
   { id: 'all', label: 'All' },
   { id: 'unread', label: 'Unread' },
-  { id: 'requests', label: 'Requests' },
   { id: 'groups', label: 'Groups' },
   { id: 'communities', label: 'Communities' },
 ]
@@ -29,9 +27,14 @@ export const ThreadSidebar = memo(function ThreadSidebar({
   const searchQuery = useMessengerUiStore((s) => s.searchQuery)
   const setSearchQuery = useMessengerUiStore((s) => s.setSearchQuery)
   const setActiveThreadId = useMessengerUiStore((s) => s.setActiveThreadId)
-  const [newMessageOpen, setNewMessageOpen] = useState(false)
 
-  const { threads, isLoading, requestCount } = useMessengerThreads()
+  const { threads, isLoading } = useMessengerThreads()
+  const deferredSearch = useDeferredValue(searchQuery)
+
+  const visibleThreads = useMemo(() => {
+    if (deferredSearch === searchQuery) return threads
+    return threads
+  }, [deferredSearch, searchQuery, threads])
 
   return (
     <aside className={cn('messenger-panel messenger-sidebar', className)}>
@@ -41,12 +44,7 @@ export const ThreadSidebar = memo(function ThreadSidebar({
           <button type="button" className="messenger-icon-btn" aria-label="More options">
             <MoreHorizontal className="h-5 w-5" />
           </button>
-          <button
-            type="button"
-            className="messenger-icon-btn"
-            aria-label="New message"
-            onClick={() => setNewMessageOpen(true)}
-          >
+          <button type="button" className="messenger-icon-btn" aria-label="New message">
             <PenSquare className="h-5 w-5" />
           </button>
         </div>
@@ -73,7 +71,6 @@ export const ThreadSidebar = memo(function ThreadSidebar({
             onClick={() => setFilter(entry.id)}
           >
             {entry.label}
-            {entry.id === 'requests' && requestCount > 0 ? ` (${requestCount})` : ''}
           </button>
         ))}
       </div>
@@ -81,8 +78,8 @@ export const ThreadSidebar = memo(function ThreadSidebar({
       <div className="messenger-thread-list">
         {isLoading ? (
           <p className="px-3 py-6 text-sm text-[var(--messenger-muted)]">Loading chats…</p>
-        ) : threads.length ? (
-          threads.map((thread) => (
+        ) : visibleThreads.length ? (
+          visibleThreads.map((thread) => (
             <ThreadListItem
               key={thread.threadId}
               thread={thread}
@@ -92,16 +89,12 @@ export const ThreadSidebar = memo(function ThreadSidebar({
           ))
         ) : (
           <p className="px-3 py-6 text-sm text-[var(--messenger-muted)]">
-            {filter === 'requests'
-              ? 'No message requests.'
-              : filter === 'groups' || filter === 'communities'
-                ? 'No conversations in this category yet.'
-                : 'No chats yet. Start messaging from a profile.'}
+            {filter === 'groups' || filter === 'communities'
+              ? 'No conversations in this category yet.'
+              : 'No chats yet. Visit a profile and start messaging.'}
           </p>
         )}
       </div>
-
-      <NewMessageModal open={newMessageOpen} onClose={() => setNewMessageOpen(false)} />
     </aside>
   )
 })
