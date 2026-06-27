@@ -37,7 +37,7 @@ export function FeedPostSoundToggle({ item, className }: FeedPostSoundToggleProp
 
     if (isActive) {
       togglePlay()
-      openBar()
+      if (!isPlaying) openBar()
       return
     }
 

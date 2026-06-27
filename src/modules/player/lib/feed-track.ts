@@ -2,6 +2,11 @@ import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { payloadNumber, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import type { PlayerTrack } from '@/modules/player/types/player.types'
 
+/** Stable player id for feed posts — does not change when catalog/enrichment loads. */
+export function resolveFeedPlayerTrackId(item: FeedItemDto): string {
+  return item.id
+}
+
 export function feedItemToPlayerTrack(item: FeedItemDto): PlayerTrack | null {
   const audioUrl = payloadString(item.payload, 'audioUrl')
   if (!audioUrl) return null
@@ -15,7 +20,7 @@ export function feedItemToPlayerTrack(item: FeedItemDto): PlayerTrack | null {
   const youtubeUrl = payloadString(item.payload, 'youtubeUrl')
 
   return {
-    id: trackId ?? releaseId ?? item.id,
+    id: resolveFeedPlayerTrackId(item),
     trackId: trackId ?? undefined,
     releaseId,
     title: trackTitle,

@@ -78,6 +78,7 @@ function PlayerControlButton({
 export function UniversalPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const fadeHandleRef = useRef(createFadeHandle())
+  const playbackGenerationRef = useRef(0)
   const targetVolumeRef = useRef(0.85)
   const isMobile = useIsMobile()
   const currentTrack = usePlayerStore((s) => s.currentTrack)
@@ -171,6 +172,7 @@ export function UniversalPlayer() {
     const audio = audioRef.current
     if (!audio) return
 
+    const generation = ++playbackGenerationRef.current
     const target = getTargetVolume()
     targetVolumeRef.current = target
     cancelAudioFade(fadeHandleRef.current)
@@ -179,20 +181,35 @@ export function UniversalPlayer() {
     try {
       await audio.play()
     } catch {
-      setPlaybackState({ isPlaying: false })
+      if (generation === playbackGenerationRef.current) {
+        setPlaybackState({ isPlaying: false })
+      }
+      return
+    }
+
+    if (generation !== playbackGenerationRef.current || !usePlayerStore.getState().isPlaying) {
+      audio.pause()
+      audio.volume = target
       return
     }
 
     await fadeAudioVolume(audio, target, PLAYER_FADE_MS, fadeHandleRef.current)
+
+    if (generation !== playbackGenerationRef.current || !usePlayerStore.getState().isPlaying) {
+      audio.pause()
+      audio.volume = target
+    }
   }, [getTargetVolume, setPlaybackState])
 
-  const fadeOutPause = useCallback(async () => {
+  const fadeOutPause = useCallback(() => {
+    playbackGenerationRef.current += 1
+    cancelAudioFade(fadeHandleRef.current)
+
     const audio = audioRef.current
-    if (!audio || audio.paused) return
+    if (!audio) return
 
     const target = getTargetVolume()
     targetVolumeRef.current = target
-    await fadeAudioVolume(audio, 0, PLAYER_FADE_MS, fadeHandleRef.current)
     audio.pause()
     audio.volume = target
   }, [getTargetVolume])
@@ -242,7 +259,7 @@ export function UniversalPlayer() {
     if (usePlayerStore.getState().isPlaying) {
       void fadeInPlay()
     }
-  }, [currentTrack?.id, currentTrack?.audioUrl, currentTrack?.durationSec, fadeInPlay, setPlaybackState])
+  }, [currentTrack?.id, currentTrack?.audioUrl, fadeInPlay, setPlaybackState])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -286,23 +303,30 @@ export function UniversalPlayer() {
     const handleLoadedData = () => syncDuration()
     const handleEnded = () => {
       reportCompleted()
-      if (repeat === 'one') {
+      const state = usePlayerStore.getState()
+      if (state.repeat === 'one') {
         audio.currentTime = 0
         void fadeInPlay()
         return
       }
 
-      if (repeat === 'all' || queue.length > 1) {
+      if (state.repeat === 'all' || state.queue.length > 1) {
         next()
         return
       }
 
       setPlaybackState({ isPlaying: false, currentTime: 0 })
     }
-    const handlePlay = () => setPlaybackState({ isPlaying: true })
+    const handlePlay = () => {
+      if (!usePlayerStore.getState().isPlaying) {
+        audio.pause()
+      }
+    }
     const handlePause = () => {
-      setPlaybackState({ isPlaying: false })
       reportPause(audio.currentTime)
+      if (usePlayerStore.getState().isPlaying) {
+        setPlaybackState({ isPlaying: false })
+      }
     }
 
     audio.addEventListener('timeupdate', handleTimeUpdate)
@@ -322,7 +346,7 @@ export function UniversalPlayer() {
       audio.removeEventListener('play', handlePlay)
       audio.removeEventListener('pause', handlePause)
     }
-  }, [fadeInPlay, next, queue.length, repeat, reportCompleted, reportPause, setPlaybackState])
+  }, [fadeInPlay, next, reportCompleted, reportPause, setPlaybackState])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -405,29 +429,17 @@ export function UniversalPlayer() {
     [seek],
   )
 
-  if (!visible || !currentTrack) return <audio ref={audioRef} className="sr-only" preload="metadata" />
-
   const showMobileMini = isMobile && mobileView === 'mini'
   const showDesktopBar = !isMobile
 
-  if (!showPlayerBar) {
-    return <audio ref={audioRef} className="sr-only" preload="metadata" />
-  }
-
-  if (isMobile && mobileView === 'sheet') {
-    return (
-      <>
-        <audio ref={audioRef} className="sr-only" preload="metadata" />
+  const playerBar =
+    visible && currentTrack && showPlayerBar ? (
+      isMobile && mobileView === 'sheet' ? (
         <NowPlayingSheet />
-      </>
-    )
-  }
-
-  return (
-    <>
-      <audio ref={audioRef} className="sr-only" preload="metadata" />
-      <NowPlayingSheet />
-      <section
+      ) : (
+        <>
+          <NowPlayingSheet />
+          <section
         className={cn(
           'ios-universal-player',
           isExpanded && showDesktopBar && 'ios-universal-player--expanded',
@@ -737,6 +749,14 @@ export function UniversalPlayer() {
           </div>
         </div>
       </section>
+        </>
+      )
+    ) : null
+
+  return (
+    <>
+      <audio ref={audioRef} className="sr-only" preload="metadata" />
+      {playerBar}
     </>
   )
 }

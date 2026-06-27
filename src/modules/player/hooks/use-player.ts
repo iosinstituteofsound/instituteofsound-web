@@ -17,8 +17,11 @@ export function usePlayer() {
   )
 
   const isCurrentTrack = useCallback(
-    (trackId: string) => currentTrack?.id === trackId,
-    [currentTrack?.id],
+    (trackId: string) => {
+      if (!currentTrack) return false
+      return currentTrack.id === trackId || currentTrack.sourceId === trackId
+    },
+    [currentTrack?.id, currentTrack?.sourceId],
   )
 
   return {

@@ -138,21 +138,29 @@ export const usePlayerStore = create<PlayerState>()((set, get) => ({
       sessionReady: false,
 
       playTrack: (track, options) => {
+        const state = get()
         const queue = options?.queue?.length ? options.queue : [track]
         const queueIndex = resolveQueueIndex(queue, track, options?.queueIndex)
+        const autoplay = options?.autoplay !== false
+        const sameTrack =
+          state.currentTrack?.id === track.id && state.currentTrack?.audioUrl === track.audioUrl
+
+        if (sameTrack) {
+          set({ isPlaying: autoplay })
+          return
+        }
 
         set({
           currentTrack: track,
           queue,
           displayQueue: queue,
           queueIndex,
-          queueSource: options?.queueSource ?? get().queueSource,
-          isPlaying: options?.autoplay !== false,
+          queueSource: options?.queueSource ?? state.queueSource,
+          isPlaying: autoplay,
           isBarOpen: false,
           currentTime: 0,
           duration: 0,
         })
-
       },
 
       togglePlay: () => set((state) => ({ isPlaying: state.currentTrack ? !state.isPlaying : false })),

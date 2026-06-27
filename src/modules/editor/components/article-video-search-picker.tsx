@@ -21,7 +21,7 @@ export function ArticleVideoSearchPicker({
   className,
 }: ArticleVideoSearchPickerProps) {
   const [query, setQuery] = useState('')
-  const { data, isLoading, isError } = useFeedList(80)
+  const { data, isLoading, isError } = useFeedList({ limit: 80 })
 
   const catalog = useMemo(() => {
     const items = data?.pages.flatMap((page) => page.items) ?? []

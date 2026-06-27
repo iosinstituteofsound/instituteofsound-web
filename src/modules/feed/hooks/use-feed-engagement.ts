@@ -182,7 +182,6 @@ export function useDeleteFeedComment() {
     onSuccess: (_result, { feedItemId }) => {
       void queryClient.invalidateQueries({ queryKey: feedCommentsQueryKey(feedItemId) })
       void queryClient.invalidateQueries({ queryKey: feedQueryKey })
-      void queryClient.invalidateQueries({ queryKey: ['profile-posts'] })
       void queryClient.invalidateQueries({ queryKey: feedItemQueryKey(feedItemId) })
     },
   })

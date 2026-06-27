@@ -2,21 +2,59 @@ import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from
 import * as feedApi from '@/modules/feed/api/feed.api'
 import { removeFeedItemFromAllListCaches } from '@/modules/feed/lib/feed-engagement'
 import { sortFeedItemsLatest } from '@/modules/feed/lib/feed-sort'
-import type { CreateFeedItemInput, FeedListResponse } from '@/modules/feed/types/feed.types'
+import type { CreateFeedItemInput, FeedItemType, FeedListResponse } from '@/modules/feed/types/feed.types'
 
 export const feedQueryKey = ['feed'] as const
 export const FEED_PAGE_SIZE = 20
 
 export type FeedScope = 'all' | 'following'
 
-export function useFeedList(limit = FEED_PAGE_SIZE, scope: FeedScope = 'all') {
+export type UseFeedListOptions = {
+  limit?: number
+  scope?: FeedScope
+  authorId?: string
+  type?: FeedItemType
+  enabled?: boolean
+}
+
+export function feedListQueryKey({
+  limit = FEED_PAGE_SIZE,
+  scope = 'all',
+  authorId,
+  type,
+}: UseFeedListOptions = {}) {
+  return [...feedQueryKey, limit, scope, authorId ?? null, type ?? null] as const
+}
+
+export function useFeedList(options: UseFeedListOptions = {}) {
+  const {
+    limit = FEED_PAGE_SIZE,
+    scope = 'all',
+    authorId,
+    type,
+    enabled,
+  } = options
+
+  const resolvedEnabled = enabled ?? (authorId ? Boolean(authorId) : true)
+
   return useInfiniteQuery({
-    queryKey: [...feedQueryKey, limit, scope],
+    queryKey: feedListQueryKey({ limit, scope, authorId, type }),
     queryFn: ({ pageParam }) =>
-      feedApi.listFeed({ limit, cursor: pageParam as string | undefined, scope }),
+      feedApi.listFeed({
+        limit,
+        cursor: pageParam as string | undefined,
+        ...(authorId ? { authorId, type } : { scope }),
+      }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: resolvedEnabled,
   })
+}
+
+/** Fetch state for feed list chrome (e.g. profile filter overlay) without duplicating query options. */
+export function useFeedListStatus(options: UseFeedListOptions = {}) {
+  const { isFetching, isFetchingNextPage, isLoading } = useFeedList(options)
+  return { isFetching, isFetchingNextPage, isLoading }
 }
 
 function isFeedListCache(data: unknown): data is InfiniteData<FeedListResponse, string | undefined> {
@@ -62,7 +100,6 @@ export function useCreateFeedItem() {
         },
       )
       void queryClient.invalidateQueries({ queryKey: feedQueryKey })
-      void queryClient.invalidateQueries({ queryKey: ['profile-posts'] })
     },
   })
 }
@@ -74,7 +111,6 @@ export function useDeleteFeedItem() {
     onSuccess: (_result, id) => {
       removeFeedItemFromAllListCaches(queryClient, id)
       void queryClient.invalidateQueries({ queryKey: feedQueryKey })
-      void queryClient.invalidateQueries({ queryKey: ['profile-posts'] })
     },
   })
 }

@@ -1,17 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Grid3x3, List, PenLine } from 'lucide-react'
-import { FeedItemCard } from '@/modules/feed/lib/feed-type-registry'
+import { useRef, useState } from 'react'
+import { Grid3x3, List } from 'lucide-react'
 import { FeedComposer } from '@/modules/feed/components/feed-composer'
-import { useProfilePosts } from '@/modules/profile/hooks/use-profile-posts'
+import { FeedList } from '@/modules/feed/components/feed-list'
+import { useFeedListStatus } from '@/modules/feed/hooks/use-feed'
 import { useSlidingIndicator } from '@/modules/profile/lib/use-sliding-indicator'
-import type { FeedItemType, FeedItemDto } from '@/modules/feed/types/feed.types'
+import type { FeedItemType } from '@/modules/feed/types/feed.types'
 import type { UserDto } from '@/shared/types/auth.types'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent } from '@/shared/components/ui/card'
-import { Skeleton } from '@/shared/components/ui/skeleton'
-import { useInfiniteScroll } from '@/shared/hooks/use-infinite-scroll'
 import { cn } from '@/shared/lib/cn'
 import './profile-posts-panel.css'
 
@@ -45,53 +42,15 @@ export function ProfilePostsPanel({ user, isOwnProfile }: ProfilePostsPanelProps
   const viewRowRef = useRef<HTMLDivElement>(null)
   const feedType = activeFilter === 'all' ? undefined : activeFilter
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    isError,
-    refetch,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useProfilePosts(user.id, feedType)
-
-  const posts = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data?.pages])
-  const [displayPosts, setDisplayPosts] = useState<FeedItemDto[]>([])
-  const [contentKey, setContentKey] = useState(0)
-  const isInitialLoading = isLoading && displayPosts.length === 0 && posts.length === 0
-  const isFilterPending = isFetching && !isFetchingNextPage && !isInitialLoading
-
-  useEffect(() => {
-    if (isFetching && !isFetchingNextPage) return
-    setDisplayPosts(posts)
-  }, [posts, isFetching, isFetchingNextPage])
-
-  useEffect(() => {
-    setContentKey((value) => value + 1)
-  }, [activeFilter, viewMode])
+  const { isFetching, isFetchingNextPage, isLoading } = useFeedListStatus({
+    authorId: user.id,
+    type: feedType,
+    enabled: Boolean(user.id),
+  })
+  const isFilterPending = isFetching && !isFetchingNextPage && !isLoading
 
   const filterIndicator = useSlidingIndicator(filterRowRef, activeFilter)
   const viewIndicator = useSlidingIndicator(viewRowRef, viewMode)
-
-  const loadMore = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage()
-    }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
-
-  const sentinelRef = useInfiniteScroll(loadMore, { enabled: Boolean(hasNextPage) })
-
-  useEffect(() => {
-    if (isFetchingNextPage || !hasNextPage) return
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
-
-    const rect = sentinel.getBoundingClientRect()
-    if (rect.top <= window.innerHeight + 240) {
-      loadMore()
-    }
-  }, [hasNextPage, isFetchingNextPage, loadMore, posts.length, sentinelRef])
 
   return (
     <div className="space-y-4">
@@ -175,123 +134,46 @@ export function ProfilePostsPanel({ user, isOwnProfile }: ProfilePostsPanelProps
         </div>
 
         <CardContent className="p-3 sm:p-4">
-          {isInitialLoading ? (
-            <PostsSkeleton />
-          ) : isError ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-              <p className="font-semibold">Could not load posts</p>
-              <Button variant="secondary" size="sm" onClick={() => void refetch()}>
-                Try again
-              </Button>
-            </div>
-          ) : (
-            <div className="relative min-h-[12rem]">
-              {isFilterPending ? (
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 z-10 rounded-lg bg-background/25 backdrop-blur-[1px] transition-opacity duration-300"
-                />
-              ) : null}
+          <div className="relative min-h-[12rem]">
+            {isFilterPending ? (
               <div
-                key={contentKey}
-                className="profile-posts-content-shell profile-posts-panel-content"
-                data-pending={isFilterPending}
-              >
-                {displayPosts.length ? (
-                  <PostsCollection items={displayPosts} viewMode={viewMode} />
-                ) : (
-                  <EmptyPostsState isOwnProfile={isOwnProfile} filterLabel={getFilterLabel(activeFilter)} />
-                )}
-              </div>
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-10 rounded-lg bg-background/25 backdrop-blur-[1px] transition-opacity duration-300"
+              />
+            ) : null}
+            <div
+              className="profile-posts-content-shell profile-posts-panel-content"
+              data-pending={isFilterPending}
+            >
+              <FeedList
+                authorId={user.id}
+                type={feedType}
+                compact={viewMode === 'grid'}
+                listClassName={viewMode === 'grid' ? 'profile-posts-grid' : 'profile-posts-list'}
+                itemClassName="profile-post-item"
+                staggerAnimation={viewMode === 'list'}
+                compactLoader
+                emptyMessage={profileEmptyMessage(isOwnProfile, activeFilter)}
+              />
             </div>
-          )}
-
-          {isFetchingNextPage ? <PostsSkeleton compact /> : null}
-          {hasNextPage ? <div ref={sentinelRef} className="h-px w-full" aria-hidden /> : null}
+          </div>
         </CardContent>
       </Card>
     </div>
   )
 }
 
-function PostsCollection({
-  items,
-  viewMode,
-}: {
-  items: FeedItemDto[]
-  viewMode: PostsViewMode
-}) {
-  const isGrid = viewMode === 'grid'
+function profileEmptyMessage(isOwnProfile: boolean | undefined, filter: ProfilePostFilter) {
+  const filterLabel = POST_FILTERS.find((entry) => entry.id === filter)?.label.toLowerCase() ?? 'posts'
+  const isFiltered = filter !== 'all'
 
-  return (
-    <div className={isGrid ? 'profile-posts-grid' : 'profile-posts-list'}>
-      {items.map((item, index) => (
-        <div
-          key={item.id}
-          className="profile-post-item"
-          style={isGrid ? undefined : { animationDelay: `${Math.min(index * 45, 360)}ms` }}
-        >
-          <FeedItemCard item={item} compact={isGrid} />
-        </div>
-      ))}
-    </div>
-  )
-}
+  if (isOwnProfile) {
+    return isFiltered
+      ? `When you share ${filterLabel} on the feed, they will show up here.`
+      : 'When you share on the feed, your posts will show up here.'
+  }
 
-function getFilterLabel(filter: ProfilePostFilter) {
-  return POST_FILTERS.find((entry) => entry.id === filter)?.label.toLowerCase() ?? 'posts'
-}
-
-function EmptyPostsState({
-  isOwnProfile,
-  filterLabel,
-}: {
-  isOwnProfile?: boolean
-  filterLabel: string
-}) {
-  const isFiltered = filterLabel !== 'all'
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-      <PenLine className="h-10 w-10 text-muted-foreground/50" />
-      <div className="space-y-1">
-        <p className="font-semibold">{isFiltered ? `No ${filterLabel} yet` : 'No posts yet'}</p>
-        <p className="text-sm text-muted-foreground">
-          {isOwnProfile
-            ? isFiltered
-              ? `When you share ${filterLabel} on the feed, they will show up here.`
-              : 'When you share on the feed, your posts will show up here.'
-            : isFiltered
-              ? `${filterLabel.charAt(0).toUpperCase()}${filterLabel.slice(1)} from this profile will show up here.`
-              : 'Posts from this profile will show up here.'}
-        </p>
-      </div>
-      {isOwnProfile && !isFiltered ? (
-        <Button asChild variant="secondary" size="sm">
-          <Link to="/home">Go to feed</Link>
-        </Button>
-      ) : null}
-    </div>
-  )
-}
-
-function PostsSkeleton({ compact }: { compact?: boolean }) {
-  const count = compact ? 1 : 2
-
-  return (
-    <div className="space-y-3">
-      {Array.from({ length: count }, (_, index) => (
-        <div key={index} className="feed-social-card overflow-hidden p-4">
-          <div className="mb-3 flex gap-3">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-3 w-20" />
-            </div>
-          </div>
-          <Skeleton className="h-24 w-full rounded-lg" />
-        </div>
-      ))}
-    </div>
-  )
+  return isFiltered
+    ? `${filterLabel.charAt(0).toUpperCase()}${filterLabel.slice(1)} from this profile will show up here.`
+    : 'Posts from this profile will show up here.'
 }

@@ -40,8 +40,6 @@ export function patchFeedItemInCache(
   }
 }
 
-export const profilePostsQueryKeyPrefix = ['profile-posts'] as const
-
 export function removeFeedItemFromCache(
   data: InfiniteData<FeedListResponse> | undefined,
   feedItemId: string,
@@ -75,11 +73,6 @@ export function removeFeedItemFromAllListCaches(
     removeFromList,
   )
 
-  queryClient.setQueriesData<InfiniteData<FeedListResponse>>(
-    { queryKey: profilePostsQueryKeyPrefix },
-    removeFromList,
-  )
-
   queryClient.removeQueries({ queryKey: feedItemQueryKey(feedItemId) })
 }
 
@@ -99,11 +92,6 @@ export function patchFeedItemInAllListCaches(
 
   queryClient.setQueriesData<InfiniteData<FeedListResponse>>(
     { queryKey: feedQueryKey },
-    patchList,
-  )
-
-  queryClient.setQueriesData<InfiniteData<FeedListResponse>>(
-    { queryKey: profilePostsQueryKeyPrefix },
     patchList,
   )
 }
