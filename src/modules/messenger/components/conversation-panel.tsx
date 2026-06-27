@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Info, Phone, Video } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
@@ -6,14 +6,14 @@ import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { ForwardMessageModal } from '@/modules/messenger/components/forward-message-modal'
 import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
 import { MessageComposer } from '@/modules/messenger/components/message-composer'
-import { MessageListVirtual } from '@/modules/messenger/components/message-list-virtual'
+import { MessageList } from '@/modules/messenger/components/message-list'
 import {
   isComposerBlockedByRequest,
   MessageRequestBanner,
 } from '@/modules/messenger/components/message-request-banner'
 import { useMessengerMessages } from '@/modules/messenger/hooks/use-messenger-messages'
+import { useMarkThreadReadWhenViewing } from '@/modules/messenger/hooks/use-mark-thread-read-when-viewing'
 import { messengerThreadsQueryKey } from '@/modules/messenger/hooks/use-messenger-threads'
-import * as messengerApi from '@/modules/messenger/api/messenger.api'
 import { getThreadAvatarUrl, getThreadDisplayName } from '@/modules/messenger/lib/messenger-utils'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
 import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
@@ -51,12 +51,7 @@ export const ConversationPanel = memo(function ConversationPanel({
   const isDirect = thread?.kind === 'direct' || !thread?.isGroup
   const displayName = getThreadDisplayName(thread)
 
-  useEffect(() => {
-    if (!thread?.threadId || !messages.length) return
-    const last = messages[messages.length - 1]
-    if (!last || last.senderId === viewerId) return
-    void messengerApi.markThreadRead(thread.threadId, last.id)
-  }, [messages, thread?.threadId, viewerId])
+  useMarkThreadReadWhenViewing(thread?.threadId, messages, viewerId)
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: messengerThreadsQueryKey })
@@ -152,13 +147,20 @@ export const ConversationPanel = memo(function ConversationPanel({
           onChanged={invalidate}
         />
 
-        <MessageListVirtual
+        <MessageList
           threadId={thread.threadId}
           messages={messages}
           viewerId={viewerId}
           otherName={displayName}
           otherAvatar={getThreadAvatarUrl(thread)}
           showSenderName={!isDirect}
+          hero={{
+            name: displayName,
+            avatarUrl: getThreadAvatarUrl(thread),
+            isDirect,
+            memberPreview: thread.memberPreview,
+            groupAvatarUrl: thread.avatarUrl,
+          }}
         />
 
         {!composerBlocked && thread.status !== 'declined' ? (

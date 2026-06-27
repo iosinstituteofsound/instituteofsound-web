@@ -196,7 +196,7 @@ export function MessengerHeaderButton() {
   const viewerAvatar = meData?.user ? getUserAvatarThumbnailUrl(meData.user) : undefined
 
   const { data: threads = [], isLoading, refetch } = useQuery({
-    queryKey: messengerThreadsQueryKey,
+    queryKey: [...messengerThreadsQueryKey, undefined],
     queryFn: () => messengerApi.listThreads(),
     staleTime: 15_000,
     enabled: open,

@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { UniversalPlayer } from '@/modules/player/components/universal-player'
 import { MessengerDock } from '@/modules/messenger/components/messenger-dock'
+import { MessengerThreadSubscriptions } from '@/modules/messenger/components/messenger-thread-subscriptions'
 import { PlayerBarDock } from '@/modules/player/components/player-bar-dock'
 import { PlayerQueuePanel } from '@/modules/player/components/player-queue-panel'
 import { PlayerLyricsPanel } from '@/modules/player/components/player-lyrics-panel'
@@ -15,6 +16,7 @@ export function AppRoot() {
       <PlayerStateSync />
       <Outlet />
       <UniversalPlayer />
+      <MessengerThreadSubscriptions />
       <MessengerDock />
       <PlayerBarDock />
       <PlayerQueuePanel />

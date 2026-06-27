@@ -1,5 +1,10 @@
 import { create } from 'zustand'
 import * as messengerApi from '@/modules/messenger/api/messenger.api'
+import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
+
+function syncActiveThread(threadId: string) {
+  useMessengerUiStore.getState().setActiveThreadId(threadId)
+}
 
 export type MessengerPopupWindow = {
   key: string
@@ -48,6 +53,8 @@ export const useMessengerPopupStore = create<MessengerPopupState>((set) => ({
     }
     if (!threadId) return
 
+    syncActiveThread(threadId)
+
     set((state) => {
       const existing = state.windows.find((window) => window.threadId === threadId)
       if (existing) {
@@ -71,9 +78,15 @@ export const useMessengerPopupStore = create<MessengerPopupState>((set) => ({
       ),
     })),
   focusChat: (threadId) =>
-    set((state) => ({ windows: moveToFront(state.windows, threadId) })),
+    set((state) => {
+      syncActiveThread(threadId)
+      return { windows: moveToFront(state.windows, threadId) }
+    }),
   promoteFromStack: (threadId) =>
-    set((state) => ({ windows: moveToFront(state.windows, threadId) })),
+    set((state) => {
+      syncActiveThread(threadId)
+      return { windows: moveToFront(state.windows, threadId) }
+    }),
 }))
 
 export const MESSENGER_OPEN_EVENT = 'ios:messenger-open'

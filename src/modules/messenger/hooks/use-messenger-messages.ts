@@ -1,11 +1,14 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as messengerApi from '@/modules/messenger/api/messenger.api'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
-import { messengerThreadsQueryKey, upsertThreadInCache } from '@/modules/messenger/hooks/use-messenger-threads'
+import { appendMessageToCache, messengerMessagesQueryKey } from '@/modules/messenger/lib/messenger-cache'
 import { useAuthStore } from '@/app/stores/auth-store'
 
-export const messengerMessagesQueryKey = (threadId: string) => ['messenger', 'messages', threadId] as const
-
+export {
+  appendMessageToCache,
+  messengerMessagesQueryKey,
+  patchMessageInCache,
+} from '@/modules/messenger/lib/messenger-cache'
 export function useMessengerMessages(threadId?: string) {
   return useInfiniteQuery({
     queryKey: messengerMessagesQueryKey(threadId ?? ''),
@@ -44,7 +47,9 @@ export function useSendMessengerMessage(threadId: string) {
       }
 
       queryClient.setQueryData(messengerMessagesQueryKey(threadId), (current: unknown) => {
-        if (!current || typeof current !== 'object' || !('pages' in current)) return current
+        if (!current || typeof current !== 'object' || !('pages' in current)) {
+          return { pages: [{ messages: [optimistic], nextCursor: null }], pageParams: [undefined] }
+        }
         const data = current as { pages: Array<{ messages: DmMessage[]; nextCursor: string | null }>; pageParams: unknown[] }
         const pages = [...data.pages]
         const lastIndex = pages.length - 1
@@ -59,19 +64,8 @@ export function useSendMessengerMessage(threadId: string) {
 
       return { clientMessageId }
     },
-    onSuccess: (message, _input, context) => {
-      queryClient.setQueryData(messengerMessagesQueryKey(threadId), (current: unknown) => {
-        if (!current || typeof current !== 'object' || !('pages' in current)) return current
-        const data = current as { pages: Array<{ messages: DmMessage[]; nextCursor: string | null }>; pageParams: unknown[] }
-        const pages = data.pages.map((page) => ({
-          ...page,
-          messages: page.messages.map((entry) =>
-            entry.clientMessageId && entry.clientMessageId === context?.clientMessageId ? message : entry,
-          ),
-        }))
-        return { ...data, pages }
-      })
-      void queryClient.invalidateQueries({ queryKey: messengerThreadsQueryKey })
+    onSuccess: (message) => {
+      appendMessageToCache(queryClient, message)
     },
     onError: (_error, _input, context) => {
       queryClient.setQueryData(messengerMessagesQueryKey(threadId), (current: unknown) => {
@@ -80,7 +74,9 @@ export function useSendMessengerMessage(threadId: string) {
         const pages = data.pages.map((page) => ({
           ...page,
           messages: page.messages.map((entry) =>
-            entry.clientMessageId === context?.clientMessageId ? { ...entry, failed: true, optimistic: false } : entry,
+            entry.clientMessageId === context?.clientMessageId
+              ? { ...entry, failed: true, optimistic: false }
+              : entry,
           ),
         }))
         return { ...data, pages }
@@ -88,40 +84,3 @@ export function useSendMessengerMessage(threadId: string) {
     },
   })
 }
-
-export function appendMessageToCache(
-  queryClient: ReturnType<typeof useQueryClient>,
-  message: DmMessage,
-) {
-  const threadId = message.threadId
-  queryClient.setQueryData(messengerMessagesQueryKey(threadId), (current: unknown) => {
-    if (!current || typeof current !== 'object' || !('pages' in current)) return current
-    const data = current as { pages: Array<{ messages: DmMessage[]; nextCursor: string | null }>; pageParams: unknown[] }
-    if (!data.pages.length) {
-      return { pages: [{ messages: [message], nextCursor: null }], pageParams: [undefined] }
-    }
-    const pages = [...data.pages]
-    const lastIndex = pages.length - 1
-    const lastPage = pages[lastIndex]!
-    if (lastPage.messages.some((entry) => entry.id === message.id)) return current
-    pages[lastIndex] = { ...lastPage, messages: [...lastPage.messages, message] }
-    return { ...data, pages }
-  })
-}
-
-export function patchMessageInCache(
-  queryClient: ReturnType<typeof useQueryClient>,
-  message: DmMessage,
-) {
-  queryClient.setQueryData(messengerMessagesQueryKey(message.threadId), (current: unknown) => {
-    if (!current || typeof current !== 'object' || !('pages' in current)) return current
-    const data = current as { pages: Array<{ messages: DmMessage[]; nextCursor: string | null }>; pageParams: unknown[] }
-    const pages = data.pages.map((page) => ({
-      ...page,
-      messages: page.messages.map((entry) => (entry.id === message.id ? message : entry)),
-    }))
-    return { ...data, pages }
-  })
-}
-
-export { upsertThreadInCache }

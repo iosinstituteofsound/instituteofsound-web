@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { useMessageActions } from '@/modules/messenger/hooks/use-message-actions'
 import { useSendMessengerMessage } from '@/modules/messenger/hooks/use-messenger-messages'
+import { useTypingEmitter } from '@/modules/messenger/hooks/use-typing-emitter'
 import { createClientMessageId } from '@/modules/messenger/lib/messenger-utils'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
-import { realtimeSocketClient } from '@/shared/services/realtime/socket-client'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 
 export function useMessageComposer(threadId: string) {
@@ -15,7 +15,7 @@ export function useMessageComposer(threadId: string) {
   const sendMessage = useSendMessengerMessage(threadId)
   const { editMessage } = useMessageActions(threadId)
   const [text, setText] = useState('')
-  const typingTimeoutRef = useRef<number | null>(null)
+  const { notifyTyping, stopTyping } = useTypingEmitter(threadId)
 
   useEffect(() => {
     if (editingMessage) {
@@ -24,14 +24,6 @@ export function useMessageComposer(threadId: string) {
     }
     setText('')
   }, [editingMessage])
-
-  const notifyTyping = useCallback(() => {
-    realtimeSocketClient.emitTypingStart(threadId)
-    if (typingTimeoutRef.current) window.clearTimeout(typingTimeoutRef.current)
-    typingTimeoutRef.current = window.setTimeout(() => {
-      realtimeSocketClient.emitTypingStop(threadId)
-    }, 1200)
-  }, [threadId])
 
   const submit = useCallback(
     async (payload?: Partial<DmMessage>) => {
@@ -58,9 +50,9 @@ export function useMessageComposer(threadId: string) {
 
       setText('')
       setReplyTo(null)
-      realtimeSocketClient.emitTypingStop(threadId)
+      stopTyping()
     },
-    [editMessage, editingMessage, replyTo?.id, sendMessage, setEditingMessage, setReplyTo, text, threadId],
+    [editMessage, editingMessage, replyTo?.id, sendMessage, setEditingMessage, setReplyTo, stopTyping, text, threadId],
   )
 
   const onFilesSelected = useCallback(

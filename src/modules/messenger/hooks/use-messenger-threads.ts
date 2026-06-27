@@ -1,11 +1,16 @@
 import { useMemo } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import * as messengerApi from '@/modules/messenger/api/messenger.api'
+import { messengerThreadsQueryKey, messengerUnreadQueryKey } from '@/modules/messenger/lib/messenger-cache'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
 import type { DmThreadSummary, MessengerFilter } from '@/modules/messenger/types/messenger.types'
 
-export const messengerThreadsQueryKey = ['messenger', 'threads'] as const
-export const messengerUnreadQueryKey = ['messenger', 'unread'] as const
+export {
+  getMessengerThreadListQueryKeys,
+  messengerThreadsQueryKey,
+  messengerUnreadQueryKey,
+  upsertThreadInCache,
+} from '@/modules/messenger/lib/messenger-cache'
 
 function filterThreads(threads: DmThreadSummary[], filter: MessengerFilter, search: string) {
   let list = threads
@@ -14,7 +19,7 @@ function filterThreads(threads: DmThreadSummary[], filter: MessengerFilter, sear
   if (filter === 'unread') {
     list = list.filter((thread) => thread.unreadCount > 0)
   } else if (filter === 'groups') {
-    list = list.filter((thread) => thread.kind === 'group')
+    list = list.filter((thread) => thread.kind === 'group' || thread.isGroup)
   } else if (filter === 'communities') {
     list = list.filter((thread) => thread.kind === 'community')
   } else if (filter === 'requests') {
@@ -81,28 +86,4 @@ export function useMessengerUnread() {
     staleTime: 20_000,
   })
   return query
-}
-
-export function upsertThreadInCache(
-  queryClient: ReturnType<typeof useQueryClient>,
-  thread: DmThreadSummary,
-) {
-  const keys = [
-    messengerThreadsQueryKey,
-    [...messengerThreadsQueryKey, 'inbox'],
-    [...messengerThreadsQueryKey, 'requests'],
-    [...messengerThreadsQueryKey, 'all'],
-  ]
-
-  for (const key of keys) {
-    queryClient.setQueryData<DmThreadSummary[]>(key, (current) => {
-      const list = current ?? []
-      const without = list.filter((entry) => entry.threadId !== thread.threadId)
-      return [thread, ...without].sort((a, b) => {
-        const aTime = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0
-        const bTime = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0
-        return bTime - aTime
-      })
-    })
-  }
 }
