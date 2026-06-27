@@ -1,5 +1,5 @@
 .reels-page {
-  --reels-player-inset: var(--ios-player-offset, 0px);
+  --reel-aspect-ratio: 9 / 16;
   display: flex;
   height: 100%;
   min-height: 0;
@@ -97,12 +97,26 @@ body[data-mobile-nav='true'] .ios-dashboard-main--reels {
   text-align: center;
 }
 
-.reels-viewer__skeleton {
-  aspect-ratio: 9 / 16;
+.reels-viewer--loading {
+  --reel-slide-pad-inline: 0.5rem;
+  --reel-slide-pad-block: 0.5rem;
+  container-type: size;
   height: 100%;
-  max-height: 100%;
-  width: auto;
-  max-width: min(100%, 420px);
+}
+
+.reels-viewer__skeleton,
+.reel-slide__frame {
+  --reel-frame-max-w: calc(100cqw - var(--reel-slide-pad-inline, 0px));
+  width: min(
+    var(--reel-frame-max-w),
+    calc((100cqh - var(--reel-slide-pad-block, 0px)) * 9 / 16)
+  );
+  aspect-ratio: var(--reel-aspect-ratio);
+  height: auto;
+  flex-shrink: 0;
+}
+
+.reels-viewer__skeleton {
   border-radius: 1rem;
 }
 
@@ -151,25 +165,22 @@ body[data-mobile-nav='true'] .ios-dashboard-main--reels {
 }
 
 .reel-slide {
+  --reel-slide-pad-inline: 0.5rem;
+  --reel-slide-pad-block: 0.5rem;
   display: flex;
   height: 100%;
   min-height: 100%;
   box-sizing: border-box;
+  container-type: size;
   align-items: center;
   justify-content: center;
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  padding: 0.5rem;
-  padding-bottom: calc(0.5rem + var(--reels-player-inset, 0px));
+  padding: 0.25rem;
 }
 
 .reel-slide__frame {
   position: relative;
-  height: 100%;
-  max-height: 100%;
-  width: auto;
-  max-width: min(100%, 420px);
-  aspect-ratio: 9 / 16;
   overflow: hidden;
   border-radius: 1rem;
   background: var(--card);
@@ -357,7 +368,8 @@ body[data-mobile-nav='true'] .ios-dashboard-main--reels {
   }
 
   .reel-slide {
-    padding-inline: 1rem;
+    --reel-slide-pad-inline: 1rem;
+    padding-inline: 0.5rem;
   }
 }
 
