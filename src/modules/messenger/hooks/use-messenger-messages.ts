@@ -4,11 +4,6 @@ import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 import { appendMessageToCache, messengerMessagesQueryKey } from '@/modules/messenger/lib/messenger-cache'
 import { useAuthStore } from '@/app/stores/auth-store'
 
-export {
-  appendMessageToCache,
-  messengerMessagesQueryKey,
-  patchMessageInCache,
-} from '@/modules/messenger/lib/messenger-cache'
 export function useMessengerMessages(threadId?: string) {
   return useInfiniteQuery({
     queryKey: messengerMessagesQueryKey(threadId ?? ''),

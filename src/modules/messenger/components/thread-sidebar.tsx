@@ -1,17 +1,10 @@
-import { memo, useDeferredValue, useMemo } from 'react'
+import { memo } from 'react'
 import { MoreHorizontal, PenSquare, Search } from 'lucide-react'
 import { ThreadListItem } from '@/modules/messenger/components/thread-list-item'
+import { MESSENGER_SIDEBAR_FILTERS } from '@/modules/messenger/constants/messenger-filters'
 import { useMessengerThreads } from '@/modules/messenger/hooks/use-messenger-threads'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
-import type { MessengerFilter } from '@/modules/messenger/types/messenger.types'
 import { cn } from '@/shared/lib/cn'
-
-const FILTERS: Array<{ id: MessengerFilter; label: string }> = [
-  { id: 'all', label: 'All' },
-  { id: 'unread', label: 'Unread' },
-  { id: 'groups', label: 'Groups' },
-  { id: 'communities', label: 'Communities' },
-]
 
 type ThreadSidebarProps = {
   activeThreadId?: string | null
@@ -29,12 +22,6 @@ export const ThreadSidebar = memo(function ThreadSidebar({
   const setActiveThreadId = useMessengerUiStore((s) => s.setActiveThreadId)
 
   const { threads, isLoading } = useMessengerThreads()
-  const deferredSearch = useDeferredValue(searchQuery)
-
-  const visibleThreads = useMemo(() => {
-    if (deferredSearch === searchQuery) return threads
-    return threads
-  }, [deferredSearch, searchQuery, threads])
 
   return (
     <aside className={cn('messenger-panel messenger-sidebar', className)}>
@@ -61,7 +48,7 @@ export const ThreadSidebar = memo(function ThreadSidebar({
       </label>
 
       <div className="messenger-filters" role="tablist" aria-label="Chat filters">
-        {FILTERS.map((entry) => (
+        {MESSENGER_SIDEBAR_FILTERS.map((entry) => (
           <button
             key={entry.id}
             type="button"
@@ -78,8 +65,8 @@ export const ThreadSidebar = memo(function ThreadSidebar({
       <div className="messenger-thread-list">
         {isLoading ? (
           <p className="px-3 py-6 text-sm text-[var(--messenger-muted)]">Loading chats…</p>
-        ) : visibleThreads.length ? (
-          visibleThreads.map((thread) => (
+        ) : threads.length ? (
+          threads.map((thread) => (
             <ThreadListItem
               key={thread.threadId}
               thread={thread}

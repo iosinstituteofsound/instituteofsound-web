@@ -5,7 +5,7 @@ import { useSendMessengerMessage } from '@/modules/messenger/hooks/use-messenger
 import { useTypingEmitter } from '@/modules/messenger/hooks/use-typing-emitter'
 import { createClientMessageId } from '@/modules/messenger/lib/messenger-utils'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
-import type { DmMessage } from '@/modules/messenger/types/messenger.types'
+import type { DmMessage, DmMessageType } from '@/modules/messenger/types/messenger.types'
 
 export function useMessageComposer(threadId: string) {
   const replyTo = useMessengerUiStore((s) => s.replyTo)
@@ -55,15 +55,25 @@ export function useMessageComposer(threadId: string) {
     [editMessage, editingMessage, replyTo?.id, sendMessage, setEditingMessage, setReplyTo, stopTyping, text, threadId],
   )
 
-  const onFilesSelected = useCallback(
-    async (files: FileList | null, kind: 'image' | 'file') => {
-      const file = files?.[0]
-      if (!file) return
-      const uploaded = await uploadMediaFile(file, file.name)
+  const uploadAndSubmit = useCallback(
+    async (file: File, kind: 'image' | 'file' | 'paste') => {
+      const uploaded = await uploadMediaFile(
+        file,
+        kind === 'paste' ? file.name || 'pasted-image.png' : file.name,
+      )
       const url = uploaded.absoluteUrl ?? uploaded.url
-      const type = kind === 'image' ? 'image' : uploaded.kind === 'video' ? 'video' : 'file'
+      let type: DmMessageType = 'file'
+      let body = file.name
+
+      if (kind === 'image' || kind === 'paste') {
+        type = 'image'
+        body = ''
+      } else if (uploaded.kind === 'video') {
+        type = 'video'
+      }
+
       await submit({
-        body: kind === 'image' ? '' : file.name,
+        body,
         type,
         mediaUrl: url,
         mediaMimeType: uploaded.mimeType,
@@ -71,6 +81,22 @@ export function useMessageComposer(threadId: string) {
       })
     },
     [submit],
+  )
+
+  const onFilesSelected = useCallback(
+    async (files: FileList | null, kind: 'image' | 'file') => {
+      const file = files?.[0]
+      if (!file) return
+      await uploadAndSubmit(file, kind)
+    },
+    [uploadAndSubmit],
+  )
+
+  const onPasteImage = useCallback(
+    async (file: File) => {
+      await uploadAndSubmit(file, 'paste')
+    },
+    [uploadAndSubmit],
   )
 
   return {
@@ -83,6 +109,7 @@ export function useMessageComposer(threadId: string) {
     notifyTyping,
     submit,
     onFilesSelected,
+    onPasteImage,
     isPending: sendMessage.isPending,
   }
 }

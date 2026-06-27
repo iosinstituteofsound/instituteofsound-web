@@ -1,5 +1,4 @@
 import {
-  memo,
   useDeferredValue,
   useEffect,
   useLayoutEffect,
@@ -14,133 +13,20 @@ import { openMessengerPopup } from '@/modules/messenger/lib/messenger-popup-open
 import { useQuery } from '@tanstack/react-query'
 import { Maximize2, MoreHorizontal, PenSquare, Search } from 'lucide-react'
 import { MessengerChatSettings } from '@/modules/messenger/components/messenger-chat-settings'
-import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
+import { ThreadListRow } from '@/modules/messenger/components/thread-list-row'
+import { MESSENGER_POPOVER_FILTERS } from '@/modules/messenger/constants/messenger-filters'
 import { useMe } from '@/modules/auth/hooks/use-auth'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { MessengerIcon } from '@/modules/messenger/components/messenger-icon'
 import * as messengerApi from '@/modules/messenger/api/messenger.api'
-import { messengerThreadsQueryKey, useMessengerUnread } from '@/modules/messenger/hooks/use-messenger-threads'
+import { messengerThreadsQueryKey } from '@/modules/messenger/lib/messenger-cache'
+import { useMessengerUnread } from '@/modules/messenger/hooks/use-messenger-threads'
 import { useMessengerLiveStore } from '@/modules/messenger/store/messenger-live-store'
-import { formatMessengerTime, getThreadAvatarUrl, getThreadDisplayName } from '@/modules/messenger/lib/messenger-utils'
-import type { DmThreadSummary, MessengerFilter } from '@/modules/messenger/types/messenger.types'
+import type { MessengerFilter } from '@/modules/messenger/types/messenger.types'
+import { filterThreads } from '@/modules/messenger/utils/filter-threads'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/messenger/styles/messenger-header-button.css'
 import '@/modules/messenger/styles/messenger-dropdown.css'
-
-const FILTERS: Array<{ id: MessengerFilter; label: string }> = [
-  { id: 'all', label: 'All' },
-  { id: 'unread', label: 'Unread' },
-  { id: 'requests', label: 'Requests' },
-  { id: 'groups', label: 'Groups' },
-  { id: 'communities', label: 'Communities' },
-]
-
-function filterThreads(
-  threads: DmThreadSummary[],
-  filter: MessengerFilter,
-  search: string,
-) {
-  let list = threads
-  const needle = search.trim().toLowerCase()
-
-  if (filter === 'unread') {
-    list = list.filter((thread) => thread.unreadCount > 0)
-  } else if (filter === 'groups') {
-    list = list.filter((thread) => thread.kind === 'group' || thread.isGroup)
-  } else if (filter === 'communities') {
-    list = list.filter((thread) => thread.kind === 'community')
-  } else if (filter === 'requests') {
-    list = list.filter((thread) => thread.isPendingRequest)
-  }
-
-  if (needle) {
-    list = list.filter(
-      (thread) =>
-        getThreadDisplayName(thread).toLowerCase().includes(needle) ||
-        thread.subtitle?.toLowerCase().includes(needle) ||
-        thread.otherHandle?.toLowerCase().includes(needle) ||
-        thread.lastMessageBody?.toLowerCase().includes(needle),
-    )
-  }
-
-  return list
-}
-
-const PopoverThreadItem = memo(function PopoverThreadItem({
-  thread,
-  viewerId,
-  viewerAvatar,
-  onSelect,
-}: {
-  thread: DmThreadSummary
-  viewerId?: string
-  viewerAvatar?: string
-  onSelect: (threadId: string) => void
-}) {
-  const sentByViewer = Boolean(viewerId && thread.lastSenderId === viewerId)
-  const isDirect = thread.kind === 'direct' || !thread.isGroup
-  const displayName = getThreadDisplayName(thread)
-
-  return (
-    <li>
-      <button
-        type="button"
-        className={cn('ios-messenger-popover__item', thread.unreadCount > 0 && 'is-unread')}
-        onClick={() => onSelect(thread.threadId)}
-      >
-        <div className="relative shrink-0">
-          {isDirect ? (
-            <FeedUserAvatar
-              name={displayName}
-              avatarUrl={getThreadAvatarUrl(thread)}
-              className="h-[52px] w-[52px]"
-            />
-          ) : (
-            <GroupAvatarStack
-              members={thread.memberPreview}
-              title={displayName}
-              avatarUrl={thread.avatarUrl}
-              size="md"
-            />
-          )}
-          {isDirect && thread.otherIsOnline ? (
-            <span className="messenger-online-dot" aria-label="Online" />
-          ) : null}
-        </div>
-        <div className="ios-messenger-popover__copy">
-          <div className="ios-messenger-popover__name">{displayName}</div>
-          <div className="ios-messenger-popover__preview-row">
-            <span className="ios-messenger-popover__preview">
-              {thread.lastMessageBody || 'Start a conversation'}
-            </span>
-            {thread.lastMessageAt ? (
-              <span
-                className={cn(
-                  'ios-messenger-popover__time',
-                  thread.unreadCount > 0 && 'is-unread',
-                )}
-              >
-                · {formatMessengerTime(thread.lastMessageAt)}
-              </span>
-            ) : null}
-          </div>
-        </div>
-        <div className="ios-messenger-popover__side">
-          {sentByViewer && viewerAvatar ? (
-            <img
-              src={viewerAvatar}
-              alt=""
-              className="ios-messenger-popover__read-avatar"
-            />
-          ) : thread.unreadCount > 0 ? (
-            <span className="ios-messenger-popover__unread-dot" aria-label="Unread" />
-          ) : null}
-        </div>
-      </button>
-    </li>
-  )
-})
 
 function useMessengerPanelPosition(open: boolean, triggerRef: React.RefObject<HTMLButtonElement | null>) {
   const [panelStyle, setPanelStyle] = useState<CSSProperties>({})
@@ -307,7 +193,7 @@ export function MessengerHeaderButton() {
           </label>
 
           <div className="ios-messenger-popover__filters" role="tablist" aria-label="Chat filters">
-            {FILTERS.map((entry) => (
+            {MESSENGER_POPOVER_FILTERS.map((entry) => (
               <button
                 key={entry.id}
                 type="button"
@@ -329,8 +215,9 @@ export function MessengerHeaderButton() {
           ) : filteredThreads.length ? (
             <ul className="ios-messenger-popover__list">
               {filteredThreads.map((thread) => (
-                <PopoverThreadItem
+                <ThreadListRow
                   key={thread.threadId}
+                  variant="popover"
                   thread={thread}
                   viewerId={viewerId}
                   viewerAvatar={viewerAvatar}

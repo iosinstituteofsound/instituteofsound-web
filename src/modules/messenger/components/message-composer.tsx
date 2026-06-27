@@ -1,8 +1,10 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { ImageIcon, Mic, Paperclip, Plus, Send, Smile, Square, Sticker, ThumbsUp } from 'lucide-react'
-import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { useMessageComposer } from '@/modules/messenger/hooks/use-message-composer'
+import { useMessageComposerEmoji } from '@/modules/messenger/hooks/use-message-composer-emoji'
+import { LIKE_MESSAGE_EMOJI } from '@/modules/messenger/lib/messenger-utils'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
+import { AnimatedEmojiPicker } from '@/shared/components/emoji'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/messenger/styles/messenger.css'
 
@@ -23,6 +25,7 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
     notifyTyping,
     submit,
     onFilesSelected,
+    onPasteImage,
     isPending,
   } = useMessageComposer(threadId)
 
@@ -31,6 +34,7 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+  const emojiPicker = useMessageComposerEmoji(setText, textareaRef)
 
   const isActive = isFocused || text.length > 0
 
@@ -63,13 +67,7 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
     event.preventDefault()
     const file = image.getAsFile()
     if (!file) return
-    const uploaded = await uploadMediaFile(file, file.name || 'pasted-image.png')
-    await submit({
-      type: 'image',
-      mediaUrl: uploaded.absoluteUrl ?? uploaded.url,
-      mediaMimeType: uploaded.mimeType,
-      mediaFileName: uploaded.originalName,
-    })
+    await onPasteImage(file)
   }
 
   return (
@@ -165,6 +163,8 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
             type="button"
             className="messenger-composer__tool messenger-composer__tool--emoji"
             aria-label="Emoji"
+            aria-expanded={emojiPicker.pickerOpen}
+            onClick={(event) => emojiPicker.openPicker(event.currentTarget)}
           >
             <Smile className="messenger-composer__icon" />
           </button>
@@ -187,7 +187,7 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
             type="button"
             className="messenger-composer__tool messenger-composer__tool--like"
             aria-label="Send like"
-            onClick={() => void submit({ body: '👍', type: 'text' } as Partial<DmMessage>)}
+            onClick={() => void submit({ body: LIKE_MESSAGE_EMOJI, type: 'text' } as Partial<DmMessage>)}
           >
             <ThumbsUp className="messenger-composer__icon" />
           </button>
@@ -208,6 +208,13 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
         className="hidden"
         aria-label="Upload file"
         onChange={(event) => void onFilesSelected(event.target.files, 'file')}
+      />
+
+      <AnimatedEmojiPicker
+        open={emojiPicker.pickerOpen}
+        onOpenChange={emojiPicker.setPickerOpen}
+        onSelect={emojiPicker.insertEmoji}
+        anchorEl={emojiPicker.anchorEl}
       />
     </div>
   )

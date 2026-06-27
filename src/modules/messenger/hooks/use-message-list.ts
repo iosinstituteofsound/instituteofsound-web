@@ -56,6 +56,5 @@ export function useMessageList({
     scrollRef,
     rows,
     lastOutgoingId,
-    scrollToBottom,
   }
 }

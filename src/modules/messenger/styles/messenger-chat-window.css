@@ -83,7 +83,7 @@
   max-width: calc(100vw - 2rem);
   height: 455px;
   max-height: calc(100vh - 4rem);
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr);
   flex-shrink: 0;
   align-self: flex-end;
   overflow: hidden;
@@ -207,6 +207,7 @@
 .messenger-chat-window__body {
   display: flex;
   min-height: 0;
+  flex: 1;
   flex-direction: column;
   overflow: hidden;
   background: color-mix(in srgb, var(--foreground) 3%, var(--background));
@@ -226,7 +227,6 @@
 }
 
 .messenger-chat-window .messenger-composer {
-  grid-row: 3;
   border-top-color: color-mix(in srgb, var(--foreground) 8%, transparent);
   background: var(--card);
 }

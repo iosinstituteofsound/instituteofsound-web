@@ -8,6 +8,8 @@ import {
   patchThreadPresenceInCache,
   upsertThreadInCache,
 } from '@/modules/messenger/lib/messenger-cache'
+import { getPopUpNewMessagesEnabled } from '@/modules/messenger/lib/messenger-settings'
+import { getOpenThreadIdsFromStores } from '@/modules/messenger/lib/open-threads'
 import { useMessengerLiveStore } from '@/modules/messenger/store/messenger-live-store'
 import { useMessengerPopupStore } from '@/modules/messenger/store/messenger-popup-store'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
@@ -16,31 +18,9 @@ import type { MeResponse } from '@/shared/types/auth.types'
 import { tokenStorage } from '@/shared/services/api/token-storage'
 import { realtimeSocketClient } from '@/shared/services/realtime/socket-client'
 
-const MESSENGER_SETTINGS_KEY = 'ios-messenger-settings'
-
 function getViewerId(queryClient: QueryClient): string | undefined {
   const me = queryClient.getQueryData<MeResponse>(meQueryKey)
   return me?.user.id
-}
-
-function isThreadOpen(threadId: string): boolean {
-  const activeThreadId = useMessengerUiStore.getState().activeThreadId
-  if (activeThreadId === threadId) return true
-  return useMessengerPopupStore
-    .getState()
-    .windows.some((window) => !window.minimized && !window.stacked && window.threadId === threadId)
-}
-
-function shouldPopUpNewMessages(): boolean {
-  if (typeof window === 'undefined') return false
-  try {
-    const raw = window.localStorage.getItem(MESSENGER_SETTINGS_KEY)
-    if (!raw) return true
-    const parsed = JSON.parse(raw) as { popUpNewMessages?: boolean }
-    return parsed.popUpNewMessages !== false
-  } catch {
-    return true
-  }
 }
 
 function handleIncomingMessage(queryClient: QueryClient, message: DmMessage) {
@@ -49,14 +29,14 @@ function handleIncomingMessage(queryClient: QueryClient, message: DmMessage) {
 
   if (!viewerId || message.senderId === viewerId) return
 
-  if (isThreadOpen(message.threadId)) {
+  if (getOpenThreadIdsFromStores().includes(message.threadId)) {
     void messengerApi.markThreadRead(message.threadId, message.id)
     return
   }
 
   useMessengerLiveStore.getState().incrementUnread()
 
-  if (shouldPopUpNewMessages()) {
+  if (getPopUpNewMessagesEnabled()) {
     const popupState = useMessengerPopupStore.getState()
     const isAlreadyOpen = popupState.windows.some((window) => window.threadId === message.threadId)
     if (!isAlreadyOpen) {

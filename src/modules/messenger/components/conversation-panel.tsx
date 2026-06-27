@@ -1,23 +1,13 @@
-import { memo, useMemo } from 'react'
+import { memo } from 'react'
 import { Info, Phone, Video } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
-import { ForwardMessageModal } from '@/modules/messenger/components/forward-message-modal'
+import { ConversationBody } from '@/modules/messenger/components/conversation-body'
 import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
-import { MessageComposer } from '@/modules/messenger/components/message-composer'
-import { MessageList } from '@/modules/messenger/components/message-list'
-import {
-  isComposerBlockedByRequest,
-  MessageRequestBanner,
-} from '@/modules/messenger/components/message-request-banner'
-import { useMessengerMessages } from '@/modules/messenger/hooks/use-messenger-messages'
-import { useMarkThreadReadWhenViewing } from '@/modules/messenger/hooks/use-mark-thread-read-when-viewing'
-import { messengerThreadsQueryKey } from '@/modules/messenger/hooks/use-messenger-threads'
-import { getThreadAvatarUrl, getThreadDisplayName } from '@/modules/messenger/lib/messenger-utils'
+import { useConversationThread } from '@/modules/messenger/hooks/use-conversation-thread'
+import { getThreadAvatarUrl, getThreadPresenceLabel } from '@/modules/messenger/lib/messenger-utils'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
 import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
-import { useAuthStore } from '@/app/stores/auth-store'
 
 type ConversationPanelProps = {
   thread?: DmThreadSummary | null
@@ -28,35 +18,14 @@ export const ConversationPanel = memo(function ConversationPanel({
   thread,
   className,
 }: ConversationPanelProps) {
-  const viewerId = useAuthStore((s) => s.userId)
-  const queryClient = useQueryClient()
   const setShowInfoPanel = useMessengerUiStore((s) => s.setShowInfoPanel)
-  const forwardFrom = useMessengerUiStore((s) => s.forwardFrom)
-  const setForwardFrom = useMessengerUiStore((s) => s.setForwardFrom)
-  const typingByThread = useMessengerUiStore((s) => s.typingByThread)
 
-  const messagesQuery = useMessengerMessages(thread?.threadId)
-  const messages = useMemo(
-    () => messagesQuery.data?.pages.flatMap((page) => page.messages) ?? [],
-    [messagesQuery.data?.pages],
-  )
+  const threadState = useConversationThread({
+    threadId: thread?.threadId,
+    thread,
+  })
 
-  const myMessageCount = useMemo(
-    () => messages.filter((m) => m.senderId === viewerId && m.type !== 'system').length,
-    [messages, viewerId],
-  )
-
-  const typingUsers = thread ? (typingByThread[thread.threadId] ?? []).filter((id) => id !== viewerId) : []
-  const composerBlocked = thread ? isComposerBlockedByRequest(thread, myMessageCount) : false
-  const isDirect = thread?.kind === 'direct' || !thread?.isGroup
-  const displayName = getThreadDisplayName(thread)
-
-  useMarkThreadReadWhenViewing(thread?.threadId, messages, viewerId)
-
-  const invalidate = () => {
-    void queryClient.invalidateQueries({ queryKey: messengerThreadsQueryKey })
-    void messagesQuery.refetch()
-  }
+  const { isDirect, displayName, typingUsers } = threadState
 
   if (!thread) {
     return (
@@ -72,6 +41,7 @@ export const ConversationPanel = memo(function ConversationPanel({
   }
 
   const profileHref = thread.otherUserId ? `/profile/${thread.otherUserId}` : undefined
+  const presenceLabel = getThreadPresenceLabel(thread, typingUsers.length)
 
   return (
     <section className={className}>
@@ -112,13 +82,7 @@ export const ConversationPanel = memo(function ConversationPanel({
               ) : (
                 <div className="truncate text-base font-bold">{displayName}</div>
               )}
-              <div className="text-xs text-[var(--messenger-muted)]">
-                {typingUsers.length
-                  ? 'Typing…'
-                  : isDirect && thread.otherIsOnline
-                    ? 'Active now'
-                    : thread.subtitle ?? (isDirect ? 'Offline' : `${thread.memberCount ?? 0} members`)}
-              </div>
+              <div className="text-xs text-[var(--messenger-muted)]">{presenceLabel}</div>
             </div>
           </div>
 
@@ -140,37 +104,11 @@ export const ConversationPanel = memo(function ConversationPanel({
           </div>
         </header>
 
-        <MessageRequestBanner
-          thread={thread}
-          viewerId={viewerId}
-          myMessageCount={myMessageCount}
-          onChanged={invalidate}
-        />
-
-        <MessageList
-          threadId={thread.threadId}
-          messages={messages}
-          viewerId={viewerId}
-          otherName={displayName}
-          otherAvatar={getThreadAvatarUrl(thread)}
+        <ConversationBody
+          conversation={{ ...threadState, threadId: thread.threadId, thread }}
           showSenderName={!isDirect}
-          hero={{
-            name: displayName,
-            avatarUrl: getThreadAvatarUrl(thread),
-            isDirect,
-            memberPreview: thread.memberPreview,
-            groupAvatarUrl: thread.avatarUrl,
-          }}
         />
-
-        {!composerBlocked && thread.status !== 'declined' ? (
-          <MessageComposer threadId={thread.threadId} />
-        ) : thread.status === 'declined' ? (
-          <p className="px-3 py-2 text-xs text-[var(--messenger-muted)]">This conversation was declined.</p>
-        ) : null}
       </div>
-
-      <ForwardMessageModal message={forwardFrom} onClose={() => setForwardFrom(null)} />
     </section>
   )
 })

@@ -1,15 +1,36 @@
-import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
+import type { DmMessage, DmThreadSummary } from '@/modules/messenger/types/messenger.types'
+import { graphemeSegments, isEmojiGrapheme } from '@/shared/lib/emoji/animated-emoji'
+
+export const LIKE_MESSAGE_EMOJI = '👍'
+
+export function isDirectThread(thread?: Pick<DmThreadSummary, 'kind' | 'isGroup'> | null) {
+  return thread?.kind === 'direct' || !thread?.isGroup
+}
 
 export function getThreadDisplayName(thread?: Pick<DmThreadSummary, 'title' | 'otherName'> | null) {
   return thread?.title ?? thread?.otherName ?? 'Chat'
 }
 
-export function getThreadAvatarUrl(thread?: Pick<DmThreadSummary, 'avatarUrl' | 'otherAvatarThumbnailUrl' | 'otherAvatarUrl'> | null) {
+export function getThreadAvatarUrl(
+  thread?: Pick<DmThreadSummary, 'avatarUrl' | 'otherAvatarThumbnailUrl' | 'otherAvatarUrl'> | null,
+) {
   return thread?.otherAvatarThumbnailUrl ?? thread?.otherAvatarUrl ?? thread?.avatarUrl
 }
 
-export function formatMessageClockTime(iso: string) {
-  return new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+export function getThreadPreviewText(thread: DmThreadSummary) {
+  const prefix = thread.subtitle && !isDirectThread(thread) ? `${thread.subtitle} · ` : ''
+  return `${prefix}${thread.lastMessageBody || 'Start a conversation'}`
+}
+
+export function getThreadPresenceLabel(
+  thread: Pick<DmThreadSummary, 'subtitle' | 'memberCount' | 'otherIsOnline' | 'kind' | 'isGroup'> | null | undefined,
+  typingCount: number,
+) {
+  const isDirect = isDirectThread(thread)
+
+  if (typingCount > 0) return 'Typing…'
+  if (isDirect && thread?.otherIsOnline) return 'Active now'
+  return thread?.subtitle ?? (isDirect ? 'Offline' : `${thread?.memberCount ?? 0} members`)
 }
 
 export function formatMessengerTime(iso?: string) {
@@ -30,17 +51,6 @@ export function formatMessengerTime(iso?: string) {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
-export function formatMessageFullTimestamp(iso: string) {
-  const date = new Date(iso)
-  return date.toLocaleString(undefined, {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
 export function formatMessageDaySeparator(iso: string) {
   const date = new Date(iso)
   const now = new Date()
@@ -58,30 +68,32 @@ export function formatMessageDaySeparator(iso: string) {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
-export function formatMessageDateSeparator(iso: string) {
-  return formatMessageDaySeparator(iso)
-}
-
-export function groupMessagesByDate<T extends { createdAt: string }>(messages: T[]) {
-  const groups: Array<{ key: string; label: string; items: T[] }> = []
-  for (const message of messages) {
-    const key = message.createdAt.slice(0, 10)
-    const last = groups[groups.length - 1]
-    if (last?.key === key) {
-      last.items.push(message)
-    } else {
-      groups.push({
-        key,
-        label: formatMessageDateSeparator(message.createdAt),
-        items: [message],
-      })
-    }
-  }
-  return groups
-}
-
 export function createClientMessageId() {
   return crypto.randomUUID()
+}
+
+export function isStandaloneEmojiMessage(
+  message: Pick<DmMessage, 'type' | 'body' | 'mediaUrl' | 'forwardFromId' | 'shareData' | 'linkPreview'>,
+) {
+  if (
+    message.type !== 'text' ||
+    !message.body.trim() ||
+    message.mediaUrl ||
+    message.forwardFromId ||
+    message.shareData ||
+    message.linkPreview
+  ) {
+    return false
+  }
+
+  const segments = graphemeSegments(message.body.trim())
+  return segments.length === 1 && isEmojiGrapheme(segments[0]!)
+}
+
+export function isLikeMessage(
+  message: Pick<DmMessage, 'type' | 'body' | 'mediaUrl' | 'forwardFromId' | 'shareData' | 'linkPreview'>,
+) {
+  return isStandaloneEmojiMessage(message) && message.body.trim() === LIKE_MESSAGE_EMOJI
 }
 
 export function getReplyPreviewText(preview: { body: string; type: string }) {

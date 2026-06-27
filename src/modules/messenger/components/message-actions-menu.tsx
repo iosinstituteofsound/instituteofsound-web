@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { Forward, MoreHorizontal, Pencil, Reply, Smile, Trash2 } from 'lucide-react'
-import { REACTION_EMOJIS } from '@/modules/messenger/hooks/use-message-actions'
+import { ReactionPickerIcon } from '@/shared/components/reactions'
+import { REACTION_OPTIONS } from '@/shared/lib/reactions/reaction-options'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 import { cn } from '@/shared/lib/cn'
 
@@ -56,18 +57,22 @@ export const MessageActionsMenu = memo(function MessageActionsMenu({
     >
       {showReactions ? (
         <div className="messenger-message-actions__reactions is-visible">
-          {REACTION_EMOJIS.map((emoji) => (
+          {REACTION_OPTIONS.map((reaction) => (
             <button
-              key={emoji}
+              key={reaction.kind}
               type="button"
               className="messenger-message-actions__emoji"
-              aria-label={`React ${emoji}`}
+              aria-label={`React ${reaction.label}`}
               onClick={() => {
-                onReact(emoji)
+                onReact(reaction.emoji)
                 setShowReactions(false)
               }}
             >
-              {emoji}
+              <ReactionPickerIcon
+                kind={reaction.kind}
+                label={reaction.label}
+                size="inline"
+              />
             </button>
           ))}
         </div>

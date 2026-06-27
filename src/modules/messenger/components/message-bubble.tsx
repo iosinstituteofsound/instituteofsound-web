@@ -6,7 +6,7 @@ import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { MessageActionsMenu } from '@/modules/messenger/components/message-actions-menu'
 import { MessageReactionBadge } from '@/modules/messenger/components/message-reaction-badge'
 import { useMessageBubbleActions } from '@/modules/messenger/hooks/use-message-bubble-actions'
-import { getReplyHeaderLabel, getReplyPreviewText } from '@/modules/messenger/lib/messenger-utils'
+import { getReplyHeaderLabel, getReplyPreviewText, isLikeMessage, isStandaloneEmojiMessage } from '@/modules/messenger/lib/messenger-utils'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 import { cn } from '@/shared/lib/cn'
 
@@ -49,6 +49,8 @@ export const MessageBubble = memo(function MessageBubble({
     quotedSenderId: message.replyPreview?.senderId,
   })
   const quotedPreviewText = message.replyPreview ? getReplyPreviewText(message.replyPreview) : ''
+  const isLike = isLikeMessage(message)
+  const isStandaloneEmoji = isStandaloneEmojiMessage(message) && !useReplyStack
 
   if (message.type === 'system') {
     return <p className="messenger-system-message">{message.body}</p>
@@ -75,7 +77,20 @@ export const MessageBubble = memo(function MessageBubble({
     />
   )
 
-  const bubble = (
+  const embeddedQuote = useReplyStack ? (
+    <div className="messenger-bubble__embedded-quote">{quotedPreviewText}</div>
+  ) : null
+
+  const bubble = isStandaloneEmoji ? (
+    <div
+      className="messenger-like-sticker"
+      onDoubleClick={onReply}
+      role="presentation"
+      aria-label={isLike ? 'Like' : 'Emoji'}
+    >
+      {message.body.trim()}
+    </div>
+  ) : (
     <div
       className={cn(
         'messenger-bubble text-left',
@@ -90,6 +105,8 @@ export const MessageBubble = memo(function MessageBubble({
       onDoubleClick={onReply}
       role="presentation"
     >
+      {embeddedQuote}
+
       {!isOutgoing && !compact && showSenderLabel && senderName ? (
         <div className="messenger-bubble__sender">{senderName}</div>
       ) : null}
@@ -156,7 +173,6 @@ export const MessageBubble = memo(function MessageBubble({
         <Reply className="h-3.5 w-3.5 shrink-0" aria-hidden />
         <span>{replyHeaderLabel}</span>
       </div>
-      <div className="messenger-reply-stack__quoted">{quotedPreviewText}</div>
       {bubble}
     </div>
   ) : (
@@ -170,6 +186,7 @@ export const MessageBubble = memo(function MessageBubble({
           'messenger-message-row messenger-message-row--compact group',
           isOutgoing && 'is-outgoing',
           isStacked && 'is-stacked',
+          isStandaloneEmoji && 'is-like',
           message.reactions.length > 0 && 'has-reactions',
         )}
       >
@@ -183,11 +200,9 @@ export const MessageBubble = memo(function MessageBubble({
 
         <div className="messenger-message-row__bubble-wrap">
           {renderedBubble}
+          {actions}
           {reactionBadge}
         </div>
-
-        {!isOutgoing ? actions : null}
-        {isOutgoing ? actions : null}
       </div>
     )
   }
@@ -198,6 +213,7 @@ export const MessageBubble = memo(function MessageBubble({
         'messenger-message-row group',
         isOutgoing && 'is-outgoing',
         isStacked && 'is-stacked',
+        isStandaloneEmoji && 'is-like',
         message.reactions.length > 0 && 'has-reactions',
       )}
     >
@@ -210,12 +226,11 @@ export const MessageBubble = memo(function MessageBubble({
       ) : null}
 
       <div className="messenger-message-row__content">
-        {isOutgoing ? actions : null}
         <div className="messenger-message-row__bubble-wrap">
           {renderedBubble}
+          {actions}
           {reactionBadge}
         </div>
-        {!isOutgoing ? actions : null}
       </div>
     </div>
   )

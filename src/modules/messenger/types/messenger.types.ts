@@ -95,54 +95,6 @@ export type DmThreadSummary = {
   communitySlug?: string
 }
 
-export type DmThreadHeader = {
-  threadId: string
-  kind: ThreadKind
-  title: string
-  subtitle?: string
-  avatarUrl?: string
-  memberPreview?: ThreadMemberPreview[]
-  memberCount?: number
-  status?: DmThreadStatus
-  isRequester?: boolean
-  isPendingRequest?: boolean
-  otherUserId?: string
-  otherName?: string
-  otherHandle?: string
-  otherAvatarUrl?: string
-  otherAvatarThumbnailUrl?: string
-  otherIsOnline?: boolean
-  communitySlug?: string
-  isAdmin?: boolean
-}
-
-export type CommunityListItem = {
-  slug: string
-  name: string
-  memberCount: number
-  threadId?: string
-  joined: boolean
-}
-
-export type GroupMember = {
-  userId: string
-  name: string
-  handle?: string
-  avatarUrl?: string
-  avatarThumbnailUrl?: string
-  role: 'member' | 'admin'
-  joinedAt?: string
-}
-
-export type BlockedUser = {
-  userId: string
-  name: string
-  handle?: string
-  avatarUrl?: string
-  avatarThumbnailUrl?: string
-  blockedAt: string
-}
-
 export const MESSENGER_MESSAGE_EVENT = 'messenger:message'
 export const MESSENGER_MESSAGE_UPDATED_EVENT = 'messenger:message:updated'
 export const MESSENGER_TYPING_EVENT = 'messenger:typing'
