@@ -45,10 +45,12 @@ export const ThreadInfoPanel = memo(function ThreadInfoPanel({ thread }: ThreadI
       </div>
 
       <div className="messenger-info__quick-actions">
-        <Link to={`/profile/${thread.otherUserId}`} className="messenger-info__action">
-          <UserRound className="h-5 w-5" />
-          Profile
-        </Link>
+        {thread.otherUserId ? (
+          <Link to={`/profile/${thread.otherUserId}`} className="messenger-info__action">
+            <UserRound className="h-5 w-5" />
+            Profile
+          </Link>
+        ) : null}
         <button type="button" className="messenger-info__action">
           <VolumeX className="h-5 w-5" />
           Mute

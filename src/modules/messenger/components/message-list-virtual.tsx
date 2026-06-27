@@ -9,19 +9,21 @@ type FlatItem =
   | { kind: 'message'; id: string; message: DmMessage }
 
 type MessageListVirtualProps = {
+  threadId: string
   messages: DmMessage[]
   viewerId?: string | null
   otherName?: string
   otherAvatar?: string
-  onReply?: (message: DmMessage) => void
+  showSenderName?: boolean
 }
 
 export const MessageListVirtual = memo(function MessageListVirtual({
+  threadId,
   messages,
   viewerId,
   otherName,
   otherAvatar,
-  onReply,
+  showSenderName,
 }: MessageListVirtualProps) {
   const parentRef = useRef<HTMLDivElement>(null)
   const shouldStickToBottom = useRef(true)
@@ -91,10 +93,10 @@ export const MessageListVirtual = memo(function MessageListVirtual({
               ) : (
                 <MessageBubble
                   message={item.message}
+                  threadId={threadId}
                   isOutgoing={item.message.senderId === viewerId}
-                  senderName={otherName}
+                  senderName={showSenderName ? item.message.senderName ?? otherName : otherName}
                   senderAvatar={otherAvatar}
-                  onReply={onReply}
                 />
               )}
             </div>

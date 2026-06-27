@@ -1,10 +1,18 @@
 import { memo, useEffect, useMemo, useRef } from 'react'
 import { ChevronDown, Minus, Phone, Video, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { ForwardMessageModal } from '@/modules/messenger/components/forward-message-modal'
+import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
+import { MessageBubble } from '@/modules/messenger/components/message-bubble'
 import { MessengerPopupComposer } from '@/modules/messenger/components/messenger-popup-composer'
+import {
+  isComposerBlockedByRequest,
+  MessageRequestBanner,
+} from '@/modules/messenger/components/message-request-banner'
 import { useMessengerMessages } from '@/modules/messenger/hooks/use-messenger-messages'
-import { useMessengerThreads } from '@/modules/messenger/hooks/use-messenger-threads'
+import { messengerThreadsQueryKey, useMessengerThreads } from '@/modules/messenger/hooks/use-messenger-threads'
 import { formatMessageDateSeparator, getThreadAvatarUrl, getThreadDisplayName } from '@/modules/messenger/lib/messenger-utils'
 import { useMessengerPopupStore } from '@/modules/messenger/store/messenger-popup-store'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
@@ -32,10 +40,13 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
   minimized,
 }: MessengerChatWindowProps) {
   const viewerId = useAuthStore((s) => s.userId)
+  const queryClient = useQueryClient()
   const { threads } = useMessengerThreads()
   const closeChat = useMessengerPopupStore((s) => s.closeChat)
   const toggleMinimize = useMessengerPopupStore((s) => s.toggleMinimize)
   const focusChat = useMessengerPopupStore((s) => s.focusChat)
+  const forwardFrom = useMessengerUiStore((s) => s.forwardFrom)
+  const setForwardFrom = useMessengerUiStore((s) => s.setForwardFrom)
   const typingByThread = useMessengerUiStore((s) => s.typingByThread)
 
   const thread = useMemo(
@@ -48,6 +59,15 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
     () => messagesQuery.data?.pages.flatMap((page) => page.messages) ?? [],
     [messagesQuery.data?.pages],
   )
+
+  const myMessageCount = useMemo(
+    () => messages.filter((m) => m.senderId === viewerId && m.type !== 'system').length,
+    [messages, viewerId],
+  )
+
+  const composerBlocked = thread ? isComposerBlockedByRequest(thread, myMessageCount) : false
+  const isDirect = thread?.kind === 'direct' || !thread?.isGroup
+  const displayName = getThreadDisplayName(thread)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const typingUsers = (typingByThread[threadId] ?? []).filter((id) => id !== viewerId)
@@ -79,6 +99,11 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
     return rows
   }, [messages])
 
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: messengerThreadsQueryKey })
+    void messagesQuery.refetch()
+  }
+
   return (
     <div
       className={cn('messenger-chat-window', minimized && 'messenger-chat-window--minimized')}
@@ -93,28 +118,37 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
           }}
         >
           <span className="messenger-chat-window__avatar-wrap">
-            <FeedUserAvatar
-              name={getThreadDisplayName(thread)}
-              avatarUrl={getThreadAvatarUrl(thread)}
-              className="h-8 w-8"
-            />
-            {thread?.otherIsOnline ? <span className="messenger-chat-window__online" /> : null}
+            {isDirect ? (
+              <FeedUserAvatar
+                name={displayName}
+                avatarUrl={getThreadAvatarUrl(thread)}
+                className="h-8 w-8"
+              />
+            ) : (
+              <GroupAvatarStack
+                members={thread?.memberPreview}
+                title={displayName}
+                avatarUrl={thread?.avatarUrl}
+                size="sm"
+              />
+            )}
+            {isDirect && thread?.otherIsOnline ? <span className="messenger-chat-window__online" /> : null}
           </span>
           <span className="messenger-chat-window__meta">
             <span className="messenger-chat-window__name-row">
-              <span className="messenger-chat-window__name">{getThreadDisplayName(thread)}</span>
+              <span className="messenger-chat-window__name">{displayName}</span>
               <ChevronDown className="h-4 w-4 shrink-0 text-[var(--primary)]" />
             </span>
             <span className="messenger-chat-window__status">
               {typingUsers.length ? (
                 'Typing…'
-              ) : thread?.otherIsOnline ? (
+              ) : isDirect && thread?.otherIsOnline ? (
                 <>
                   <span className="messenger-chat-window__status-dot" />
                   Active now
                 </>
               ) : (
-                'Offline'
+                thread?.subtitle ?? (isDirect ? 'Offline' : `${thread?.memberCount ?? 0} members`)
               )}
             </span>
           </span>
@@ -152,15 +186,33 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
       {!minimized ? (
         <>
           <div className="messenger-chat-window__body">
+            {thread ? (
+              <MessageRequestBanner
+                thread={thread}
+                viewerId={viewerId}
+                myMessageCount={myMessageCount}
+                onChanged={invalidate}
+              />
+            ) : null}
+
             <div ref={scrollRef} className="messenger-chat-window__scroll">
               {messages.length <= 2 ? (
                 <div className="messenger-chat-window__hero">
-                  <FeedUserAvatar
-                    name={getThreadDisplayName(thread)}
-                    avatarUrl={getThreadAvatarUrl(thread)}
-                    className="h-16 w-16"
-                  />
-                  <div className="messenger-chat-window__hero-name">{getThreadDisplayName(thread)}</div>
+                  {isDirect ? (
+                    <FeedUserAvatar
+                      name={displayName}
+                      avatarUrl={getThreadAvatarUrl(thread)}
+                      className="h-16 w-16"
+                    />
+                  ) : (
+                    <GroupAvatarStack
+                      members={thread?.memberPreview}
+                      title={displayName}
+                      avatarUrl={thread?.avatarUrl}
+                      size="lg"
+                    />
+                  )}
+                  <div className="messenger-chat-window__hero-name">{displayName}</div>
                 </div>
               ) : null}
 
@@ -176,18 +228,23 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
                 const mine = row.message.senderId === viewerId
                 const isLastOutgoing = mine && row.message.id === lastOutgoingId
 
+                if (row.message.type === 'system') {
+                  return (
+                    <p key={row.message.id} className="messenger-system-message">
+                      {row.message.body}
+                    </p>
+                  )
+                }
+
                 return (
-                  <div
-                    key={row.message.id}
-                    className={cn('messenger-chat-window__message', mine && 'is-mine')}
-                  >
-                    <div className={cn('messenger-chat-window__bubble', mine && 'is-mine', isLastOutgoing && 'is-last')}>
-                      {row.message.type === 'image' && row.message.mediaUrl ? (
-                        <img src={row.message.mediaUrl} alt="" className="max-w-[180px] rounded-lg" />
-                      ) : (
-                        <span>{row.message.body}</span>
-                      )}
-                    </div>
+                  <div key={row.message.id}>
+                    <MessageBubble
+                      message={row.message}
+                      threadId={threadId}
+                      isOutgoing={mine}
+                      senderName={row.message.senderName ?? displayName}
+                      senderAvatar={getThreadAvatarUrl(thread)}
+                    />
                     {isLastOutgoing ? (
                       <p className="messenger-chat-window__receipt">{receiptLabel(row.message)}</p>
                     ) : null}
@@ -197,13 +254,19 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
             </div>
 
             {typingUsers.length ? (
-              <p className="messenger-chat-window__typing">{getThreadDisplayName(thread)} is typing…</p>
+              <p className="messenger-chat-window__typing">{displayName} is typing…</p>
             ) : null}
           </div>
 
-          <MessengerPopupComposer threadId={threadId} />
+          {!composerBlocked && thread?.status !== 'declined' ? (
+            <MessengerPopupComposer threadId={threadId} />
+          ) : thread?.status === 'declined' ? (
+            <p className="px-3 py-2 text-xs text-[var(--messenger-muted)]">This conversation was declined.</p>
+          ) : null}
         </>
       ) : null}
+
+      <ForwardMessageModal message={forwardFrom} onClose={() => setForwardFrom(null)} />
     </div>
   )
 })

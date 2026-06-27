@@ -14,6 +14,7 @@ import { openMessengerPopup } from '@/modules/messenger/lib/messenger-popup-open
 import { useQuery } from '@tanstack/react-query'
 import { Maximize2, MoreHorizontal, PenSquare, Search } from 'lucide-react'
 import { MessengerChatSettings } from '@/modules/messenger/components/messenger-chat-settings'
+import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { MessengerIcon } from '@/modules/messenger/components/messenger-icon'
@@ -78,6 +79,8 @@ const PopoverThreadItem = memo(function PopoverThreadItem({
   onSelect: (threadId: string) => void
 }) {
   const sentByViewer = Boolean(viewerId && thread.lastSenderId === viewerId)
+  const isDirect = thread.kind === 'direct' || !thread.isGroup
+  const displayName = getThreadDisplayName(thread)
 
   return (
     <li>
@@ -86,13 +89,27 @@ const PopoverThreadItem = memo(function PopoverThreadItem({
         className={cn('ios-messenger-popover__item', thread.unreadCount > 0 && 'is-unread')}
         onClick={() => onSelect(thread.threadId)}
       >
-        <FeedUserAvatar
-          name={getThreadDisplayName(thread)}
-          avatarUrl={getThreadAvatarUrl(thread)}
-          className="h-[52px] w-[52px]"
-        />
+        <div className="relative shrink-0">
+          {isDirect ? (
+            <FeedUserAvatar
+              name={displayName}
+              avatarUrl={getThreadAvatarUrl(thread)}
+              className="h-[52px] w-[52px]"
+            />
+          ) : (
+            <GroupAvatarStack
+              members={thread.memberPreview}
+              title={displayName}
+              avatarUrl={thread.avatarUrl}
+              size="md"
+            />
+          )}
+          {isDirect && thread.otherIsOnline ? (
+            <span className="messenger-online-dot" aria-label="Online" />
+          ) : null}
+        </div>
         <div className="ios-messenger-popover__copy">
-          <div className="ios-messenger-popover__name">{getThreadDisplayName(thread)}</div>
+          <div className="ios-messenger-popover__name">{displayName}</div>
           <div className="ios-messenger-popover__preview-row">
             <span className="ios-messenger-popover__preview">
               {thread.lastMessageBody || 'Start a conversation'}

@@ -8,6 +8,10 @@ export function getThreadAvatarUrl(thread?: Pick<DmThreadSummary, 'avatarUrl' | 
   return thread?.otherAvatarThumbnailUrl ?? thread?.otherAvatarUrl ?? thread?.avatarUrl
 }
 
+export function formatMessageClockTime(iso: string) {
+  return new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+}
+
 export function formatMessengerTime(iso?: string) {
   if (!iso) return ''
   const date = new Date(iso)
