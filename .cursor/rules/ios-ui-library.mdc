@@ -27,3 +27,5 @@ alwaysApply: true
 | Duplicated sliding tab rows | `SlidingTabBar` |
 | Inline file drop zones | `FileDropzone` |
 | `feed-social-card__action-bar` markup in new code | `EngagementActionBar` kit |
+| `@/modules/social/*` shim imports | `@/shared/components/social`, `@/shared/hooks/use-follow` |
+| `@/modules/feed/components/feed-user-avatar` | `UserAvatar` from `@/shared/components/user` |

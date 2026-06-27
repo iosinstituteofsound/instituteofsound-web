@@ -20,3 +20,10 @@ export {
 } from '@/shared/lib/reactions/reaction-sounds'
 
 export { groupReactionsByEmoji } from '@/shared/lib/reactions/group-reactions'
+
+export {
+  ENGAGEMENT_REACTION_STATE_CLASS,
+  COMMENT_REACTION_STATE_CLASS,
+  REEL_REACTION_STATE_CLASS,
+  reactionStateClass,
+} from '@/shared/lib/reactions/reaction-state-classes'

@@ -9,6 +9,7 @@ import { DashboardLineChart } from '@/modules/music/components/artist-dashboard/
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
 import { Loader } from '@/shared/components/feedback/loader'
 import { EmptyState } from '@/shared/components/feedback/states'
+import { StatCard } from '@/shared/components/layout'
 import { Page, PageDescription, PageHeader, PageHeaderMain, PageSection, PageTitle } from '@/shared/components/layout/page-shell'
 import '@/modules/music/styles/artist-analytics.css'
 import '@/modules/music/styles/artist-dashboard-home.css'
@@ -60,10 +61,7 @@ export function IllustratorAnalyticsPage() {
             { label: 'Canvas pieces', value: overview?.portfolioCount ?? 0 },
             { label: 'Unique engagers', value: overview?.uniqueEngagers ?? 0 },
           ].map((stat) => (
-            <div key={stat.label} className="rounded-xl border border-border/60 bg-card/40 p-4">
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-              <p className="mt-1 text-2xl font-semibold">{formatIllustratorCount(stat.value)}</p>
-            </div>
+            <StatCard key={stat.label} label={stat.label} value={formatIllustratorCount(stat.value)} />
           ))}
         </div>
 

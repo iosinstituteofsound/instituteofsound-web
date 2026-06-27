@@ -3,7 +3,7 @@ import { useCreateFeedItem } from '@/modules/feed/hooks/use-feed'
 import type { FeedItemDto, FeedItemType } from '@/modules/feed/types/feed.types'
 import { ReleaseSharePreview } from '@/modules/feed/components/release-share-preview'
 import { isReleaseSharePayload } from '@/modules/feed/lib/feed-release-payload'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import {
   AnimatedEmojiPicker,
   EmojiTriggerButton,
@@ -40,9 +40,9 @@ import {
 import {
   LinkPreviewCard,
   LinkPreviewCardSkeleton,
-} from '@/modules/feed/components/link-preview-card'
-import { useLinkPreview } from '@/modules/feed/hooks/use-link-preview'
-import { stripUrlFromText, urlsMatch } from '@/modules/feed/lib/link-preview'
+} from '@/shared/components/link-preview'
+import { useLinkPreview } from '@/shared/hooks/use-link-preview'
+import { stripUrlFromText, urlsMatch } from '@/shared/lib/link-preview'
 import type { MediaAttachKind, MediaAttachMode } from '@/modules/feed/lib/media-utils'
 import {
   Dialog,
@@ -490,7 +490,7 @@ export function CreatePostDialog({
           <div ref={composePanelRef} className="feed-create-post__viewport-compose">
             <div className="feed-create-post__body feed-create-post__stack">
           <div className="feed-create-post__author">
-            <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10" />
+            <UserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10" />
             <div className="min-w-0">
               <p className="feed-create-post__author-name">{userName}</p>
               <div className="feed-create-post__author-badges">

@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { ImageIcon, Loader2, Upload } from 'lucide-react'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { RichTextEditor } from '@/modules/editor/components/rich-text-editor'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -50,9 +51,13 @@ export function PuckImageField({ value, onChange }: PuckFieldProps<string>) {
           <img src={value} alt="" className="max-h-48 w-full object-cover" />
         </div>
       ) : (
-        <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border bg-muted/20">
-          <ImageIcon className="h-8 w-8 text-muted-foreground" />
-        </div>
+        <EmptyState
+          variant="dashed"
+          title=""
+          description=""
+          icon={<ImageIcon className="h-8 w-8 text-muted-foreground" />}
+          className="flex h-32 items-center justify-center p-0"
+        />
       )}
       <div className="flex flex-wrap gap-2">
         <input

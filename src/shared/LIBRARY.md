@@ -22,7 +22,7 @@
 | `Skeleton` | `@/shared/components/ui/skeleton` | Loading placeholders |
 | `Card`, `Tabs`, `Select`, `Badge`, etc. | `@/shared/components/ui/*` | Standard form/layout primitives |
 
-**Deprecated:** `Modal` and `Sheet` wrappers — use `Dialog` / `AlertDialog` directly. No current consumers.
+**Removed:** `Modal` and `Sheet` wrappers — use `Dialog` / `AlertDialog` directly.
 
 ## Tier 2 — Patterns
 
@@ -58,6 +58,7 @@
 | Component | Use when |
 |-----------|----------|
 | `MediaPreviewRow` | Track/post preview row with artwork |
+| `ReleaseGridCard` | Release grid card shell (artwork, meta, badges, actions slots) |
 
 ### Engagement (`@/shared/components/engagement`)
 
@@ -66,6 +67,7 @@
 | `EngagementActionBar` | Like / comment / share action row |
 | `EngagementActionSlot` | Slot inside action bar |
 | `EngagementActionButton` | Styled engagement button |
+| `EngagementStatsRow` | Reaction/comment counts row (`social` \| `compact`) |
 
 ### User (`@/shared/components/user`)
 
@@ -120,10 +122,12 @@
 
 | Component | Use when |
 |-----------|----------|
-| `LinkPreviewCard` | URL preview card (feed, messenger, composer) |
+| `LinkPreviewCard` | URL preview card (CSS: `ios-link-preview__*`) |
 | `LinkPreviewCardSkeleton` | Loading state for link preview |
 
 ### Social (`@/shared/components/social`)
+
+Import from `@/shared/components/social` or `@/shared/hooks/use-follow` — **not** `@/modules/social` (removed).
 
 | Component | Use when |
 |-----------|----------|
@@ -159,6 +163,7 @@
 | `getProfilePath` | `/profile/:userId` path |
 | `userInitials` | Avatar fallback initials |
 | `cn` | Tailwind class merging |
+| `reactionStateClass`, `ENGAGEMENT_REACTION_STATE_CLASS` | Reaction button active CSS classes (`@/shared/lib/reactions`) |
 
 ## Not in library (keep in modules)
 

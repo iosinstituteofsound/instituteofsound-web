@@ -8,7 +8,7 @@ import { DiscographyStatsTelemetry } from '@/modules/profile/components/discogra
 import { DiscographyArtistPick } from '@/modules/profile/components/discography-artist-pick'
 import { DiscographyLatestRelease } from '@/modules/profile/components/discography-latest-release'
 import { DiscographyPopularList } from '@/modules/profile/components/discography-popular-list'
-import { ProfileTabEmpty } from '@/modules/profile/components/profile-tab-empty'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { useProfileDiscography } from '@/modules/profile/hooks/use-profile-discography'
 import {
   discographyHasContent,
@@ -58,17 +58,17 @@ export function ProfileDiscographyTab({ user, isOwnProfile }: ProfileDiscography
 
   if (isError || !display) {
     return (
-      <ProfileTabEmpty message="No discography yet. Published releases from the artist studio will appear here." />
+      <EmptyState variant="card" description="No discography yet. Published releases from the artist studio will appear here." />
     )
   }
 
   if (!rawHasContent && !showStarterLayout) {
     if (!display.artist) {
       return (
-        <ProfileTabEmpty message="No discography yet. Published releases from the artist studio will appear here." />
+        <EmptyState variant="card" description="No discography yet. Published releases from the artist studio will appear here." />
       )
     }
-    return <ProfileTabEmpty message="No releases published yet." />
+    return <EmptyState variant="card" description="No releases published yet." />
   }
 
   const artistName = display.artist?.displayName || user.name

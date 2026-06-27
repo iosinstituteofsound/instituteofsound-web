@@ -6,34 +6,27 @@ import { FeedCommentDialog } from '@/modules/feed/components/feed-comment-dialog
 import { FeedShareDialog } from '@/modules/feed/components/feed-share-dialog'
 import { useSetFeedReaction } from '@/modules/feed/hooks/use-feed-engagement'
 import { getEngagement } from '@/modules/feed/lib/feed-engagement'
-import { FEED_REACTION_OPTIONS, feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
+import { reactionMeta } from '@/shared/lib/reactions/reaction-options'
 import type { FeedItemDto, FeedReactionKind } from '@/modules/feed/types/feed.types'
 import {
   EngagementActionBar,
   EngagementActionButton,
   EngagementActionSlot,
+  EngagementStatsRow,
 } from '@/shared/components/engagement'
 import { ReactionHoverPickerSlot, ReactionPickerIcon } from '@/shared/components/reactions'
-import { formatEngagementCount } from '@/shared/lib/format-count'
 import { unlockReactionSounds } from '@/shared/lib/reactions/reaction-sounds'
 import { useReactionHoverPicker } from '@/shared/hooks/use-reaction-hover-picker'
 import { cn } from '@/shared/lib/cn'
 import '@/shared/components/engagement/engagement-action-bar.css'
+
+import { ENGAGEMENT_REACTION_STATE_CLASS, reactionStateClass } from '@/shared/lib/reactions/reaction-state-classes'
 
 interface FeedEngagementProps {
   item: FeedItemDto
   defaultCommentsOpen?: boolean
   variant?: 'default' | 'social'
   trailingAction?: ReactNode
-}
-
-const REACTION_STATE_CLASS: Record<FeedReactionKind, string> = {
-  like: 'is-active',
-  love: 'is-loved',
-  haha: 'is-haha',
-  wow: 'is-wow',
-  sad: 'is-sad',
-  angry: 'is-angry',
 }
 
 export function FeedEngagement({
@@ -57,10 +50,7 @@ export function FeedEngagement({
 
   const setReaction = useSetFeedReaction()
 
-  const activeKinds = FEED_REACTION_OPTIONS.filter((r) => engagement.reactions[r.kind] > 0).sort(
-    (a, b) => engagement.reactions[b.kind] - engagement.reactions[a.kind],
-  )
-  const myReaction = engagement.myReaction ? feedReactionMeta(engagement.myReaction) : null
+  const myReaction = engagement.myReaction ? reactionMeta(engagement.myReaction) : null
 
   const react = (kind: FeedReactionKind) => {
     if (!userId || setReaction.isPending) return
@@ -93,7 +83,7 @@ export function FeedEngagement({
       type="button"
       className={cn(
         'ios-engagement-action-bar__btn',
-        engagement.myReaction && REACTION_STATE_CLASS[engagement.myReaction],
+        engagement.myReaction && reactionStateClass(engagement.myReaction, ENGAGEMENT_REACTION_STATE_CLASS),
       )}
       aria-label={myReaction ? myReaction.label : 'Like'}
       disabled={setReaction.isPending}
@@ -113,31 +103,13 @@ export function FeedEngagement({
     return (
       <>
         <div className="feed-social-card__engagement">
-          <div className="feed-social-card__stats">
-            <div className="feed-social-card__stats-left">
-              {engagement.reactionTotal > 0 ? (
-                <span className="feed-social-card__reaction-stack" aria-hidden>
-                  {activeKinds.slice(0, 3).map((reaction) => (
-                    <span key={reaction.kind} className="feed-social-card__reaction-bubble">
-                      <ReactionPickerIcon kind={reaction.kind} label={reaction.label} size="inline" />
-                    </span>
-                  ))}
-                </span>
-              ) : null}
-              <span className="feed-social-card__stats-count">
-                {formatEngagementCount(engagement.reactionTotal)}
-              </span>
-            </div>
-            <div className="feed-social-card__stats-right">
-              <button
-                type="button"
-                className="feed-social-card__stats-link"
-                onClick={openComments}
-              >
-                {formatEngagementCount(engagement.commentCount)} comments
-              </button>
-            </div>
-          </div>
+          <EngagementStatsRow
+            variant="social"
+            reactionTotal={engagement.reactionTotal}
+            commentCount={engagement.commentCount}
+            reactions={engagement.reactions}
+            onCommentsClick={openComments}
+          />
 
           <div className="feed-social-card__divider" />
 

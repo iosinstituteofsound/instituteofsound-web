@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { useCreateFeedItem } from '@/modules/feed/hooks/use-feed'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import {
   MediaAttachPanel,
   type MediaAttachment,
@@ -105,7 +105,7 @@ export function CreateMediaStoryDialog({
         </DialogHeader>
 
         <div className="flex items-center gap-3 border-b px-5 py-3">
-          <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10" />
+          <UserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10" />
           <p className="text-sm font-semibold">{userName}</p>
         </div>
 

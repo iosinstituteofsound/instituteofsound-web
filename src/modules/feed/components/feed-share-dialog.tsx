@@ -9,7 +9,7 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { AnimatedEmojiPicker } from '@/shared/components/emoji'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import {
   ShareCopyLinkIcon,
@@ -139,7 +139,7 @@ export function FeedShareDialog({ item, open, onOpenChange }: FeedShareDialogPro
 
             <section className="feed-share-dialog__composer">
               <div className="feed-share-dialog__author">
-                <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10 shrink-0" />
+                <UserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10 shrink-0" />
                 <div className="feed-share-dialog__author-meta">
                   <p className="feed-share-dialog__author-name">{userName}</p>
                   <div className="feed-share-dialog__badges">

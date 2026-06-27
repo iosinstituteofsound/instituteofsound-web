@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { useDeleteFeedItem } from '@/modules/feed/hooks/use-feed'
-import { useFollowStatus, useToggleFollow } from '@/modules/social/hooks/use-follow'
+import { useFollowStatus, useToggleFollow } from '@/shared/hooks/use-follow'
 import type { FeedAuthorDto } from '@/modules/feed/types/feed.types'
 import { Button } from '@/shared/components/ui/button'
 import {

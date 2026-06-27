@@ -8,7 +8,7 @@ import { EditorialLatestPublications } from '@/modules/profile/components/editor
 import { EditorialPicks } from '@/modules/profile/components/editorial-picks'
 import { EditorialPopularArticles } from '@/modules/profile/components/editorial-popular-articles'
 import { EditorialArticleCatalog } from '@/modules/profile/components/editorial-article-catalog'
-import { ProfileTabEmpty } from '@/modules/profile/components/profile-tab-empty'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { useProfileEditorial } from '@/modules/profile/hooks/use-profile-editorial'
 import { enrichEditorialDesk } from '@/modules/profile/lib/editorial-desk-format'
 import { PageLoader } from '@/shared/components/feedback/loader'
@@ -29,7 +29,7 @@ export function ProfileEditorialTab({ user, isOwnProfile }: ProfileEditorialTabP
 
   if (isError || !desk) {
     return (
-      <ProfileTabEmpty message="Could not load editorial desk. Check your connection and try again." />
+      <EmptyState variant="card" description="Could not load editorial desk. Check your connection and try again." />
     )
   }
 
@@ -43,8 +43,9 @@ export function ProfileEditorialTab({ user, isOwnProfile }: ProfileEditorialTabP
 
   if (!hasContent) {
     return (
-      <ProfileTabEmpty
-        message={
+      <EmptyState
+        variant="card"
+        description={
           isOwnProfile
             ? 'No published editorial yet. Open your desk to write and publish your first story.'
             : 'No published editorial from this editor yet.'

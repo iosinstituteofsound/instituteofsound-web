@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { UserAvatar } from '@/shared/components/user'
-import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
+import { GroupAvatarStack } from '@/shared/components/user'
 import { MessageBubble } from '@/modules/messenger/components/message-bubble'
 import { useMessageList } from '@/modules/messenger/hooks/use-message-list'
 import { getMessageReceiptLabel } from '@/modules/messenger/utils/message-list-utils'

@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { X } from 'lucide-react'
-import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
+import { GroupAvatarStack } from '@/shared/components/user'
 import { UserAvatar } from '@/shared/components/user'
 import { useForwardMessageModal } from '@/modules/messenger/hooks/use-forward-message-modal'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'

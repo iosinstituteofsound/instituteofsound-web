@@ -6,7 +6,7 @@ import { FeedCommentDialog } from '@/modules/feed/components/feed-comment-dialog
 import { FeedShareDialog } from '@/modules/feed/components/feed-share-dialog'
 import { useSetFeedReaction } from '@/modules/feed/hooks/use-feed-engagement'
 import { getEngagement } from '@/modules/feed/lib/feed-engagement'
-import { feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
+import { reactionMeta } from '@/shared/lib/reactions/reaction-options'
 import type { FeedItemDto, FeedReactionKind } from '@/modules/feed/types/feed.types'
 import { ReactionHoverPickerSlot, ReactionPickerIcon } from '@/shared/components/reactions'
 import { formatEngagementCount } from '@/shared/lib/format-count'
@@ -22,14 +22,7 @@ const ICON_PROPS = {
   strokeWidth: 2.5,
 } as const
 
-const REACTION_STATE_CLASS: Record<FeedReactionKind, string> = {
-  like: 'reel-actions__btn--liked',
-  love: 'reel-actions__btn--loved',
-  haha: 'reel-actions__btn--haha',
-  wow: 'reel-actions__btn--wow',
-  sad: 'reel-actions__btn--sad',
-  angry: 'reel-actions__btn--angry',
-}
+import { REEL_REACTION_STATE_CLASS, reactionStateClass } from '@/shared/lib/reactions/reaction-state-classes'
 
 function ReelActionButton({
   label,
@@ -79,7 +72,7 @@ export function ReelActions({ item }: ReelActionsProps) {
   } = useReactionHoverPicker()
   const setReaction = useSetFeedReaction()
 
-  const myReaction = engagement.myReaction ? feedReactionMeta(engagement.myReaction) : null
+  const myReaction = engagement.myReaction ? reactionMeta(engagement.myReaction) : null
   const likeCount = formatEngagementCount(engagement.reactionTotal)
   const commentCount = formatEngagementCount(engagement.commentCount)
 
@@ -100,7 +93,7 @@ export function ReelActions({ item }: ReelActionsProps) {
       type="button"
       className={cn(
         'reel-actions__btn',
-        engagement.myReaction && REACTION_STATE_CLASS[engagement.myReaction],
+        engagement.myReaction && reactionStateClass(engagement.myReaction, REEL_REACTION_STATE_CLASS),
       )}
       aria-label={myReaction ? myReaction.label : 'Like'}
       disabled={setReaction.isPending}

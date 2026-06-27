@@ -15,7 +15,7 @@ import { ProfileLabelOverviewTab } from '@/modules/profile/components/profile-la
 import { ProfileCuratorOverviewTab } from '@/modules/profile/components/profile-curator-overview-tab'
 import { ProfilePostsPanel } from '@/modules/profile/components/profile-posts-panel'
 import { usePublicProfile } from '@/modules/profile/hooks/use-public-profile'
-import { useFollowStats } from '@/modules/social/hooks/use-follow'
+import { useFollowStats } from '@/shared/hooks/use-follow'
 import type { PublicProfileDto } from '@/modules/search/api/search.api'
 import { SlidingTabBar } from '@/shared/components/controls'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'

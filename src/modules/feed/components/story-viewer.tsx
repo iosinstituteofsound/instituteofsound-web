@@ -12,7 +12,7 @@ import {
   X,
 } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import {
@@ -24,7 +24,7 @@ import {
   storyTextStyle,
   storyVideoUrl,
 } from '@/modules/feed/lib/story-content'
-import { FEED_REACTION_OPTIONS } from '@/modules/feed/lib/feed-reactions'
+import { REACTION_OPTIONS } from '@/shared/lib/reactions/reaction-options'
 import { formatFeedTimestamp } from '@/modules/feed/lib/feed-time'
 import { useStoryGestures } from '@/modules/feed/hooks/use-story-gestures'
 import { Button } from '@/shared/components/ui/button'
@@ -208,7 +208,7 @@ export function StoryViewer({
                 className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-white/10"
               >
                 <div className="relative">
-                  <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="h-12 w-12" />
+                  <UserAvatar name={userName} avatarUrl={avatarUrl} className="h-12 w-12" />
                   <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
                     <Plus className="h-4 w-4" />
                   </div>
@@ -236,7 +236,7 @@ export function StoryViewer({
                       isActive ? 'bg-white/10' : 'hover:bg-white/5',
                     )}
                   >
-                    <FeedUserAvatar
+                    <UserAvatar
                       name={group.author.name}
                       avatarUrl={group.author.avatarUrl}
                       className={cn('h-12 w-12', isActive ? 'ring-2 ring-primary' : 'ring-2 ring-primary/80')}
@@ -309,7 +309,7 @@ export function StoryViewer({
                 onPointerDown={(event) => event.stopPropagation()}
               >
                 <div className="flex min-w-0 items-center gap-2">
-                  <FeedUserAvatar
+                  <UserAvatar
                     name={activeGroup.author.name}
                     avatarUrl={activeGroup.author.avatarUrl}
                     className="h-9 w-9 ring-2 ring-primary"
@@ -410,7 +410,7 @@ export function StoryViewer({
                     className="h-11 flex-1 rounded-full border-white/15 bg-white/10 text-white placeholder:text-white/60 focus-visible:ring-white/30"
                   />
                   <div className="hidden items-center gap-1 sm:flex">
-                    {FEED_REACTION_OPTIONS.map((reaction) => (
+                    {REACTION_OPTIONS.map((reaction) => (
                       <button
                         key={reaction.kind}
                         type="button"

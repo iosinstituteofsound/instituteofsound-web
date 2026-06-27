@@ -148,7 +148,7 @@
   }
 
   /* Link previews — full bleed inside card */
-  .feed-page .feed-link-preview-outer:not(.feed-link-preview-outer--compact) {
+  .feed-page .ios-link-preview-outer:not(.ios-link-preview-outer--compact) {
     margin-inline: calc(var(--feed-link-pad) * -1);
   }
 

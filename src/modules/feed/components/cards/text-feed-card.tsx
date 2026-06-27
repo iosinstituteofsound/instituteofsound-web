@@ -1,7 +1,7 @@
 import type { FeedCardProps } from '@/modules/feed/lib/feed-card-props'
-import { LinkPreviewCard } from '@/modules/feed/components/link-preview-card'
+import { LinkPreviewCard } from '@/shared/components/link-preview'
 import { FeedCardShell, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
-import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'
+import { parseLinkPreviewFromPayload } from '@/shared/lib/link-preview'
 
 export function TextFeedCard({ item, defaultCommentsOpen, compact, onPostDeleted }: FeedCardProps) {
   const text = payloadString(item.payload, 'text') ?? item.body

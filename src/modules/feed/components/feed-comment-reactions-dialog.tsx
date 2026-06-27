@@ -2,11 +2,11 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { ReactionPickerIcon } from '@/shared/components/reactions'
-import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { ProfileLink } from '@/shared/components/user'
+import { UserAvatar } from '@/shared/components/user'
 import { useFeedCommentReactions } from '@/modules/feed/hooks/use-feed-engagement'
-import { formatEngagementCount } from '@/modules/feed/lib/format-engagement-count'
-import { FEED_REACTION_OPTIONS, feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
+import { formatEngagementCount } from '@/shared/lib/format-count'
+import { REACTION_OPTIONS, reactionMeta } from '@/shared/lib/reactions/reaction-options'
 import type { FeedCommentEngagementSummary, FeedReactionKind } from '@/modules/feed/types/feed.types'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { cn } from '@/shared/lib/cn'
@@ -33,7 +33,7 @@ export function FeedCommentReactionsDialog({
   const { data, isLoading } = useFeedCommentReactions(feedItemId, commentId, open)
 
   const reactions = Array.isArray(data) ? data : []
-  const activeKinds = FEED_REACTION_OPTIONS.filter((option) => (engagement?.reactions[option.kind] ?? 0) > 0)
+  const activeKinds = REACTION_OPTIONS.filter((option) => (engagement?.reactions[option.kind] ?? 0) > 0)
 
   const filteredReactions = useMemo(() => {
     if (filter === 'all') return reactions
@@ -107,23 +107,23 @@ export function FeedCommentReactionsDialog({
               <p className="feed-comment-reactions-dialog__empty">No reactions yet.</p>
             ) : (
               filteredReactions.map((entry) => {
-                const meta = feedReactionMeta(entry.kind)
+                const meta = reactionMeta(entry.kind)
                 return (
                   <div key={`${entry.user.id}-${entry.kind}-${entry.createdAt}`} className="feed-comment-reactions-dialog__item">
-                    <FeedAuthorProfileLink author={entry.user} variant="avatar" className="shrink-0">
-                      <FeedUserAvatar
+                    <ProfileLink userId={entry.user.id} name={entry.user.name} variant="avatar" className="shrink-0">
+                      <UserAvatar
                         name={entry.user.name}
                         avatarUrl={entry.user.avatarUrl}
                         className="h-8 w-8"
                       />
-                    </FeedAuthorProfileLink>
-                    <FeedAuthorProfileLink author={entry.user} variant="name" className="min-w-0 flex-1">
+                    </ProfileLink>
+                    <ProfileLink userId={entry.user.id} name={entry.user.name} variant="name" className="min-w-0 flex-1">
                       <VerifiedUserName
                         name={entry.user.name}
                         isVerified={entry.user.isVerified}
                         className="feed-comment-reactions-dialog__item-name"
                       />
-                    </FeedAuthorProfileLink>
+                    </ProfileLink>
                     <span className="feed-comment-reactions-dialog__item-reaction">
                       <ReactionPickerIcon kind={meta.kind} label={meta.label} size="inline" />
                     </span>

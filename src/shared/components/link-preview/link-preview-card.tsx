@@ -31,49 +31,49 @@ export function LinkPreviewCard({ preview, className, compact = false, onRemove 
   }
 
   const shellClass = cn(
-    'feed-link-preview',
-    compact && 'feed-link-preview--compact',
-    !inComposer && 'feed-link-preview--interactive',
+    'ios-link-preview',
+    compact && 'ios-link-preview--compact',
+    !inComposer && 'ios-link-preview--interactive',
     className,
   )
 
   const media = (
-    <div className="feed-link-preview__media">
+    <div className="ios-link-preview__media">
       {display.imageUrl ? (
         <img
           src={display.imageUrl}
           alt=""
           loading="lazy"
           decoding="async"
-          className="feed-link-preview__img"
+          className="ios-link-preview__img"
         />
       ) : (
-        <div className="feed-link-preview__hero-placeholder" aria-hidden>
+        <div className="ios-link-preview__hero-placeholder" aria-hidden>
           <Link2 className={cn(compact ? 'h-6 w-6' : 'h-10 w-10', 'opacity-45')} />
         </div>
       )}
 
-      <span className="ios-mh-badge feed-link-preview__badge">{hostname}</span>
+      <span className="ios-mh-badge ios-link-preview__badge">{hostname}</span>
 
       {!inComposer ? (
-        <span className="feed-link-preview__hover-icon" aria-hidden>
+        <span className="ios-link-preview__hover-icon" aria-hidden>
           <ExternalLink className="h-3.5 w-3.5" />
         </span>
       ) : null}
 
-      <div className="feed-link-preview__overlay">
+      <div className="ios-link-preview__overlay">
         {display.title ? (
-          <p className="feed-link-preview__title">{display.title}</p>
+          <p className="ios-link-preview__title">{display.title}</p>
         ) : compact ? (
-          <p className="feed-link-preview__title">{hostname}</p>
+          <p className="ios-link-preview__title">{hostname}</p>
         ) : null}
         {display.description && !compact ? (
-          <p className="feed-link-preview__desc">{display.description}</p>
+          <p className="ios-link-preview__desc">{display.description}</p>
         ) : null}
         {!inComposer ? (
-          <span className="feed-link-preview__cta">
+          <span className="ios-link-preview__cta">
             {linkCtaLabel(hostname)}
-            <ExternalLink className="feed-link-preview__cta-icon" aria-hidden />
+            <ExternalLink className="ios-link-preview__cta-icon" aria-hidden />
           </span>
         ) : null}
       </div>
@@ -83,8 +83,8 @@ export function LinkPreviewCard({ preview, className, compact = false, onRemove 
   return (
     <div
       className={cn(
-        'feed-link-preview-outer',
-        compact && 'feed-link-preview-outer--compact',
+        'ios-link-preview-outer',
+        compact && 'ios-link-preview-outer--compact',
       )}
     >
       {inComposer ? (
@@ -92,7 +92,7 @@ export function LinkPreviewCard({ preview, className, compact = false, onRemove 
           {media}
           <button
             type="button"
-            className="feed-link-preview__remove"
+            className="ios-link-preview__remove"
             aria-label="Remove link preview"
             onClick={onRemove}
           >
@@ -106,7 +106,7 @@ export function LinkPreviewCard({ preview, className, compact = false, onRemove 
       )}
 
       {inComposer && isMinimal ? (
-        <p className="feed-link-preview__note">
+        <p className="ios-link-preview__note">
           This site limits automated previews — your link will still post.
         </p>
       ) : null}
@@ -118,26 +118,26 @@ export function LinkPreviewCardSkeleton({ compact = false }: { compact?: boolean
   return (
     <div
       className={cn(
-        'feed-link-preview-outer',
-        compact && 'feed-link-preview-outer--compact',
+        'ios-link-preview-outer',
+        compact && 'ios-link-preview-outer--compact',
       )}
     >
       <div
         className={cn(
-          'feed-link-preview feed-link-preview--skeleton',
-          compact && 'feed-link-preview--compact',
+          'ios-link-preview ios-link-preview--skeleton',
+          compact && 'ios-link-preview--compact',
         )}
       >
-        <div className="feed-link-preview__media" />
+        <div className="ios-link-preview__media" />
         {compact ? (
-          <div className="feed-link-preview__overlay">
-            <div className="feed-link-preview__skel-line feed-link-preview__skel-line--sm" />
-            <div className="feed-link-preview__skel-line feed-link-preview__skel-line--md" />
+          <div className="ios-link-preview__overlay">
+            <div className="ios-link-preview__skel-line ios-link-preview__skel-line--sm" />
+            <div className="ios-link-preview__skel-line ios-link-preview__skel-line--md" />
           </div>
         ) : (
-          <div className="feed-link-preview__overlay">
-            <div className="feed-link-preview__skel-line feed-link-preview__skel-line--md" />
-            <div className="feed-link-preview__skel-line feed-link-preview__skel-line--sm" />
+          <div className="ios-link-preview__overlay">
+            <div className="ios-link-preview__skel-line ios-link-preview__skel-line--md" />
+            <div className="ios-link-preview__skel-line ios-link-preview__skel-line--sm" />
           </div>
         )}
       </div>

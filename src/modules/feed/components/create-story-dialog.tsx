@@ -1,6 +1,6 @@
 import { ImageIcon } from 'lucide-react'
 import type { FeedItemType } from '@/modules/feed/types/feed.types'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import {
   Dialog,
   DialogContent,
@@ -54,7 +54,7 @@ export function CreateStoryDialog({
         </DialogHeader>
 
         <div className="flex items-center gap-3 border-b px-5 py-3">
-          <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10" />
+          <UserAvatar name={userName} avatarUrl={avatarUrl} className="h-10 w-10" />
           <p className="text-sm font-semibold">{userName}</p>
         </div>
 

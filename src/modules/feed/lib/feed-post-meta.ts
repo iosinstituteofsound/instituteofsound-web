@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
-import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'
+import { parseLinkPreviewFromPayload } from '@/shared/lib/link-preview'
 import { payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import { env } from '@/shared/config/env'
 import type { PageMeta } from '@/shared/hooks/use-page-meta'

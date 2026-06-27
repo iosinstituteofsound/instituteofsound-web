@@ -1,6 +1,6 @@
 import { Box, Film, ImageIcon, Music2, Plus } from 'lucide-react'
 import type { FeedItemType } from '@/modules/feed/types/feed.types'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { Button } from '@/shared/components/ui/button'
 import { premiumSurfaceClass } from '@/shared/lib/surface-classes'
 import { cn } from '@/shared/lib/cn'
@@ -63,7 +63,7 @@ export function CreatePostCard({
           padding: `${12 - collapseProgress * 4}px ${16 - collapseProgress * 4}px`,
         }}
       >
-        <FeedUserAvatar
+        <UserAvatar
           name={userName}
           avatarUrl={avatarUrl}
           className="shrink-0 transition-[width,height] duration-300 ease-out"
@@ -161,7 +161,7 @@ export function CreateStoryCard({
     >
       <div className="feed-story-card__orb">
         <span className="feed-story-card__orbit" aria-hidden />
-        <FeedUserAvatar name={userName} avatarUrl={avatarUrl} className="feed-story-card__avatar" />
+        <UserAvatar name={userName} avatarUrl={avatarUrl} className="feed-story-card__avatar" />
       </div>
 
       <div className="feed-story-card__capsule">

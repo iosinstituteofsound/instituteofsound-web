@@ -161,7 +161,7 @@
   display: none;
 }
 
-.profile-posts-grid .feed-link-preview-outer:not(.feed-link-preview-outer--compact) {
+.profile-posts-grid .ios-link-preview-outer:not(.ios-link-preview-outer--compact) {
   margin-inline: -10px;
 }
 

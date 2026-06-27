@@ -119,37 +119,37 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
           isMultiline && 'is-multiline',
         )}
       >
-        <button type="button" className="messenger-composer__tool messenger-composer__tool--plus" aria-label="More">
+        <IconButton type="button" className="messenger-composer__tool messenger-composer__tool--plus" aria-label="More">
           <Plus className="messenger-composer__icon" />
-        </button>
+        </IconButton>
 
         <div className="messenger-composer__tools-extra" aria-hidden={isActive || undefined}>
-          <button type="button" className="messenger-composer__tool" aria-label="Voice message">
+          <IconButton type="button" className="messenger-composer__tool" aria-label="Voice message">
             <Mic className="messenger-composer__icon" />
-          </button>
-          <button
+          </IconButton>
+          <IconButton
             type="button"
             className="messenger-composer__tool"
             aria-label="Upload image"
             onClick={() => imageInputRef.current?.click()}
           >
             <ImageIcon className="messenger-composer__icon" />
-          </button>
-          <button
+          </IconButton>
+          <IconButton
             type="button"
             className="messenger-composer__tool"
             aria-label="Upload file"
             onClick={() => fileInputRef.current?.click()}
           >
             <Paperclip className="messenger-composer__icon" />
-          </button>
-          <button type="button" className="messenger-composer__tool" aria-label="Stickers">
+          </IconButton>
+          <IconButton type="button" className="messenger-composer__tool" aria-label="Stickers">
             <Sticker className="messenger-composer__icon" />
-          </button>
-          <button type="button" className="messenger-composer__tool" aria-label="GIF">
+          </IconButton>
+          <IconButton type="button" className="messenger-composer__tool" aria-label="GIF">
             <Square className="messenger-composer__icon messenger-composer__icon--gif" />
             <span className="sr-only">GIF</span>
-          </button>
+          </IconButton>
         </div>
 
         <div className={cn('messenger-composer__input-wrap', isMultiline && 'is-multiline')}>
@@ -168,7 +168,7 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
             onKeyDown={onKeyDown}
             onPaste={onPaste}
           />
-          <button
+          <IconButton
             type="button"
             className="messenger-composer__tool messenger-composer__tool--emoji"
             aria-label="Emoji"
@@ -176,7 +176,7 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
             onClick={(event) => emojiPicker.openPicker(event.currentTarget)}
           >
             <Smile className="messenger-composer__icon" />
-          </button>
+          </IconButton>
         </div>
 
         {text.trim() ? (

@@ -15,7 +15,7 @@ import {
   GiphyTriggerButton,
 } from '@/modules/feed/components/giphy-picker'
 import type { GiphyGif } from '@/modules/feed/api/giphy.api'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { useAddFeedComment } from '@/modules/feed/hooks/use-feed-engagement'
 import type { FeedCommentDto } from '@/modules/feed/types/feed.types'
@@ -265,7 +265,7 @@ export function FeedCommentComposer({
   if (variant === 'modal') {
     return (
       <div className="feed-comment-composer feed-comment-composer--modal">
-        <FeedUserAvatar
+        <UserAvatar
           name={me?.user.name ?? 'You'}
           avatarUrl={myAvatarUrl}
           className="h-9 w-9 shrink-0"
@@ -341,7 +341,7 @@ export function FeedCommentComposer({
 
   return (
     <div className="feed-comment-composer feed-comment-composer--inline">
-      <FeedUserAvatar
+      <UserAvatar
         name={me?.user.name ?? 'You'}
         avatarUrl={myAvatarUrl}
         className="h-8 w-8 shrink-0"

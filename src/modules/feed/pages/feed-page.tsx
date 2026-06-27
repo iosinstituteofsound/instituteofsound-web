@@ -5,7 +5,7 @@ import { CreateStoryDialog } from '@/modules/feed/components/create-story-dialog
 import { CreateTextStoryDialog } from '@/modules/feed/components/create-text-story-dialog'
 import { FeedComposer } from '@/modules/feed/components/feed-composer'
 import { FeedList, useFeedListItems } from '@/modules/feed/components/feed-list'
-import { FeedScopeToggle } from '@/modules/feed/components/feed-scope-toggle'
+import { SegmentedControl } from '@/shared/components/controls'
 import { FeedStoriesRow } from '@/modules/feed/components/feed-stories-row'
 import { StoryViewer } from '@/modules/feed/components/story-viewer'
 import { useScrollCollapse } from '@/modules/feed/hooks/use-scroll-collapse'
@@ -18,6 +18,11 @@ import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { FEED_COLUMN_CLASS } from '@/shared/lib/layout-config'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/feed/styles/feed-page.css'
+
+const FEED_SCOPE_OPTIONS: Array<{ value: FeedScope; label: string }> = [
+  { value: 'all', label: 'All' },
+  { value: 'following', label: 'Following' },
+]
 
 export function FeedPage() {
   const { data: me } = useMe()
@@ -80,7 +85,14 @@ export function FeedPage() {
         <SectionHeader
           title="Feed"
           className="px-1 [&_h2]:text-sm"
-          action={<FeedScopeToggle value={feedScope} onChange={setFeedScope} />}
+          action={
+            <SegmentedControl
+              value={feedScope}
+              options={FEED_SCOPE_OPTIONS}
+              onChange={setFeedScope}
+              aria-label="Feed scope"
+            />
+          }
         />
 
         <FeedList compactLoader scope={feedScope} />

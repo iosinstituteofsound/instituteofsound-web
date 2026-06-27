@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { FeedCommentComposer } from '@/modules/feed/components/feed-comment-composer'
 import { FeedCommentLikeAction } from '@/modules/feed/components/feed-comment-like-action'
-import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
+import { ProfileLink } from '@/shared/components/user'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import {
   useDeleteFeedComment,
   useFeedComments,
@@ -166,23 +166,23 @@ function CommentItem({
             className="pointer-events-none absolute -left-5 top-0 h-4 w-5 rounded-bl-lg border-b-2 border-l-2 border-muted-foreground/25"
           />
         ) : null}
-        <FeedAuthorProfileLink author={comment.author} variant="avatar" className="shrink-0">
-          <FeedUserAvatar
+        <ProfileLink userId={comment.author.id} name={comment.author.name} variant="avatar" className="shrink-0">
+          <UserAvatar
             name={comment.author.name}
             avatarUrl={comment.author.avatarUrl}
             className={cn(depth > 0 ? 'h-7 w-7' : 'h-8 w-8')}
           />
-        </FeedAuthorProfileLink>
+        </ProfileLink>
         <div className="min-w-0 flex-1">
           <div className={cn('inline-block max-w-full rounded-2xl px-3 py-2 feed-comment-bubble', isModal ? 'bg-muted/50' : 'bg-muted/70')}>
-            <FeedAuthorProfileLink author={comment.author} variant="name" className="inline-block max-w-full">
+            <ProfileLink userId={comment.author.id} name={comment.author.name} variant="name" className="inline-block max-w-full">
               <VerifiedUserName
                 name={comment.author.name}
                 isVerified={comment.author.isVerified}
                 className="text-[13px] font-semibold leading-tight"
                 nameClassName="font-semibold"
               />
-            </FeedAuthorProfileLink>
+            </ProfileLink>
             {comment.body ? (
               <p className="whitespace-pre-wrap text-[15px] leading-snug">{comment.body}</p>
             ) : null}

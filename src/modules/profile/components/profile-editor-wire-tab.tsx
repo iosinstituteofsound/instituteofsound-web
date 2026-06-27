@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { getWirePicks } from '@/modules/explore/api/explore.api'
-import { ProfileTabEmpty } from '@/modules/profile/components/profile-tab-empty'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { PanelCard } from '@/shared/components/layout'
 import { Button } from '@/shared/components/ui/button'
 import { PageLoader } from '@/shared/components/feedback/loader'
@@ -18,7 +18,7 @@ export function ProfileEditorWireTab({ isOwnProfile }: ProfileEditorWireTabProps
   })
 
   if (!isOwnProfile) {
-    return <ProfileTabEmpty message="Wire picks are only visible on the editor's own profile." />
+    return <EmptyState variant="card" description="Wire picks are only visible on the editor's own profile." />
   }
 
   if (isLoading) return <PageLoader />

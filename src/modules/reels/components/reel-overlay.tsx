@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Volume2, VolumeX } from 'lucide-react'
-import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
+import { ProfileLink } from '@/shared/components/user'
 import { UserAvatar } from '@/shared/components/user'
 import { reelCaption } from '@/modules/reels/lib/reel-item'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
@@ -37,21 +37,21 @@ export function ReelOverlay({ item, muted, onMutedChange }: ReelOverlayProps) {
 
       <div className="reel-overlay__bottom" onClick={(event) => event.stopPropagation()}>
         <div className="reel-overlay__author">
-          <FeedAuthorProfileLink author={item.author} variant="avatar">
+          <ProfileLink userId={item.author.id} name={item.author.name} variant="avatar">
             <UserAvatar
               name={item.author.name}
               avatarUrl={item.author.avatarUrl}
               className="h-9 w-9 ring-2 ring-white/30"
             />
-          </FeedAuthorProfileLink>
-          <FeedAuthorProfileLink author={item.author} variant="name">
+          </ProfileLink>
+          <ProfileLink userId={item.author.id} name={item.author.name} variant="name">
             <VerifiedUserName
               name={item.author.name}
               isVerified={item.author.isVerified}
               className="text-sm font-semibold text-white"
               nameClassName="font-semibold"
             />
-          </FeedAuthorProfileLink>
+          </ProfileLink>
         </div>
 
         {caption ? (

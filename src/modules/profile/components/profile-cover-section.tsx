@@ -15,8 +15,7 @@ import { CoverPhotoRepositionDialog } from '@/modules/profile/components/cover-p
 import { CroppedCover } from '@/modules/profile/components/cropped-cover'
 import { ProfileAvatarMenu } from '@/modules/profile/components/profile-avatar-menu'
 import { SelectPhotoDialog } from '@/modules/profile/components/select-photo-dialog'
-import { FollowStats } from '@/modules/social/components/follow-stats'
-import { ProfileFollowButton } from '@/modules/social/components/profile-follow-button'
+import { FollowStats, ProfileFollowButton } from '@/shared/components/social'
 import { ProfileMessageButton } from '@/modules/messenger/components/profile-message-button'
 import { useUpdateProfile } from '@/modules/profile/hooks/use-profile'
 import {

@@ -4,9 +4,9 @@ import { X } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { FeedPostAudienceIcon } from '@/modules/feed/components/feed-post-audience-icon'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
-import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
+import { ProfileLink } from '@/shared/components/user'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
 import { Button } from '@/shared/components/ui/button'
@@ -45,18 +45,18 @@ export function FeedPhotoViewer({ open, onOpenChange, item, imageUrl, alt }: Fee
     <div className="feed-photo-viewer" role="dialog" aria-modal="true" aria-label="Photo post">
       <header className="feed-photo-viewer__header">
         <div className="feed-photo-viewer__header-main">
-          <FeedAuthorProfileLink author={item.author} variant="avatar">
-            <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-9 w-9" />
-          </FeedAuthorProfileLink>
+          <ProfileLink userId={item.author.id} name={item.author.name} variant="avatar">
+            <UserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-9 w-9" />
+          </ProfileLink>
           <div className="min-w-0">
             <p className="feed-photo-viewer__author-line">
-              <FeedAuthorProfileLink author={item.author} variant="name">
+              <ProfileLink userId={item.author.id} name={item.author.name} variant="name">
                 <VerifiedUserName
                   name={item.author.name}
                   isVerified={item.author.isVerified}
                   nameClassName="feed-photo-viewer__author-name"
                 />
-              </FeedAuthorProfileLink>
+              </ProfileLink>
             </p>
             <p className="feed-photo-viewer__meta-line">
               <FeedPostTimestamp value={item.createdAt} />

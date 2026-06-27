@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { listArtistSubmissions } from '@/modules/explore/api/explore.api'
-import { ProfileTabEmpty } from '@/modules/profile/components/profile-tab-empty'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { ListRow, PanelCard } from '@/shared/components/layout'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
@@ -19,7 +19,7 @@ export function ProfileArtistSubmissionsTab({ isOwnProfile }: ProfileArtistSubmi
   })
 
   if (!isOwnProfile) {
-    return <ProfileTabEmpty message="Submissions are only visible on the artist's own profile." />
+    return <EmptyState variant="card" description="Submissions are only visible on the artist's own profile." />
   }
 
   if (isLoading) return <PageLoader />

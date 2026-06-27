@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { ArrowLeft, Check, Search } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
-import { useFollowingUsers } from '@/modules/social/hooks/use-following-users'
+import { UserAvatar } from '@/shared/components/user'
+import { useFollowingUsers } from '@/shared/hooks/use-following-users'
 import { cn } from '@/shared/lib/cn'
 
 interface AudienceFriend {
@@ -87,7 +87,7 @@ export function PostAudienceFriendsPicker({
                 className={cn('feed-post-audience-friends__row', selected && 'is-selected')}
                 onClick={() => toggleFriend(friend.id)}
               >
-                <FeedUserAvatar name={friend.name} avatarUrl={friend.avatarUrl} className="h-10 w-10" />
+                <UserAvatar name={friend.name} avatarUrl={friend.avatarUrl} className="h-10 w-10" />
                 <span className="feed-post-audience-friends__name">{friend.name}</span>
                 <span className={cn('feed-post-audience-friends__check', selected && 'is-checked')}>
                   {selected ? <Check className="h-4 w-4" /> : null}

@@ -7,9 +7,9 @@ import { FeedPhotoViewer } from '@/modules/feed/components/feed-photo-viewer'
 import { FeedPostHiddenState } from '@/modules/feed/components/feed-post-hidden-state'
 import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options-menu'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
-import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
+import { ProfileLink } from '@/shared/components/user'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
 import { getFeedItemPhotoUrl } from '@/modules/feed/lib/feed-post-meta'
 import { feedItemHasAttachedAudio, FeedPostSoundToggle } from '@/modules/feed/components/feed-post-sound-toggle'
@@ -74,21 +74,21 @@ export function FeedCardShell({
         >
           <div className="feed-social-card__layer-inner">
             <header className="feed-social-card__header">
-              <FeedAuthorProfileLink author={item.author} variant="avatar" className="feed-social-card__avatar">
-                <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
-              </FeedAuthorProfileLink>
+              <ProfileLink userId={item.author.id} name={item.author.name} variant="avatar" className="feed-social-card__avatar">
+                <UserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
+              </ProfileLink>
 
               <div className="feed-social-card__header-body">
                 <div className="feed-social-card__title-row">
                   <div className="feed-social-card__identity">
                     <p className="feed-social-card__name-line">
-                      <FeedAuthorProfileLink author={item.author} variant="name">
+                      <ProfileLink userId={item.author.id} name={item.author.name} variant="name">
                         <VerifiedUserName
                           name={item.author.name}
                           isVerified={item.author.isVerified}
                           nameClassName="feed-social-card__name"
                         />
-                      </FeedAuthorProfileLink>
+                      </ProfileLink>
                     </p>
                     <p className="feed-social-card__meta-line">
                       <FeedPostTimestamp value={item.createdAt} />

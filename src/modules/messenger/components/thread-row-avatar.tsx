@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { UserAvatar } from '@/shared/components/user'
-import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
+import { GroupAvatarStack } from '@/shared/components/user'
 import {
   getThreadAvatarUrl,
   getThreadDisplayName,

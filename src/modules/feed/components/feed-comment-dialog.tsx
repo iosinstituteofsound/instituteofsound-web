@@ -9,7 +9,8 @@ import { isGiphyPickerTarget } from '@/modules/feed/components/giphy-picker'
 import type { FeedItemDto, FeedCommentDto } from '@/modules/feed/types/feed.types'
 import { FeedCommentComposer } from '@/modules/feed/components/feed-comment-composer'
 import { FeedCommentsSection } from '@/modules/feed/components/feed-comments-section'
-import { FeedEngagementStatsBar } from '@/modules/feed/components/feed-engagement-stats-bar'
+import { EngagementStatsRow } from '@/shared/components/engagement'
+import { getEngagement } from '@/modules/feed/lib/feed-engagement'
 import { FeedPostPreview } from '@/modules/feed/components/feed-post-preview'
 import './feed-comment-dialog.css'
 
@@ -40,6 +41,7 @@ export function FeedCommentDialog({ item, open, onOpenChange }: FeedCommentDialo
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [replyTo, setReplyTo] = useState<FeedCommentDto | null>(null)
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null)
+  const engagement = getEngagement(item)
 
   const handleDialogContentRef = useCallback((node: HTMLDivElement | null) => {
     setPortalContainer(node)
@@ -97,7 +99,13 @@ export function FeedCommentDialog({ item, open, onOpenChange }: FeedCommentDialo
 
           <div className="feed-comment-dialog__scroll">
             <FeedPostPreview item={item} menuPortalContainer={portalContainer} />
-            <FeedEngagementStatsBar item={item} />
+            <EngagementStatsRow
+              variant="compact"
+              reactionTotal={engagement.reactionTotal}
+              commentCount={engagement.commentCount}
+              reactions={engagement.reactions}
+              showShareMetric
+            />
             <div className="feed-comment-dialog__filter">
               <button type="button" className="feed-comment-dialog__filter-btn">
                 Most relevant

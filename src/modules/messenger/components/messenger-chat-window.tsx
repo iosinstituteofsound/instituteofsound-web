@@ -2,8 +2,9 @@ import { memo, useMemo } from 'react'
 import { ChevronDown, Minus, Phone, Video, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { UserAvatar } from '@/shared/components/user'
+import { IconButton } from '@/shared/components/ui/icon-button'
 import { ConversationBody } from '@/modules/messenger/components/conversation-body'
-import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
+import { GroupAvatarStack } from '@/shared/components/user'
 import { useConversationThread } from '@/modules/messenger/hooks/use-conversation-thread'
 import { useMessengerThreads } from '@/modules/messenger/hooks/use-messenger-threads'
 import { getThreadAvatarUrl, getThreadPresenceLabel } from '@/modules/messenger/lib/messenger-utils'
@@ -88,12 +89,12 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
           className="messenger-chat-window__actions"
           onMouseDown={(event) => event.stopPropagation()}
         >
-          <button type="button" className="messenger-chat-window__icon" aria-label="Voice call">
+          <IconButton className="messenger-chat-window__icon" aria-label="Voice call">
             <Phone className="h-3.5 w-3.5" />
-          </button>
-          <button type="button" className="messenger-chat-window__icon" aria-label="Video call">
+          </IconButton>
+          <IconButton className="messenger-chat-window__icon" aria-label="Video call">
             <Video className="h-3.5 w-3.5" />
-          </button>
+          </IconButton>
           <button
             type="button"
             className="messenger-chat-window__icon"

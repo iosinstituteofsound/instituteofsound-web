@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { listEditorSubmissions } from '@/modules/explore/api/explore.api'
-import { ProfileTabEmpty } from '@/modules/profile/components/profile-tab-empty'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { ListRow, PanelCard } from '@/shared/components/layout'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
@@ -19,7 +19,7 @@ export function ProfileEditorSubmissionsTab({ isOwnProfile }: ProfileEditorSubmi
   })
 
   if (!isOwnProfile) {
-    return <ProfileTabEmpty message="Submission review is only visible on the editor's own profile." />
+    return <EmptyState variant="card" description="Submission review is only visible on the editor's own profile." />
   }
 
   if (isLoading) return <PageLoader />

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 import type { LayoutConfig } from '@/shared/types/layout.types'
@@ -12,9 +13,12 @@ interface LayoutPublicPreviewProps {
 export function LayoutPublicPreview({ layoutName, config, compact = false }: LayoutPublicPreviewProps) {
   if (!config.enabled) {
     return (
-      <div className="flex min-h-[120px] items-center justify-center rounded-lg border border-dashed p-4 text-xs text-muted-foreground">
-        Public surface disabled
-      </div>
+      <EmptyState
+        variant="dashed"
+        title=""
+        description="Public surface disabled"
+        className="flex min-h-[120px] items-center justify-center text-xs"
+      />
     )
   }
 

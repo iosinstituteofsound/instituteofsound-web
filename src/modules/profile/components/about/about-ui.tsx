@@ -16,6 +16,8 @@ import {
 } from 'lucide-react'
 import type { AboutProfile, ProfileVisibility } from '@/modules/profile/types/about-profile.types'
 import { EmptyState } from '@/shared/components/feedback/states'
+import { ListRow } from '@/shared/components/layout/list-row'
+import { IconButton } from '@/shared/components/ui/icon-button'
 import { cn } from '@/shared/lib/cn'
 
 export function VisibilityIcon({ visibility }: { visibility?: ProfileVisibility }) {
@@ -44,7 +46,7 @@ export function AboutFieldRow({
   if (!value) return null
 
   return (
-    <div className="flex items-start justify-between gap-3 py-3">
+    <ListRow className="items-start border-0 px-0 py-3 shadow-none">
       <div className="flex min-w-0 flex-1 items-start gap-3">
         {Icon ? <Icon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" /> : null}
         <div className="min-w-0">
@@ -56,17 +58,18 @@ export function AboutFieldRow({
       <div className="flex shrink-0 items-center gap-2">
         <VisibilityIcon visibility={visibility} />
         {editable && onEdit ? (
-          <button
-            type="button"
+          <IconButton
+            variant="ghost"
+            size="sm"
+            shape="circle"
             onClick={onEdit}
-            className="rounded-full p-2 hover:bg-muted"
             aria-label={`Edit ${label ?? value}`}
           >
             <Pencil className="h-4 w-4 text-muted-foreground" />
-          </button>
+          </IconButton>
         ) : null}
       </div>
-    </div>
+    </ListRow>
   )
 }
 

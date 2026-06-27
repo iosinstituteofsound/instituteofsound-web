@@ -5,13 +5,13 @@ import { FeedPostOptionsMenu } from '@/modules/feed/components/feed-post-options
 import { FeedAudioTag } from '@/modules/feed/components/feed-audio-tag'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { buildPostCaptionText, FeedPostCaption } from '@/modules/feed/components/feed-post-caption'
-import { LinkPreviewCard } from '@/modules/feed/components/link-preview-card'
+import { LinkPreviewCard } from '@/shared/components/link-preview'
 import { FeedMediaFrame, musicTrackContextLine, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
-import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
+import { ProfileLink } from '@/shared/components/user'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { FeedPostTimestamp } from '@/modules/feed/components/feed-post-timestamp'
-import { parseLinkPreviewFromPayload } from '@/modules/feed/lib/link-preview'
+import { parseLinkPreviewFromPayload } from '@/shared/lib/link-preview'
 import { ReleaseSharePreview } from '@/modules/feed/components/release-share-preview'
 import { isReleaseShareItem } from '@/modules/feed/lib/feed-release-payload'
 import { useEnrichedMusicFeedItem } from '@/modules/feed/hooks/use-enriched-music-feed-item'
@@ -215,20 +215,20 @@ export function FeedPostPreview({ item, menuPortalContainer }: FeedPostPreviewPr
   return (
     <div className="feed-post-preview">
       <header className="feed-post-preview__header">
-        <FeedAuthorProfileLink author={item.author} variant="avatar" className="shrink-0">
-          <FeedUserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
-        </FeedAuthorProfileLink>
+        <ProfileLink userId={item.author.id} name={item.author.name} variant="avatar" className="shrink-0">
+          <UserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
+        </ProfileLink>
         <div className="feed-post-preview__header-body">
           <div className="feed-post-preview__title-row">
             <div className="feed-post-preview__identity">
               <p className="feed-post-preview__name-line">
-                <FeedAuthorProfileLink author={item.author} variant="name">
+                <ProfileLink userId={item.author.id} name={item.author.name} variant="name">
                   <VerifiedUserName
                     name={item.author.name}
                     isVerified={item.author.isVerified}
                     nameClassName="feed-post-preview__name"
                   />
-                </FeedAuthorProfileLink>
+                </ProfileLink>
               </p>
               <p className="feed-post-preview__meta-line">
                 <FeedPostTimestamp value={item.createdAt} />

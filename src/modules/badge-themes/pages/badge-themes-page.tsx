@@ -24,7 +24,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
 import { PageLoader } from '@/shared/components/feedback/loader'
-import { ErrorState } from '@/shared/components/feedback/states'
+import { EmptyState, ErrorState } from '@/shared/components/feedback/states'
 import {
   Page,
   PageDescription,
@@ -33,7 +33,6 @@ import {
   PageTitle,
 } from '@/shared/components/layout/page-shell'
 import { premiumSurfaceGhostClass } from '@/shared/lib/surface-classes'
-import { cn } from '@/shared/lib/cn'
 import {
   cloneThemeTokens,
   DEFAULT_THEME_TOKENS,
@@ -164,9 +163,12 @@ export function BadgeThemesPage() {
       </PageHeader>
 
       {rows.length === 0 ? (
-        <div className={cn(premiumSurfaceGhostClass, 'border-dashed p-10 text-center')}>
-          <p className="text-sm text-muted-foreground">No themes yet. Create one to get started.</p>
-        </div>
+        <EmptyState
+          variant="dashed"
+          title=""
+          description="No themes yet. Create one to get started."
+          className={premiumSurfaceGhostClass}
+        />
       ) : (
         <div className="ios-page-grid sm:grid-cols-2 xl:grid-cols-3">
           {rows.map((theme) => (

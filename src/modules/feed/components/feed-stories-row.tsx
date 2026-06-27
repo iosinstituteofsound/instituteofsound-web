@@ -2,7 +2,7 @@ import { ChevronRight } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { CreateStoryCard } from '@/modules/feed/components/create-post-card'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import { payloadString } from '@/modules/feed/components/cards/feed-card-shell'
 import {
@@ -117,7 +117,7 @@ function StoryRowCard({
     >
       <div className="feed-story-card__orb">
         <span className="feed-story-card__orbit" aria-hidden />
-        <FeedUserAvatar
+        <UserAvatar
           name={item.author.name}
           avatarUrl={item.author.avatarUrl}
           className="feed-story-card__avatar"

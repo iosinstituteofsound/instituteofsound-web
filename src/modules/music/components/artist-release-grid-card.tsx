@@ -11,6 +11,7 @@ import {
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { releaseDetailToPlayerTrack } from '@/modules/music/lib/player-track-builders'
 import { releaseCardPath } from '@/modules/explore/lib/track-paths'
+import { ReleaseGridCard } from '@/shared/components/media'
 import { cn } from '@/shared/lib/cn'
 
 type ArtistReleaseGridCardProps = {
@@ -52,27 +53,33 @@ export function ArtistReleaseGridCard({
   }
 
   return (
-    <Link to={publicHref} className={cn('rel-grid-card artist-release-card', className)}>
-      <div className="rel-grid-card__inner">
-        <div className="rel-grid-card__art">
-          {release.coverUrl ? (
-            <img src={release.coverUrl} alt="" loading="lazy" className="rel-grid-card__img" />
-          ) : (
-            <div className="rel-grid-card__fallback" aria-hidden>
-              {releaseInitials(release.title)}
-            </div>
-          )}
-          {badge ? (
-            <span
-              className={cn(
-                'rel-grid-card__badge artist-release-card__badge',
-                live && 'artist-release-card__badge--live',
-                scheduled && 'artist-release-card__badge--scheduled',
-              )}
-            >
-              {badge}
-            </span>
-          ) : null}
+    <ReleaseGridCard
+      to={publicHref}
+      className={cn('artist-release-card', className)}
+      artwork={
+        release.coverUrl ? (
+          <img src={release.coverUrl} alt="" loading="lazy" className="rel-grid-card__img" />
+        ) : (
+          <div className="rel-grid-card__fallback" aria-hidden>
+            {releaseInitials(release.title)}
+          </div>
+        )
+      }
+      badges={
+        badge ? (
+          <span
+            className={cn(
+              'rel-grid-card__badge artist-release-card__badge',
+              live && 'artist-release-card__badge--live',
+              scheduled && 'artist-release-card__badge--scheduled',
+            )}
+          >
+            {badge}
+          </span>
+        ) : null
+      }
+      actions={
+        <>
           <Link
             to={`/artist/releases/${release.id}/edit`}
             className="artist-release-card__edit"
@@ -102,17 +109,19 @@ export function ArtistReleaseGridCard({
               <Play size={14} strokeWidth={2} fill="currentColor" aria-hidden />
             </button>
           ) : null}
-        </div>
-
-        <div className="rel-grid-card__body">
+        </>
+      }
+      title={
+        <>
           <p className="rel-grid-card__genre">{releaseGenreLabel(dto)}</p>
           <h3 className="rel-grid-card__title">{release.title}</h3>
           {release.artistName ? (
             <p className="rel-grid-card__artist">{release.artistName}</p>
           ) : null}
-        </div>
-
-        <div className="rel-grid-card__foot">
+        </>
+      }
+      meta={
+        <>
           <span className="rel-grid-card__date">
             <Calendar size={11} strokeWidth={1.75} aria-hidden />
             {releaseDateLabel(dto)}
@@ -123,8 +132,8 @@ export function ArtistReleaseGridCard({
               {plays}
             </span>
           ) : null}
-        </div>
-      </div>
-    </Link>
+        </>
+      }
+    />
   )
 }

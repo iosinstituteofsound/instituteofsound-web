@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { FeedCommentReactionsDialog } from '@/modules/feed/components/feed-comment-reactions-dialog'
 import { useSetFeedCommentReaction } from '@/modules/feed/hooks/use-feed-engagement'
-import { feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
+import { reactionMeta } from '@/shared/lib/reactions/reaction-options'
 import type { FeedCommentDto, FeedReactionKind } from '@/modules/feed/types/feed.types'
 import { ReactionHoverPickerSlot, ReactionPickerIcon } from '@/shared/components/reactions'
 import { formatEngagementCount } from '@/shared/lib/format-count'
@@ -9,14 +9,7 @@ import { unlockReactionSounds } from '@/shared/lib/reactions/reaction-sounds'
 import { useReactionHoverPicker } from '@/shared/hooks/use-reaction-hover-picker'
 import { cn } from '@/shared/lib/cn'
 
-const COMMENT_REACTION_STATE_CLASS: Record<FeedReactionKind, string> = {
-  like: 'text-primary',
-  love: 'text-rose-500',
-  haha: 'text-amber-500',
-  wow: 'text-amber-400',
-  sad: 'text-sky-400',
-  angry: 'text-orange-500',
-}
+import { COMMENT_REACTION_STATE_CLASS, reactionStateClass } from '@/shared/lib/reactions/reaction-state-classes'
 
 interface FeedCommentLikeActionProps {
   feedItemId: string
@@ -36,7 +29,7 @@ export function FeedCommentLikeAction({ feedItemId, comment }: FeedCommentLikeAc
   } = useReactionHoverPicker({ unlockSounds: unlockReactionSounds })
 
   const engagement = comment.engagement
-  const myReaction = engagement?.myReaction ? feedReactionMeta(engagement.myReaction) : null
+  const myReaction = engagement?.myReaction ? reactionMeta(engagement.myReaction) : null
   const reactionTotal = engagement?.reactionTotal ?? 0
 
   const react = (kind: FeedReactionKind) => {
@@ -74,7 +67,7 @@ export function FeedCommentLikeAction({ feedItemId, comment }: FeedCommentLikeAc
           type="button"
           className={cn(
             'inline-flex items-center gap-1 hover:underline',
-            myReaction && COMMENT_REACTION_STATE_CLASS[myReaction.kind],
+            myReaction && reactionStateClass(myReaction.kind, COMMENT_REACTION_STATE_CLASS),
           )}
           aria-label={myReaction ? myReaction.label : 'Like'}
           disabled={setReaction.isPending}

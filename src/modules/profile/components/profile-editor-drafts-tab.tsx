@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { deleteEditorArticle, listEditorArticles, publishEditorArticle } from '@/modules/explore/api/explore.api'
 import { EditorDeskGrid } from '@/modules/editor/components/editor-desk-grid'
-import { ProfileTabEmpty } from '@/modules/profile/components/profile-tab-empty'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { toast } from '@/shared/components/ui/sonner'
@@ -35,7 +35,7 @@ export function ProfileEditorDraftsTab({ isOwnProfile }: ProfileEditorDraftsTabP
   })
 
   if (!isOwnProfile) {
-    return <ProfileTabEmpty message="Drafts are only visible on the editor's own profile." />
+    return <EmptyState variant="card" description="Drafts are only visible on the editor's own profile." />
   }
 
   if (isLoading) return <PageLoader />
