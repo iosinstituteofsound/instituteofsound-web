@@ -9,6 +9,7 @@ import {
 } from '@/modules/feed/lib/media-utils'
 import { FeedModelViewer } from '@/modules/feed/components/feed-model-viewer'
 import { Button } from '@/shared/components/ui/button'
+import { FileDropzone } from '@/shared/components/forms'
 import { toast } from '@/shared/components/ui/sonner'
 import { cn } from '@/shared/lib/cn'
 
@@ -78,11 +79,8 @@ export const ModelAttachPanel = forwardRef<ModelAttachPanelHandle, ModelAttachPa
       setPreviewUrl(url)
     }
 
-    const handleDrop = async (event: React.DragEvent) => {
-      event.preventDefault()
-      setDragOver(false)
-      if (disabled || busy) return
-      const file = event.dataTransfer.files[0]
+    const handleDropFiles = async (files: FileList) => {
+      const file = files[0]
       if (file) await handleFile(file)
     }
 
@@ -170,59 +168,22 @@ export const ModelAttachPanel = forwardRef<ModelAttachPanelHandle, ModelAttachPa
         ) : (
           <>
             {!previewUrl ? (
-              <div
-                onDragOver={(event) => {
-                  event.preventDefault()
-                  if (!disabled && !busy) setDragOver(true)
-                }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={handleDrop}
+              <FileDropzone
+                onFiles={(files) => void handleDropFiles(files)}
+                accept={acceptForKind('model')}
+                disabled={disabled || busy}
+                isDragActive={dragOver}
+                onDragStateChange={setDragOver}
+                inputRef={fileInputRef}
+                icon={<Box className="h-7 w-7 text-violet-500" />}
+                title="Drag a 3D model"
+                description="GLB, GLTF, OBJ, FBX, STL, DAE, PLY, USDZ and more — auto-converts and compresses for upload"
                 className={cn(
-                  'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 text-center transition-colors',
                   embedded ? 'py-4' : 'py-6',
-                  dragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 bg-background/50',
-                  (disabled || busy) && 'pointer-events-none opacity-60',
+                  'border-muted-foreground/25 bg-background/50',
                 )}
-              >
-                <Box className="h-7 w-7 text-violet-500" />
-                <div>
-                  <p className="text-sm font-medium">Drag a 3D model</p>
-                  <p className="text-xs text-muted-foreground">
-                    GLB, GLTF, OBJ, FBX, STL, DAE, PLY, USDZ and more — auto-converts and compresses for upload
-                  </p>
-                </div>
-                {!embedded ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={disabled || busy}
-                  >
-                    Browse files
-                  </Button>
-                ) : (
-                  <button
-                    type="button"
-                    className="text-xs font-semibold text-primary"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={disabled || busy}
-                  >
-                    Browse device
-                  </button>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept={acceptForKind('model')}
-                  className="hidden"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0]
-                    if (file) void handleFile(file)
-                    event.target.value = ''
-                  }}
-                />
-              </div>
+                aria-label="Upload 3D model"
+              />
             ) : null}
 
             {previewUrl ? (

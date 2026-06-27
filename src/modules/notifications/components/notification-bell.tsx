@@ -1,24 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { AtSign, Bell, MessageCircle, Music2, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useNotifications } from '@/modules/notifications/hooks/use-notifications'
 import { useNotificationLiveStore } from '@/modules/notifications/store/notification-live-store'
 import type { NotificationDto, NotificationKind } from '@/modules/notifications/types/notification.types'
-import { useHeaderPopoverPosition } from '@/shared/hooks/use-header-popover-position'
+import { HeaderPopover } from '@/shared/components/navigation/header-popover'
+import { formatRelativeTime } from '@/shared/lib/format-relative-time'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/notifications/styles/notification-bell.css'
-
-function formatRelativeTime(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime()
-  const minutes = Math.floor(diffMs / 60_000)
-  if (minutes < 1) return 'Just now'
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  return `${days}d ago`
-}
 
 function notificationHref(notification: NotificationDto): string | undefined {
   if (notification.data.feedItemId) {
@@ -68,11 +57,6 @@ export function NotificationBell() {
   const rootRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
-  const panelStyle = useHeaderPopoverPosition(open, triggerRef, {
-    width: 360,
-    maxHeight: 420,
-    minHeight: 180,
-  })
 
   const { isLoading, markRead, markAllRead, isMarkingRead, refetch } = useNotifications()
   const unreadCount = useNotificationLiveStore((s) => s.unreadCount)
@@ -83,36 +67,33 @@ export function NotificationBell() {
     if (open) void refetch()
   }, [open, refetch])
 
-  useEffect(() => {
-    if (!open) return
+  return (
+    <div className="ios-notification-bell" ref={rootRef}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className={cn('dashboard-header-utility ios-notification-bell__trigger', open && 'is-open')}
+        aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 ? (
+          <span className="ios-notification-bell__badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+        ) : null}
+      </button>
 
-    const onPointerDown = (event: MouseEvent) => {
-      const target = event.target as Node
-      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) return
-      setOpen(false)
-    }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
-    }
-
-    window.addEventListener('mousedown', onPointerDown)
-    window.addEventListener('keydown', onKeyDown)
-    return () => {
-      window.removeEventListener('mousedown', onPointerDown)
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  }, [open])
-
-  const panel = open ? (
-    <div
-      ref={panelRef}
-      className="ios-notification-bell__panel"
-      style={panelStyle}
-      role="dialog"
-      aria-label="Notifications"
-    >
-      <div className="ios-notification-bell__head">
+      <HeaderPopover
+        open={open}
+        onOpenChange={setOpen}
+        rootRef={rootRef}
+        triggerRef={triggerRef}
+        panelRef={panelRef}
+        panelClassName="ios-notification-bell__panel"
+        ariaLabel="Notifications"
+        positionOptions={{ width: 360, maxHeight: 420, minHeight: 180 }}
+      >
+        <div className="ios-notification-bell__head">
         <p className="ios-notification-bell__title">Notifications</p>
         {unreadCount > 0 ? (
           <button
@@ -188,26 +169,7 @@ export function NotificationBell() {
           )
         })}
       </ul>
-    </div>
-  ) : null
-
-  return (
-    <div className="ios-notification-bell" ref={rootRef}>
-      <button
-        ref={triggerRef}
-        type="button"
-        className={cn('dashboard-header-utility ios-notification-bell__trigger', open && 'is-open')}
-        aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <Bell className="h-5 w-5" />
-        {unreadCount > 0 ? (
-          <span className="ios-notification-bell__badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
-        ) : null}
-      </button>
-
-      {panel ? createPortal(panel, document.body) : null}
+      </HeaderPopover>
     </div>
   )
 }

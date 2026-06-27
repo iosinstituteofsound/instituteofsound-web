@@ -17,10 +17,10 @@ import { useCatalog } from '@/modules/permissions/hooks/use-permissions'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Button } from '@/shared/components/ui/button'
 import { Checkbox } from '@/shared/components/ui/checkbox'
+import { AlertDialog } from '@/shared/components/ui/alert-dialog'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/shared/components/ui/dialog'
@@ -28,7 +28,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/shared/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { PageLoader } from '@/shared/components/feedback/loader'
-import { ErrorState } from '@/shared/components/feedback/states'
+import { ErrorState, EmptyState } from '@/shared/components/feedback/states'
 import {
   Page,
   PageDescription,
@@ -36,8 +36,6 @@ import {
   PageHeaderMain,
   PageTitle,
 } from '@/shared/components/layout/page-shell'
-import { premiumSurfaceGhostClass } from '@/shared/lib/surface-classes'
-import { cn } from '@/shared/lib/cn'
 import { toast } from '@/shared/components/ui/sonner'
 import type { LayoutDto } from '@/shared/types/layout.types'
 import { normalizeLayoutConfig } from '@/shared/lib/layout-config'
@@ -216,9 +214,7 @@ export function LayoutsPage() {
       </PageHeader>
 
       {!layouts?.length ? (
-        <div className={cn(premiumSurfaceGhostClass, 'border-dashed p-10 text-center text-sm text-muted-foreground')}>
-          No layouts yet.
-        </div>
+        <EmptyState variant="dashed" title="No layouts yet" description="" className="text-sm text-muted-foreground" />
       ) : (
         <div className="ios-page-grid sm:grid-cols-2 xl:grid-cols-3">
           {layouts.map((layout) => (
@@ -232,25 +228,21 @@ export function LayoutsPage() {
         </div>
       )}
 
-      <Dialog open={Boolean(deleteTarget)} onOpenChange={(next) => !next && setDeleteTarget(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete layout?</DialogTitle>
-            <DialogDescription>
-              Permanently delete <span className="font-medium text-foreground">{deleteTarget?.name}</span>. Layouts
-              assigned to roles cannot be deleted.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleConfirmDelete} disabled={deleteLayout.isPending}>
-              Delete layout
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AlertDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(next) => !next && setDeleteTarget(null)}
+        title="Delete layout?"
+        description={
+          <>
+            Permanently delete <span className="font-medium text-foreground">{deleteTarget?.name}</span>. Layouts
+            assigned to roles cannot be deleted.
+          </>
+        }
+        destructive
+        loading={deleteLayout.isPending}
+        confirmLabel="Delete layout"
+        onConfirm={handleConfirmDelete}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="flex max-h-[92vh] max-w-6xl flex-col gap-0 overflow-hidden p-0">

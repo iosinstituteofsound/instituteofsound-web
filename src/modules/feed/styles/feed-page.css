@@ -131,18 +131,18 @@
     font-size: 0.75rem;
   }
 
-  .feed-page .feed-social-card__action-bar {
+  .feed-page .ios-engagement-action-bar {
     gap: 2px;
   }
 
-  .feed-page .feed-social-card__action-btn {
+  .feed-page .ios-engagement-action-bar__btn {
     gap: 5px;
     min-height: 34px;
     padding: 0 4px;
     font-size: 0.8125rem;
   }
 
-  .feed-page .feed-social-card__action-btn svg {
+  .feed-page .ios-engagement-action-bar__btn svg {
     width: 18px;
     height: 18px;
   }
@@ -250,14 +250,14 @@
     --feed-card-pad-x: 10px;
   }
 
-  .feed-page .feed-social-card__action-btn {
+  .feed-page .ios-engagement-action-bar__btn {
     flex-direction: column;
     gap: 2px;
     font-size: 0.625rem;
     letter-spacing: 0.01em;
   }
 
-  .feed-page .feed-social-card__action-btn svg {
+  .feed-page .ios-engagement-action-bar__btn svg {
     width: 20px;
     height: 20px;
   }

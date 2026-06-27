@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { PlaylistDetailDto } from '@/modules/music/types/music.types'
 import { PlaylistCreateCard } from '@/modules/music/components/playlists/playlist-create-card'
 import { PlaylistGridCard } from '@/modules/music/components/playlists/playlist-grid-card'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/music/styles/playlist.css'
 
@@ -30,9 +31,16 @@ export function PlaylistGrid({
 
   if (isEmpty) {
     return (
-      <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-        {emptyMessage ?? 'No playlists yet.'}
-      </p>
+      <EmptyState
+        variant="dashed"
+        title=""
+        description={typeof emptyMessage === 'string' ? emptyMessage : emptyMessage ? undefined : 'No playlists yet.'}
+        action={
+          typeof emptyMessage !== 'string' && emptyMessage ? (
+            <span className="text-sm text-muted-foreground">{emptyMessage}</span>
+          ) : undefined
+        }
+      />
     )
   }
 

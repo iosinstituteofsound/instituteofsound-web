@@ -5,6 +5,7 @@ import { useReleasesPage } from '@/modules/explore/hooks/use-releases-page'
 import { ReleasesGridCard } from '@/modules/explore/components/releases-grid-card'
 import { ReleasesFeaturedHero } from '@/modules/explore/components/releases-featured-hero'
 import { ReleasesGenreGrid } from '@/modules/explore/components/releases-genre-grid'
+import { CenteredPageState } from '@/shared/components/feedback/centered-page-state'
 import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import type { ReleasesPageFilter } from '@/modules/explore/types/explore.types'
@@ -48,9 +49,7 @@ export function ReleasesPage() {
   if (catalogLoading) return <Loader className="min-h-screen bg-background" />
   if (catalogError || !catalog) {
     return (
-      <div className="releases-page flex min-h-screen items-center justify-center p-8 text-center">
-        <p>Could not load releases. Check API connection.</p>
-      </div>
+      <CenteredPageState message="Could not load releases. Check API connection." pageClassName="releases-page" />
     )
   }
 

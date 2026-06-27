@@ -25,6 +25,7 @@ import {
 import { artistInitials } from '@/modules/explore/lib/artist-meta'
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
+import { CenteredPageState } from '@/shared/components/feedback/centered-page-state'
 import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import { getReleaseDetail } from '@/modules/music/api/music.api'
@@ -190,12 +191,15 @@ export function ReleasePage() {
 
   if (!release) {
     return (
-      <div className="explore-page flex min-h-screen flex-col items-center justify-center gap-4 p-8">
-        <p className="text-muted-foreground">Release not found.</p>
-        <Link to="/releases" className="explore-accent-text text-sm underline">
-          Back to Releases
-        </Link>
-      </div>
+      <CenteredPageState
+        message="Release not found."
+        pageClassName="explore-page"
+        action={
+          <Link to="/releases" className="explore-accent-text text-sm underline">
+            Back to Releases
+          </Link>
+        }
+      />
     )
   }
 

@@ -20,6 +20,7 @@ import {
 import type { AboutProfile, AboutSectionId } from '@/modules/profile/types/about-profile.types'
 import { ABOUT_SECTIONS } from '@/modules/profile/types/about-profile.types'
 import type { UserDto } from '@/shared/types/auth.types'
+import { DividedList } from '@/shared/components/layout'
 import { Card, CardContent } from '@/shared/components/ui/card'
 import { cn } from '@/shared/lib/cn'
 import {
@@ -127,7 +128,7 @@ function AboutSectionPanel({
           </div>
           <div>
             <p className="mb-2 text-sm font-semibold">Pinned details</p>
-            <div className="divide-y rounded-lg border px-4">
+            <DividedList>
               <AboutFieldRow
                 icon={Folder}
                 value={about.pinnedDetails?.category ?? about.category}
@@ -169,7 +170,7 @@ function AboutSectionPanel({
                   onAction={editable ? onEdit : undefined}
                 />
               ) : null}
-            </div>
+            </DividedList>
           </div>
         </div>
       )
@@ -200,7 +201,7 @@ function AboutSectionPanel({
       return (
         <div>
           <AboutSectionHeader title="Personal details" editable={editable} onEdit={onEdit} />
-          <div className="divide-y rounded-lg border px-4">
+          <DividedList>
             <AboutFieldRow
               icon={MapPin}
               value={about.personalDetails?.currentLocation}
@@ -274,7 +275,7 @@ function AboutSectionPanel({
               editable={editable}
               onEdit={onEdit}
             />
-          </div>
+          </DividedList>
         </div>
       )
 
@@ -288,7 +289,7 @@ function AboutSectionPanel({
             onEdit={onEdit}
           />
           {about.links?.length ? (
-            <div className="rounded-lg border px-4">
+            <DividedList>
               {about.links.map((link, index) => (
                 <AboutListItem
                   key={`${link.url}-${index}`}
@@ -300,7 +301,7 @@ function AboutSectionPanel({
                   onEdit={onEdit}
                 />
               ))}
-            </div>
+            </DividedList>
           ) : (
             <AboutEmptyHint
               message="Share links to your website, portfolio, or social profiles."
@@ -321,7 +322,7 @@ function AboutSectionPanel({
             onEdit={onEdit}
           />
           {about.communities?.length ? (
-            <div className="rounded-lg border px-4">
+            <DividedList>
               {about.communities.map((community, index) => (
                 <AboutListItem
                   key={`${community.name}-${index}`}
@@ -332,7 +333,7 @@ function AboutSectionPanel({
                   onEdit={onEdit}
                 />
               ))}
-            </div>
+            </DividedList>
           ) : (
             <AboutEmptyHint
               message="Add communities or groups you're part of."
@@ -348,7 +349,7 @@ function AboutSectionPanel({
         <div>
           <AboutSectionHeader title="Offers" editable={editable} onEdit={onEdit} />
           {about.offers?.length ? (
-            <div className="rounded-lg border px-4">
+            <DividedList>
               {about.offers.map((offer, index) => (
                 <AboutListItem
                   key={`${offer.title}-${index}`}
@@ -359,7 +360,7 @@ function AboutSectionPanel({
                   onEdit={onEdit}
                 />
               ))}
-            </div>
+            </DividedList>
           ) : (
             <AboutEmptyHint
               message="Add promotions or affiliate links."
@@ -528,7 +529,7 @@ function AboutSectionPanel({
           <AboutSectionHeader title="Contact info" editable={editable} onEdit={onEdit} />
           <div>
             <p className="mb-2 text-sm font-semibold">Social media</p>
-            <div className="rounded-lg border px-4">
+            <DividedList>
               {about.contactInfo?.socialMedia?.map((item, index) => (
                 <AboutListItem
                   key={`${item.platform}-${index}`}
@@ -540,11 +541,11 @@ function AboutSectionPanel({
               )) ?? (
                 <AboutEmptyHint message="Add social media profiles." actionLabel="Add social media" onAction={editable ? onEdit : undefined} />
               )}
-            </div>
+            </DividedList>
           </div>
           <div>
             <p className="mb-2 text-sm font-semibold">Phone</p>
-            <div className="rounded-lg border px-4">
+            <DividedList>
               {about.contactInfo?.phones?.map((phone, index) => (
                 <AboutListItem
                   key={`${phone.number}-${index}`}
@@ -556,11 +557,11 @@ function AboutSectionPanel({
                   onEdit={onEdit}
                 />
               )) ?? null}
-            </div>
+            </DividedList>
           </div>
           <div>
             <p className="mb-2 text-sm font-semibold">Email</p>
-            <div className="rounded-lg border px-4">
+            <DividedList>
               {about.contactInfo?.emails?.map((email, index) => (
                 <AboutListItem
                   key={`${email.address}-${index}`}
@@ -571,7 +572,7 @@ function AboutSectionPanel({
                   onEdit={onEdit}
                 />
               )) ?? null}
-            </div>
+            </DividedList>
           </div>
           {about.contactInfo?.mediaKit ? (
             <AboutFieldRow
@@ -605,13 +606,13 @@ function AboutSectionPanel({
       return (
         <div>
           <AboutSectionHeader title="Names" editable={editable} onEdit={onEdit} />
-          <div className="divide-y rounded-lg border px-4">
+          <DividedList>
             <AboutFieldRow icon={User} value={user.name} subLabel="Display name" />
             <AboutFieldRow value={about.names?.nickname} subLabel="Nickname" editable={editable} onEdit={onEdit} />
             {about.names?.otherNames?.map((name) => (
               <AboutFieldRow key={name} value={name} subLabel="Other name" editable={editable} onEdit={onEdit} />
             ))}
-          </div>
+          </DividedList>
         </div>
       )
 

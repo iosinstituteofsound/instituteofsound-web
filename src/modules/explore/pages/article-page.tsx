@@ -24,6 +24,7 @@ import {
   articleReadTime,
 } from '@/modules/explore/lib/editorial-meta'
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
+import { CenteredPageState } from '@/shared/components/feedback/centered-page-state'
 import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import '@/modules/explore/styles/explore.css'
@@ -103,12 +104,15 @@ export function ArticlePage() {
   if (isLoading) return <Loader className="min-h-screen bg-background" />
   if (isError || !article) {
     return (
-      <div className="explore-page flex min-h-screen flex-col items-center justify-center gap-4 p-8">
-        <p className="text-muted-foreground">Article not found.</p>
-        <Link to="/explore" className="explore-accent-text text-sm underline">
-          Back to Explore
-        </Link>
-      </div>
+      <CenteredPageState
+        message="Article not found."
+        pageClassName="explore-page"
+        action={
+          <Link to="/explore" className="explore-accent-text text-sm underline">
+            Back to Explore
+          </Link>
+        }
+      />
     )
   }
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Volume2, VolumeX } from 'lucide-react'
 import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { reelCaption } from '@/modules/reels/lib/reel-item'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
@@ -38,7 +38,7 @@ export function ReelOverlay({ item, muted, onMutedChange }: ReelOverlayProps) {
       <div className="reel-overlay__bottom" onClick={(event) => event.stopPropagation()}>
         <div className="reel-overlay__author">
           <FeedAuthorProfileLink author={item.author} variant="avatar">
-            <FeedUserAvatar
+            <UserAvatar
               name={item.author.name}
               avatarUrl={item.author.avatarUrl}
               className="h-9 w-9 ring-2 ring-white/30"

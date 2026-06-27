@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
 import {
   getThreadAvatarUrl,
@@ -25,7 +25,7 @@ export const ThreadRowAvatar = memo(function ThreadRowAvatar({
   return (
     <div className="relative shrink-0">
       {isDirect ? (
-        <FeedUserAvatar
+        <UserAvatar
           name={displayName}
           avatarUrl={getThreadAvatarUrl(thread)}
           className={avatarClassName}

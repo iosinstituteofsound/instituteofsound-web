@@ -2,7 +2,9 @@ import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { Reply } from 'lucide-react'
 import '@/modules/messenger/styles/messenger.css'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
+import { LinkPreviewCard } from '@/shared/components/link-preview'
+import { toLinkPreview } from '@/shared/lib/link-preview/dm-link-preview'
 import { MessageActionsMenu } from '@/modules/messenger/components/message-actions-menu'
 import { MessageReactionBadge } from '@/modules/messenger/components/message-reaction-badge'
 import { useMessageBubbleActions } from '@/modules/messenger/hooks/use-message-bubble-actions'
@@ -125,9 +127,7 @@ export const MessageBubble = memo(function MessageBubble({
       ) : null}
 
       {message.linkPreview ? (
-        <a href={message.linkPreview.url} target="_blank" rel="noreferrer" className="messenger-link-preview block">
-          {message.linkPreview.title ?? message.linkPreview.url}
-        </a>
+        <LinkPreviewCard preview={toLinkPreview(message.linkPreview)} compact className="messenger-link-preview" />
       ) : null}
 
       {message.type === 'image' && message.mediaUrl ? (
@@ -192,7 +192,7 @@ export const MessageBubble = memo(function MessageBubble({
       >
         {!isOutgoing ? (
           showAvatar ? (
-            <FeedUserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 shrink-0 self-end" />
+            <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 shrink-0 self-end" />
           ) : (
             <span className="h-7 w-7 shrink-0" aria-hidden />
           )
@@ -219,7 +219,7 @@ export const MessageBubble = memo(function MessageBubble({
     >
       {!isOutgoing ? (
         showAvatar ? (
-          <FeedUserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-8 w-8 shrink-0 self-end" />
+          <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-8 w-8 shrink-0 self-end" />
         ) : (
           <span className="messenger-message-row__avatar-spacer" aria-hidden />
         )

@@ -9,6 +9,7 @@ import {
   updateLabelProfile,
 } from '@/modules/explore/api/explore.api'
 import { Page, PageHeader, PageTitle, PageSection } from '@/shared/components/layout/page-shell'
+import { ListRow } from '@/shared/components/layout'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
@@ -80,10 +81,12 @@ export function LabelDashboardPage() {
           {rosterLoading ? <Loader /> : null}
           <div className="grid gap-3 sm:grid-cols-2">
             {(roster as Array<{ displayName: string; slug: string; genres: string[] }> ?? []).map((artist) => (
-              <div key={artist.slug} className="rounded-lg border p-4">
-                <p className="font-bold">{artist.displayName}</p>
-                <p className="text-sm text-muted-foreground">{artist.genres.join(' · ')}</p>
-              </div>
+              <ListRow key={artist.slug}>
+                <div>
+                  <p className="font-bold">{artist.displayName}</p>
+                  <p className="text-sm text-muted-foreground">{artist.genres.join(' · ')}</p>
+                </div>
+              </ListRow>
             ))}
           </div>
         </PageSection>
@@ -99,10 +102,12 @@ export function LabelDashboardPage() {
           {releasesLoading ? <Loader /> : null}
           <div className="space-y-3">
             {(releases as Array<{ title: string; artistName?: string }> ?? []).map((release, i) => (
-              <div key={`${release.title}-${i}`} className="rounded-lg border p-4">
-                <p className="font-semibold">{release.title}</p>
-                <p className="text-sm text-muted-foreground">{release.artistName}</p>
-              </div>
+              <ListRow key={`${release.title}-${i}`}>
+                <div>
+                  <p className="font-semibold">{release.title}</p>
+                  <p className="text-sm text-muted-foreground">{release.artistName}</p>
+                </div>
+              </ListRow>
             ))}
           </div>
         </PageSection>

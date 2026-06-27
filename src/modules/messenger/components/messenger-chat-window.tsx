@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react'
 import { ChevronDown, Minus, Phone, Video, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { ConversationBody } from '@/modules/messenger/components/conversation-body'
 import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
 import { useConversationThread } from '@/modules/messenger/hooks/use-conversation-thread'
@@ -55,7 +55,7 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
         >
           <span className="messenger-chat-window__avatar-wrap">
             {isDirect ? (
-              <FeedUserAvatar
+              <UserAvatar
                 name={displayName}
                 avatarUrl={getThreadAvatarUrl(thread)}
                 className="h-8 w-8"

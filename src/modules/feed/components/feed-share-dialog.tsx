@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useMe } from '@/modules/auth/hooks/use-auth'
-import { AnimatedEmojiPicker } from '@/modules/feed/components/animated-emoji-picker'
+import { AnimatedEmojiPicker } from '@/shared/components/emoji'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import {

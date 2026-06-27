@@ -22,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
+import { IconButton } from '@/shared/components/ui/icon-button'
 import { cn } from '@/shared/lib/cn'
 import { formatAttachedAudioLabel } from '@/modules/feed/lib/attached-audio-label'
 
@@ -58,63 +59,63 @@ export function CreatePostAddBar({
     <div className="feed-create-post__add-bar">
       <span className="feed-create-post__add-label">Add to your post</span>
       <div className="feed-create-post__add-actions">
-        <button
-          type="button"
+        <IconButton
+          aria-label="Photo or video"
           title="Photo or video"
           disabled={disabled}
           onClick={() => onAction('photo-video')}
           className={cn(
-            'feed-create-post__add-btn',
+            'feed-create-post__add-btn h-auto w-auto rounded-none',
             activeAction === 'photo-video' && 'is-active',
           )}
         >
           <ImageIcon className="h-6 w-6 text-emerald-500" />
-        </button>
+        </IconButton>
 
-        <button
-          type="button"
+        <IconButton
+          aria-label="Audio or music"
           title="Audio or music"
           disabled={disabled}
           onClick={() => onAction('audio')}
-          className={cn('feed-create-post__add-btn', activeAction === 'audio' && 'is-active')}
+          className={cn('feed-create-post__add-btn h-auto w-auto rounded-none', activeAction === 'audio' && 'is-active')}
         >
           <Mic className="h-6 w-6 text-red-500" />
-        </button>
+        </IconButton>
 
-        <button
-          type="button"
+        <IconButton
+          aria-label="3D model"
           title="3D model"
           disabled={disabled}
           onClick={() => onAction('model')}
-          className={cn('feed-create-post__add-btn', activeAction === 'model' && 'is-active')}
+          className={cn('feed-create-post__add-btn h-auto w-auto rounded-none', activeAction === 'model' && 'is-active')}
         >
           <Box className="h-6 w-6 text-violet-500" />
-        </button>
+        </IconButton>
 
-        <button
-          type="button"
-          data-emoji-trigger
+        <IconButton
+          aria-label="Animated emoji"
           title="Animated emoji"
+          data-emoji-trigger
           disabled={disabled}
           onClick={(event) => onEmojiClick?.(event.currentTarget)}
           className={cn(
-            'feed-create-post__add-btn hidden sm:inline-flex',
+            'feed-create-post__add-btn hidden h-auto w-auto rounded-none sm:inline-flex',
             emojiActive && 'is-active',
           )}
         >
           <Smile className="h-6 w-6 text-amber-500" />
-        </button>
+        </IconButton>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              type="button"
+            <IconButton
+              aria-label="More options"
               title="More options"
               disabled={disabled}
-              className="feed-create-post__add-btn"
+              className="feed-create-post__add-btn h-auto w-auto rounded-none"
             >
               <MoreHorizontal className="h-6 w-6 text-muted-foreground" />
-            </button>
+            </IconButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="z-[120] w-52">
             <DropdownMenuItem onClick={() => onAction('record-video')}>

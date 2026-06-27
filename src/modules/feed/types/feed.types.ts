@@ -1,3 +1,5 @@
+import type { AuthorSummary } from '@/shared/types/author.types'
+
 export type FeedItemType = 'music' | 'video' | 'image' | 'text' | 'article' | 'model'
 export type FeedItemStatus = 'published' | 'hidden'
 
@@ -46,13 +48,7 @@ export interface FeedCommentDto {
   engagement?: FeedCommentEngagementSummary
 }
 
-export interface FeedAuthorDto {
-  id: string
-  name: string
-  username?: string
-  avatarUrl?: string
-  isVerified?: boolean
-}
+export type FeedAuthorDto = AuthorSummary
 
 export interface FeedItemDto {
   id: string

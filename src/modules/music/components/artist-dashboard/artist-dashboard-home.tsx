@@ -38,6 +38,7 @@ import {
 } from '@/modules/music/lib/artist-dashboard-utils'
 import { formatPlays } from '@/modules/music/lib/analytics-format'
 import { Loader } from '@/shared/components/feedback/loader'
+import { DashboardPanel } from '@/shared/components/layout'
 import '@/modules/music/styles/artist-dashboard-home.css'
 import {
   ArtistDashboardMetricModal,
@@ -362,8 +363,8 @@ export function ArtistDashboardHome() {
             ))}
           </section>
 
-          <section
-            className="ios-artist-dashboard__panel ios-artist-dashboard__panel--clickable"
+          <DashboardPanel
+            className="ios-artist-dashboard__panel--clickable"
             aria-labelledby="latest-release-heading"
           >
             <div className="ios-artist-dashboard__panel-head">
@@ -477,7 +478,7 @@ export function ArtistDashboardHome() {
               </p>
             )}
             </button>
-          </section>
+          </DashboardPanel>
 
           <section className="ios-artist-dashboard__actions" aria-label="Quick actions">
             <Link to="/artist/releases/new" className="ios-artist-dashboard__action" data-accent="primary">
@@ -524,7 +525,7 @@ export function ArtistDashboardHome() {
           </section>
 
           <div className="ios-artist-dashboard__split">
-            <section className="ios-artist-dashboard__panel" aria-labelledby="streams-overview-heading">
+            <DashboardPanel aria-labelledby="streams-overview-heading">
               <div className="ios-artist-dashboard__panel-head">
                 <h2 id="streams-overview-heading" className="ios-artist-dashboard__panel-title">
                   Streams Overview
@@ -532,9 +533,9 @@ export function ArtistDashboardHome() {
                 <span className="ios-artist-dashboard__range">Last 30 Days</span>
               </div>
               <StreamsLineChart points={chartPoints} />
-            </section>
+            </DashboardPanel>
 
-            <section className="ios-artist-dashboard__panel" aria-labelledby="top-tracks-heading">
+            <DashboardPanel aria-labelledby="top-tracks-heading">
               <div className="ios-artist-dashboard__panel-head">
                 <h2 id="top-tracks-heading" className="ios-artist-dashboard__panel-title">
                   Top Tracks
@@ -558,7 +559,7 @@ export function ArtistDashboardHome() {
                   <p className="ios-artist-dashboard__empty">Upload and publish tracks to see rankings.</p>
                 ) : null}
               </div>
-            </section>
+            </DashboardPanel>
           </div>
         </div>
 

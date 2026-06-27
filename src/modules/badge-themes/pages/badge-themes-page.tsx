@@ -14,10 +14,10 @@ import { ThemeTokensEditor } from '@/modules/badge-themes/components/theme-token
 import { ThemeFluidConfigEditor } from '@/modules/badge-themes/components/theme-fluid-config-editor'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
 import { Button } from '@/shared/components/ui/button'
+import { AlertDialog } from '@/shared/components/ui/alert-dialog'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/shared/components/ui/dialog'
@@ -180,31 +180,27 @@ export function BadgeThemesPage() {
         </div>
       )}
 
-      <Dialog open={Boolean(deleteTarget)} onOpenChange={(nextOpen) => !nextOpen && setDeleteTarget(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete theme?</DialogTitle>
-            <DialogDescription>
-              This will permanently delete <span className="font-medium text-foreground">{deleteTarget?.name}</span>
-              {deleteTarget?.slug ? (
-                <>
-                  {' '}
-                  (<span className="font-mono">{deleteTarget.slug}</span>)
-                </>
-              ) : null}
-              . Themes linked to a badge cannot be deleted.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleteTheme.isPending}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleConfirmDelete} disabled={deleteTheme.isPending}>
-              {deleteTheme.isPending ? 'Deleting…' : 'Delete theme'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AlertDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(nextOpen) => !nextOpen && setDeleteTarget(null)}
+        title="Delete theme?"
+        description={
+          <>
+            This will permanently delete <span className="font-medium text-foreground">{deleteTarget?.name}</span>
+            {deleteTarget?.slug ? (
+              <>
+                {' '}
+                (<span className="font-mono">{deleteTarget.slug}</span>)
+              </>
+            ) : null}
+            . Themes linked to a badge cannot be deleted.
+          </>
+        }
+        destructive
+        loading={deleteTheme.isPending}
+        confirmLabel={deleteTheme.isPending ? 'Deleting…' : 'Delete theme'}
+        onConfirm={handleConfirmDelete}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="flex max-h-[92vh] max-w-6xl flex-col gap-0 overflow-hidden p-0">

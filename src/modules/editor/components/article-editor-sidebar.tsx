@@ -17,6 +17,7 @@ import {
 import { Switch } from '@/shared/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { FormGroupCard } from '@/shared/components/forms'
 import type { Data } from '@measured/puck'
 import { normalizeArticleSlug } from '@/modules/editor/lib/article-slug'
 import { cn } from '@/shared/lib/cn'
@@ -254,8 +255,7 @@ export function ArticleEditorSidebar({
               <TagInput tags={meta.tags} onChange={(tags) => onMetaChange({ tags })} />
             </div>
 
-            <div className="space-y-3 rounded-lg border border-border p-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Featured</p>
+            <FormGroupCard title="Featured">
               {featuredFlags.map((item) => (
                 <label key={item.key} className="flex items-center justify-between gap-3 text-sm">
                   <span>{item.label}</span>
@@ -267,7 +267,7 @@ export function ArticleEditorSidebar({
                   />
                 </label>
               ))}
-            </div>
+            </FormGroupCard>
 
             <div className="space-y-2">
               <Label>Session audio URL</Label>

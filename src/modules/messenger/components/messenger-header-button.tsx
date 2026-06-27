@@ -1,13 +1,10 @@
 import {
   useDeferredValue,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
 } from 'react'
-import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import { openMessengerPopup } from '@/modules/messenger/lib/messenger-popup-open'
 import { useQuery } from '@tanstack/react-query'
@@ -24,43 +21,10 @@ import { useMessengerLiveStore } from '@/modules/messenger/store/messenger-live-
 import type { MessengerFilter } from '@/modules/messenger/types/messenger.types'
 import { filterThreads } from '@/modules/messenger/utils/filter-threads'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
+import { HeaderPopover } from '@/shared/components/navigation/header-popover'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/messenger/styles/messenger-header-button.css'
 import '@/modules/messenger/styles/messenger-dropdown.css'
-
-function useMessengerPanelPosition(open: boolean, triggerRef: React.RefObject<HTMLButtonElement | null>) {
-  const [panelStyle, setPanelStyle] = useState<CSSProperties>({})
-
-  useLayoutEffect(() => {
-    if (!open || !triggerRef.current) return
-
-    const updatePosition = () => {
-      const rect = triggerRef.current!.getBoundingClientRect()
-      const gap = 8
-      const width = Math.min(360, window.innerWidth - 24)
-      const right = Math.max(12, window.innerWidth - rect.right)
-      const top = rect.bottom + gap
-      const maxHeight = Math.min(560, window.innerHeight - top - 12)
-
-      setPanelStyle({
-        top,
-        right,
-        width,
-        maxHeight: Math.max(240, maxHeight),
-      })
-    }
-
-    updatePosition()
-    window.addEventListener('resize', updatePosition)
-    window.addEventListener('scroll', updatePosition, true)
-    return () => {
-      window.removeEventListener('resize', updatePosition)
-      window.removeEventListener('scroll', updatePosition, true)
-    }
-  }, [open, triggerRef])
-
-  return panelStyle
-}
 
 export function MessengerHeaderButton() {
   const location = useLocation()
@@ -94,7 +58,6 @@ export function MessengerHeaderButton() {
   )
 
   const isMessengerRoute = location.pathname.startsWith('/messenger')
-  const panelStyle = useMessengerPanelPosition(open, triggerRef)
 
   useEffect(() => {
     if (!open) {
@@ -103,31 +66,7 @@ export function MessengerHeaderButton() {
     }
 
     void refetch()
-
-    const onPointerDown = (event: MouseEvent) => {
-      const target = event.target as Node
-      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) return
-      setOpen(false)
-      setSettingsOpen(false)
-    }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        if (settingsOpen) {
-          setSettingsOpen(false)
-          return
-        }
-        setOpen(false)
-      }
-    }
-
-    window.addEventListener('mousedown', onPointerDown)
-    window.addEventListener('keydown', onKeyDown)
-    return () => {
-      window.removeEventListener('mousedown', onPointerDown)
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  }, [open, refetch, settingsOpen])
+  }, [open, refetch])
 
   const toggleSettings = () => {
     setSettingsOpen((value) => !value)
@@ -139,14 +78,47 @@ export function MessengerHeaderButton() {
     void openMessengerPopup({ threadId })
   }
 
-  const panel = open ? (
-        <div
-          ref={panelRef}
-          className="ios-messenger-popover__panel"
-          style={panelStyle}
-          role="dialog"
-          aria-label="Messenger"
-        >
+  return (
+    <div className="ios-messenger-popover" ref={rootRef}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className={cn(
+          'dashboard-header-utility ios-messenger-header-btn ios-messenger-popover__trigger',
+          (open || isMessengerRoute) && 'is-open',
+        )}
+        aria-label={displayUnread > 0 ? `Messenger, ${displayUnread} unread` : 'Messenger'}
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <MessengerIcon className="h-[22px] w-[22px]" />
+        {displayUnread > 0 ? (
+          <span className="ios-messenger-header-btn__badge">
+            {displayUnread > 9 ? '9+' : displayUnread}
+          </span>
+        ) : null}
+      </button>
+
+      <HeaderPopover
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next)
+          if (!next) setSettingsOpen(false)
+        }}
+        rootRef={rootRef}
+        triggerRef={triggerRef}
+        panelRef={panelRef}
+        panelClassName="ios-messenger-popover__panel"
+        ariaLabel="Messenger"
+        positionOptions={{ width: 360, maxHeight: 560, minHeight: 240 }}
+        onEscape={() => {
+          if (settingsOpen) {
+            setSettingsOpen(false)
+            return
+          }
+          setOpen(false)
+        }}
+      >
           <div className="ios-messenger-popover__head">
             {!settingsOpen ? <h2 className="ios-messenger-popover__title">Chats</h2> : <span aria-hidden />}
             <div className="ios-messenger-popover__actions">
@@ -244,31 +216,7 @@ export function MessengerHeaderButton() {
           </div>
             </>
           )}
-        </div>
-      ) : null
-
-  return (
-    <div className="ios-messenger-popover" ref={rootRef}>
-      <button
-        ref={triggerRef}
-        type="button"
-        className={cn(
-          'dashboard-header-utility ios-messenger-header-btn ios-messenger-popover__trigger',
-          (open || isMessengerRoute) && 'is-open',
-        )}
-        aria-label={displayUnread > 0 ? `Messenger, ${displayUnread} unread` : 'Messenger'}
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <MessengerIcon className="h-[22px] w-[22px]" />
-        {displayUnread > 0 ? (
-          <span className="ios-messenger-header-btn__badge">
-            {displayUnread > 9 ? '9+' : displayUnread}
-          </span>
-        ) : null}
-      </button>
-
-      {panel ? createPortal(panel, document.body) : null}
+      </HeaderPopover>
     </div>
   )
 }

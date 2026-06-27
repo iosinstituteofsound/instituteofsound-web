@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import { CuratorStudioHomePage } from '@/modules/curator/pages/curator-studio-home-page'
 import { MyPlaylistsPage } from '@/modules/music/pages/my-playlists-page'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { Page, PageDescription, PageHeader, PageSection, PageTitle } from '@/shared/components/layout/page-shell'
 import { Button } from '@/shared/components/ui/button'
 import { SubmissionsDeskPage } from '@/modules/submissions-desk/pages/submissions-desk-page'
@@ -16,10 +17,11 @@ function CuratorPicksPage() {
         </PageDescription>
       </PageHeader>
       <PageSection className="max-w-lg space-y-4">
-        <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-          Recent picks already appear on your public curator profile. Use editorial tools to publish full curator
-          reviews linked from each pick.
-        </p>
+        <EmptyState
+          variant="dashed"
+          title=""
+          description="Recent picks already appear on your public curator profile. Use editorial tools to publish full curator reviews linked from each pick."
+        />
         <Button asChild variant="outline" size="sm">
           <Link to="/profile">View profile picks</Link>
         </Button>

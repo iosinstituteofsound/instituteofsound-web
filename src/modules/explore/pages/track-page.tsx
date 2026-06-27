@@ -22,6 +22,7 @@ import {
 } from '@/modules/explore/lib/release-meta'
 import { artistInitials } from '@/modules/explore/lib/artist-meta'
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
+import { CenteredPageState } from '@/shared/components/feedback/centered-page-state'
 import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import { getReleaseDetail, getTrackReleaseRedirect } from '@/modules/music/api/music.api'
@@ -157,12 +158,15 @@ export function TrackPage() {
 
   if (redirectError || !releaseDetail || !track || !release) {
     return (
-      <div className="explore-page flex min-h-screen flex-col items-center justify-center gap-4 p-8">
-        <p className="text-muted-foreground">Track not found.</p>
-        <Link to="/releases" className="explore-accent-text text-sm underline">
-          Back to Releases
-        </Link>
-      </div>
+      <CenteredPageState
+        message="Track not found."
+        pageClassName="explore-page"
+        action={
+          <Link to="/releases" className="explore-accent-text text-sm underline">
+            Back to Releases
+          </Link>
+        }
+      />
     )
   }
 

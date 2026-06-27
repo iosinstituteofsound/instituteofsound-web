@@ -1,5 +1,5 @@
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
-import { payloadNumber, payloadString } from '@/modules/feed/components/cards/feed-card-shell'
+import { payloadNumber, payloadString } from '@/shared/lib/payload-utils'
 import type { PlayerTrack } from '@/modules/player/types/player.types'
 
 /** Stable player id for feed posts — does not change when catalog/enrichment loads. */

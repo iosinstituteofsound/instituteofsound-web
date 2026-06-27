@@ -8,6 +8,7 @@
 
 | Task | Open these files only |
 |------|----------------------|
+| Any UI component | `src/shared/LIBRARY.md`, `src/shared/components/` |
 | Feed | `feedService.ts`, `v1Client.ts`, `v1CommunityFeed.ts` |
 | Follow/comments/notify | `*Service.ts` in `community/`, `v1Phase4Client.ts`, `v1Phase4Community.ts` |
 | Network | `connectionService.ts` or `presenceService.ts`, `v1Client.ts`, `v1Network.ts` |

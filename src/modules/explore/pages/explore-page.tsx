@@ -1,6 +1,7 @@
 import { Compass, Home } from 'lucide-react'
 import { useExplore } from '@/modules/explore/hooks/use-explore'
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
+import { CenteredPageState } from '@/shared/components/feedback/centered-page-state'
 import { Loader } from '@/shared/components/feedback/loader'
 import { useBreadcrumbHomeHref } from '@/shared/hooks/use-breadcrumb-home'
 import { ExploreEditorialSection } from '@/modules/explore/components/explore-editorial-section'
@@ -25,9 +26,7 @@ export function ExplorePage() {
   if (isLoading) return <Loader className="min-h-screen bg-background" />
   if (isError || !data) {
     return (
-      <div className="explore-page flex min-h-screen items-center justify-center p-8 text-center">
-        <p>Could not load Explore. Check API connection.</p>
-      </div>
+      <CenteredPageState message="Could not load Explore. Check API connection." pageClassName="explore-page" />
     )
   }
 

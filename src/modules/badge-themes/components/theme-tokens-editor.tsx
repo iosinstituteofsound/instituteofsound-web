@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { FormGroupCard } from '@/shared/components/forms'
 import { ThemeColorField } from '@/modules/badge-themes/components/theme-color-field'
 import {
   COLOR_GROUPS,
@@ -59,11 +60,7 @@ export function ThemeTokensEditor({
       {(['light', 'dark'] as ThemeMode[]).map((tabMode) => (
         <TabsContent key={tabMode} value={tabMode} className="mt-4 space-y-5">
           {COLOR_GROUPS.map((group) => (
-            <div key={`${tabMode}-${group.label}`} className="space-y-3 rounded-lg border p-3">
-              <div>
-                <p className="text-sm font-medium">{group.label}</p>
-                <p className="text-xs text-muted-foreground">{group.description}</p>
-              </div>
+            <FormGroupCard key={`${tabMode}-${group.label}`} title={group.label} description={group.description}>
               <div className="space-y-3">
                 {group.keys.map((key) => (
                   <ThemeColorField
@@ -76,15 +73,11 @@ export function ThemeTokensEditor({
                   />
                 ))}
               </div>
-            </div>
+            </FormGroupCard>
           ))}
 
           {STATUS_COLOR_GROUPS.map((group) => (
-            <div key={`${tabMode}-status-${group.label}`} className="space-y-3 rounded-lg border p-3">
-              <div>
-                <p className="text-sm font-medium">{group.label}</p>
-                <p className="text-xs text-muted-foreground">{group.description}</p>
-              </div>
+            <FormGroupCard key={`${tabMode}-status-${group.label}`} title={group.label} description={group.description}>
               <div className="space-y-3">
                 {group.keys.map((key) => (
                   <ThemeColorField
@@ -96,7 +89,7 @@ export function ThemeTokensEditor({
                   />
                 ))}
               </div>
-            </div>
+            </FormGroupCard>
           ))}
         </TabsContent>
       ))}

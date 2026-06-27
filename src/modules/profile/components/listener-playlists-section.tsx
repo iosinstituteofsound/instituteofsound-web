@@ -6,6 +6,7 @@ import { PlaylistGridCard } from '@/modules/music/components/playlists/playlist-
 import { PlaylistCreateCard } from '@/modules/music/components/playlists/playlist-create-card'
 import { usePlaylistsIndex } from '@/modules/music/hooks/use-playlists-index'
 import { Loader } from '@/shared/components/feedback/loader'
+import { SectionHeader, SurfaceSection } from '@/shared/components/layout'
 import { Button } from '@/shared/components/ui/button'
 import '@/modules/music/styles/playlist.css'
 
@@ -25,16 +26,18 @@ export function ListenerPlaylistsSection({ isOwnProfile }: ListenerPlaylistsSect
   const preview = playlists.slice(0, 4)
 
   return (
-    <section className="space-y-4 rounded-xl border border-border bg-card/60 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-bold">My Playlists</h2>
-        <Button size="sm" variant="outline" asChild>
-          <Link to="/library/playlists">
-            Manage all
-            <ArrowRight className="ml-1 size-4" aria-hidden />
-          </Link>
-        </Button>
-      </div>
+    <SurfaceSection>
+      <SectionHeader
+        title="My Playlists"
+        action={
+          <Button size="sm" variant="outline" asChild>
+            <Link to="/library/playlists">
+              Manage all
+              <ArrowRight className="ml-1 size-4" aria-hidden />
+            </Link>
+          </Button>
+        }
+      />
 
       <div className="flex gap-3 overflow-x-auto pb-1">
         {preview.map((pl) => (
@@ -70,6 +73,6 @@ export function ListenerPlaylistsSection({ isOwnProfile }: ListenerPlaylistsSect
           })
         }
       />
-    </section>
+    </SurfaceSection>
   )
 }

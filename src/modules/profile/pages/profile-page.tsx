@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Grid3x3 } from 'lucide-react'
 import { useMe } from '@/modules/auth/hooks/use-auth'
@@ -16,13 +16,12 @@ import { ProfileCuratorOverviewTab } from '@/modules/profile/components/profile-
 import { ProfilePostsPanel } from '@/modules/profile/components/profile-posts-panel'
 import { usePublicProfile } from '@/modules/profile/hooks/use-public-profile'
 import { useFollowStats } from '@/modules/social/hooks/use-follow'
-import { useSlidingIndicator } from '@/modules/profile/lib/use-sliding-indicator'
 import type { PublicProfileDto } from '@/modules/search/api/search.api'
+import { SlidingTabBar } from '@/shared/components/controls'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import type { UserDto } from '@/shared/types/auth.types'
-import { cn } from '@/shared/lib/cn'
 import './profile-page.css'
 
 const FALLBACK_TABS: Array<{ id: string; label: string; panelKey: 'all' | 'posts' | 'about' | 'photos' }> = [
@@ -56,7 +55,6 @@ function mapPublicProfileToUser(profile: PublicProfileDto): UserDto {
 export function ProfilePage() {
   const { userId: routeUserId } = useParams()
   const [activeTab, setActiveTab] = useState<string>('')
-  const tabNavRef = useRef<HTMLElement>(null)
   const { data: meData, isLoading: meLoading, isError: meError, refetch: refetchMe } = useMe()
   const isOwnProfile = !routeUserId || routeUserId === meData?.user.id
   const {
@@ -65,8 +63,6 @@ export function ProfilePage() {
     isError: publicError,
     refetch: refetchPublic,
   } = usePublicProfile(isOwnProfile ? undefined : routeUserId)
-
-  const tabIndicator = useSlidingIndicator(tabNavRef, activeTab)
 
   const isLoading = isOwnProfile ? meLoading : meLoading || publicLoading
   const isError = isOwnProfile ? meError || !meData?.user : meError || publicError || !publicProfile
@@ -127,35 +123,17 @@ export function ProfilePage() {
         isFollowing={isFollowing}
       />
 
-      <div className="mt-1 border-b">
-        <nav ref={tabNavRef} className="relative -mb-px flex gap-1 overflow-x-auto px-1">
-          {tabs.map(({ id, label }) => {
-            const isActive = activeTab === id
-            return (
-              <button
-                key={id}
-                type="button"
-                data-indicator-key={id}
-                onClick={() => setActiveTab(id)}
-                className={cn(
-                  'profile-tab-button relative z-10 shrink-0 px-4 py-3 text-sm font-semibold',
-                  isActive ? 'text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
-                )}
-              >
-                {label}
-              </button>
-            )
-          })}
-          <span
-            aria-hidden
-            className="profile-tab-indicator pointer-events-none absolute bottom-0 h-0.5 rounded-full bg-primary"
-            style={{
-              left: tabIndicator.left,
-              width: tabIndicator.width,
-              opacity: tabIndicator.width ? 1 : 0,
-            }}
+      <div className="mt-1 border-b px-1 py-2">
+        <div className="overflow-x-auto">
+          <SlidingTabBar
+            value={activeTab}
+            options={tabs.map(({ id, label }) => ({ value: id, label }))}
+            onChange={setActiveTab}
+            className="min-w-max"
+            tabClassName="profile-tab-button shrink-0 px-4 py-2.5 text-sm font-semibold"
+            aria-label="Profile sections"
           />
-        </nav>
+        </div>
       </div>
 
       <div className="py-4">

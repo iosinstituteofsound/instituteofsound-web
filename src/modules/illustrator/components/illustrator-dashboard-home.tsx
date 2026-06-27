@@ -26,6 +26,7 @@ import {
 } from '@/modules/illustrator/lib/illustrator-dashboard-utils'
 import { DashboardLineChart } from '@/modules/music/components/artist-dashboard/dashboard-line-chart'
 import { Loader } from '@/shared/components/feedback/loader'
+import { DashboardPanel } from '@/shared/components/layout'
 import '@/modules/music/styles/artist-dashboard-home.css'
 
 type MetricKind = 'reactions' | 'comments' | 'portfolio' | 'engagers'
@@ -212,7 +213,7 @@ export function IllustratorDashboardHome() {
             ))}
           </section>
 
-          <section className="ios-artist-dashboard__panel" aria-labelledby="latest-artwork-heading">
+          <DashboardPanel aria-labelledby="latest-artwork-heading">
             <div className="ios-artist-dashboard__panel-head">
               <h2 id="latest-artwork-heading" className="ios-artist-dashboard__panel-title">
                 Latest Artwork Performance
@@ -251,9 +252,9 @@ export function IllustratorDashboardHome() {
                 to start tracking engagement.
               </p>
             )}
-          </section>
+          </DashboardPanel>
 
-          <section className="ios-artist-dashboard__panel" aria-labelledby="reactions-chart-heading">
+          <DashboardPanel aria-labelledby="reactions-chart-heading">
             <div className="ios-artist-dashboard__panel-head">
               <h2 id="reactions-chart-heading" className="ios-artist-dashboard__panel-title">
                 Reactions Overview
@@ -270,7 +271,7 @@ export function IllustratorDashboardHome() {
               width={600}
               height={200}
             />
-          </section>
+          </DashboardPanel>
 
           <section className="ios-artist-dashboard__actions" aria-label="Quick actions">
             <Link to="/home" className="ios-artist-dashboard__action" data-accent="primary">

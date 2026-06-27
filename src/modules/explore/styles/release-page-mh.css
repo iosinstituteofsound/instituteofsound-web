@@ -121,6 +121,7 @@
   padding-inline: 0.5rem;
 }
 
+.ios-engagement-action-bar__slot--trailing,
 .feed-social-card__action-slot--trailing {
   flex: 0 0 auto;
   width: auto;

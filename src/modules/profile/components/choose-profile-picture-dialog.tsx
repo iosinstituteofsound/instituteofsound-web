@@ -12,6 +12,7 @@ import {
 import type { ProfileAvatarSelection } from '@/modules/profile/types/profile.types'
 import type { AvatarCrop } from '@/shared/types/auth.types'
 import { Button } from '@/shared/components/ui/button'
+import { FileDropzone } from '@/shared/components/forms'
 import { cn } from '@/shared/lib/cn'
 import { toast } from '@/shared/components/ui/sonner'
 
@@ -244,10 +245,19 @@ export function ChooseProfilePictureDialog({
               ) : (
                 <section className="space-y-2">
                   <h3 className="text-[15px] font-semibold">Uploads</h3>
-                  <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-10 text-muted-foreground">
-                    <ImageIcon className="h-8 w-8 opacity-50" />
-                    <p className="text-sm">No photos uploaded yet</p>
-                  </div>
+                  <FileDropzone
+                    onFiles={(files) => {
+                      const file = files[0]
+                      if (file) handleFileSelected(file)
+                    }}
+                    accept="image/*"
+                    disabled={updateProfile.isPending || savingCrop}
+                    icon={<ImageIcon className="h-8 w-8 opacity-50 text-muted-foreground" />}
+                    title="No photos uploaded yet"
+                    description="Drop an image or click to browse"
+                    className="border-border py-10"
+                    aria-label="Upload profile picture"
+                  />
                 </section>
               )}
 

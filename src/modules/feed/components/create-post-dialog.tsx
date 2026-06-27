@@ -9,8 +9,8 @@ import {
   EmojiTriggerButton,
   getRadixOutsideEventTarget,
   isEmojiPickerTarget,
-} from '@/modules/feed/components/animated-emoji-picker'
-import { insertAtCursor } from '@/modules/feed/lib/animated-emoji'
+} from '@/shared/components/emoji'
+import { insertAtCursor } from '@/shared/lib/emoji/animated-emoji'
 import {
   CreatePostAddAudioBadge,
   CreatePostAddBar,

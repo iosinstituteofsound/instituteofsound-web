@@ -15,6 +15,7 @@ import {
 import type { AdminTrackDto } from '@/modules/music/types/music.types'
 import { DuplicateTrackAlert } from '@/modules/music/components/duplicate-track-alert'
 import { Button } from '@/shared/components/ui/button'
+import { AlertDialog } from '@/shared/components/ui/alert-dialog'
 import { Badge } from '@/shared/components/ui/badge'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import {
@@ -522,46 +523,33 @@ export function AdminTracksPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete track permanently?</DialogTitle>
-            <DialogDescription>
-              This removes <span className="font-medium text-foreground">{deleteTarget?.title}</span>{' '}
-              from the database, Cloudflare R2 (audio + peaks), fingerprint data, playlists, and
-              analytics. This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleConfirmDelete} disabled={deleteTrack.isPending}>
-              Delete permanently
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AlertDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Delete track permanently?"
+        description={
+          <>
+            This removes <span className="font-medium text-foreground">{deleteTarget?.title}</span>{' '}
+            from the database, Cloudflare R2 (audio + peaks), fingerprint data, playlists, and
+            analytics. This cannot be undone.
+          </>
+        }
+        destructive
+        loading={deleteTrack.isPending}
+        confirmLabel="Delete permanently"
+        onConfirm={handleConfirmDelete}
+      />
 
-      <Dialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete {selectedIds.length} tracks?</DialogTitle>
-            <DialogDescription>
-              All selected tracks will be permanently removed including R2 audio, peaks, fingerprints,
-              and related data. This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBulkDeleteOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleBulkDelete} disabled={bulkDelete.isPending}>
-              Delete {selectedIds.length} tracks
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AlertDialog
+        open={bulkDeleteOpen}
+        onOpenChange={setBulkDeleteOpen}
+        title={`Delete ${selectedIds.length} tracks?`}
+        description="All selected tracks will be permanently removed including R2 audio, peaks, fingerprints, and related data. This cannot be undone."
+        destructive
+        loading={bulkDelete.isPending}
+        confirmLabel={`Delete ${selectedIds.length} tracks`}
+        onConfirm={handleBulkDelete}
+      />
     </Page>
   )
 }

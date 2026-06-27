@@ -7,7 +7,7 @@ import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import {
   AnimatedEmojiPicker,
   EmojiTriggerButton,
-} from '@/modules/feed/components/animated-emoji-picker'
+} from '@/shared/components/emoji'
 import { CommentPhotoMenu } from '@/modules/feed/components/comment-photo-menu'
 import {
   GiphyPicker,

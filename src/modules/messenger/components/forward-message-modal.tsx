@@ -1,9 +1,10 @@
 import { memo } from 'react'
 import { X } from 'lucide-react'
 import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { useForwardMessageModal } from '@/modules/messenger/hooks/use-forward-message-modal'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
+import { IconButton } from '@/shared/components/ui/icon-button'
 import { cn } from '@/shared/lib/cn'
 
 type ForwardMessageModalProps = {
@@ -29,9 +30,9 @@ export const ForwardMessageModal = memo(function ForwardMessageModal({
       >
         <div className="messenger-new-modal__head">
           <h2 className="text-lg font-semibold">Forward message</h2>
-          <button type="button" className="messenger-icon-btn" aria-label="Close" onClick={onClose}>
+          <IconButton className="messenger-icon-btn" aria-label="Close" onClick={onClose}>
             <X className="h-5 w-5" />
-          </button>
+          </IconButton>
         </div>
 
         <p className="mb-3 text-sm text-[var(--messenger-muted)]">
@@ -48,7 +49,7 @@ export const ForwardMessageModal = memo(function ForwardMessageModal({
               onClick={() => void forwardToThread(thread.threadId)}
             >
               {thread.kind === 'direct' ? (
-                <FeedUserAvatar
+                <UserAvatar
                   name={thread.title}
                   avatarUrl={thread.otherAvatarThumbnailUrl ?? thread.otherAvatarUrl ?? thread.avatarUrl}
                   className="h-10 w-10"

@@ -4,6 +4,8 @@ import { ThreadListItem } from '@/modules/messenger/components/thread-list-item'
 import { MESSENGER_SIDEBAR_FILTERS } from '@/modules/messenger/constants/messenger-filters'
 import { useMessengerThreads } from '@/modules/messenger/hooks/use-messenger-threads'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
+import { EmptyState } from '@/shared/components/feedback/states'
+import { IconButton } from '@/shared/components/ui/icon-button'
 import { cn } from '@/shared/lib/cn'
 
 type ThreadSidebarProps = {
@@ -28,12 +30,12 @@ export const ThreadSidebar = memo(function ThreadSidebar({
       <div className="messenger-sidebar__header">
         <h1 className="messenger-sidebar__title">Chats</h1>
         <div className="flex items-center gap-1">
-          <button type="button" className="messenger-icon-btn" aria-label="More options">
+          <IconButton className="messenger-icon-btn" aria-label="More options">
             <MoreHorizontal className="h-5 w-5" />
-          </button>
-          <button type="button" className="messenger-icon-btn" aria-label="New message">
+          </IconButton>
+          <IconButton className="messenger-icon-btn" aria-label="New message">
             <PenSquare className="h-5 w-5" />
-          </button>
+          </IconButton>
         </div>
       </div>
 
@@ -75,11 +77,15 @@ export const ThreadSidebar = memo(function ThreadSidebar({
             />
           ))
         ) : (
-          <p className="px-3 py-6 text-sm text-[var(--messenger-muted)]">
-            {filter === 'groups' || filter === 'communities'
-              ? 'No conversations in this category yet.'
-              : 'No chats yet. Visit a profile and start messaging.'}
-          </p>
+          <EmptyState
+            variant="dashed"
+            description={
+              filter === 'groups' || filter === 'communities'
+                ? 'No conversations in this category yet.'
+                : 'No chats yet. Visit a profile and start messaging.'
+            }
+            className="mx-3 my-4 border-none bg-transparent p-4 shadow-none"
+          />
         )}
       </div>
     </aside>

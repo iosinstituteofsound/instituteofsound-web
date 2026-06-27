@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
 import { MessageBubble } from '@/modules/messenger/components/message-bubble'
 import { useMessageList } from '@/modules/messenger/hooks/use-message-list'
@@ -52,7 +52,7 @@ export const MessageList = memo(function MessageList({
       {showHero && hero ? (
         <div className="messenger-message-list__hero">
           {hero.isDirect ? (
-            <FeedUserAvatar name={hero.name} avatarUrl={hero.avatarUrl} className="h-16 w-16" />
+            <UserAvatar name={hero.name} avatarUrl={hero.avatarUrl} className="h-16 w-16" />
           ) : (
             <GroupAvatarStack
               members={hero.memberPreview}

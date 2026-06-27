@@ -1,4 +1,4 @@
-import { payloadString } from '@/modules/feed/components/cards/feed-card-shell'
+import { payloadString } from '@/shared/lib/payload-utils'
 import { isStoryItem } from '@/modules/feed/lib/story-utils'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
 

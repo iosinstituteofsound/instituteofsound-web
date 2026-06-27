@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
+import { WorkspaceHeader } from '@/shared/components/layout'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
 import type { UserDto } from '@/shared/types/auth.types'
@@ -63,58 +64,63 @@ export function ProfilePictureViewer({
 
   return createPortal(
     <div className="fixed inset-0 z-[200] flex flex-col bg-[#0a0a0a] text-white">
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/10 px-3 sm:px-4">
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-10 w-10 rounded-full text-white hover:bg-white/10"
-            onClick={() => onOpenChange(false)}
-          >
-            <X className="h-5 w-5" />
-          </Button>
-          <span className="hidden text-sm font-semibold sm:inline">Profile picture</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 rounded-full text-white hover:bg-white/10"
-            aria-label="Zoom out"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 rounded-full text-white hover:bg-white/10"
-            aria-label="Zoom in"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="hidden h-9 w-9 rounded-full text-white hover:bg-white/10 sm:inline-flex"
-            aria-label="Search"
-          >
-            <Search className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="hidden h-9 w-9 rounded-full text-white hover:bg-white/10 sm:inline-flex"
-            aria-label="Fullscreen"
-          >
-            <Maximize2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </header>
+      <WorkspaceHeader
+        className="h-14 border-white/10 bg-[#0a0a0a] px-3 text-white sm:px-4"
+        leading={
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-full text-white hover:bg-white/10"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            <span className="hidden text-sm font-semibold sm:inline">Profile picture</span>
+          </>
+        }
+        trailing={
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full text-white hover:bg-white/10"
+              aria-label="Zoom out"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full text-white hover:bg-white/10"
+              aria-label="Zoom in"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="hidden h-9 w-9 rounded-full text-white hover:bg-white/10 sm:inline-flex"
+              aria-label="Search"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="hidden h-9 w-9 rounded-full text-white hover:bg-white/10 sm:inline-flex"
+              aria-label="Fullscreen"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+          </>
+        }
+      />
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <div className="relative flex min-h-0 flex-1 items-center justify-center bg-black p-4">

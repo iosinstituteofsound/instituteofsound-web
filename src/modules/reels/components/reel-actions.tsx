@@ -1,16 +1,16 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { MessageCircle, MoreHorizontal, Share2, ThumbsUp } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { FeedCommentDialog } from '@/modules/feed/components/feed-comment-dialog'
 import { FeedShareDialog } from '@/modules/feed/components/feed-share-dialog'
-import { ReactionPickerIcon } from '@/modules/feed/components/feed-reaction-icons'
-import { FeedReactionPicker } from '@/modules/feed/components/feed-reaction-picker'
 import { useSetFeedReaction } from '@/modules/feed/hooks/use-feed-engagement'
 import { getEngagement } from '@/modules/feed/lib/feed-engagement'
-import { formatEngagementCount } from '@/modules/feed/lib/format-engagement-count'
 import { feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
 import type { FeedItemDto, FeedReactionKind } from '@/modules/feed/types/feed.types'
+import { ReactionHoverPickerSlot, ReactionPickerIcon } from '@/shared/components/reactions'
+import { formatEngagementCount } from '@/shared/lib/format-count'
+import { useReactionHoverPicker } from '@/shared/hooks/use-reaction-hover-picker'
 import { cn } from '@/shared/lib/cn'
 
 interface ReelActionsProps {
@@ -69,28 +69,19 @@ export function ReelActions({ item }: ReelActionsProps) {
   const engagement = getEngagement(item)
   const [commentDialogOpen, setCommentDialogOpen] = useState(false)
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [pickerOpen, setPickerOpen] = useState(false)
-  const likeButtonRef = useRef<HTMLButtonElement>(null)
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const {
+    pickerOpen,
+    setPickerOpen,
+    likeButtonRef,
+    containerRef,
+    openPicker,
+    scheduleClosePicker,
+  } = useReactionHoverPicker()
   const setReaction = useSetFeedReaction()
 
   const myReaction = engagement.myReaction ? feedReactionMeta(engagement.myReaction) : null
   const likeCount = formatEngagementCount(engagement.reactionTotal)
   const commentCount = formatEngagementCount(engagement.commentCount)
-
-  const clearCloseTimer = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current)
-  }
-
-  const openPicker = () => {
-    clearCloseTimer()
-    setPickerOpen(true)
-  }
-
-  const scheduleClosePicker = () => {
-    clearCloseTimer()
-    closeTimer.current = setTimeout(() => setPickerOpen(false), 280)
-  }
 
   const react = (kind: FeedReactionKind) => {
     if (!userId || setReaction.isPending) return
@@ -142,24 +133,19 @@ export function ReelActions({ item }: ReelActionsProps) {
   return (
     <>
       <div className="reel-actions" onClick={(event) => event.stopPropagation()}>
-        <div
-          className="reel-actions__slot"
+        <ReactionHoverPickerSlot
+          pickerOpen={pickerOpen}
+          anchorRef={likeButtonRef}
+          containerRef={containerRef}
+          myReaction={engagement.myReaction}
+          disabled={setReaction.isPending}
+          onSelect={react}
           onMouseEnter={openPicker}
           onMouseLeave={scheduleClosePicker}
+          className="reel-actions__slot"
         >
-          {pickerOpen ? (
-            <FeedReactionPicker
-              open={pickerOpen}
-              anchorRef={likeButtonRef}
-              myReaction={engagement.myReaction}
-              disabled={setReaction.isPending}
-              onSelect={react}
-              onMouseEnter={openPicker}
-              onMouseLeave={scheduleClosePicker}
-            />
-          ) : null}
           {likeButton}
-        </div>
+        </ReactionHoverPickerSlot>
 
         <ReelActionButton
           label="Comment"

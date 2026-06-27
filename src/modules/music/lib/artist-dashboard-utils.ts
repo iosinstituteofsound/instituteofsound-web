@@ -1,4 +1,5 @@
 import type { AnalyticsTrendPointDto } from '@/modules/music/types/analytics.types'
+import { formatRelativeTime as formatRelativeTimeBase } from '@/shared/lib/format-relative-time'
 
 export type DashboardAccent = 'primary' | 'success' | 'warning' | 'info'
 
@@ -79,18 +80,7 @@ export function estimateDbRank(qualifiedPlays: number): string {
 }
 
 export function formatRelativeTime(iso?: string): string {
-  if (!iso) return 'Recently'
-  const then = new Date(iso).getTime()
-  if (Number.isNaN(then)) return 'Recently'
-
-  const diffMs = Date.now() - then
-  const mins = Math.floor(diffMs / 60_000)
-  if (mins < 1) return 'Just now'
-  if (mins < 60) return `${mins} min ago`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  return `${days}d ago`
+  return formatRelativeTimeBase(iso, 'dashboard')
 }
 
 export function fillTrendDateGaps(

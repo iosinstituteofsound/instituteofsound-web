@@ -26,7 +26,7 @@ import {
   discoverClickRouteToFormValue,
 } from '@/shared/data/role-discover-click-routes'
 import { PageLoader } from '@/shared/components/feedback/loader'
-import { ErrorState } from '@/shared/components/feedback/states'
+import { EmptyState, ErrorState } from '@/shared/components/feedback/states'
 import {
   Page,
   PageDescription,
@@ -202,9 +202,11 @@ export function RolesListPage() {
       </PageHeader>
 
       {(data ?? []).length === 0 ? (
-        <div className="rounded-xl border border-dashed p-10 text-center">
-          <p className="text-muted-foreground">No roles yet. Create one to get started.</p>
-        </div>
+        <EmptyState
+          variant="dashed"
+          title=""
+          description="No roles yet. Create one to get started."
+        />
       ) : (
         <div className="ios-page-grid xl:grid-cols-2">
           {(data ?? []).map((role) => (

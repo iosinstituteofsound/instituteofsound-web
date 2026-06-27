@@ -2,9 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { listArtistSubmissions } from '@/modules/explore/api/explore.api'
 import { ProfileTabEmpty } from '@/modules/profile/components/profile-tab-empty'
+import { ListRow, PanelCard } from '@/shared/components/layout'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { PageLoader } from '@/shared/components/feedback/loader'
 
 type ProfileArtistSubmissionsTabProps = {
@@ -25,35 +25,35 @@ export function ProfileArtistSubmissionsTab({ isOwnProfile }: ProfileArtistSubmi
   if (isLoading) return <PageLoader />
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-        <CardTitle className="text-base">My Submissions</CardTitle>
+    <PanelCard
+      title="My Submissions"
+      action={
         <Button asChild size="sm">
           <Link to="/artist/submissions/new">New Submission</Link>
         </Button>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {(data ?? []).length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">No submissions yet.</p>
-        ) : (
-          (data ?? []).map((sub) => (
-            <div key={sub.id} className="flex items-center justify-between rounded-lg border p-4">
-              <div>
-                <p className="font-semibold">{sub.trackTitle}</p>
+      }
+      contentClassName="space-y-3"
+    >
+      {(data ?? []).length === 0 ? (
+        <p className="py-6 text-center text-sm text-muted-foreground">No submissions yet.</p>
+      ) : (
+        (data ?? []).map((sub) => (
+          <ListRow key={sub.id}>
+            <div>
+              <p className="font-semibold">{sub.trackTitle}</p>
+              <p className="text-sm text-muted-foreground">
+                {sub.projectName} · {sub.genre}
+              </p>
+              {sub.targets && sub.targets.length > 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  {sub.projectName} · {sub.genre}
+                  Submitted to {sub.targets.map((t) => t.destinationTitle).join(', ')}
                 </p>
-                {sub.targets && sub.targets.length > 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    Submitted to {sub.targets.map((t) => t.destinationTitle).join(', ')}
-                  </p>
-                ) : null}
-              </div>
-              <Badge variant="outline">{sub.status}</Badge>
+              ) : null}
             </div>
-          ))
-        )}
-      </CardContent>
-    </Card>
+            <Badge variant="outline">{sub.status}</Badge>
+          </ListRow>
+        ))
+      )}
+    </PanelCard>
   )
 }

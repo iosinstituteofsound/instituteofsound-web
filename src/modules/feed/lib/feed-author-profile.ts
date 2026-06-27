@@ -1,5 +1,6 @@
-import type { FeedAuthorDto } from '@/modules/feed/types/feed.types'
+import type { AuthorSummary } from '@/shared/types/author.types'
+import { getProfilePath } from '@/shared/lib/profile-path'
 
-export function getFeedAuthorProfilePath(author: FeedAuthorDto): string {
-  return `/profile/${author.id}`
+export function getFeedAuthorProfilePath(author: AuthorSummary): string {
+  return getProfilePath(author.id)
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Award, ChevronDown, Menu, Shield } from 'lucide-react'
+import { WorkspaceHeader } from '@/shared/components/layout'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 import { formatColorLabel, type SemanticColorKey } from '@/shared/design-tokens/theme-tokens'
@@ -125,33 +126,37 @@ export function ThemeDashboardPreview({ themeName, onTokenSelect, compact = fals
 
         <div className="flex min-w-0 flex-1 flex-col">
           <PreviewTokenTarget token="border" onSelect={onTokenSelect}>
-            <header className={cn('flex shrink-0 items-center justify-between border-b border-border/80 bg-background px-3', compact ? 'h-8' : 'h-10')}>
-              <PreviewTokenTarget token="foreground" onSelect={onTokenSelect} className="inline-flex">
-                <Menu className="h-3.5 w-3.5 text-foreground" />
-              </PreviewTokenTarget>
-
-              <div className="flex items-center gap-1.5">
-                <PreviewTokenTarget token="primary" onSelect={onTokenSelect} className="inline-flex">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary px-2 py-0.5 text-[8px] font-semibold text-primary-foreground shadow-sm">
-                    <Shield className="h-2.5 w-2.5 shrink-0" />
-                    Super Admin
-                  </span>
+            <WorkspaceHeader
+              className={cn('border-border/80 bg-background px-3', compact ? 'h-8' : 'h-10')}
+              leading={
+                <PreviewTokenTarget token="foreground" onSelect={onTokenSelect} className="inline-flex">
+                  <Menu className="h-3.5 w-3.5 text-foreground" />
                 </PreviewTokenTarget>
+              }
+              trailing={
+                <>
+                  <PreviewTokenTarget token="primary" onSelect={onTokenSelect} className="inline-flex">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary px-2 py-0.5 text-[8px] font-semibold text-primary-foreground shadow-sm">
+                      <Shield className="h-2.5 w-2.5 shrink-0" />
+                      Super Admin
+                    </span>
+                  </PreviewTokenTarget>
 
-                <PreviewTokenTarget token="accent" onSelect={onTokenSelect} className="inline-flex">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent px-2 py-0.5 text-[8px] font-semibold text-accent-foreground shadow-sm">
-                    <Award className="h-2.5 w-2.5 shrink-0" />
-                    {themeName?.trim() || 'Pioneer'}
-                  </span>
-                </PreviewTokenTarget>
+                  <PreviewTokenTarget token="accent" onSelect={onTokenSelect} className="inline-flex">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent px-2 py-0.5 text-[8px] font-semibold text-accent-foreground shadow-sm">
+                      <Award className="h-2.5 w-2.5 shrink-0" />
+                      {themeName?.trim() || 'Pioneer'}
+                    </span>
+                  </PreviewTokenTarget>
 
-                <PreviewTokenTarget token="secondary" onSelect={onTokenSelect} className="inline-flex">
-                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-[8px] font-semibold text-secondary-foreground">
-                    IO
-                  </span>
-                </PreviewTokenTarget>
-              </div>
-            </header>
+                  <PreviewTokenTarget token="secondary" onSelect={onTokenSelect} className="inline-flex">
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-[8px] font-semibold text-secondary-foreground">
+                      IO
+                    </span>
+                  </PreviewTokenTarget>
+                </>
+              }
+            />
           </PreviewTokenTarget>
 
           <PreviewTokenTarget token="background" onSelect={onTokenSelect} className="flex-1">

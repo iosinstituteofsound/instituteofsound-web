@@ -1,3 +1,5 @@
+import { SurfaceSection } from '@/shared/components/layout'
+
 const STAGE_LABELS: Record<string, string> = {
   created: 'Initializing uplink',
   uploaded: 'Signal received',
@@ -52,7 +54,7 @@ export function ProcessingStatus({
   }
 
   return (
-    <div className="space-y-3 rounded-lg border p-4">
+    <SurfaceSection className="space-y-3 rounded-lg" padding="md">
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium">{label}</span>
         <span className="text-muted-foreground">{progress}%</span>
@@ -64,6 +66,6 @@ export function ProcessingStatus({
         />
       </div>
       {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
-    </div>
+    </SurfaceSection>
   )
 }

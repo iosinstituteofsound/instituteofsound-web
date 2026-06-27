@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   getRadixOutsideEventTarget,
   isEmojiPickerTarget,
-} from '@/modules/feed/components/animated-emoji-picker'
+} from '@/shared/components/emoji'
 import { isGiphyPickerTarget } from '@/modules/feed/components/giphy-picker'
 import type { FeedItemDto, FeedCommentDto } from '@/modules/feed/types/feed.types'
 import { FeedCommentComposer } from '@/modules/feed/components/feed-comment-composer'

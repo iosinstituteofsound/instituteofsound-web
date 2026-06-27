@@ -23,6 +23,7 @@ import {
   type MediaAttachMode,
 } from '@/modules/feed/lib/media-utils'
 import { Button } from '@/shared/components/ui/button'
+import { FileDropzone } from '@/shared/components/forms'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { toast } from '@/shared/components/ui/sonner'
@@ -166,11 +167,8 @@ export const MediaAttachPanel = forwardRef<MediaAttachPanelHandle, MediaAttachPa
     await setPreviewFromBlob(file, fileKind)
   }
 
-  const handleDrop = async (event: React.DragEvent) => {
-    event.preventDefault()
-    setDragOver(false)
-    if (disabled || busy) return
-    const file = event.dataTransfer.files[0]
+  const handleDropFiles = async (files: FileList) => {
+    const file = files[0]
     if (file) await handleFile(file)
   }
 
@@ -395,65 +393,32 @@ export const MediaAttachPanel = forwardRef<MediaAttachPanelHandle, MediaAttachPa
           ) : null}
 
           {tab !== 'record' && !previewUrl ? (
-            <div
-              onDragOver={(event) => {
-                event.preventDefault()
-                if (!disabled && !busy) setDragOver(true)
-              }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleDrop}
+            <FileDropzone
+              onFiles={(files) => void handleDropFiles(files)}
+              accept={acceptForKind(kind)}
+              disabled={disabled || busy}
+              isDragActive={dragOver}
+              onDragStateChange={setDragOver}
+              inputRef={fileInputRef}
+              icon={
+                activeKind === 'image' || kind === 'photo-video' ? (
+                  <Camera className="h-7 w-7 text-muted-foreground" />
+                ) : activeKind === 'video' ? (
+                  <Film className="h-7 w-7 text-muted-foreground" />
+                ) : (
+                  <Mic className="h-7 w-7 text-muted-foreground" />
+                )
+              }
+              title={
+                kind === 'photo-video' ? 'Drag photo, video or audio' : `Drag & drop ${activeKind}`
+              }
+              description={embedded ? 'or tap to browse' : 'or click to browse'}
               className={cn(
-                'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 text-center transition-colors',
                 embedded ? 'py-4' : 'py-6',
-                dragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 bg-background/50',
-                (disabled || busy) && 'pointer-events-none opacity-60',
+                'border-muted-foreground/25 bg-background/50',
               )}
-            >
-              {activeKind === 'image' || kind === 'photo-video' ? (
-                <Camera className="h-7 w-7 text-muted-foreground" />
-              ) : activeKind === 'video' ? (
-                <Film className="h-7 w-7 text-muted-foreground" />
-              ) : (
-                <Mic className="h-7 w-7 text-muted-foreground" />
-              )}
-              <div>
-                <p className="text-sm font-medium">
-                  {kind === 'photo-video' ? 'Drag photo, video or audio' : `Drag & drop ${activeKind}`}
-                </p>
-                <p className="text-xs text-muted-foreground">or tap to browse</p>
-              </div>
-              {!embedded ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={disabled || busy}
-                >
-                  Browse files
-                </Button>
-              ) : (
-                <button
-                  type="button"
-                  className="text-xs font-semibold text-primary"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={disabled || busy}
-                >
-                  Browse device
-                </button>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={acceptForKind(kind)}
-                className="hidden"
-                onChange={(event) => {
-                  const file = event.target.files?.[0]
-                  if (file) void handleFile(file)
-                  event.target.value = ''
-                }}
-              />
-            </div>
+              aria-label="Upload media"
+            />
           ) : null}
 
           {tab === 'record' && canRecord ? (

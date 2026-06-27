@@ -5,6 +5,7 @@ import { useMessageComposerEmoji } from '@/modules/messenger/hooks/use-message-c
 import { LIKE_MESSAGE_EMOJI } from '@/modules/messenger/lib/messenger-utils'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 import { AnimatedEmojiPicker } from '@/shared/components/emoji'
+import { IconButton } from '@/shared/components/ui/icon-button'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/messenger/styles/messenger.css'
 
@@ -85,9 +86,13 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
             <div className="messenger-composer__banner-title">Replying</div>
             <div className="messenger-composer__banner-body">{replyTo.body || 'Attachment'}</div>
           </div>
-          <button type="button" className="messenger-icon-btn" onClick={() => setReplyTo(null)}>
+          <IconButton
+            className="messenger-icon-btn"
+            aria-label="Dismiss reply"
+            onClick={() => setReplyTo(null)}
+          >
             ×
-          </button>
+          </IconButton>
         </div>
       ) : null}
 
@@ -97,9 +102,13 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
             <div className="messenger-composer__banner-title">Editing message</div>
             <div className="messenger-composer__banner-body">{editingMessage.body}</div>
           </div>
-          <button type="button" className="messenger-icon-btn" onClick={() => setEditingMessage(null)}>
+          <IconButton
+            className="messenger-icon-btn"
+            aria-label="Cancel edit"
+            onClick={() => setEditingMessage(null)}
+          >
             ×
-          </button>
+          </IconButton>
         </div>
       ) : null}
 

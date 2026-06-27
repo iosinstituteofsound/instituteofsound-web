@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronRight, Minus, Play, Plus, Redo2, Share2, Undo2, X } from 'lucide-react'
 import { env } from '@/shared/config/env'
+import { IconButton } from '@/shared/components/ui/icon-button'
 import type { StudioSaveStatus } from '@/modules/illustrator/hooks/use-studio-autosave'
 import { StudioGlass } from '@/modules/illustrator/components/studio/studio-glass'
 
@@ -77,23 +78,41 @@ export function StudioTopBar({
             <div className="mas-topbar__cluster">
               <span className="text-xs font-medium text-[var(--mas-muted)]">{saveLabel(saveStatus, saved)}</span>
               <div className="mas-topbar__divider" />
-              <button type="button" className="mas-icon-btn" aria-label="Undo" onClick={onUndo} disabled={!canUndo}>
+              <IconButton
+                className="mas-icon-btn h-auto w-auto rounded-none"
+                aria-label="Undo"
+                onClick={onUndo}
+                disabled={!canUndo}
+              >
                 <Undo2 size={16} strokeWidth={1.75} />
-              </button>
-              <button type="button" className="mas-icon-btn" aria-label="Redo" onClick={onRedo} disabled={!canRedo}>
+              </IconButton>
+              <IconButton
+                className="mas-icon-btn h-auto w-auto rounded-none"
+                aria-label="Redo"
+                onClick={onRedo}
+                disabled={!canRedo}
+              >
                 <Redo2 size={16} strokeWidth={1.75} />
-              </button>
+              </IconButton>
               <div className="mas-topbar__divider" />
-              <button type="button" className="mas-icon-btn" aria-label="Zoom out" onClick={onZoomOut}>
+              <IconButton
+                className="mas-icon-btn h-auto w-auto rounded-none"
+                aria-label="Zoom out"
+                onClick={onZoomOut}
+              >
                 <Minus size={16} strokeWidth={1.75} />
-              </button>
+              </IconButton>
               <span className="mas-zoom">{zoom}%</span>
-              <button type="button" className="mas-icon-btn" aria-label="Zoom in" onClick={onZoomIn}>
+              <IconButton
+                className="mas-icon-btn h-auto w-auto rounded-none"
+                aria-label="Zoom in"
+                onClick={onZoomIn}
+              >
                 <Plus size={16} strokeWidth={1.75} />
-              </button>
-              <button type="button" className="mas-icon-btn" aria-label="Preview">
+              </IconButton>
+              <IconButton className="mas-icon-btn h-auto w-auto rounded-none" aria-label="Preview">
                 <Play size={16} strokeWidth={1.75} />
-              </button>
+              </IconButton>
             </div>
 
             <div className="mas-topbar__cluster">
@@ -110,14 +129,13 @@ export function StudioTopBar({
                 <ChevronRight size={14} strokeWidth={1.75} />
               </button>
               <div className="mas-topbar__divider" />
-              <button
-                type="button"
-                className="mas-icon-btn mas-icon-btn--close"
+              <IconButton
+                className="mas-icon-btn mas-icon-btn--close h-auto w-auto rounded-none"
                 aria-label="Close command bar"
                 onClick={() => setExpanded(false)}
               >
                 <X size={16} strokeWidth={1.75} />
-              </button>
+              </IconButton>
             </div>
           </div>
         )}

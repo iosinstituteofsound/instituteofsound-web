@@ -6,6 +6,7 @@ import { playPlaylistFromDetail, playReleaseFromDetail } from '@/modules/music/l
 import { usePlayerStore } from '@/modules/player/stores/player-store'
 import { Button } from '@/shared/components/ui/button'
 import { Loader } from '@/shared/components/feedback/loader'
+import { ListRow, SectionHeader } from '@/shared/components/layout'
 
 interface ProfileMusicSectionProps {
   userId: string
@@ -26,7 +27,7 @@ export function ProfileMusicSection({ userId }: ProfileMusicSectionProps) {
   return (
     <div className="space-y-8">
       <section>
-        <h2 className="mb-4 text-xl font-bold">Releases</h2>
+        <SectionHeader title="Releases" className="mb-4" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.releases.map((release) => (
             <div key={release.id} className="rounded-lg border p-4">
@@ -61,10 +62,10 @@ export function ProfileMusicSection({ userId }: ProfileMusicSectionProps) {
 
       {data.playlists.length ? (
         <section>
-          <h2 className="mb-4 text-xl font-bold">Public Playlists</h2>
+          <SectionHeader title="Public Playlists" className="mb-4" />
           <div className="grid gap-4 sm:grid-cols-2">
             {data.playlists.map((pl) => (
-              <div key={pl.id} className="flex items-center justify-between rounded-lg border p-4">
+              <ListRow key={pl.id}>
                 <div>
                   <p className="font-semibold">{pl.title}</p>
                   <p className="text-sm text-muted-foreground">{pl.tracks.length} tracks</p>
@@ -81,7 +82,7 @@ export function ProfileMusicSection({ userId }: ProfileMusicSectionProps) {
                     <Link to={`/playlists/${pl.slug}`}>Open</Link>
                   </Button>
                 </div>
-              </div>
+              </ListRow>
             ))}
           </div>
         </section>

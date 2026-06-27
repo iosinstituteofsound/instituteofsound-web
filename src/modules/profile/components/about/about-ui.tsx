@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react'
 import type { AboutProfile, ProfileVisibility } from '@/modules/profile/types/about-profile.types'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { cn } from '@/shared/lib/cn'
 
 export function VisibilityIcon({ visibility }: { visibility?: ProfileVisibility }) {
@@ -110,18 +111,22 @@ export function AboutEmptyHint({
   onAction?: () => void
 }) {
   return (
-    <div className="rounded-lg border border-dashed p-6 text-center">
-      <p className="text-sm text-muted-foreground">{message}</p>
-      {actionLabel && onAction ? (
-        <button
-          type="button"
-          onClick={onAction}
-          className="mt-3 text-sm font-semibold text-primary hover:underline"
-        >
-          {actionLabel}
-        </button>
-      ) : null}
-    </div>
+    <EmptyState
+      variant="dashed"
+      title=""
+      description={message}
+      action={
+        actionLabel && onAction ? (
+          <button
+            type="button"
+            onClick={onAction}
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            {actionLabel}
+          </button>
+        ) : undefined
+      }
+    />
   )
 }
 

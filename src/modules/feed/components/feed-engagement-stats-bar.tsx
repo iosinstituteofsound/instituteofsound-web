@@ -1,6 +1,6 @@
 import { MessageCircle, Share2, ThumbsUp } from 'lucide-react'
 import type { FeedItemDto } from '@/modules/feed/types/feed.types'
-import { ReactionPickerIcon } from '@/modules/feed/components/feed-reaction-icons'
+import { ReactionPickerIcon } from '@/shared/components/reactions'
 import { getEngagement } from '@/modules/feed/lib/feed-engagement'
 import { formatEngagementCount } from '@/modules/feed/lib/format-engagement-count'
 import { FEED_REACTION_OPTIONS } from '@/modules/feed/lib/feed-reactions'

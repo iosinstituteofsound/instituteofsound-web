@@ -12,6 +12,7 @@ import { useScrollCollapse } from '@/modules/feed/hooks/use-scroll-collapse'
 import type { FeedScope } from '@/modules/feed/hooks/use-feed'
 import { getStoryItems } from '@/modules/feed/lib/story-content'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
+import { SectionHeader } from '@/shared/components/layout'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { FEED_COLUMN_CLASS } from '@/shared/lib/layout-config'
@@ -76,10 +77,11 @@ export function FeedPage() {
           />
         )}
 
-        <div className="flex items-center justify-between gap-3 px-1">
-          <p className="text-sm font-semibold text-foreground">Feed</p>
-          <FeedScopeToggle value={feedScope} onChange={setFeedScope} />
-        </div>
+        <SectionHeader
+          title="Feed"
+          className="px-1 [&_h2]:text-sm"
+          action={<FeedScopeToggle value={feedScope} onChange={setFeedScope} />}
+        />
 
         <FeedList compactLoader scope={feedScope} />
       </div>

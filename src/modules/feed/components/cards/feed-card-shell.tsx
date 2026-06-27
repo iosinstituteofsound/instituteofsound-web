@@ -16,6 +16,7 @@ import { feedItemHasAttachedAudio, FeedPostSoundToggle } from '@/modules/feed/co
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 import { formatAttachedAudioLabel } from '@/modules/feed/lib/attached-audio-label'
+import { payloadString } from '@/shared/lib/payload-utils'
 import { FeedAudioTag } from '@/modules/feed/components/feed-audio-tag'
 import './feed-card.css'
 
@@ -184,15 +185,7 @@ export function FeedCardShell({
   )
 }
 
-export function payloadString(payload: Record<string, unknown>, key: string) {
-  const value = payload[key]
-  return typeof value === 'string' ? value : undefined
-}
-
-export function payloadNumber(payload: Record<string, unknown>, key: string) {
-  const value = payload[key]
-  return typeof value === 'number' ? value : undefined
-}
+export { payloadString, payloadNumber } from '@/shared/lib/payload-utils'
 
 export function musicTrackContextLine(payload: Record<string, unknown>) {
   const trackTitle = payloadString(payload, 'trackTitle')

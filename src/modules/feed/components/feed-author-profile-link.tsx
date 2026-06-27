@@ -1,8 +1,5 @@
-import { Link } from 'react-router-dom'
 import type { FeedAuthorDto } from '@/modules/feed/types/feed.types'
-import { getFeedAuthorProfilePath } from '@/modules/feed/lib/feed-author-profile'
-import { cn } from '@/shared/lib/cn'
-import './feed-author-profile-link.css'
+import { ProfileLink } from '@/shared/components/user/profile-link'
 
 interface FeedAuthorProfileLinkProps {
   author: FeedAuthorDto
@@ -20,17 +17,14 @@ export function FeedAuthorProfileLink({
   'aria-label': ariaLabel,
 }: FeedAuthorProfileLinkProps) {
   return (
-    <Link
-      to={getFeedAuthorProfilePath(author)}
-      className={cn(
-        'feed-author-profile-link',
-        variant === 'avatar' && 'feed-author-profile-link--avatar',
-        variant === 'name' && 'feed-author-profile-link--name',
-        className,
-      )}
-      aria-label={ariaLabel ?? `${author.name} profile`}
+    <ProfileLink
+      userId={author.id}
+      name={author.name}
+      className={className}
+      variant={variant}
+      aria-label={ariaLabel}
     >
       {children}
-    </Link>
+    </ProfileLink>
   )
 }

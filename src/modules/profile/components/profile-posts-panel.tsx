@@ -1,15 +1,15 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Grid3x3, List } from 'lucide-react'
 import { FeedComposer } from '@/modules/feed/components/feed-composer'
 import { FeedList } from '@/modules/feed/components/feed-list'
 import { useFeedListStatus } from '@/modules/feed/hooks/use-feed'
-import { useSlidingIndicator } from '@/modules/profile/lib/use-sliding-indicator'
 import type { FeedItemType } from '@/modules/feed/types/feed.types'
 import type { UserDto } from '@/shared/types/auth.types'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
+import { SlidingTabBar } from '@/shared/components/controls'
+import { SectionHeader } from '@/shared/components/layout'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent } from '@/shared/components/ui/card'
-import { cn } from '@/shared/lib/cn'
 import './profile-posts-panel.css'
 
 type PostsViewMode = 'list' | 'grid'
@@ -38,8 +38,6 @@ type ProfilePostsPanelProps = {
 export function ProfilePostsPanel({ user, isOwnProfile }: ProfilePostsPanelProps) {
   const [viewMode, setViewMode] = useState<PostsViewMode>('list')
   const [activeFilter, setActiveFilter] = useState<ProfilePostFilter>('all')
-  const filterRowRef = useRef<HTMLDivElement>(null)
-  const viewRowRef = useRef<HTMLDivElement>(null)
   const feedType = activeFilter === 'all' ? undefined : activeFilter
 
   const { isFetching, isFetchingNextPage, isLoading } = useFeedListStatus({
@@ -48,9 +46,6 @@ export function ProfilePostsPanel({ user, isOwnProfile }: ProfilePostsPanelProps
     enabled: Boolean(user.id),
   })
   const isFilterPending = isFetching && !isFetchingNextPage && !isLoading
-
-  const filterIndicator = useSlidingIndicator(filterRowRef, activeFilter)
-  const viewIndicator = useSlidingIndicator(viewRowRef, viewMode)
 
   return (
     <div className="space-y-4">
@@ -61,75 +56,46 @@ export function ProfilePostsPanel({ user, isOwnProfile }: ProfilePostsPanelProps
       ) : null}
 
       <Card>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
-          <h3 className="text-xl font-bold">Posts</h3>
-          {isOwnProfile ? (
-            <Button variant="secondary" size="sm" className="rounded-lg">
-              Manage posts
-            </Button>
-          ) : null}
+        <div className="border-b px-4 py-3">
+          <SectionHeader
+            title="Posts"
+            action={
+              isOwnProfile ? (
+                <Button variant="secondary" size="sm" className="rounded-lg">
+                  Manage posts
+                </Button>
+              ) : null
+            }
+          />
         </div>
 
         <div className="overflow-x-auto border-b px-4 py-3">
-          <div ref={filterRowRef} className="relative inline-flex gap-2">
-            {POST_FILTERS.map(({ id, label }) => {
-              const isActive = activeFilter === id
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  data-indicator-key={id}
-                  onClick={() => setActiveFilter(id)}
-                  className={cn(
-                    'profile-posts-filter-chip relative z-10 shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold',
-                    isActive ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  {label}
-                </button>
-              )
-            })}
-            <span
-              aria-hidden
-              className="profile-posts-filter-indicator pointer-events-none absolute z-0 rounded-full bg-primary"
-              style={{
-                left: filterIndicator.left,
-                top: filterIndicator.top,
-                width: filterIndicator.width,
-                height: filterIndicator.height,
-                opacity: filterIndicator.width ? 1 : 0,
-              }}
-            />
-          </div>
+          <SlidingTabBar
+            value={activeFilter}
+            options={POST_FILTERS.map(({ id, label }) => ({ value: id, label }))}
+            onChange={setActiveFilter}
+            className="min-w-max rounded-full"
+            tabClassName="profile-posts-filter-chip shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold"
+            aria-label="Post filters"
+          />
         </div>
 
-        <div ref={viewRowRef} className="relative flex border-b px-2">
-          {VIEW_TABS.map(({ id, label, icon: Icon }) => {
-            const isActive = viewMode === id
-            return (
-              <button
-                key={id}
-                type="button"
-                data-indicator-key={id}
-                onClick={() => setViewMode(id)}
-                className={cn(
-                  'profile-posts-view-tab relative z-10 flex items-center gap-2 px-4 py-3 text-sm font-semibold',
-                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            )
-          })}
-          <span
-            aria-hidden
-            className="profile-posts-view-indicator pointer-events-none absolute bottom-0 h-0.5 rounded-full bg-primary"
-            style={{
-              left: viewIndicator.left,
-              width: viewIndicator.width,
-              opacity: viewIndicator.width ? 1 : 0,
-            }}
+        <div className="border-b px-2 py-2">
+          <SlidingTabBar
+            value={viewMode}
+            options={VIEW_TABS.map(({ id, label, icon: Icon }) => ({
+              value: id,
+              label: (
+                <span className="profile-posts-view-tab inline-flex items-center gap-2">
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </span>
+              ),
+            }))}
+            onChange={setViewMode}
+            className="w-full bg-transparent p-0"
+            tabClassName="flex-1 px-4 py-2.5 text-sm font-semibold"
+            aria-label="Post view mode"
           />
         </div>
 

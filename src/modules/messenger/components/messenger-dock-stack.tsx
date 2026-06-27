@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { useMessengerThreads } from '@/modules/messenger/hooks/use-messenger-threads'
 import { getThreadAvatarUrl, getThreadDisplayName } from '@/modules/messenger/lib/messenger-utils'
 import { useMessengerPopupStore } from '@/modules/messenger/store/messenger-popup-store'
@@ -35,7 +35,7 @@ export const MessengerDockStack = memo(function MessengerDockStack({ threadIds }
               closeChat(threadId)
             }}
           >
-            <FeedUserAvatar name={name} avatarUrl={avatar} className="h-12 w-12" />
+            <UserAvatar name={name} avatarUrl={avatar} className="h-12 w-12" />
             {thread?.unreadCount ? (
               <span className="messenger-dock-stack__badge">
                 {thread.unreadCount > 9 ? '9+' : thread.unreadCount}

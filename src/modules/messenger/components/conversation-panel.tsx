@@ -1,7 +1,9 @@
 import { memo } from 'react'
 import { Info, Phone, Video } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
+import { EmptyState } from '@/shared/components/feedback/states'
+import { IconButton } from '@/shared/components/ui/icon-button'
 import { ConversationBody } from '@/modules/messenger/components/conversation-body'
 import { GroupAvatarStack } from '@/modules/messenger/components/group-avatar-stack'
 import { useConversationThread } from '@/modules/messenger/hooks/use-conversation-thread'
@@ -31,10 +33,11 @@ export const ConversationPanel = memo(function ConversationPanel({
     return (
       <section className={className}>
         <div className="messenger-empty">
-          <div>
-            <p className="text-lg font-semibold text-[var(--messenger-text)]">Select a chat</p>
-            <p className="mt-1 text-sm">Choose a conversation to start messaging.</p>
-          </div>
+          <EmptyState
+            title="Select a chat"
+            description="Choose a conversation to start messaging."
+            className="py-0"
+          />
         </div>
       </section>
     )
@@ -50,7 +53,7 @@ export const ConversationPanel = memo(function ConversationPanel({
           <div className="flex min-w-0 items-center gap-3">
             {profileHref && isDirect ? (
               <Link to={profileHref} className="relative shrink-0">
-                <FeedUserAvatar
+                <UserAvatar
                   name={displayName}
                   avatarUrl={getThreadAvatarUrl(thread)}
                   className="h-10 w-10"
@@ -59,7 +62,7 @@ export const ConversationPanel = memo(function ConversationPanel({
               </Link>
             ) : isDirect ? (
               <div className="relative shrink-0">
-                <FeedUserAvatar
+                <UserAvatar
                   name={displayName}
                   avatarUrl={getThreadAvatarUrl(thread)}
                   className="h-10 w-10"
@@ -87,20 +90,19 @@ export const ConversationPanel = memo(function ConversationPanel({
           </div>
 
           <div className="messenger-conversation__actions">
-            <button type="button" className="messenger-icon-btn" aria-label="Voice call">
+            <IconButton className="messenger-icon-btn" aria-label="Voice call">
               <Phone className="h-5 w-5" />
-            </button>
-            <button type="button" className="messenger-icon-btn" aria-label="Video call">
+            </IconButton>
+            <IconButton className="messenger-icon-btn" aria-label="Video call">
               <Video className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
+            </IconButton>
+            <IconButton
               className="messenger-icon-btn"
               aria-label="Conversation info"
               onClick={() => setShowInfoPanel(true)}
             >
               <Info className="h-5 w-5" />
-            </button>
+            </IconButton>
           </div>
         </header>
 

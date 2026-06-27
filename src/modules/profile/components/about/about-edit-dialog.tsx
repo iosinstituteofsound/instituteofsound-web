@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { FormGroupCard } from '@/shared/components/forms'
 import { toast } from '@/shared/components/ui/sonner'
 
 type AboutEditDialogProps = {
@@ -499,7 +500,7 @@ function LinksEditor({
   return (
     <div className="space-y-3">
       {links.map((link, index) => (
-        <div key={index} className="space-y-2 rounded-lg border p-3">
+        <FormGroupCard key={index} className="space-y-2 p-3">
           <Field label="URL">
             <Input value={link.url} onChange={(e) => update(index, { url: e.target.value })} placeholder="https://..." />
           </Field>
@@ -511,7 +512,7 @@ function LinksEditor({
             <Trash2 className="mr-2 h-4 w-4" />
             Remove
           </Button>
-        </div>
+        </FormGroupCard>
       ))}
       <Button type="button" variant="secondary" size="sm" onClick={add} disabled={links.length >= 10}>
         <Plus className="mr-2 h-4 w-4" />
@@ -535,7 +536,7 @@ function CommunitiesEditor({
   return (
     <div className="space-y-3">
       {communities.map((community, index) => (
-        <div key={index} className="space-y-2 rounded-lg border p-3">
+        <FormGroupCard key={index} className="space-y-2 p-3">
           <Field label="Group name">
             <Input value={community.name} onChange={(e) => update(index, { name: e.target.value })} />
           </Field>
@@ -546,7 +547,7 @@ function CommunitiesEditor({
             <Trash2 className="mr-2 h-4 w-4" />
             Remove
           </Button>
-        </div>
+        </FormGroupCard>
       ))}
       <Button type="button" variant="secondary" size="sm" onClick={() => onChange([...communities, { name: '' }])}>
         <Plus className="mr-2 h-4 w-4" />
@@ -570,7 +571,7 @@ function OffersEditor({
   return (
     <div className="space-y-3">
       {offers.map((offer, index) => (
-        <div key={index} className="space-y-2 rounded-lg border p-3">
+        <FormGroupCard key={index} className="space-y-2 p-3">
           <Field label="Title">
             <Input value={offer.title} onChange={(e) => update(index, { title: e.target.value })} />
           </Field>
@@ -581,7 +582,7 @@ function OffersEditor({
             <Trash2 className="mr-2 h-4 w-4" />
             Remove
           </Button>
-        </div>
+        </FormGroupCard>
       ))}
       <Button type="button" variant="secondary" size="sm" onClick={() => onChange([...offers, { title: '' }])}>
         <Plus className="mr-2 h-4 w-4" />
@@ -605,7 +606,7 @@ function WorkEditor({
   return (
     <div className="space-y-3">
       {work.map((entry, index) => (
-        <div key={index} className="space-y-2 rounded-lg border p-3">
+        <FormGroupCard key={index} className="space-y-2 p-3">
           <Field label="Company">
             <Input value={entry.company} onChange={(e) => update(index, { company: e.target.value })} />
           </Field>
@@ -631,7 +632,7 @@ function WorkEditor({
             <Trash2 className="mr-2 h-4 w-4" />
             Remove
           </Button>
-        </div>
+        </FormGroupCard>
       ))}
       <Button type="button" variant="secondary" size="sm" onClick={() => onChange([...work, { company: '', position: '', visibility: 'public' }])}>
         <Plus className="mr-2 h-4 w-4" />
@@ -656,7 +657,7 @@ function EducationEditor({
     <div className="space-y-3">
       <p className="text-sm font-semibold">{label}</p>
       {entries.map((entry, index) => (
-        <div key={index} className="space-y-2 rounded-lg border p-3">
+        <FormGroupCard key={index} className="space-y-2 p-3">
           <Field label="Institution">
             <Input
               value={entry.institution}
@@ -710,7 +711,7 @@ function EducationEditor({
             <Trash2 className="mr-2 h-4 w-4" />
             Remove
           </Button>
-        </div>
+        </FormGroupCard>
       ))}
       <Button
         type="button"
@@ -752,7 +753,7 @@ function FamilyMembersEditor({
     <div className="space-y-3">
       <Label>Family members</Label>
       {members.map((member, index) => (
-        <div key={index} className="space-y-2 rounded-lg border p-3">
+        <FormGroupCard key={index} className="space-y-2 p-3">
           <Field label="Name">
             <Input value={member.name} onChange={(e) => update(index, { name: e.target.value })} />
           </Field>
@@ -763,7 +764,7 @@ function FamilyMembersEditor({
             <Trash2 className="mr-2 h-4 w-4" />
             Remove
           </Button>
-        </div>
+        </FormGroupCard>
       ))}
       <Button type="button" variant="secondary" size="sm" onClick={() => onChange([...members, { name: '', relationship: '' }])}>
         <Plus className="mr-2 h-4 w-4" />
@@ -789,7 +790,7 @@ function ContactInfoEditor({
       <div className="space-y-3">
         <Label>Social media</Label>
         {socialMedia.map((item, index) => (
-          <div key={index} className="space-y-2 rounded-lg border p-3">
+          <FormGroupCard key={index} className="space-y-2 p-3">
             <Field label="Platform">
               <Input
                 value={item.platform}
@@ -814,7 +815,7 @@ function ContactInfoEditor({
               <Trash2 className="mr-2 h-4 w-4" />
               Remove
             </Button>
-          </div>
+          </FormGroupCard>
         ))}
         <Button type="button" variant="secondary" size="sm" onClick={() => onChange({ ...contactInfo, socialMedia: [...socialMedia, { platform: '', username: '' }] })}>
           <Plus className="mr-2 h-4 w-4" />
@@ -825,7 +826,7 @@ function ContactInfoEditor({
       <div className="space-y-3">
         <Label>Phone numbers</Label>
         {phones.map((phone, index) => (
-          <div key={index} className="space-y-2 rounded-lg border p-3">
+          <FormGroupCard key={index} className="space-y-2 p-3">
             <Field label="Number">
               <Input
                 value={phone.number}
@@ -850,7 +851,7 @@ function ContactInfoEditor({
               <Trash2 className="mr-2 h-4 w-4" />
               Remove
             </Button>
-          </div>
+          </FormGroupCard>
         ))}
         <Button type="button" variant="secondary" size="sm" onClick={() => onChange({ ...contactInfo, phones: [...phones, { number: '', label: 'Mobile' }] })}>
           <Plus className="mr-2 h-4 w-4" />
@@ -861,7 +862,7 @@ function ContactInfoEditor({
       <div className="space-y-3">
         <Label>Email addresses</Label>
         {emails.map((email, index) => (
-          <div key={index} className="space-y-2 rounded-lg border p-3">
+          <FormGroupCard key={index} className="space-y-2 p-3">
             <Field label="Email">
               <Input
                 value={email.address}
@@ -876,7 +877,7 @@ function ContactInfoEditor({
               <Trash2 className="mr-2 h-4 w-4" />
               Remove
             </Button>
-          </div>
+          </FormGroupCard>
         ))}
         <Button type="button" variant="secondary" size="sm" onClick={() => onChange({ ...contactInfo, emails: [...emails, { address: '', label: 'Email address' }] })}>
           <Plus className="mr-2 h-4 w-4" />

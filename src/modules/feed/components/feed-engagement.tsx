@@ -1,18 +1,24 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { MessageCircle, Share2, ThumbsUp } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { FeedCommentDialog } from '@/modules/feed/components/feed-comment-dialog'
 import { FeedShareDialog } from '@/modules/feed/components/feed-share-dialog'
-import { ReactionPickerIcon } from '@/modules/feed/components/feed-reaction-icons'
-import { FeedReactionPicker } from '@/modules/feed/components/feed-reaction-picker'
 import { useSetFeedReaction } from '@/modules/feed/hooks/use-feed-engagement'
 import { getEngagement } from '@/modules/feed/lib/feed-engagement'
-import { formatEngagementCount } from '@/modules/feed/lib/format-engagement-count'
 import { FEED_REACTION_OPTIONS, feedReactionMeta } from '@/modules/feed/lib/feed-reactions'
-import { unlockReactionSounds } from '@/modules/feed/lib/feed-reaction-sounds'
 import type { FeedItemDto, FeedReactionKind } from '@/modules/feed/types/feed.types'
+import {
+  EngagementActionBar,
+  EngagementActionButton,
+  EngagementActionSlot,
+} from '@/shared/components/engagement'
+import { ReactionHoverPickerSlot, ReactionPickerIcon } from '@/shared/components/reactions'
+import { formatEngagementCount } from '@/shared/lib/format-count'
+import { unlockReactionSounds } from '@/shared/lib/reactions/reaction-sounds'
+import { useReactionHoverPicker } from '@/shared/hooks/use-reaction-hover-picker'
 import { cn } from '@/shared/lib/cn'
+import '@/shared/components/engagement/engagement-action-bar.css'
 
 interface FeedEngagementProps {
   item: FeedItemDto
@@ -40,10 +46,14 @@ export function FeedEngagement({
   const engagement = getEngagement(item)
   const [commentDialogOpen, setCommentDialogOpen] = useState(defaultCommentsOpen)
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [pickerOpen, setPickerOpen] = useState(false)
-  const reactRef = useRef<HTMLDivElement>(null)
-  const likeButtonRef = useRef<HTMLButtonElement>(null)
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const {
+    pickerOpen,
+    setPickerOpen,
+    likeButtonRef,
+    containerRef,
+    openPicker,
+    scheduleClosePicker,
+  } = useReactionHoverPicker({ unlockSounds: unlockReactionSounds })
 
   const setReaction = useSetFeedReaction()
 
@@ -51,21 +61,6 @@ export function FeedEngagement({
     (a, b) => engagement.reactions[b.kind] - engagement.reactions[a.kind],
   )
   const myReaction = engagement.myReaction ? feedReactionMeta(engagement.myReaction) : null
-
-  const clearCloseTimer = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current)
-  }
-
-  const openPicker = () => {
-    clearCloseTimer()
-    unlockReactionSounds()
-    setPickerOpen(true)
-  }
-
-  const scheduleClosePicker = () => {
-    clearCloseTimer()
-    closeTimer.current = setTimeout(() => setPickerOpen(false), 280)
-  }
 
   const react = (kind: FeedReactionKind) => {
     if (!userId || setReaction.isPending) return
@@ -97,7 +92,7 @@ export function FeedEngagement({
       ref={likeButtonRef}
       type="button"
       className={cn(
-        'feed-social-card__action-btn',
+        'ios-engagement-action-bar__btn',
         engagement.myReaction && REACTION_STATE_CLASS[engagement.myReaction],
       )}
       aria-label={myReaction ? myReaction.label : 'Like'}
@@ -108,7 +103,7 @@ export function FeedEngagement({
       <span>Like</span>
     </button>
   ) : (
-    <Link to="/auth/login" className="feed-social-card__action-btn" aria-label="Like">
+    <Link to="/auth/login" className="ios-engagement-action-bar__btn" aria-label="Like">
       <ThumbsUp className="h-5 w-5" />
       <span>Like</span>
     </Link>
@@ -146,57 +141,39 @@ export function FeedEngagement({
 
           <div className="feed-social-card__divider" />
 
-          <div className="feed-social-card__action-bar">
-            <div
-              ref={reactRef}
-              className="feed-social-card__action-slot"
+          <EngagementActionBar>
+            <ReactionHoverPickerSlot
+              pickerOpen={pickerOpen}
+              anchorRef={likeButtonRef}
+              containerRef={containerRef}
+              myReaction={engagement.myReaction}
+              disabled={setReaction.isPending}
+              onSelect={react}
               onMouseEnter={openPicker}
               onMouseLeave={scheduleClosePicker}
+              className="ios-engagement-action-bar__slot"
             >
-              {pickerOpen ? (
-                <FeedReactionPicker
-                  open={pickerOpen}
-                  anchorRef={likeButtonRef}
-                  myReaction={engagement.myReaction}
-                  disabled={setReaction.isPending}
-                  onSelect={react}
-                  onMouseEnter={openPicker}
-                  onMouseLeave={scheduleClosePicker}
-                />
-              ) : null}
               {likeButton}
-            </div>
+            </ReactionHoverPickerSlot>
 
-            <div className="feed-social-card__action-slot">
-              <button
-                type="button"
-                className="feed-social-card__action-btn"
-                aria-label="Comment"
-                onClick={openComments}
-              >
+            <EngagementActionSlot>
+              <EngagementActionButton aria-label="Comment" onClick={openComments}>
                 <MessageCircle className="h-5 w-5" />
                 <span>Comment</span>
-              </button>
-            </div>
+              </EngagementActionButton>
+            </EngagementActionSlot>
 
-            <div className="feed-social-card__action-slot">
-              <button
-                type="button"
-                className="feed-social-card__action-btn"
-                aria-label="Share"
-                onClick={openShare}
-              >
+            <EngagementActionSlot>
+              <EngagementActionButton aria-label="Share" onClick={openShare}>
                 <Share2 className="h-5 w-5" />
                 <span>Share</span>
-              </button>
-            </div>
+              </EngagementActionButton>
+            </EngagementActionSlot>
 
             {trailingAction ? (
-              <div className="feed-social-card__action-slot feed-social-card__action-slot--trailing">
-                {trailingAction}
-              </div>
+              <EngagementActionSlot trailing>{trailingAction}</EngagementActionSlot>
             ) : null}
-          </div>
+          </EngagementActionBar>
         </div>
 
         <FeedCommentDialog item={item} open={commentDialogOpen} onOpenChange={setCommentDialogOpen} />
@@ -208,21 +185,21 @@ export function FeedEngagement({
   return (
     <>
       <div>
-        <div className="feed-social-card__action-bar">
-          <div className="feed-social-card__action-slot">{likeButton}</div>
-          <div className="feed-social-card__action-slot">
-            <button type="button" className="feed-social-card__action-btn" onClick={openComments}>
+        <EngagementActionBar>
+          <EngagementActionSlot>{likeButton}</EngagementActionSlot>
+          <EngagementActionSlot>
+            <EngagementActionButton onClick={openComments}>
               <MessageCircle className="h-5 w-5" />
               <span>Comment</span>
-            </button>
-          </div>
-          <div className="feed-social-card__action-slot">
-            <button type="button" className="feed-social-card__action-btn" onClick={openShare}>
+            </EngagementActionButton>
+          </EngagementActionSlot>
+          <EngagementActionSlot>
+            <EngagementActionButton onClick={openShare}>
               <Share2 className="h-5 w-5" />
               <span>Share</span>
-            </button>
-          </div>
-        </div>
+            </EngagementActionButton>
+          </EngagementActionSlot>
+        </EngagementActionBar>
       </div>
 
       <FeedCommentDialog item={item} open={commentDialogOpen} onOpenChange={setCommentDialogOpen} />

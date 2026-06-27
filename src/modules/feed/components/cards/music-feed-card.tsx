@@ -9,6 +9,7 @@ import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-
 import { feedItemToPlayerTrack } from '@/modules/player/lib/feed-track'
 import { usePlayer } from '@/modules/player/hooks/use-player'
 import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
+import { MediaPreviewRow } from '@/shared/components/media'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 
@@ -54,87 +55,98 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact, onPostDelete
       onPostDeleted={onPostDeleted}
       headerAudioLabel={audioHeaderLine || undefined}
     >
-      <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-        <button
-          type="button"
-          className={cn(
-            'relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-primary/10 text-primary transition-colors',
-            playerTrack && 'hover:bg-primary/15',
-          )}
-          disabled={!playerTrack}
-          aria-label={showPause ? 'Pause track' : 'Play track'}
-          onClick={() => {
-            if (!playerTrack) return
-            if (isActive) {
-              togglePlay()
-              return
-            }
-            play(playerTrack)
-          }}
-        >
-          {playerTrack?.artworkUrl ? (
-            <img src={playerTrack.artworkUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          ) : (
-            <Music2 className="h-7 w-7" />
-          )}
-          {playerTrack ? (
-            <span className="absolute inset-0 grid place-items-center bg-background/35 opacity-0 transition-opacity hover:opacity-100">
-              {showPause ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
-            </span>
-          ) : null}
-        </button>
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold">{trackTitle ?? 'Shared track'}</p>
-          {artistName ? <p className="truncate text-sm text-muted-foreground">{artistName}</p> : null}
-          {!audioUrl && link ? (
-            <p className="mt-1 truncate text-xs text-muted-foreground">Stream link only — no in-app audio</p>
-          ) : null}
-        </div>
-        {link ? (
-          <Button variant="outline" size="sm" className="shrink-0 rounded-lg" asChild>
-            <a href={link} target="_blank" rel="noreferrer">
-              <ExternalLink className="mr-1 h-4 w-4" />
-              Listen
-            </a>
-          </Button>
-        ) : playerTrack ? (
-          <div className="flex shrink-0 items-center gap-1">
-            <Button
-              variant={isActive ? 'default' : 'outline'}
-              size="sm"
-              className="rounded-lg"
-              onClick={() => {
-                if (isActive) {
-                  togglePlay()
-                  return
-                }
-                play(playerTrack)
-              }}
-            >
-              {showPause ? <Pause className="mr-1 h-4 w-4" /> : <Play className="mr-1 h-4 w-4" />}
-              {showPause ? 'Pause' : 'Play'}
+      <MediaPreviewRow
+        className="border-0 bg-muted/50"
+        artwork={
+          <button
+            type="button"
+            className={cn(
+              'relative flex h-full w-full items-center justify-center overflow-hidden rounded-md border border-border/60 bg-primary/10 text-primary transition-colors',
+              playerTrack && 'hover:bg-primary/15',
+            )}
+            disabled={!playerTrack}
+            aria-label={showPause ? 'Pause track' : 'Play track'}
+            onClick={() => {
+              if (!playerTrack) return
+              if (isActive) {
+                togglePlay()
+                return
+              }
+              play(playerTrack)
+            }}
+          >
+            {playerTrack?.artworkUrl ? (
+              <img src={playerTrack.artworkUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            ) : (
+              <Music2 className="h-7 w-7" />
+            )}
+            {playerTrack ? (
+              <span className="absolute inset-0 grid place-items-center bg-background/35 opacity-0 transition-opacity hover:opacity-100">
+                {showPause ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
+              </span>
+            ) : null}
+          </button>
+        }
+        title={trackTitle ?? 'Shared track'}
+        subtitle={
+          artistName || (!audioUrl && link) ? (
+            <>
+              {artistName ? <span className="block truncate">{artistName}</span> : null}
+              {!audioUrl && link ? (
+                <span className="mt-1 block truncate text-xs text-muted-foreground">
+                  Stream link only — no in-app audio
+                </span>
+              ) : null}
+            </>
+          ) : undefined
+        }
+        trailing={
+          link ? (
+            <Button variant="outline" size="sm" className="shrink-0 rounded-lg" asChild>
+              <a href={link} target="_blank" rel="noreferrer">
+                <ExternalLink className="mr-1 h-4 w-4" />
+                Listen
+              </a>
             </Button>
-            <AddToPlaylistButton
-              trackId={playerTrack.trackId}
-              id={playerTrack.id}
-              title={playerTrack.title}
-              artist={playerTrack.artist}
-              artworkUrl={playerTrack.artworkUrl}
-            />
-            <TrackActionsMenu
-              trackId={playerTrack.trackId}
-              id={playerTrack.id}
-              title={playerTrack.title}
-              artist={playerTrack.artist}
-              audioUrl={playerTrack.audioUrl}
-              artworkUrl={playerTrack.artworkUrl}
-              durationSec={playerTrack.durationSec}
-              releaseId={playerTrack.releaseId}
-              triggerClassName="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/60"
-            />
-          </div>
-        ) : null}
-      </div>
+          ) : playerTrack ? (
+            <div className="flex shrink-0 items-center gap-1">
+              <Button
+                variant={isActive ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-lg"
+                onClick={() => {
+                  if (isActive) {
+                    togglePlay()
+                    return
+                  }
+                  play(playerTrack)
+                }}
+              >
+                {showPause ? <Pause className="mr-1 h-4 w-4" /> : <Play className="mr-1 h-4 w-4" />}
+                {showPause ? 'Pause' : 'Play'}
+              </Button>
+              <AddToPlaylistButton
+                trackId={playerTrack.trackId}
+                id={playerTrack.id}
+                title={playerTrack.title}
+                artist={playerTrack.artist}
+                artworkUrl={playerTrack.artworkUrl}
+              />
+              <TrackActionsMenu
+                trackId={playerTrack.trackId}
+                id={playerTrack.id}
+                title={playerTrack.title}
+                artist={playerTrack.artist}
+                audioUrl={playerTrack.audioUrl}
+                artworkUrl={playerTrack.artworkUrl}
+                durationSec={playerTrack.durationSec}
+                releaseId={playerTrack.releaseId}
+                triggerClassName="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/60"
+              />
+            </div>
+          ) : null
+        }
+      />
     </FeedCardShell>
   )
 }

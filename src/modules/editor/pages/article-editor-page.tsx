@@ -23,6 +23,7 @@ import { puckToBodyHtml } from '@/modules/editor/lib/puck-to-html'
 import type { PreviewDevice } from '@/modules/editor/components/article-preview-dialog'
 import { useMe } from '@/modules/auth/hooks/use-auth'
 import { Loader } from '@/shared/components/feedback/loader'
+import { WorkspaceFooter, WorkspaceHeader } from '@/shared/components/layout'
 import { Button } from '@/shared/components/ui/button'
 import type { CanvasPreviewMode } from '@/modules/editor/hooks/use-article-canvas-history'
 import { sanitizeSelectedBlockIds } from '@/modules/editor/lib/canvas-block-utils'
@@ -186,46 +187,49 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
 
   return (
     <div className="article-editor fixed inset-0 z-[100] flex flex-col bg-background text-foreground">
-      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="shrink-0"
-            aria-label="Back to editor desk"
-            onClick={() => void handleBack()}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <SaveStatusIndicator status={editor.saveStatus} />
-        </div>
+      <WorkspaceHeader
+        leading={
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="shrink-0"
+              aria-label="Back to editor desk"
+              onClick={() => void handleBack()}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <SaveStatusIndicator status={editor.saveStatus} />
+          </>
+        }
+        trailing={
+          <>
+            <Button type="button" size="sm" variant="outline" onClick={() => setTemplatesOpen(true)}>
+              <LayoutTemplate className="mr-1.5 h-4 w-4" />
+              Templates
+            </Button>
 
-        <div className="flex items-center gap-2">
-          <Button type="button" size="sm" variant="outline" onClick={() => setTemplatesOpen(true)}>
-            <LayoutTemplate className="mr-1.5 h-4 w-4" />
-            Templates
-          </Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => setSaveTemplateOpen(true)}>
+              <Save className="mr-1.5 h-4 w-4" />
+              Save template
+            </Button>
 
-          <Button type="button" size="sm" variant="outline" onClick={() => setSaveTemplateOpen(true)}>
-            <Save className="mr-1.5 h-4 w-4" />
-            Save template
-          </Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => setPreviewOpen(true)}>
+              <Eye className="mr-1.5 h-4 w-4" />
+              Preview
+            </Button>
 
-          <Button type="button" size="sm" variant="outline" onClick={() => setPreviewOpen(true)}>
-            <Eye className="mr-1.5 h-4 w-4" />
-            Preview
-          </Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => void editor.saveNow()} disabled={editor.isSaving}>
+              Save draft
+            </Button>
 
-          <Button type="button" size="sm" variant="outline" onClick={() => void editor.saveNow()} disabled={editor.isSaving}>
-            Save draft
-          </Button>
-
-          <Button type="button" size="sm" onClick={() => setPublishOpen(true)} disabled={editor.isPublishing}>
-            Publish
-          </Button>
-        </div>
-      </header>
+            <Button type="button" size="sm" onClick={() => setPublishOpen(true)} disabled={editor.isPublishing}>
+              Publish
+            </Button>
+          </>
+        }
+      />
 
       <div className="flex min-h-0 flex-1">
         <main className="article-editor__write min-h-0 min-w-0 flex-1">
@@ -291,13 +295,16 @@ export function ArticleEditorPage({ articleId: articleIdProp }: ArticleEditorPag
         />
       </div>
 
-      <footer className="flex h-11 shrink-0 items-center justify-between border-t border-border bg-card px-4 text-xs text-muted-foreground">
-        <div className="flex items-center gap-4">
-          <span>{stats.words} words</span>
-          <span>{stats.readMinutes} min read</span>
-        </div>
-        <SaveStatusIndicator status={editor.saveStatus} />
-      </footer>
+      <WorkspaceFooter
+        className="h-11 text-xs text-muted-foreground"
+        leading={
+          <div className="flex items-center gap-4">
+            <span>{stats.words} words</span>
+            <span>{stats.readMinutes} min read</span>
+          </div>
+        }
+        trailing={<SaveStatusIndicator status={editor.saveStatus} />}
+      />
 
       <ArticleTemplatesDialog
         open={templatesOpen}

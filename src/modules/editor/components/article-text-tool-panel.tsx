@@ -54,6 +54,7 @@ import {
 import type { CanvasBlockType } from '@/modules/editor/types/article-canvas.types'
 import { isTextCanvasBlock } from '@/modules/editor/types/article-canvas.types'
 import { Button } from '@/shared/components/ui/button'
+import { IconButton } from '@/shared/components/ui/icon-button'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Label } from '@/shared/components/ui/label'
 import {
@@ -149,18 +150,18 @@ function ToolIconButton({
   destructive?: boolean
 }) {
   return (
-    <button
-      type="button"
+    <IconButton
+      aria-label={title}
       title={title}
       onClick={onClick}
       className={cn(
-        'article-text-tool__icon-btn',
+        'article-text-tool__icon-btn h-auto w-auto rounded-none',
         active && 'article-text-tool__icon-btn--active',
         destructive && 'article-text-tool__icon-btn--destructive',
       )}
     >
       {children}
-    </button>
+    </IconButton>
   )
 }
 
@@ -207,14 +208,14 @@ export function ArticleTextToolPanel({
     <div className="article-text-tool article-edit-tool-panel">
       <div className="article-edit-tool-panel__header">
         <span className="article-edit-tool-panel__title">{panelTitle}</span>
-        <button
-          type="button"
-          className="article-edit-tool-panel__close"
+        <IconButton
+          aria-label="Close"
           title="Close"
           onClick={onDeselect}
+          className="article-edit-tool-panel__close h-auto w-auto rounded-none"
         >
           <X className="h-3.5 w-3.5" />
-        </button>
+        </IconButton>
       </div>
 
       <div className="article-edit-tool-panel__body">

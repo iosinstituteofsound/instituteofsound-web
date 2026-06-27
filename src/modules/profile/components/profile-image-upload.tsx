@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { ImagePlus, Loader2, X } from 'lucide-react'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { Button } from '@/shared/components/ui/button'
+import { FileDropzone } from '@/shared/components/forms'
 import { cn } from '@/shared/lib/cn'
 import { toast } from '@/shared/components/ui/sonner'
 
@@ -62,32 +63,42 @@ export function ProfileImageUpload({
         {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
       </div>
 
-      <button
-        type="button"
-        disabled={disabled || uploading}
-        onClick={() => inputRef.current?.click()}
-        className={cn(
-          'relative block overflow-hidden rounded-xl border border-dashed border-border/80 bg-muted/30 transition-colors hover:bg-muted/45 disabled:pointer-events-none disabled:opacity-60',
-          aspect === 'cover' ? 'h-36 w-full sm:h-44' : squareSizeClass[size],
-        )}
-      >
-        {value ? (
+      {value ? (
+        <button
+          type="button"
+          disabled={disabled || uploading}
+          onClick={() => inputRef.current?.click()}
+          className={cn(
+            'relative block overflow-hidden rounded-xl border border-dashed border-border/80 bg-muted/30 transition-colors hover:bg-muted/45 disabled:pointer-events-none disabled:opacity-60',
+            aspect === 'cover' ? 'h-36 w-full sm:h-44' : squareSizeClass[size],
+          )}
+        >
           <img src={value} alt={label} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-3 text-muted-foreground">
-            <ImagePlus className={cn('opacity-60', size === 'lg' ? 'h-10 w-10' : 'h-8 w-8')} />
-            {size === 'lg' ? (
-              <span className="text-center text-xs text-muted-foreground">Click to upload</span>
-            ) : null}
-          </div>
-        )}
 
-        {uploading ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/70">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        ) : null}
-      </button>
+          {uploading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/70">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : null}
+        </button>
+      ) : (
+        <FileDropzone
+          onFiles={(files) => {
+            const file = files[0]
+            if (file) void handleFile(file)
+          }}
+          accept="image/*"
+          disabled={disabled || uploading}
+          icon={<ImagePlus className={cn('opacity-60', size === 'lg' ? 'h-10 w-10' : 'h-8 w-8')} />}
+          title="Click to upload"
+          description={description}
+          className={cn(
+            aspect === 'cover' ? 'h-36 w-full sm:h-44' : squareSizeClass[size],
+            'border-border/80 bg-muted/30 hover:bg-muted/45',
+          )}
+          aria-label={label}
+        />
+      )}
 
       <div className={cn('flex flex-wrap gap-2', size === 'lg' && 'justify-center md:justify-start')}>
         <Button

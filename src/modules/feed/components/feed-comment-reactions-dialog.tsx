@@ -1,7 +1,7 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { ReactionPickerIcon } from '@/modules/feed/components/feed-reaction-icons'
+import { ReactionPickerIcon } from '@/shared/components/reactions'
 import { FeedAuthorProfileLink } from '@/modules/feed/components/feed-author-profile-link'
 import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
 import { useFeedCommentReactions } from '@/modules/feed/hooks/use-feed-engagement'

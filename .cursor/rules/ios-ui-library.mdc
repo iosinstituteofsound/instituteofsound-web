@@ -1,0 +1,29 @@
+---
+description: IOS UI Library — reuse shared components before creating new UI
+alwaysApply: true
+---
+
+# IOS UI Library (mandatory before any UI work)
+
+1. READ `src/shared/LIBRARY.md` — search for an existing component or hook
+2. REUSE from `@/shared/components` or `@/shared/hooks` — never duplicate UI in modules
+3. EXTEND via props, `className`, or children — do not fork or copy-paste
+4. NEW component only if:
+   - Not in the library AND reusable in 2+ places OR clearly generic
+   - Place in the correct tier folder under `src/shared/components/`
+   - Add `index.ts` export and a `LIBRARY.md` entry
+   - UI-only in the component file; logic in `shared/hooks/`
+5. NEVER import generic UI from `@/modules/*` — only `@/shared/*`
+6. Module-specific page layout stays in `src/modules/<name>/components/`
+
+## Banned patterns (use library instead)
+
+| Do NOT | Use instead |
+|--------|-------------|
+| Raw `<button>` for icon/toolbar actions | `IconButton` from `@/shared/components/ui/icon-button` |
+| Inline `border-dashed` empty placeholders | `EmptyState` with `variant="dashed"` or `variant="card"` |
+| Full-page centered error divs | `CenteredPageState` |
+| Duplicated pill toggles | `SegmentedControl` |
+| Duplicated sliding tab rows | `SlidingTabBar` |
+| Inline file drop zones | `FileDropzone` |
+| `feed-social-card__action-bar` markup in new code | `EngagementActionBar` kit |

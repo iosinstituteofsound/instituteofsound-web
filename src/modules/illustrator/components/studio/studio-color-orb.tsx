@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Check, ChevronDown, MoreHorizontal } from 'lucide-react'
+import { IconButton } from '@/shared/components/ui/icon-button'
 import { StudioIconTooltip } from '@/modules/illustrator/components/studio/studio-icon-tooltip'
 import { StudioColorClassic } from '@/modules/illustrator/components/studio/studio-color-classic'
 import { StudioColorDisc } from '@/modules/illustrator/components/studio/studio-color-disc'
@@ -400,9 +401,12 @@ export function StudioColorOrb({
                     {activePaletteId === palette.id ? <Check size={15} className="mas-cp-palette-card__check" /> : null}
                     {palette.name}
                   </div>
-                  <button type="button" className="mas-cp-palette-card__menu" aria-label="Options">
+                  <IconButton
+                    className="mas-cp-palette-card__menu h-auto w-auto rounded-none"
+                    aria-label="Options"
+                  >
                     <MoreHorizontal size={18} />
-                  </button>
+                  </IconButton>
                 </div>
                 <div className={`mas-cp-palette-grid${paletteView === 'cards' ? ' mas-cp-palette-grid--cards' : ''}`}>
                   {(paletteView === 'cards' ? palette.colors.slice(0, PALETTE_CARDS_COUNT) : palette.colors.slice(0, PALETTE_COMPACT_COUNT)).map((c, i) => (

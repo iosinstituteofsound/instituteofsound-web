@@ -13,6 +13,7 @@ import { WirePicksEditor } from '@/shared/components/wire-picks'
 import { SubmissionsDeskPage } from '@/modules/submissions-desk/pages/submissions-desk-page'
 import { Page, PageHeader, PageTitle, PageDescription, PageSection } from '@/shared/components/layout/page-shell'
 import { Loader } from '@/shared/components/feedback/loader'
+import { EmptyState } from '@/shared/components/feedback/states'
 
 type EditorTab = 'write' | 'published' | 'wire' | 'submissions' | 'events'
 
@@ -115,9 +116,11 @@ export function EditorDashboardPage() {
           </PageDescription>
           {publishedLoading ? <Loader /> : null}
           {!publishedLoading && (publishedArticles ?? []).length === 0 ? (
-            <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-              No published articles yet. Publish a draft from Write to see it here.
-            </p>
+            <EmptyState
+              variant="dashed"
+              title=""
+              description="No published articles yet. Publish a draft from Write to see it here."
+            />
           ) : null}
           <EditorDeskGrid
             articles={publishedArticles ?? []}

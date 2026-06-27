@@ -596,69 +596,6 @@
   background: color-mix(in oklch, var(--foreground) 8%, transparent);
 }
 
-.feed-social-card__action-bar {
-  display: flex;
-  align-items: stretch;
-  gap: 4px;
-}
-
-.feed-social-card__action-slot {
-  flex: 1;
-  min-width: 0;
-  position: relative;
-  overflow: visible;
-}
-
-.feed-social-card__action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 36px;
-  padding: 0 8px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--muted-foreground);
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.feed-social-card__action-btn:hover {
-  background: color-mix(in oklch, var(--foreground) 6%, transparent);
-  color: var(--foreground);
-}
-
-.feed-social-card__action-btn svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.feed-social-card__action-btn.is-active {
-  color: var(--primary);
-}
-
-.feed-social-card__action-btn.is-loved {
-  color: oklch(0.62 0.24 25);
-}
-
-.feed-social-card__action-btn.is-haha,
-.feed-social-card__action-btn.is-wow {
-  color: oklch(0.78 0.16 95);
-}
-
-.feed-social-card__action-btn.is-sad {
-  color: oklch(0.72 0.14 95);
-}
-
-.feed-social-card__action-btn.is-angry {
-  color: oklch(0.62 0.2 35);
-}
-
 .feed-social-card__comments {
   border-top: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
   margin-top: 4px;

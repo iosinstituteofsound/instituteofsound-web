@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { AnimatedEmojiText } from '@/modules/feed/components/animated-emoji-text'
+import { AnimatedEmojiText } from '@/shared/components/emoji'
 import { cn } from '@/shared/lib/cn'
 
 const CAPTION_CHAR_LIMIT = 280

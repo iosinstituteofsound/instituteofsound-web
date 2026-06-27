@@ -15,9 +15,11 @@ import {
 } from '@/modules/music/components/analytics-dashboard-blocks'
 import { ReleaseLocationMap } from '@/modules/explore/components/release-location-map'
 import { ReleaseListenerCard } from '@/modules/explore/components/release-listener-card'
+import { SectionHeader } from '@/shared/components/layout'
 import '@/modules/explore/styles/release-analytics.css'
 
 import { useAnalyticsRealtime } from '@/modules/music/hooks/use-analytics-realtime'
+import { SegmentedControl } from '@/shared/components/controls'
 
 type Props = {
   releaseId: string
@@ -52,21 +54,24 @@ export function ReleaseAnalyticsPanel({ releaseId, primaryTrackId }: Props) {
 
   return (
     <section className="ios-release-analytics" aria-label="Release analytics">
-      <div className="ios-release-analytics__header">
-        <h2 className="ios-mh-kicker">Listening analytics</h2>
-        {primaryTrackId ? (
-          <button
-            type="button"
-            className={`ios-release-analytics__like${analytics.userLiked ? ' is-active' : ''}`}
-            onClick={() => likeMutation.mutate()}
-            disabled={likeMutation.isPending}
-          >
-            <Heart size={16} fill={analytics.userLiked ? 'currentColor' : 'none'} />
-            {analytics.userLiked ? 'Liked' : 'Like'}
-            <span>{formatPlays(analytics.activeLikes)}</span>
-          </button>
-        ) : null}
-      </div>
+      <SectionHeader
+        className="ios-release-analytics__header [&_h2]:ios-mh-kicker"
+        title="Listening analytics"
+        action={
+          primaryTrackId ? (
+            <button
+              type="button"
+              className={`ios-release-analytics__like${analytics.userLiked ? ' is-active' : ''}`}
+              onClick={() => likeMutation.mutate()}
+              disabled={likeMutation.isPending}
+            >
+              <Heart size={16} fill={analytics.userLiked ? 'currentColor' : 'none'} />
+              {analytics.userLiked ? 'Liked' : 'Like'}
+              <span>{formatPlays(analytics.activeLikes)}</span>
+            </button>
+          ) : null
+        }
+      />
 
       <div className="ios-release-analytics__grid">
         <AnalyticsStatCell label="Plays" value={formatPlays(analytics.qualifiedPlays)} />
@@ -83,14 +88,16 @@ export function ReleaseAnalyticsPanel({ releaseId, primaryTrackId }: Props) {
         <div className="ios-release-analytics__section-head">
           <TrendingUp size={16} aria-hidden />
           <h3>Trends</h3>
-          <div className="ios-release-analytics__range">
-            <button type="button" className={range === '7d' ? 'is-active' : ''} onClick={() => setRange('7d')}>
-              7d
-            </button>
-            <button type="button" className={range === '30d' ? 'is-active' : ''} onClick={() => setRange('30d')}>
-              30d
-            </button>
-          </div>
+          <SegmentedControl
+            value={range}
+            options={[
+              { value: '7d', label: '7d' },
+              { value: '30d', label: '30d' },
+            ]}
+            onChange={setRange}
+            className="ios-release-analytics__range"
+            aria-label="Trend range"
+          />
         </div>
         {trends?.length ? <AnalyticsTrendsChart points={trends} /> : (
           <p className="ios-release-analytics__empty">Play this release to see trends.</p>

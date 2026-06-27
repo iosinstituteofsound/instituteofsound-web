@@ -1,4 +1,5 @@
 import { Award, Menu, Shield } from 'lucide-react'
+import { WorkspaceHeader } from '@/shared/components/layout'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/cn'
 import { SIDEBAR_WIDTH_CLASS } from '@/shared/lib/layout-config'
@@ -79,33 +80,31 @@ export function LayoutDashboardPreview({
 
         <div className="flex min-w-0 flex-1 flex-col">
           {config.header.visible ? (
-            <header
-              className={cn(
-                'flex shrink-0 items-center justify-between border-b border-border/80 bg-background px-3',
-                compact ? 'h-8' : 'h-10',
-              )}
-            >
-              {config.header.showMenuToggle ? <Menu className="h-3.5 w-3.5 text-foreground" /> : <span />}
-              <div className="flex items-center gap-1.5">
-                {config.header.showIdentity ? (
-                  <>
-                    <span className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary px-2 py-0.5 text-[8px] font-semibold text-primary-foreground">
-                      <Shield className="h-2.5 w-2.5" />
-                      Super Admin
+            <WorkspaceHeader
+              className={cn('border-border/80 bg-background px-3', compact ? 'h-8' : 'h-10')}
+              leading={config.header.showMenuToggle ? <Menu className="h-3.5 w-3.5 text-foreground" /> : <span />}
+              trailing={
+                <>
+                  {config.header.showIdentity ? (
+                    <>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary px-2 py-0.5 text-[8px] font-semibold text-primary-foreground">
+                        <Shield className="h-2.5 w-2.5" />
+                        Super Admin
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent px-2 py-0.5 text-[8px] font-semibold text-accent-foreground">
+                        <Award className="h-2.5 w-2.5" />
+                        {layoutName?.trim() || 'Badge'}
+                      </span>
+                    </>
+                  ) : null}
+                  {config.header.showProfileMenu ? (
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-[8px] font-semibold text-secondary-foreground">
+                      IO
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent px-2 py-0.5 text-[8px] font-semibold text-accent-foreground">
-                      <Award className="h-2.5 w-2.5" />
-                      {layoutName?.trim() || 'Badge'}
-                    </span>
-                  </>
-                ) : null}
-                {config.header.showProfileMenu ? (
-                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-[8px] font-semibold text-secondary-foreground">
-                    IO
-                  </span>
-                ) : null}
-              </div>
-            </header>
+                  ) : null}
+                </>
+              }
+            />
           ) : null}
 
           <main className={cn('flex-1 space-y-2 bg-background', compact ? 'p-2' : 'p-3')}>

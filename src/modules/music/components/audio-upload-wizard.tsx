@@ -11,6 +11,7 @@ import {
 import { AudioLibraryConsentToggle } from '@/modules/music/components/audio-library-consent-toggle'
 import { ProcessingStatus } from '@/modules/music/components/processing-status'
 import { Button } from '@/shared/components/ui/button'
+import { FileDropzone } from '@/shared/components/forms'
 import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/cn'
 
@@ -87,25 +88,22 @@ export function AudioUploadWizard({ onComplete }: AudioUploadWizardProps) {
 
   return (
     <div className="space-y-6">
-      <div
+      <FileDropzone
+        onFiles={(files) => {
+          const file = files[0] ?? null
+          setSelectedFile(file)
+          if (file && !title) setTitle(file.name.replace(/\.[^.]+$/, ''))
+        }}
+        accept="audio/*"
+        title="Drop any audio format"
+        description="We convert to AAC for streaming"
+        icon={<Upload className="size-10 text-muted-foreground" />}
         className={cn(
-          'flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-10 text-center',
+          'rounded-xl p-10',
           selectedFile ? 'border-primary/50 bg-primary/5' : 'border-muted-foreground/25',
         )}
-      >
-        <Upload className="size-10 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Drop any audio format — we convert to AAC for streaming</p>
-        <Input
-          type="file"
-          accept="audio/*"
-          className="max-w-xs"
-          onChange={(e) => {
-            const file = e.target.files?.[0] ?? null
-            setSelectedFile(file)
-            if (file && !title) setTitle(file.name.replace(/\.[^.]+$/, ''))
-          }}
-        />
-      </div>
+        aria-label="Upload audio"
+      />
 
       <Input placeholder="Song name" value={title} onChange={(e) => setTitle(e.target.value)} />
 

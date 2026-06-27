@@ -1,7 +1,7 @@
 import { memo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronDown, Search, UserRound, VolumeX } from 'lucide-react'
-import { FeedUserAvatar } from '@/modules/feed/components/feed-user-avatar'
+import { UserAvatar } from '@/shared/components/user'
 import { getThreadAvatarUrl, getThreadDisplayName } from '@/modules/messenger/lib/messenger-utils'
 import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
 import { cn } from '@/shared/lib/cn'
@@ -31,7 +31,7 @@ export const ThreadInfoPanel = memo(function ThreadInfoPanel({ thread }: ThreadI
   return (
     <aside className="messenger-panel messenger-info">
       <div className="messenger-info__hero">
-        <FeedUserAvatar
+        <UserAvatar
           name={getThreadDisplayName(thread)}
           avatarUrl={getThreadAvatarUrl(thread)}
           className="h-28 w-28"

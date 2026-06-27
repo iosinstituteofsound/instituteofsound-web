@@ -18,6 +18,7 @@ import { useEnrichedMusicFeedItem } from '@/modules/feed/hooks/use-enriched-musi
 import { feedItemHasAttachedAudio, FeedPostSoundToggle } from '@/modules/feed/components/feed-post-sound-toggle'
 import { feedItemToPlayerTrack } from '@/modules/player/lib/feed-track'
 import { usePlayer } from '@/modules/player/hooks/use-player'
+import { MediaPreviewRow } from '@/shared/components/media'
 import { Button } from '@/shared/components/ui/button'
 
 function FeedPostMedia({ item }: { item: FeedItemDto }) {
@@ -95,43 +96,16 @@ function MusicFeedPreviewBlock({ item }: { item: FeedItemDto }) {
   const showPause = isActive && isPlaying
 
   return (
-    <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-      <button
-        type="button"
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-primary/10 text-primary"
-        disabled={!playerTrack}
-        aria-label={showPause ? 'Pause track' : 'Play track'}
-        onClick={() => {
-          if (!playerTrack) return
-          if (isActive) {
-            togglePlay()
-            return
-          }
-          play(playerTrack)
-        }}
-      >
-        {showPause ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
-      </button>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-sm">{trackTitle ?? 'Shared track'}</p>
-        {artistName ? <p className="truncate text-xs text-muted-foreground">{artistName}</p> : null}
-        {!audioUrl && link ? (
-          <p className="mt-1 truncate text-xs text-muted-foreground">Stream link only — no in-app audio</p>
-        ) : null}
-      </div>
-      {link ? (
-        <Button variant="outline" size="sm" className="shrink-0 rounded-lg" asChild>
-          <a href={link} target="_blank" rel="noreferrer">
-            <ExternalLink className="mr-1 h-3.5 w-3.5" />
-            Listen
-          </a>
-        </Button>
-      ) : playerTrack ? (
-        <Button
-          variant={isActive ? 'default' : 'outline'}
-          size="sm"
-          className="shrink-0 rounded-lg"
+    <MediaPreviewRow
+      className="border-0 bg-muted/50"
+      artwork={
+        <button
+          type="button"
+          className="flex h-full w-full items-center justify-center rounded-md border border-border/60 bg-primary/10 text-primary"
+          disabled={!playerTrack}
+          aria-label={showPause ? 'Pause track' : 'Play track'}
           onClick={() => {
+            if (!playerTrack) return
             if (isActive) {
               togglePlay()
               return
@@ -139,10 +113,48 @@ function MusicFeedPreviewBlock({ item }: { item: FeedItemDto }) {
             play(playerTrack)
           }}
         >
-          {showPause ? 'Pause' : 'Play'}
-        </Button>
-      ) : null}
-    </div>
+          {showPause ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
+        </button>
+      }
+      title={<span className="font-semibold">{trackTitle ?? 'Shared track'}</span>}
+      subtitle={
+        artistName || (!audioUrl && link) ? (
+          <>
+            {artistName ? <span className="block truncate">{artistName}</span> : null}
+            {!audioUrl && link ? (
+              <span className="mt-1 block truncate text-xs text-muted-foreground">
+                Stream link only — no in-app audio
+              </span>
+            ) : null}
+          </>
+        ) : undefined
+      }
+      trailing={
+        link ? (
+          <Button variant="outline" size="sm" className="shrink-0 rounded-lg" asChild>
+            <a href={link} target="_blank" rel="noreferrer">
+              <ExternalLink className="mr-1 h-3.5 w-3.5" />
+              Listen
+            </a>
+          </Button>
+        ) : playerTrack ? (
+          <Button
+            variant={isActive ? 'default' : 'outline'}
+            size="sm"
+            className="shrink-0 rounded-lg"
+            onClick={() => {
+              if (isActive) {
+                togglePlay()
+                return
+              }
+              play(playerTrack)
+            }}
+          >
+            {showPause ? 'Pause' : 'Play'}
+          </Button>
+        ) : null
+      }
+    />
   )
 }
 

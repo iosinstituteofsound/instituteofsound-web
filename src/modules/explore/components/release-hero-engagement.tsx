@@ -4,8 +4,14 @@ import { MessageCircle, Share2, ThumbsUp } from 'lucide-react'
 import { useAuthStore } from '@/app/stores/auth-store'
 import { FeedEngagement } from '@/modules/feed/components/feed-engagement'
 import { useReleaseFeedItem } from '@/modules/explore/hooks/use-release-feed-item'
+import {
+  EngagementActionBar,
+  EngagementActionButton,
+  EngagementActionSlot,
+} from '@/shared/components/engagement'
 import { toast } from '@/shared/components/ui/sonner'
 import '@/modules/feed/components/cards/feed-card.css'
+import '@/shared/components/engagement/engagement-action-bar.css'
 
 interface ReleaseHeroEngagementProps {
   releaseId: string
@@ -14,7 +20,7 @@ interface ReleaseHeroEngagementProps {
 }
 
 const OPTIONS_TRIGGER_CLASS =
-  'feed-social-card__action-btn explore-release-hero__options-trigger'
+  'ios-engagement-action-bar__btn explore-release-hero__options-trigger'
 
 function ReleaseHeroSocialFallback({
   releaseTitle,
@@ -49,17 +55,12 @@ function ReleaseHeroSocialFallback({
   }
 
   const likeButton = userId ? (
-    <button
-      type="button"
-      className="feed-social-card__action-btn"
-      aria-label="Like"
-      onClick={promptEngagement}
-    >
+    <EngagementActionButton aria-label="Like" onClick={promptEngagement}>
       <ThumbsUp className="h-5 w-5" />
       <span>Like</span>
-    </button>
+    </EngagementActionButton>
   ) : (
-    <Link to="/auth/login" className="feed-social-card__action-btn" aria-label="Like">
+    <Link to="/auth/login" className="ios-engagement-action-bar__btn" aria-label="Like">
       <ThumbsUp className="h-5 w-5" />
       <span>Like</span>
     </Link>
@@ -68,44 +69,29 @@ function ReleaseHeroSocialFallback({
   return (
     <div className="feed-social-card__engagement">
       <div className="feed-social-card__divider" />
-      <div className="feed-social-card__action-bar">
-        <div className="feed-social-card__action-slot">{likeButton}</div>
-        <div className="feed-social-card__action-slot">
+      <EngagementActionBar>
+        <EngagementActionSlot>{likeButton}</EngagementActionSlot>
+        <EngagementActionSlot>
           {userId ? (
-            <button
-              type="button"
-              className="feed-social-card__action-btn"
-              aria-label="Comment"
-              onClick={promptEngagement}
-            >
+            <EngagementActionButton aria-label="Comment" onClick={promptEngagement}>
               <MessageCircle className="h-5 w-5" />
               <span>Comment</span>
-            </button>
+            </EngagementActionButton>
           ) : (
-            <Link to="/auth/login" className="feed-social-card__action-btn" aria-label="Comment">
+            <Link to="/auth/login" className="ios-engagement-action-bar__btn" aria-label="Comment">
               <MessageCircle className="h-5 w-5" />
               <span>Comment</span>
             </Link>
           )}
-        </div>
-        <div className="feed-social-card__action-slot">
-          <button
-            type="button"
-            className="feed-social-card__action-btn"
-            aria-label="Share"
-            disabled={busy}
-            onClick={() => void share()}
-          >
+        </EngagementActionSlot>
+        <EngagementActionSlot>
+          <EngagementActionButton aria-label="Share" disabled={busy} onClick={() => void share()}>
             <Share2 className="h-5 w-5" />
             <span>Share</span>
-          </button>
-        </div>
-        {menu ? (
-          <div className="feed-social-card__action-slot feed-social-card__action-slot--trailing">
-            {menu}
-          </div>
-        ) : null}
-      </div>
+          </EngagementActionButton>
+        </EngagementActionSlot>
+        {menu ? <EngagementActionSlot trailing>{menu}</EngagementActionSlot> : null}
+      </EngagementActionBar>
     </div>
   )
 }

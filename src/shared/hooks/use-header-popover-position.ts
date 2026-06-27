@@ -1,6 +1,6 @@
 import { useLayoutEffect, useState, type CSSProperties, type RefObject } from 'react'
 
-type HeaderPopoverPositionOptions = {
+export type HeaderPopoverPositionOptions = {
   width?: number
   maxHeight?: number
   gap?: number

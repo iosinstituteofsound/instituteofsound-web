@@ -1,3 +1,4 @@
+/** @deprecated Use Drawer from `@/shared/components/ui/drawer` directly. */
 import * as React from 'react'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/components/ui/drawer'
 

@@ -8,6 +8,7 @@ import { filterIllustratorTrendByDays, formatIllustratorCount } from '@/modules/
 import { DashboardLineChart } from '@/modules/music/components/artist-dashboard/dashboard-line-chart'
 import { AppBreadcrumb } from '@/shared/components/navigation/app-breadcrumb'
 import { Loader } from '@/shared/components/feedback/loader'
+import { EmptyState } from '@/shared/components/feedback/states'
 import { Page, PageDescription, PageHeader, PageHeaderMain, PageSection, PageTitle } from '@/shared/components/layout/page-shell'
 import '@/modules/music/styles/artist-analytics.css'
 import '@/modules/music/styles/artist-dashboard-home.css'
@@ -112,9 +113,11 @@ export function IllustratorAnalyticsPage() {
               ))}
             </div>
           ) : (
-            <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-              No artwork analytics yet. Image posts on the feed power this dashboard.
-            </p>
+            <EmptyState
+              variant="dashed"
+              title=""
+              description="No artwork analytics yet. Image posts on the feed power this dashboard."
+            />
           )}
         </section>
       </PageSection>

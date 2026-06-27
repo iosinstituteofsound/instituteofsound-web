@@ -11,7 +11,7 @@ import { sortFeedItemsLatest } from '@/modules/feed/lib/feed-sort'
 import { isStoryItem } from '@/modules/feed/lib/story-utils'
 import type { FeedItemType } from '@/modules/feed/types/feed.types'
 import { PageLoader } from '@/shared/components/feedback/loader'
-import { ErrorState } from '@/shared/components/feedback/states'
+import { EmptyState, ErrorState } from '@/shared/components/feedback/states'
 import { useInfiniteScroll } from '@/shared/hooks/use-infinite-scroll'
 import { cn } from '@/shared/lib/cn'
 
@@ -103,19 +103,19 @@ export function FeedList({
 
   if (!items.length) {
     return (
-      <div className="rounded-lg border border-dashed bg-card p-10 text-center shadow-sm">
-        <p className="font-medium">
-          {scope === 'following' ? 'No posts from people you follow' : 'No posts yet'}
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {emptyMessage ??
-            (scope === 'following'
-              ? 'Follow artists and operators to see their posts here.'
-              : authorId
-                ? 'Posts from this profile will show up here.'
-                : 'Be the first to share something with the community.')}
-        </p>
-      </div>
+      <EmptyState
+        variant="dashed"
+        className="p-10"
+        title={scope === 'following' ? 'No posts from people you follow' : 'No posts yet'}
+        description={
+          emptyMessage ??
+          (scope === 'following'
+            ? 'Follow artists and operators to see their posts here.'
+            : authorId
+              ? 'Posts from this profile will show up here.'
+              : 'Be the first to share something with the community.')
+        }
+      />
     )
   }
 

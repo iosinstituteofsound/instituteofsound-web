@@ -12,8 +12,9 @@ import {
 } from 'lucide-react'
 import type { AboutProfile } from '@/modules/profile/types/about-profile.types'
 import type { UserDto } from '@/shared/types/auth.types'
+import { PanelCard } from '@/shared/components/layout'
 import { Button } from '@/shared/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Card, CardContent } from '@/shared/components/ui/card'
 import { cn } from '@/shared/lib/cn'
 import { mergeAboutProfile } from '@/modules/profile/components/about/about-ui'
 
@@ -39,10 +40,10 @@ function SidebarCard({
   action?: React.ReactNode
 }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 px-4 py-3">
-        <CardTitle className="text-[17px] font-bold">{title}</CardTitle>
-        {editable && onEdit ? (
+    <PanelCard
+      title={title}
+      action={
+        editable && onEdit ? (
           <button
             type="button"
             onClick={onEdit}
@@ -51,11 +52,12 @@ function SidebarCard({
           >
             <Pencil className="h-4 w-4 text-muted-foreground" />
           </button>
-        ) : null}
-      </CardHeader>
-      <CardContent className="space-y-3 px-4 pb-4 pt-0">{children}</CardContent>
-      {action ? <div className="border-t px-4 py-3">{action}</div> : null}
-    </Card>
+        ) : null
+      }
+    >
+      {children}
+      {action ? <div className="border-t pt-3">{action}</div> : null}
+    </PanelCard>
   )
 }
 
@@ -220,23 +222,18 @@ export function ProfileIntroSidebar({
       ) : null}
 
       {editable ? (
-        <Card>
-          <CardHeader className="px-4 py-3">
-            <CardTitle className="text-[17px] font-bold">Highlights</CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0">
-            <Button variant="secondary" className="w-full rounded-lg">
-              <Plus className="mr-2 h-4 w-4" />
-              Add highlights
-            </Button>
-          </CardContent>
-        </Card>
+        <PanelCard title="Highlights">
+          <Button variant="secondary" className="w-full rounded-lg">
+            <Plus className="mr-2 h-4 w-4" />
+            Add highlights
+          </Button>
+        </PanelCard>
       ) : null}
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 px-4 py-3">
-          <CardTitle className="text-[17px] font-bold">Photos</CardTitle>
-          {onSeeAllPhotos ? (
+      <PanelCard
+        title="Photos"
+        action={
+          onSeeAllPhotos ? (
             <button
               type="button"
               onClick={onSeeAllPhotos}
@@ -244,28 +241,27 @@ export function ProfileIntroSidebar({
             >
               See all photos
             </button>
-          ) : null}
-        </CardHeader>
-        <CardContent className="px-4 pb-4 pt-0">
-          {photos.length ? (
-            <div className={cn('grid gap-1', photos.length > 1 ? 'grid-cols-3' : 'grid-cols-1')}>
-              {photos.slice(0, 9).map((photo, index) => (
-                <div
-                  key={`${photo}-${index}`}
-                  className={cn(
-                    'overflow-hidden rounded-md bg-muted',
-                    index === 0 && photos.length > 1 ? 'col-span-2 row-span-2 aspect-square' : 'aspect-square',
-                  )}
-                >
-                  <img src={photo} alt="" className="h-full w-full object-cover" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No photos to show.</p>
-          )}
-        </CardContent>
-      </Card>
+          ) : null
+        }
+      >
+        {photos.length ? (
+          <div className={cn('grid gap-1', photos.length > 1 ? 'grid-cols-3' : 'grid-cols-1')}>
+            {photos.slice(0, 9).map((photo, index) => (
+              <div
+                key={`${photo}-${index}`}
+                className={cn(
+                  'overflow-hidden rounded-md bg-muted',
+                  index === 0 && photos.length > 1 ? 'col-span-2 row-span-2 aspect-square' : 'aspect-square',
+                )}
+              >
+                <img src={photo} alt="" className="h-full w-full object-cover" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No photos to show.</p>
+        )}
+      </PanelCard>
 
       {editable ? (
         <Button asChild variant="secondary" className="w-full">

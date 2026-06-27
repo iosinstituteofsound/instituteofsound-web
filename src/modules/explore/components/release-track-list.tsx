@@ -4,6 +4,7 @@ import type { ReleaseDetailDto, TrackDto } from '@/modules/music/types/music.typ
 import { trackPagePath } from '@/modules/explore/lib/track-paths'
 import { AddToPlaylistButton } from '@/modules/music/components/add-to-playlist-button'
 import { TrackActionsMenu } from '@/modules/music/components/track-actions-menu'
+import { DividedList } from '@/shared/components/layout'
 import { cn } from '@/shared/lib/cn'
 
 type ReleaseTrackListProps = {
@@ -24,15 +25,15 @@ export function ReleaseTrackList({
   if (!tracks.length) return null
 
   return (
-    <ol className={cn('explore-release-tracklist mt-4 divide-y rounded-lg border', className)}>
+    <DividedList className={cn('explore-release-tracklist mt-4', className)}>
       {tracks.map((track, index) => {
         const isCurrent = track.id === currentTrackId
 
         return (
-          <li
+          <div
             key={track.id}
             className={cn(
-              'flex items-center justify-between gap-2 px-4 py-3',
+              'flex items-center justify-between gap-2 py-3',
               isCurrent && 'is-current',
             )}
           >
@@ -74,9 +75,9 @@ export function ReleaseTrackList({
                 triggerClassName="explore-release-hero__btn explore-release-hero__btn--line"
               />
             </div>
-          </li>
+          </div>
         )
       })}
-    </ol>
+    </DividedList>
   )
 }
