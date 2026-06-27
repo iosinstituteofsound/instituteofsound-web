@@ -23,6 +23,8 @@ export function DashboardLayout() {
   const showHeader = dashboardConfig.header.visible
   const showMobileNav = showSidebar && isMobile
   const isMessengerRoute = location.pathname.startsWith('/messenger')
+  const isReelsRoute = location.pathname.startsWith('/reels')
+  const isFullBleedRoute = isMessengerRoute || isReelsRoute
 
   useBodyScrollLock(showSidebar && mobileOpen && isMobile)
 
@@ -79,14 +81,15 @@ export function DashboardLayout() {
           ref={mainScrollRef}
           className={cn(
             'ios-dashboard-main min-h-0 flex-1 overflow-x-hidden',
-            isMessengerRoute ? 'flex flex-col overflow-hidden' : 'overflow-y-auto',
+            isFullBleedRoute ? 'flex flex-col overflow-hidden' : 'overflow-y-auto',
+            isReelsRoute && 'ios-dashboard-main--reels',
           )}
         >
           <div
             className={cn(
-              MAIN_PADDING_CLASS[dashboardConfig.main.padding],
-              MAIN_MAX_WIDTH_CLASS[dashboardConfig.main.maxWidth],
-              isMessengerRoute && 'flex min-h-0 flex-1 flex-col',
+              !isFullBleedRoute && MAIN_PADDING_CLASS[dashboardConfig.main.padding],
+              !isFullBleedRoute && MAIN_MAX_WIDTH_CLASS[dashboardConfig.main.maxWidth],
+              isFullBleedRoute && 'flex min-h-0 flex-1 flex-col',
             )}
           >
             <Outlet />

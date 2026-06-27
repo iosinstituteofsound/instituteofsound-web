@@ -80,6 +80,11 @@ const FeedPage = lazy(() =>
     default: m.FeedPage,
   })),
 )
+const ReelsPage = lazy(() =>
+  import('@/modules/reels/pages/reels-page').then((m) => ({
+    default: m.ReelsPage,
+  })),
+)
 const MessengerPage = lazy(() =>
   import('@/modules/messenger/pages/messenger-page').then((m) => ({
     default: m.MessengerPage,
@@ -366,6 +371,18 @@ export const router = createBrowserRouter([
             <PermissionGuard resource="feed" action="read">
               <Lazy>
                 <FeedPage />
+              </Lazy>
+            </PermissionGuard>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'reels',
+        element: (
+          <ResourceGuard name="FeedPage">
+            <PermissionGuard resource="feed" action="read">
+              <Lazy>
+                <ReelsPage />
               </Lazy>
             </PermissionGuard>
           </ResourceGuard>

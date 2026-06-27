@@ -2,6 +2,9 @@ export function resolveMobilePageTitle(pathname: string): string {
   if (pathname === '/home' || pathname === '/feed' || pathname.startsWith('/feed/')) {
     return 'Feed'
   }
+  if (pathname === '/reels' || pathname.startsWith('/reels/')) {
+    return 'Reels'
+  }
   if (pathname === '/explore' || pathname.startsWith('/explore/')) {
     return 'Explore'
   }

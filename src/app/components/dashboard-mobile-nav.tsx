@@ -46,6 +46,11 @@ export function DashboardMobileNav() {
       items.push(feedTab)
     }
 
+    const reelsTab = HEADER_NAV_TABS.find((tab) => tab.path === '/reels')
+    if (reelsTab && canSeeTab(reelsTab, hasResource, can)) {
+      items.push(reelsTab)
+    }
+
     if (canSeeTab(EXPLORE_TAB, hasResource, can)) {
       items.push(EXPLORE_TAB)
     }

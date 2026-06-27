@@ -18,6 +18,7 @@ export const REGISTERED_PAGES = [
   'LayoutsPage',
   'ProfileTabsPage',
   'FeedPage',
+  'ReelsPage',
   'MessengerPage',
   'ProfilePage',
   'IdentityPage',

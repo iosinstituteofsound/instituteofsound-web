@@ -1,4 +1,4 @@
-export const HEADER_NAV_PATHS = new Set(['/home', '/feed', '/dashboard'])
+export const HEADER_NAV_PATHS = new Set(['/home', '/feed', '/reels', '/dashboard'])
 
 export type HeaderNavTab = {
   label: string
@@ -13,6 +13,13 @@ export const HEADER_NAV_TABS: HeaderNavTab[] = [
     label: 'Feed',
     path: '/home',
     icon: 'Rss',
+    resourceName: 'FeedPage',
+    permission: { resource: 'feed', action: 'read' },
+  },
+  {
+    label: 'Reels',
+    path: '/reels',
+    icon: 'Clapperboard',
     resourceName: 'FeedPage',
     permission: { resource: 'feed', action: 'read' },
   },

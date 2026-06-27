@@ -1,0 +1,7 @@
+export { ReelsPage } from '@/modules/reels/pages/reels-page'
+export { ReelsViewer } from '@/modules/reels/components/reels-viewer'
+export { ReelVideo } from '@/modules/reels/components/reel-video'
+export { ReelSlide } from '@/modules/reels/components/reel-slide'
+export { ReelActions } from '@/modules/reels/components/reel-actions'
+export { useReelsFeed } from '@/modules/reels/hooks/use-reels-feed'
+export { isReelItem } from '@/modules/reels/lib/reel-item'
