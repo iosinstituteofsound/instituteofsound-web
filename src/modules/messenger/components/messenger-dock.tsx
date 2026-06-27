@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { MessengerChatWindow } from '@/modules/messenger/components/messenger-chat-window'
 import { MessengerDockStack } from '@/modules/messenger/components/messenger-dock-stack'
-import { appendMessageToCache } from '@/modules/messenger/hooks/use-messenger-messages'
+import { appendMessageToCache, patchMessageInCache } from '@/modules/messenger/hooks/use-messenger-messages'
 import { useMessengerSettings } from '@/modules/messenger/hooks/use-messenger-settings'
 import {
   messengerThreadsQueryKey,
@@ -68,9 +68,14 @@ function MessengerPopupRealtime() {
       setTyping(payload.threadId, payload.userId, payload.isTyping)
     })
 
+    const offUpdated = realtimeSocketClient.onMessengerMessageUpdated((message) => {
+      patchMessageInCache(queryClient, message)
+    })
+
     return () => {
       offMessage()
       offTyping()
+      offUpdated()
     }
   }, [
     openChat,

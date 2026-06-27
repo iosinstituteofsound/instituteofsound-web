@@ -30,15 +30,36 @@ export function formatMessengerTime(iso?: string) {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
-export function formatMessageDateSeparator(iso: string) {
+export function formatMessageFullTimestamp(iso: string) {
   const date = new Date(iso)
   return date.toLocaleString(undefined, {
+    day: '2-digit',
+    month: '2-digit',
     year: 'numeric',
-    month: 'short',
-    day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+export function formatMessageDaySeparator(iso: string) {
+  const date = new Date(iso)
+  const now = new Date()
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const diffDays = Math.floor((startOfToday.getTime() - startOfDate.getTime()) / 86_400_000)
+
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+
+  if (now.getFullYear() === date.getFullYear()) {
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  }
+
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+export function formatMessageDateSeparator(iso: string) {
+  return formatMessageDaySeparator(iso)
 }
 
 export function groupMessagesByDate<T extends { createdAt: string }>(messages: T[]) {

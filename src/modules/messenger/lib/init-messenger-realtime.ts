@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { meQueryKey } from '@/modules/auth/hooks/use-auth'
 import * as messengerApi from '@/modules/messenger/api/messenger.api'
-import { appendMessageToCache } from '@/modules/messenger/hooks/use-messenger-messages'
+import { appendMessageToCache, patchMessageInCache } from '@/modules/messenger/hooks/use-messenger-messages'
 import {
   messengerThreadsQueryKey,
   messengerUnreadQueryKey,
@@ -45,6 +45,10 @@ export function initMessengerRealtime(queryClient: QueryClient): void {
 
     useMessengerLiveStore.getState().incrementUnread()
     void queryClient.invalidateQueries({ queryKey: messengerThreadsQueryKey })
+  })
+
+  realtimeSocketClient.onMessengerMessageUpdated((message) => {
+    patchMessageInCache(queryClient, message)
   })
 
   realtimeSocketClient.onMessengerThread((thread) => {
