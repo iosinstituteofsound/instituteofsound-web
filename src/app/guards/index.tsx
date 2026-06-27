@@ -73,14 +73,10 @@ interface ResourceGuardProps {
 
 export function ResourceGuard({ children, name, type = 'PAGE' }: ResourceGuardProps) {
   const location = useLocation()
-  const { hasResource, canAccessPath, hydrated, sidebarSynced, isSuperAdmin } = usePermission()
+  const { hasResource, canAccessPath, hydrated, sidebarSynced } = usePermission()
   const { isLoading: sidebarLoading } = useSidebar()
 
   if (!hydrated) return <PageLoader />
-
-  if (isSuperAdmin) {
-    return <>{children}</>
-  }
 
   if (sidebarLoading || !sidebarSynced) return <PageLoader />
 

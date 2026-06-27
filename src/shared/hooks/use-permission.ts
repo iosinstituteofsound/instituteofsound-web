@@ -34,11 +34,9 @@ export function usePermission() {
       hasResource(resourceNames, isSuperAdmin, name, type),
     hasAnyResource: (names: string[], type: ResourceType = 'PAGE') =>
       hasAnyResource(resourceNames, isSuperAdmin, names, type),
-    canAccessPath: (path: string) => {
-      if (isSuperAdmin) return true
-      return sidebarPaths.some(
+    canAccessPath: (path: string) =>
+      sidebarPaths.some(
         (itemPath) => path === itemPath || path.startsWith(`${itemPath}/`),
-      )
-    },
+      ),
   }
 }

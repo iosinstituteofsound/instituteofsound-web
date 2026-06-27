@@ -47,6 +47,16 @@ export const usePermissionStore = create<PermissionState>((set) => ({
       })
       const sidebarPaths = items.map((item) => item.path)
 
+      // Super admins switch persona roles for layout testing — scope UI access to the active role's sidebar.
+      if (state.isSuperAdmin) {
+        return {
+          resourceNames: [...new Set(resourceNames)],
+          permissions: [...new Set(permissions)],
+          sidebarPaths,
+          sidebarSynced: true,
+        }
+      }
+
       return {
         resourceNames: [...new Set([...state.resourceNames, ...resourceNames])],
         permissions: [...new Set([...state.permissions, ...permissions])],

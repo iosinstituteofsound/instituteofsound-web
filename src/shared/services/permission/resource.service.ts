@@ -2,11 +2,10 @@ import { isRegisteredResource, type ResourceType } from '@/shared/lib/resource-r
 
 export function hasResource(
   resourceNames: string[],
-  isSuperAdmin: boolean,
+  _isSuperAdmin: boolean,
   name: string,
   type: ResourceType = 'PAGE',
 ): boolean {
-  if (isSuperAdmin) return true
   if (!isRegisteredResource(name, type)) return false
   return resourceNames.includes(name)
 }
