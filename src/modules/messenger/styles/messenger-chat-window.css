@@ -416,6 +416,22 @@
   justify-content: flex-end;
 }
 
+.messenger-chat-window__scroll .messenger-reply-stack {
+  max-width: 88%;
+}
+
+.messenger-chat-window__scroll .messenger-reply-stack.is-outgoing {
+  margin-left: auto;
+}
+
+.messenger-chat-window__scroll .messenger-reply-stack__quoted {
+  background: color-mix(in oklch, var(--foreground) 14%, var(--card));
+}
+
+.messenger-chat-window__scroll .messenger-reply-stack .messenger-bubble.is-outgoing {
+  align-self: flex-end;
+}
+
 .messenger-chat-window__scroll .messenger-message-row.is-outgoing > .relative {
   display: flex;
   justify-content: flex-end;

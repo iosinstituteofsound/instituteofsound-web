@@ -256,6 +256,8 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
                       message={row.message}
                       threadId={threadId}
                       isOutgoing={mine}
+                      viewerId={viewerId}
+                      otherName={displayName}
                       compact
                       showAvatar={showAvatar}
                       isTail={isTail}

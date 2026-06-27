@@ -40,7 +40,7 @@ export const MessageBubble = memo(function MessageBubble({
   isStacked = false,
 }: MessageBubbleProps) {
   const { onReply, onForward, onEdit, onDelete, onReact } = useMessageBubbleActions(message, threadId)
-  const useReplyStack = Boolean(message.replyPreview && !compact)
+  const useReplyStack = Boolean(message.replyPreview)
   const replyHeaderLabel = getReplyHeaderLabel({
     isOutgoing,
     viewerId,
@@ -94,13 +94,6 @@ export const MessageBubble = memo(function MessageBubble({
         <div className="messenger-bubble__sender">{senderName}</div>
       ) : null}
 
-      {message.replyPreview && compact ? (
-        <div className="messenger-bubble__reply">
-          <div className="font-semibold">Reply</div>
-          <div>{quotedPreviewText}</div>
-        </div>
-      ) : null}
-
       {message.forwardFromId ? (
         <div className="messenger-bubble__reply mb-1 text-[11px] opacity-80">Forwarded</div>
       ) : null}
@@ -151,6 +144,25 @@ export const MessageBubble = memo(function MessageBubble({
       />
     ) : null
 
+  const renderedBubble = useReplyStack ? (
+    <div
+      className={cn(
+        'messenger-reply-stack',
+        isOutgoing && 'is-outgoing',
+        compact && 'messenger-reply-stack--compact',
+      )}
+    >
+      <div className="messenger-reply-stack__header">
+        <Reply className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        <span>{replyHeaderLabel}</span>
+      </div>
+      <div className="messenger-reply-stack__quoted">{quotedPreviewText}</div>
+      {bubble}
+    </div>
+  ) : (
+    bubble
+  )
+
   if (compact) {
     return (
       <div
@@ -170,7 +182,7 @@ export const MessageBubble = memo(function MessageBubble({
         ) : null}
 
         <div className="messenger-message-row__bubble-wrap">
-          {bubble}
+          {renderedBubble}
           {reactionBadge}
         </div>
 
@@ -200,18 +212,7 @@ export const MessageBubble = memo(function MessageBubble({
       <div className="messenger-message-row__content">
         {isOutgoing ? actions : null}
         <div className="messenger-message-row__bubble-wrap">
-          {useReplyStack ? (
-            <div className={cn('messenger-reply-stack', isOutgoing && 'is-outgoing')}>
-              <div className="messenger-reply-stack__header">
-                <Reply className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                <span>{replyHeaderLabel}</span>
-              </div>
-              <div className="messenger-reply-stack__quoted">{quotedPreviewText}</div>
-              {bubble}
-            </div>
-          ) : (
-            bubble
-          )}
+          {renderedBubble}
           {reactionBadge}
         </div>
         {!isOutgoing ? actions : null}
