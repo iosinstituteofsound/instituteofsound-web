@@ -12,6 +12,16 @@ import {
   type NotificationDto,
 } from '@/modules/notifications/types/notification.types'
 import {
+  CALL_ACCEPT_EVENT,
+  CALL_ANSWER_EVENT,
+  CALL_END_EVENT,
+  CALL_ICE_EVENT,
+  CALL_INVITE_EVENT,
+  CALL_OFFER_EVENT,
+  CALL_REJECT_EVENT,
+  type CallPeerPayload,
+} from '@/modules/messenger/types/call.types'
+import {
   MESSENGER_MESSAGE_EVENT,
   MESSENGER_MESSAGE_UPDATED_EVENT,
   MESSENGER_PRESENCE_EVENT,
@@ -33,6 +43,9 @@ type MessengerThreadListener = (thread: DmThreadSummary) => void
 type MessengerTypingListener = (payload: MessengerTypingPayload) => void
 type MessengerReadListener = (payload: MessengerReadPayload) => void
 type MessengerPresenceListener = (payload: MessengerPresencePayload) => void
+type CallListener = (payload: CallPeerPayload) => void
+
+type CallEmitPayload = Omit<CallPeerPayload, 'fromUserId'> & { toUserId: string }
 
 const CONNECT_TIMEOUT_MS = 15_000
 
@@ -46,6 +59,13 @@ class RealtimeSocketClient {
   private messengerTypingListeners = new Set<MessengerTypingListener>()
   private messengerReadListeners = new Set<MessengerReadListener>()
   private messengerPresenceListeners = new Set<MessengerPresenceListener>()
+  private callInviteListeners = new Set<CallListener>()
+  private callAcceptListeners = new Set<CallListener>()
+  private callRejectListeners = new Set<CallListener>()
+  private callOfferListeners = new Set<CallListener>()
+  private callAnswerListeners = new Set<CallListener>()
+  private callIceListeners = new Set<CallListener>()
+  private callEndListeners = new Set<CallListener>()
   private subscribedReleaseIds = new Set<string>()
   private subscribedThreadIds = new Set<string>()
   private subscribedArtistProfileId: string | null = null
@@ -120,6 +140,88 @@ class RealtimeSocketClient {
   onMessengerPresence(listener: MessengerPresenceListener): () => void {
     this.messengerPresenceListeners.add(listener)
     return () => this.messengerPresenceListeners.delete(listener)
+  }
+
+  onCallInvite(listener: CallListener): () => void {
+    this.callInviteListeners.add(listener)
+    this.connect()
+    return () => this.callInviteListeners.delete(listener)
+  }
+
+  onCallAccept(listener: CallListener): () => void {
+    this.callAcceptListeners.add(listener)
+    this.connect()
+    return () => this.callAcceptListeners.delete(listener)
+  }
+
+  onCallReject(listener: CallListener): () => void {
+    this.callRejectListeners.add(listener)
+    this.connect()
+    return () => this.callRejectListeners.delete(listener)
+  }
+
+  onCallOffer(listener: CallListener): () => void {
+    this.callOfferListeners.add(listener)
+    this.connect()
+    return () => this.callOfferListeners.delete(listener)
+  }
+
+  onCallAnswer(listener: CallListener): () => void {
+    this.callAnswerListeners.add(listener)
+    this.connect()
+    return () => this.callAnswerListeners.delete(listener)
+  }
+
+  onCallIce(listener: CallListener): () => void {
+    this.callIceListeners.add(listener)
+    this.connect()
+    return () => this.callIceListeners.delete(listener)
+  }
+
+  onCallEnd(listener: CallListener): () => void {
+    this.callEndListeners.add(listener)
+    this.connect()
+    return () => this.callEndListeners.delete(listener)
+  }
+
+  async emitCallInvite(payload: CallEmitPayload): Promise<boolean> {
+    return this.emitCallEvent(CALL_INVITE_EVENT, payload)
+  }
+
+  async emitCallAccept(payload: CallEmitPayload): Promise<boolean> {
+    return this.emitCallEvent(CALL_ACCEPT_EVENT, payload)
+  }
+
+  async emitCallReject(payload: CallEmitPayload): Promise<boolean> {
+    return this.emitCallEvent(CALL_REJECT_EVENT, payload)
+  }
+
+  async emitCallOffer(payload: CallEmitPayload): Promise<boolean> {
+    return this.emitCallEvent(CALL_OFFER_EVENT, payload)
+  }
+
+  async emitCallAnswer(payload: CallEmitPayload): Promise<boolean> {
+    return this.emitCallEvent(CALL_ANSWER_EVENT, payload)
+  }
+
+  async emitCallIce(payload: CallEmitPayload): Promise<boolean> {
+    return this.emitCallEvent(CALL_ICE_EVENT, payload)
+  }
+
+  async emitCallEnd(payload: CallEmitPayload): Promise<boolean> {
+    return this.emitCallEvent(CALL_END_EVENT, payload)
+  }
+
+  private async emitCallEvent(event: string, payload: CallEmitPayload): Promise<boolean> {
+    if (!env.wsEnabled) return false
+    try {
+      const socket = await this.ensureConnected()
+      if (!socket.connected) return false
+      socket.emit(event, payload)
+      return true
+    } catch {
+      return false
+    }
   }
 
   async subscribeThread(threadId: string): Promise<void> {
@@ -291,6 +393,22 @@ class RealtimeSocketClient {
     socket.on(MESSENGER_PRESENCE_EVENT, (payload: MessengerPresencePayload) => {
       for (const listener of this.messengerPresenceListeners) listener(payload)
     })
+
+    const callEvents: Array<[string, Set<CallListener>]> = [
+      [CALL_INVITE_EVENT, this.callInviteListeners],
+      [CALL_ACCEPT_EVENT, this.callAcceptListeners],
+      [CALL_REJECT_EVENT, this.callRejectListeners],
+      [CALL_OFFER_EVENT, this.callOfferListeners],
+      [CALL_ANSWER_EVENT, this.callAnswerListeners],
+      [CALL_ICE_EVENT, this.callIceListeners],
+      [CALL_END_EVENT, this.callEndListeners],
+    ]
+
+    for (const [event, listeners] of callEvents) {
+      socket.on(event, (payload: CallPeerPayload) => {
+        for (const listener of listeners) listener(payload)
+      })
+    }
   }
 
   private async ensureConnected(): Promise<Socket | null> {

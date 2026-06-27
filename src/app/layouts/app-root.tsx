@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { UniversalPlayer } from '@/modules/player/components/universal-player'
 import { MessengerDock } from '@/modules/messenger/components/messenger-dock'
+import { MessengerCallOverlay } from '@/modules/messenger/components/messenger-call-overlay'
 import { MessengerThreadSubscriptions } from '@/modules/messenger/components/messenger-thread-subscriptions'
 import { PlayerBarDock } from '@/modules/player/components/player-bar-dock'
 import { PlayerQueuePanel } from '@/modules/player/components/player-queue-panel'
@@ -18,6 +19,7 @@ export function AppRoot() {
       <UniversalPlayer />
       <MessengerThreadSubscriptions />
       <MessengerDock />
+      <MessengerCallOverlay />
       <PlayerBarDock />
       <PlayerQueuePanel />
       <PlayerLyricsPanel />

@@ -1,0 +1,99 @@
+.messenger-call {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background: color-mix(in oklch, var(--background) 12%, #020617 88%);
+  color: var(--foreground);
+}
+
+.messenger-call__stage {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.messenger-call__avatar-stage {
+  display: grid;
+  place-items: center;
+}
+
+.messenger-call__meta {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.messenger-call__name {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.messenger-call__status {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: color-mix(in oklch, var(--foreground) 72%, transparent);
+}
+
+.messenger-call__video {
+  width: 100%;
+  max-width: 960px;
+  max-height: min(72vh, 720px);
+  border-radius: 18px;
+  object-fit: cover;
+  background: #000;
+}
+
+.messenger-call__video--mirror {
+  transform: scaleX(-1);
+}
+
+.messenger-call__remote {
+  width: min(100%, 960px);
+  height: min(72vh, 720px);
+}
+
+.messenger-call__pip {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  width: 160px;
+  height: 112px;
+  border: 2px solid color-mix(in oklch, var(--foreground) 18%, transparent);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 35%);
+}
+
+.messenger-call__controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.85rem;
+  padding-bottom: 0.5rem;
+}
+
+.messenger-call__action {
+  min-width: 120px;
+}
+
+.messenger-call__round-btn {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--foreground) 12%, transparent);
+}
+
+.messenger-call__round-btn--danger {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.messenger-call__round-btn--danger:hover {
+  background: color-mix(in oklch, var(--destructive) 88%, #000 12%);
+}

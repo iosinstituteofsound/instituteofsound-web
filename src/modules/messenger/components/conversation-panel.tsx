@@ -1,10 +1,11 @@
 import { memo } from 'react'
-import { Info, Phone, Video } from 'lucide-react'
+import { Info } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { UserAvatar } from '@/shared/components/user'
 import { EmptyState } from '@/shared/components/feedback/states'
 import { IconButton } from '@/shared/components/ui/icon-button'
 import { ConversationBody } from '@/modules/messenger/components/conversation-body'
+import { MessengerCallActions } from '@/modules/messenger/components/messenger-call-actions'
 import { GroupAvatarStack } from '@/shared/components/user'
 import { useConversationThread } from '@/modules/messenger/hooks/use-conversation-thread'
 import { getThreadAvatarUrl, getThreadPresenceLabel } from '@/modules/messenger/lib/messenger-utils'
@@ -90,12 +91,11 @@ export const ConversationPanel = memo(function ConversationPanel({
           </div>
 
           <div className="messenger-conversation__actions">
-            <IconButton className="messenger-icon-btn" aria-label="Voice call">
-              <Phone className="h-5 w-5" />
-            </IconButton>
-            <IconButton className="messenger-icon-btn" aria-label="Video call">
-              <Video className="h-5 w-5" />
-            </IconButton>
+            <MessengerCallActions
+              thread={thread}
+              className="flex items-center gap-1"
+              iconClassName="messenger-icon-btn"
+            />
             <IconButton
               className="messenger-icon-btn"
               aria-label="Conversation info"

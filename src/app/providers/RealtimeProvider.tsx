@@ -12,6 +12,10 @@ import {
   initMessengerRealtime,
   resetMessengerRealtime,
 } from '@/modules/messenger/lib/init-messenger-realtime'
+import {
+  initMessengerCall,
+  teardownMessengerCall,
+} from '@/modules/messenger/lib/init-messenger-call'
 
 export function RealtimeProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
@@ -23,12 +27,14 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     if (!isAuthenticated || !tokenStorage.hasSession()) {
       resetNotificationsRealtime()
       resetMessengerRealtime()
+      teardownMessengerCall()
       realtimeSocketClient.disconnect()
       return undefined
     }
 
     initNotificationsRealtime(queryClient)
     initMessengerRealtime(queryClient)
+    initMessengerCall()
     realtimeSocketClient.connect()
 
     return undefined
