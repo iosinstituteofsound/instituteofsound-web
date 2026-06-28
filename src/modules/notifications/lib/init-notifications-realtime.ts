@@ -3,6 +3,7 @@ import { getNotifications } from '@/modules/notifications/api/notifications.api'
 import { notificationsQueryKey } from '@/modules/notifications/hooks/use-notifications'
 import { applyIncomingNotification } from '@/modules/notifications/lib/notifications-cache'
 import { useNotificationLiveStore } from '@/modules/notifications/store/notification-live-store'
+import { playNotificationAlertSound } from '@/shared/lib/alert-sounds/alert-sounds'
 import { tokenStorage } from '@/shared/services/api/token-storage'
 import { realtimeSocketClient } from '@/shared/services/realtime/socket-client'
 
@@ -15,6 +16,9 @@ export function initNotificationsRealtime(queryClient: QueryClient): void {
     realtimeSocketClient.onNotification((notification) => {
       useNotificationLiveStore.getState().pushLive(notification)
       applyIncomingNotification(queryClient, notification)
+      if (notification.kind !== 'dm_message') {
+        void playNotificationAlertSound()
+      }
     })
 
     realtimeSocketClient.onConnect(() => {

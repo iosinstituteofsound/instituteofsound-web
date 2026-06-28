@@ -15,6 +15,7 @@ import { useMessengerPopupStore } from '@/modules/messenger/store/messenger-popu
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 import type { MeResponse } from '@/shared/types/auth.types'
+import { playMessageAlertSound } from '@/shared/lib/alert-sounds/alert-sounds'
 import { tokenStorage } from '@/shared/services/api/token-storage'
 import { realtimeSocketClient } from '@/shared/services/realtime/socket-client'
 
@@ -35,6 +36,7 @@ function handleIncomingMessage(queryClient: QueryClient, message: DmMessage) {
   }
 
   useMessengerLiveStore.getState().incrementUnread()
+  void playMessageAlertSound()
 
   if (getPopUpNewMessagesEnabled()) {
     const popupState = useMessengerPopupStore.getState()
