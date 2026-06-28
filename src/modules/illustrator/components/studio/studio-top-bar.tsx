@@ -4,6 +4,7 @@ import { env } from '@/shared/config/env'
 import { IconButton } from '@/shared/components/ui/icon-button'
 import type { StudioSaveStatus } from '@/modules/illustrator/hooks/use-studio-autosave'
 import { StudioGlass } from '@/modules/illustrator/components/studio/studio-glass'
+import type { ExportProgress } from '@/modules/illustrator/lib/export/export.types'
 
 function saveLabel(status: StudioSaveStatus | undefined, saved: boolean) {
   if (status === 'dirty') return 'Save failed'
@@ -24,6 +25,9 @@ type StudioTopBarProps = {
   onRedo?: () => void
   canUndo?: boolean
   canRedo?: boolean
+  onExportGif?: (options?: {
+    onProgress?: (progress: ExportProgress) => void
+  }) => Promise<Blob>
 }
 
 export function StudioTopBar({
@@ -39,8 +43,10 @@ export function StudioTopBar({
   onRedo,
   canUndo = false,
   canRedo = false,
+  onExportGif,
 }: StudioTopBarProps) {
   const [expanded, setExpanded] = useState(false)
+  const [exporting, setExporting] = useState(false)
 
   return (
     <div
@@ -120,8 +126,21 @@ export function StudioTopBar({
                 <Share2 size={14} strokeWidth={1.75} />
                 Share
               </button>
-              <button type="button" className="mas-btn">
-                Export
+              <button
+                type="button"
+                className="mas-btn"
+                disabled={!onExportGif || exporting}
+                onClick={() => {
+                  if (!onExportGif || exporting) return
+                  setExporting(true)
+                  void onExportGif({
+                    onProgress: (progress) => {
+                      if (progress.phase === 'done') setExporting(false)
+                    },
+                  }).finally(() => setExporting(false))
+                }}
+              >
+                {exporting ? 'Exporting…' : 'Export GIF'}
                 <ChevronRight size={14} strokeWidth={1.75} />
               </button>
               <button type="button" className="mas-btn mas-btn--primary">

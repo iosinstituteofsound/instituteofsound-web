@@ -8,6 +8,9 @@ import {
   type TimelineClip,
 } from '@/modules/illustrator/components/studio/studio-animation.types'
 import { useAnimationAssist } from '@/modules/illustrator/components/studio/use-animation-assist'
+import { useSequenceAssist } from '@/modules/illustrator/components/studio/use-sequence-assist'
+import { SequenceBreadcrumb } from '@/modules/illustrator/components/studio/sequence-breadcrumb'
+import { isSequenceEngineEnabled } from '@/modules/illustrator/lib/sequence/feature-flag'
 import { useStudioDocument } from '@/modules/illustrator/components/studio/studio-document-context'
 import { useVirtualTimeline } from '@/modules/illustrator/components/studio/use-virtual-timeline'
 import {
@@ -19,6 +22,7 @@ import {
 import type { FrameDocumentState } from '@/modules/illustrator/lib/studio-frame-store'
 import type { OnionSkinPreview } from '@/modules/illustrator/components/studio/studio-animation.types'
 import { cn } from '@/shared/lib/cn'
+import { snapshotThumbnailDataUrl } from '@/modules/illustrator/components/studio/studio-layer-engine'
 
 function formatTimelineClock(frame: number, fps = 24) {
   const totalSeconds = Math.floor(frame / fps)
@@ -42,6 +46,9 @@ type ClipDragState = {
   startX: number
   startY: number
   trackHeight: number
+  mode: 'move' | 'resize'
+  originDurationFrames?: number
+  moved: boolean
 }
 
 const PLAYBACK_MODES: Array<{ id: PlaybackMode; label: string }> = [
@@ -50,12 +57,27 @@ const PLAYBACK_MODES: Array<{ id: PlaybackMode; label: string }> = [
   { id: 'one-shot', label: 'One Shot' },
 ]
 
-export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPreviewChange }: StudioTimelineProps) {
+type TimelineAssistHook = typeof useAnimationAssist
+
+export function StudioTimeline(props: StudioTimelineProps) {
+  if (isSequenceEngineEnabled()) {
+    return <StudioTimelineInner {...props} useAssist={useSequenceAssist} panelTitle="Infinite Sequence" />
+  }
+  return <StudioTimelineInner {...props} useAssist={useAnimationAssist} panelTitle="Animation Assist" />
+}
+
+function StudioTimelineInner({
+  captureSnapshot,
+  applySnapshot,
+  onOnionSkinPreviewChange,
+  useAssist,
+  panelTitle,
+}: StudioTimelineProps & { useAssist: TimelineAssistHook; panelTitle: string }) {
   const studioDocument = useStudioDocument()
   const layers = studioDocument?.snapshot.layers ?? []
   const layerThumbnails = studioDocument?.snapshot.layerThumbnails ?? {}
 
-  const assist = useAnimationAssist({
+  const assist = useAssist({
     layers,
     layerThumbnails,
     captureSnapshot,
@@ -75,9 +97,49 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
   const [settingsAnchor, setSettingsAnchor] = useState<{ top: number; right: number } | null>(null)
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null)
   const clipDragRef = useRef<ClipDragState | null>(null)
+  const clipTapRef = useRef<{ clipId: string; time: number } | null>(null)
   const scrubbingRef = useRef(false)
-  const [dragClip, setDragClip] = useState<{ id: string; trackId: string; startFrame: number } | null>(null)
+  const [dragClip, setDragClip] = useState<{ id: string; trackId: string; startFrame: number; durationFrames?: number } | null>(null)
+  const [snapFlash, setSnapFlash] = useState(false)
+  const sequenceMode = isSequenceEngineEnabled()
+  const sequenceAssist = sequenceMode ? (assist as ReturnType<typeof useSequenceAssist>) : null
   const [dropTargetTrackId, setDropTargetTrackId] = useState<string | null>(null)
+  const [blockPreview, setBlockPreview] = useState<{
+    blockId: string
+    left: number
+    top: number
+    dataUrl: string
+  } | null>(null)
+  const blockHoverTimerRef = useRef(0)
+  const blockHoverTargetRef = useRef<string | null>(null)
+
+  const clearBlockPreview = useCallback(() => {
+    window.clearTimeout(blockHoverTimerRef.current)
+    blockHoverTargetRef.current = null
+    setBlockPreview(null)
+  }, [])
+
+  const handleClipPointerEnter = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>, clip: TimelineClip) => {
+      if (!sequenceAssist?.previewBlock) return
+      blockHoverTargetRef.current = clip.id
+      window.clearTimeout(blockHoverTimerRef.current)
+      blockHoverTimerRef.current = window.setTimeout(() => {
+        if (blockHoverTargetRef.current !== clip.id) return
+        const snapshot = sequenceAssist.previewBlock(clip.id)
+        if (!snapshot) return
+        const dataUrl = snapshotThumbnailDataUrl(snapshot, 96)
+        const rect = event.currentTarget.getBoundingClientRect()
+        setBlockPreview({
+          blockId: clip.id,
+          left: rect.left + rect.width / 2,
+          top: rect.top,
+          dataUrl,
+        })
+      }, 500)
+    },
+    [sequenceAssist],
+  )
 
   const resolveTrackFromY = useCallback(
     (clientY: number) => {
@@ -91,11 +153,28 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
     [assist.tracks],
   )
 
+  useEffect(() => {
+    if (!sequenceMode || !sequenceAssist?.isNestedEdit) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        sequenceAssist.closeInnerEdit?.()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [sequenceAssist, sequenceMode])
+
+  useEffect(() => {
+    if (!snapFlash) return
+    const id = window.setTimeout(() => setSnapFlash(false), 120)
+    return () => window.clearTimeout(id)
+  }, [snapFlash])
+
   const handleClipPointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLButtonElement>, clip: TimelineClip) => {
-      event.preventDefault()
+    (event: ReactPointerEvent<HTMLElement>, clip: TimelineClip, mode: 'move' | 'resize' = 'move') => {
       event.stopPropagation()
-      assist.beginScrub()
+      sequenceAssist?.selectClip?.(clip.id, { additive: event.shiftKey })
       clipDragRef.current = {
         clipId: clip.id,
         originFrame: clip.startFrame,
@@ -103,43 +182,103 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
         startX: event.clientX,
         startY: event.clientY,
         trackHeight: TIMELINE_TRACK_HEIGHT,
+        mode,
+        originDurationFrames: clip.durationFrames,
+        moved: mode === 'resize',
       }
-      setDragClip({ id: clip.id, trackId: clip.trackId, startFrame: clip.startFrame })
-      event.currentTarget.setPointerCapture(event.pointerId)
+      if (mode === 'resize') {
+        assist.beginScrub()
+        setDragClip({
+          id: clip.id,
+          trackId: clip.trackId,
+          startFrame: clip.startFrame,
+          durationFrames: clip.durationFrames,
+        })
+        event.currentTarget.setPointerCapture(event.pointerId)
+      }
     },
-    [assist],
+    [assist, sequenceAssist],
   )
 
   const handleClipPointerMove = useCallback(
-    (event: ReactPointerEvent<HTMLButtonElement>) => {
+    (event: ReactPointerEvent<HTMLElement>) => {
       const drag = clipDragRef.current
-      if (!drag || !event.currentTarget.hasPointerCapture(event.pointerId)) return
+      if (!drag) return
+
       const deltaX = event.clientX - drag.startX
+      const deltaY = event.clientY - drag.startY
+      if (!drag.moved && Math.hypot(deltaX, deltaY) > 4) {
+        drag.moved = true
+        assist.beginScrub()
+        setDragClip({
+          id: drag.clipId,
+          trackId: drag.originTrackId,
+          startFrame: drag.originFrame,
+          durationFrames: drag.originDurationFrames,
+        })
+        if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+          event.currentTarget.setPointerCapture(event.pointerId)
+        }
+      }
+
+      if (!drag.moved || !event.currentTarget.hasPointerCapture(event.pointerId)) return
+
       const deltaFrames = Math.round(deltaX / assist.pixelsPerFrame)
-      const nextFrame = Math.max(0, drag.originFrame + deltaFrames)
+
+      if (drag.mode === 'resize') {
+        const nextDuration = Math.max(1, (drag.originDurationFrames ?? 1) + deltaFrames)
+        setDragClip({
+          id: drag.clipId,
+          trackId: drag.originTrackId,
+          startFrame: drag.originFrame,
+          durationFrames: nextDuration,
+        })
+        return
+      }
+
+      const rawFrame = Math.max(0, drag.originFrame + deltaFrames)
       const nextTrackId = resolveTrackFromY(event.clientY)
-      setDragClip({ id: drag.clipId, trackId: nextTrackId, startFrame: nextFrame })
+      const snapped = sequenceAssist?.snapFrame?.(rawFrame, drag.clipId) ?? { frame: rawFrame, snapped: false }
+      if (snapped.snapped) setSnapFlash(true)
+      setDragClip({ id: drag.clipId, trackId: nextTrackId, startFrame: snapped.frame })
       setDropTargetTrackId(nextTrackId)
     },
-    [assist.pixelsPerFrame, resolveTrackFromY],
+    [assist, resolveTrackFromY, sequenceAssist],
   )
 
   const handleClipPointerUp = useCallback(
-    (event: ReactPointerEvent<HTMLButtonElement>) => {
+    (event: ReactPointerEvent<HTMLElement>, clip: TimelineClip) => {
       const drag = clipDragRef.current
-      if (!drag) return
-      const deltaX = event.clientX - drag.startX
-      const deltaFrames = Math.round(deltaX / assist.pixelsPerFrame)
-      const nextFrame = Math.max(0, drag.originFrame + deltaFrames)
-      const nextTrackId = resolveTrackFromY(event.clientY)
-      assist.moveClip(drag.clipId, nextTrackId, nextFrame)
+      if (!drag || drag.clipId !== clip.id) return
+
+      if (drag.moved) {
+        if (drag.mode === 'resize' && sequenceAssist?.resizeHoldClip && dragClip) {
+          sequenceAssist.resizeHoldClip(drag.clipId, dragClip.durationFrames ?? drag.originDurationFrames ?? 1)
+        } else if (dragClip) {
+          assist.moveClip(drag.clipId, dragClip.trackId, dragClip.startFrame)
+        }
+      } else {
+        const now = Date.now()
+        const last = clipTapRef.current
+        if (last?.clipId === clip.id && now - last.time < 350) {
+          if (clip.blockKind === 'sequence' || clip.blockKind === 'compound') {
+            sequenceAssist?.openInnerClip?.(clip.id)
+          }
+          clipTapRef.current = null
+        } else {
+          clipTapRef.current = { clipId: clip.id, time: now }
+        }
+      }
+
       clipDragRef.current = null
       setDragClip(null)
       setDropTargetTrackId(null)
       assist.endScrub()
-      event.currentTarget.releasePointerCapture(event.pointerId)
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }
     },
-    [assist, assist.pixelsPerFrame, resolveTrackFromY],
+    [assist, dragClip, sequenceAssist],
   )
 
   const handleTrackDrop = useCallback(
@@ -235,44 +374,106 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
     [timeline],
   )
 
-  const renderClip = (clip: TimelineClip, isGhost = false) => {
-    const active = dragClip?.id === clip.id
-    const frame = active && dragClip ? dragClip.startFrame : clip.startFrame
-    const trackId = active && dragClip ? dragClip.trackId : clip.trackId
+  const renderClip = (
+    clip: TimelineClip,
+    opts?: { ghost?: boolean; dragging?: boolean },
+  ) => {
+    const drag = clipDragRef.current
+    const isGhost = opts?.ghost
+    const isDragging = opts?.dragging
+    const active = isDragging && dragClip?.id === clip.id
+    const frame =
+      isGhost && drag
+        ? drag.originFrame
+        : active && dragClip
+          ? dragClip.startFrame
+          : clip.startFrame
+    const trackId =
+      isGhost && drag
+        ? drag.originTrackId
+        : active && dragClip
+          ? dragClip.trackId
+          : clip.trackId
+    const durationFrames =
+      active && dragClip?.durationFrames != null ? dragClip.durationFrames : clip.durationFrames
     const trackIndex = assist.trackIndexById.get(trackId) ?? -1
     if (trackIndex < 0) return null
     const left = timeline.frameToX(frame)
-    const width = Math.max(assist.pixelsPerFrame * clip.durationFrames, 18)
+    const width = Math.max(assist.pixelsPerFrame * durationFrames, 18)
+    const isSelected = sequenceAssist?.selectedBlockIds?.includes(clip.id)
+    const isNestedClip = clip.blockKind === 'sequence' || clip.blockKind === 'compound'
+    const isReferenceClip = clip.blockKind === 'reference'
+    const tickCount = isNestedClip
+      ? Math.min(clip.innerFrameCount ?? 0, 4 + (sequenceAssist?.blockZoomLevel ?? 1) * 4)
+      : 0
 
     return (
-      <button
+      <div
         key={isGhost ? `${clip.id}-ghost` : clip.id}
-        type="button"
         className={cn(
           'mas-clip mas-timeline__virtual-clip',
+          isGhost && 'mas-timeline__clip--ghost',
           active && 'mas-clip--active mas-timeline__clip--dragging',
-          frame === assist.currentFrame && 'mas-timeline__clip--playhead',
+          active && snapFlash && 'mas-block--snapped',
+          isSelected && !isGhost && 'mas-clip--selected',
+          isNestedClip && clip.blockKind === 'sequence' && 'mas-timeline__clip--sequence',
+          isNestedClip && clip.blockKind === 'compound' && 'mas-timeline__clip--compound',
+          isReferenceClip && 'mas-timeline__clip--reference',
+          frame === assist.currentFrame && !isGhost && 'mas-timeline__clip--playhead',
         )}
         style={{
           left,
           width,
           top: timelineTrackTop(trackIndex),
         }}
-        draggable={!isGhost}
-        onDragStart={(event) => {
-          event.dataTransfer.setData(TIMELINE_CLIP_MIME, clip.id)
-          event.dataTransfer.effectAllowed = 'move'
+        data-testid="sequence-timeline-clip"
+        data-block-id={clip.id}
+        data-block-kind={clip.blockKind ?? 'hold'}
+        onPointerDown={(event) => {
+          if (isGhost || isDragging) return
+          if ((event.target as HTMLElement).closest('.mas-clip__resize-handle')) return
+          handleClipPointerDown(event, clip, 'move')
         }}
-        onPointerDown={(event) => handleClipPointerDown(event, clip)}
-        onPointerMove={handleClipPointerMove}
-        onPointerUp={handleClipPointerUp}
-        onPointerCancel={handleClipPointerUp}
+        onPointerEnter={!isGhost && sequenceMode ? (event) => handleClipPointerEnter(event, clip) : undefined}
+        onPointerLeave={!isGhost && sequenceMode ? clearBlockPreview : undefined}
+        onDoubleClick={(event) => {
+          if (isGhost || !isNestedClip) return
+          event.stopPropagation()
+          sequenceAssist?.openInnerClip?.(clip.id)
+        }}
+        onPointerMove={!isGhost ? handleClipPointerMove : undefined}
+        onPointerUp={!isGhost ? (event) => handleClipPointerUp(event, clip) : undefined}
+        onPointerCancel={!isGhost ? (event) => handleClipPointerUp(event, clip) : undefined}
+        role="group"
         aria-label={`${clip.label} at frame ${frame}`}
       >
         {clip.thumbUrl ? (
           <span className="mas-timeline__clip-thumb" style={{ backgroundImage: `url(${clip.thumbUrl})` }} />
+        ) : (
+          <span className="mas-timeline__clip-label">{clip.label}</span>
+        )}
+        {isNestedClip ? (
+          <>
+            <span className="mas-timeline__clip-badge" data-testid="sequence-clip-badge">
+              {clip.blockKind === 'compound' ? 'CMP' : 'SEQ'}
+            </span>
+            {tickCount >= 4 ? (
+              <span className="mas-timeline__clip-ticks" data-testid="sequence-clip-ticks" aria-hidden>
+                {Array.from({ length: tickCount }, (_, i) => (
+                  <span key={i} className="mas-timeline__clip-tick" />
+                ))}
+              </span>
+            ) : null}
+          </>
         ) : null}
-      </button>
+        {sequenceMode && clip.blockKind === 'hold' ? (
+          <span
+            className="mas-clip__resize-handle"
+            aria-label={`Stretch ${clip.label}`}
+            onPointerDown={(event) => handleClipPointerDown(event, clip, 'resize')}
+          />
+        ) : null}
+      </div>
     )
   }
 
@@ -287,7 +488,7 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
   })
 
   return (
-    <StudioGlass className="mas-timeline">
+    <StudioGlass className="mas-timeline" data-testid="sequence-timeline">
       <div className="mas-timeline__head">
         <div className="flex items-center gap-2">
           <button
@@ -308,7 +509,8 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
           <button type="button" className="mas-icon-btn" aria-label="Skip forward" onClick={() => assist.stepFrame(1)}>
             <SkipForward size={14} strokeWidth={1.75} />
           </button>
-          <span className="mas-timeline__title">Animation Assist</span>
+          <span className="mas-timeline__title">{panelTitle}</span>
+          {sequenceMode ? <SequenceBreadcrumb /> : null}
         </div>
         <span className="mas-timeline__time">
           {formatTimelineClock(assist.currentFrame, assist.settings.fps)} /{' '}
@@ -400,7 +602,21 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
               )
             })}
 
-            {visibleClips.map((clip) => renderClip(clip))}
+            {visibleClips.flatMap((clip) => {
+              if (dragClip?.id === clip.id && clipDragRef.current?.mode === 'move') {
+                return [renderClip(clip, { ghost: true }), renderClip(clip, { dragging: true })]
+              }
+              if (dragClip?.id === clip.id) {
+                return [renderClip(clip, { dragging: true })]
+              }
+              return [renderClip(clip)]
+            })}
+
+            {sequenceMode && assist.clips.length === 0 ? (
+              <p className="mas-timeline__empty-hint" data-testid="sequence-timeline-empty">
+                Paint on canvas to create your first hold clip
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
@@ -432,6 +648,63 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
         </div>
 
         <div className="mas-timeline__assist-actions">
+          {sequenceMode ? (
+            <>
+              <button
+                type="button"
+                className="mas-timeline__assist-btn"
+                data-testid="sequence-split-btn"
+                onClick={() => sequenceAssist?.splitSelectedAtPlayhead?.()}
+              >
+                Split
+              </button>
+              <button
+                type="button"
+                className="mas-timeline__assist-btn"
+                data-testid="sequence-convert-btn"
+                disabled={!sequenceAssist?.selectedBlockIds?.length}
+                onClick={() => sequenceAssist?.convertSelectedToSequence?.()}
+              >
+                To Sequence
+              </button>
+              <button
+                type="button"
+                className="mas-timeline__assist-btn"
+                data-testid="sequence-open-inner-btn"
+                disabled={!sequenceAssist?.selectedBlockIds?.length}
+                onClick={() => {
+                  const id = sequenceAssist?.selectedBlockIds?.[0]
+                  if (id) sequenceAssist?.openInnerClip?.(id)
+                }}
+              >
+                Open
+              </button>
+              <button
+                type="button"
+                className="mas-timeline__assist-btn"
+                data-testid="sequence-onion-toggle"
+                onClick={() =>
+                  sequenceAssist?.updateSettings?.({
+                    onionSkinEnabled: !sequenceAssist.onionSkinEnabled,
+                  })
+                }
+              >
+                Onion
+              </button>
+              <button
+                type="button"
+                className="mas-timeline__assist-btn"
+                data-testid="sequence-ripple-toggle"
+                onClick={() =>
+                  sequenceAssist?.updateSettings?.({
+                    rippleDelete: !sequenceAssist.rippleDelete,
+                  })
+                }
+              >
+                Ripple
+              </button>
+            </>
+          ) : null}
           <button
             ref={settingsBtnRef}
             type="button"
@@ -558,6 +831,19 @@ export function StudioTimeline({ captureSnapshot, applySnapshot, onOnionSkinPrev
                   </label>
                 </div>
               ) : null}
+            </div>,
+            portalRoot,
+          )
+        : null}
+
+      {blockPreview && portalRoot
+        ? createPortal(
+            <div
+              className="mas-block-preview"
+              data-testid="sequence-block-preview"
+              style={{ left: blockPreview.left, top: blockPreview.top }}
+            >
+              <img src={blockPreview.dataUrl} alt="" width={96} height={96} />
             </div>,
             portalRoot,
           )

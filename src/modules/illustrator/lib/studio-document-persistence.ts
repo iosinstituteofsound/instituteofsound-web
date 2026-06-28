@@ -5,6 +5,8 @@ import type { PaintLayer } from '@/modules/illustrator/components/studio/studio-
 import { restoreLayerSnapshot, snapshotLayers } from '@/modules/illustrator/components/studio/studio-layer-engine'
 import { encodeLayerBuffersAsync, extractLayerPixelPayloads } from '@/modules/illustrator/lib/studio-layer-encode'
 
+import type { PersistedSequenceBundle } from '@/modules/illustrator/lib/sequence/sequence-persistence'
+
 export const STUDIO_AUTOSAVE_VERSION = 1 as const
 
 export type SerializedImageData = {
@@ -53,6 +55,8 @@ export type PersistedStudioDocument = {
   layers: SerializedLayerSnapshot[]
   elements: SerializedCanvasElement[]
   hasPaintedContent?: boolean
+  /** Sequence engine state — present when VITE_SEQUENCE_ENGINE is enabled */
+  sequence?: PersistedSequenceBundle
 }
 
 export type InitialStudioDocument = {
@@ -179,6 +183,7 @@ export function serializeStudioDocument(input: {
   activeLayerId: string
   layers: PaintLayer[]
   elements: CanvasElement[]
+  sequence?: PersistedSequenceBundle
 }): PersistedStudioDocument {
   return {
     version: STUDIO_AUTOSAVE_VERSION,
@@ -197,6 +202,7 @@ export function serializeStudioDocument(input: {
       imageData: serializeImageData(layer.imageData),
     })),
     elements: input.elements.map(serializeCanvasElement),
+    sequence: input.sequence,
   }
 }
 
@@ -209,6 +215,7 @@ export async function serializeStudioDocumentAsync(
     activeLayerId: string
     layers: PaintLayer[]
     elements: CanvasElement[]
+    sequence?: PersistedSequenceBundle
   },
   options?: {
     layerVersions?: Record<string, number>
@@ -279,6 +286,7 @@ export async function serializeStudioDocumentAsync(
     hasPaintedContent: input.layers.some(layerHasPaintedPixels),
     layers: serializedLayers,
     elements: input.elements.map(serializeCanvasElement),
+    sequence: input.sequence,
   }
 }
 

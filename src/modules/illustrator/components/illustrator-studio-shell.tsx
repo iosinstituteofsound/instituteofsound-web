@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/components/ui/dialog'
+import { toast } from '@/shared/components/ui/sonner'
 import { StudioAiDock } from '@/modules/illustrator/components/studio/studio-ai-dock'
 import { StudioAssetLibrary } from '@/modules/illustrator/components/studio/studio-asset-library'
 import { StudioCanvasStage } from '@/modules/illustrator/components/studio/studio-canvas-stage'
@@ -26,6 +27,13 @@ import {
 } from '@/modules/illustrator/lib/studio-document-persistence'
 import { createStudioPreviewDataUrl } from '@/modules/illustrator/lib/studio-preview'
 import { usePanelResize } from '@/modules/illustrator/components/studio/use-panel-resize'
+import {
+  SequenceEngineProvider,
+} from '@/modules/illustrator/context/sequence-engine-context'
+import { isSequenceEngineEnabled } from '@/modules/illustrator/lib/sequence/feature-flag'
+import type { ExportProgress } from '@/modules/illustrator/lib/export/export.types'
+import { SequenceEngineBindings, type SequencePaintPayload } from '@/modules/illustrator/components/studio/sequence-engine-bindings'
+import type { PersistedSequenceBundle } from '@/modules/illustrator/lib/sequence/sequence-persistence'
 import '@/modules/illustrator/styles/illustrator-studio.css'
 
 export type { StudioArtworkDraft } from '@/modules/illustrator/components/studio/studio-types'
@@ -179,6 +187,38 @@ function StudioWorkspaceInner({
   const buildPersistedDocumentRef = useRef<() => PersistedStudioDocument | null>(() => null)
   const savedLayerVersionsRef = useRef<Record<string, number>>({})
   const cachedSavedLayersRef = useRef<SerializedLayerSnapshot[]>([])
+  const sequencePaintRef = useRef<(payload: SequencePaintPayload) => void>(() => {})
+  const sequenceExportRef = useRef<() => PersistedSequenceBundle>(() => ({
+    state: {} as PersistedSequenceBundle['state'],
+    drawingPayloads: {},
+  }))
+  const sequenceUndoRef = useRef<{
+    undo: () => boolean
+    redo: () => boolean
+    canUndo: () => boolean
+    canRedo: () => boolean
+    preferUndo: () => boolean
+    clearPrefer: () => void
+  } | null>(null)
+  const sequenceEscapeRef = useRef<{
+    isNestedEdit: () => boolean
+    closeInnerEdit: () => boolean
+  } | null>(null)
+  const sequenceActionsRef = useRef<{
+    groupCompound: () => boolean
+    exportSequenceFile: () => string
+    importSequenceFile: (json: string) => boolean
+    exportGif: (options?: {
+      durationMs?: number
+      onProgress?: (progress: ExportProgress) => void
+    }) => Promise<Blob>
+    exportWebm: (options?: {
+      durationMs?: number
+      onProgress?: (progress: ExportProgress) => void
+    }) => Promise<Blob>
+  } | null>(null)
+  const sequenceValidatePaintRef = useRef<(layerId: string) => boolean>(() => true)
+  const [sequenceRevision, setSequenceRevision] = useState(0)
 
   const canvas = useStudioCanvas({
     activeTool,
@@ -192,6 +232,23 @@ function StudioWorkspaceInner({
     initialDocument,
     onDocumentCommit: () => {
       autosaveMarkDirtyRef.current()
+    },
+    onPaintStrokeCommit: isSequenceEngineEnabled()
+      ? (payload) => sequencePaintRef.current(payload)
+      : undefined,
+    canPaintOnLayer: isSequenceEngineEnabled()
+      ? (layerId) => sequenceValidatePaintRef.current(layerId)
+      : undefined,
+    onPaintBlocked: (reason) => {
+      if (reason === 'sequence_block') {
+        toast.error('Is time pe sequence/reference clip hai — hold frame pe jao')
+      } else if (reason === 'background') {
+        toast.error('Background pe edit nahi — koi layer select karo')
+      } else if (reason === 'locked') {
+        toast.error('Layer locked hai — pehle unlock karo')
+      } else if (reason === 'no_image') {
+        toast.error('Image tool ke liye artwork image chahiye')
+      }
     },
     onZoomChange: setZoom,
     onDocumentSizeChange: (width, height) => setDocSize((prev) => ({ ...prev, width, height })),
@@ -217,6 +274,7 @@ function StudioWorkspaceInner({
       activeLayerId: snapshot.activeLayerId,
       layers: snapshot.layers,
       elements: snapshot.elements,
+      sequence: isSequenceEngineEnabled() ? sequenceExportRef.current() : undefined,
     })
   }, [
     artwork,
@@ -253,6 +311,7 @@ function StudioWorkspaceInner({
         activeLayerId: snapshot.activeLayerId,
         layers: snapshot.layers,
         elements: snapshot.elements,
+        sequence: isSequenceEngineEnabled() ? sequenceExportRef.current() : undefined,
       },
       {
         layerVersions: canvas.getLayerSaveVersions(),
@@ -366,6 +425,8 @@ function StudioWorkspaceInner({
   const canvasActionsRef = useRef({
     undo: canvas.undo,
     redo: canvas.redo,
+    canUndo: canvas.canUndo,
+    canRedo: canvas.canRedo,
     zoomIn: () => canvas.zoomByStep(1),
     zoomOut: () => canvas.zoomByStep(-1),
     zoomFit: () => canvas.fitToView(),
@@ -376,6 +437,8 @@ function StudioWorkspaceInner({
   canvasActionsRef.current = {
     undo: canvas.undo,
     redo: canvas.redo,
+    canUndo: canvas.canUndo,
+    canRedo: canvas.canRedo,
     zoomIn: () => canvas.zoomByStep(1),
     zoomOut: () => canvas.zoomByStep(-1),
     zoomFit: () => canvas.fitToView(),
@@ -383,13 +446,57 @@ function StudioWorkspaceInner({
     zoomActual: () => canvas.zoomToActual(),
   }
 
+  const performUndo = useCallback(() => {
+    const seq = sequenceUndoRef.current
+    if (isSequenceEngineEnabled() && seq) {
+      if (seq.preferUndo() && seq.canUndo()) {
+        seq.undo()
+        if (!seq.canUndo()) seq.clearPrefer()
+        setSequenceRevision((v) => v + 1)
+        return
+      }
+      if (canvas.canUndo) {
+        canvas.undo()
+        return
+      }
+      if (seq.canUndo()) {
+        seq.undo()
+        setSequenceRevision((v) => v + 1)
+      }
+      return
+    }
+    canvas.undo()
+  }, [canvas])
+
+  const performRedo = useCallback(() => {
+    const seq = sequenceUndoRef.current
+    if (isSequenceEngineEnabled() && seq) {
+      if (seq.preferUndo() && seq.canRedo()) {
+        seq.redo()
+        setSequenceRevision((v) => v + 1)
+        return
+      }
+      if (canvas.canRedo) {
+        canvas.redo()
+        return
+      }
+      if (seq.canRedo()) {
+        seq.redo()
+        setSequenceRevision((v) => v + 1)
+      }
+      return
+    }
+    canvas.redo()
+  }, [canvas])
+
   useEffect(() => {
-    setHistoryState((prev) =>
-      prev.canUndo === canvas.canUndo && prev.canRedo === canvas.canRedo
-        ? prev
-        : { canUndo: canvas.canUndo, canRedo: canvas.canRedo },
-    )
-  }, [canvas.canUndo, canvas.canRedo])
+    const seq = sequenceUndoRef.current
+    setHistoryState((prev) => {
+      const canUndo = canvas.canUndo || (seq?.canUndo() ?? false)
+      const canRedo = canvas.canRedo || (seq?.canRedo() ?? false)
+      return prev.canUndo === canUndo && prev.canRedo === canRedo ? prev : { canUndo, canRedo }
+    })
+  }, [canvas.canUndo, canvas.canRedo, sequenceRevision])
 
   const activeColor = colorTarget === 'foreground' ? foreground : background
   const setActiveColor = colorTarget === 'foreground' ? setForeground : setBackground
@@ -427,8 +534,8 @@ function StudioWorkspaceInner({
       const key = e.key.toLowerCase()
       if ((e.metaKey || e.ctrlKey) && key === 'z') {
         e.preventDefault()
-        if (e.shiftKey) canvasActionsRef.current.redo()
-        else canvasActionsRef.current.undo()
+        if (e.shiftKey) performRedo()
+        else performUndo()
         return
       }
 
@@ -482,7 +589,21 @@ function StudioWorkspaceInner({
         return
       }
 
+      if (zoomMod && key === 'g' && !e.shiftKey) {
+        if (isSequenceEngineEnabled() && sequenceActionsRef.current?.groupCompound()) {
+          e.preventDefault()
+          setSequenceRevision((v) => v + 1)
+          toast.success('Compound created')
+        }
+        return
+      }
+
       if (key === 'Escape') {
+        if (sequenceEscapeRef.current?.isNestedEdit()) {
+          sequenceEscapeRef.current.closeInnerEdit()
+          setSequenceRevision((v) => v + 1)
+          return
+        }
         void onClose()
         return
       }
@@ -496,7 +617,7 @@ function StudioWorkspaceInner({
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [foreground, background, onClose])
+  }, [foreground, background, onClose, performRedo, performUndo])
 
   const showAi = activeTool === 'ai'
   const showContext = activeTool === 'select'
@@ -509,7 +630,7 @@ function StudioWorkspaceInner({
     '--mas-props-h': `${props.size}px`,
   } as CSSProperties
 
-  return (
+  const workspace = (
     <StudioDocumentContext.Provider value={documentContextValue}>
       <div
         className={`mas-studio__workspace${assetsOpen ? '' : ' mas-studio__workspace--assets-hidden'}`}
@@ -526,8 +647,23 @@ function StudioWorkspaceInner({
             canRedo={historyState.canRedo}
             onZoomIn={() => canvasActionsRef.current.zoomIn()}
             onZoomOut={() => canvasActionsRef.current.zoomOut()}
-            onUndo={() => canvasActionsRef.current.undo()}
-            onRedo={() => canvasActionsRef.current.redo()}
+            onUndo={performUndo}
+            onRedo={performRedo}
+            onExportGif={
+              isSequenceEngineEnabled()
+                ? async (options) => {
+                    const exportGif = sequenceActionsRef.current?.exportGif
+                    if (!exportGif) throw new Error('Export unavailable')
+                    toast.message('Exporting GIF…')
+                    const blob = await exportGif({
+                      durationMs: 3000,
+                      onProgress: options?.onProgress,
+                    })
+                    toast.success('GIF downloaded')
+                    return blob
+                  }
+                : undefined
+            }
             placement="rail"
           />
           <StudioToolRail
@@ -559,8 +695,8 @@ function StudioWorkspaceInner({
             onAssetsToggle={() => setAssetsOpen((v) => !v)}
             canUndo={historyState.canUndo}
             canRedo={historyState.canRedo}
-            onUndo={() => canvasActionsRef.current.undo()}
-            onRedo={() => canvasActionsRef.current.redo()}
+            onUndo={performUndo}
+            onRedo={performRedo}
           />
           <StudioColorOrb
             open={colorOpen}
@@ -617,6 +753,35 @@ function StudioWorkspaceInner({
         </div>
       </div>
     </StudioDocumentContext.Provider>
+  )
+
+  if (!isSequenceEngineEnabled()) return workspace
+
+  return (
+    <SequenceEngineProvider initialBundle={persisted?.sequence}>
+      <SequenceEngineBindings
+        onPaintReady={(handler) => {
+          sequencePaintRef.current = handler
+        }}
+        onExportReady={(handler) => {
+          sequenceExportRef.current = handler
+        }}
+        onUndoReady={(handlers) => {
+          sequenceUndoRef.current = handlers
+        }}
+        onEscapeReady={(handlers) => {
+          sequenceEscapeRef.current = handlers
+        }}
+        onActionsReady={(handlers) => {
+          sequenceActionsRef.current = handlers
+        }}
+        onValidatePaintReady={(handler) => {
+          sequenceValidatePaintRef.current = handler
+        }}
+        onStoreChange={() => setSequenceRevision((v) => v + 1)}
+      />
+      {workspace}
+    </SequenceEngineProvider>
   )
 }
 

@@ -37,6 +37,8 @@ export type TimelineClip = {
   label: string
   thumbUrl?: string
   source: 'layer' | 'library'
+  blockKind?: 'hold' | 'sequence' | 'compound' | 'reference'
+  innerFrameCount?: number
 }
 
 export type FrameThumb = {

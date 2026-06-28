@@ -63,6 +63,10 @@ type UseStudioCanvasOptions = {
   documentHeight: number
   initialDocument?: InitialStudioDocument | null
   onDocumentCommit?: () => void
+  onPaintStrokeCommit?: (payload: { layerId: string; layerName: string; snapshot: LayerCanvasSnapshot }) => void
+  /** When false, brush/erase/smudge/fill are blocked (e.g. sequence clip at playhead). */
+  canPaintOnLayer?: (layerId: string) => boolean
+  onPaintBlocked?: (reason: 'locked' | 'sequence_block' | 'background' | 'no_image') => void
   onZoomChange?: (zoom: number) => void
   onDocumentSizeChange?: (width: number, height: number) => void
 }
@@ -134,6 +138,9 @@ export function useStudioCanvas({
   documentHeight,
   initialDocument,
   onDocumentCommit,
+  onPaintStrokeCommit,
+  canPaintOnLayer,
+  onPaintBlocked,
   onZoomChange,
   onDocumentSizeChange,
 }: UseStudioCanvasOptions) {
@@ -150,6 +157,12 @@ export function useStudioCanvas({
   const baseImageRef = useRef<HTMLImageElement | null>(null)
   const onDocumentCommitRef = useRef(onDocumentCommit)
   onDocumentCommitRef.current = onDocumentCommit
+  const onPaintStrokeCommitRef = useRef(onPaintStrokeCommit)
+  onPaintStrokeCommitRef.current = onPaintStrokeCommit
+  const canPaintOnLayerRef = useRef(canPaintOnLayer)
+  canPaintOnLayerRef.current = canPaintOnLayer
+  const onPaintBlockedRef = useRef(onPaintBlocked)
+  onPaintBlockedRef.current = onPaintBlocked
 
   const defaultLayers = useRef<PaintLayer[] | null>(null)
   if (!defaultLayers.current) {
@@ -298,6 +311,22 @@ export function useStudioCanvas({
     return layersRef.current.find((l) => l.id === activeLayerId) ?? layersRef.current[layersRef.current.length - 1]
   }, [activeLayerId])
 
+  const guardPixelEdit = useCallback((layer: PaintLayer): boolean => {
+    if (layer.name === 'Background') {
+      onPaintBlockedRef.current?.('background')
+      return false
+    }
+    if (layer.locked) {
+      onPaintBlockedRef.current?.('locked')
+      return false
+    }
+    if (canPaintOnLayerRef.current && !canPaintOnLayerRef.current(layer.id)) {
+      onPaintBlockedRef.current?.('sequence_block')
+      return false
+    }
+    return true
+  }, [])
+
   const commitPaintStroke = useCallback(() => {
     const active = getActiveLayer()
     const afterLayerSnap = snapshotLayerCanvas(active)
@@ -318,6 +347,11 @@ export function useStudioCanvas({
     layerSaveVersionRef.current[afterLayerSnap.id] = (layerSaveVersionRef.current[afterLayerSnap.id] ?? 0) + 1
     syncHistoryFlags()
     onDocumentCommitRef.current?.()
+    onPaintStrokeCommitRef.current?.({
+      layerId: afterLayerSnap.id,
+      layerName: afterLayerSnap.name,
+      snapshot: afterLayerSnap,
+    })
   }, [getActiveLayer, syncHistoryFlags])
 
   const selection = useMemo((): StudioSelection => {
@@ -802,7 +836,7 @@ export function useStudioCanvas({
 
     if (isPaintTool(effectiveTool)) {
       const layer = getActiveLayer()
-      if (layer.locked) return
+      if (!guardPixelEdit(layer)) return
       const stabilized = stabilizePoint(lastPaintPoint.current, point, toolSettings.streamline)
       const brushPoint: BrushPoint = { ...stabilized, pressure: pressureFromEvent(e) }
       lastPaintPoint.current = stabilized
@@ -839,13 +873,15 @@ export function useStudioCanvas({
 
     if (effectiveTool === 'fill') {
       const layer = getActiveLayer()
-      if (layer.locked) return
-      const ctx = layer.canvas.getContext('2d')!
+      if (!guardPixelEdit(layer)) return
+      const ctx = layer.canvas.getContext('2d')
+      if (!ctx) return
       const fillData = floodFillCanvas(ctx, point.x, point.y, foreground)
       if (fillData) {
         ctx.putImageData(fillData, 0, 0)
-        commitDocument(layersRef.current, elements)
         repaint()
+        commitPaintStroke()
+        scheduleLayerThumbnails([layer.id])
       }
       return
     }
@@ -876,6 +912,10 @@ export function useStudioCanvas({
     }
 
     if (effectiveTool === 'image') {
+      if (!imageUrl?.trim()) {
+        onPaintBlockedRef.current?.('no_image')
+        return
+      }
       pushElement({
         id: uid(),
         kind: 'image',
@@ -888,6 +928,7 @@ export function useStudioCanvas({
     }
   }, [
     commitDocument,
+    commitPaintStroke,
     effectiveTool,
     elements,
     activeLayerId,
@@ -895,6 +936,7 @@ export function useStudioCanvas({
     selectedIds,
     foreground,
     getActiveLayer,
+    guardPixelEdit,
     getCanvasPoint,
     getPan,
     getZoom,
@@ -902,6 +944,7 @@ export function useStudioCanvas({
     paintOnLayer,
     pushElement,
     repaint,
+    scheduleLayerThumbnails,
     setPanImmediate,
     toolSettings,
     zoomAt,

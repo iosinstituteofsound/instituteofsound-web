@@ -72,7 +72,7 @@ export function StudioCanvasStage({
       <div className="mas-canvas-zone__grid" aria-hidden />
 
       {showContext ? (
-        <div className="mas-context-wrap">
+        <div className="mas-context-wrap" data-testid="studio-select-context">
           <StudioGlass className="mas-context" small pill>
             {CONTEXT_ACTIONS.map((action) => (
               <button
@@ -90,7 +90,7 @@ export function StudioCanvasStage({
         </div>
       ) : null}
 
-      <div ref={viewportRef} className={`mas-canvas-viewport ${cursorClass}${painting ? ' mas-canvas-viewport--paint' : ''}`}>
+      <div ref={viewportRef} className={`mas-canvas-viewport ${cursorClass}${painting ? ' mas-canvas-viewport--paint' : ''}`} data-testid="studio-canvas-viewport">
         {zoomHud ? (
           <div className="mas-zoom-hud" aria-live="polite">
             {Math.round(zoom)}%
@@ -132,6 +132,7 @@ export function StudioCanvasStage({
                   ref={textInputRef}
                   type="text"
                   placeholder="Type here…"
+                  data-testid="studio-text-input"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') submitText(e.currentTarget.value)
                     if (e.key === 'Escape') submitText('')
@@ -144,7 +145,7 @@ export function StudioCanvasStage({
         </div>
       </div>
 
-      {!painting ? <p className="mas-canvas-hint">{toolHint(activeTool)}</p> : null}
+      {!painting ? <p className="mas-canvas-hint" data-testid="studio-canvas-hint">{toolHint(activeTool)}</p> : null}
     </div>
   )
 }

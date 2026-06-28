@@ -13,7 +13,10 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:sequence-qa": "vitest run src/modules/illustrator/lib/sequence/__tests__/ src/modules/illustrator/components/studio/__tests__/ && tsc -b",
     "test:e2e": "playwright test",
+    "test:e2e:canvas": "playwright test e2e/studio-canvas-tools.spec.ts",
+    "test:e2e:sequence": "playwright test e2e/sequence-feel.spec.ts",
     "generate:icons": "node scripts/generate-lucide-icon-catalog.mjs",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

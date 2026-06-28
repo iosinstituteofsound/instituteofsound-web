@@ -87,6 +87,7 @@ export function StudioToolRail({
                   className={`mas-rail__tool${active ? ' mas-rail__tool--active' : ''}`}
                   aria-label={tool.label}
                   aria-pressed={active}
+                  data-testid={`studio-tool-${tool.id}`}
                   onClick={() => {
                     if (isPaintTool(tool.id)) {
                       if (activeTool === tool.id) {

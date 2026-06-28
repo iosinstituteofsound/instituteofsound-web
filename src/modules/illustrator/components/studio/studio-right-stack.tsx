@@ -15,6 +15,7 @@ import type { StudioLayerPanelActions } from '@/modules/illustrator/components/s
 import { StudioGlass } from '@/modules/illustrator/components/studio/studio-glass'
 import { StudioResizeHandle } from '@/modules/illustrator/components/studio/studio-resize-handle'
 import { cn } from '@/shared/lib/cn'
+import { SequenceBlockInspector } from '@/modules/illustrator/components/studio/sequence-block-inspector'
 
 type StudioRightStackProps = {
   layersHeight: number
@@ -267,6 +268,7 @@ export function StudioRightStack({
             <span>Properties</span>
           </div>
           <div className="mas-card-panel__body">
+            <SequenceBlockInspector />
             {PROPERTY_SECTIONS.map((section) => {
               const open = openSections[section.id]
               return (

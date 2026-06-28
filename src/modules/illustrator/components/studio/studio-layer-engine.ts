@@ -101,6 +101,39 @@ export function snapshotLayerCanvas(layer: PaintLayer): LayerCanvasSnapshot {
   }
 }
 
+/** Blank pixels for a layer (used when no hold block covers playhead time). */
+export function blankLayerCanvasSnapshot(layer: PaintLayer): LayerCanvasSnapshot {
+  const pixelCanvas = document.createElement('canvas')
+  pixelCanvas.width = layer.canvas.width
+  pixelCanvas.height = layer.canvas.height
+  return {
+    id: layer.id,
+    name: layer.name,
+    visible: layer.visible,
+    locked: layer.locked,
+    opacity: layer.opacity,
+    pixelCanvas,
+  }
+}
+
+/**
+ * Merge engine eval output into full canvas layer list.
+ * Timeline-linked layers without eval data are cleared; others keep current pixels.
+ */
+export function mergeCompositeIntoLayerSnapshots(
+  layers: PaintLayer[],
+  evaluated: LayerCanvasSnapshot[],
+  linkedLayerIds: ReadonlySet<string>,
+): LayerCanvasSnapshot[] {
+  const byId = new Map(evaluated.map((snap) => [snap.id, snap]))
+  return layers.map((layer) => {
+    if (!linkedLayerIds.has(layer.id)) {
+      return snapshotLayerCanvas(layer)
+    }
+    return byId.get(layer.id) ?? blankLayerCanvasSnapshot(layer)
+  })
+}
+
 export function snapshotLayersCanvas(layers: PaintLayer[]): LayerCanvasSnapshot[] {
   return layers.map(snapshotLayerCanvas)
 }
@@ -178,6 +211,19 @@ export function layerThumbnailDataUrl(layer: PaintLayer, size = 28): string {
   ctx.fillStyle = DOCUMENT_BG
   ctx.fillRect(0, 0, size, size)
   ctx.drawImage(layer.canvas, 0, 0, size, size)
+  return thumbCanvasCache.toDataURL('image/png')
+}
+
+export function snapshotThumbnailDataUrl(snapshot: LayerCanvasSnapshot, size = 96): string {
+  if (thumbCanvasCache.width !== size || thumbCanvasCache.height !== size) {
+    thumbCanvasCache.width = size
+    thumbCanvasCache.height = size
+  }
+  const ctx = thumbCanvasCache.getContext('2d')
+  if (!ctx) return ''
+  ctx.fillStyle = DOCUMENT_BG
+  ctx.fillRect(0, 0, size, size)
+  ctx.drawImage(snapshot.pixelCanvas, 0, 0, size, size)
   return thumbCanvasCache.toDataURL('image/png')
 }
 
