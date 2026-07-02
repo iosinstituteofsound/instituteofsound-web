@@ -4,4 +4,6 @@ export interface AuthorSummary {
   username?: string
   avatarUrl?: string
   isVerified?: boolean
+  themeSlug?: string
+  themePrimary?: string
 }
