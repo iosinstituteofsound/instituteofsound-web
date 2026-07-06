@@ -5,6 +5,7 @@ export const MESSENGER_SIDEBAR_FILTERS: Array<{ id: MessengerFilter; label: stri
   { id: 'unread', label: 'Unread' },
   { id: 'groups', label: 'Groups' },
   { id: 'communities', label: 'Communities' },
+  { id: 'alliances', label: 'Alliances' },
 ]
 
 export const MESSENGER_POPOVER_FILTERS: Array<{ id: MessengerFilter; label: string }> = [
@@ -13,4 +14,5 @@ export const MESSENGER_POPOVER_FILTERS: Array<{ id: MessengerFilter; label: stri
   { id: 'requests', label: 'Requests' },
   { id: 'groups', label: 'Groups' },
   { id: 'communities', label: 'Communities' },
+  { id: 'alliances', label: 'Alliances' },
 ]

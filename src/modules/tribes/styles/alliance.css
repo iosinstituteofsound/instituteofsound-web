@@ -1,0 +1,275 @@
+.alliance-page {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.alliance-kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.alliance-muted {
+  opacity: 0.72;
+  font-size: 0.92rem;
+}
+
+.alliance-hero h1,
+.alliance-hq h1,
+.alliance-form-page h1 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1.05;
+  margin: 0.2rem 0;
+}
+
+.alliance-hero__actions,
+.alliance-hq__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.alliance-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 0.55rem 0.95rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.alliance-btn--ghost {
+  background: transparent;
+  color: var(--foreground);
+}
+
+.alliance-btn--danger {
+  background: color-mix(in oklab, crimson 82%, black);
+  color: white;
+  border-color: transparent;
+}
+
+.alliance-section {
+  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+  border-radius: 1rem;
+  padding: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.alliance-section__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.alliance-board {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.alliance-board__item {
+  border-radius: 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
+.alliance-board__item--lead {
+  border-color: color-mix(in oklab, var(--primary) 45%, transparent);
+}
+
+.alliance-board__link {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.35rem 0.75rem;
+  padding: 0.75rem 0.85rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.alliance-board__rank {
+  font-weight: 700;
+  opacity: 0.55;
+}
+
+.alliance-board__name {
+  font-weight: 700;
+}
+
+.alliance-board__score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.alliance-board__bar {
+  grid-column: 1 / -1;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  overflow: hidden;
+}
+
+.alliance-board__bar > span {
+  display: block;
+  height: 100%;
+  width: var(--pct, 0%);
+  background: linear-gradient(90deg, var(--primary), color-mix(in oklab, var(--primary) 55%, white));
+}
+
+.alliance-board__meta {
+  grid-column: 2 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  opacity: 0.72;
+}
+
+.alliance-hq__banner {
+  position: relative;
+  min-height: 180px;
+  border-radius: 1.1rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 35%, black), #111);
+  background-size: cover;
+  background-position: center;
+}
+
+.alliance-hq__banner-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.72));
+}
+
+.alliance-hq__banner-body {
+  position: relative;
+  padding: 1.2rem;
+  color: white;
+}
+
+.alliance-hq__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+}
+
+.alliance-tabs {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.alliance-tabs__btn {
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  background: transparent;
+  padding: 0.35rem 0.75rem;
+  text-transform: capitalize;
+}
+
+.alliance-tabs__btn.is-active {
+  background: color-mix(in oklab, var(--primary) 16%, transparent);
+  border-color: color-mix(in oklab, var(--primary) 35%, transparent);
+}
+
+.alliance-score-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.5rem;
+}
+
+.alliance-score-card {
+  border-radius: 0.75rem;
+  padding: 0.65rem;
+  border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+  display: grid;
+  gap: 0.2rem;
+}
+
+.alliance-score-card__label {
+  text-transform: capitalize;
+  font-size: 0.78rem;
+  opacity: 0.7;
+}
+
+.alliance-roster,
+.alliance-legacy {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.alliance-roster__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
+.alliance-roster__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  font-size: 0.82rem;
+}
+
+.alliance-badge {
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  background: color-mix(in oklab, var(--primary) 18%, transparent);
+  font-size: 0.72rem;
+}
+
+.alliance-form {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 480px;
+}
+
+.alliance-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+}
+
+.alliance-form input,
+.alliance-form select {
+  border-radius: 0.65rem;
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  background: transparent;
+  padding: 0.55rem 0.7rem;
+}
+
+.alliance-error {
+  color: crimson;
+  font-size: 0.88rem;
+}
+
+.alliance-empty {
+  opacity: 0.7;
+  padding: 0.5rem 0;
+}
+
+.alliance-challenge {
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+  padding-top: 0.75rem;
+}

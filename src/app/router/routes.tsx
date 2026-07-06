@@ -118,6 +118,15 @@ const RegisterPage = lazy(() =>
 const ExplorePage = lazy(() =>
   import('@/modules/explore/pages/explore-page').then((m) => ({ default: m.ExplorePage })),
 )
+const GenreHubPage = lazy(() =>
+  import('@/modules/tribes/pages/genre-hub-page').then((m) => ({ default: m.GenreHubPage })),
+)
+const AllianceHqPage = lazy(() =>
+  import('@/modules/tribes/pages/alliance-hq-page').then((m) => ({ default: m.AllianceHqPage })),
+)
+const CreateAlliancePage = lazy(() =>
+  import('@/modules/tribes/pages/create-alliance-page').then((m) => ({ default: m.CreateAlliancePage })),
+)
 const ArticlePage = lazy(() =>
   import('@/modules/explore/pages/article-page').then((m) => ({ default: m.ArticlePage })),
 )
@@ -238,6 +247,36 @@ export const router = createBrowserRouter([
           <ExplorePageGuard>
             <Lazy>
               <ExplorePage />
+            </Lazy>
+          </ExplorePageGuard>
+        ),
+      },
+      {
+        path: 'genres/:slug',
+        element: (
+          <ExplorePageGuard>
+            <Lazy>
+              <GenreHubPage />
+            </Lazy>
+          </ExplorePageGuard>
+        ),
+      },
+      {
+        path: 'genres/:genreSlug/alliances/new',
+        element: (
+          <ExplorePageGuard>
+            <Lazy>
+              <CreateAlliancePage />
+            </Lazy>
+          </ExplorePageGuard>
+        ),
+      },
+      {
+        path: 'genres/:genreSlug/alliances/:slug',
+        element: (
+          <ExplorePageGuard>
+            <Lazy>
+              <AllianceHqPage />
             </Lazy>
           </ExplorePageGuard>
         ),

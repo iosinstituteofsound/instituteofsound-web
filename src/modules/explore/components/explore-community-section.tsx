@@ -11,20 +11,18 @@ import {
 import type { ExplorePayload } from '@/modules/explore/types/explore.types'
 import {
   formatExploreDb,
-  listExploreCrews,
   listExploreSpins,
-  listExploreTribes,
   spinReactionLabel,
   tribeBarPercent,
   type ExploreCrewRow,
   type ExploreSpinRow,
-  type ExploreTribeRow,
 } from '@/modules/explore/lib/community-meta'
 import {
   ExploreSectionHead,
   ExploreSectionHeadAction,
 } from '@/modules/explore/components/explore-section-head'
 import { useTribeCommunityChat } from '@/modules/explore/hooks/use-tribe-community-chat'
+import { useAllianceLeaderboard, useGenres } from '@/modules/tribes/hooks/use-alliances'
 
 interface ExploreCommunitySectionProps {
   community: ExplorePayload['community']
@@ -71,36 +69,30 @@ function CommunityWaveform({
   )
 }
 
-function TribeRow({
-  tribe,
+function AllianceRow({
+  alliance,
   rank,
-  leaderDb,
-  onChat,
-  chatBusy,
+  leaderScore,
 }: {
-  tribe: ExploreTribeRow
+  alliance: { slug: string; name: string; genreSlug: string; tribeScore: number; memberCount: number; level: number }
   rank: number
-  leaderDb: number
-  onChat: (slug: string) => void
-  chatBusy: boolean
+  leaderScore: number
 }) {
   const lead = rank === 1
-  const pct = tribeBarPercent(tribe.totalDb, leaderDb)
-
+  const pct = tribeBarPercent(alliance.tribeScore, leaderScore)
   return (
     <li className={lead ? 'explore-com-tribes__item explore-com-tribes__item--lead' : 'explore-com-tribes__item'}>
       <Link
-        to="/feed"
+        to={`/genres/${alliance.genreSlug}/alliances/${alliance.slug}`}
         className={lead ? 'explore-com-tribe explore-com-tribe--lead' : 'explore-com-tribe'}
-        aria-label={`#${rank} ${tribe.name}`}
       >
         <div className="explore-com-tribe__row">
           <span className="explore-com-tribe__rank">{rank}</span>
           <span className="explore-com-tribe__icon" aria-hidden>
             <Disc3 size={12} strokeWidth={2} />
           </span>
-          <span className="explore-com-tribe__name">{tribe.name}</span>
-          <span className="explore-com-tribe__db">{formatExploreDb(tribe.totalDb)}</span>
+          <span className="explore-com-tribe__name">{alliance.name}</span>
+          <span className="explore-com-tribe__db">{alliance.tribeScore.toLocaleString()} pts</span>
         </div>
         <div
           className="explore-com-tribe__bar"
@@ -109,25 +101,39 @@ function TribeRow({
         >
           <span />
         </div>
-        {lead ? (
-          <p className="explore-com-tribe__meta">{tribe.activeMembers} active listeners</p>
-        ) : (
-          <p className="explore-com-tribe__meta explore-com-tribe__meta--ghost">
-            {tribe.activeMembers} listeners
-          </p>
-        )}
+        <p className="explore-com-tribe__meta">{alliance.memberCount} members · Lv {alliance.level}</p>
+      </Link>
+    </li>
+  )
+}
+
+function GenreHubRow({
+  genre,
+  onChat,
+  chatBusy,
+}: {
+  genre: { slug: string; label: string; allianceCount: number }
+  onChat: (slug: string) => void
+  chatBusy: boolean
+}) {
+  return (
+    <li className="explore-com-tribes__item">
+      <Link to={`/genres/${genre.slug}`} className="explore-com-tribe">
+        <div className="explore-com-tribe__row">
+          <span className="explore-com-tribe__icon" aria-hidden>
+            <Disc3 size={12} strokeWidth={2} />
+          </span>
+          <span className="explore-com-tribe__name">{genre.label}</span>
+          <span className="explore-com-tribe__db">{genre.allianceCount} alliances</span>
+        </div>
       </Link>
       <button
         type="button"
         className="explore-com-tribe__chat"
         disabled={chatBusy}
-        onClick={(event) => {
-          event.preventDefault()
-          event.stopPropagation()
-          onChat(tribe.slug)
-        }}
+        onClick={() => onChat(genre.slug)}
       >
-        Chat
+        World chat
       </button>
     </li>
   )
@@ -245,13 +251,14 @@ function CrewScene({ crew }: { crew: ExploreCrewRow }) {
 
 export function ExploreCommunitySection({ community }: ExploreCommunitySectionProps) {
   const { busySlug, openTribeChat } = useTribeCommunityChat()
-  const tribes = listExploreTribes(community)
+  const { data: genres = [] } = useGenres()
+  const { data: leaderboard } = useAllianceLeaderboard({ period: 'score', limit: 6 })
+  const alliances = leaderboard?.alliances ?? []
   const spins = listExploreSpins(community).slice(0, 5)
-  const crews = listExploreCrews(community)
+  const leaderScore = alliances[0]?.tribeScore ?? 1
+  const genreRows = genres.filter((g) => g.worldChatEnabled).slice(0, 6)
 
-  const leaderDb = tribes[0]?.totalDb ?? 1
-
-  if (tribes.length === 0 && spins.length === 0 && crews.length === 0) return null
+  if (genreRows.length === 0 && spins.length === 0 && alliances.length === 0) return null
 
   return (
     <section id="explore-community" className="explore-section explore-com-section">
@@ -259,7 +266,7 @@ export function ExploreCommunitySection({ community }: ExploreCommunitySectionPr
         index={9}
         kicker="Wire"
         title="Community"
-        description="Tribes, spins, and crews — ranked by activity."
+        description="Genre hubs, alliances, and spins — ranked by activity."
         action={<ExploreSectionHeadAction label="Full wire" to="/feed" />}
       />
 
@@ -269,25 +276,23 @@ export function ExploreCommunitySection({ community }: ExploreCommunitySectionPr
           <header className="explore-com-panel__head">
             <TrendingUp size={16} strokeWidth={2} className="explore-com-panel__ico" aria-hidden />
             <div>
-              <h3 className="explore-com-panel__title">Trending tribes</h3>
-              <p className="explore-com-panel__sub">Monthly standings</p>
+              <h3 className="explore-com-panel__title">Genre hubs</h3>
+              <p className="explore-com-panel__sub">World chat by genre</p>
             </div>
           </header>
 
           <ol className="explore-com-tribes">
-            {tribes.map((tribe, i) => (
-              <TribeRow
-                key={tribe.id}
-                tribe={tribe}
-                rank={i + 1}
-                leaderDb={leaderDb}
+            {genreRows.map((genre) => (
+              <GenreHubRow
+                key={genre.slug}
+                genre={genre}
                 onChat={(slug) => void openTribeChat(slug)}
-                chatBusy={busySlug === tribe.slug}
+                chatBusy={busySlug === genre.slug}
               />
             ))}
           </ol>
 
-          <PanelCta to="/feed" label="View all tribes" />
+          <PanelCta to="/genres/electronic" label="Browse genres" />
         </article>
 
         <article className="explore-com-panel explore-com-panel--spins">
@@ -314,20 +319,23 @@ export function ExploreCommunitySection({ community }: ExploreCommunitySectionPr
           <header className="explore-com-panel__head">
             <Users size={16} strokeWidth={2} className="explore-com-panel__ico" aria-hidden />
             <div>
-              <h3 className="explore-com-panel__title">Top crews</h3>
-              <p className="explore-com-panel__sub">Weekly board</p>
+              <h3 className="explore-com-panel__title">Top alliances</h3>
+              <p className="explore-com-panel__sub">Identity score board</p>
             </div>
           </header>
 
-          <ol className="explore-com-crews">
-            {crews.map((crew, i) => (
-              <CrewRow key={crew.id} crew={crew} rank={i + 1} />
+          <ol className="explore-com-tribes">
+            {alliances.map((alliance, i) => (
+              <AllianceRow
+                key={alliance.id}
+                alliance={alliance}
+                rank={i + 1}
+                leaderScore={leaderScore}
+              />
             ))}
           </ol>
 
-          {crews[0] ? <CrewScene crew={crews[0]} /> : null}
-
-          <PanelCta to="/feed" label="View leaderboards" />
+          <PanelCta to="/genres/electronic" label="View alliances" />
         </article>
       </div>
     </section>

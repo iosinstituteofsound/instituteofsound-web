@@ -2,11 +2,11 @@
 
 export type DmThreadStatus = 'pending' | 'accepted' | 'declined'
 
-export type ThreadKind = 'direct' | 'group' | 'community'
+export type ThreadKind = 'direct' | 'group' | 'community' | 'alliance'
 
 export type DmMessageType = 'text' | 'image' | 'video' | 'file' | 'system' | 'share_card'
 
-export type MessengerFilter = 'all' | 'unread' | 'groups' | 'communities' | 'requests'
+export type MessengerFilter = 'all' | 'unread' | 'groups' | 'communities' | 'alliances' | 'requests'
 
 export type DmReaction = {
   userId: string
@@ -93,6 +93,7 @@ export type DmThreadSummary = {
   otherAvatarThumbnailUrl?: string
   otherIsOnline?: boolean
   communitySlug?: string
+  tribeId?: string
 }
 
 export const MESSENGER_MESSAGE_EVENT = 'messenger:message'

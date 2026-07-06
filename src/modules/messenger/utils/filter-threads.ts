@@ -15,6 +15,8 @@ export function filterThreads(
     list = list.filter((thread) => thread.kind === 'group' || thread.isGroup)
   } else if (filter === 'communities') {
     list = list.filter((thread) => thread.kind === 'community')
+  } else if (filter === 'alliances') {
+    list = list.filter((thread) => thread.kind === 'alliance')
   } else if (filter === 'requests') {
     list = list.filter((thread) => thread.isPendingRequest)
   }
