@@ -25,12 +25,15 @@ import {
   MESSENGER_MESSAGE_EVENT,
   MESSENGER_MESSAGE_UPDATED_EVENT,
   MESSENGER_PRESENCE_EVENT,
+  MESSENGER_PRESENCE_SYNC_EVENT,
   MESSENGER_READ_EVENT,
   MESSENGER_THREAD_EVENT,
   MESSENGER_TYPING_EVENT,
+  PRESENCE_HEARTBEAT_EVENT,
   type DmMessage,
   type DmThreadSummary,
   type MessengerPresencePayload,
+  type MessengerPresenceSyncPayload,
   type MessengerReadPayload,
   type MessengerTypingPayload,
 } from '@/modules/messenger/types/messenger.types'
@@ -43,11 +46,13 @@ type MessengerThreadListener = (thread: DmThreadSummary) => void
 type MessengerTypingListener = (payload: MessengerTypingPayload) => void
 type MessengerReadListener = (payload: MessengerReadPayload) => void
 type MessengerPresenceListener = (payload: MessengerPresencePayload) => void
+type MessengerPresenceSyncListener = (payload: MessengerPresenceSyncPayload) => void
 type CallListener = (payload: CallPeerPayload) => void
 
 type CallEmitPayload = Omit<CallPeerPayload, 'fromUserId'> & { toUserId: string }
 
 const CONNECT_TIMEOUT_MS = 15_000
+const PRESENCE_HEARTBEAT_MS = 30_000
 
 class RealtimeSocketClient {
   private socket: Socket | null = null
@@ -59,6 +64,7 @@ class RealtimeSocketClient {
   private messengerTypingListeners = new Set<MessengerTypingListener>()
   private messengerReadListeners = new Set<MessengerReadListener>()
   private messengerPresenceListeners = new Set<MessengerPresenceListener>()
+  private messengerPresenceSyncListeners = new Set<MessengerPresenceSyncListener>()
   private callInviteListeners = new Set<CallListener>()
   private callAcceptListeners = new Set<CallListener>()
   private callRejectListeners = new Set<CallListener>()
@@ -72,6 +78,7 @@ class RealtimeSocketClient {
   private connectListeners = new Set<() => void>()
   private connectPromise: Promise<Socket | null> | null = null
   private handlersBound = false
+  private presenceHeartbeatTimer: ReturnType<typeof setInterval> | null = null
 
   get isConnected(): boolean {
     return this.socket?.connected ?? false
@@ -83,6 +90,7 @@ class RealtimeSocketClient {
   }
 
   disconnect(): void {
+    this.stopPresenceHeartbeat()
     this.socket?.disconnect()
     this.socket = null
     this.connectPromise = null
@@ -140,6 +148,12 @@ class RealtimeSocketClient {
   onMessengerPresence(listener: MessengerPresenceListener): () => void {
     this.messengerPresenceListeners.add(listener)
     return () => this.messengerPresenceListeners.delete(listener)
+  }
+
+  onMessengerPresenceSync(listener: MessengerPresenceSyncListener): () => void {
+    this.messengerPresenceSyncListeners.add(listener)
+    this.connect()
+    return () => this.messengerPresenceSyncListeners.delete(listener)
   }
 
   onCallInvite(listener: CallListener): () => void {
@@ -340,10 +354,15 @@ class RealtimeSocketClient {
       if (env.isDev) {
         console.info('[realtime] connected', socket.id)
       }
+      this.startPresenceHeartbeat(socket)
       void this.resubscribeAll()
       for (const listener of this.connectListeners) {
         listener()
       }
+    })
+
+    socket.on('disconnect', () => {
+      this.stopPresenceHeartbeat()
     })
 
     socket.on('connect_error', (err) => {
@@ -392,6 +411,10 @@ class RealtimeSocketClient {
 
     socket.on(MESSENGER_PRESENCE_EVENT, (payload: MessengerPresencePayload) => {
       for (const listener of this.messengerPresenceListeners) listener(payload)
+    })
+
+    socket.on(MESSENGER_PRESENCE_SYNC_EVENT, (payload: MessengerPresenceSyncPayload) => {
+      for (const listener of this.messengerPresenceSyncListeners) listener(payload)
     })
 
     const callEvents: Array<[string, Set<CallListener>]> = [
@@ -476,6 +499,24 @@ class RealtimeSocketClient {
         resolve()
       })
     })
+  }
+
+  private startPresenceHeartbeat(socket: Socket): void {
+    this.stopPresenceHeartbeat()
+    const emitHeartbeat = () => {
+      if (socket.connected) {
+        socket.emit(PRESENCE_HEARTBEAT_EVENT)
+      }
+    }
+    emitHeartbeat()
+    this.presenceHeartbeatTimer = setInterval(emitHeartbeat, PRESENCE_HEARTBEAT_MS)
+  }
+
+  private stopPresenceHeartbeat(): void {
+    if (this.presenceHeartbeatTimer) {
+      clearInterval(this.presenceHeartbeatTimer)
+      this.presenceHeartbeatTimer = null
+    }
   }
 }
 

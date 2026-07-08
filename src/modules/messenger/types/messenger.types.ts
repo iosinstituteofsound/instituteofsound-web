@@ -102,6 +102,8 @@ export const MESSENGER_TYPING_EVENT = 'messenger:typing'
 export const MESSENGER_READ_EVENT = 'messenger:read'
 export const MESSENGER_THREAD_EVENT = 'messenger:thread:updated'
 export const MESSENGER_PRESENCE_EVENT = 'messenger:presence'
+export const MESSENGER_PRESENCE_SYNC_EVENT = 'messenger:presence:sync'
+export const PRESENCE_HEARTBEAT_EVENT = 'presence:heartbeat'
 
 export type MessengerTypingPayload = {
   threadId: string
@@ -119,6 +121,10 @@ export type MessengerReadPayload = {
 export type MessengerPresencePayload = {
   userId: string
   isOnline: boolean
+}
+
+export type MessengerPresenceSyncPayload = {
+  users: MessengerPresencePayload[]
 }
 
 export type DmThreadListBucket = 'inbox' | 'requests' | 'archived'

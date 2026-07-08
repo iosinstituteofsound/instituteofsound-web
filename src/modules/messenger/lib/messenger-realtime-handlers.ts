@@ -3,10 +3,12 @@ import { meQueryKey } from '@/modules/auth/hooks/use-auth'
 import * as messengerApi from '@/modules/messenger/api/messenger.api'
 import {
   appendMessageToCache,
+  applyPresenceSync,
   messengerUnreadQueryKey,
   patchMessageInCache,
   patchThreadPresenceInCache,
   upsertThreadInCache,
+  getMessengerThreadListQueryKeys,
 } from '@/modules/messenger/lib/messenger-cache'
 import { getPopUpNewMessagesEnabled } from '@/modules/messenger/lib/messenger-settings'
 import { getOpenThreadIdsFromStores } from '@/modules/messenger/lib/open-threads'
@@ -77,8 +79,15 @@ export function registerMessengerRealtimeHandlers(queryClient: QueryClient): voi
     patchThreadPresenceInCache(queryClient, payload.userId, payload.isOnline)
   })
 
+  realtimeSocketClient.onMessengerPresenceSync((payload) => {
+    applyPresenceSync(queryClient, payload.users)
+  })
+
   realtimeSocketClient.onConnect(() => {
     if (!tokenStorage.hasSession()) return
+    for (const key of getMessengerThreadListQueryKeys()) {
+      void queryClient.invalidateQueries({ queryKey: key })
+    }
     void messengerApi.getUnreadCount().then((count) => {
       useMessengerLiveStore.getState().setUnreadCount(count)
       queryClient.setQueryData(messengerUnreadQueryKey, count)

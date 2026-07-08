@@ -32,9 +32,23 @@ export function upsertThreadInCache(queryClient: QueryClient, thread: DmThreadSu
   for (const key of getMessengerThreadListQueryKeys()) {
     queryClient.setQueryData<DmThreadSummary[]>(key, (current) => {
       const list = current ?? []
+      const existing = list.find((entry) => entry.threadId === thread.threadId)
+      const mergedThread =
+        existing?.otherIsOnline && !thread.otherIsOnline
+          ? { ...thread, otherIsOnline: true }
+          : thread
       const without = list.filter((entry) => entry.threadId !== thread.threadId)
-      return sortThreads([thread, ...without])
+      return sortThreads([mergedThread, ...without])
     })
+  }
+}
+
+export function applyPresenceSync(
+  queryClient: QueryClient,
+  users: Array<{ userId: string; isOnline: boolean }>,
+) {
+  for (const entry of users) {
+    patchThreadPresenceInCache(queryClient, entry.userId, entry.isOnline)
   }
 }
 
