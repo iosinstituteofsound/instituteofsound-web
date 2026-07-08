@@ -1,13 +1,16 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { ImageIcon, Mic, Paperclip, Plus, Send, Smile, Square, Sticker, ThumbsUp } from 'lucide-react'
+import { ComposerVoiceRecordingBar } from '@/modules/messenger/components/composer-voice-recording-bar'
+import { useComposerVoiceRecorder } from '@/modules/messenger/hooks/use-composer-voice-recorder'
 import { useMessageComposer } from '@/modules/messenger/hooks/use-message-composer'
 import { useMessageComposerEmoji } from '@/modules/messenger/hooks/use-message-composer-emoji'
-import { LIKE_MESSAGE_EMOJI } from '@/modules/messenger/lib/messenger-utils'
+import { getReplyPreviewText, LIKE_MESSAGE_EMOJI } from '@/modules/messenger/lib/messenger-utils'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 import { AnimatedEmojiPicker } from '@/shared/components/emoji'
 import { IconButton } from '@/shared/components/ui/icon-button'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/messenger/styles/messenger.css'
+import '@/modules/messenger/styles/messenger-voice.css'
 
 const MAX_INPUT_HEIGHT = 140
 
@@ -30,6 +33,12 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
     isPending,
   } = useMessageComposer(threadId)
 
+  const voice = useComposerVoiceRecorder({
+    threadId,
+    disabled: isPending,
+    onSend: submit,
+  })
+
   const [isFocused, setIsFocused] = useState(false)
   const [isMultiline, setIsMultiline] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -37,7 +46,7 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
   const imageInputRef = useRef<HTMLInputElement>(null)
   const emojiPicker = useMessageComposerEmoji(setText, textareaRef)
 
-  const isActive = isFocused || text.length > 0
+  const isActive = isFocused || text.length > 0 || voice.isCaptureActive
 
   const resizeTextarea = useCallback(() => {
     const node = textareaRef.current
@@ -84,7 +93,15 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
         <div className="messenger-composer__banner">
           <div>
             <div className="messenger-composer__banner-title">Replying</div>
-            <div className="messenger-composer__banner-body">{replyTo.body || 'Attachment'}</div>
+            <div className="messenger-composer__banner-body">
+              {replyTo.body ||
+                getReplyPreviewText({
+                  body: replyTo.body,
+                  type: replyTo.type,
+                  mediaMimeType: replyTo.mediaMimeType,
+                  mediaFileName: replyTo.mediaFileName,
+                })}
+            </div>
           </div>
           <IconButton
             className="messenger-icon-btn"
@@ -112,6 +129,21 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
         </div>
       ) : null}
 
+      {voice.error ? (
+        <p className="messenger-composer__error" role="alert">
+          {voice.error}
+        </p>
+      ) : null}
+
+      {voice.isCaptureActive ? (
+        <ComposerVoiceRecordingBar
+          formattedElapsed={voice.formattedElapsed}
+          waveformSamples={voice.waveformSamples}
+          isSending={voice.isSending}
+          onDiscard={voice.discardRecording}
+          onSend={voice.confirmSend}
+        />
+      ) : (
       <div
         className={cn(
           'messenger-composer__row',
@@ -124,7 +156,13 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
         </IconButton>
 
         <div className="messenger-composer__tools-extra" aria-hidden={isActive || undefined}>
-          <IconButton type="button" className="messenger-composer__tool" aria-label="Voice message">
+          <IconButton
+            type="button"
+            className={cn('messenger-composer__tool', voice.isRecording && 'is-recording')}
+            aria-label={voice.isRecording ? 'Stop and send voice message' : 'Voice message'}
+            disabled={isPending || voice.isSending}
+            onClick={() => void voice.toggleRecording()}
+          >
             <Mic className="messenger-composer__icon" />
           </IconButton>
           <IconButton
@@ -202,6 +240,7 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
           </button>
         )}
       </div>
+      )}
 
       <input
         ref={imageInputRef}

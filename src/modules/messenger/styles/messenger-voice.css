@@ -1,0 +1,314 @@
+
+/* Voice message bubble */
+.messenger-voice-bubble {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 15.5rem;
+  max-width: 20rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.messenger-voice-bubble.is-incoming {
+  background: color-mix(in srgb, var(--foreground) 12%, var(--card));
+  color: var(--foreground);
+  border: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+.messenger-voice-bubble.is-outgoing {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.messenger-voice-bubble.is-stacked.is-incoming {
+  border-top-left-radius: 6px;
+}
+
+.messenger-voice-bubble.is-stacked.is-outgoing {
+  border-top-right-radius: 6px;
+}
+
+.messenger-voice-bubble.is-tail-in {
+  border-bottom-left-radius: 6px;
+}
+
+.messenger-voice-bubble.is-tail-out {
+  border-bottom-right-radius: 6px;
+}
+
+.messenger-voice-bubble__play {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.messenger-voice-bubble__play.is-incoming {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+}
+
+.messenger-voice-bubble__play.is-outgoing {
+  background: rgb(255 255 255 / 22%);
+  color: var(--primary-foreground);
+}
+
+.messenger-voice-bubble__play:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.messenger-voice-bubble__play-overlay {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 35%);
+  color: #fff;
+  pointer-events: none;
+}
+
+.messenger-voice-bubble__speed {
+  flex-shrink: 0;
+  min-width: 2.5rem;
+  padding: 0.2rem 0.5rem;
+  border: 0;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.messenger-voice-bubble.is-incoming .messenger-voice-bubble__speed {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  color: var(--primary);
+}
+
+.messenger-voice-bubble.is-outgoing .messenger-voice-bubble__speed {
+  background: rgb(255 255 255 / 18%);
+  color: var(--primary-foreground);
+}
+
+.messenger-voice-bubble__track {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.messenger-voice-bubble__waveform {
+  display: flex;
+  align-items: center;
+  gap: 1.5px;
+  min-width: 0;
+  flex: 1;
+  height: 30px;
+  overflow: hidden;
+}
+
+.messenger-voice-bubble__waveform.is-seekable {
+  cursor: pointer;
+}
+
+.messenger-voice-bubble__bar {
+  width: 2.5px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.messenger-voice-bubble__bar.is-incoming {
+  background: color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+.messenger-voice-bubble__bar.is-incoming.is-played {
+  background: var(--primary);
+}
+
+.messenger-voice-bubble__bar.is-outgoing {
+  background: rgb(255 255 255 / 35%);
+}
+
+.messenger-voice-bubble__bar.is-outgoing.is-played {
+  background: var(--primary-foreground);
+}
+
+.messenger-voice-bubble__time {
+  flex-shrink: 0;
+  min-width: 2.4rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  opacity: 0.85;
+}
+
+.messenger-voice-bubble__time.has-error {
+  opacity: 1;
+}
+
+/* Media bubble */
+.messenger-media-bubble {
+  overflow: hidden;
+  max-width: 248px;
+  border-radius: 14px;
+}
+
+.messenger-media-bubble.is-incoming {
+  border: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+.messenger-media-bubble.has-caption.is-incoming {
+  background: color-mix(in srgb, var(--foreground) 12%, var(--card));
+  color: var(--foreground);
+}
+
+.messenger-media-bubble.has-caption.is-outgoing {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.messenger-media-bubble.is-stacked.is-incoming {
+  border-top-left-radius: 4px;
+}
+
+.messenger-media-bubble.is-stacked.is-outgoing {
+  border-top-right-radius: 4px;
+}
+
+.messenger-media-bubble.is-tail-in {
+  border-bottom-left-radius: 4px;
+}
+
+.messenger-media-bubble.is-tail-out {
+  border-bottom-right-radius: 4px;
+}
+
+.messenger-media-bubble__frame {
+  position: relative;
+  width: 248px;
+  background: rgb(0 0 0 / 8%);
+}
+
+.messenger-media-bubble__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.messenger-media-bubble__loading {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 4%) 0%,
+    rgb(0 0 0 / 10%) 50%,
+    rgb(0 0 0 / 4%) 100%
+  );
+  background-size: 200% 100%;
+  animation: messenger-media-shimmer 1.2s ease-in-out infinite;
+}
+
+.messenger-media-bubble__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.messenger-media-bubble__caption {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+@keyframes messenger-media-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* Composer voice recording */
+.messenger-composer__error {
+  margin: 0 0.75rem 0.35rem;
+  font-size: 0.75rem;
+  color: var(--destructive);
+}
+
+.messenger-composer__voice-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.75rem 0.75rem;
+}
+
+.messenger-composer__voice-indicator {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--destructive);
+  flex-shrink: 0;
+  animation: messenger-voice-pulse 1s ease-in-out infinite;
+}
+
+.messenger-composer__voice-time {
+  flex-shrink: 0;
+  min-width: 2.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.messenger-composer__voice-send {
+  margin-left: auto;
+  border: 0;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.messenger-composer__voice-send:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.messenger-composer__tool.is-recording {
+  color: var(--destructive);
+}
+
+@keyframes messenger-voice-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.92);
+  }
+}

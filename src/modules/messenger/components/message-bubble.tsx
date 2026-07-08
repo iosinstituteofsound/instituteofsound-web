@@ -2,13 +2,20 @@ import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { Reply } from 'lucide-react'
 import '@/modules/messenger/styles/messenger.css'
+import '@/modules/messenger/styles/messenger-voice.css'
 import { UserAvatar } from '@/shared/components/user'
 import { LinkPreviewCard } from '@/shared/components/link-preview'
 import { toLinkPreview } from '@/shared/lib/link-preview/dm-link-preview'
 import { MessageActionsMenu } from '@/modules/messenger/components/message-actions-menu'
+import { MessageMediaBubble } from '@/modules/messenger/components/message-media-bubble'
 import { MessageReactionBadge } from '@/modules/messenger/components/message-reaction-badge'
+import { MessageVoiceBubble } from '@/modules/messenger/components/message-voice-bubble'
 import { useMessageBubbleActions } from '@/modules/messenger/hooks/use-message-bubble-actions'
 import { getReplyHeaderLabel, getReplyPreviewText, isLikeMessage, isStandaloneEmojiMessage } from '@/modules/messenger/lib/messenger-utils'
+import {
+  isImageMessage,
+  isVoiceMessage,
+} from '@/modules/messenger/utils/voice-message-utils'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 import { cn } from '@/shared/lib/cn'
 
@@ -53,6 +60,8 @@ export const MessageBubble = memo(function MessageBubble({
   const quotedPreviewText = message.replyPreview ? getReplyPreviewText(message.replyPreview) : ''
   const isLike = isLikeMessage(message)
   const isStandaloneEmoji = isStandaloneEmojiMessage(message) && !useReplyStack
+  const isVoice = isVoiceMessage(message)
+  const isMedia = isImageMessage(message) && Boolean(message.mediaUrl)
 
   if (message.type === 'system') {
     return <p className="messenger-system-message">{message.body}</p>
@@ -78,6 +87,181 @@ export const MessageBubble = memo(function MessageBubble({
       onReact={(emoji) => void onReact(emoji)}
     />
   )
+
+  const reactionBadge =
+    message.reactions.length > 0 ? (
+      <MessageReactionBadge
+        reactions={message.reactions}
+        isOutgoing={isOutgoing}
+        onReact={(emoji) => void onReact(emoji)}
+      />
+    ) : null
+
+  if (isVoice && message.mediaUrl) {
+    const voiceBubble = (
+      <MessageVoiceBubble
+        messageId={message.id}
+        mediaUrl={message.mediaUrl}
+        isOutgoing={isOutgoing}
+        senderName={senderName}
+        senderAvatar={senderAvatar}
+        isTail={isTail}
+        isStacked={isStacked}
+      />
+    )
+
+    const renderedVoice = useReplyStack ? (
+      <div
+        className={cn(
+          'messenger-reply-stack',
+          isOutgoing && 'is-outgoing',
+          compact && 'messenger-reply-stack--compact',
+        )}
+      >
+        <div className="messenger-reply-stack__header">
+          <Reply className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          <span>{replyHeaderLabel}</span>
+        </div>
+        {voiceBubble}
+      </div>
+    ) : (
+      voiceBubble
+    )
+
+    if (compact) {
+      return (
+        <div
+          className={cn(
+            'messenger-message-row messenger-message-row--compact group',
+            isOutgoing && 'is-outgoing',
+            isStacked && 'is-stacked',
+            message.reactions.length > 0 && 'has-reactions',
+          )}
+        >
+          {!isOutgoing ? (
+            showAvatar ? (
+              <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 shrink-0 self-end" />
+            ) : (
+              <span className="h-7 w-7 shrink-0" aria-hidden />
+            )
+          ) : null}
+          <div className="messenger-message-row__bubble-wrap">
+            {renderedVoice}
+            {actions}
+            {reactionBadge}
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div
+        className={cn(
+          'messenger-message-row group',
+          isOutgoing && 'is-outgoing',
+          isStacked && 'is-stacked',
+          message.reactions.length > 0 && 'has-reactions',
+        )}
+      >
+        {!isOutgoing ? (
+          showAvatar ? (
+            <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-8 w-8 shrink-0 self-end" />
+          ) : (
+            <span className="messenger-message-row__avatar-spacer" aria-hidden />
+          )
+        ) : null}
+        <div className="messenger-message-row__content">
+          <div className="messenger-message-row__bubble-wrap">
+            {renderedVoice}
+            {actions}
+            {reactionBadge}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (isMedia && message.mediaUrl) {
+    const mediaBubble = (
+      <MessageMediaBubble
+        mediaUrl={message.mediaUrl}
+        isOutgoing={isOutgoing}
+        caption={message.body?.trim() || undefined}
+        isTail={isTail}
+        isStacked={isStacked}
+      />
+    )
+
+    const renderedMedia = useReplyStack ? (
+      <div
+        className={cn(
+          'messenger-reply-stack',
+          isOutgoing && 'is-outgoing',
+          compact && 'messenger-reply-stack--compact',
+        )}
+      >
+        <div className="messenger-reply-stack__header">
+          <Reply className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          <span>{replyHeaderLabel}</span>
+        </div>
+        {mediaBubble}
+      </div>
+    ) : (
+      mediaBubble
+    )
+
+    if (compact) {
+      return (
+        <div
+          className={cn(
+            'messenger-message-row messenger-message-row--compact group',
+            isOutgoing && 'is-outgoing',
+            isStacked && 'is-stacked',
+            message.reactions.length > 0 && 'has-reactions',
+          )}
+        >
+          {!isOutgoing ? (
+            showAvatar ? (
+              <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 shrink-0 self-end" />
+            ) : (
+              <span className="h-7 w-7 shrink-0" aria-hidden />
+            )
+          ) : null}
+          <div className="messenger-message-row__bubble-wrap">
+            {renderedMedia}
+            {actions}
+            {reactionBadge}
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div
+        className={cn(
+          'messenger-message-row group',
+          isOutgoing && 'is-outgoing',
+          isStacked && 'is-stacked',
+          message.reactions.length > 0 && 'has-reactions',
+        )}
+      >
+        {!isOutgoing ? (
+          showAvatar ? (
+            <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-8 w-8 shrink-0 self-end" />
+          ) : (
+            <span className="messenger-message-row__avatar-spacer" aria-hidden />
+          )
+        ) : null}
+        <div className="messenger-message-row__content">
+          <div className="messenger-message-row__bubble-wrap">
+            {renderedMedia}
+            {actions}
+            {reactionBadge}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const embeddedQuote = useReplyStack ? (
     <div className="messenger-bubble__embedded-quote">{quotedPreviewText}</div>
@@ -140,7 +324,7 @@ export const MessageBubble = memo(function MessageBubble({
         <video src={message.mediaUrl} controls className="messenger-bubble__media" preload="metadata" />
       ) : null}
 
-      {message.type === 'file' && message.mediaUrl ? (
+      {message.type === 'file' && message.mediaUrl && !isVoiceMessage(message) ? (
         <a href={message.mediaUrl} target="_blank" rel="noreferrer" className="underline">
           {message.mediaFileName ?? 'Download file'}
         </a>
@@ -151,15 +335,6 @@ export const MessageBubble = memo(function MessageBubble({
       ) : null}
     </div>
   )
-
-  const reactionBadge =
-    message.reactions.length > 0 ? (
-      <MessageReactionBadge
-        reactions={message.reactions}
-        isOutgoing={isOutgoing}
-        onReact={(emoji) => void onReact(emoji)}
-      />
-    ) : null
 
   const renderedBubble = useReplyStack ? (
     <div

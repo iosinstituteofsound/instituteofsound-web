@@ -37,7 +37,7 @@ export function useMessageComposer(threadId: string) {
         return
       }
 
-      sendMessage.mutate({
+      await sendMessage.mutateAsync({
         threadId,
         body,
         type: payload?.type ?? 'text',
@@ -45,7 +45,7 @@ export function useMessageComposer(threadId: string) {
         mediaMimeType: payload?.mediaMimeType,
         mediaFileName: payload?.mediaFileName,
         replyToId: replyTo?.id,
-        clientMessageId: createClientMessageId(),
+        clientMessageId: payload?.clientMessageId ?? createClientMessageId(),
       })
 
       setText('')

@@ -96,10 +96,20 @@ export function isLikeMessage(
   return isStandaloneEmojiMessage(message) && message.body.trim() === LIKE_MESSAGE_EMOJI
 }
 
-export function getReplyPreviewText(preview: { body: string; type: string }) {
+export function getReplyPreviewText(preview: {
+  body: string
+  type: string
+  mediaMimeType?: string
+  mediaFileName?: string
+}) {
   if (preview.type === 'image') return 'Photo'
   if (preview.type === 'video') return 'Video'
-  if (preview.type === 'file') return 'Attachment'
+  if (preview.type === 'file') {
+    if (preview.mediaMimeType?.startsWith('audio/') || preview.mediaFileName === 'Voice message') {
+      return 'Voice message'
+    }
+    return 'Attachment'
+  }
   return preview.body || 'Message'
 }
 
