@@ -8,6 +8,8 @@ import type {
   CallMediaMode,
   CallPeerPayload,
   CallTarget,
+  PipCorner,
+  PrimaryVideoFeed,
 } from '@/modules/messenger/types/call.types'
 
 type ViewerContext = {
@@ -18,12 +20,23 @@ type ViewerContext = {
 
 let peer: WebRTCPeerSession | null = null
 let listenersRegistered = false
+let disconnectTimer: ReturnType<typeof setTimeout> | null = null
+let iceRestartAttempted = false
 
 function patch(partial: Parameters<ReturnType<typeof useMessengerCallStore.getState>['patch']>[0]) {
   useMessengerCallStore.getState().patch(partial)
 }
 
+function clearDisconnectTimer(): void {
+  if (disconnectTimer) {
+    clearTimeout(disconnectTimer)
+    disconnectTimer = null
+  }
+}
+
 function cleanupPeer(): void {
+  clearDisconnectTimer()
+  iceRestartAttempted = false
   peer?.close()
   peer = null
 }
@@ -39,6 +52,52 @@ function ensureWsEnabled(): boolean {
   return false
 }
 
+async function attemptIceRestart(callId: string, threadId: string, toUserId: string): Promise<void> {
+  if (!peer || iceRestartAttempted) return
+  iceRestartAttempted = true
+  try {
+    const offer = await peer.createRenegotiationOffer({ iceRestart: true })
+    await realtimeSocketClient.emitCallOffer({
+      ...relayBase(callId, threadId, toUserId),
+      sdp: offer,
+    })
+  } catch {
+    messengerCallController.endCall('error')
+  }
+}
+
+function handleConnectionStateChange(
+  state: RTCPeerConnectionState,
+  callId: string,
+  threadId: string,
+  toUserId: string,
+): void {
+  if (state === 'connected') {
+    clearDisconnectTimer()
+    iceRestartAttempted = false
+    return
+  }
+
+  if (state === 'disconnected') {
+    clearDisconnectTimer()
+    disconnectTimer = setTimeout(() => {
+      const currentPeer = peer
+      if (!currentPeer || currentPeer.getConnectionState() !== 'disconnected') return
+      void attemptIceRestart(callId, threadId, toUserId)
+    }, 8000)
+    return
+  }
+
+  if (state === 'failed') {
+    clearDisconnectTimer()
+    if (!iceRestartAttempted) {
+      void attemptIceRestart(callId, threadId, toUserId)
+      return
+    }
+    messengerCallController.endCall('error')
+  }
+}
+
 function createPeer(mediaMode: CallMediaMode, callId: string, threadId: string, toUserId: string) {
   cleanupPeer()
   peer = new WebRTCPeerSession(mediaMode, {
@@ -46,12 +105,10 @@ function createPeer(mediaMode: CallMediaMode, callId: string, threadId: string, 
       void realtimeSocketClient.emitCallIce({ callId, threadId, toUserId, candidate })
     },
     onRemoteStream: (stream) => {
-      patch({ remoteStream: stream, phase: 'active' })
+      patch({ remoteStream: stream, phase: 'active', startedAt: Date.now() })
     },
-    onConnectionStateChange: (state) => {
-      if (state === 'failed') {
-        messengerCallController.endCall('error')
-      }
+    onConnectionStateChange: (connectionState) => {
+      handleConnectionStateChange(connectionState, callId, threadId, toUserId)
     },
   })
   return peer
@@ -59,6 +116,10 @@ function createPeer(mediaMode: CallMediaMode, callId: string, threadId: string, 
 
 function relayBase(callId: string, threadId: string, toUserId: string) {
   return { callId, threadId, toUserId }
+}
+
+export function getActiveCallPeer(): WebRTCPeerSession | null {
+  return peer
 }
 
 export const messengerCallController = {
@@ -81,9 +142,18 @@ export const messengerCallController = {
       mediaMode,
       isMuted: false,
       isCameraOff: mediaMode === 'voice',
+      isSpeakerOn: false,
       error: null,
       localStream: null,
       remoteStream: null,
+      startedAt: null,
+      primaryVideoFeed: 'remote',
+      isPipHidden: false,
+      pipCorner: 'topRight',
+      cameraFacing: 'user',
+      connectionQuality: null,
+      answerWithMuted: false,
+      answerWithCameraOff: false,
     })
 
     try {
@@ -121,12 +191,24 @@ export const messengerCallController = {
       return
     }
 
+    const answerMuted = state.answerWithMuted
+    const answerCameraOff = state.answerWithCameraOff
+
     patch({ phase: 'connecting', error: null })
 
     try {
       const session = createPeer(state.mediaMode, state.callId, state.threadId, state.remoteUserId)
       const localStream = await session.acquireLocalMedia()
-      patch({ localStream, isCameraOff: state.mediaMode === 'voice' })
+      const isCameraOff =
+        state.mediaMode === 'voice' || (state.mediaMode === 'video' && answerCameraOff)
+      patch({ localStream, isCameraOff, isMuted: answerMuted })
+
+      if (answerMuted) {
+        session.setMicEnabled(false)
+      }
+      if (isCameraOff) {
+        session.setCameraEnabled(false)
+      }
 
       const pendingOffer = pendingOffers.get(state.callId)
       if (!pendingOffer) {
@@ -199,6 +281,77 @@ export const messengerCallController = {
     peer?.setCameraEnabled(!next)
     patch({ isCameraOff: next })
   },
+
+  toggleSpeaker(): void {
+    const state = useMessengerCallStore.getState()
+    patch({ isSpeakerOn: !state.isSpeakerOn })
+  },
+
+  swapVideoFeed(): void {
+    const state = useMessengerCallStore.getState()
+    const next: PrimaryVideoFeed = state.primaryVideoFeed === 'remote' ? 'local' : 'remote'
+    patch({ primaryVideoFeed: next, isPipHidden: false })
+  },
+
+  setPipHidden(hidden: boolean): void {
+    patch({ isPipHidden: hidden })
+  },
+
+  setPipCorner(corner: PipCorner): void {
+    patch({ pipCorner: corner, isPipHidden: false })
+  },
+
+  setAnswerWithMuted(muted: boolean): void {
+    patch({ answerWithMuted: muted })
+  },
+
+  setAnswerWithCameraOff(off: boolean): void {
+    patch({ answerWithCameraOff: off })
+  },
+
+  async flipCamera(): Promise<void> {
+    if (!peer) return
+    try {
+      const facing = await peer.switchCamera()
+      patch({ cameraFacing: facing })
+    } catch {
+      toast.error('Could not switch camera')
+    }
+  },
+
+  async upgradeToVideo(): Promise<void> {
+    const state = useMessengerCallStore.getState()
+    if (!peer || state.mediaMode === 'video' || !state.callId || !state.threadId || !state.remoteUserId) {
+      return
+    }
+
+    try {
+      const localStream = await peer.addVideoTrack(state.cameraFacing)
+      const offer = await peer.createRenegotiationOffer()
+      const sent = await realtimeSocketClient.emitCallOffer({
+        ...relayBase(state.callId, state.threadId, state.remoteUserId),
+        mediaMode: 'video',
+        sdp: offer,
+      })
+      if (!sent) {
+        throw new Error('Realtime socket not connected')
+      }
+      patch({
+        mediaMode: 'video',
+        localStream,
+        isCameraOff: false,
+        primaryVideoFeed: 'remote',
+      })
+    } catch {
+      toast.error('Could not switch to video call')
+    }
+  },
+
+  async pollConnectionQuality(): Promise<void> {
+    if (!peer) return
+    const quality = await peer.getConnectionQuality()
+    patch({ connectionQuality: quality })
+  },
 }
 
 const pendingOffers = new Map<string, RTCSessionDescriptionInit>()
@@ -232,6 +385,14 @@ async function handleInvite(payload: CallPeerPayload): Promise<void> {
     error: null,
     localStream: null,
     remoteStream: null,
+    startedAt: null,
+    primaryVideoFeed: 'remote',
+    isPipHidden: false,
+    pipCorner: 'topRight',
+    cameraFacing: 'user',
+    connectionQuality: null,
+    answerWithMuted: false,
+    answerWithCameraOff: false,
   })
 }
 
@@ -243,14 +404,31 @@ async function handleAccept(payload: CallPeerPayload): Promise<void> {
 
   if (payload.sdp && peer) {
     await peer.applyAnswer(payload.sdp)
-    patch({ phase: 'active' })
+    patch({ phase: 'active', startedAt: Date.now() })
   }
 }
 
 async function handleOffer(payload: CallPeerPayload): Promise<void> {
   const state = useMessengerCallStore.getState()
-  if (state.callId !== payload.callId || !peer) return
-  if (payload.sdp) {
+  if (state.callId !== payload.callId || !payload.sdp) return
+
+  if (state.phase === 'active' && peer && state.threadId && state.remoteUserId) {
+    try {
+      if (payload.mediaMode === 'video') {
+        patch({ mediaMode: 'video', isCameraOff: false })
+      }
+      const answer = await peer.acceptRenegotiationOffer(payload.sdp)
+      await realtimeSocketClient.emitCallAnswer({
+        ...relayBase(state.callId, state.threadId, state.remoteUserId),
+        sdp: answer,
+      })
+    } catch {
+      messengerCallController.endCall('error')
+    }
+    return
+  }
+
+  if (peer) {
     pendingOffers.set(payload.callId, payload.sdp)
   }
 }
@@ -258,8 +436,18 @@ async function handleOffer(payload: CallPeerPayload): Promise<void> {
 async function handleAnswer(payload: CallPeerPayload): Promise<void> {
   const state = useMessengerCallStore.getState()
   if (state.callId !== payload.callId || !peer || !payload.sdp) return
+
+  if (state.phase === 'active' || state.phase === 'connecting') {
+    await peer.applyRenegotiationAnswer(payload.sdp)
+    if (state.phase === 'connecting') {
+      patch({ phase: 'active', startedAt: Date.now() })
+    }
+    iceRestartAttempted = false
+    return
+  }
+
   await peer.applyAnswer(payload.sdp)
-  patch({ phase: 'active' })
+  patch({ phase: 'active', startedAt: Date.now() })
 }
 
 async function handleIce(payload: CallPeerPayload): Promise<void> {

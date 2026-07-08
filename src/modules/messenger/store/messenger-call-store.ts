@@ -1,5 +1,12 @@
 import { create } from 'zustand'
-import type { CallMediaMode, CallPhase } from '@/modules/messenger/types/call.types'
+import type {
+  CallMediaMode,
+  CallPhase,
+  CameraFacing,
+  ConnectionQuality,
+  PipCorner,
+  PrimaryVideoFeed,
+} from '@/modules/messenger/types/call.types'
 
 export type MessengerCallSnapshot = {
   phase: CallPhase
@@ -11,9 +18,18 @@ export type MessengerCallSnapshot = {
   mediaMode: CallMediaMode | null
   isMuted: boolean
   isCameraOff: boolean
+  isSpeakerOn: boolean
   localStream: MediaStream | null
   remoteStream: MediaStream | null
   error: string | null
+  startedAt: number | null
+  primaryVideoFeed: PrimaryVideoFeed
+  isPipHidden: boolean
+  pipCorner: PipCorner
+  cameraFacing: CameraFacing
+  connectionQuality: ConnectionQuality | null
+  answerWithMuted: boolean
+  answerWithCameraOff: boolean
 }
 
 const idleState: MessengerCallSnapshot = {
@@ -26,9 +42,18 @@ const idleState: MessengerCallSnapshot = {
   mediaMode: null,
   isMuted: false,
   isCameraOff: false,
+  isSpeakerOn: false,
   localStream: null,
   remoteStream: null,
   error: null,
+  startedAt: null,
+  primaryVideoFeed: 'remote',
+  isPipHidden: false,
+  pipCorner: 'topRight',
+  cameraFacing: 'user',
+  connectionQuality: null,
+  answerWithMuted: false,
+  answerWithCameraOff: false,
 }
 
 type MessengerCallStore = MessengerCallSnapshot & {

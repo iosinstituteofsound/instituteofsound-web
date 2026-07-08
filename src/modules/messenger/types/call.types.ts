@@ -4,6 +4,14 @@ export type CallMediaMode = 'voice' | 'video'
 
 export type CallEndReason = 'hangup' | 'rejected' | 'busy' | 'unavailable' | 'error'
 
+export type PipCorner = 'topRight' | 'topLeft' | 'bottomRight' | 'bottomLeft'
+
+export type CameraFacing = 'user' | 'environment'
+
+export type ConnectionQuality = 'good' | 'fair' | 'poor'
+
+export type PrimaryVideoFeed = 'remote' | 'local'
+
 export type CallPhase = 'idle' | 'outgoing' | 'incoming' | 'connecting' | 'active' | 'ended'
 
 export const CALL_INVITE_EVENT = 'messenger:call:invite'

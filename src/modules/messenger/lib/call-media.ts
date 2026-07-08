@@ -1,3 +1,5 @@
+import type { CameraFacing } from '@/modules/messenger/types/call.types'
+
 const DEFAULT_STUN = 'stun:stun.l.google.com:19302'
 const METERED_STUN = 'stun:stun.relay.metered.ca:80'
 
@@ -33,9 +35,25 @@ export function getCallIceServers(): RTCIceServer[] {
   return servers
 }
 
-export function getCallMediaConstraints(mode: 'voice' | 'video'): MediaStreamConstraints {
+export function getCallAudioConstraints(): MediaTrackConstraints {
   return {
-    audio: true,
-    video: mode === 'video' ? { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } : false,
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+  }
+}
+
+export function getCallVideoConstraints(facingMode: CameraFacing = 'user'): MediaTrackConstraints {
+  return {
+    facingMode,
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
+  }
+}
+
+export function getCallMediaConstraints(mode: 'voice' | 'video', facingMode: CameraFacing = 'user'): MediaStreamConstraints {
+  return {
+    audio: getCallAudioConstraints(),
+    video: mode === 'video' ? getCallVideoConstraints(facingMode) : false,
   }
 }

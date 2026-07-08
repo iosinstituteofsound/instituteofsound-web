@@ -18,9 +18,18 @@
   min-height: 0;
 }
 
+.messenger-call__video-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
 .messenger-call__avatar-stage {
   display: grid;
   place-items: center;
+  width: 100%;
+  height: 100%;
 }
 
 .messenger-call__meta {
@@ -29,6 +38,8 @@
   bottom: 1rem;
   transform: translateX(-50%);
   text-align: center;
+  pointer-events: none;
+  z-index: 5;
 }
 
 .messenger-call__name {
@@ -55,19 +66,84 @@
   transform: scaleX(-1);
 }
 
-.messenger-call__remote {
+.messenger-call__primary {
   width: min(100%, 960px);
   height: min(72vh, 720px);
 }
 
 .messenger-call__pip {
   position: absolute;
-  right: 1rem;
-  top: 1rem;
-  width: 160px;
-  height: 112px;
-  border: 2px solid color-mix(in oklch, var(--foreground) 18%, transparent);
+  border: 2px solid color-mix(in oklch, var(--foreground) 35%, transparent);
+  border-radius: 12px;
   box-shadow: 0 12px 40px rgb(0 0 0 / 35%);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  z-index: 10;
+  background: #111827;
+}
+
+.messenger-call__pip:active {
+  cursor: grabbing;
+}
+
+.messenger-call__pip-video {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+}
+
+.messenger-call__pip-placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: #111827;
+}
+
+.messenger-call__pip-restore {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 3rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 30%, transparent);
+  background: rgb(0 0 0 / 55%);
+  z-index: 12;
+  cursor: pointer;
+}
+
+.messenger-call__network-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 50%);
+}
+
+.messenger-call__network-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.messenger-call__network-bar {
+  width: 4px;
+  border-radius: 2px;
+  background: #fff;
+}
+
+.messenger-call__network-label {
+  font-size: 0.75rem;
+  color: rgb(255 255 255 / 90%);
 }
 
 .messenger-call__controls {
@@ -76,6 +152,7 @@
   align-items: center;
   gap: 0.85rem;
   padding-bottom: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .messenger-call__action {
