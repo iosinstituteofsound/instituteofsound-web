@@ -33,6 +33,9 @@ export const ConversationBody = memo(function ConversationBody({
     setForwardFrom,
     invalidate,
     typingUsers,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   } = conversation
 
   const avatarUrl = getThreadAvatarUrl(thread)
@@ -50,11 +53,15 @@ export const ConversationBody = memo(function ConversationBody({
 
       <MessageList
         threadId={threadId}
+        thread={thread}
         messages={messages}
         viewerId={viewerId}
         otherName={displayName}
         otherAvatar={avatarUrl}
         showSenderName={showSenderName}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        fetchNextPage={() => void fetchNextPage()}
         hero={{
           name: displayName,
           avatarUrl,

@@ -7,6 +7,7 @@ import {
   messengerUnreadQueryKey,
   patchMessageInCache,
   patchThreadPresenceInCache,
+  patchThreadReadReceiptInCache,
   upsertThreadInCache,
   getMessengerThreadListQueryKeys,
 } from '@/modules/messenger/lib/messenger-cache'
@@ -68,6 +69,7 @@ export function registerMessengerRealtimeHandlers(queryClient: QueryClient): voi
 
   realtimeSocketClient.onMessengerRead((payload) => {
     const viewerId = getViewerId(queryClient)
+    patchThreadReadReceiptInCache(queryClient, payload, viewerId)
     if (payload.userId !== viewerId) return
     void messengerApi.getUnreadCount().then((count) => {
       useMessengerLiveStore.getState().setUnreadCount(count)

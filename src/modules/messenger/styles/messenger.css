@@ -153,12 +153,35 @@
 }
 
 .messenger-thread-item__preview {
-  margin-top: 0.15rem;
+  min-width: 0;
   font-size: 0.82rem;
   color: var(--messenger-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.messenger-thread-item__preview-row {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-top: 0.15rem;
+  min-width: 0;
+}
+
+.messenger-thread-item__tick {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex-shrink: 0;
+  color: #8696a0;
+}
+
+.messenger-thread-item__tick.is-read {
+  color: #53bdeb;
+}
+
+.messenger-thread-item__tick.is-failed {
+  color: #f87171;
 }
 
 .messenger-thread-item__meta {
@@ -233,6 +256,13 @@
   background: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
+.messenger-message-list-shell {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
 .messenger-message-list {
   container-type: inline-size;
   container-name: messenger-message-list;
@@ -240,11 +270,49 @@
   flex: 1;
   min-height: 0;
   flex-direction: column;
+  justify-content: flex-end;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0.5rem 0.65rem 0.35rem;
   overscroll-behavior: contain;
   background: var(--messenger-messages-bg);
+}
+
+.messenger-scroll-to-bottom {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.85rem;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--primary);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 12%);
+  cursor: pointer;
+}
+
+.messenger-scroll-to-bottom:hover {
+  background: color-mix(in srgb, var(--primary) 6%, var(--card));
+}
+
+.messenger-scroll-to-bottom__badge {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.15rem;
+  min-width: 1.1rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
 }
 
 .messenger-message-list__hero {
@@ -259,6 +327,13 @@
 .messenger-message-list__hero-name {
   font-size: 0.875rem;
   font-weight: 700;
+}
+
+.messenger-message-list__history-loading {
+  align-self: center;
+  margin: 0.35rem 0 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
 }
 
 .messenger-message-list__day {
@@ -547,6 +622,87 @@
   background: var(--messenger-outgoing);
   color: var(--primary-foreground);
   border-bottom-right-radius: 6px;
+}
+
+.messenger-bubble__meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.2rem;
+  margin-top: 0.2rem;
+  margin-left: auto;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.messenger-bubble__time {
+  font-size: 0.6875rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
+  white-space: nowrap;
+}
+
+.messenger-bubble.is-incoming .messenger-bubble__time {
+  color: var(--muted-foreground);
+  opacity: 0.85;
+}
+
+.messenger-bubble.is-outgoing .messenger-bubble__time {
+  color: var(--primary-foreground);
+}
+
+.messenger-bubble__tick {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  opacity: 0.78;
+}
+
+.messenger-bubble.is-incoming .messenger-bubble__tick {
+  color: var(--muted-foreground);
+}
+
+.messenger-bubble.is-outgoing .messenger-bubble__tick {
+  color: var(--primary-foreground);
+}
+
+.messenger-bubble__tick.is-read {
+  color: #53bdeb;
+  opacity: 1;
+}
+
+.messenger-bubble__tick.is-pending,
+.messenger-bubble__tick.is-failed {
+  opacity: 0.9;
+}
+
+.messenger-bubble__tick.is-failed {
+  color: #f87171;
+}
+
+.messenger-media-bubble-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  max-width: min(72%, 560px);
+}
+
+.messenger-media-bubble-wrap .messenger-bubble__meta {
+  margin-top: 0.15rem;
+  padding-right: 0.15rem;
+}
+
+.messenger-message-row.is-outgoing .messenger-media-bubble-wrap .messenger-bubble__meta {
+  align-self: flex-end;
+}
+
+.messenger-message-row:not(.is-outgoing) .messenger-media-bubble-wrap {
+  align-items: flex-start;
+}
+
+.messenger-message-row:not(.is-outgoing) .messenger-media-bubble-wrap .messenger-bubble__meta {
+  align-self: flex-start;
 }
 
 .messenger-bubble__media {

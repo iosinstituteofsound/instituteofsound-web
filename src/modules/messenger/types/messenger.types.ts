@@ -94,6 +94,7 @@ export type DmThreadSummary = {
   otherIsOnline?: boolean
   communitySlug?: string
   tribeId?: string
+  otherLastReadAt?: string
 }
 
 export const MESSENGER_MESSAGE_EVENT = 'messenger:message'

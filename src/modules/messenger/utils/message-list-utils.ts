@@ -1,6 +1,13 @@
 import { formatMessageDaySeparator } from '@/modules/messenger/lib/messenger-utils'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 
+export function flattenMessengerMessagePages(
+  pages: Array<{ messages: DmMessage[] }> | undefined,
+): DmMessage[] {
+  if (!pages?.length) return []
+  return [...pages].reverse().flatMap((page) => page.messages)
+}
+
 export type MessageListRow =
   | { kind: 'day'; id: string; label: string }
   | { kind: 'system'; id: string; body: string }
@@ -11,19 +18,13 @@ export type MessageListRow =
       isStacked: boolean
       isTail: boolean
       showAvatar: boolean
+      indentForAvatar: boolean
     }
-
-export function getMessageReceiptLabel(message: DmMessage): string {
-  if (message.optimistic) return 'Sending…'
-  if (message.failed) return 'Failed'
-  if (message.readAt) return 'Seen'
-  if (message.deliveredAt) return 'Delivered'
-  return 'Sent'
-}
 
 export function buildMessageListRows(
   messages: DmMessage[],
   viewerId?: string | null,
+  isGroupChat = false,
 ): MessageListRow[] {
   const rows: MessageListRow[] = []
   let lastDayKey = ''
@@ -61,7 +62,8 @@ export function buildMessageListRows(
       next.type === 'system' ||
       next.senderId !== message.senderId ||
       next.createdAt.slice(0, 10) !== dayKey
-    const showAvatar = !isOutgoing && !isStacked
+    const showAvatar = isGroupChat && !isOutgoing && isTail
+    const indentForAvatar = isGroupChat && !isOutgoing && isStacked && !showAvatar
 
     rows.push({
       kind: 'message',
@@ -70,6 +72,7 @@ export function buildMessageListRows(
       isStacked,
       isTail,
       showAvatar,
+      indentForAvatar,
     })
   }
 

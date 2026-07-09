@@ -5,6 +5,7 @@ import { useMarkThreadReadWhenViewing } from '@/modules/messenger/hooks/use-mark
 import { useMessengerMessages } from '@/modules/messenger/hooks/use-messenger-messages'
 import { messengerThreadsQueryKey } from '@/modules/messenger/lib/messenger-cache'
 import { getThreadDisplayName, isDirectThread } from '@/modules/messenger/lib/messenger-utils'
+import { flattenMessengerMessagePages } from '@/modules/messenger/utils/message-list-utils'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
 import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
 import { useAuthStore } from '@/app/stores/auth-store'
@@ -28,7 +29,7 @@ export function useConversationThread({
 
   const messagesQuery = useMessengerMessages(threadId)
   const messages = useMemo(
-    () => messagesQuery.data?.pages.flatMap((page) => page.messages) ?? [],
+    () => flattenMessengerMessagePages(messagesQuery.data?.pages),
     [messagesQuery.data?.pages],
   )
 
@@ -62,6 +63,10 @@ export function useConversationThread({
     forwardFrom,
     setForwardFrom,
     invalidate,
+    isLoading: messagesQuery.isLoading,
+    hasNextPage: messagesQuery.hasNextPage ?? false,
+    isFetchingNextPage: messagesQuery.isFetchingNextPage,
+    fetchNextPage: messagesQuery.fetchNextPage,
   }
 }
 

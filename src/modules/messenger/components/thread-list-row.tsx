@@ -1,11 +1,14 @@
 import { memo } from 'react'
 import { ThreadRowAvatar } from '@/modules/messenger/components/thread-row-avatar'
+import { ThreadListDeliveryTicks } from '@/modules/messenger/components/thread-list-delivery-ticks'
 import {
   formatMessengerTime,
   getThreadDisplayName,
   getThreadPreviewText,
 } from '@/modules/messenger/lib/messenger-utils'
+import { getThreadListDeliveryStatus } from '@/modules/messenger/utils/message-delivery-utils'
 import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
+import { useAuthStore } from '@/app/stores/auth-store'
 import { cn } from '@/shared/lib/cn'
 
 type ThreadListRowProps = {
@@ -22,11 +25,12 @@ export const ThreadListRow = memo(function ThreadListRow({
   variant,
   active = false,
   viewerId,
-  viewerAvatar,
   onSelect,
 }: ThreadListRowProps) {
+  const authViewerId = useAuthStore((state) => state.userId)
+  const resolvedViewerId = viewerId ?? authViewerId
   const displayName = getThreadDisplayName(thread)
-  const sentByViewer = Boolean(viewerId && thread.lastSenderId === viewerId)
+  const deliveryStatus = getThreadListDeliveryStatus(thread, resolvedViewerId)
 
   const button = (
     <button
@@ -46,7 +50,10 @@ export const ThreadListRow = memo(function ThreadListRow({
         <>
           <div className="min-w-0">
             <div className="messenger-thread-item__name">{displayName}</div>
-            <div className="messenger-thread-item__preview">{getThreadPreviewText(thread)}</div>
+            <div className="messenger-thread-item__preview-row">
+              {deliveryStatus ? <ThreadListDeliveryTicks status={deliveryStatus} /> : null}
+              <div className="messenger-thread-item__preview">{getThreadPreviewText(thread)}</div>
+            </div>
           </div>
           <div className="messenger-thread-item__meta">
             <span>{formatMessengerTime(thread.lastMessageAt)}</span>
@@ -60,6 +67,7 @@ export const ThreadListRow = memo(function ThreadListRow({
           <div className="ios-messenger-popover__copy">
             <div className="ios-messenger-popover__name">{displayName}</div>
             <div className="ios-messenger-popover__preview-row">
+              {deliveryStatus ? <ThreadListDeliveryTicks status={deliveryStatus} /> : null}
               <span className="ios-messenger-popover__preview">
                 {thread.lastMessageBody || 'Start a conversation'}
               </span>
@@ -76,9 +84,7 @@ export const ThreadListRow = memo(function ThreadListRow({
             </div>
           </div>
           <div className="ios-messenger-popover__side">
-            {sentByViewer && viewerAvatar ? (
-              <img src={viewerAvatar} alt="" className="ios-messenger-popover__read-avatar" />
-            ) : thread.unreadCount > 0 ? (
+            {thread.unreadCount > 0 ? (
               <span className="ios-messenger-popover__unread-dot" aria-label="Unread" />
             ) : null}
           </div>

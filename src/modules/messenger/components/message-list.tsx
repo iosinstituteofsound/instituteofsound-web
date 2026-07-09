@@ -2,9 +2,9 @@ import { memo } from 'react'
 import { UserAvatar } from '@/shared/components/user'
 import { GroupAvatarStack } from '@/shared/components/user'
 import { MessageBubble } from '@/modules/messenger/components/message-bubble'
+import { MessageScrollToBottomButton } from '@/modules/messenger/components/message-scroll-to-bottom-button'
 import { useMessageList } from '@/modules/messenger/hooks/use-message-list'
-import { getMessageReceiptLabel } from '@/modules/messenger/utils/message-list-utils'
-import type { DmMessage, ThreadMemberPreview } from '@/modules/messenger/types/messenger.types'
+import type { DmMessage, DmThreadSummary, ThreadMemberPreview } from '@/modules/messenger/types/messenger.types'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/messenger/styles/messenger.css'
 
@@ -18,6 +18,7 @@ export type MessageListHeroProps = {
 
 type MessageListProps = {
   threadId: string
+  thread?: DmThreadSummary | null
   messages: DmMessage[]
   viewerId?: string | null
   otherName?: string
@@ -26,10 +27,14 @@ type MessageListProps = {
   hero?: MessageListHeroProps | null
   className?: string
   autoScroll?: boolean
+  hasNextPage?: boolean
+  isFetchingNextPage?: boolean
+  fetchNextPage?: () => void
 }
 
 export const MessageList = memo(function MessageList({
   threadId,
+  thread,
   messages,
   viewerId,
   otherName,
@@ -38,18 +43,31 @@ export const MessageList = memo(function MessageList({
   hero = null,
   className,
   autoScroll = true,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  fetchNextPage,
 }: MessageListProps) {
-  const { scrollRef, rows, lastOutgoingId } = useMessageList({
-    messages,
-    viewerId,
-    autoScroll,
-  })
+  const { scrollRef, rows, showScrollToBottom, belowScrollCount, jumpToBottom } = useMessageList({
+      threadId,
+      thread,
+      messages,
+      viewerId,
+      autoScroll,
+      hasNextPage,
+      isFetchingNextPage,
+      fetchNextPage,
+    })
 
   const showHero = Boolean(hero && messages.length <= 2)
 
   return (
-    <div ref={scrollRef} className={cn('messenger-message-list', className)}>
-      {showHero && hero ? (
+    <div className={cn('messenger-message-list-shell', className)}>
+      <div ref={scrollRef} className="messenger-message-list">
+        {isFetchingNextPage ? (
+          <p className="messenger-message-list__history-loading">Loading older messages…</p>
+        ) : null}
+
+        {showHero && hero ? (
         <div className="messenger-message-list__hero">
           {hero.isDirect ? (
             <UserAvatar name={hero.name} avatarUrl={hero.avatarUrl} className="h-16 w-16" />
@@ -83,7 +101,6 @@ export const MessageList = memo(function MessageList({
         }
 
         const mine = row.message.senderId === viewerId
-        const isLastOutgoing = mine && row.message.id === lastOutgoingId
 
         return (
           <div
@@ -102,18 +119,23 @@ export const MessageList = memo(function MessageList({
               otherName={otherName}
               compact
               showAvatar={row.showAvatar}
+              indentForAvatar={row.indentForAvatar}
               isTail={row.isTail}
               isStacked={row.isStacked}
               senderName={row.message.senderName ?? otherName}
               senderAvatar={otherAvatar}
               showSenderLabel={showSenderName}
             />
-            {isLastOutgoing && row.isTail ? (
-              <p className="messenger-message-list__receipt">{getMessageReceiptLabel(row.message)}</p>
-            ) : null}
           </div>
         )
       })}
+      </div>
+
+      <MessageScrollToBottomButton
+        visible={showScrollToBottom}
+        unreadCount={belowScrollCount}
+        onClick={jumpToBottom}
+      />
     </div>
   )
 })

@@ -66,6 +66,24 @@ export function patchThreadPresenceInCache(
   }
 }
 
+export function patchThreadReadReceiptInCache(
+  queryClient: QueryClient,
+  payload: { threadId: string; userId: string; readAt: string },
+  viewerId?: string,
+) {
+  if (!viewerId || payload.userId === viewerId) return
+
+  for (const key of getMessengerThreadListQueryKeys()) {
+    queryClient.setQueryData<DmThreadSummary[]>(key, (current) =>
+      (current ?? []).map((thread) =>
+        thread.threadId === payload.threadId
+          ? { ...thread, otherLastReadAt: payload.readAt }
+          : thread,
+      ),
+    )
+  }
+}
+
 function mergeMessageIntoPage(messages: DmMessage[], message: DmMessage): DmMessage[] | null {
   if (message.clientMessageId) {
     const optimisticIndex = messages.findIndex(

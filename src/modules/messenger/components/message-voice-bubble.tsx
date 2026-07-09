@@ -1,25 +1,25 @@
 import { Pause, Play } from 'lucide-react'
+import { MessageDeliveryTicks } from '@/modules/messenger/components/message-delivery-ticks'
 import { VoiceWaveformBars } from '@/modules/messenger/components/voice-waveform-bars'
 import { useMessageVoiceBubble } from '@/modules/messenger/hooks/use-message-voice-bubble'
-import { UserAvatar } from '@/shared/components/user'
+import { getMessageDeliveryStatus } from '@/modules/messenger/utils/message-delivery-utils'
+import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 import { cn } from '@/shared/lib/cn'
 
 type MessageVoiceBubbleProps = {
+  message: DmMessage
   messageId: string
   mediaUrl?: string
   isOutgoing: boolean
-  senderName?: string
-  senderAvatar?: string
   isTail?: boolean
   isStacked?: boolean
 }
 
 export function MessageVoiceBubble({
+  message,
   messageId,
   mediaUrl,
   isOutgoing,
-  senderName,
-  senderAvatar,
   isTail,
   isStacked,
 }: MessageVoiceBubbleProps) {
@@ -46,7 +46,7 @@ export function MessageVoiceBubble({
 
   if (!resolvedUrl) return null
 
-  const showSenderAvatar = !isOutgoing && Boolean(senderAvatar || senderName)
+  const deliveryStatus = getMessageDeliveryStatus(message)
 
   return (
     <div
@@ -67,22 +67,7 @@ export function MessageVoiceBubble({
         disabled={isPreparing}
         onClick={() => void toggle()}
       >
-        {showSenderAvatar ? (
-          <>
-            <UserAvatar
-              name={senderName ?? 'User'}
-              avatarUrl={senderAvatar}
-              className="h-11 w-11"
-            />
-            <span className="messenger-voice-bubble__play-overlay" aria-hidden>
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </span>
-          </>
-        ) : isPlaying ? (
-          <Pause className="h-5 w-5" />
-        ) : (
-          <Play className="h-5 w-5" />
-        )}
+        {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
       </button>
 
       {showSpeedControl ? (
@@ -111,6 +96,7 @@ export function MessageVoiceBubble({
         >
           {playbackError ? 'Tap' : durationLabel}
         </span>
+        {isOutgoing ? <MessageDeliveryTicks status={deliveryStatus} /> : null}
       </div>
     </div>
   )

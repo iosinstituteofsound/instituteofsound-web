@@ -7,6 +7,7 @@ import { UserAvatar } from '@/shared/components/user'
 import { LinkPreviewCard } from '@/shared/components/link-preview'
 import { toLinkPreview } from '@/shared/lib/link-preview/dm-link-preview'
 import { MessageActionsMenu } from '@/modules/messenger/components/message-actions-menu'
+import { MessageBubbleMeta } from '@/modules/messenger/components/message-bubble-meta'
 import { MessageMediaBubble } from '@/modules/messenger/components/message-media-bubble'
 import { MessageReactionBadge } from '@/modules/messenger/components/message-reaction-badge'
 import { MessageVoiceBubble } from '@/modules/messenger/components/message-voice-bubble'
@@ -29,6 +30,7 @@ type MessageBubbleProps = {
   senderAvatar?: string
   compact?: boolean
   showAvatar?: boolean
+  indentForAvatar?: boolean
   showSenderLabel?: boolean
   isTail?: boolean
   isStacked?: boolean
@@ -44,6 +46,7 @@ export const MessageBubble = memo(function MessageBubble({
   senderAvatar,
   compact = false,
   showAvatar = false,
+  indentForAvatar = false,
   showSenderLabel = false,
   isTail = true,
   isStacked = false,
@@ -97,14 +100,27 @@ export const MessageBubble = memo(function MessageBubble({
       />
     ) : null
 
+  const compactAvatarColumn =
+    !isOutgoing && showAvatar ? (
+      <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 shrink-0 self-end" />
+    ) : !isOutgoing && indentForAvatar ? (
+      <span className="h-7 w-7 shrink-0 self-end" aria-hidden />
+    ) : null
+
+  const fullAvatarColumn =
+    !isOutgoing && showAvatar ? (
+      <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-8 w-8 shrink-0 self-end" />
+    ) : !isOutgoing && indentForAvatar ? (
+      <span className="h-8 w-8 shrink-0 self-end" aria-hidden />
+    ) : null
+
   if (isVoice && message.mediaUrl) {
     const voiceBubble = (
       <MessageVoiceBubble
+        message={message}
         messageId={message.id}
         mediaUrl={message.mediaUrl}
         isOutgoing={isOutgoing}
-        senderName={senderName}
-        senderAvatar={senderAvatar}
         isTail={isTail}
         isStacked={isStacked}
       />
@@ -138,13 +154,7 @@ export const MessageBubble = memo(function MessageBubble({
             message.reactions.length > 0 && 'has-reactions',
           )}
         >
-          {!isOutgoing ? (
-            showAvatar ? (
-              <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 shrink-0 self-end" />
-            ) : (
-              <span className="h-7 w-7 shrink-0" aria-hidden />
-            )
-          ) : null}
+          {compactAvatarColumn}
           <div className="messenger-message-row__bubble-wrap">
             {renderedVoice}
             {actions}
@@ -163,13 +173,7 @@ export const MessageBubble = memo(function MessageBubble({
           message.reactions.length > 0 && 'has-reactions',
         )}
       >
-        {!isOutgoing ? (
-          showAvatar ? (
-            <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-8 w-8 shrink-0 self-end" />
-          ) : (
-            <span className="messenger-message-row__avatar-spacer" aria-hidden />
-          )
-        ) : null}
+        {fullAvatarColumn}
         <div className="messenger-message-row__content">
           <div className="messenger-message-row__bubble-wrap">
             {renderedVoice}
@@ -183,13 +187,16 @@ export const MessageBubble = memo(function MessageBubble({
 
   if (isMedia && message.mediaUrl) {
     const mediaBubble = (
-      <MessageMediaBubble
-        mediaUrl={message.mediaUrl}
-        isOutgoing={isOutgoing}
-        caption={message.body?.trim() || undefined}
-        isTail={isTail}
-        isStacked={isStacked}
-      />
+      <div className="messenger-media-bubble-wrap">
+        <MessageMediaBubble
+          mediaUrl={message.mediaUrl}
+          isOutgoing={isOutgoing}
+          caption={message.body?.trim() || undefined}
+          isTail={isTail}
+          isStacked={isStacked}
+        />
+        <MessageBubbleMeta message={message} isOutgoing={isOutgoing} />
+      </div>
     )
 
     const renderedMedia = useReplyStack ? (
@@ -220,13 +227,7 @@ export const MessageBubble = memo(function MessageBubble({
             message.reactions.length > 0 && 'has-reactions',
           )}
         >
-          {!isOutgoing ? (
-            showAvatar ? (
-              <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 shrink-0 self-end" />
-            ) : (
-              <span className="h-7 w-7 shrink-0" aria-hidden />
-            )
-          ) : null}
+          {compactAvatarColumn}
           <div className="messenger-message-row__bubble-wrap">
             {renderedMedia}
             {actions}
@@ -245,13 +246,7 @@ export const MessageBubble = memo(function MessageBubble({
           message.reactions.length > 0 && 'has-reactions',
         )}
       >
-        {!isOutgoing ? (
-          showAvatar ? (
-            <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-8 w-8 shrink-0 self-end" />
-          ) : (
-            <span className="messenger-message-row__avatar-spacer" aria-hidden />
-          )
-        ) : null}
+        {fullAvatarColumn}
         <div className="messenger-message-row__content">
           <div className="messenger-message-row__bubble-wrap">
             {renderedMedia}
@@ -333,6 +328,10 @@ export const MessageBubble = memo(function MessageBubble({
       {message.body && message.type !== 'share_card' ? (
         <div className={cn(!compact && 'messenger-bubble__text')}>{message.body}</div>
       ) : null}
+
+      {!isStandaloneEmoji ? (
+        <MessageBubbleMeta message={message} isOutgoing={isOutgoing} />
+      ) : null}
     </div>
   )
 
@@ -365,13 +364,7 @@ export const MessageBubble = memo(function MessageBubble({
           message.reactions.length > 0 && 'has-reactions',
         )}
       >
-        {!isOutgoing ? (
-          showAvatar ? (
-            <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-7 w-7 shrink-0 self-end" />
-          ) : (
-            <span className="h-7 w-7 shrink-0" aria-hidden />
-          )
-        ) : null}
+        {compactAvatarColumn}
 
         <div className="messenger-message-row__bubble-wrap">
           {renderedBubble}
@@ -392,13 +385,7 @@ export const MessageBubble = memo(function MessageBubble({
         message.reactions.length > 0 && 'has-reactions',
       )}
     >
-      {!isOutgoing ? (
-        showAvatar ? (
-          <UserAvatar name={senderName ?? 'User'} avatarUrl={senderAvatar} className="h-8 w-8 shrink-0 self-end" />
-        ) : (
-          <span className="messenger-message-row__avatar-spacer" aria-hidden />
-        )
-      ) : null}
+      {fullAvatarColumn}
 
       <div className="messenger-message-row__content">
         <div className="messenger-message-row__bubble-wrap">
