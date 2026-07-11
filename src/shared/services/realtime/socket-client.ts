@@ -256,7 +256,11 @@ class RealtimeSocketClient {
     if (!threadId) return
     const emit = () => {
       if (!this.socket?.connected) return
-      this.socket.emit('typing:start', { threadId, mode })
+      this.socket.emit('typing:start', {
+        threadId,
+        mode,
+        isReplying: mode === 'replying',
+      })
     }
     if (this.socket?.connected) {
       emit()

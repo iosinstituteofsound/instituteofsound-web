@@ -6,11 +6,12 @@ const TYPING_EMIT_DEBOUNCE_MS = 400
 /**
  * typing:start — when draft content grows (debounced).
  * mode = replying when composer has a reply target (mobile shows "replying…").
- * typing:stop — always emitted on stopTyping() so mobile can show "confused".
+ * Mode changes while composing force an immediate re-emit (debounce bypass).
  */
 export function useTypingEmitter(threadId: string, mode: 'typing' | 'replying' = 'typing') {
   const isComposingRef = useRef(false)
   const lastEmitAtRef = useRef(0)
+  const lastEmittedModeRef = useRef<'typing' | 'replying' | null>(null)
   const modeRef = useRef(mode)
   const debounceTimerRef = useRef<number | null>(null)
   modeRef.current = mode
@@ -24,8 +25,10 @@ export function useTypingEmitter(threadId: string, mode: 'typing' | 'replying' =
 
   const emitStart = useCallback(() => {
     if (!threadId) return
+    const nextMode = modeRef.current
     lastEmitAtRef.current = Date.now()
-    realtimeSocketClient.emitTypingStart(threadId, modeRef.current)
+    lastEmittedModeRef.current = nextMode
+    realtimeSocketClient.emitTypingStart(threadId, nextMode)
   }, [threadId])
 
   const stopTyping = useCallback(() => {
@@ -34,6 +37,7 @@ export function useTypingEmitter(threadId: string, mode: 'typing' | 'replying' =
     const hadStart = lastEmitAtRef.current > 0
     isComposingRef.current = false
     lastEmitAtRef.current = 0
+    lastEmittedModeRef.current = null
     if (!threadId) return
     if (wasComposing || hadStart) {
       realtimeSocketClient.emitTypingStop(threadId)
@@ -44,6 +48,14 @@ export function useTypingEmitter(threadId: string, mode: 'typing' | 'replying' =
     clearDebounce()
   }, [clearDebounce])
 
+  // Reply banner opened/closed while already composing → push new mode immediately.
+  useEffect(() => {
+    if (!isComposingRef.current) return
+    if (lastEmittedModeRef.current === mode) return
+    clearDebounce()
+    emitStart()
+  }, [mode, clearDebounce, emitStart])
+
   useEffect(() => {
     return () => {
       clearDebounce()
@@ -52,6 +64,7 @@ export function useTypingEmitter(threadId: string, mode: 'typing' | 'replying' =
       }
       isComposingRef.current = false
       lastEmitAtRef.current = 0
+      lastEmittedModeRef.current = null
     }
   }, [clearDebounce, threadId])
 
@@ -59,8 +72,9 @@ export function useTypingEmitter(threadId: string, mode: 'typing' | 'replying' =
     if (!threadId) return
     isComposingRef.current = true
 
+    const modeChanged = lastEmittedModeRef.current !== modeRef.current
     const elapsed = Date.now() - lastEmitAtRef.current
-    if (lastEmitAtRef.current === 0 || elapsed >= TYPING_EMIT_DEBOUNCE_MS) {
+    if (modeChanged || lastEmitAtRef.current === 0 || elapsed >= TYPING_EMIT_DEBOUNCE_MS) {
       clearDebounce()
       emitStart()
       return

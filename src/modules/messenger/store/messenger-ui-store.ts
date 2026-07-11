@@ -30,7 +30,13 @@ export const useMessengerUiStore = create<MessengerUiState>((set) => ({
   forwardFrom: null,
   typingByThread: {},
   setActiveThreadId: (threadId) =>
-    set({ activeThreadId: threadId, replyTo: null, editingMessage: null }),
+    set((state) => {
+      // Same thread re-focus (input click / popup focus) must NOT wipe reply/edit.
+      if (state.activeThreadId === threadId) {
+        return { activeThreadId: threadId }
+      }
+      return { activeThreadId: threadId, replyTo: null, editingMessage: null }
+    }),
   setFilter: (filter) => set({ filter }),
   setSearchQuery: (searchQuery) => set({ searchQuery }),
   setShowInfoPanel: (showInfoPanel) => set({ showInfoPanel }),

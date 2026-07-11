@@ -58,9 +58,19 @@ export function useMessageComposer(threadId: string) {
       setTextState(editingMessage.body)
       return
     }
-    draftRef.current = ''
-    setTextState('')
-    stopTyping()
+  }, [editingMessage])
+
+  // Clear draft only when leaving edit mode — not on every stopTyping identity change.
+  const prevEditingIdRef = useRef<string | null>(null)
+  useEffect(() => {
+    const prevId = prevEditingIdRef.current
+    const nextId = editingMessage?.id ?? null
+    prevEditingIdRef.current = nextId
+    if (prevId && !nextId) {
+      draftRef.current = ''
+      setTextState('')
+      stopTyping()
+    }
   }, [editingMessage, stopTyping])
 
   const submit = useCallback(
