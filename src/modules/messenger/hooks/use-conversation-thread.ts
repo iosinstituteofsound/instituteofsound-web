@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { isComposerBlockedByRequest } from '@/modules/messenger/components/message-request-banner'
 import { useMarkThreadReadWhenViewing } from '@/modules/messenger/hooks/use-mark-thread-read-when-viewing'
 import { useMessengerMessages } from '@/modules/messenger/hooks/use-messenger-messages'
+import { useThreadTypingUsers } from '@/modules/messenger/hooks/use-thread-typing-users'
 import { messengerThreadsQueryKey } from '@/modules/messenger/lib/messenger-cache'
 import { getThreadDisplayName, isDirectThread } from '@/modules/messenger/lib/messenger-utils'
 import { flattenMessengerMessagePages } from '@/modules/messenger/utils/message-list-utils'
@@ -25,7 +26,7 @@ export function useConversationThread({
   const queryClient = useQueryClient()
   const forwardFrom = useMessengerUiStore((s) => s.forwardFrom)
   const setForwardFrom = useMessengerUiStore((s) => s.setForwardFrom)
-  const typingByThread = useMessengerUiStore((s) => s.typingByThread)
+  const { typingUsers, isPeerTyping, phase } = useThreadTypingUsers(threadId, viewerId)
 
   const messagesQuery = useMessengerMessages(threadId)
   const messages = useMemo(
@@ -38,9 +39,6 @@ export function useConversationThread({
     [messages, viewerId],
   )
 
-  const typingUsers = threadId
-    ? (typingByThread[threadId] ?? []).filter((id) => id !== viewerId)
-    : []
   const composerBlocked = thread ? Boolean(isComposerBlockedByRequest(thread, myMessageCount)) : false
   const isDirect = isDirectThread(thread)
   const displayName = getThreadDisplayName(thread)
@@ -57,6 +55,8 @@ export function useConversationThread({
     messages,
     myMessageCount,
     typingUsers,
+    isPeerTyping,
+    typingPhase: phase,
     composerBlocked,
     isDirect,
     displayName,

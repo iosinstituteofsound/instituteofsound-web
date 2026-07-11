@@ -15,7 +15,6 @@ import { getPopUpNewMessagesEnabled } from '@/modules/messenger/lib/messenger-se
 import { getOpenThreadIdsFromStores } from '@/modules/messenger/lib/open-threads'
 import { useMessengerLiveStore } from '@/modules/messenger/store/messenger-live-store'
 import { useMessengerPopupStore } from '@/modules/messenger/store/messenger-popup-store'
-import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
 import type { DmMessage } from '@/modules/messenger/types/messenger.types'
 import type { MeResponse } from '@/shared/types/auth.types'
 import { playMessageAlertSound } from '@/shared/lib/alert-sounds/alert-sounds'
@@ -30,6 +29,7 @@ function getViewerId(queryClient: QueryClient): string | undefined {
 function handleIncomingMessage(queryClient: QueryClient, message: DmMessage) {
   const viewerId = getViewerId(queryClient)
   appendMessageToCache(queryClient, message)
+  useMessengerLiveStore.getState().clearTypingForUser(message.threadId, message.senderId)
 
   if (!viewerId || message.senderId === viewerId) return
 
@@ -64,7 +64,15 @@ export function registerMessengerRealtimeHandlers(queryClient: QueryClient): voi
   })
 
   realtimeSocketClient.onMessengerTyping((payload) => {
-    useMessengerUiStore.getState().setTyping(payload.threadId, payload.userId, payload.isTyping)
+    const mode =
+      payload.mode === 'replying' || payload.isReplying === true
+        ? 'replying'
+        : payload.mode === 'typing'
+          ? 'typing'
+          : undefined
+    useMessengerLiveStore
+      .getState()
+      .setTyping(payload.threadId, payload.userId, payload.isTyping, mode)
   })
 
   realtimeSocketClient.onMessengerRead((payload) => {
@@ -78,7 +86,12 @@ export function registerMessengerRealtimeHandlers(queryClient: QueryClient): voi
   })
 
   realtimeSocketClient.onMessengerPresence((payload) => {
-    patchThreadPresenceInCache(queryClient, payload.userId, payload.isOnline)
+    patchThreadPresenceInCache(
+      queryClient,
+      payload.userId,
+      payload.isOnline,
+      payload.lastSeenAt,
+    )
   })
 
   realtimeSocketClient.onMessengerPresenceSync((payload) => {

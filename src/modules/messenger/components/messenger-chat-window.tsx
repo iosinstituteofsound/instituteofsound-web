@@ -7,7 +7,10 @@ import { MessengerCallActions } from '@/modules/messenger/components/messenger-c
 import { GroupAvatarStack } from '@/shared/components/user'
 import { useConversationThread } from '@/modules/messenger/hooks/use-conversation-thread'
 import { useMessengerThreads } from '@/modules/messenger/hooks/use-messenger-threads'
-import { getThreadAvatarUrl, getThreadPresenceLabel } from '@/modules/messenger/lib/messenger-utils'
+import { getThreadAvatarUrl, isDirectThread } from '@/modules/messenger/lib/messenger-utils'
+import { resolveMessengerPresenceStatus } from '@/modules/messenger/lib/messenger-status-visuals'
+import { MessengerAvatarStatusBadge } from '@/modules/messenger/components/messenger-avatar-status-badge'
+import { MessengerThreadStatus } from '@/modules/messenger/components/messenger-thread-status'
 import { useMessengerPopupStore } from '@/modules/messenger/store/messenger-popup-store'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/messenger/styles/messenger-chat-window.css'
@@ -37,9 +40,14 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
     markReadEnabled: !minimized,
   })
 
-  const { isDirect, displayName, typingUsers } = threadState
+  const { isDirect, displayName, isPeerTyping, typingPhase } = threadState
 
-  const presenceLabel = getThreadPresenceLabel(thread, typingUsers.length)
+  const avatarStatus = resolveMessengerPresenceStatus(
+    isPeerTyping,
+    typingPhase,
+    Boolean(thread?.otherIsOnline),
+  )
+  const showAvatarBadge = isDirectThread(thread) || isPeerTyping
 
   return (
     <div
@@ -59,7 +67,7 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
               <UserAvatar
                 name={displayName}
                 avatarUrl={getThreadAvatarUrl(thread)}
-                className="h-8 w-8"
+                className="h-8 w-8 border border-primary"
               />
             ) : (
               <GroupAvatarStack
@@ -69,19 +77,19 @@ export const MessengerChatWindow = memo(function MessengerChatWindow({
                 size="sm"
               />
             )}
-            {isDirect && thread?.otherIsOnline ? <span className="messenger-chat-window__online" /> : null}
+            {showAvatarBadge ? <MessengerAvatarStatusBadge status={avatarStatus} /> : null}
           </span>
           <span className="messenger-chat-window__meta">
             <span className="messenger-chat-window__name-row">
               <span className="messenger-chat-window__name">{displayName}</span>
               <ChevronDown className="h-4 w-4 shrink-0 text-[var(--primary)]" />
             </span>
-            <span className="messenger-chat-window__status">
-              {!typingUsers.length && isDirect && thread?.otherIsOnline ? (
-                <span className="messenger-chat-window__status-dot" />
-              ) : null}
-              {presenceLabel}
-            </span>
+            <MessengerThreadStatus
+              thread={thread}
+              isPeerTyping={isPeerTyping}
+              phase={typingPhase}
+              className="messenger-chat-window__status"
+            />
           </span>
         </Link>
 

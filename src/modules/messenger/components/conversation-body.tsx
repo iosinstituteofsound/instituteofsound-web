@@ -3,6 +3,7 @@ import { ForwardMessageModal } from '@/modules/messenger/components/forward-mess
 import { MessageComposer } from '@/modules/messenger/components/message-composer'
 import { MessageList } from '@/modules/messenger/components/message-list'
 import { MessageRequestBanner } from '@/modules/messenger/components/message-request-banner'
+import { TypingIndicatorBubble } from '@/modules/messenger/components/typing-indicator-bubble'
 import type { ConversationThreadView } from '@/modules/messenger/hooks/use-conversation-thread'
 import { getThreadAvatarUrl } from '@/modules/messenger/lib/messenger-utils'
 import { cn } from '@/shared/lib/cn'
@@ -17,7 +18,7 @@ type ConversationBodyProps = {
 export const ConversationBody = memo(function ConversationBody({
   conversation,
   showSenderName = false,
-  showInlineTyping = false,
+  showInlineTyping = true,
   className,
 }: ConversationBodyProps) {
   const {
@@ -32,7 +33,8 @@ export const ConversationBody = memo(function ConversationBody({
     forwardFrom,
     setForwardFrom,
     invalidate,
-    typingUsers,
+    isPeerTyping,
+    typingPhase,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -71,8 +73,10 @@ export const ConversationBody = memo(function ConversationBody({
         }}
       />
 
-      {showInlineTyping && typingUsers.length ? (
-        <p className="messenger-chat-window__typing">{displayName} is typing…</p>
+      {showInlineTyping && isPeerTyping ? (
+        <div className="messenger-typing-row">
+          <TypingIndicatorBubble phase={typingPhase} />
+        </div>
       ) : null}
 
       {!composerBlocked && thread?.status !== 'declined' ? (

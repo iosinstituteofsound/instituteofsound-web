@@ -9,7 +9,6 @@ type MessengerUiState = {
   replyTo: DmMessage | null
   editingMessage: DmMessage | null
   forwardFrom: DmMessage | null
-  typingByThread: Record<string, string[]>
   setActiveThreadId: (threadId: string | null) => void
   setFilter: (filter: MessengerFilter) => void
   setSearchQuery: (query: string) => void
@@ -17,7 +16,6 @@ type MessengerUiState = {
   setReplyTo: (message: DmMessage | null) => void
   setEditingMessage: (message: DmMessage | null) => void
   setForwardFrom: (message: DmMessage | null) => void
-  setTyping: (threadId: string, userId: string, isTyping: boolean) => void
 }
 
 export const useMessengerUiStore = create<MessengerUiState>((set) => ({
@@ -28,7 +26,6 @@ export const useMessengerUiStore = create<MessengerUiState>((set) => ({
   replyTo: null,
   editingMessage: null,
   forwardFrom: null,
-  typingByThread: {},
   setActiveThreadId: (threadId) =>
     set((state) => {
       // Same thread re-focus (input click / popup focus) must NOT wipe reply/edit.
@@ -43,19 +40,4 @@ export const useMessengerUiStore = create<MessengerUiState>((set) => ({
   setReplyTo: (replyTo) => set({ replyTo, editingMessage: null }),
   setEditingMessage: (editingMessage) => set({ editingMessage, replyTo: null }),
   setForwardFrom: (forwardFrom) => set({ forwardFrom }),
-  setTyping: (threadId, userId, isTyping) =>
-    set((state) => {
-      const current = state.typingByThread[threadId] ?? []
-      const next = isTyping
-        ? current.includes(userId)
-          ? current
-          : [...current, userId]
-        : current.filter((id) => id !== userId)
-      return {
-        typingByThread: {
-          ...state.typingByThread,
-          [threadId]: next,
-        },
-      }
-    }),
 }))

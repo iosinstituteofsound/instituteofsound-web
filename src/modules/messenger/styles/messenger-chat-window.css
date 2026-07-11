@@ -144,7 +144,7 @@
   height: 9px;
   border: 2px solid var(--card);
   border-radius: 999px;
-  background: var(--chart-2, #31a24c);
+  background: var(--messenger-status-online, #23a55a);
 }
 
 .messenger-chat-window__meta {

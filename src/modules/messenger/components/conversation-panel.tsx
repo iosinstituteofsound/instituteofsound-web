@@ -7,8 +7,11 @@ import { IconButton } from '@/shared/components/ui/icon-button'
 import { ConversationBody } from '@/modules/messenger/components/conversation-body'
 import { MessengerCallActions } from '@/modules/messenger/components/messenger-call-actions'
 import { GroupAvatarStack } from '@/shared/components/user'
+import { MessengerAvatarStatusBadge } from '@/modules/messenger/components/messenger-avatar-status-badge'
+import { MessengerThreadStatus } from '@/modules/messenger/components/messenger-thread-status'
 import { useConversationThread } from '@/modules/messenger/hooks/use-conversation-thread'
-import { getThreadAvatarUrl, getThreadPresenceLabel } from '@/modules/messenger/lib/messenger-utils'
+import { getThreadAvatarUrl, isDirectThread } from '@/modules/messenger/lib/messenger-utils'
+import { resolveMessengerPresenceStatus } from '@/modules/messenger/lib/messenger-status-visuals'
 import { useMessengerUiStore } from '@/modules/messenger/store/messenger-ui-store'
 import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
 
@@ -28,8 +31,6 @@ export const ConversationPanel = memo(function ConversationPanel({
     thread,
   })
 
-  const { isDirect, displayName, typingUsers } = threadState
-
   if (!thread) {
     return (
       <section className={className}>
@@ -44,8 +45,15 @@ export const ConversationPanel = memo(function ConversationPanel({
     )
   }
 
+  const { isDirect, displayName, isPeerTyping, typingPhase } = threadState
+  const avatarStatus = resolveMessengerPresenceStatus(
+    isPeerTyping,
+    typingPhase,
+    Boolean(thread.otherIsOnline),
+  )
+  const showAvatarBadge = isDirectThread(thread) || isPeerTyping
+
   const profileHref = thread.otherUserId ? `/profile/${thread.otherUserId}` : undefined
-  const presenceLabel = getThreadPresenceLabel(thread, typingUsers.length)
 
   return (
     <section className={className}>
@@ -57,18 +65,18 @@ export const ConversationPanel = memo(function ConversationPanel({
                 <UserAvatar
                   name={displayName}
                   avatarUrl={getThreadAvatarUrl(thread)}
-                  className="h-10 w-10"
+                  className="h-10 w-10 border border-primary"
                 />
-                {thread.otherIsOnline ? <span className="messenger-online-dot" aria-label="Online" /> : null}
+                {showAvatarBadge ? <MessengerAvatarStatusBadge status={avatarStatus} /> : null}
               </Link>
             ) : isDirect ? (
               <div className="relative shrink-0">
                 <UserAvatar
                   name={displayName}
                   avatarUrl={getThreadAvatarUrl(thread)}
-                  className="h-10 w-10"
+                  className="h-10 w-10 border border-primary"
                 />
-                {thread.otherIsOnline ? <span className="messenger-online-dot" aria-label="Online" /> : null}
+                {showAvatarBadge ? <MessengerAvatarStatusBadge status={avatarStatus} /> : null}
               </div>
             ) : (
               <GroupAvatarStack
@@ -86,7 +94,11 @@ export const ConversationPanel = memo(function ConversationPanel({
               ) : (
                 <div className="truncate text-base font-bold">{displayName}</div>
               )}
-              <div className="text-xs text-[var(--messenger-muted)]">{presenceLabel}</div>
+              <MessengerThreadStatus
+                thread={thread}
+                isPeerTyping={isPeerTyping}
+                phase={typingPhase}
+              />
             </div>
           </div>
 

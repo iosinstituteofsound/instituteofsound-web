@@ -45,10 +45,10 @@ export function upsertThreadInCache(queryClient: QueryClient, thread: DmThreadSu
 
 export function applyPresenceSync(
   queryClient: QueryClient,
-  users: Array<{ userId: string; isOnline: boolean }>,
+  users: Array<{ userId: string; isOnline: boolean; lastSeenAt?: string }>,
 ) {
   for (const entry of users) {
-    patchThreadPresenceInCache(queryClient, entry.userId, entry.isOnline)
+    patchThreadPresenceInCache(queryClient, entry.userId, entry.isOnline, entry.lastSeenAt)
   }
 }
 
@@ -56,11 +56,24 @@ export function patchThreadPresenceInCache(
   queryClient: QueryClient,
   userId: string,
   isOnline: boolean,
+  lastSeenAt?: string,
 ) {
+  const resolvedLastSeen = !isOnline
+    ? (lastSeenAt ?? new Date().toISOString())
+    : undefined
+
   for (const key of getMessengerThreadListQueryKeys()) {
     queryClient.setQueryData<DmThreadSummary[]>(key, (current) =>
       (current ?? []).map((thread) =>
-        thread.otherUserId === userId ? { ...thread, otherIsOnline: isOnline } : thread,
+        thread.otherUserId === userId
+          ? {
+              ...thread,
+              otherIsOnline: isOnline,
+              otherLastSeenAt: isOnline
+                ? undefined
+                : (resolvedLastSeen ?? thread.otherLastSeenAt),
+            }
+          : thread,
       ),
     )
   }

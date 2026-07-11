@@ -1,4 +1,5 @@
 import type { DmMessage, DmThreadSummary } from '@/modules/messenger/types/messenger.types'
+import { formatMessengerLastSeen } from '@/modules/messenger/lib/messenger-status-visuals'
 import { graphemeSegments, isEmojiGrapheme } from '@/shared/lib/emoji/animated-emoji'
 
 export const LIKE_MESSAGE_EMOJI = '👍'
@@ -23,14 +24,24 @@ export function getThreadPreviewText(thread: DmThreadSummary) {
 }
 
 export function getThreadPresenceLabel(
-  thread: Pick<DmThreadSummary, 'subtitle' | 'memberCount' | 'otherIsOnline' | 'kind' | 'isGroup'> | null | undefined,
+  thread: Pick<
+    DmThreadSummary,
+    'subtitle' | 'memberCount' | 'otherIsOnline' | 'otherLastSeenAt' | 'kind' | 'isGroup'
+  > | null | undefined,
   typingCount: number,
+  phase?: 'typing' | 'thinking' | 'confused' | 'replying' | null,
 ) {
   const isDirect = isDirectThread(thread)
 
-  if (typingCount > 0) return 'Typing…'
-  if (isDirect && thread?.otherIsOnline) return 'Active now'
-  return thread?.subtitle ?? (isDirect ? 'Offline' : `${thread?.memberCount ?? 0} members`)
+  if (typingCount > 0) {
+    if (phase === 'confused') return 'confused…'
+    if (phase === 'thinking') return 'thinking…'
+    if (phase === 'replying') return 'replying…'
+    return 'typing…'
+  }
+  if (isDirect && thread?.otherIsOnline) return 'Online'
+  if (isDirect) return formatMessengerLastSeen(thread?.otherLastSeenAt)
+  return thread?.subtitle ?? `${thread?.memberCount ?? 0} members`
 }
 
 export function formatMessengerTime(iso?: string) {
