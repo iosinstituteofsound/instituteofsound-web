@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { uploadMediaFile } from '@/modules/feed/api/media.api'
 import { useMessageActions } from '@/modules/messenger/hooks/use-message-actions'
 import { useSendMessengerMessage } from '@/modules/messenger/hooks/use-messenger-messages'
@@ -14,16 +14,45 @@ export function useMessageComposer(threadId: string) {
   const setEditingMessage = useMessengerUiStore((s) => s.setEditingMessage)
   const sendMessage = useSendMessengerMessage(threadId)
   const { editMessage } = useMessageActions(threadId)
-  const [text, setText] = useState('')
-  const { notifyTyping, stopTyping } = useTypingEmitter(threadId)
+  const [text, setTextState] = useState('')
+  const { notifyTyping, stopTyping, cancelPendingTyping } = useTypingEmitter(threadId)
+  const draftRef = useRef(text)
+
+  /** Single path for draft changes — keeps web→mobile typing/stop in sync. */
+  const setText = useCallback(
+    (value: string) => {
+      const prev = draftRef.current
+      draftRef.current = value
+      setTextState(value)
+
+      if (!value.trim()) {
+        stopTyping()
+        return
+      }
+
+      // Backspace / delete must NOT re-trigger typing — only content growth does.
+      if (value.length > prev.length) {
+        notifyTyping()
+        return
+      }
+
+      if (value.length < prev.length) {
+        cancelPendingTyping()
+      }
+    },
+    [cancelPendingTyping, notifyTyping, stopTyping],
+  )
 
   useEffect(() => {
     if (editingMessage) {
-      setText(editingMessage.body)
+      draftRef.current = editingMessage.body
+      setTextState(editingMessage.body)
       return
     }
-    setText('')
-  }, [editingMessage])
+    draftRef.current = ''
+    setTextState('')
+    stopTyping()
+  }, [editingMessage, stopTyping])
 
   const submit = useCallback(
     async (payload?: Partial<DmMessage>) => {
@@ -33,7 +62,9 @@ export function useMessageComposer(threadId: string) {
       if (editingMessage) {
         await editMessage({ messageId: editingMessage.id, body })
         setEditingMessage(null)
-        setText('')
+        draftRef.current = ''
+        setTextState('')
+        stopTyping()
         return
       }
 
@@ -48,11 +79,22 @@ export function useMessageComposer(threadId: string) {
         clientMessageId: payload?.clientMessageId ?? createClientMessageId(),
       })
 
-      setText('')
+      draftRef.current = ''
+      setTextState('')
       setReplyTo(null)
       stopTyping()
     },
-    [editMessage, editingMessage, replyTo?.id, sendMessage, setEditingMessage, setReplyTo, stopTyping, text, threadId],
+    [
+      editMessage,
+      editingMessage,
+      replyTo?.id,
+      sendMessage,
+      setEditingMessage,
+      setReplyTo,
+      stopTyping,
+      text,
+      threadId,
+    ],
   )
 
   const uploadAndSubmit = useCallback(
@@ -107,6 +149,7 @@ export function useMessageComposer(threadId: string) {
     setReplyTo,
     setEditingMessage,
     notifyTyping,
+    stopTyping,
     submit,
     onFilesSelected,
     onPasteImage,

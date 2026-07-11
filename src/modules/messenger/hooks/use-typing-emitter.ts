@@ -1,28 +1,76 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { realtimeSocketClient } from '@/shared/services/realtime/socket-client'
 
+const TYPING_EMIT_DEBOUNCE_MS = 400
+
+/**
+ * typing:start — when draft content grows (debounced).
+ * typing:stop — always emitted on stopTyping() so mobile can show "confused".
+ */
 export function useTypingEmitter(threadId: string) {
-  const typingTimeoutRef = useRef<number | null>(null)
+  const isComposingRef = useRef(false)
+  const lastEmitAtRef = useRef(0)
+  const debounceTimerRef = useRef<number | null>(null)
 
-  useEffect(() => {
-    return () => {
-      if (typingTimeoutRef.current) window.clearTimeout(typingTimeoutRef.current)
-      realtimeSocketClient.emitTypingStop(threadId)
+  const clearDebounce = useCallback(() => {
+    if (debounceTimerRef.current !== null) {
+      window.clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = null
     }
-  }, [threadId])
+  }, [])
 
-  const notifyTyping = useCallback(() => {
+  const emitStart = useCallback(() => {
+    if (!threadId) return
+    lastEmitAtRef.current = Date.now()
     realtimeSocketClient.emitTypingStart(threadId)
-    if (typingTimeoutRef.current) window.clearTimeout(typingTimeoutRef.current)
-    typingTimeoutRef.current = window.setTimeout(() => {
-      realtimeSocketClient.emitTypingStop(threadId)
-    }, 1200)
   }, [threadId])
 
   const stopTyping = useCallback(() => {
-    if (typingTimeoutRef.current) window.clearTimeout(typingTimeoutRef.current)
-    realtimeSocketClient.emitTypingStop(threadId)
-  }, [threadId])
+    clearDebounce()
+    const wasComposing = isComposingRef.current
+    const hadStart = lastEmitAtRef.current > 0
+    isComposingRef.current = false
+    lastEmitAtRef.current = 0
+    if (!threadId) return
+    // Always stop after a composing session so mobile can show "confused".
+    if (wasComposing || hadStart) {
+      realtimeSocketClient.emitTypingStop(threadId)
+    }
+  }, [clearDebounce, threadId])
 
-  return { notifyTyping, stopTyping }
+  const cancelPendingTyping = useCallback(() => {
+    clearDebounce()
+  }, [clearDebounce])
+
+  useEffect(() => {
+    return () => {
+      clearDebounce()
+      if (threadId && isComposingRef.current) {
+        realtimeSocketClient.emitTypingStop(threadId)
+      }
+      isComposingRef.current = false
+      lastEmitAtRef.current = 0
+    }
+  }, [clearDebounce, threadId])
+
+  const notifyTyping = useCallback(() => {
+    if (!threadId) return
+    isComposingRef.current = true
+
+    const elapsed = Date.now() - lastEmitAtRef.current
+    if (lastEmitAtRef.current === 0 || elapsed >= TYPING_EMIT_DEBOUNCE_MS) {
+      clearDebounce()
+      emitStart()
+      return
+    }
+
+    clearDebounce()
+    debounceTimerRef.current = window.setTimeout(() => {
+      debounceTimerRef.current = null
+      if (!isComposingRef.current) return
+      emitStart()
+    }, TYPING_EMIT_DEBOUNCE_MS - elapsed)
+  }, [clearDebounce, emitStart, threadId])
+
+  return { notifyTyping, stopTyping, cancelPendingTyping }
 }

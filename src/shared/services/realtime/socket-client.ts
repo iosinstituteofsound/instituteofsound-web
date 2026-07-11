@@ -253,13 +253,29 @@ class RealtimeSocketClient {
   }
 
   emitTypingStart(threadId: string): void {
-    if (!this.socket?.connected) return
-    this.socket.emit('typing:start', { threadId })
+    if (!threadId) return
+    const emit = () => {
+      if (!this.socket?.connected) return
+      this.socket.emit('typing:start', { threadId })
+    }
+    if (this.socket?.connected) {
+      emit()
+      return
+    }
+    void this.ensureConnected().then(() => emit()).catch(() => undefined)
   }
 
   emitTypingStop(threadId: string): void {
-    if (!this.socket?.connected) return
-    this.socket.emit('typing:stop', { threadId })
+    if (!threadId) return
+    const emit = () => {
+      if (!this.socket?.connected) return
+      this.socket.emit('typing:stop', { threadId })
+    }
+    if (this.socket?.connected) {
+      emit()
+      return
+    }
+    void this.ensureConnected().then(() => emit()).catch(() => undefined)
   }
 
   async subscribeRelease(releaseId: string): Promise<void> {

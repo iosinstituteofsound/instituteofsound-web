@@ -26,7 +26,7 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
     editingMessage,
     setReplyTo,
     setEditingMessage,
-    notifyTyping,
+    stopTyping,
     submit,
     onFilesSelected,
     onPasteImage,
@@ -198,10 +198,12 @@ export const MessageComposer = memo(function MessageComposer({ threadId }: Messa
             value={text}
             placeholder="Aa"
             onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onBlur={() => {
+              setIsFocused(false)
+              if (!text.trim()) stopTyping()
+            }}
             onChange={(event) => {
               setText(event.target.value)
-              notifyTyping()
             }}
             onKeyDown={onKeyDown}
             onPaste={onPaste}
