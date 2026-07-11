@@ -5,12 +5,15 @@ const TYPING_EMIT_DEBOUNCE_MS = 400
 
 /**
  * typing:start — when draft content grows (debounced).
+ * mode = replying when composer has a reply target (mobile shows "replying…").
  * typing:stop — always emitted on stopTyping() so mobile can show "confused".
  */
-export function useTypingEmitter(threadId: string) {
+export function useTypingEmitter(threadId: string, mode: 'typing' | 'replying' = 'typing') {
   const isComposingRef = useRef(false)
   const lastEmitAtRef = useRef(0)
+  const modeRef = useRef(mode)
   const debounceTimerRef = useRef<number | null>(null)
+  modeRef.current = mode
 
   const clearDebounce = useCallback(() => {
     if (debounceTimerRef.current !== null) {
@@ -22,7 +25,7 @@ export function useTypingEmitter(threadId: string) {
   const emitStart = useCallback(() => {
     if (!threadId) return
     lastEmitAtRef.current = Date.now()
-    realtimeSocketClient.emitTypingStart(threadId)
+    realtimeSocketClient.emitTypingStart(threadId, modeRef.current)
   }, [threadId])
 
   const stopTyping = useCallback(() => {
@@ -32,7 +35,6 @@ export function useTypingEmitter(threadId: string) {
     isComposingRef.current = false
     lastEmitAtRef.current = 0
     if (!threadId) return
-    // Always stop after a composing session so mobile can show "confused".
     if (wasComposing || hadStart) {
       realtimeSocketClient.emitTypingStop(threadId)
     }

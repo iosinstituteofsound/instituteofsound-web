@@ -110,6 +110,7 @@ export type MessengerTypingPayload = {
   threadId: string
   userId: string
   isTyping: boolean
+  mode?: 'typing' | 'replying'
 }
 
 export type MessengerReadPayload = {

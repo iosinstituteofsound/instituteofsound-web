@@ -15,8 +15,17 @@ export function useMessageComposer(threadId: string) {
   const sendMessage = useSendMessengerMessage(threadId)
   const { editMessage } = useMessageActions(threadId)
   const [text, setTextState] = useState('')
-  const { notifyTyping, stopTyping, cancelPendingTyping } = useTypingEmitter(threadId)
+  const { notifyTyping, stopTyping, cancelPendingTyping } = useTypingEmitter(
+    threadId,
+    replyTo ? 'replying' : 'typing',
+  )
   const draftRef = useRef(text)
+
+  // If draft already has text, re-broadcast so mobile sees typing → replying (or back).
+  useEffect(() => {
+    if (!draftRef.current.trim()) return
+    notifyTyping()
+  }, [replyTo?.id, notifyTyping])
 
   /** Single path for draft changes — keeps web→mobile typing/stop in sync. */
   const setText = useCallback(

@@ -252,11 +252,11 @@ class RealtimeSocketClient {
     await this.emitAck(this.socket, 'unsubscribe', { room: `thread:${threadId}` })
   }
 
-  emitTypingStart(threadId: string): void {
+  emitTypingStart(threadId: string, mode: 'typing' | 'replying' = 'typing'): void {
     if (!threadId) return
     const emit = () => {
       if (!this.socket?.connected) return
-      this.socket.emit('typing:start', { threadId })
+      this.socket.emit('typing:start', { threadId, mode })
     }
     if (this.socket?.connected) {
       emit()
