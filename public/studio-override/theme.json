@@ -1,0 +1,125 @@
+{
+  "slug": "ios-studio-project",
+  "appliedAt": "2026-07-09T19:22:54.441Z",
+  "source": "instituteofsound-studio",
+  "tokens": {
+    "colors": {
+      "light": {
+        "background": "oklch(0.985 0 0)",
+        "foreground": "oklch(0.12 0 0)",
+        "card": "oklch(1 0 0)",
+        "card-foreground": "oklch(0.12 0 0)",
+        "popover": "oklch(1 0 0)",
+        "popover-foreground": "oklch(0.12 0 0)",
+        "primary": "oklch(0.55 0.254 25)",
+        "primary-foreground": "oklch(0.985 0 0)",
+        "secondary": "oklch(0.96 0 0)",
+        "secondary-foreground": "oklch(0.12 0 0)",
+        "muted": "oklch(0.96 0 0)",
+        "muted-foreground": "oklch(0.5 0 0)",
+        "accent": "oklch(0.62 0.28 25)",
+        "accent-foreground": "oklch(0.985 0 0)",
+        "destructive": "oklch(0.48 0.2 15)",
+        "destructive-foreground": "oklch(0.985 0 0)",
+        "border": "oklch(0.88 0 0)",
+        "input": "oklch(0.88 0 0)",
+        "ring": "oklch(0.55 0.254 25)"
+      },
+      "dark": {
+        "background": "oklch(0.08 0 0)",
+        "foreground": "oklch(0.985 0 0)",
+        "card": "oklch(0.11 0 0)",
+        "card-foreground": "oklch(0.985 0 0)",
+        "popover": "oklch(0.11 0 0)",
+        "popover-foreground": "oklch(0.985 0 0)",
+        "primary": "oklch(0.55 0.254 25)",
+        "primary-foreground": "oklch(0.985 0 0)",
+        "secondary": "oklch(0.16 0 0)",
+        "secondary-foreground": "oklch(0.985 0 0)",
+        "muted": "oklch(0.16 0 0)",
+        "muted-foreground": "oklch(0.55 0 0)",
+        "accent": "oklch(0.62 0.28 25)",
+        "accent-foreground": "oklch(0.985 0 0)",
+        "destructive": "oklch(0.48 0.2 15)",
+        "destructive-foreground": "oklch(0.985 0 0)",
+        "border": "oklch(1 0 0 / 12%)",
+        "input": "oklch(1 0 0 / 15%)",
+        "ring": "oklch(0.55 0.254 25)"
+      }
+    }
+  },
+  "layout": {
+    "feedScope": "all",
+    "profileTabs": [
+      "portfolio",
+      "discography",
+      "music",
+      "albums",
+      "collections"
+    ],
+    "defaultProfileTab": "portfolio",
+    "sidebarItems": [
+      "Home",
+      "Explore",
+      "Releases",
+      "Profile"
+    ],
+    "showStories": true,
+    "showComposer": true
+  },
+  "screens": {
+    "feed": [
+      {
+        "id": "b-stories",
+        "type": "stories"
+      },
+      {
+        "id": "b-composer",
+        "type": "composer"
+      },
+      {
+        "id": "b-scope",
+        "type": "feed-scope"
+      },
+      {
+        "id": "b-list",
+        "type": "feed-list"
+      }
+    ],
+    "profile": [
+      {
+        "id": "b-cover",
+        "type": "profile-cover"
+      },
+      {
+        "id": "b-tabs",
+        "type": "profile-tabs"
+      },
+      {
+        "id": "b-portfolio",
+        "type": "profile-portfolio"
+      }
+    ]
+  },
+  "builder": {
+    "surface": {
+      "cardStyle": "hud-frame",
+      "radius": 14,
+      "padding": 16,
+      "cardSpacing": 16,
+      "borderWidth": 1,
+      "effects": {
+        "glow": true,
+        "liquidGlass": false,
+        "innerShadow": true
+      }
+    },
+    "motion": {
+      "preset": "fade",
+      "durationMs": 320,
+      "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+      "delayMs": 0,
+      "translateY": -24
+    }
+  }
+}
