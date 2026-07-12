@@ -21,6 +21,10 @@ export type MessageListRow =
       indentForAvatar: boolean
     }
 
+function isStackBreakMessage(message: DmMessage) {
+  return message.type === 'system'
+}
+
 export function buildMessageListRows(
   messages: DmMessage[],
   viewerId?: string | null,
@@ -52,14 +56,15 @@ export function buildMessageListRows(
     const isOutgoing = message.senderId === viewerId
     const isStacked = Boolean(
       prev &&
-        prev.type !== 'system' &&
+        !isStackBreakMessage(prev) &&
+        !isStackBreakMessage(message) &&
         prev.senderId === message.senderId &&
         prev.createdAt.slice(0, 10) === dayKey &&
         prev.reactions.length === 0,
     )
     const isTail =
       !next ||
-      next.type === 'system' ||
+      isStackBreakMessage(next) ||
       next.senderId !== message.senderId ||
       next.createdAt.slice(0, 10) !== dayKey
     const showAvatar = isGroupChat && !isOutgoing && isTail

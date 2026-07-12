@@ -274,8 +274,8 @@
   display: flex;
   flex: 1;
   min-height: 0;
-  flex-direction: column;
-  justify-content: flex-end;
+  /* Newest at visual bottom without a post-paint jump to scrollHeight. */
+  flex-direction: column-reverse;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0.5rem 0.65rem 0.35rem;
@@ -359,7 +359,9 @@
 }
 
 .messenger-message-list__wrap.is-stacked {
-  margin-top: -0.04rem;
+  /* column-reverse: pull toward the older sibling (visual above / DOM after). */
+  margin-bottom: -0.04rem;
+  margin-top: 0;
 }
 
 .messenger-message-list__receipt {
@@ -627,6 +629,62 @@
   background: var(--messenger-outgoing);
   color: var(--primary-foreground);
   border-bottom-right-radius: 6px;
+}
+
+.messenger-call-bubble__row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 10.5rem;
+}
+
+.messenger-call-bubble__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.messenger-bubble.is-outgoing .messenger-call-bubble__icon {
+  background: color-mix(in srgb, #fff 18%, transparent);
+  color: #fff;
+}
+
+.messenger-bubble.is-incoming .messenger-call-bubble__icon {
+  color: var(--foreground);
+}
+
+.messenger-call-bubble__icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.messenger-call-bubble__icon--missed {
+  background: #ef4444 !important;
+  color: #fff !important;
+}
+
+.messenger-call-bubble__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.messenger-call-bubble__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.messenger-call-bubble__subtitle {
+  font-size: 0.8rem;
+  line-height: 1.2;
+  opacity: 0.72;
 }
 
 .messenger-bubble__meta {

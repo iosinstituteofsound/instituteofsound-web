@@ -6,6 +6,7 @@ import '@/modules/messenger/styles/messenger-voice.css'
 import { UserAvatar } from '@/shared/components/user'
 import { LinkPreviewCard } from '@/shared/components/link-preview'
 import { toLinkPreview } from '@/shared/lib/link-preview/dm-link-preview'
+import { MessageCallBubble } from '@/modules/messenger/components/message-call-bubble'
 import { MessageActionsMenu } from '@/modules/messenger/components/message-actions-menu'
 import { MessageBubbleMeta } from '@/modules/messenger/components/message-bubble-meta'
 import { MessageMediaBubble } from '@/modules/messenger/components/message-media-bubble'
@@ -77,6 +78,8 @@ export const MessageBubble = memo(function MessageBubble({
       </div>
     )
   }
+
+  const isCall = message.type === 'call' && Boolean(message.callData)
 
   const actions = (
     <MessageActionsMenu
@@ -296,6 +299,10 @@ export const MessageBubble = memo(function MessageBubble({
         <div className="messenger-bubble__reply mb-1 text-[11px] opacity-80">Forwarded</div>
       ) : null}
 
+      {isCall ? (
+        <MessageCallBubble message={message} isOutgoing={isOutgoing} viewerId={viewerId} />
+      ) : null}
+
       {message.type === 'share_card' && message.shareData ? (
         <Link to={message.shareData.href ?? '#'} className="messenger-share-card block">
           {message.shareData.imageUrl ? (
@@ -325,7 +332,7 @@ export const MessageBubble = memo(function MessageBubble({
         </a>
       ) : null}
 
-      {message.body && message.type !== 'share_card' ? (
+      {message.body && message.type !== 'share_card' && !isCall ? (
         <div className={cn(!compact && 'messenger-bubble__text')}>{message.body}</div>
       ) : null}
 

@@ -19,7 +19,7 @@ export function buildForwardMessageInput(source: DmMessage, targetThreadId: stri
   return {
     threadId: targetThreadId,
     body,
-    type: source.type === 'system' ? ('text' as const) : source.type,
+    type: source.type === 'system' || source.type === 'call' ? ('text' as const) : source.type,
     mediaUrl: source.mediaUrl,
     mediaMimeType: source.mediaMimeType,
     mediaFileName: source.mediaFileName,

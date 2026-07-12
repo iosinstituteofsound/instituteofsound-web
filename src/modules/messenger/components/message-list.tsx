@@ -63,72 +63,76 @@ export const MessageList = memo(function MessageList({
   return (
     <div className={cn('messenger-message-list-shell', className)}>
       <div ref={scrollRef} className="messenger-message-list">
+        {/*
+          column-reverse: first DOM node sits at the visual bottom.
+          Render newest rows first, then hero/history at the end (visual top).
+        */}
+        {rows.map((row) => {
+          if (row.kind === 'day') {
+            return (
+              <p key={row.id} className="messenger-message-list__day">
+                {row.label}
+              </p>
+            )
+          }
+
+          if (row.kind === 'system') {
+            return (
+              <p key={row.id} className="messenger-system-message">
+                {row.body}
+              </p>
+            )
+          }
+
+          const mine = row.message.senderId === viewerId
+
+          return (
+            <div
+              key={row.id}
+              className={cn(
+                'messenger-message-list__wrap',
+                mine && 'is-mine',
+                row.isStacked && 'is-stacked',
+              )}
+            >
+              <MessageBubble
+                message={row.message}
+                threadId={threadId}
+                isOutgoing={mine}
+                viewerId={viewerId}
+                otherName={otherName}
+                compact
+                showAvatar={row.showAvatar}
+                indentForAvatar={row.indentForAvatar}
+                isTail={row.isTail}
+                isStacked={row.isStacked}
+                senderName={row.message.senderName ?? otherName}
+                senderAvatar={otherAvatar}
+                showSenderLabel={showSenderName}
+              />
+            </div>
+          )
+        })}
+
+        {showHero && hero ? (
+          <div className="messenger-message-list__hero">
+            {hero.isDirect ? (
+              <UserAvatar name={hero.name} avatarUrl={hero.avatarUrl} className="h-16 w-16" />
+            ) : (
+              <GroupAvatarStack
+                members={hero.memberPreview}
+                title={hero.name}
+                avatarUrl={hero.groupAvatarUrl}
+                size="lg"
+              />
+            )}
+            <div className="messenger-message-list__hero-name">{hero.name}</div>
+          </div>
+        ) : null}
+
         {isFetchingNextPage ? (
           <p className="messenger-message-list__history-loading">Loading older messages…</p>
         ) : null}
-
-        {showHero && hero ? (
-        <div className="messenger-message-list__hero">
-          {hero.isDirect ? (
-            <UserAvatar name={hero.name} avatarUrl={hero.avatarUrl} className="h-16 w-16" />
-          ) : (
-            <GroupAvatarStack
-              members={hero.memberPreview}
-              title={hero.name}
-              avatarUrl={hero.groupAvatarUrl}
-              size="lg"
-            />
-          )}
-          <div className="messenger-message-list__hero-name">{hero.name}</div>
-        </div>
-      ) : null}
-
-      {rows.map((row) => {
-        if (row.kind === 'day') {
-          return (
-            <p key={row.id} className="messenger-message-list__day">
-              {row.label}
-            </p>
-          )
-        }
-
-        if (row.kind === 'system') {
-          return (
-            <p key={row.id} className="messenger-system-message">
-              {row.body}
-            </p>
-          )
-        }
-
-        const mine = row.message.senderId === viewerId
-
-        return (
-          <div
-            key={row.id}
-            className={cn(
-              'messenger-message-list__wrap',
-              mine && 'is-mine',
-              row.isStacked && 'is-stacked',
-            )}
-          >
-            <MessageBubble
-              message={row.message}
-              threadId={threadId}
-              isOutgoing={mine}
-              viewerId={viewerId}
-              otherName={otherName}
-              compact
-              showAvatar={row.showAvatar}
-              indentForAvatar={row.indentForAvatar}
-              isTail={row.isTail}
-              isStacked={row.isStacked}
-              senderName={row.message.senderName ?? otherName}
-              senderAvatar={otherAvatar}
-              showSenderLabel={showSenderName}
-            />
-          </div>
-        )
-      })}
       </div>
 
       <MessageScrollToBottomButton

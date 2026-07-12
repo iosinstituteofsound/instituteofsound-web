@@ -140,6 +140,7 @@ export const messengerCallController = {
       remoteName: target.remoteName,
       remoteAvatarUrl: target.remoteAvatarUrl ?? null,
       mediaMode,
+      initiatorUserId: viewer.userId,
       isMuted: false,
       isCameraOff: mediaMode === 'voice',
       isSpeakerOn: false,
@@ -243,10 +244,14 @@ export const messengerCallController = {
       resetCall()
       return
     }
-    realtimeSocketClient.emitCallReject({
-      ...relayBase(state.callId, state.threadId, state.remoteUserId),
-      reason: 'rejected',
-    }).catch(() => undefined)
+    realtimeSocketClient
+      .emitCallReject({
+        ...relayBase(state.callId, state.threadId, state.remoteUserId),
+        reason: 'rejected',
+        initiatorId: state.initiatorUserId ?? state.remoteUserId,
+        mediaMode: state.mediaMode ?? undefined,
+      })
+      .catch(() => undefined)
     resetCall()
   },
 
@@ -257,10 +262,19 @@ export const messengerCallController = {
       return
     }
     if (state.callId && state.threadId && state.remoteUserId) {
-      realtimeSocketClient.emitCallEnd({
-        ...relayBase(state.callId, state.threadId, state.remoteUserId),
-        reason,
-      }).catch(() => undefined)
+      const durationSec =
+        state.startedAt != null
+          ? Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000))
+          : undefined
+      realtimeSocketClient
+        .emitCallEnd({
+          ...relayBase(state.callId, state.threadId, state.remoteUserId),
+          reason,
+          durationSec,
+          initiatorId: state.initiatorUserId ?? undefined,
+          mediaMode: state.mediaMode ?? undefined,
+        })
+        .catch(() => undefined)
     }
     patch({ phase: 'ended' })
     cleanupPeer()
@@ -360,12 +374,16 @@ async function handleInvite(payload: CallPeerPayload): Promise<void> {
   if (!payload.fromUserId) return
   const state = useMessengerCallStore.getState()
   if (isCallActive(state.phase)) {
-    realtimeSocketClient.emitCallReject({
-      callId: payload.callId,
-      threadId: payload.threadId,
-      toUserId: payload.fromUserId,
-      reason: 'busy',
-    }).catch(() => undefined)
+    realtimeSocketClient
+      .emitCallReject({
+        callId: payload.callId,
+        threadId: payload.threadId,
+        toUserId: payload.fromUserId,
+        reason: 'busy',
+        initiatorId: payload.fromUserId,
+        mediaMode: payload.mediaMode,
+      })
+      .catch(() => undefined)
     return
   }
 
@@ -381,6 +399,7 @@ async function handleInvite(payload: CallPeerPayload): Promise<void> {
     remoteName: payload.fromUserName ?? 'Someone',
     remoteAvatarUrl: payload.fromAvatarUrl ?? null,
     mediaMode: payload.mediaMode ?? 'voice',
+    initiatorUserId: payload.fromUserId,
     isCameraOff: payload.mediaMode !== 'video',
     error: null,
     localStream: null,

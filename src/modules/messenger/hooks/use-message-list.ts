@@ -7,9 +7,11 @@ import {
   type MessageListRow,
 } from '@/modules/messenger/utils/message-list-utils'
 
-const NEAR_TOP_THRESHOLD = 80
-const NEAR_BOTTOM_THRESHOLD = 120
-const SHOW_SCROLL_TO_BOTTOM_THRESHOLD = 150
+/** With column-reverse, scrollTop ≈ 0 is the newest end (bottom). */
+const NEAR_BOTTOM_THRESHOLD = 80
+const SHOW_SCROLL_TO_BOTTOM_THRESHOLD = 120
+/** Load older history near the opposite end. */
+const NEAR_TOP_THRESHOLD = 120
 
 type UseMessageListOptions = {
   threadId?: string
@@ -34,7 +36,6 @@ export function useMessageList({
 }: UseMessageListOptions) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const shouldStickToBottom = useRef(true)
-  const hasInitialScrolled = useRef(false)
   const prevScrollHeightRef = useRef<number | null>(null)
   const prevMessageCountRef = useRef(0)
   const activeThreadIdRef = useRef(threadId)
@@ -44,7 +45,6 @@ export function useMessageList({
   useEffect(() => {
     if (!threadId || activeThreadIdRef.current === threadId) return
     activeThreadIdRef.current = threadId
-    hasInitialScrolled.current = false
     prevScrollHeightRef.current = null
     prevMessageCountRef.current = 0
     shouldStickToBottom.current = true
@@ -52,36 +52,27 @@ export function useMessageList({
     setBelowScrollCount(0)
   }, [threadId])
 
-  const rows = useMemo<MessageListRow[]>(
-    () => buildMessageListRows(messages, viewerId, isGroupChatThread(thread)),
-    [messages, thread, viewerId],
-  )
+  // Newest-first so column-reverse pins the latest messages at the visual bottom.
+  const rows = useMemo<MessageListRow[]>(() => {
+    const built = buildMessageListRows(messages, viewerId, isGroupChatThread(thread))
+    return [...built].reverse()
+  }, [messages, thread, viewerId])
 
   const lastOutgoingId = useMemo(
     () => getLastOutgoingMessageId(messages, viewerId),
     [messages, viewerId],
   )
 
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+  /** Bottom = scrollTop 0 under column-reverse. */
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
     const node = scrollRef.current
     if (!node) return
-    node.scrollTo({ top: node.scrollHeight, behavior })
-    if (behavior === 'auto') {
-      node.scrollTop = node.scrollHeight
+    if (behavior === 'smooth') {
+      node.scrollTo({ top: 0, behavior: 'smooth' })
+      return
     }
+    node.scrollTop = 0
   }, [])
-
-  const scrollToBottomReliable = useCallback(
-    (behavior: ScrollBehavior = 'smooth') => {
-      scrollToBottom(behavior)
-      requestAnimationFrame(() => {
-        scrollToBottom('auto')
-        window.setTimeout(() => scrollToBottom('auto'), 50)
-        window.setTimeout(() => scrollToBottom('auto'), 150)
-      })
-    },
-    [scrollToBottom],
-  )
 
   const markAtBottom = useCallback(() => {
     shouldStickToBottom.current = true
@@ -90,22 +81,15 @@ export function useMessageList({
   }, [])
 
   const jumpToBottom = useCallback(() => {
-    scrollToBottomReliable('smooth')
+    scrollToBottom('smooth')
     markAtBottom()
-  }, [markAtBottom, scrollToBottomReliable])
+  }, [markAtBottom, scrollToBottom])
 
   useLayoutEffect(() => {
     const node = scrollRef.current
     if (!node || !messages.length) return
 
-    if (!hasInitialScrolled.current) {
-      scrollToBottomReliable('auto')
-      hasInitialScrolled.current = true
-      prevMessageCountRef.current = messages.length
-      markAtBottom()
-      return
-    }
-
+    // Preserve position when older pages prepend (DOM grows at the far end).
     if (prevScrollHeightRef.current != null) {
       const delta = node.scrollHeight - prevScrollHeightRef.current
       if (delta > 0) {
@@ -117,8 +101,8 @@ export function useMessageList({
     }
 
     if (shouldStickToBottom.current) {
-      if (autoScroll && messages.length > prevMessageCountRef.current) {
-        scrollToBottomReliable('smooth')
+      if (autoScroll) {
+        scrollToBottom('auto')
       }
       setBelowScrollCount(0)
       prevMessageCountRef.current = messages.length
@@ -130,15 +114,17 @@ export function useMessageList({
     }
 
     prevMessageCountRef.current = messages.length
-  }, [autoScroll, markAtBottom, messages.length, scrollToBottomReliable])
+  }, [autoScroll, messages.length, messages[messages.length - 1]?.id, scrollToBottom])
 
   useEffect(() => {
     const node = scrollRef.current
     if (!node) return
 
     const onScroll = () => {
-      const distanceFromBottom = node.scrollHeight - node.scrollTop - node.clientHeight
+      const distanceFromBottom = node.scrollTop
+      const distanceFromTop = node.scrollHeight - node.clientHeight - node.scrollTop
       const isNearBottom = distanceFromBottom < NEAR_BOTTOM_THRESHOLD
+
       shouldStickToBottom.current = isNearBottom
       setShowScrollToBottom(distanceFromBottom > SHOW_SCROLL_TO_BOTTOM_THRESHOLD)
 
@@ -147,7 +133,7 @@ export function useMessageList({
       }
 
       if (
-        node.scrollTop < NEAR_TOP_THRESHOLD &&
+        distanceFromTop < NEAR_TOP_THRESHOLD &&
         hasNextPage &&
         !isFetchingNextPage &&
         fetchNextPage

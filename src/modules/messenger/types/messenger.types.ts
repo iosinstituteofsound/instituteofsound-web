@@ -4,7 +4,23 @@ export type DmThreadStatus = 'pending' | 'accepted' | 'declined'
 
 export type ThreadKind = 'direct' | 'group' | 'community' | 'alliance'
 
-export type DmMessageType = 'text' | 'image' | 'video' | 'file' | 'system' | 'share_card'
+export type DmMessageType = 'text' | 'image' | 'video' | 'file' | 'system' | 'share_card' | 'call'
+
+export type DmCallLogStatus =
+  | 'completed'
+  | 'missed'
+  | 'declined'
+  | 'cancelled'
+  | 'busy'
+  | 'failed'
+
+export type DmCallData = {
+  callId: string
+  mediaMode: 'voice' | 'video'
+  initiatorId: string
+  status: DmCallLogStatus
+  durationSec?: number
+}
 
 export type MessengerFilter = 'all' | 'unread' | 'groups' | 'communities' | 'alliances' | 'requests'
 
@@ -56,6 +72,7 @@ export type DmMessage = {
   forwardFromId?: string
   linkPreview?: DmLinkPreview
   shareData?: DmShareData
+  callData?: DmCallData
   reactions: DmReaction[]
   clientMessageId?: string
   deliveredAt?: string

@@ -16,6 +16,8 @@ export type MessengerCallSnapshot = {
   remoteName: string | null
   remoteAvatarUrl: string | null
   mediaMode: CallMediaMode | null
+  /** User who started the call. */
+  initiatorUserId: string | null
   isMuted: boolean
   isCameraOff: boolean
   isSpeakerOn: boolean
@@ -40,6 +42,7 @@ const idleState: MessengerCallSnapshot = {
   remoteName: null,
   remoteAvatarUrl: null,
   mediaMode: null,
+  initiatorUserId: null,
   isMuted: false,
   isCameraOff: false,
   isSpeakerOn: false,

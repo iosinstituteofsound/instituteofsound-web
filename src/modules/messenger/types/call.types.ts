@@ -33,6 +33,8 @@ export type CallPeerPayload = {
   sdp?: RTCSessionDescriptionInit
   candidate?: RTCIceCandidateInit
   reason?: CallEndReason
+  durationSec?: number
+  initiatorId?: string
 }
 
 export type CallTarget = {

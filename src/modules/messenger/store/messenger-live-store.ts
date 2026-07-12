@@ -140,8 +140,7 @@ export const useMessengerLiveStore = create<MessengerLiveState>((set, get) => ({
       return
     }
 
-    if (confusedTimers.has(peerKey(threadId, userId))) return
-
+    // New keystrokes always win over confused/thinking — show typing/replying immediately.
     clearPeerTimers(threadId, userId)
     lastTypingStartedAt.set(peerKey(threadId, userId), Date.now())
 

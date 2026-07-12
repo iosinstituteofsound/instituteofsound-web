@@ -1,12 +1,20 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { realtimeSocketClient } from '@/shared/services/realtime/socket-client'
 
-const TYPING_EMIT_DEBOUNCE_MS = 400
+/** While continuously typing/replying, keepalives are debounced to this interval. */
+const TYPING_KEEPALIVE_DEBOUNCE_MS = 450
 
 /**
- * typing:start — when draft content grows (debounced).
- * mode = replying when composer has a reply target (mobile shows "replying…").
- * Mode changes while composing force an immediate re-emit (debounce bypass).
+ * If the user paused at least this long (thinking / idle / other status),
+ * the next keystroke emits typing/replying immediately — no debounce wait.
+ * Keep below TYPING_TO_THINKING_MS so resume feels instant after thinking.
+ */
+const TYPING_RESUME_IDLE_MS = 500
+
+/**
+ * typing:start / replying:
+ * - First keystroke, mode change, or resume after idle → emit immediately
+ * - Continuous typing → debounce keepalives
  */
 export function useTypingEmitter(threadId: string, mode: 'typing' | 'replying' = 'typing') {
   const isComposingRef = useRef(false)
@@ -72,20 +80,27 @@ export function useTypingEmitter(threadId: string, mode: 'typing' | 'replying' =
     if (!threadId) return
     isComposingRef.current = true
 
-    const modeChanged = lastEmittedModeRef.current !== modeRef.current
-    const elapsed = Date.now() - lastEmitAtRef.current
-    if (modeChanged || lastEmitAtRef.current === 0 || elapsed >= TYPING_EMIT_DEBOUNCE_MS) {
+    const nextMode = modeRef.current
+    const modeChanged = lastEmittedModeRef.current !== nextMode
+    const idleMs =
+      lastEmitAtRef.current === 0 ? Number.POSITIVE_INFINITY : Date.now() - lastEmitAtRef.current
+
+    // Resume from thinking/confused/idle, first start, or typing↔replying → instant.
+    if (modeChanged || idleMs >= TYPING_RESUME_IDLE_MS) {
       clearDebounce()
       emitStart()
       return
     }
 
-    clearDebounce()
+    // Active burst: throttle keepalives (leading). Don't reset to a full trailing wait
+    // or peer can flip to thinking while the user is still typing.
+    if (debounceTimerRef.current !== null) return
+
     debounceTimerRef.current = window.setTimeout(() => {
       debounceTimerRef.current = null
       if (!isComposingRef.current) return
       emitStart()
-    }, TYPING_EMIT_DEBOUNCE_MS - elapsed)
+    }, TYPING_KEEPALIVE_DEBOUNCE_MS - idleMs)
   }, [clearDebounce, emitStart, threadId])
 
   return { notifyTyping, stopTyping, cancelPendingTyping }

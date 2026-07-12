@@ -44,7 +44,7 @@ export const MessageActionsMenu = memo(function MessageActionsMenu({
     return () => window.removeEventListener('mousedown', onPointerDown)
   }, [open, showReactions])
 
-  if (message.type === 'system' || message.deletedAt) return null
+  if (message.type === 'system' || message.type === 'call' || message.deletedAt) return null
 
   const variantClass = compact
     ? 'messenger-message-actions--compact'
