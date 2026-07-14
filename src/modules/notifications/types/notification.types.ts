@@ -11,6 +11,7 @@ export type NotificationKind =
   | 'dm_message'
   | 'dm_request'
   | 'dm_request_accepted'
+  | 'support_reply'
 
 export type NotificationDto = {
   id: string
@@ -33,6 +34,7 @@ export type NotificationDto = {
     commentId?: string
     threadId?: string
     messageId?: string
+    ticketId?: string
   }
 }
 

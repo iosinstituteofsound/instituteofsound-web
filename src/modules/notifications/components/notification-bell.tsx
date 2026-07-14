@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { AtSign, Bell, MessageCircle, Music2, UserPlus } from 'lucide-react'
+import { AtSign, Bell, HelpCircle, MessageCircle, Music2, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useNotifications } from '@/modules/notifications/hooks/use-notifications'
 import { useNotificationLiveStore } from '@/modules/notifications/store/notification-live-store'
@@ -47,6 +47,8 @@ function notificationIcon(kind: NotificationKind) {
     case 'dm_request':
     case 'dm_request_accepted':
       return MessageCircle
+    case 'support_reply':
+      return HelpCircle
     default:
       return Music2
   }

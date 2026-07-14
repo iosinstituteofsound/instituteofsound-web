@@ -11,6 +11,7 @@ import {
 } from '@/modules/feed/hooks/use-feed-engagement'
 import { formatCommentTimestamp } from '@/modules/feed/lib/feed-time'
 import type { FeedCommentDto } from '@/modules/feed/types/feed.types'
+import { ReportDialog } from '@/modules/support/components/report-dialog'
 import { cn } from '@/shared/lib/cn'
 
 const PREVIEW_COMMENT_LIMIT = 2
@@ -61,6 +62,7 @@ export function FeedCommentsSection({
   const comments = Array.isArray(commentsData) ? commentsData : []
   const deleteComment = useDeleteFeedComment()
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({})
+  const [reportCommentId, setReportCommentId] = useState<string | null>(null)
 
   const thread = useMemo(() => buildCommentThread(comments), [comments])
   const hiddenCount = Math.max(0, thread.length - PREVIEW_COMMENT_LIMIT)
@@ -113,6 +115,7 @@ export function FeedCommentsSection({
               }
               onReply={handleReply}
               onDelete={(comment) => deleteComment.mutate({ feedItemId, commentId: comment.id })}
+              onReport={(comment) => setReportCommentId(comment.id)}
             />
           ))}
         </ul>
@@ -122,6 +125,18 @@ export function FeedCommentsSection({
 
       {showComposer && variant === 'inline' ? (
         <FeedCommentComposer feedItemId={feedItemId} inputRef={inputRef} variant="inline" />
+      ) : null}
+
+      {reportCommentId ? (
+        <ReportDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setReportCommentId(null)
+          }}
+          target={{ type: 'comment', id: reportCommentId }}
+          subject="Report comment"
+          diagnosticsRoute={`feed/${feedItemId}`}
+        />
       ) : null}
     </div>
   )
@@ -138,6 +153,7 @@ function CommentItem({
   onToggleReplies,
   onReply,
   onDelete,
+  onReport,
 }: {
   node: CommentNode
   depth: number
@@ -149,6 +165,7 @@ function CommentItem({
   onToggleReplies: (commentId: string) => void
   onReply: (comment: FeedCommentDto) => void
   onDelete: (comment: FeedCommentDto) => void
+  onReport: (comment: FeedCommentDto) => void
 }) {
   const { comment, replies } = node
   const isOwner = userId === comment.author.id
@@ -225,6 +242,10 @@ function CommentItem({
               <button type="button" className="hover:text-destructive" onClick={() => onDelete(comment)}>
                 Delete
               </button>
+            ) : userId ? (
+              <button type="button" className="hover:underline" onClick={() => onReport(comment)}>
+                Report
+              </button>
             ) : null}
           </div>
         </div>
@@ -255,6 +276,7 @@ function CommentItem({
                 onToggleReplies={onToggleReplies}
                 onReply={onReply}
                 onDelete={onDelete}
+                onReport={onReport}
               />
             ))}
           </ul>

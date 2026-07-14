@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { MessageCircleWarning, SlidersHorizontal, UserX, X } from 'lucide-react'
 import type { FeedAuthorDto } from '@/modules/feed/types/feed.types'
+import { ReportDialog } from '@/modules/support/components/report-dialog'
 import { Button } from '@/shared/components/ui/button'
 import { toast } from '@/shared/components/ui/sonner'
 
 type FeedPostHiddenStateProps = {
   author: FeedAuthorDto
+  postId: string
   onUndo: () => void
 }
 
@@ -31,8 +34,9 @@ function HiddenAction({
   )
 }
 
-export function FeedPostHiddenState({ author, onUndo }: FeedPostHiddenStateProps) {
+export function FeedPostHiddenState({ author, postId, onUndo }: FeedPostHiddenStateProps) {
   const authorName = author.name
+  const [reportOpen, setReportOpen] = useState(false)
 
   return (
     <div className="feed-post-hidden">
@@ -72,7 +76,7 @@ export function FeedPostHiddenState({ author, onUndo }: FeedPostHiddenStateProps
           icon={MessageCircleWarning}
           title="Report post"
           subtitle={`We won't let ${authorName} know who reported this.`}
-          onClick={() => toast.success('Thanks for reporting this post')}
+          onClick={() => setReportOpen(true)}
         />
         <HiddenAction
           icon={SlidersHorizontal}
@@ -80,6 +84,13 @@ export function FeedPostHiddenState({ author, onUndo }: FeedPostHiddenStateProps
           onClick={() => toast.message('Content preferences coming soon')}
         />
       </div>
+
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        target={{ type: 'post', id: postId }}
+        subject="Report post"
+      />
     </div>
   )
 }

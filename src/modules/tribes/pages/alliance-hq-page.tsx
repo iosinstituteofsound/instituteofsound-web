@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowUpRight, MessageCircle, Shield, Swords } from 'lucide-react'
+import { ArrowUpRight, Flag, MessageCircle, Shield, Swords } from 'lucide-react'
 import {
   getAllianceChallenges,
   getAllianceLegacy,
@@ -9,6 +9,7 @@ import {
 } from '@/modules/tribes/api/tribes.api'
 import { useAlliance, useAllianceMembershipGate } from '@/modules/tribes/hooks/use-alliances'
 import { openMessengerPopup } from '@/modules/messenger/lib/messenger-popup-open'
+import { ReportDialog } from '@/modules/support/components/report-dialog'
 import { useQuery } from '@tanstack/react-query'
 import '@/modules/tribes/styles/alliance.css'
 
@@ -19,6 +20,7 @@ export function AllianceHqPage() {
   const gate = useAllianceMembershipGate(slug)
   const [busy, setBusy] = useState(false)
   const [tab, setTab] = useState<'overview' | 'roster' | 'wars' | 'legacy'>('overview')
+  const [reportOpen, setReportOpen] = useState(false)
 
   const { data: legacy = [] } = useQuery({
     queryKey: ['alliance-legacy', slug],
@@ -128,7 +130,22 @@ export function AllianceHqPage() {
         <Link to={`/genres/${genreSlug}`} className="alliance-btn alliance-btn--ghost">
           Back to genre <ArrowUpRight size={14} />
         </Link>
+        <button
+          type="button"
+          className="alliance-btn alliance-btn--ghost"
+          onClick={() => setReportOpen(true)}
+        >
+          <Flag size={16} /> Report alliance
+        </button>
       </div>
+
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        target={{ type: 'tribe', id: alliance.id }}
+        subject="Report alliance"
+        diagnosticsRoute={`alliances/${alliance.slug}`}
+      />
 
       {tab === 'overview' ? (
         <section className="alliance-section">

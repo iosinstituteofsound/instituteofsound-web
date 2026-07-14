@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Camera,
+  Flag,
   ImageIcon,
   Loader2,
   Move,
@@ -17,6 +18,7 @@ import { ProfileAvatarMenu } from '@/modules/profile/components/profile-avatar-m
 import { SelectPhotoDialog } from '@/modules/profile/components/select-photo-dialog'
 import { FollowStats, ProfileFollowButton } from '@/shared/components/social'
 import { ProfileMessageButton } from '@/modules/messenger/components/profile-message-button'
+import { ReportDialog } from '@/modules/support/components/report-dialog'
 import { useUpdateProfile } from '@/modules/profile/hooks/use-profile'
 import {
   addStoredUpload,
@@ -64,6 +66,7 @@ export function ProfileCoverSection({
   const [repositionCrop, setRepositionCrop] = useState<CoverCrop | null>(null)
   const [saving, setSaving] = useState(false)
   const [extraRecent, setExtraRecent] = useState<string[]>([])
+  const [reportOpen, setReportOpen] = useState(false)
 
   const recentPhotos = useMemo(
     () => buildRecentPhotos(user, extraRecent),
@@ -289,11 +292,29 @@ export function ProfileCoverSection({
                   initialFollowing={isFollowing}
                 />
                 <ProfileMessageButton userId={user.id} />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 shrink-0 rounded-lg"
+                  aria-label="Report user"
+                  onClick={() => setReportOpen(true)}
+                >
+                  <Flag className="h-4 w-4" />
+                </Button>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        target={{ type: 'user', id: user.id }}
+        subject="Report user"
+        diagnosticsRoute={`profile/${user.id}`}
+      />
 
       <SelectPhotoDialog
         open={selectOpen}

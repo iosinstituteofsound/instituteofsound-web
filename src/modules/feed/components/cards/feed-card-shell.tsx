@@ -163,7 +163,11 @@ export function FeedCardShell({
           aria-hidden={!isHidden}
         >
           <div className="feed-social-card__layer-inner">
-            <FeedPostHiddenState author={item.author} onUndo={() => setIsHidden(false)} />
+            <FeedPostHiddenState
+              author={item.author}
+              postId={item.id}
+              onUndo={() => setIsHidden(false)}
+            />
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import {
   Bell,
@@ -14,6 +15,7 @@ import { useAuthStore } from '@/app/stores/auth-store'
 import { useDeleteFeedItem } from '@/modules/feed/hooks/use-feed'
 import { useFollowStatus, useToggleFollow } from '@/shared/hooks/use-follow'
 import type { FeedAuthorDto } from '@/modules/feed/types/feed.types'
+import { ReportDialog } from '@/modules/support/components/report-dialog'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
@@ -97,6 +99,7 @@ export function FeedPostOptionsMenu({
   const { data: followStatus } = useFollowStatus(!isOwner ? author.id : undefined)
   const toggleFollow = useToggleFollow(author.id)
   const isFollowing = followStatus?.following ?? false
+  const [reportOpen, setReportOpen] = useState(false)
 
   const handleDelete = () => {
     if (!window.confirm('Delete this post? This cannot be undone.')) return
@@ -113,6 +116,7 @@ export function FeedPostOptionsMenu({
   }
 
   return (
+    <>
     <DropdownMenu modal={!inDialog}>
       <DropdownMenuTrigger asChild>
         <Button
@@ -191,9 +195,16 @@ export function FeedPostOptionsMenu({
           icon={MessageCircleWarning}
           title="Report post"
           subtitle={`We won't let ${authorName} know who reported this.`}
-          onClick={() => toast.success('Thanks for reporting this post')}
+          onClick={() => setReportOpen(true)}
         />
       </DropdownMenuContent>
     </DropdownMenu>
+    <ReportDialog
+      open={reportOpen}
+      onOpenChange={setReportOpen}
+      target={{ type: 'post', id: postId }}
+      subject="Report post"
+    />
+    </>
   )
 }

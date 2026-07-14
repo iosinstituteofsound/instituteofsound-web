@@ -27,6 +27,11 @@ const SubmissionsDeskPage = lazy(() =>
     default: m.SubmissionsDeskPage,
   })),
 )
+const SupportTicketsPage = lazy(() =>
+  import('@/modules/support-admin/pages/support-tickets-page').then((m) => ({
+    default: m.SupportTicketsPage,
+  })),
+)
 const UsersListPage = lazy(() =>
   import('@/modules/users/pages/users-list-page').then((m) => ({ default: m.UsersListPage })),
 )
@@ -452,6 +457,18 @@ export const router = createBrowserRouter([
             <Lazy>
               <SubmissionsDeskPage title="All Submissions" description="Review submissions across the network." />
             </Lazy>
+          </ResourceGuard>
+        ),
+      },
+      {
+        path: 'support',
+        element: (
+          <ResourceGuard name="SupportTicketsPage">
+            <PermissionGuard resource="support" action="read">
+              <Lazy>
+                <SupportTicketsPage />
+              </Lazy>
+            </PermissionGuard>
           </ResourceGuard>
         ),
       },

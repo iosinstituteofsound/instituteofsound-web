@@ -1,7 +1,8 @@
 import { memo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronDown, Search, UserRound, VolumeX } from 'lucide-react'
+import { ChevronDown, Flag, Search, UserRound, VolumeX } from 'lucide-react'
 import { UserAvatar } from '@/shared/components/user'
+import { ReportDialog } from '@/modules/support/components/report-dialog'
 import { getThreadAvatarUrl, getThreadDisplayName } from '@/modules/messenger/lib/messenger-utils'
 import type { DmThreadSummary } from '@/modules/messenger/types/messenger.types'
 import { cn } from '@/shared/lib/cn'
@@ -24,6 +25,8 @@ function InfoSection({ title, children }: { title: string; children: React.React
 }
 
 export const ThreadInfoPanel = memo(function ThreadInfoPanel({ thread }: ThreadInfoPanelProps) {
+  const [reportOpen, setReportOpen] = useState(false)
+
   if (!thread) {
     return <aside className="messenger-panel messenger-info messenger-empty">No chat selected</aside>
   }
@@ -72,8 +75,32 @@ export const ThreadInfoPanel = memo(function ThreadInfoPanel({ thread }: ThreadI
         <p>Shared media from this conversation will appear here.</p>
       </InfoSection>
       <InfoSection title="Privacy & support">
-        <p>Report, block, and privacy controls will be connected here.</p>
+        {thread.otherUserId ? (
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 text-sm font-medium text-destructive hover:underline"
+            onClick={() => setReportOpen(true)}
+          >
+            <Flag className="h-4 w-4" />
+            Report user
+          </button>
+        ) : (
+          <p>No peer available to report for this conversation.</p>
+        )}
+        <p className="mt-2 text-sm text-[var(--messenger-muted)]">
+          Block and mute controls will be connected later.
+        </p>
       </InfoSection>
+
+      {thread.otherUserId ? (
+        <ReportDialog
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          target={{ type: 'user', id: thread.otherUserId }}
+          subject="Report user"
+          diagnosticsRoute={`messenger/${thread.threadId}`}
+        />
+      ) : null}
     </aside>
   )
 })
