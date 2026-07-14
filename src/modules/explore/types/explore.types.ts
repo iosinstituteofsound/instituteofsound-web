@@ -306,6 +306,8 @@ export interface ListenerStatDto {
   name: string
   avatarUrl?: string
   dbScore: number
+  /** Lifetime earned — prestige / Rank XP. Prefer for displays. */
+  lifetimeEarned?: number
   totalPlays: number
   rank?: number
 }

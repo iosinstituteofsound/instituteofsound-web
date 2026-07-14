@@ -41,7 +41,7 @@ export function IdentityPage() {
   const avatarUrl = user.avatarThumbnailUrl || user.avatarUrl || dexProfile.avatarUrl
   const displayName = user.name || dexProfile.name
   const isVerified = user.isVerified || dexProfile.isVerified
-  const networkScore = dexProfile.dbScore ?? 0
+  const networkScore = dexProfile.lifetimeEarned ?? dexProfile.dbScore ?? 0
   const xpPct = xpPercent(dexProfile.xp.current, dexProfile.xp.target)
   const ringPct = ringPercent(dexProfile.xp.current, dexProfile.xp.target)
   const circumference = 2 * Math.PI * 46

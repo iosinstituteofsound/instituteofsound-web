@@ -135,6 +135,10 @@ const LISTENER_FALLBACKS: ExploreListenerRow[] = [
   },
 ]
 
+function prestigeDb(listener: Pick<ListenerStatDto, 'dbScore' | 'lifetimeEarned'>): number {
+  return listener.lifetimeEarned ?? listener.dbScore
+}
+
 function hashDelta(userId: string, dbScore: number): number {
   let h = 0
   for (let i = 0; i < userId.length; i++) h = (h + userId.charCodeAt(i) * 17) % 1000
@@ -155,9 +159,12 @@ function formatCount(n: number): string {
 }
 
 function enrichListener(listener: ListenerStatDto, index: number): ExploreListenerRow {
+  const prestige = prestigeDb(listener)
   return {
     ...listener,
-    weeklyDelta: hashDelta(listener.userId, listener.dbScore),
+    dbScore: prestige,
+    lifetimeEarned: prestige,
+    weeklyDelta: hashDelta(listener.userId, prestige),
     followers: hashFollowers(listener.userId),
     totalListens: formatCount(listener.totalPlays),
     weeksOnTop: index === 0 ? 5 : undefined,
@@ -171,7 +178,10 @@ export function listExploreListeners(
   limit = 10,
 ): ExploreListenerRow[] {
   const source = cards.length > 0 ? cards : topListener ? [topListener] : []
-  const sorted = [...source].sort((a, b) => (a.rank || 99) - (b.rank || 99) || b.dbScore - a.dbScore)
+  const sorted = [...source].sort(
+    (a, b) =>
+      (a.rank || 99) - (b.rank || 99) || prestigeDb(b) - prestigeDb(a),
+  )
   const seen = new Set(sorted.map((row) => row.userId))
   const merged = sorted.map((row, i) => enrichListener(row, i))
 
@@ -190,7 +200,7 @@ export function listExploreListeners(
 }
 
 export function listenerNetworkStats(rows: ExploreListenerRow[], totalPlays: number) {
-  const total = rows.reduce((sum, row) => sum + row.dbScore, 0)
+  const total = rows.reduce((sum, row) => sum + prestigeDb(row), 0)
   const display =
     total >= 100000 ? total.toLocaleString() : total > 0 ? total.toLocaleString() : '142,680'
   return {

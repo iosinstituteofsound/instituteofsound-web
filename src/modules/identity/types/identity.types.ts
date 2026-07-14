@@ -12,6 +12,7 @@ export interface DexProfileDto {
     level: number
     xp: { current: number; target: number }
     dbScore: number
+    lifetimeEarned?: number
     avatarUrl?: string
     username?: string
     bio?: string
