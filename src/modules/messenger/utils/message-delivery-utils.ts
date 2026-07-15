@@ -2,10 +2,22 @@ import type { DmMessage, DmThreadSummary } from '@/modules/messenger/types/messe
 
 export type MessageDeliveryStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed'
 
-export function getMessageDeliveryStatus(message: DmMessage): MessageDeliveryStatus {
+export function getMessageDeliveryStatus(
+  message: DmMessage,
+  options?: { otherLastReadAt?: string | null },
+): MessageDeliveryStatus {
   if (message.failed) return 'failed'
+  // Still queued / request in flight — circular pending, not a tick.
   if (message.optimistic) return 'sending'
   if (message.readAt) return 'read'
+
+  if (
+    options?.otherLastReadAt &&
+    new Date(options.otherLastReadAt).getTime() >= new Date(message.createdAt).getTime()
+  ) {
+    return 'read'
+  }
+
   if (message.deliveredAt) return 'delivered'
   return 'sent'
 }

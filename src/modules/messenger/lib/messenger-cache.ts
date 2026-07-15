@@ -81,7 +81,7 @@ export function patchThreadPresenceInCache(
 
 export function patchThreadReadReceiptInCache(
   queryClient: QueryClient,
-  payload: { threadId: string; userId: string; readAt: string },
+  payload: { threadId: string; userId: string; readAt: string; lastReadMessageId?: string },
   viewerId?: string,
 ) {
   if (!viewerId || payload.userId === viewerId) return
@@ -95,6 +95,30 @@ export function patchThreadReadReceiptInCache(
       ),
     )
   }
+
+  queryClient.setQueryData<MessagesInfiniteData>(messengerMessagesQueryKey(payload.threadId), (current) => {
+    if (!current || !('pages' in current)) return current
+
+    const readAtMs = new Date(payload.readAt).getTime()
+    let changed = false
+
+    const pages = current.pages.map((page) => ({
+      ...page,
+      messages: page.messages.map((entry) => {
+        if (entry.senderId !== viewerId) return entry
+        if (entry.readAt || entry.optimistic || entry.failed) return entry
+        if (new Date(entry.createdAt).getTime() > readAtMs) return entry
+        changed = true
+        return {
+          ...entry,
+          readAt: payload.readAt,
+          deliveredAt: entry.deliveredAt ?? payload.readAt,
+        }
+      }),
+    }))
+
+    return changed ? { ...current, pages } : current
+  })
 }
 
 function mergeMessageIntoPage(messages: DmMessage[], message: DmMessage): DmMessage[] | null {
