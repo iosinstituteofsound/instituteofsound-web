@@ -7,6 +7,7 @@ import type {
   TicketKind,
   TicketStatus,
   UpdateSupportTicketInput,
+  WarnAuthorInput,
 } from '@/modules/support-admin/types/support-admin.types'
 
 const BASE = `${API_V1}/admin/support/tickets`
@@ -33,6 +34,21 @@ export async function getAdminSupportTicket(id: string) {
 export async function updateAdminSupportTicket(id: string, input: UpdateSupportTicketInput) {
   const { data } = await apiClient.patch<ApiSuccessResponse<{ ticket: SupportTicketDto }>>(
     `${BASE}/${id}`,
+    input,
+  )
+  return data.data.ticket
+}
+
+export async function deleteSupportTicketTarget(id: string) {
+  const { data } = await apiClient.post<ApiSuccessResponse<{ ticket: SupportTicketDto }>>(
+    `${BASE}/${id}/actions/delete-target`,
+  )
+  return data.data.ticket
+}
+
+export async function warnSupportTicketAuthor(id: string, input: WarnAuthorInput) {
+  const { data } = await apiClient.post<ApiSuccessResponse<{ ticket: SupportTicketDto }>>(
+    `${BASE}/${id}/actions/warn-author`,
     input,
   )
   return data.data.ticket

@@ -49,6 +49,8 @@ function notificationIcon(kind: NotificationKind) {
       return MessageCircle
     case 'support_reply':
       return HelpCircle
+    case 'moderation_warn':
+      return HelpCircle
     default:
       return Music2
   }

@@ -12,6 +12,7 @@ export type NotificationKind =
   | 'dm_request'
   | 'dm_request_accepted'
   | 'support_reply'
+  | 'moderation_warn'
 
 export type NotificationDto = {
   id: string

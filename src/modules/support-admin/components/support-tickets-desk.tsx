@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import type { SupportTicketDto, TicketStatus } from '@/modules/support-admin/types/support-admin.types'
+import type {
+  SupportTicketDto,
+  TicketStatus,
+  TicketTargetPreview,
+} from '@/modules/support-admin/types/support-admin.types'
 import { usePermission } from '@/shared/hooks/use-permission'
 import { cn } from '@/shared/lib/cn'
 import { Button } from '@/shared/components/ui/button'
@@ -29,6 +33,78 @@ function statusLabel(status: string) {
   }
 }
 
+function TargetPreviewBlock({ preview }: { preview: TicketTargetPreview }) {
+  if (preview.kind === 'comment') {
+    if (preview.missing) {
+      return <p className="text-sm text-muted-foreground">Comment no longer available.</p>
+    }
+    return (
+      <div className="space-y-2">
+        <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
+          {preview.body?.trim() || '(empty comment)'}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Author · {preview.authorName || 'Unknown'}
+          {preview.authorEmail ? ` · ${preview.authorEmail}` : ''}
+          {preview.createdAt ? ` · ${new Date(preview.createdAt).toLocaleString()}` : ''}
+        </p>
+      </div>
+    )
+  }
+
+  if (preview.kind === 'post') {
+    if (preview.missing) {
+      return <p className="text-sm text-muted-foreground">Post no longer available.</p>
+    }
+    return (
+      <div className="space-y-1">
+        {preview.title ? (
+          <p className="text-sm font-medium text-foreground">{preview.title}</p>
+        ) : null}
+        {preview.body ? (
+          <p className="whitespace-pre-wrap text-sm text-foreground">{preview.body}</p>
+        ) : null}
+        <p className="text-xs text-muted-foreground">
+          Author · {preview.authorName || 'Unknown'}
+        </p>
+      </div>
+    )
+  }
+
+  if (preview.kind === 'user') {
+    if (preview.missing) {
+      return <p className="text-sm text-muted-foreground">User no longer available.</p>
+    }
+    return (
+      <p className="text-sm text-foreground">
+        {preview.name || 'Unknown'}
+        {preview.email ? ` · ${preview.email}` : ''}
+      </p>
+    )
+  }
+
+  if (preview.missing) {
+    return <p className="text-sm text-muted-foreground">Alliance no longer available.</p>
+  }
+  return (
+    <p className="text-sm text-foreground">
+      {preview.name || 'Unknown'}
+      {preview.slug ? ` · ${preview.slug}` : ''}
+    </p>
+  )
+}
+
+function canWarnAuthor(ticket: SupportTicketDto) {
+  const preview = ticket.targetPreview
+  if (!preview || preview.missing) {
+    return ticket.target?.type === 'user'
+  }
+  if (preview.kind === 'comment') return Boolean(preview.authorId)
+  if (preview.kind === 'post') return Boolean(preview.authorId)
+  if (preview.kind === 'user') return true
+  return false
+}
+
 export function SupportTicketsDesk({
   items,
   selectedId,
@@ -38,7 +114,11 @@ export function SupportTicketsDesk({
   onKindFilterChange,
   onStatusFilterChange,
   onSave,
+  onDeleteTarget,
+  onWarnAuthor,
   isSaving,
+  isDeletingTarget,
+  isWarningAuthor,
 }: {
   items: SupportTicketDto[]
   selectedId: string | null
@@ -48,7 +128,11 @@ export function SupportTicketsDesk({
   onKindFilterChange: (value: string) => void
   onStatusFilterChange: (value: string) => void
   onSave: (input: { status: TicketStatus; adminNote?: string }) => void
+  onDeleteTarget: () => void
+  onWarnAuthor: (message: string) => void
   isSaving: boolean
+  isDeletingTarget: boolean
+  isWarningAuthor: boolean
 }) {
   const { can } = usePermission()
   const canManage = can('support', 'manage')
@@ -58,12 +142,20 @@ export function SupportTicketsDesk({
   )
   const [status, setStatus] = useState<TicketStatus>('open')
   const [adminNote, setAdminNote] = useState('')
+  const [warnMessage, setWarnMessage] = useState('')
 
   useEffect(() => {
     if (!selected) return
     setStatus(selected.status)
     setAdminNote(selected.adminNote ?? '')
+    setWarnMessage('')
   }, [selected])
+
+  const showDeleteComment =
+    canManage &&
+    selected?.target?.type === 'comment' &&
+    selected.targetPreview?.kind === 'comment' &&
+    !selected.targetPreview.missing
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
@@ -148,33 +240,90 @@ export function SupportTicketsDesk({
               </p>
               <h2 className="mt-1 text-lg font-semibold text-foreground">{selected.subject}</h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                {selected.userName || 'Unknown'} · {selected.userEmail || selected.userId}
+                Reporter · {selected.userName || 'Unknown'} · {selected.userEmail || selected.userId}
               </p>
             </div>
             <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">{selected.body}</p>
+
             {selected.target ? (
-              <div className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-                <p className="font-semibold uppercase tracking-wide text-muted-foreground">Target</p>
-                <p className="mt-1 font-mono text-sm text-foreground">
-                  {selected.target.type} · {selected.target.id}
-                </p>
-                {selected.diagnostics.route ? (
-                  <p className="mt-1 text-xs text-muted-foreground">Route · {selected.diagnostics.route}</p>
-                ) : null}
-                <button
-                  type="button"
-                  className="mt-2 text-xs font-medium text-primary hover:underline"
-                  onClick={() => {
-                    void navigator.clipboard.writeText(
-                      `${selected.target!.type}:${selected.target!.id}`,
-                    )
-                    toast.success('Target copied')
-                  }}
-                >
-                  Copy target
-                </button>
+              <div className="space-y-3 rounded-lg border border-border bg-muted/30 px-3 py-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Reported content
+                  </p>
+                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                    {selected.target.type} · {selected.target.id}
+                  </p>
+                  {selected.diagnostics.route ? (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Route · {selected.diagnostics.route}
+                    </p>
+                  ) : null}
+                </div>
+                {selected.targetPreview ? (
+                  <TargetPreviewBlock preview={selected.targetPreview} />
+                ) : (
+                  <p className="text-sm text-muted-foreground">No preview available.</p>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-primary hover:underline"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(
+                        `${selected.target!.type}:${selected.target!.id}`,
+                      )
+                      toast.success('Target copied')
+                    }}
+                  >
+                    Copy target
+                  </button>
+                  {showDeleteComment ? (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      disabled={isDeletingTarget}
+                      onClick={() => {
+                        if (
+                          !window.confirm(
+                            'Delete this comment permanently? Replies under it will also be removed.',
+                          )
+                        ) {
+                          return
+                        }
+                        onDeleteTarget()
+                      }}
+                    >
+                      {isDeletingTarget ? 'Deleting…' : 'Delete comment'}
+                    </Button>
+                  ) : null}
+                </div>
               </div>
             ) : null}
+
+            {selected.target && canManage && canWarnAuthor(selected) ? (
+              <div className="space-y-2 border-t border-border pt-4">
+                <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Warn reported account
+                </label>
+                <Textarea
+                  value={warnMessage}
+                  onChange={(event) => setWarnMessage(event.target.value)}
+                  placeholder="Message sent to the reported account"
+                  rows={3}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={isWarningAuthor || warnMessage.trim().length < 3}
+                  onClick={() => onWarnAuthor(warnMessage.trim())}
+                >
+                  {isWarningAuthor ? 'Sending…' : 'Send warn'}
+                </Button>
+              </div>
+            ) : null}
+
             <p className="text-xs text-muted-foreground">
               Device · App {selected.diagnostics.appVersion} · {selected.diagnostics.platform} · OS{' '}
               {selected.diagnostics.osVersion}
@@ -196,13 +345,13 @@ export function SupportTicketsDesk({
                 <option value="closed">Closed</option>
               </select>
               <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Admin note
+                Reply to reporter
               </label>
               <Textarea
                 value={adminNote}
                 disabled={!canManage}
                 onChange={(event) => setAdminNote(event.target.value)}
-                placeholder="Internal note shown to the user when set"
+                placeholder="Shown to the person who filed this report"
                 rows={4}
               />
               {canManage ? (
