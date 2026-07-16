@@ -113,3 +113,50 @@ export async function setUserVerified(userId: string, isVerified: boolean) {
   )
   return data.data.user
 }
+
+export type AdminWalletLedgerItem = {
+  id: string
+  delta: number
+  xpDelta?: number
+  balanceAfter: number
+  lifetimeAfter: number
+  reason: string
+  reasonLabel: string
+  note?: string
+  createdAt: string
+}
+
+export type AdminWalletSnapshot = {
+  userId: string
+  balance: number
+  lifetimeEarned: number
+  rank: number | null
+  recentLedger: AdminWalletLedgerItem[]
+}
+
+export type AdminWalletGrantResult = {
+  userId: string
+  granted: number
+  balance: number
+  lifetimeEarned: number
+}
+
+export async function getAdminUserWallet(userId: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<AdminWalletSnapshot>>(
+    `${API_V1}/admin/nation/wallet/${userId}`,
+  )
+  return data.data
+}
+
+export async function grantAdminUserWallet(input: {
+  userId: string
+  amount: number
+  note?: string
+  clientRequestId?: string
+}) {
+  const { data } = await apiClient.post<ApiSuccessResponse<AdminWalletGrantResult>>(
+    `${API_V1}/admin/nation/wallet/grant`,
+    input,
+  )
+  return data.data
+}

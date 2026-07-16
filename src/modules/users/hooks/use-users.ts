@@ -60,3 +60,27 @@ export function useSetUserVerified(userId: string) {
     },
   })
 }
+
+export function useAdminUserWallet(userId: string, enabled = true) {
+  return useQuery({
+    queryKey: ['users', userId, 'wallet'],
+    queryFn: () => userApi.getAdminUserWallet(userId),
+    enabled: Boolean(userId) && enabled,
+  })
+}
+
+export function useGrantAdminUserWallet(userId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { amount: number; note?: string }) =>
+      userApi.grantAdminUserWallet({
+        userId,
+        amount: input.amount,
+        note: input.note,
+        clientRequestId: `admin_grant_${userId}_${Date.now()}`,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users', userId, 'wallet'] })
+    },
+  })
+}

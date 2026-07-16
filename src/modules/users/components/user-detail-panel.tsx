@@ -1,17 +1,26 @@
 import { useState } from 'react'
 import { ExternalLink, Mail, UserRound } from 'lucide-react'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
-import { useAssignUserRole, useRevokeUserRole, useSetUserVerified, useUser } from '@/modules/users/hooks/use-users'
+import {
+  useAdminUserWallet,
+  useAssignUserRole,
+  useGrantAdminUserWallet,
+  useRevokeUserRole,
+  useSetUserVerified,
+  useUser,
+} from '@/modules/users/hooks/use-users'
 import { useRoles } from '@/modules/roles/hooks/use-roles'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
+import { Input } from '@/shared/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { Separator } from '@/shared/components/ui/separator'
 import { PageLoader } from '@/shared/components/feedback/loader'
 import { ErrorState } from '@/shared/components/feedback/states'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
+import { usePermission } from '@/shared/hooks/use-permission'
 import { toast } from '@/shared/components/ui/sonner'
 
 interface UserDetailPanelProps {
@@ -30,8 +39,13 @@ function DetailField({ label, value }: { label: string; value?: string | null })
 
 export function UserDetailPanel({ userId }: UserDetailPanelProps) {
   const [selectedRole, setSelectedRole] = useState('')
+  const [grantAmount, setGrantAmount] = useState('')
+  const [grantNote, setGrantNote] = useState('')
+  const { isSuperAdmin } = usePermission()
   const { data: user, isLoading, isError, refetch } = useUser(userId)
   const { data: roles, isLoading: rolesLoading } = useRoles()
+  const wallet = useAdminUserWallet(userId, isSuperAdmin)
+  const grantWallet = useGrantAdminUserWallet(userId)
   const assignRole = useAssignUserRole(userId)
   const revokeRole = useRevokeUserRole(userId)
   const setVerified = useSetUserVerified(userId)
@@ -65,6 +79,33 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
           ? String((err as { message: string }).message)
           : 'Failed'
       toast.error(message)
+    }
+  }
+
+  const handleGrantWallet = async () => {
+    const amount = Number(grantAmount)
+    if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount)) {
+      toast.error('Enter a positive whole-number dB amount')
+      return
+    }
+    if (amount > 1_000_000_000) {
+      toast.error('Max grant is 1,000,000,000 dB')
+      return
+    }
+    try {
+      const result = await grantWallet.mutateAsync({
+        amount,
+        note: grantNote.trim() || undefined,
+      })
+      toast.success(
+        `Granted ${result.granted.toLocaleString()} dB · balance ${result.balance.toLocaleString()}`,
+      )
+      setGrantAmount('')
+      setGrantNote('')
+    } catch (err) {
+      const apiErr = err as { message?: string; fieldErrors?: Array<{ field?: string; message: string }> }
+      const fieldMsg = apiErr.fieldErrors?.[0]?.message
+      toast.error(fieldMsg || apiErr.message || 'Failed')
     }
   }
 
@@ -139,6 +180,69 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
       ) : null}
 
       <Separator />
+
+      {isSuperAdmin ? (
+        <>
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold">dB Wallet</h3>
+              <p className="text-xs text-muted-foreground">
+                Grant spendable dB only. Network XP / rank is not affected.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Balance</p>
+                <p className="font-semibold tabular-nums">
+                  {wallet.data ? wallet.data.balance.toLocaleString() : '—'} dB
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Network XP</p>
+                <p className="font-semibold tabular-nums">
+                  {wallet.data ? wallet.data.lifetimeEarned.toLocaleString() : '—'}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Rank</p>
+                <p className="font-semibold tabular-nums">{wallet.data?.rank ?? '—'}</p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <div className="w-full sm:w-40">
+                <label className="text-xs text-muted-foreground" htmlFor="grant-amount">
+                  Amount (dB)
+                </label>
+                <Input
+                  id="grant-amount"
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={grantAmount}
+                  onChange={(e) => setGrantAmount(e.target.value)}
+                  placeholder="500"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <label className="text-xs text-muted-foreground" htmlFor="grant-note">
+                  Note (optional)
+                </label>
+                <Input
+                  id="grant-note"
+                  value={grantNote}
+                  onChange={(e) => setGrantNote(e.target.value)}
+                  placeholder="Support credit"
+                  maxLength={500}
+                />
+              </div>
+              <Button onClick={handleGrantWallet} disabled={grantWallet.isPending || !grantAmount}>
+                Grant dB
+              </Button>
+            </div>
+          </div>
+          <Separator />
+        </>
+      ) : null}
 
       <PermissionGate resource="users" action="verify">
         <div className="space-y-3">
