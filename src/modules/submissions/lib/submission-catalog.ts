@@ -25,8 +25,8 @@ export const SUBMISSION_DESTINATIONS: SubmissionDestination[] = [
   },
   {
     id: 'playlist-curators',
-    title: 'Playlist Curators',
-    description: 'Reach independent curators actively scouting new metal and alternative acts.',
+    title: 'Community Curators',
+    description: 'Reach listeners by genre taste — they can playlist, story, or share your release.',
     reach: '35K+',
     reachValue: 35000,
     acceptance: 'Varies',

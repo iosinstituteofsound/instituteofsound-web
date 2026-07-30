@@ -10,6 +10,7 @@ export function CuratorStudioHomePage() {
         <PageTitle>Curator Studio</PageTitle>
         <PageDescription>
           Shape taste, surface discovery, and manage the playlists and signal picks that define your profile.
+          Community pitches now live in mobile CURATE (Machine Hub). This studio remains for staff playlist tools.
         </PageDescription>
       </PageHeader>
       <PageSection>

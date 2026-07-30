@@ -7,7 +7,7 @@ declare module '@instituteofsound/dex' {
     | 'dex-chat'
     | 'artist-scan'
     | 'signal-archive'
-    | 'lyrics-database'
+    | 'curate'
     | 'network-intel'
 
   export interface DexContext {
