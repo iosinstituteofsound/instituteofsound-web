@@ -129,6 +129,11 @@ const GenreHubPage = lazy(() =>
 const AllianceHqPage = lazy(() =>
   import('@/modules/tribes/pages/alliance-hq-page').then((m) => ({ default: m.AllianceHqPage })),
 )
+const AllianceMarketplacePage = lazy(() =>
+  import('@/modules/tribes/pages/alliance-marketplace-page').then((m) => ({
+    default: m.AllianceMarketplacePage,
+  })),
+)
 const CreateAlliancePage = lazy(() =>
   import('@/modules/tribes/pages/create-alliance-page').then((m) => ({ default: m.CreateAlliancePage })),
 )
@@ -272,6 +277,16 @@ export const router = createBrowserRouter([
           <ExplorePageGuard>
             <Lazy>
               <CreateAlliancePage />
+            </Lazy>
+          </ExplorePageGuard>
+        ),
+      },
+      {
+        path: 'genres/:genreSlug/alliances/:slug/shop',
+        element: (
+          <ExplorePageGuard>
+            <Lazy>
+              <AllianceMarketplacePage />
             </Lazy>
           </ExplorePageGuard>
         ),

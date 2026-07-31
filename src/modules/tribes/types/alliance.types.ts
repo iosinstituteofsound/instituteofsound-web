@@ -41,6 +41,7 @@ export type AllianceSummary = {
   allianceThreadId?: string
   underReview: boolean
   disbandAt?: string
+  featuredUntil?: string
   createdAt: string
 }
 
@@ -122,3 +123,12 @@ export type AllianceChallenge = {
   signalsReward: number
   status: 'active' | 'completed' | 'claimed'
 }
+
+export type AllianceUnlock = {
+  key: string
+  label: string
+  signalsCost: number
+  owned: boolean
+}
+
+export type AllianceVisibility = 'public' | 'invite_only' | 'private'

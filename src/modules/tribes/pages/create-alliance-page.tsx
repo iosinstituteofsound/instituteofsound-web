@@ -23,6 +23,7 @@ export function CreateAlliancePage() {
   const [tagline, setTagline] = useState('')
   const [genre, setGenre] = useState(genreSlug)
   const [reputationTag, setReputationTag] = useState<TribeReputationTag>('friendly')
+  const [visibility, setVisibility] = useState<'public' | 'invite_only' | 'private'>('public')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -32,7 +33,7 @@ export function CreateAlliancePage() {
     setBusy(true)
     setError(null)
     try {
-      const created = await createAlliance({ name, tagline, genreSlug: genre, reputationTag })
+      const created = await createAlliance({ name, tagline, genreSlug: genre, reputationTag, visibility })
       navigate(`/genres/${genre}/alliances/${created.alliance.slug}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create alliance')
@@ -85,6 +86,14 @@ export function CreateAlliancePage() {
             {REPUTATION_OPTIONS.map((tag) => (
               <option key={tag} value={tag}>{tag}</option>
             ))}
+          </select>
+        </label>
+        <label>
+          Visibility
+          <select value={visibility} onChange={(e) => setVisibility(e.target.value as typeof visibility)}>
+            <option value="public">Public</option>
+            <option value="invite_only">Invite only</option>
+            <option value="private">Private</option>
           </select>
         </label>
         {error ? <p className="alliance-error">{error}</p> : null}

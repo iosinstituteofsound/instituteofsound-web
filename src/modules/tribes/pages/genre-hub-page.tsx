@@ -58,13 +58,36 @@ export function GenreHubPage() {
           <span className="alliance-muted">Identity Score leaderboard</span>
         </div>
         <ul className="alliance-board">
-          {alliances.map((row, index) => {
+          {[...alliances]
+            .sort((a, b) => {
+              const now = Date.now()
+              const aFeat = a.featuredUntil && new Date(a.featuredUntil).getTime() > now ? 1 : 0
+              const bFeat = b.featuredUntil && new Date(b.featuredUntil).getTime() > now ? 1 : 0
+              if (aFeat !== bFeat) return bFeat - aFeat
+              return 0
+            })
+            .map((row, index) => {
             const pct = leaderScore > 0 ? Math.max(8, Math.round((row.tribeScore / leaderScore) * 100)) : 0
+            const featured = Boolean(
+              row.featuredUntil && new Date(row.featuredUntil).getTime() > Date.now(),
+            )
             return (
-              <li key={row.id} className={index === 0 ? 'alliance-board__item alliance-board__item--lead' : 'alliance-board__item'}>
+              <li
+                key={row.id}
+                className={
+                  index === 0
+                    ? 'alliance-board__item alliance-board__item--lead'
+                    : featured
+                      ? 'alliance-board__item alliance-board__item--featured'
+                      : 'alliance-board__item'
+                }
+              >
                 <Link to={`/genres/${slug}/alliances/${row.slug}`} className="alliance-board__link">
                   <span className="alliance-board__rank">{index + 1}</span>
-                  <span className="alliance-board__name">{row.name}</span>
+                  <span className="alliance-board__name">
+                    {row.name}
+                    {featured ? <span className="alliance-badge"> Featured</span> : null}
+                  </span>
                   <span className="alliance-board__score">{row.tribeScore.toLocaleString()}</span>
                   <div className="alliance-board__bar" style={{ '--pct': `${pct}%` } as React.CSSProperties}>
                     <span />

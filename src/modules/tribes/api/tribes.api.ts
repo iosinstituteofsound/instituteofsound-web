@@ -6,6 +6,8 @@ import type {
   AllianceDetail,
   AllianceLegacyEvent,
   AllianceSummary,
+  AllianceUnlock,
+  AllianceVisibility,
   GenreDetail,
   GenreDto,
   MyAlliance,
@@ -57,7 +59,7 @@ export async function createAlliance(input: {
   description?: string
   genreSlug: string
   reputationTag: TribeReputationTag
-  visibility?: 'public' | 'invite_only' | 'private'
+  visibility?: AllianceVisibility
 }) {
   const { data } = await apiClient.post<
     ApiSuccessResponse<{ alliance: AllianceSummary; threadId?: string }>
@@ -88,4 +90,71 @@ export async function getAllianceChallenges(slug: string) {
     `${API_V1}/tribes/${slug}/challenges`,
   )
   return data.data.challenges
+}
+
+export async function getAllianceUnlocks(slug: string) {
+  const { data } = await apiClient.get<ApiSuccessResponse<{ unlocks: AllianceUnlock[] }>>(
+    `${API_V1}/tribes/${slug}/unlocks`,
+  )
+  return data.data.unlocks
+}
+
+export async function claimChallenge(slug: string, challengeId: string) {
+  const { data } = await apiClient.post<ApiSuccessResponse<{ signalsAwarded: number }>>(
+    `${API_V1}/tribes/${slug}/challenges/${challengeId}/claim`,
+  )
+  return data.data
+}
+
+export async function spendUnlock(slug: string, unlockKey: string) {
+  const { data } = await apiClient.post<
+    ApiSuccessResponse<{ unlock: { key: string; label: string; signalsCost: number } }>
+  >(`${API_V1}/tribes/${slug}/unlocks/spend`, { unlockKey })
+  return data.data
+}
+
+export async function promoteMember(slug: string, userId: string) {
+  await apiClient.post(`${API_V1}/tribes/${slug}/members/${userId}/promote`)
+}
+
+export async function demoteMember(slug: string, userId: string) {
+  await apiClient.post(`${API_V1}/tribes/${slug}/members/${userId}/demote`)
+}
+
+export async function kickMember(slug: string, userId: string) {
+  await apiClient.post(`${API_V1}/tribes/${slug}/members/${userId}/kick`)
+}
+
+export async function transferLeadership(slug: string, targetUserId: string) {
+  await apiClient.post(`${API_V1}/tribes/${slug}/transfer-leadership`, { targetUserId })
+}
+
+export async function updateAlliance(
+  slug: string,
+  patch: {
+    name?: string
+    tagline?: string
+    description?: string
+    bannerUrl?: string
+    emblemUrl?: string
+    visibility?: AllianceVisibility
+    settings?: { joinApproval?: boolean; minDbToJoin?: number; probationHours?: number }
+  },
+) {
+  const { data } = await apiClient.patch<ApiSuccessResponse<{ alliance: AllianceSummary }>>(
+    `${API_V1}/tribes/${slug}`,
+    patch,
+  )
+  return data.data
+}
+
+export async function startDisband(slug: string) {
+  const { data } = await apiClient.post<ApiSuccessResponse<{ disbandAt?: string; archived?: boolean }>>(
+    `${API_V1}/tribes/${slug}/disband`,
+  )
+  return data.data
+}
+
+export async function cancelDisband(slug: string) {
+  await apiClient.delete(`${API_V1}/tribes/${slug}/disband`)
 }

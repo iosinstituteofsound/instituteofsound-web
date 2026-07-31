@@ -273,3 +273,57 @@
   border-top: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
   padding-top: 0.75rem;
 }
+
+.alliance-input {
+  border-radius: 0.65rem;
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  background: transparent;
+  color: var(--foreground);
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
+.alliance-roster__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.alliance-hq.is-midnight .alliance-hq__banner {
+  background-color: #070a12;
+}
+
+.alliance-hq.is-neon .alliance-hq__banner {
+  outline: 2px solid #39ff14;
+  outline-offset: 2px;
+}
+
+.alliance-board__item--featured {
+  border-color: color-mix(in oklab, var(--primary) 45%, transparent);
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+}
+
+.alliance-wallet__balance {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.6rem;
+}
+
+.alliance-wallet__balance strong {
+  color: var(--primary);
+}
+
+.alliance-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: color-mix(in oklab, var(--primary) 18%, transparent);
+  color: var(--primary);
+}
