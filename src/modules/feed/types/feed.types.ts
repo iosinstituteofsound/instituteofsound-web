@@ -20,6 +20,9 @@ export interface FeedEngagementSummary {
   reactionTotal: number
   commentCount: number
   myReaction: FeedReactionKind | null
+  saved?: boolean
+  saveCount?: number
+  viewCount?: number
 }
 
 export interface FeedCommentEngagementSummary {
