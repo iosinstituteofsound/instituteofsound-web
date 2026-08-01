@@ -17,7 +17,17 @@ function useCroppedImageStyle(
     const isLocal = src.startsWith('blob:') || src.startsWith('data:')
     if (!isLocal) img.crossOrigin = 'anonymous'
     img.onload = () => setDims({ w: img.naturalWidth, h: img.naturalHeight })
-    img.onerror = () => setDims(null)
+    img.onerror = () => {
+      // Retry without CORS — we only need dimensions, not pixel access.
+      if (!img.crossOrigin) {
+        setDims(null)
+        return
+      }
+      const plain = new Image()
+      plain.onload = () => setDims({ w: plain.naturalWidth, h: plain.naturalHeight })
+      plain.onerror = () => setDims(null)
+      plain.src = src
+    }
     img.src = src
   }, [src, crop])
 

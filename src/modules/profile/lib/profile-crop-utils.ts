@@ -135,7 +135,20 @@ export function loadImageElement(src: string): Promise<HTMLImageElement> {
     img.onload = () => {
       void img.decode().then(() => resolve(img)).catch(() => resolve(img))
     }
-    img.onerror = () => reject(new Error('Failed to load image'))
+    img.onerror = () => {
+      // Retry without CORS so preview/repositioning still works when the CDN
+      // doesn't send CORS headers. Canvas pixel export may fail in that case.
+      if (!img.crossOrigin) {
+        reject(new Error('Failed to load image'))
+        return
+      }
+      const plain = new Image()
+      plain.onload = () => {
+        void plain.decode().then(() => resolve(plain)).catch(() => resolve(plain))
+      }
+      plain.onerror = () => reject(new Error('Failed to load image'))
+      plain.src = src
+    }
     img.src = src
   })
 }
