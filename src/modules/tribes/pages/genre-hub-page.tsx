@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { ArrowUpRight, MessageCircle, Plus, Shield, Users } from 'lucide-react'
+import { MessageCircle, Plus, Shield, Users } from 'lucide-react'
 import { useGenre, useAlliances, useAllianceMembershipGate } from '@/modules/tribes/hooks/use-alliances'
 import { useTribeCommunityChat } from '@/modules/explore/hooks/use-tribe-community-chat'
 import '@/modules/tribes/styles/alliance.css'

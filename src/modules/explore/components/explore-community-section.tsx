@@ -10,11 +10,9 @@ import {
 } from 'lucide-react'
 import type { ExplorePayload } from '@/modules/explore/types/explore.types'
 import {
-  formatExploreDb,
   listExploreSpins,
   spinReactionLabel,
   tribeBarPercent,
-  type ExploreCrewRow,
   type ExploreSpinRow,
 } from '@/modules/explore/lib/community-meta'
 import {
@@ -182,70 +180,6 @@ function SpinRow({ spin, rank, lead }: { spin: ExploreSpinRow; rank: number; lea
         <SpinWaveform seed={spin.id} />
       </Link>
     </li>
-  )
-}
-
-function CrewRow({ crew, rank }: { crew: ExploreCrewRow; rank: number }) {
-  const lead = rank === 1
-
-  return (
-    <li className={lead ? 'explore-com-crews__item explore-com-crews__item--lead' : 'explore-com-crews__item'}>
-      <Link
-        to="/feed"
-        className={lead ? 'explore-com-crew explore-com-crew--lead' : 'explore-com-crew'}
-        aria-label={`#${rank} ${crew.name}`}
-      >
-        <span className="explore-com-crew__rank">{rank}</span>
-        <AudioLines size={13} strokeWidth={2} className="explore-com-crew__ico" aria-hidden />
-        <span className="explore-com-crew__name">{crew.name}</span>
-        <span className="explore-com-crew__db">{formatExploreDb(crew.weeklyDb)}</span>
-      </Link>
-    </li>
-  )
-}
-
-function CrewScene({ crew }: { crew: ExploreCrewRow }) {
-  return (
-    <div className="explore-com-crew-scene">
-      <div className="explore-com-crew-scene__atmosphere" aria-hidden>
-        <div className="explore-com-crew-scene__grid" />
-        <div className="explore-com-crew-scene__portal" />
-        <div className="explore-com-crew-scene__rings">
-          <span className="explore-com-crew-scene__ring explore-com-crew-scene__ring--outer" />
-          <span className="explore-com-crew-scene__ring explore-com-crew-scene__ring--mid" />
-          <span className="explore-com-crew-scene__ring explore-com-crew-scene__ring--core" />
-        </div>
-        <div className="explore-com-crew-scene__figures" aria-hidden>
-          {Array.from({ length: 5 }, (_, i) => (
-            <span
-              key={i}
-              className={
-                i === 2
-                  ? 'explore-com-crew-scene__figure explore-com-crew-scene__figure--lead'
-                  : 'explore-com-crew-scene__figure'
-              }
-            />
-          ))}
-        </div>
-        <div className="explore-com-crew-scene__scan" aria-hidden />
-      </div>
-
-      <div className="explore-com-crew-scene__body">
-        <span className="explore-com-crew-scene__kicker">#1 crew</span>
-        <p className="explore-com-crew-scene__name">{crew.name}</p>
-        <p className="explore-com-crew-scene__tag">{crew.tagline}</p>
-        <div className="explore-com-crew-scene__stats">
-          <span className="explore-com-crew-scene__stat">
-            <Users size={11} strokeWidth={2} aria-hidden />
-            {crew.memberCount} members
-          </span>
-          <span className="explore-com-crew-scene__stat">
-            <AudioLines size={11} strokeWidth={2} aria-hidden />
-            {formatExploreDb(crew.weeklyDb)}
-          </span>
-        </div>
-      </div>
-    </div>
   )
 }
 

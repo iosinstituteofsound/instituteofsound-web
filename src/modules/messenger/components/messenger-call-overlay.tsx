@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import { FlipHorizontal, Mic, MicOff, PhoneOff, Video, VideoOff, Volume2 } from 'lucide-react'
 import { CallNetworkBadge } from '@/modules/messenger/components/call-network-badge'
 import { CallVideoStage } from '@/modules/messenger/components/call-video-stage'

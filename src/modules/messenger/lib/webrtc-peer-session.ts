@@ -1,5 +1,4 @@
 import {
-  getCallAudioConstraints,
   getCallIceServers,
   getCallMediaConstraints,
   getCallVideoConstraints,
@@ -128,8 +127,9 @@ export class WebRTCPeerSession {
   }
 
   async switchCamera(): Promise<CameraFacing> {
-    const videoTrack = this.localStream?.getVideoTracks()[0]
-    if (!videoTrack) {
+    const stream = this.localStream
+    const videoTrack = stream?.getVideoTracks()[0]
+    if (!stream || !videoTrack) {
       return this.cameraFacing
     }
 
@@ -147,8 +147,8 @@ export class WebRTCPeerSession {
     }
 
     videoTrack.stop()
-    this.localStream.removeTrack(videoTrack)
-    this.localStream.addTrack(newTrack)
+    stream.removeTrack(videoTrack)
+    stream.addTrack(newTrack)
     this.cameraFacing = nextFacing
     return this.cameraFacing
   }
