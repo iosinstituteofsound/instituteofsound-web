@@ -75,7 +75,12 @@ export interface NationTopArtistDto {
   plays: number
   likes: number
   supportScore: number
+  /** Real percentile among this artist's listeners (1 = top 1%). */
   listenerPercentile: number
+  minutes: number
+  bondLevel: number
+  bondLevelLabel: string
+  isTopFan: boolean
 }
 
 export interface NationTopArtistsDto {
