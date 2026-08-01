@@ -45,6 +45,7 @@ type ProfileCoverSectionProps = {
   followingCount?: number
   isFollowing?: boolean
   className?: string
+  alliance?: { name: string; slug: string; genreSlug: string } | null
 }
 
 export function ProfileCoverSection({
@@ -54,6 +55,7 @@ export function ProfileCoverSection({
   followingCount = 0,
   isFollowing,
   className,
+  alliance,
 }: ProfileCoverSectionProps) {
   const updateProfile = useUpdateProfile()
   const uploadInputRef = useRef<HTMLInputElement>(null)
@@ -248,6 +250,17 @@ export function ProfileCoverSection({
                 </div>
                 {user.username ? (
                   <p className="text-[13px] font-medium tracking-wide text-white/65">@{user.username}</p>
+                ) : null}
+                {alliance ? (
+                  <Link
+                    to={`/genres/${alliance.genreSlug}/alliances/${alliance.slug}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/12 px-2.5 py-1 text-[12px] font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
+                  >
+                    {alliance.name}
+                    <span className="font-normal capitalize text-white/70">
+                      · {alliance.genreSlug.replace(/-/g, ' ')}
+                    </span>
+                  </Link>
                 ) : null}
                 <FollowStats
                   userId={user.id}

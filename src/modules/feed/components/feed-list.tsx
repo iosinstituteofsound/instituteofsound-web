@@ -15,8 +15,8 @@ import { EmptyState, ErrorState } from '@/shared/components/feedback/states'
 import { useInfiniteScroll } from '@/shared/hooks/use-infinite-scroll'
 import { cn } from '@/shared/lib/cn'
 
-export function useFeedListItems(scope: FeedScope = 'all') {
-  const query = useFeedList({ limit: FEED_PAGE_SIZE, scope })
+export function useFeedListItems(scope: FeedScope = 'all', enabled = true) {
+  const query = useFeedList({ limit: FEED_PAGE_SIZE, scope, enabled })
   const items = useMemo(
     () => sortFeedItemsLatest(query.data?.pages.flatMap((page) => page.items) ?? []),
     [query.data?.pages],
@@ -106,21 +106,25 @@ export function FeedList({
       <EmptyState
         variant="dashed"
         className="p-10"
-        title={scope === 'following' ? 'No posts from people you follow' : 'No posts yet'}
+        title={
+          scope === 'following'
+            ? 'Nothing in My yet'
+            : 'No posts yet'
+        }
         description={
           emptyMessage ??
           (scope === 'following'
-            ? 'Follow artists and operators to see their posts here.'
+            ? 'Follow artists to fill your My feed.'
             : authorId
               ? 'Posts from this profile will show up here.'
-              : 'Be the first to share something with the community.')
+              : 'Be the first to drop a signal with the Nation.')
         }
       />
     )
   }
 
   return (
-    <div className={cn(listClassName ?? 'space-y-3')}>
+    <div className={cn(listClassName ?? 'space-y-5')}>
       {items.map((item, index) => {
         const itemStyle: CSSProperties | undefined =
           staggerAnimation && itemClassName

@@ -16,6 +16,7 @@ import { ProfileCuratorOverviewTab } from '@/modules/profile/components/profile-
 import { ProfilePostsPanel } from '@/modules/profile/components/profile-posts-panel'
 import { usePublicProfile } from '@/modules/profile/hooks/use-public-profile'
 import { useFollowStats } from '@/shared/hooks/use-follow'
+import { useMyAlliance } from '@/modules/tribes/hooks/use-alliances'
 import type { PublicProfileDto } from '@/modules/search/api/search.api'
 import { SlidingTabBar } from '@/shared/components/controls'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
@@ -73,6 +74,22 @@ export function ProfilePage() {
       : undefined
 
   const { data: ownFollowStats } = useFollowStats(isOwnProfile ? user?.id : undefined)
+  const myAlliance = useMyAlliance()
+  const alliance = isOwnProfile
+    ? myAlliance.data?.alliance
+      ? {
+          name: myAlliance.data.alliance.name,
+          slug: myAlliance.data.alliance.slug,
+          genreSlug: myAlliance.data.alliance.genreSlug,
+        }
+      : null
+    : publicProfile?.alliance
+      ? {
+          name: publicProfile.alliance.name,
+          slug: publicProfile.alliance.slug,
+          genreSlug: publicProfile.alliance.genreSlug,
+        }
+      : null
   const followerCount = isOwnProfile
     ? (ownFollowStats?.followerCount ?? 0)
     : (publicProfile?.followerCount ?? 0)
@@ -121,6 +138,7 @@ export function ProfilePage() {
         followerCount={followerCount}
         followingCount={followingCount}
         isFollowing={isFollowing}
+        alliance={alliance}
       />
 
       <div className="mt-1 border-b px-1 py-2">

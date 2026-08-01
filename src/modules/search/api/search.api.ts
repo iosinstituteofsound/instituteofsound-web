@@ -136,6 +136,12 @@ export interface PublicProfileDto {
   followerCount?: number
   followingCount?: number
   isFollowing?: boolean
+  alliance?: {
+    id: string
+    slug: string
+    name: string
+    genreSlug: string
+  }
 }
 
 export async function getPublicProfile(userId: string) {

@@ -23,18 +23,26 @@ export function MediaPreviewRow({
     <Comp
       type={onClick ? 'button' : undefined}
       className={cn(
-        'flex w-full items-center gap-3 rounded-lg border border-border/60 bg-card/40 p-3 text-left',
+        'feed-media-preview-row flex w-full items-center gap-3 rounded-lg border border-border/60 bg-card/40 p-3 text-left',
         onClick && 'transition-colors hover:bg-accent/40',
         className,
       )}
       onClick={onClick}
     >
-      {artwork ? <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md">{artwork}</div> : null}
+      {artwork ? (
+        <div className="feed-media-preview-row__art h-12 w-12 shrink-0 overflow-hidden rounded-md">
+          {artwork}
+        </div>
+      ) : null}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{title}</p>
-        {subtitle ? <p className="truncate text-xs text-muted-foreground">{subtitle}</p> : null}
+        <p className="feed-media-preview-row__title truncate text-sm font-medium">{title}</p>
+        {subtitle ? (
+          <p className="feed-media-preview-row__subtitle truncate text-xs text-muted-foreground">
+            {subtitle}
+          </p>
+        ) : null}
       </div>
-      {trailing ? <div className="shrink-0">{trailing}</div> : null}
+      {trailing ? <div className="feed-media-preview-row__trailing shrink-0">{trailing}</div> : null}
     </Comp>
   )
 }

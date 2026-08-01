@@ -84,3 +84,23 @@ export function useGrantAdminUserWallet(userId: string) {
     },
   })
 }
+
+export function useAdminHornProducts(enabled = true) {
+  return useQuery({
+    queryKey: ['marketplace', 'catalog', 'horn'],
+    queryFn: () => userApi.listAdminHornProducts(),
+    enabled,
+    staleTime: 5 * 60_000,
+  })
+}
+
+export function useGrantAdminHorn(userId: string) {
+  return useMutation({
+    mutationFn: (input: { productId: string; quantity: number }) =>
+      userApi.grantAdminHorn({
+        userId,
+        productId: input.productId,
+        quantity: input.quantity,
+      }),
+  })
+}

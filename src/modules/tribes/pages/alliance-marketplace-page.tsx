@@ -65,15 +65,15 @@ export function AllianceMarketplacePage() {
           <Store size={14} /> Alliance market
         </p>
         <h1>{alliance.name}</h1>
-        <p className="alliance-muted">Spend tribe Signals on HQ unlocks — not personal dB.</p>
+        <p className="alliance-muted">Spend alliance treasury dB on HQ unlocks — not personal wallet dB.</p>
       </header>
 
       <section className="alliance-section alliance-wallet">
-        <h2>Alliance wallet</h2>
+        <h2>Alliance treasury</h2>
         <div className="alliance-wallet__balance">
           <Zap size={22} />
-          <strong>{alliance.signalsBalance.toLocaleString()}</strong>
-          <span>Signals</span>
+          <strong>{alliance.treasuryDb.toLocaleString()}</strong>
+          <span>dB</span>
         </div>
         <p className="alliance-muted">
           {ownedCount}/{unlocks.length} unlocks owned · {alliance.weeklyDb.toLocaleString()} wk dB
@@ -89,16 +89,14 @@ export function AllianceMarketplacePage() {
               <div>
                 <strong>{item.label}</strong>
                 <span className="alliance-muted">
-                  {item.owned ? 'Owned' : `${item.signalsCost} Signals`}
+                  {item.owned ? 'Owned' : `${item.dbCost} dB`}
                 </span>
               </div>
               {!item.owned && canBuy ? (
                 <button
                   type="button"
                   className="alliance-btn"
-                  disabled={
-                    alliance.signalsBalance < item.signalsCost || buyingKey === item.key
-                  }
+                  disabled={alliance.treasuryDb < item.dbCost || buyingKey === item.key}
                   onClick={() => void handleBuy(item.key)}
                 >
                   {buyingKey === item.key ? 'Buying…' : 'Buy'}

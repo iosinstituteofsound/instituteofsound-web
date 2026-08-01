@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { ExternalLink, Mail, UserRound } from 'lucide-react'
 import { VerifiedUserName } from '@/shared/components/icons/verified-user-name'
 import {
+  useAdminHornProducts,
   useAdminUserWallet,
   useAssignUserRole,
+  useGrantAdminHorn,
   useGrantAdminUserWallet,
   useRevokeUserRole,
   useSetUserVerified,
@@ -41,11 +43,15 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
   const [selectedRole, setSelectedRole] = useState('')
   const [grantAmount, setGrantAmount] = useState('')
   const [grantNote, setGrantNote] = useState('')
+  const [hornProductId, setHornProductId] = useState('')
+  const [hornQuantity, setHornQuantity] = useState('1')
   const { isSuperAdmin } = usePermission()
   const { data: user, isLoading, isError, refetch } = useUser(userId)
   const { data: roles, isLoading: rolesLoading } = useRoles()
   const wallet = useAdminUserWallet(userId, isSuperAdmin)
+  const horns = useAdminHornProducts(isSuperAdmin)
   const grantWallet = useGrantAdminUserWallet(userId)
+  const grantHorn = useGrantAdminHorn(userId)
   const assignRole = useAssignUserRole(userId)
   const revokeRole = useRevokeUserRole(userId)
   const setVerified = useSetUserVerified(userId)
@@ -88,8 +94,8 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
       toast.error('Enter a positive whole-number dB amount')
       return
     }
-    if (amount > 1_000_000_000) {
-      toast.error('Max grant is 1,000,000,000 dB')
+    if (amount > 10_000) {
+      toast.error('Max grant is 10,000 dB')
       return
     }
     try {
@@ -102,6 +108,37 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
       )
       setGrantAmount('')
       setGrantNote('')
+    } catch (err) {
+      const apiErr = err as { message?: string; fieldErrors?: Array<{ field?: string; message: string }> }
+      const fieldMsg = apiErr.fieldErrors?.[0]?.message
+      toast.error(fieldMsg || apiErr.message || 'Failed')
+    }
+  }
+
+  const handleGrantHorn = async () => {
+    if (!hornProductId) {
+      toast.error('Select a horn')
+      return
+    }
+    const quantity = Number(hornQuantity)
+    if (!Number.isFinite(quantity) || quantity <= 0 || !Number.isInteger(quantity)) {
+      toast.error('Enter a positive whole-number quantity')
+      return
+    }
+    if (quantity > 100) {
+      toast.error('Max grant is 100 horns')
+      return
+    }
+    try {
+      const result = await grantHorn.mutateAsync({ productId: hornProductId, quantity })
+      const hornName = horns.data?.find((h) => h.id === hornProductId)?.name ?? 'Horn'
+      toast.success(
+        `Granted ${quantity}× ${hornName}` +
+          (result.entitlement.quantity != null
+            ? ` · stack ${result.entitlement.quantity.toLocaleString()}`
+            : ''),
+      )
+      setHornQuantity('1')
     } catch (err) {
       const apiErr = err as { message?: string; fieldErrors?: Array<{ field?: string; message: string }> }
       const fieldMsg = apiErr.fieldErrors?.[0]?.message
@@ -217,6 +254,7 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
                   id="grant-amount"
                   type="number"
                   min={1}
+                  max={10_000}
                   step={1}
                   value={grantAmount}
                   onChange={(e) => setGrantAmount(e.target.value)}
@@ -239,6 +277,60 @@ export function UserDetailPanel({ userId }: UserDetailPanelProps) {
                 Grant dB
               </Button>
             </div>
+          </div>
+          <Separator />
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold">Megaphone Horns</h3>
+              <p className="text-xs text-muted-foreground">
+                Grant stackable horn consumables for megaphone blasts.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <div className="min-w-0 flex-1">
+                <label className="text-xs text-muted-foreground" htmlFor="horn-product">
+                  Horn
+                </label>
+                <Select value={hornProductId} onValueChange={setHornProductId}>
+                  <SelectTrigger id="horn-product" className="w-full">
+                    <SelectValue
+                      placeholder={horns.isLoading ? 'Loading horns…' : 'Select horn'}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(horns.data ?? []).map((horn) => (
+                      <SelectItem key={horn.id} value={horn.id}>
+                        {horn.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-full sm:w-28">
+                <label className="text-xs text-muted-foreground" htmlFor="horn-qty">
+                  Qty
+                </label>
+                <Input
+                  id="horn-qty"
+                  type="number"
+                  min={1}
+                  max={100}
+                  step={1}
+                  value={hornQuantity}
+                  onChange={(e) => setHornQuantity(e.target.value)}
+                  placeholder="1"
+                />
+              </div>
+              <Button
+                onClick={handleGrantHorn}
+                disabled={grantHorn.isPending || !hornProductId || !hornQuantity}
+              >
+                Grant Horn
+              </Button>
+            </div>
+            {horns.isError ? (
+              <p className="text-xs text-destructive">Could not load horn catalog.</p>
+            ) : null}
           </div>
           <Separator />
         </>

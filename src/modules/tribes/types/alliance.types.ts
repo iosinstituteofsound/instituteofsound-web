@@ -32,7 +32,7 @@ export type AllianceSummary = {
   scoreBreakdown: AllianceScoreBreakdown
   weeklyDb: number
   seasonDb: number
-  signalsBalance: number
+  treasuryDb: number
   emblemUrl?: string
   bannerUrl?: string
   founderId: string
@@ -120,14 +120,14 @@ export type AllianceChallenge = {
   description?: string
   target: number
   progress: number
-  signalsReward: number
+  treasuryDbReward: number
   status: 'active' | 'completed' | 'claimed'
 }
 
 export type AllianceUnlock = {
   key: string
   label: string
-  signalsCost: number
+  dbCost: number
   owned: boolean
 }
 

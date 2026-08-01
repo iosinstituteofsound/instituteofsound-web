@@ -1,12 +1,21 @@
 .feed-social-card {
-  --feed-card-pad-x: 12px;
+  /* Aligned with mobile UI_METRICS / FEED_TEXT */
+  --feed-card-pad-x: 16px;
+  --feed-card-pad-y: 14px;
+  --feed-card-header-gap: 12px;
+  --feed-card-content-gap: 10px;
+  --feed-card-radius: 16px;
+  --feed-card-name-size: 0.9375rem; /* 15px */
+  --feed-card-meta-size: 0.8125rem; /* 13px */
+  --feed-card-body-size: 1.0625rem; /* 17px */
+  --feed-card-body-leading: 1.55;
   --feed-card-hide-duration: 0.38s;
   --feed-card-hide-ease: cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   isolation: isolate;
   overflow: visible;
-  border-radius: 12px;
-  border: 1px solid color-mix(in oklch, var(--foreground) 7%, transparent);
+  border-radius: var(--feed-card-radius);
+  border: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
   background: color-mix(in oklch, var(--card) 92%, black);
   color: var(--card-foreground);
 }
@@ -169,8 +178,8 @@
 .feed-social-card__header {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 12px var(--feed-card-pad-x) 8px;
+  gap: var(--feed-card-header-gap);
+  padding: var(--feed-card-pad-y) var(--feed-card-pad-x) var(--feed-card-content-gap);
 }
 
 .feed-social-card__avatar {
@@ -180,12 +189,13 @@
 .feed-social-card__header-body {
   flex: 1;
   min-width: 0;
+  padding-top: 0.1rem;
 }
 
 .feed-social-card__title-row {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0.65rem;
   min-width: 0;
 }
 
@@ -193,14 +203,14 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 0;
+  gap: 0.2rem;
   min-width: 0;
 }
 
 .feed-social-card__meta {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: 0.2rem;
   min-width: 0;
   flex: 1;
 }
@@ -210,8 +220,9 @@
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  font-size: 0.9375rem;
-  line-height: 1.2;
+  font-size: var(--feed-card-name-size);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
   color: var(--foreground);
 }
 
@@ -225,7 +236,8 @@
 }
 
 .feed-social-card__audio-tag {
-  max-width: min(12rem, 42%);
+  max-width: min(13rem, 44%);
+  margin-top: 0.15rem;
 }
 
 .feed-social-card__name {
@@ -240,9 +252,9 @@
 .feed-social-card__meta-line {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  margin: 1px 0 0;
-  font-size: 0.8125rem;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: var(--feed-card-meta-size);
   line-height: 1.3;
   color: var(--muted-foreground);
 }
@@ -254,8 +266,8 @@
 }
 
 .feed-social-card__globe {
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
   flex-shrink: 0;
   opacity: 0.9;
 }
@@ -266,7 +278,7 @@
   gap: 0.375rem;
   margin-top: 0.25rem;
   min-width: 0;
-  font-size: 0.8125rem;
+  font-size: var(--feed-card-meta-size);
   line-height: 1.35;
   color: var(--muted-foreground);
 }
@@ -275,7 +287,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  margin: -2px -4px 0 0;
+  margin: -4px -6px 0 0;
   flex-shrink: 0;
 }
 
@@ -290,28 +302,32 @@
 
 @media (max-width: 640px) {
   .feed-social-card__audio-tag {
-    max-width: min(9.5rem, 36vw);
-    font-size: 0.75rem;
+    max-width: min(10.5rem, 38vw);
   }
 
   .feed-social-card__title-row {
-    gap: 0.375rem;
+    gap: 0.5rem;
   }
 
   .feed-social-card__header-actions .feed-social-card__header-btn {
-    width: 2rem;
-    height: 2rem;
+    width: 2.125rem;
+    height: 2.125rem;
   }
 }
 
 /* ── Caption ── */
 .feed-social-card__caption {
-  padding: 0 var(--feed-card-pad-x) 10px;
+  padding: 0 var(--feed-card-pad-x) var(--feed-card-content-gap);
 }
 
 .feed-social-card__caption-text {
-  font-size: 0.9375rem;
-  line-height: 1.45;
+  margin: 0;
+  font-size: var(--feed-card-body-size);
+  line-height: var(--feed-card-body-leading);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .feed-social-card__caption-link {
@@ -342,6 +358,7 @@
 /* ── Media ── */
 .feed-social-card__media {
   width: 100%;
+  margin-bottom: 2px;
 }
 
 .feed-social-card__media--interactive {
@@ -431,7 +448,18 @@
 .feed-social-card__body {
   min-width: 0;
   max-width: 100%;
-  padding: 8px var(--feed-card-pad-x) 4px;
+  padding: 0 var(--feed-card-pad-x) var(--feed-card-content-gap);
+}
+
+.feed-social-card__media + .feed-social-card__body,
+.feed-social-card__caption + .feed-social-card__body {
+  padding-top: 2px;
+}
+
+.feed-social-card--compact {
+  --feed-card-pad-x: 14px;
+  --feed-card-pad-y: 12px;
+  --feed-card-body-size: 1rem;
 }
 
 .feed-social-card__body--release {
@@ -525,7 +553,7 @@
 
 /* ── Engagement ── */
 .feed-social-card__engagement {
-  padding: 0 var(--feed-card-pad-x) 8px;
+  padding: 2px var(--feed-card-pad-x) 10px;
 }
 
 .feed-social-card__stats {
@@ -533,8 +561,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 32px;
-  padding: 4px 0;
+  min-height: 1.75rem;
+  padding: 6px 0 4px;
 }
 
 .feed-social-card__stats-left,
@@ -572,13 +600,15 @@
 }
 
 .feed-social-card__stats-count {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: var(--muted-foreground);
   font-variant-numeric: tabular-nums;
 }
 
 .feed-social-card__stats-link {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: var(--muted-foreground);
   background: none;
   border: none;
@@ -592,12 +622,61 @@
 
 .feed-social-card__divider {
   height: 1px;
-  margin: 0 0 2px;
-  background: color-mix(in oklch, var(--foreground) 8%, transparent);
+  margin: 2px 0 4px;
+  background: color-mix(in oklch, var(--foreground) 9%, transparent);
+}
+
+.feed-social-card__engagement .ios-engagement-action-bar,
+.feed-social-card__engagement .feed-social-card__action-bar {
+  gap: 4px;
+}
+
+.feed-social-card__engagement .ios-engagement-action-bar__btn,
+.feed-social-card__engagement .feed-social-card__action-btn,
+.feed-social-card__engagement a.feed-social-card__action-btn {
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.feed-social-card__engagement .ios-engagement-action-bar__btn svg,
+.feed-social-card__engagement .feed-social-card__action-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .feed-social-card__comments {
   border-top: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
   margin-top: 4px;
   padding-top: 8px;
+}
+
+/* Attached track row inside posts */
+.feed-social-card__body .feed-media-preview-row {
+  gap: 0.85rem;
+  padding: 0.85rem;
+  border-radius: 12px;
+  border-color: color-mix(in oklch, var(--foreground) 10%, transparent);
+  background: color-mix(in oklch, var(--muted) 55%, transparent);
+}
+
+.feed-social-card__body .feed-media-preview-row__art {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.65rem;
+}
+
+.feed-social-card__body .feed-media-preview-row__title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.feed-social-card__body .feed-media-preview-row__subtitle {
+  margin-top: 0.2rem;
+  font-size: 0.8125rem;
+  line-height: 1.3;
 }

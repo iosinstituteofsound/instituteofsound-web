@@ -75,7 +75,7 @@ export function FeedCardShell({
           <div className="feed-social-card__layer-inner">
             <header className="feed-social-card__header">
               <ProfileLink userId={item.author.id} name={item.author.name} variant="avatar" className="feed-social-card__avatar">
-                <UserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-10 w-10" />
+                <UserAvatar name={item.author.name} avatarUrl={item.author.avatarUrl} className="h-11 w-11" />
               </ProfileLink>
 
               <div className="feed-social-card__header-body">

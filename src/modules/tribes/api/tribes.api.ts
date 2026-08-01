@@ -100,15 +100,19 @@ export async function getAllianceUnlocks(slug: string) {
 }
 
 export async function claimChallenge(slug: string, challengeId: string) {
-  const { data } = await apiClient.post<ApiSuccessResponse<{ signalsAwarded: number }>>(
-    `${API_V1}/tribes/${slug}/challenges/${challengeId}/claim`,
-  )
+  const { data } = await apiClient.post<
+    ApiSuccessResponse<{
+      treasuryDbAwarded: number
+      membersRewarded: number
+      memberDbEach: number
+    }>
+  >(`${API_V1}/tribes/${slug}/challenges/${challengeId}/claim`)
   return data.data
 }
 
 export async function spendUnlock(slug: string, unlockKey: string) {
   const { data } = await apiClient.post<
-    ApiSuccessResponse<{ unlock: { key: string; label: string; signalsCost: number } }>
+    ApiSuccessResponse<{ unlock: { key: string; label: string; dbCost: number } }>
   >(`${API_V1}/tribes/${slug}/unlocks/spend`, { unlockKey })
   return data.data
 }

@@ -138,7 +138,7 @@ export function AllianceHqPage() {
             <span>
               {alliance.memberCount}/{alliance.maxMembers} members
             </span>
-            <span>{alliance.signalsBalance} Signals</span>
+            <span>{alliance.treasuryDb} treasury dB</span>
           </div>
         </div>
       </div>
@@ -371,7 +371,8 @@ export function AllianceHqPage() {
                 <span />
               </div>
               <p>
-                Reward: {challenge.signalsReward} Signals · {challenge.status}
+                Reward: +{challenge.treasuryDbReward} treasury dB · +25 personal dB to active
+                members · {challenge.status}
               </p>
               {challenge.status === 'completed' && canAdmin ? (
                 <button
@@ -412,8 +413,8 @@ export function AllianceHqPage() {
         <section className="alliance-section">
           <h2>Rewards</h2>
           <p className="alliance-muted">
-            Treasury: {alliance.signalsBalance} Signals ·{' '}
-            {unlocks.filter((u) => u.owned).length}/{unlocks.length} unlocks owned
+            Treasury: {alliance.treasuryDb} dB · {unlocks.filter((u) => u.owned).length}/
+            {unlocks.length} unlocks owned · members earn +2 dB per listen · war claim +25 dB each
           </p>
           <Link
             to={`/genres/${genreSlug}/alliances/${slug}/shop`}

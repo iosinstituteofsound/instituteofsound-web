@@ -56,7 +56,7 @@ export function MusicFeedCard({ item, defaultCommentsOpen, compact, onPostDelete
       headerAudioLabel={audioHeaderLine || undefined}
     >
       <MediaPreviewRow
-        className="border-0 bg-muted/50"
+        className="feed-media-preview-row--track border-0"
         artwork={
           <button
             type="button"

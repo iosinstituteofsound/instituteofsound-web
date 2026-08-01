@@ -154,9 +154,26 @@ interface ReleasesPageGuardProps {
 export function ReleasesPageGuard({ children }: ReleasesPageGuardProps) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const hasSession = tokenStorage.hasSession()
+  const location = useLocation()
+  const { hasResource, canAccessPath, hydrated, sidebarSynced } = usePermission()
+  const { isLoading: sidebarLoading } = useSidebar()
 
-  if (isAuthenticated || hasSession) {
-    return <ResourceGuard name="ReleasesPage">{children}</ResourceGuard>
+  // Guests can browse the public catalog.
+  if (!isAuthenticated && !hasSession) {
+    return <>{children}</>
+  }
+
+  if (!hydrated) return <PageLoader />
+  if (sidebarLoading || !sidebarSynced) return <PageLoader />
+
+  // Releases catalog is part of Explore — allow either resource (or sidebar path).
+  const allowed =
+    hasResource('ReleasesPage') ||
+    hasResource('ExplorePage') ||
+    canAccessPath(location.pathname)
+
+  if (!allowed) {
+    return <Navigate to="/403" replace />
   }
 
   return <>{children}</>

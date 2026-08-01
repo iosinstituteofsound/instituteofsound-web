@@ -1,0 +1,440 @@
+.nation-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 1.5rem;
+}
+
+.nation-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nation-section__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.nation-section__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+.nation-section__title--accent {
+  color: var(--primary);
+}
+
+.nation-section__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.nation-section__link--muted {
+  color: var(--foreground);
+}
+
+.nation-section__link:hover {
+  opacity: 0.85;
+}
+
+.nation-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.nation-stats__pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.nation-card {
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklch, var(--primary) 16%, var(--border));
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--card) 88%, transparent) 0%,
+      color-mix(in oklch, var(--background) 94%, black) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--foreground) 6%, transparent),
+    0 0 28px color-mix(in oklch, var(--primary) 6%, transparent);
+  padding: 0.9rem 1rem;
+}
+
+.nation-card--center {
+  display: grid;
+  place-items: center;
+  min-height: 5.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+.nation-card--network {
+  padding-bottom: 0.85rem;
+}
+
+.nation-card__label {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.nation-card__hero {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--foreground);
+}
+
+.nation-card__unit {
+  margin-left: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.nation-card__meta {
+  margin: 0.4rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+  text-transform: capitalize;
+}
+
+.nation-card__body {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+
+.nation-card__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.nation-trend {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+.nation-progress {
+  margin-top: 0.75rem;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--foreground) 8%, transparent);
+  overflow: hidden;
+}
+
+.nation-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.nation-genre-war {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.nation-genre-war p {
+  margin: 0;
+}
+
+.nation-stat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.nation-stat-chip {
+  border-radius: 0.65rem;
+  padding: 0.4rem 0.65rem;
+  background: color-mix(in oklch, var(--foreground) 6%, transparent);
+}
+
+.nation-stat-chip span {
+  display: block;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.nation-stat-chip strong {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.nation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.nation-btn {
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 7rem;
+  border-radius: 999px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.nation-btn--primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.nation-btn--ghost {
+  border-color: color-mix(in oklch, var(--foreground) 14%, transparent);
+  background: transparent;
+  color: var(--foreground);
+}
+
+.nation-alliance-list {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+}
+
+.nation-alliance-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nation-alliance-row__rank {
+  width: 1.25rem;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+}
+
+.nation-alliance-row__copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.nation-alliance-row__copy strong {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.nation-alliance-row__copy em {
+  font-style: normal;
+  font-size: 0.625rem;
+  color: var(--muted-foreground);
+  text-transform: capitalize;
+}
+
+.nation-artist-rail,
+.nation-magazine-rail {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: thin;
+}
+
+.nation-artist-card {
+  display: flex;
+  width: 7.5rem;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nation-artist-card__avatar {
+  width: 7.5rem !important;
+  height: 7.5rem !important;
+  border-radius: 1rem !important;
+}
+
+.nation-artist-card__name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.nation-artist-card__meta {
+  font-size: 0.625rem;
+  color: var(--muted-foreground);
+}
+
+.nation-activity-list,
+.nation-trending-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nation-activity-list__item--divider,
+.nation-trending-row--divider {
+  border-bottom: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+}
+
+.nation-activity-list__text {
+  margin: 0;
+  padding: 0.65rem 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--foreground);
+}
+
+.nation-magazine-card {
+  display: flex;
+  width: 9.5rem;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nation-magazine-card__cover {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  background: color-mix(in oklch, var(--muted) 70%, transparent);
+}
+
+.nation-magazine-card__cover--empty {
+  display: block;
+}
+
+.nation-magazine-card__category {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.nation-magazine-card__title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--foreground);
+}
+
+.nation-magazine-card__date {
+  font-style: normal;
+  font-size: 0.625rem;
+  color: var(--muted-foreground);
+}
+
+.nation-trending-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nation-trending-row__rank {
+  width: 1.25rem;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.nation-trending-row__cover {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  background: color-mix(in oklch, var(--muted) 70%, transparent);
+}
+
+.nation-trending-row__cover--empty {
+  display: inline-block;
+}
+
+.nation-trending-row__copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.nation-trending-row__copy strong {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.nation-trending-row__copy em {
+  font-style: normal;
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+}
+
+@media (max-width: 420px) {
+  .nation-stats__pair {
+    grid-template-columns: 1fr;
+  }
+
+  .nation-card__hero {
+    font-size: 1.5rem;
+  }
+}

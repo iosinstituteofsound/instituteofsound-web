@@ -160,3 +160,40 @@ export async function grantAdminUserWallet(input: {
   )
   return data.data
 }
+
+export type AdminHornProduct = {
+  id: string
+  sku: string
+  slug: string
+  name: string
+  type: string
+}
+
+export type AdminHornGrantResult = {
+  entitlement: {
+    id: string
+    userId: string
+    productId: string
+    quantity?: number
+  }
+}
+
+export async function listAdminHornProducts() {
+  const { data } = await apiClient.get<ApiSuccessResponse<{ products: AdminHornProduct[] }>>(
+    `${API_V1}/marketplace/catalog`,
+    { params: { type: 'horn' } },
+  )
+  return data.data.products.filter((p) => p.type === 'horn')
+}
+
+export async function grantAdminHorn(input: {
+  userId: string
+  productId: string
+  quantity: number
+}) {
+  const { data } = await apiClient.post<ApiSuccessResponse<AdminHornGrantResult>>(
+    `${API_V1}/admin/marketplace/grants`,
+    input,
+  )
+  return data.data
+}

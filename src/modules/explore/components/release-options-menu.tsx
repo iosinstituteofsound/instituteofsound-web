@@ -6,6 +6,7 @@ import {
   HeartHandshake,
   MoreHorizontal,
   ShoppingBag,
+  Users,
   UserRound,
   UserSquare2,
 } from 'lucide-react'
@@ -21,6 +22,7 @@ import {
   releaseSharePayloadToRecord,
 } from '@/modules/feed/lib/feed-release-payload'
 import { useExplore } from '@/modules/explore/hooks/use-explore'
+import { usePostReleaseToAlliance } from '@/modules/tribes/hooks/use-post-release-to-alliance'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +77,7 @@ function releaseShareLine(release: ReleaseDto) {
 export function ReleaseOptionsMenu({ release, artist, triggerClassName }: ReleaseOptionsMenuProps) {
   const navigate = useNavigate()
   const { data: explore } = useExplore()
+  const { canPost, allianceName, postRelease } = usePostReleaseToAlliance()
   const artistName = artist?.displayName ?? release.artistName ?? 'this artist'
   const platform = releaseStreamPlatform(release.streamUrl)
 
@@ -117,6 +120,15 @@ export function ReleaseOptionsMenu({ release, artist, triggerClassName }: Releas
 
   const postAsSpinOrDrop = () => {
     openComposer(`Spin or drop: ${releaseShareLine(release)}`)
+  }
+
+  const postToAlliance = () => {
+    void postRelease({
+      releaseId: release.id,
+      title: release.title,
+      coverUrl: release.coverUrl,
+      artistProfileId: release.artistProfileId ?? artist?.id,
+    })
   }
 
   return (
@@ -166,6 +178,16 @@ export function ReleaseOptionsMenu({ release, artist, triggerClassName }: Releas
           title="Share to profile"
           subtitle="Post this release on your profile feed."
           onClick={shareToProfile}
+        />
+        <ReleaseMenuOption
+          icon={Users}
+          title="Post to alliance"
+          subtitle={
+            canPost
+              ? `Send to ${allianceName ?? 'your squad'} chat so members can play it.`
+              : 'Join an alliance first to post tracks to your squad.'
+          }
+          onClick={postToAlliance}
         />
         <ReleaseMenuOption
           icon={Disc3}

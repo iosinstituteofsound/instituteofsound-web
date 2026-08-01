@@ -5,29 +5,29 @@ import { CreateStoryDialog } from '@/modules/feed/components/create-story-dialog
 import { CreateTextStoryDialog } from '@/modules/feed/components/create-text-story-dialog'
 import { FeedComposer } from '@/modules/feed/components/feed-composer'
 import { FeedList, useFeedListItems } from '@/modules/feed/components/feed-list'
-import { SegmentedControl } from '@/shared/components/controls'
+import { FeedScopePicker } from '@/modules/feed/components/feed-scope-picker'
 import { FeedStoriesRow } from '@/modules/feed/components/feed-stories-row'
 import { StoryViewer } from '@/modules/feed/components/story-viewer'
 import { useScrollCollapse } from '@/modules/feed/hooks/use-scroll-collapse'
-import type { FeedScope } from '@/modules/feed/hooks/use-feed'
+import {
+  feedHomeTabToScope,
+  useFeedScopeStore,
+} from '@/modules/feed/stores/feed-scope-store'
+import { NationPage } from '@/modules/feed/pages/nation-page'
 import { getStoryItems } from '@/modules/feed/lib/story-content'
 import { PermissionGate } from '@/shared/components/authz/permission-gate'
-import { SectionHeader } from '@/shared/components/layout'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { getUserAvatarThumbnailUrl } from '@/shared/lib/user-avatar'
 import { FEED_COLUMN_CLASS } from '@/shared/lib/layout-config'
 import { cn } from '@/shared/lib/cn'
 import '@/modules/feed/styles/feed-page.css'
 
-const FEED_SCOPE_OPTIONS: Array<{ value: FeedScope; label: string }> = [
-  { value: 'all', label: 'All' },
-  { value: 'following', label: 'Following' },
-]
-
 export function FeedPage() {
   const { data: me } = useMe()
-  const [feedScope, setFeedScope] = useState<FeedScope>('all')
-  const { items, isLoading } = useFeedListItems(feedScope)
+  const homeTab = useFeedScopeStore((state) => state.homeTab)
+  const feedScope = feedHomeTabToScope(homeTab)
+  const isNation = homeTab === 'nation'
+  const { items, isLoading } = useFeedListItems(feedScope ?? 'all', !isNation)
   const [storyPickerOpen, setStoryPickerOpen] = useState(false)
   const [mediaStoryOpen, setMediaStoryOpen] = useState(false)
   const [textStoryOpen, setTextStoryOpen] = useState(false)
@@ -48,54 +48,53 @@ export function FeedPage() {
 
   return (
     <div className={cn(FEED_COLUMN_CLASS, 'pb-4 md:pb-8')}>
-      <PermissionGate resource="feed" action="create">
-        <div ref={composerAnchorRef} className="sticky top-0 z-50 bg-background">
-          <FeedComposer collapseProgress={collapseProgress} />
-        </div>
-      </PermissionGate>
+      <div className="feed-scope-picker-wrap">
+        <FeedScopePicker />
+      </div>
+
+      {!isNation ? (
+        <PermissionGate resource="feed" action="create">
+          <div ref={composerAnchorRef} className="sticky top-0 z-50 bg-background">
+            <FeedComposer collapseProgress={collapseProgress} />
+          </div>
+        </PermissionGate>
+      ) : null}
 
       <div className="relative z-0 mt-3 space-y-3">
-        {isLoading ? (
-          <div className="feed-stories-row">
-            <div className="feed-stories-row__field">
-              <div className="feed-stories-row__head">
-                <p className="feed-stories-row__label">Signal Flux</p>
-                <span className="feed-stories-row__status">Syncing</span>
-              </div>
-              <div className="feed-stories-row__track">
-                {[1, 2, 3, 4].map((key) => (
-                  <Skeleton key={key} className="feed-stories-row__skeleton" />
-                ))}
-              </div>
-            </div>
-          </div>
+        {isNation ? (
+          <NationPage />
         ) : (
-          <FeedStoriesRow
-            items={items}
-            userName={userName}
-            avatarUrl={avatarUrl}
-            onCreateStory={() => setStoryPickerOpen(true)}
-            onStoryClick={(storyId) => {
-              setActiveStoryId(storyId)
-              setStoryViewerOpen(true)
-            }}
-          />
+          <>
+            {isLoading ? (
+              <div className="feed-stories-row">
+                <div className="feed-stories-row__field">
+                  <div className="feed-stories-row__head">
+                    <p className="feed-stories-row__label">Signal Flux</p>
+                    <span className="feed-stories-row__status">Syncing</span>
+                  </div>
+                  <div className="feed-stories-row__track">
+                    {[1, 2, 3, 4].map((key) => (
+                      <Skeleton key={key} className="feed-stories-row__skeleton" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <FeedStoriesRow
+                items={items}
+                userName={userName}
+                avatarUrl={avatarUrl}
+                onCreateStory={() => setStoryPickerOpen(true)}
+                onStoryClick={(storyId) => {
+                  setActiveStoryId(storyId)
+                  setStoryViewerOpen(true)
+                }}
+              />
+            )}
+
+            <FeedList compactLoader scope={feedScope ?? 'all'} />
+          </>
         )}
-
-        <SectionHeader
-          title="Feed"
-          className="px-1 [&_h2]:text-sm"
-          action={
-            <SegmentedControl
-              value={feedScope}
-              options={FEED_SCOPE_OPTIONS}
-              onChange={setFeedScope}
-              aria-label="Feed scope"
-            />
-          }
-        />
-
-        <FeedList compactLoader scope={feedScope} />
       </div>
 
       <CreateStoryDialog
