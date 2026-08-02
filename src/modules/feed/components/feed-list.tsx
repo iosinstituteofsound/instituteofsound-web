@@ -7,7 +7,7 @@ import {
   type UseFeedListOptions,
   FEED_PAGE_SIZE,
 } from '@/modules/feed/hooks/use-feed'
-import { sortFeedItemsLatest } from '@/modules/feed/lib/feed-sort'
+import { orderFeedItemsWithAds } from '@/modules/feed/lib/feed-sort'
 import { isStoryItem } from '@/modules/feed/lib/story-utils'
 import type { FeedItemType } from '@/modules/feed/types/feed.types'
 import { PageLoader } from '@/shared/components/feedback/loader'
@@ -18,7 +18,7 @@ import { cn } from '@/shared/lib/cn'
 export function useFeedListItems(scope: FeedScope = 'all', enabled = true) {
   const query = useFeedList({ limit: FEED_PAGE_SIZE, scope, enabled })
   const items = useMemo(
-    () => sortFeedItemsLatest(query.data?.pages.flatMap((page) => page.items) ?? []),
+    () => orderFeedItemsWithAds(query.data?.pages.flatMap((page) => page.items) ?? []),
     [query.data?.pages],
   )
   return { ...query, items }
@@ -67,8 +67,8 @@ export function FeedList({
 
   const items = useMemo(
     () =>
-      sortFeedItemsLatest(data?.pages.flatMap((page) => page.items) ?? []).filter(
-        (item) => !isStoryItem(item),
+      orderFeedItemsWithAds(
+        (data?.pages.flatMap((page) => page.items) ?? []).filter((item) => !isStoryItem(item)),
       ),
     [data?.pages],
   )
